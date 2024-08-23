@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ month_year }} Calendar</title>
+    <style>
+        @media (max-width: 768px) {
+            .feeds-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        body {
+            font-family: 'Open Sans', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: 80%;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .weekday {
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            background-color: rgb(250, 247, 244);
+        }
+
+        .day {
+            border: 1px solid #ede9e9;
+            padding: 10px;
+            min-height: 100px;
+        }
+
+        .date {
+            margin-bottom: 10px;
+            text-align: center;
+            background-color: rgb(250, 247, 244);
+        }
+
+        .time-slot {
+            margin-top: 10px;
+        }
+
+        .time-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .event {
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .all-day {
+            border-radius: 3px;
+        }
+
+        .event-title {
+            cursor: pointer;
+        }
+
+        .event-details {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            z-index: 1000;
+            width: 300px;
+            left: 100%;
+            top: 0;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .event:hover .event-details {
+            display: block;
+        }
+
+        .event:not(:last-child) {
+            border-bottom: 1px solid #e0e0e0;
+            /* Light gray color, adjust as needed */
+            padding-bottom: 10px;
+            /* Add some space below the content before the border */
+            margin-bottom: 10px;
+            /* Add some space after the border before the next event */
+        }
+
+        .feeds-section {
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .feeds-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .feeds-table th,
+        .feeds-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .feeds-table th {
+            background-color: #f2f2f2;
+        }
+
+        .feeds-table .date-cell {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>{{ month_year }}</h1>
+
+    <div class="calendar">
+        <div class="weekday">Monday</div>
+        <div class="weekday">Tuesday</div>
+        <div class="weekday">Wednesday</div>
+        <div class="weekday">Thursday</div>
+        <div class="weekday">Friday</div>
+        <div class="weekday">Saturday</div>
+        <div class="weekday">Sunday</div>
+
+        {% for week in calendar_weeks %}
+        {% for day, time_grouped_events in week %}
+        <div class="day">
+            {% if day != 0 %}
+            <div class="date">{{ day }}</div>
+            {% for time, events in time_grouped_events.items() %}
+            <div class="time-slot">
+                <div class="time-label">{{ time }}</div>
+                {% for event in events %}
+                <div class="event {% if time == 'All Day' %}all-day{% endif %}">
+                    <div class="event-title">{{ event.summary }}</div>
+                    <div class="event-details">
+                        <p>
+                            {% if event.url %}
+                            <strong><a href="{{ event.url }}" target="_blank">{{ event.summary }}</a></strong>
+                            {% else %}
+                            <strong>{{ event.summary }}</strong>
+                            {% endif %}
+                        </p>
+                        <p>
+                            {% if time != 'All Day' %}
+                            {{ event.start.strftime('%A %B %d - %I:%M %p') }}
+                            {% if event.end %}
+                            to {{ event.end.strftime('%I:%M %p') }}
+                            {% endif %}
+                            {% else %}
+                            All Day
+                            {% endif %}
+                        </p>
+                        {% if event.location %}
+                        <p>Location: {{ event.location }}</p>
+                        {% endif %}
+                        {% if event.description %}
+                        <p>{{ event.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% endfor %}
+    </div>
+    <div class="feeds-section">
+        <details>
+            <summary>Feeds</summary>
+            <table class="feeds-table">
+                <thead>
+                    <tr>
+                        <th>Calendar Name</th>
+                        <th>Total Events</th>
+                        <th>Oldest Day</th>
+                        <th>Newest Day</th>
+                        <th>URL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feed in feeds %}
+                    <tr>
+                        <td>{{ feed.name }}</td>
+                        <td>{{ feed.total_events }}</td>
+                        <td class="date-cell">{{ feed.oldest_day }}</td>
+                        <td class="date-cell">{{ feed.newest_day }}</td>
+                        <td>{{ feed.url }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </details>
+    </div>
+
+</body>
+
+</html>
