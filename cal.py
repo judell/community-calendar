@@ -102,7 +102,9 @@ def parse_and_localize_event(event, source_tz, target_tz):
         'location': str(event.get('location')),
         'description': str(event.get('description')),
         'is_all_day': isinstance(dtstart.dt, date) and not isinstance(dtstart.dt, datetime),
-        'url': str(event.get('url'))
+        'url': str(event.get('url')),
+        'original_start': dtstart.dt,
+        'original_end': dtend.dt if dtend else None
     }
 
 def group_events_by_time(events):
@@ -317,11 +319,18 @@ if __name__ == "__main__":
         print(f"Oldest event date: {oldest_day.strftime('%Y-%m-%d') if oldest_day else 'N/A'}")
         print(f"Newest event date: {newest_day.strftime('%Y-%m-%d') if newest_day else 'N/A'}")
         print("\nFirst few events:")
-        for event in events[:5]:  # Display details of first 5 events
-            print(f"  - {event['summary']} on {event['start']}")
+        for event in events[:5]:
+            print(f"  - {event['summary']}")
+            if event['is_all_day']:
+                print(f"    All-day event on {event['start']}")
+            else:
+                print(f"    Original Start: {event['original_start']}")
+                print(f"    Adjusted Start: {event['start']}")
+            print()  # Add a blank line between events for readability
     elif args.generate:
         generate_calendar('feeds.txt', args.year, args.month, args.timezone)
     else:
         print("Please specify either --dry-run or --generate")
         parser.print_help()
         sys.exit(1)
+    
