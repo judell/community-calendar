@@ -18,6 +18,10 @@ options:
 
 Community calendar for [August 2024](https://jonudell.info/bloomington/2024-08.html)
 
+## Rendered calendar
+
 ![image](https://github.com/user-attachments/assets/280beee9-d752-47c7-be70-d1b710f08bcc)
+
+## Source feeds and stats
 
 ![image](https://github.com/user-attachments/assets/d015fbd7-113a-4049-bf32-a708ba77aac5)
