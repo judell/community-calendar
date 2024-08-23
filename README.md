@@ -24,4 +24,5 @@ Community calendar for [August 2024](https://jonudell.info/bloomington/2024-08.h
 
 ## Source feeds and stats
 
-![image](https://github.com/user-attachments/assets/d015fbd7-113a-4049-bf32-a708ba77aac5)
+![image](https://github.com/user-attachments/assets/80dfb127-eae3-4a7c-af50-65bc576a6b15)
+
