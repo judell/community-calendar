@@ -1,7 +1,7 @@
 # Usage
 
 ```
-usage: cal.py [-h] [--dry-run DRY_RUN] [--generate] [--timezone TIMEZONE] [--year YEAR] [--month MONTH]
+cal.py [-h] [--dry-run DRY_RUN] [--generate] [--timezone TIMEZONE] [--year YEAR] [--month MONTH]
 
 Generate an HTML calendar from iCalendar feeds or perform a dry run.
 
