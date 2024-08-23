@@ -301,7 +301,7 @@ def generate_calendar(file_path, year, month, default_timezone, output_dir='.'):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate an HTML calendar from iCalendar feeds or perform a dry run.")
     parser.add_argument("--dry-run", help="Perform a dry run on a single iCalendar URL", type=str)
-    parser.add_argument("--generate", action="store_true", help="Generate the HTML calendar")
+    parser.add_argument("--generate", action="store_true", help="Generate an HTML calendar from feeds.txt, a list of iCalendar feeds")
     parser.add_argument("--timezone", help="Default timezone (default: America/Indiana/Indianapolis)", 
                         type=str, default='America/Indiana/Indianapolis')
     parser.add_argument("--year", help="Year for calendar generation", type=int, default=datetime.now().year)
