@@ -366,7 +366,7 @@ def generate_calendar(file_path, year, month, default_timezone, output_dir='.'):
     feeds, all_events = read_and_process_feeds(file_path, default_timezone)
     grouped_events = group_events_by_date(all_events, year, month)
     render_html_calendar(grouped_events, year, month, feeds, output_dir)
-    
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate an HTML calendar from iCalendar feeds or perform a dry run.")
     parser.add_argument("--dry-run", help="Perform a dry run on a single iCalendar URL", type=str)
@@ -382,13 +382,17 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if args.dry_run:
-        name, events = fetch_and_process_calendar(args.dry_run, args.timezone)
+        name, events, total_events, oldest_day, newest_day = fetch_and_process_calendar(args.dry_run, args.timezone)
         print(f"Calendar Name: {name}")
-        print(f"Number of events: {len(events)}")
+        print(f"Number of events: {total_events}")
+        print(f"Oldest event date: {oldest_day.strftime('%Y-%m-%d') if oldest_day else 'N/A'}")
+        print(f"Newest event date: {newest_day.strftime('%Y-%m-%d') if newest_day else 'N/A'}")
+        print("\nFirst few events:")
+        for event in events[:5]:  # Display details of first 5 events
+            print(f"  - {event['summary']} on {event['start']}")
     elif args.generate:
         generate_calendar('feeds.txt', args.year, args.month, args.timezone)
     else:
         print("Please specify either --dry-run or --generate")
         parser.print_help()
         sys.exit(1)
-
