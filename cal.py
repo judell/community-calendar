@@ -17,36 +17,7 @@ import os
 
 logging.basicConfig(level=logging.INFO)
 
-# Suppress only the specific InsecureRequestWarning from urllib3
 warnings.simplefilter('ignore', urllib3.exceptions.InsecureRequestWarning)
-#warnings.filterwarnings("ignore", category=UserWarning)
-
-def get_calendar_name(url):
-    try:
-        response = requests.get(url, verify=False)
-        response.raise_for_status()
-        content = response.text
-
-        # Search for X-WR-CALNAME using regex
-        match = re.search(r'X-WR-CALNAME:(.*?)(?:\r\n|\r|\n)', content)
-        if match:
-            return match.group(1).strip()
-        else:
-            return "Unnamed Calendar"
-    except Exception as e:
-        logging.error(f"Error fetching calendar name from {url}: {str(e)}")
-        return "Unnamed Calendar"
-
-def read_urls_from_file(file_path):
-    feeds = []
-    with open(file_path, 'r') as file:
-        for line in file:
-            line = line.strip()
-            if line and not line.startswith('#'):
-                url = line
-                name = get_calendar_name(url)
-                feeds.append({'name': name, 'url': url})
-    return feeds
 
 def determine_timezone(vtimezone_info, x_wr_timezone, default_timezone):
     if vtimezone_info:
@@ -253,48 +224,6 @@ def determine_timezone(vtimezone_info, x_wr_timezone, default_timezone):
     
     logging.warning("Unable to determine timezone and invalid default timezone. Using UTC.")
     return pytz.UTC
-
-def process_calendar(url, default_timezone):
-    try:
-        response = requests.get(url, verify=False)
-        response.raise_for_status()
-        cal = Calendar.from_ical(response.text)
-        
-        vtimezone_info = parse_vtimezone(cal)
-        x_wr_timezone = cal.get('X-WR-TIMEZONE')
-        
-        source_tz = determine_timezone(vtimezone_info, x_wr_timezone, default_timezone)
-        target_tz = pytz.timezone(default_timezone)
-        
-        logging.info(f"Source timezone: {source_tz}")
-        logging.info(f"Target timezone: {target_tz}")
-        
-        processed_events = []
-        for event in cal.walk('VEVENT'):
-            processed_event = parse_and_localize_event(event, source_tz, target_tz)
-            processed_events.append(processed_event)
-        
-        logging.info(f"Processed {len(processed_events)} events")
-        
-        return processed_events
-    
-    except Exception as e:
-        logging.error(f"Error processing URL {url}: {str(e)}")
-        return []
-   
-def dry_run(url, default_timezone='America/Indiana/Indianapolis'):
-    result = process_calendar(url, default_timezone)
-    if result:
-        logging.info("VTIMEZONE details:")
-        logging.info(pprint(result['vtimezone_info']))
-        logging.info(f"X-WR-TIMEZONE: {result['x_wr_timezone']}")
-        logging.info(f"Determined timezone: {result['timezone']}")
-        
-        logging.info("Events:")
-        for event in result['events']:
-            logging.info(f"Event: {event['summary']}")
-            logging.info(f"Unadjusted DTSTART, DTEND: {event['original_start']}, {event['original_end']}")
-            logging.info(f"  Adjusted DTSTART, DTEND: {event['start']}, {event['end']}")
 
 def fetch_and_process_calendar(url, default_timezone):
     try:
