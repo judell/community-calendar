@@ -8,7 +8,7 @@ Generate an HTML calendar from iCalendar feeds or perform a dry run.
 options:
   -h, --help           show this help message and exit
   --dry-run DRY_RUN    Perform a dry run on a single iCalendar URL
-  --generate           Generate the HTML calendar
+  --generate           Generate an HTML calendar from feeds.txt, a list of iCalendar feeds
   --timezone TIMEZONE  Default timezone (default: America/Indiana/Indianapolis)
   --year YEAR          Year for calendar generation
   --month MONTH        Month for calendar generation
