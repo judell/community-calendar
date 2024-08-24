@@ -15,7 +15,8 @@ from collections import OrderedDict
 import re
 import os
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+logger = logging.getLogger()
 
 warnings.simplefilter('ignore', urllib3.exceptions.InsecureRequestWarning)
 
@@ -29,11 +30,11 @@ def determine_timezone(vtimezone_info, x_wr_timezone, default_timezone):
         return pytz.timezone(x_wr_timezone)
     elif default_timezone in pytz.all_timezones:
         # Use the provided default_timezone
-        logging.info(f"Using default timezone: {default_timezone}")
+        logger.info(f"Using default timezone: {default_timezone}")
         return pytz.timezone(default_timezone)
     else:
         # Fall back to UTC if no valid timezone is provided
-        logging.warning(f"Invalid default timezone: {default_timezone}. Using UTC.")
+        logger.warning(f"Invalid default timezone: {default_timezone}. Using UTC.")
         return pytz.UTC
      
 def parse_vtimezone(cal):
@@ -41,10 +42,10 @@ def parse_vtimezone(cal):
     try:
         for component in cal.walk():
             if component.name == "VTIMEZONE":
-                logging.warning(f"Found VTIMEZONE")
+                logger.warning(f"Found VTIMEZONE")
                 tzid = str(component.get('tzid'))
                 if not tzid:
-                    logging.warning("VTIMEZONE component missing TZID")
+                    logger.warning("VTIMEZONE component missing TZID")
                     continue
                 tz_info = {
                     'tzid': tzid,
@@ -52,7 +53,7 @@ def parse_vtimezone(cal):
                     'standard': None
                 }
                 for subcomp in component.walk():
-                    #logging.info(f"Subcomponent: {subcomp.name}")
+                    #logger.info(f"Subcomponent: {subcomp.name}")
                     if subcomp.name in ["DAYLIGHT", "STANDARD"]:
                         try:
                             tz_info[subcomp.name.lower()] = {
@@ -62,17 +63,17 @@ def parse_vtimezone(cal):
                                 'dtstart': subcomp.get('dtstart').dt if subcomp.get('dtstart') else None,
                                 'rrule': subcomp.get('rrule')
                             }
-                            #logging.info(f"Parsed {subcomp.name}: {tz_info[subcomp.name.lower()]}")
+                            #logger.info(f"Parsed {subcomp.name}: {tz_info[subcomp.name.lower()]}")
                         except Exception as e:
-                            logging.error(f"Error parsing {subcomp.name} component in TZID '{tzid}': {str(e)}")
-                            logging.error(f"Error details: {e}")
-                            logging.error(f"Subcomponent details: {subcomp}")
+                            logger.error(f"Error parsing {subcomp.name} component in TZID '{tzid}': {str(e)}")
+                            logger.error(f"Error details: {e}")
+                            logger.error(f"Subcomponent details: {subcomp}")
                             for key, value in subcomp.items():
-                                logging.error(f"  {key}: {value} (type: {type(value)})")
+                                logger.error(f"  {key}: {value} (type: {type(value)})")
                 timezones[tzid] = tz_info
     except Exception as e:
-        logging.error(f"Error parsing VTIMEZONE: {str(e)}")
-        logging.error(f"Error details: {e}")
+        logger.error(f"Error parsing VTIMEZONE: {str(e)}")
+        logger.error(f"Error details: {e}")
     return timezones
 
 def parse_and_localize_event(event, source_tz, target_tz):
@@ -136,7 +137,7 @@ def group_events_by_date(events, year, month):
         dtstart = event['start']
         
         if dtstart is None:
-            logging.warning(f"Event with summary '{event.get('summary')}' has no start time. Skipping.")
+            logger.warning(f"Event with summary '{event.get('summary')}' has no start time. Skipping.")
             continue
         
         # Convert date to datetime if necessary
@@ -205,7 +206,7 @@ def determine_timezone(vtimezone_info, x_wr_timezone, default_timezone):
         elif isinstance(offset, int):
             return offset
         else:
-            logging.warning(f"Warning: Unexpected offset type {type(offset)}. Using default timezone.")
+            logger.warning(f"Warning: Unexpected offset type {type(offset)}. Using default timezone.")
             return None
 
     if vtimezone_info and vtimezone_info.get('daylight') and vtimezone_info.get('standard'):
@@ -221,10 +222,10 @@ def determine_timezone(vtimezone_info, x_wr_timezone, default_timezone):
         return pytz.timezone(x_wr_timezone)
     
     if default_timezone in pytz.all_timezones:
-        logging.warning(f"Using default timezone: {default_timezone}")
+        logger.warning(f"Using default timezone: {default_timezone}")
         return pytz.timezone(default_timezone)
     
-    logging.warning("Unable to determine timezone and invalid default timezone. Using UTC.")
+    logger.warning("Unable to determine timezone and invalid default timezone. Using UTC.")
     return pytz.UTC
 
 def fetch_and_process_calendar(url, default_timezone):
@@ -237,6 +238,8 @@ def fetch_and_process_calendar(url, default_timezone):
         match = re.search(r'X-WR-CALNAME:(.*?)(?:\r\n|\r|\n)', content)
         cal_name = match.group(1).strip() if match else "Unnamed Calendar"
 
+        logger.info(f'{cal_name}, {url}')
+
         # Process the calendar content
         cal = Calendar.from_ical(content)
 
@@ -246,15 +249,17 @@ def fetch_and_process_calendar(url, default_timezone):
         source_tz = determine_timezone(vtimezone_info, x_wr_timezone, default_timezone)
         target_tz = pytz.timezone(default_timezone)
 
-        logging.info(f"Calendar: {cal_name}")
-        logging.info(f"Source timezone: {source_tz}")
-        logging.info(f"Target timezone: {target_tz}")
+        logger.info(f"Calendar: {cal_name}")
+        logger.info(f"Source timezone: {source_tz}")
+        logger.info(f"Target timezone: {target_tz}")
 
         processed_events = []
         oldest_day = None
         newest_day = None
 
         for event in cal.walk('VEVENT'):
+            if 'CATEGORIES' in event:
+                logger.info(f"CATEGORIES {event['CATEGORIES'].to_ical().decode('utf-8')} [[{event['SUMMARY']}]]")
             processed_event = parse_and_localize_event(event, source_tz, target_tz)
             processed_events.append(processed_event)
 
@@ -266,12 +271,12 @@ def fetch_and_process_calendar(url, default_timezone):
                 newest_day = event_date
 
         total_events = len(processed_events)
-        logging.info(f"Processed {total_events} events")
+        logger.info(f"Processed {total_events} events")
 
         return cal_name, processed_events, total_events, oldest_day, newest_day
 
     except Exception as e:
-        logging.error(f"Error processing URL {url}: {str(e)}")
+        logger.error(f"Error processing URL {url}: {str(e)}")
         return "Unnamed Calendar", [], 0, None, None
 
 def read_and_process_feeds(file_path, default_timezone):
