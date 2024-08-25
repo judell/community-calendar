@@ -1,5 +1,8 @@
 name: Generate Calendar
 
+permissions:
+  contents: write
+
 on:
   # push:
   #   branches:
@@ -29,10 +32,10 @@ jobs:
 
     - name: Commit and push if changes
       env:
-        PAT: ${{ secrets.COMMUNITY_CALENDAR }}
+        GITHUB_TOKEN: ${{ secrets.COMMUNITY_CALENDAR }}
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
-        git remote set-url origin https://$PAT@github.com/${{ github.repository }}.git
+        git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         git add .
         git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-generate calendar" && git push)
