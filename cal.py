@@ -1,19 +1,19 @@
 import argparse
+import calendar
+import logging
+import os
+import re
+import sys
+import warnings
+from collections import OrderedDict
+from datetime import date, datetime, time
+
+import pytz
 import requests
+import urllib3
 from icalendar import Calendar
 from icalendar.prop import vUTCOffset
-from datetime import datetime, date, time
-import pytz
 from jinja2 import Environment, FileSystemLoader
-import warnings
-import calendar
-import urllib3
-from pprint import pprint
-import logging
-import sys
-from collections import OrderedDict
-import re
-import os
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger()
