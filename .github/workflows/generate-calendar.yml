@@ -27,8 +27,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Generate calendar
-      run: python cal.py --generate
+    - name: Generate Bloomington
+      run: |
+        python cal.py --generate --year $(date +%Y) --month $(date +%m) --timezone "America/Indiana/Indianapolis"
+
+    - name: Copy output to bloomington folder
+      run: |
+        cp $(date +%Y-%m).html ./bloomington/
 
     - name: Commit and push if changes
       env:
