@@ -1,7 +1,9 @@
+name: Generate Calendar
+
 on:
   # push:
-  #  branches:
-  #    - main
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
@@ -26,8 +28,11 @@ jobs:
       run: python cal.py --generate
 
     - name: Commit and push if changes
+      env:
+        PAT: ${{ secrets.COMMUNITY_CALENDAR }}
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
+        git remote set-url origin https://$PAT@github.com/${{ github.repository }}.git
         git add .
         git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-generate calendar" && git push)
