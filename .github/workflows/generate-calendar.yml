@@ -4,10 +4,9 @@ permissions:
   contents: write
 
 on:
-  # push:
-  #   branches:
-  #     - main
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
 
 jobs:
   generate-calendar:
@@ -27,13 +26,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Generate Bloomington
+    - name: Generate Bloomington Calendar for Current Month
       run: |
-        python cal.py --generate --year $(date +%Y) --month $(date +%m) --timezone "America/Indiana/Indianapolis"
+        python cal.py --generate --location bloomington --year $(date +%Y) --month $(date +%m) --timezone "America/Indiana/Indianapolis"
 
-    - name: Copy output to bloomington folder
+    - name: Generate Bloomington Calendar for Next Month
       run: |
-        cp $(date +%Y-%m).html ./bloomington/
+        python cal.py --generate --location bloomington --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Indiana/Indianapolis"
 
     - name: Commit and push if changes
       env:
@@ -43,4 +42,4 @@ jobs:
         git config --global user.email 'actions@github.com'
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         git add .
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-generate calendar" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-generate calendar for current and next month" && git push)
