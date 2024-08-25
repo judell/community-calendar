@@ -311,14 +311,19 @@ if __name__ == "__main__":
                         type=str, default='America/Indiana/Indianapolis')
     parser.add_argument("--year", help="Year for calendar generation", type=int, default=datetime.now().year)
     parser.add_argument("--month", help="Month for calendar generation", type=int, default=datetime.now().month)
-    parser.add_argument("--location", help="Folder containing feeds.txt and for output", type=str, required=True)
+    parser.add_argument("--location", help="Folder containing feeds.txt and for output (required for --generate)", type=str)
     args = parser.parse_args()
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
-    if not os.path.isdir(args.location):
+    if args.generate and not args.location:
+        print("Error: --location is required when using --generate")
+        parser.print_help()
+        sys.exit(1)
+
+    if args.location and not os.path.isdir(args.location):
         print(f"Error: The specified location '{args.location}' is not a valid directory.")
         sys.exit(1)
 
@@ -347,5 +352,3 @@ if __name__ == "__main__":
         print("Please specify either --dry-run or --generate")
         parser.print_help()
         sys.exit(1)
-
-
