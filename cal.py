@@ -99,6 +99,10 @@ def parse_and_localize_event(event, source_tz, target_tz):
     # Use the date in the target timezone for grouping
     grouping_date = local_start.date() if isinstance(local_start, datetime) else local_start
 
+    url = str(event.get('url'))
+    if not url.startswith(('http://', 'https://')):
+        url = None
+
     return {
         'summary': str(event.get('summary')),
         'start': local_start,
@@ -106,7 +110,7 @@ def parse_and_localize_event(event, source_tz, target_tz):
         'location': str(event.get('location')),
         'description': str(event.get('description')),
         'is_all_day': isinstance(dtstart.dt, date) and not isinstance(dtstart.dt, datetime),
-        'url': str(event.get('url')),
+        'url': url,
         'original_start': dtstart.dt,
         'original_end': dtend.dt if dtend else None,
         'grouping_date': grouping_date
