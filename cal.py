@@ -96,6 +96,12 @@ def parse_and_localize_event(event, source_tz, target_tz):
     local_start = convert_to_target_time(dtstart)
     local_end = convert_to_target_time(dtend)
     
+    # Use the original date in the source timezone for grouping
+    if isinstance(dtstart.dt, datetime):
+        original_date = dtstart.dt.astimezone(source_tz).date()
+    else:
+        original_date = dtstart.dt  # It's already a date object for all-day events
+
     return {
         'summary': str(event.get('summary')),
         'start': local_start,
@@ -105,7 +111,8 @@ def parse_and_localize_event(event, source_tz, target_tz):
         'is_all_day': isinstance(dtstart.dt, date) and not isinstance(dtstart.dt, datetime),
         'url': str(event.get('url')),
         'original_start': dtstart.dt,
-        'original_end': dtend.dt if dtend else None
+        'original_end': dtend.dt if dtend else None,
+        'grouping_date': original_date
     }
 
 def group_events_by_time(events):
@@ -134,20 +141,7 @@ def group_events_by_time(events):
 def group_events_by_date(events, year, month):
     grouped_events = OrderedDict()
     for event in events:
-        dtstart = event['start']
-        
-        if dtstart is None:
-            logger.warning(f"Event with summary '{event.get('summary')}' has no start time. Skipping.")
-            continue
-        
-        # Convert date to datetime if necessary
-        if isinstance(dtstart, date) and not isinstance(dtstart, datetime):
-            dtstart = datetime.combine(dtstart, time.min)
-        
-        if dtstart.tzinfo is not None:
-            dtstart = dtstart.astimezone(pytz.UTC).replace(tzinfo=None)
-        
-        date_key = dtstart.date()
+        date_key = event['grouping_date']
         
         if date_key.year == year and date_key.month == month:
             if date_key not in grouped_events:
