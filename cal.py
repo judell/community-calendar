@@ -112,19 +112,6 @@ def parse_and_localize_event(event, source_tz, target_tz):
         'grouping_date': grouping_date
     }
 
-    return {
-        'summary': str(event.get('summary')),
-        'start': local_start,
-        'end': local_end,
-        'location': str(event.get('location')),
-        'description': str(event.get('description')),
-        'is_all_day': isinstance(dtstart.dt, date) and not isinstance(dtstart.dt, datetime),
-        'url': str(event.get('url')),
-        'original_start': dtstart.dt,
-        'original_end': dtend.dt if dtend else None,
-        'grouping_date': original_date
-    }
-
 def group_events_by_time(events):
     grouped_events = OrderedDict()
     grouped_events["All Day"] = []
