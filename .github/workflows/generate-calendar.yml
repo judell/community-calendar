@@ -26,13 +26,21 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Generate Bloomington Calendar for Current Month
+    - name: Bloomington, this month
       run: |
         python cal.py --generate --location bloomington --year $(date +%Y) --month $(date +%m) --timezone "America/Indiana/Indianapolis"
 
-    - name: Generate Bloomington Calendar for Next Month
+    - name: Bloomington, next month
       run: |
         python cal.py --generate --location bloomington --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Indiana/Indianapolis"
+
+    - name: Santa Rosa, this month
+      run: |
+        python cal.py --generate --location santarosa --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Los_Angeles"
+
+    - name: Santa Rosa, next month
+      run: |
+          python cal.py --generate --location santarosa --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Los_Angeles"
 
     - name: Commit and push if changes
       env:
