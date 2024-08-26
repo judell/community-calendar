@@ -46,7 +46,7 @@ The system uses a three-step approach:
 
 1. Determine the source timezone for each calendar.
 2. Parse and localize each event to its source timezone, then convert to the target timezone.
-3. Group events by their original date in the source timezone to ensure correct placement in the calendar.
+3. Group events by their date in the target timezone to ensure correct placement in the calendar.
 
 ## Key Functions and Their Roles
 
@@ -57,7 +57,7 @@ The system uses a three-step approach:
   1. Check for VTIMEZONE information in the calendar.
   2. If not found, use X-WR-TIMEZONE property.
   3. Fall back to the user-specified default timezone.
-  4. Use UTC as a last resort.
+  4. If all else fails, use UTC, but flag the timezone as uncertain.
 
 ### `parse_vtimezone(cal)`
 
@@ -70,13 +70,13 @@ The system uses a three-step approach:
 - **Strategy**:
   1. Handle naive datetime objects by assuming they're in the source timezone.
   2. Convert aware datetime objects to the target timezone.
-  3. Preserve the original date in the source timezone for correct grouping.
+  3. Calculate the grouping date based on the event's date in the target timezone.
   4. Special handling for all-day events to prevent date shifts.
 
 ### `group_events_by_date(events, year, month)`
 
-- **Role**: Groups processed events by their original date in the source timezone.
-- **Importance**: Ensures events appear on the correct date in the calendar, regardless of timezone conversions.
+- **Role**: Groups processed events by their date in the target timezone.
+- **Importance**: Ensures events appear on the correct date in the calendar, reflecting how they would occur in the target timezone.
 
 ## Implementation Details
 
@@ -87,15 +87,15 @@ The system uses a three-step approach:
 2. **Event Localization and Conversion**:
    - Each event is processed by `parse_and_localize_event`.
    - This function handles the conversion from source to target timezone.
-   - It also calculates a `grouping_date` based on the event's original date in the source timezone.
+   - It calculates a `grouping_date` based on the event's date in the target timezone.
 
 3. **Event Grouping**:
    - The `group_events_by_date` function uses the `grouping_date` to place events in the correct day.
-   - This prevents issues where timezone conversions might shift an event to a different day.
+   - This ensures events are displayed on the day they occur in the target timezone.
 
 4. **All-Day Event Handling**:
    - All-day events are detected in `parse_and_localize_event`.
-   - These events are not converted to the target timezone to prevent date shifts.
+   - These events maintain their original date to prevent unintended shifts across date boundaries.
 
 ## Considerations for Developers
 
@@ -103,6 +103,7 @@ The system uses a three-step approach:
 - Be cautious of naive datetime objects and always ensure proper timezone awareness.
 - When adding new event sources, ensure they properly specify their timezone information.
 - Consider edge cases like events spanning midnight or daylight saving time transitions.
+- Pay special attention to events near timezone boundaries to ensure they appear on the correct date in the target timezone.
 
-By following this strategy, the system aims to accurately represent events from various sources in a unified, user-specified timezone while maintaining the correct date associations for all events.
+By following this strategy, the system aims to accurately represent events from various sources in a unified, user-specified timezone while ensuring events are displayed on the correct dates as they would occur in the target timezone.
 
