@@ -96,11 +96,21 @@ def parse_and_localize_event(event, source_tz, target_tz):
     local_start = convert_to_target_time(dtstart)
     local_end = convert_to_target_time(dtend)
     
-    # Use the original date in the source timezone for grouping
-    if isinstance(dtstart.dt, datetime):
-        original_date = dtstart.dt.astimezone(source_tz).date()
-    else:
-        original_date = dtstart.dt  # It's already a date object for all-day events
+    # Use the date in the target timezone for grouping
+    grouping_date = local_start.date() if isinstance(local_start, datetime) else local_start
+
+    return {
+        'summary': str(event.get('summary')),
+        'start': local_start,
+        'end': local_end,
+        'location': str(event.get('location')),
+        'description': str(event.get('description')),
+        'is_all_day': isinstance(dtstart.dt, date) and not isinstance(dtstart.dt, datetime),
+        'url': str(event.get('url')),
+        'original_start': dtstart.dt,
+        'original_end': dtend.dt if dtend else None,
+        'grouping_date': grouping_date
+    }
 
     return {
         'summary': str(event.get('summary')),
