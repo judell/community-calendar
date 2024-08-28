@@ -184,7 +184,9 @@ def render_html_calendar(grouped_events, year, month, feeds, output_dir='.'):
     rendered_html = template.render(
         calendar_weeks=calendar_weeks,
         month_year=month_year,
-        feeds=sorted(feeds, key=lambda x: x['name'])
+        feeds=sorted(feeds, key=lambda x: x['name']),
+        year=year,
+        month=month
     )
 
     output_filename = f"{year:04d}-{month:02d}.html"

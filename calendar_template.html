@@ -141,7 +141,13 @@
         {% for day, time_grouped_events in week %}
         <div class="day">
             {% if day != 0 %}
-            <div class="date">{{ day }}</div>
+            <div class="date">
+            {% if time_grouped_events %}
+                <a href="{{ '%04d-%02d-%02d'|format(year, month, day) }}.html">{{ day }}</a>
+            {% else %}
+                {{ day }}
+            {% endif %}
+        </div>
             {% for time, events in time_grouped_events.items() %}
             <div class="time-slot">
                 <div class="time-label">{{ time }}</div>
