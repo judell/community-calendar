@@ -41,21 +41,34 @@
     </style>
 </head>
 <body>
-    <h1>Events for {{ date_str }}</h1>
-
-    {% for time_slot, events in grouped_events.items() %}
-        <h2>{{ time_slot }}</h2>
-        {% for event in events %}
-            <div class="event">
-                <h3>{{ event.summary }}</h3>
-                <p>Time: {% if event.is_all_day %}All Day{% else %}{{ event.start.strftime('%I:%M %p') }} - {{ event.end.strftime('%I:%M %p') }}{% endif %}</p>
-                {% if event.location %}<p>Location: {{ event.location }}</p>{% endif %}
-                {% if event.description %}<p>Description: {{ event.description }}</p>{% endif %}
-                {% if event.url %}<p>URL: <a href="{{ event.url }}" target="_blank">{{ event.url }}</a></p>{% endif %}
-                <p>Source: {{ event.source }}</p>
-            </div>
-            {% if not loop.last %}<hr>{% endif %}
-        {% endfor %}
-    {% endfor %}
+  <h1>Events for {{ date_str }}</h1>
+  {% for time, events in grouped_events.items() %}
+      <h2>{{ time }}</h2>
+      {% for event in events %}
+          <div class="event">
+              <h3>{{ event.summary }}</h3>
+              <p>Time: 
+                  {% if event.is_all_day %}
+                      All Day
+                  {% else %}
+                      {{ event.start.strftime('%I:%M %p') }}
+                      {% if event.end %}
+                          - {{ event.end.strftime('%I:%M %p') }}
+                      {% endif %}
+                  {% endif %}
+              </p>
+              {% if event.location %}
+                  <p>Location: {{ event.location }}</p>
+              {% endif %}
+              {% if event.description %}
+                  <p>Description: {{ event.description }}</p>
+              {% endif %}
+              {% if event.url %}
+                  <p><a href="{{ event.url }}" target="_blank">Event Link</a></p>
+              {% endif %}
+              <p>Source: {{ event.source }}</p>
+          </div>
+      {% endfor %}
+  {% endfor %}
 </body>
 </html>
