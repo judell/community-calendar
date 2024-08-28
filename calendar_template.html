@@ -142,12 +142,8 @@
         <div class="day">
             {% if day != 0 %}
             <div class="date">
-            {% if time_grouped_events %}
-                <a href="{{ '%04d-%02d-%02d'|format(year, month, day) }}.html">{{ day }}</a>
-            {% else %}
                 {{ day }}
-            {% endif %}
-        </div>
+            </div>
             {% for time, events in time_grouped_events.items() %}
             <div class="time-slot">
                 <div class="time-label">{{ time }}</div>
@@ -155,30 +151,28 @@
                 <div class="event {% if time == 'All Day' %}all-day{% endif %}">
                     <div class="event-title">{{ event.summary }}</div>
                     <div class="event-details">
-                        <p>
-                            {% if event.url %}
-                            <strong><a href="{{ event.url }}" target="_blank">{{ event.summary }}</a></strong>
-                            {% else %}
-                            <strong>{{ event.summary }}</strong>
-                            {% endif %}
-                        </p>
-                        <p>
-                            {% if time != 'All Day' %}
-                            {{ event.start.strftime('%A %B %d - %I:%M %p') }}
-                            {% if event.end %}
-                            to {{ event.end.strftime('%I:%M %p') }}
-                            {% endif %}
-                            {% else %}
-                            All Day
-                            {% endif %}
-                        </p>
+                        {% if event.url %}
+                        <strong><a href="{{ event.url }}" target="_blank">{{ event.summary }}</a></strong>
+                        {% else %}
+                        <strong>{{ event.summary }}</strong>
+                        {% endif %}
+
+                        {% if time != 'All Day' %}
+                        {{ event.start.strftime('%A %B %d - %I:%M %p') }}
+                        {% if event.end %}
+                        to {{ event.end.strftime('%I:%M %p') }}
+                        {% endif %}
+                        {% else %}
+                        All Day
+                        {% endif %}
+
                         {% if event.location %}
-                        <p>Location: {{ event.location }}</p>
+                        <br>Location: {{ event.location }}
                         {% endif %}
                         {% if event.description %}
-                        <p>{{ event.description }}</p>
+                        <br>{{ event.description }}
                         {% endif %}
-                        <p>Source: {{ event.source }}</p>
+                        <br>Source: {{ event.source }}
                     </div>
                 </div>
                 {% endfor %}
@@ -215,7 +209,7 @@
         </table>
     </div>
 
-<script src="../sorttable.js"></script>
+    <script src="../sorttable.js"></script>
 
 </body>
 

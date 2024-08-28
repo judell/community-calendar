@@ -301,9 +301,12 @@ def generate_calendar(file_path, year, month, default_timezone, output_dir='.'):
     grouped_events = group_events_by_date(all_events, year, month)
     render_html_calendar(grouped_events, year, month, feeds, output_dir)
 
-    for date, events in grouped_events.items():
-        if events:
-            generate_day_event_page(all_events, date, output_dir)
+    # on refection this feels like overkill, but uncomment if wanted
+    # see also corresponding section in calendar_template.html
+    #
+    # for date, events in grouped_events.items():
+    #    if events:
+    #        generate_day_event_page(all_events, date, output_dir)
 
 def generate_day_event_page(events, date, output_dir):
 
