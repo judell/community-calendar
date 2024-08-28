@@ -299,6 +299,27 @@ def generate_calendar(file_path, year, month, default_timezone, output_dir='.'):
     grouped_events = group_events_by_date(all_events, year, month)
     render_html_calendar(grouped_events, year, month, feeds, output_dir)
 
+    for date, events in grouped_events.items():
+        if events:
+            generate_day_event_page(all_events, date, output_dir)
+
+def generate_day_event_page(events, date, output_dir):
+    env = Environment(loader=FileSystemLoader('.'))
+    template = env.get_template('day_template.html')
+    date_str = date.strftime('%Y-%m-%d')
+    events_for_day = [event for event in events if event['grouping_date'] == date]
+
+    rendered_html = template.render(
+        events=events_for_day,
+        date_str=date_str
+    )
+
+    output_filename = f"{date_str}.html"
+    output_path = os.path.join(output_dir, output_filename)
+
+    with open(output_path, 'w') as f:
+        f.write(rendered_html)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate an HTML calendar from iCalendar feeds or perform a dry run.")
     parser.add_argument("--dry-run", help="Perform a dry run on a single iCalendar URL", type=str)
