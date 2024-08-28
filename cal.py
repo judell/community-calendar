@@ -304,13 +304,23 @@ def generate_calendar(file_path, year, month, default_timezone, output_dir='.'):
             generate_day_event_page(all_events, date, output_dir)
 
 def generate_day_event_page(events, date, output_dir):
+
     env = Environment(loader=FileSystemLoader('.'))
     template = env.get_template('day_template.html')
     date_str = date.strftime('%Y-%m-%d')
     events_for_day = [event for event in events if event['grouping_date'] == date]
 
+    grouped_events = group_events_by_time(events_for_day)
+
+    def sort_key(item):
+        if item[0] == "All Day":
+            return (0, "")
+        return (1, datetime.strptime(item[0], "%I:%M %p"))
+
+    sorted_grouped_events = dict(sorted(grouped_events.items(), key=sort_key))
+
     rendered_html = template.render(
-        events=events_for_day,
+        grouped_events=sorted_grouped_events,
         date_str=date_str
     )
 
