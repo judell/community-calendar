@@ -83,10 +83,21 @@
             left: 100%;
             top: 0;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .event:hover .event-details {
             display: block;
+        }
+
+        /* Media query for smaller screens */
+        @media (max-width: 768px) {
+            .event-details {
+                left: auto;
+                right: 0;
+                transform: none;
+            }
         }
 
         .event:not(:last-child) {
@@ -159,12 +170,12 @@
 
                         {% if time != 'All Day' %}
                         <p>{{ event.start.strftime('%A %B %d - %I:%M %p') }}
-                        {% if event.end %}
-                        to {{ event.end.strftime('%I:%M %p') }}
-                        {% endif %}
-                        {% else %}
-                        All Day
-                        {% endif %}</p>
+                            {% if event.end %}
+                            to {{ event.end.strftime('%I:%M %p') }}
+                            {% endif %}
+                            {% else %}
+                            All Day
+                            {% endif %}</p>
 
                         {% if event.location %}
                         <p>Location: {{ event.location }}</p>
