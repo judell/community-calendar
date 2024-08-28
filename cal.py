@@ -134,8 +134,14 @@ def group_events_by_time(events):
     if not grouped_events["All Day"]:
         del grouped_events["All Day"]
 
-    # Sort the keys, ensuring "All Day" stays first if it exists
-    sorted_keys = sorted(grouped_events.keys(), key=lambda x: x if x != "All Day" else "")
+    # Custom sorting function that respects AM/PM
+    def sort_key(time_str):
+        if time_str == "All Day":
+            return datetime.min  # Ensures "All Day" comes first
+        return datetime.strptime(time_str, '%I:%M %p')
+
+    # Sort the keys using the custom sorting function
+    sorted_keys = sorted(grouped_events.keys(), key=sort_key)
 
     # Create a new OrderedDict with sorted keys
     return OrderedDict((k, grouped_events[k]) for k in sorted_keys)
@@ -300,40 +306,6 @@ def generate_calendar(file_path, year, month, default_timezone, output_dir='.'):
     feeds, all_events = read_and_process_feeds(file_path, default_timezone)
     grouped_events = group_events_by_date(all_events, year, month)
     render_html_calendar(grouped_events, year, month, feeds, output_dir)
-
-    # on refection this feels like overkill, but uncomment if wanted
-    # see also corresponding section in calendar_template.html
-    #
-    # for date, events in grouped_events.items():
-    #    if events:
-    #        generate_day_event_page(all_events, date, output_dir)
-
-def generate_day_event_page(events, date, output_dir):
-
-    env = Environment(loader=FileSystemLoader('.'))
-    template = env.get_template('day_template.html')
-    date_str = date.strftime('%Y-%m-%d')
-    events_for_day = [event for event in events if event['grouping_date'] == date]
-
-    grouped_events = group_events_by_time(events_for_day)
-
-    def sort_key(item):
-        if item[0] == "All Day":
-            return (0, "")
-        return (1, datetime.strptime(item[0], "%I:%M %p"))
-
-    sorted_grouped_events = dict(sorted(grouped_events.items(), key=sort_key))
-
-    rendered_html = template.render(
-        grouped_events=sorted_grouped_events,
-        date_str=date_str
-    )
-
-    output_filename = f"{date_str}.html"
-    output_path = os.path.join(output_dir, output_filename)
-
-    with open(output_path, 'w') as f:
-        f.write(rendered_html)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate an HTML calendar from iCalendar feeds or perform a dry run.")
