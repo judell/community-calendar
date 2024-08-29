@@ -130,11 +130,16 @@
 
   {% for event in events %}
   <div class="event">
-    <div class="event-title">{{ event.summary }}</div>
+
+    <div class="event-title">
+    {% if event.url %}
+    <a href="{{ event.url }}" target="_blank">{{ event.summary }}</a>
+    {% else %}
+    {{ event.summary }}
+    {% endif %}
+    </div>
+
     <div class="event-details">
-      {% if event.url %}
-      <a href="{{ event.url }}" target="_blank">{{ event.summary }}</a><br>
-      {% endif %}
       {% if time != 'All Day' %}
       {{ event.start.strftime('%A %B %d - %I:%M %p') }}
       {% if event.end %}
@@ -145,10 +150,10 @@
       {% endif %}
       <br>
       {% if event.location %}
-      Location: {{ event.location }}<br>
+      <p>{{ event.location }}</p>
       {% endif %}
       {% if event.description %}
-      {{ event.description }}<br>
+      <p>{{ event.description }}</p>
       {% endif %}
       Source: {{ event.source }}
     </div>
