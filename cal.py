@@ -11,6 +11,7 @@ from datetime import date, datetime, time
 import pytz
 import requests
 import urllib3
+from bs4 import BeautifulSoup
 from icalendar import Calendar
 from icalendar.prop import vUTCOffset
 from jinja2 import Environment, FileSystemLoader
@@ -19,6 +20,21 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger()
 
 warnings.simplefilter('ignore', urllib3.exceptions.InsecureRequestWarning)
+
+def truncate_html_description(html_text, max_length=300):
+    # Use BeautifulSoup to parse the HTML
+    soup = BeautifulSoup(html_text, 'html.parser')
+    
+    # Extract plain text
+    plain_text = soup.get_text()
+    
+    # Truncate the text to the desired length, adding an ellipsis if necessary
+    if len(plain_text) > max_length:
+        truncated_text = plain_text[:max_length] + '...'
+    else:
+        truncated_text = plain_text
+    
+    return truncated_text
 
 def determine_timezone(vtimezone_info, x_wr_timezone, default_timezone):
     if vtimezone_info:
@@ -103,13 +119,15 @@ def parse_and_localize_event(event, source_tz, target_tz, cal_name):
     if not url.startswith(('http://', 'https://')):
         url = None
 
+    description = str(event.get('description'))
+
     return {
         'summary': str(event.get('summary')),
         'start': local_start,
         'end': local_end,
         'location': str(event.get('location')),
-        'description': str(event.get('description')),
         'is_all_day': isinstance(dtstart.dt, date) and not isinstance(dtstart.dt, datetime),
+        'description': truncate_html_description(description),
         'url': url,
         'original_start': dtstart.dt,
         'original_end': dtend.dt if dtend else None,
