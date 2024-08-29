@@ -6,72 +6,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ month_year }} Calendar</title>
     <style>
-        @media (max-width: 768px) {
-            .feeds-table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-        }
-
         body {
             font-family: 'Open Sans', Arial, sans-serif;
             margin: 0;
             padding: 20px;
             font-size: 80%;
+            overflow-x: hidden;
         }
-
+    
         h1 {
             text-align: center;
         }
-
+    
         .calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 10px;
+            width: 100%;
+            position: relative;
         }
-
+    
         .weekday {
             font-weight: bold;
             text-align: center;
             padding: 10px;
             background-color: rgb(250, 247, 244);
         }
-
+    
         .day {
             border: 1px solid #ede9e9;
             padding: 10px;
             min-height: 100px;
+            position: relative;
+            vertical-align: top;
         }
-
+    
         .date {
             margin-bottom: 10px;
             text-align: center;
             background-color: rgb(250, 247, 244);
         }
-
+    
         .time-slot {
             margin-top: 10px;
         }
-
+    
         .time-label {
             font-weight: bold;
             margin-bottom: 5px;
         }
-
+    
         .event {
             margin-bottom: 5px;
             position: relative;
         }
-
+    
         .all-day {
             border-radius: 3px;
         }
-
+    
         .event-title {
             cursor: pointer;
         }
-
+    
         .event-details {
             display: none;
             position: absolute;
@@ -80,57 +77,49 @@
             padding: 10px;
             z-index: 1000;
             width: 300px;
-            left: 100%;
-            top: 0;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
             left: 50%;
             transform: translateX(-50%);
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
         }
-
+    
         .event:hover .event-details {
             display: block;
         }
-
-        /* Media query for smaller screens */
-        @media (max-width: 768px) {
-            .event-details {
-                left: auto;
-                right: 0;
-                transform: none;
-            }
-        }
-
+    
         .event:not(:last-child) {
             border-bottom: 1px solid #e0e0e0;
-            /* Light gray color, adjust as needed */
             padding-bottom: 10px;
-            /* Add some space below the content before the border */
             margin-bottom: 10px;
-            /* Add some space after the border before the next event */
         }
-
+    
         .feeds-section {
             margin-top: 20px;
             overflow-x: auto;
         }
+    
         .feeds-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9em;
         }
-        .feeds-table th, .feeds-table td {
+    
+        .feeds-table th,
+        .feeds-table td {
             padding: 8px;
             border: 1px solid #ddd;
             text-align: left;
         }
+    
         .feeds-table th {
             background-color: #f2f2f2;
         }
+    
         .feeds-table .url-cell {
             max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
         }
     </style>
 </head>
@@ -180,7 +169,7 @@
                         <p>Location: {{ event.location }}</p>
                         {% endif %}
                         {% if event.description %}
-                        <p>{{ event.description }}</p>
+                        <p class="description">{{ event.description }}</p>
                         {% endif %}
                         <p>Source: {{ event.source }}</p>
                     </div>
@@ -220,6 +209,51 @@
     </div>
 
     <script src="../sorttable.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const events = document.querySelectorAll('.event-title');
+            
+            events.forEach(event => {
+                event.addEventListener('mouseenter', function () {
+                    const tooltip = this.nextElementSibling;
+                    const rect = tooltip.getBoundingClientRect();
+    
+                    // Check if tooltip overflows the left edge
+                    if (rect.left < 0) {
+                        tooltip.style.left = '0';
+                        tooltip.style.transform = 'translateX(0%)';
+                    }
+    
+                    // Check if tooltip overflows the right edge
+                    if (rect.right > window.innerWidth) {
+                        tooltip.style.left = 'auto';
+                        tooltip.style.right = '0';
+                        tooltip.style.transform = 'translateX(0%)';
+                    }
+                });
+            });
+        });
+    </script>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendar = document.querySelector('.calendar');
+            const days = calendar.querySelectorAll('.day');
+
+            if (days.length > 0) {
+                const columnWidth = days[0].offsetWidth;
+                const detailWidth = columnWidth * 2;
+
+                const eventDetails = document.querySelectorAll('.event-details');
+                eventDetails.forEach(detail => {
+                    detail.style.width = `${detailWidth}px`;
+                });
+            }
+        });
+    </script>
+
 
 </body>
 
