@@ -10,14 +10,14 @@
             font-family: 'Open Sans', Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            font-size: 80%;
+            font-size: smaller;
             overflow-x: hidden;
         }
-    
+
         h1 {
             text-align: center;
         }
-    
+
         .calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -25,14 +25,14 @@
             width: 100%;
             position: relative;
         }
-    
+
         .weekday {
             font-weight: bold;
             text-align: center;
             padding: 10px;
             background-color: rgb(250, 247, 244);
         }
-    
+
         .day {
             border: 1px solid #ede9e9;
             padding: 10px;
@@ -40,35 +40,35 @@
             position: relative;
             vertical-align: top;
         }
-    
+
         .date {
             margin-bottom: 10px;
             text-align: center;
             background-color: rgb(250, 247, 244);
         }
-    
+
         .time-slot {
             margin-top: 10px;
         }
-    
+
         .time-label {
             font-weight: bold;
             margin-bottom: 5px;
         }
-    
+
         .event {
             margin-bottom: 5px;
             position: relative;
         }
-    
+
         .all-day {
             border-radius: 3px;
         }
-    
+
         .event-title {
             cursor: pointer;
         }
-    
+
         .event-details {
             display: none;
             position: absolute;
@@ -81,39 +81,39 @@
             transform: translateX(-50%);
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
         }
-    
+
         .event:hover .event-details {
             display: block;
         }
-    
+
         .event:not(:last-child) {
             border-bottom: 1px solid #e0e0e0;
             padding-bottom: 10px;
             margin-bottom: 10px;
         }
-    
+
         .feeds-section {
             margin-top: 20px;
             overflow-x: auto;
         }
-    
+
         .feeds-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9em;
         }
-    
+
         .feeds-table th,
         .feeds-table td {
             padding: 8px;
             border: 1px solid #ddd;
             text-align: left;
         }
-    
+
         .feeds-table th {
             background-color: #f2f2f2;
         }
-    
+
         .feeds-table .url-cell {
             max-width: 200px;
             overflow-wrap: break-word;
@@ -121,11 +121,17 @@
             word-break: break-word;
             hyphens: auto;
         }
+
+        .switcher {
+            font-family: italic;
+            font-size: x-small;
+        }
     </style>
 </head>
 
 <body>
-    <h1>{{ month_year }}</h1>
+    <h1>{{ month_year }} <span class="switcher"><a href="{{ year }}-{{ '%02d'|format(month) }}-l.html">list
+                view</a></span></h1>
 
     <div class="calendar">
         <div class="weekday">Monday</div>
@@ -213,18 +219,18 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const events = document.querySelectorAll('.event-title');
-            
+
             events.forEach(event => {
                 event.addEventListener('mouseenter', function () {
                     const tooltip = this.nextElementSibling;
                     const rect = tooltip.getBoundingClientRect();
-    
+
                     // Check if tooltip overflows the left edge
                     if (rect.left < 0) {
                         tooltip.style.left = '0';
                         tooltip.style.transform = 'translateX(0%)';
                     }
-    
+
                     // Check if tooltip overflows the right edge
                     if (rect.right > window.innerWidth) {
                         tooltip.style.left = 'auto';

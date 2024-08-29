@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ month_year }} - List View</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      padding: 20px;
+      margin-right: 300px;
+      font-size: smaller;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    h2 {
+      color: #666;
+    }
+
+    .event {
+      margin-bottom: 20px;
+      padding-left: 10px;
+    }
+
+    .event-title {
+      font-weight: bold;
+    }
+
+    .event-details {
+      margin-top: 5px;
+    }
+
+    .feeds-section {
+      margin-top: 40px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    /* Floating calendar styles */
+    #calendar-widget {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 250px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #calendar-widget table {
+      width: 100%;
+    }
+
+    #calendar-widget th {
+      background-color: rgb(250, 247, 244);
+    }
+
+    #calendar-widget td {
+      text-align: center;
+      cursor: pointer;
+    }
+
+    #calendar-widget td:hover {
+      background-color: #e6e6e6;
+    }
+
+    #calendar-widget .has-events {
+      font-weight: bold;
+    }
+
+    .switcher {
+      font-family: italic;
+      font-size: x-small;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>{{ month_year }} <span class="switcher"><a href="{{ year }}-{{ '%02d'|format(month) }}.html">calendar
+        view</a></span></h1>
+
+  <div id="calendar-widget">
+    <table>
+      <tr>
+        <th>Mo</th>
+        <th>Tu</th>
+        <th>We</th>
+        <th>Th</th>
+        <th>Fr</th>
+        <th>Sa</th>
+        <th>Su</th>
+      </tr>
+      {% for week in calendar_weeks %}
+      <tr>
+        {% for day, events in week %}
+        <td {% if day !=0 %}onclick="scrollToDay('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(day) }}')" {%
+          endif %} {% if events %}class="has-events" {% endif %}>
+          {{ day if day != 0 else '' }}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  {% for date, time_grouped_events in grouped_events.items() %}
+  <h2 id="{{ date.strftime('%Y-%m-%d') }}">{{ date.strftime('%A, %B %d, %Y') }}</h2>
+
+  {% for time, events in time_grouped_events.items() %}
+  <h3>{{ time }}</h3>
+
+  {% for event in events %}
+  <div class="event">
+    <div class="event-title">{{ event.summary }}</div>
+    <div class="event-details">
+      {% if event.url %}
+      <a href="{{ event.url }}" target="_blank">{{ event.summary }}</a><br>
+      {% endif %}
+      {% if time != 'All Day' %}
+      {{ event.start.strftime('%A %B %d - %I:%M %p') }}
+      {% if event.end %}
+      to {{ event.end.strftime('%I:%M %p') }}
+      {% endif %}
+      {% else %}
+      All Day
+      {% endif %}
+      <br>
+      {% if event.location %}
+      Location: {{ event.location }}<br>
+      {% endif %}
+      {% if event.description %}
+      {{ event.description }}<br>
+      {% endif %}
+      Source: {{ event.source }}
+    </div>
+  </div>
+  {% endfor %}
+  {% endfor %}
+  {% endfor %}
+
+  <div class="feeds-section">
+    <h2>Feeds</h2>
+    <table>
+      <tr>
+        <th>Calendar Name</th>
+        <th>Total Events</th>
+        <th>Oldest Day</th>
+        <th>Newest Day</th>
+        <th>URL</th>
+      </tr>
+      {% for feed in feeds %}
+      <tr>
+        <td>{{ feed.name }}</td>
+        <td>{{ feed.total_events }}</td>
+        <td>{{ feed.oldest_day }}</td>
+        <td>{{ feed.newest_day }}</td>
+        <td>{{ feed.url }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <script>
+    function scrollToDay(dateId) {
+      const element = document.getElementById(dateId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  </script>
+</body>
+
+</html>

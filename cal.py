@@ -200,12 +200,14 @@ def create_calendar_weeks(year, month, grouped_events):
 
 def render_html_calendar(grouped_events, year, month, feeds, output_dir='.'):
     env = Environment(loader=FileSystemLoader('.'))
-    template = env.get_template('calendar_template.html')
-    
+    calendar_template = env.get_template('calendar_template.html')
+    list_template = env.get_template('list_template.html')
+
     calendar_weeks = create_calendar_weeks(year, month, grouped_events)
     month_year = datetime(year, month, 1).strftime('%B %Y')
 
-    rendered_html = template.render(
+    # Render calendar view
+    rendered_calendar = calendar_template.render(
         calendar_weeks=calendar_weeks,
         month_year=month_year,
         feeds=sorted(feeds, key=lambda x: x['name']),
@@ -213,13 +215,29 @@ def render_html_calendar(grouped_events, year, month, feeds, output_dir='.'):
         month=month
     )
 
-    output_filename = f"{year:04d}-{month:02d}.html"
-    output_path = os.path.join(output_dir, output_filename)
+    # Render list view
+    rendered_list = list_template.render(
+        grouped_events=grouped_events,
+        calendar_weeks=calendar_weeks,  # Add this line
+        month_year=month_year,
+        feeds=sorted(feeds, key=lambda x: x['name']),
+        year=year,
+        month=month
+    )
 
-    with open(output_path, 'w') as f:
-        f.write(rendered_html)
+    # Save calendar view
+    calendar_filename = f"{year:04d}-{month:02d}.html"
+    calendar_path = os.path.join(output_dir, calendar_filename)
+    with open(calendar_path, 'w') as f:
+        f.write(rendered_calendar)
+    print(f"Calendar view generated: {calendar_path}")
 
-    print(f"Calendar generated: {output_path}")
+    # Save list view
+    list_filename = f"{year:04d}-{month:02d}-l.html"
+    list_path = os.path.join(output_dir, list_filename)
+    with open(list_path, 'w') as f:
+        f.write(rendered_list)
+    print(f"List view generated: {list_path}")
 
 def determine_timezone(vtimezone_info, x_wr_timezone, default_timezone):
     def vutcoffset_to_minutes(offset):
