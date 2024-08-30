@@ -11,34 +11,34 @@
             margin: 0;
             padding: 20px;
             font-size: smaller;
-            overflow-x: hidden;
         }
 
         h1 {
             text-align: center;
         }
 
+        .calendar-container {
+            width: 100%;
+            overflow-x: scroll;
+            overflow-y: hidden;
+        }
+
+
         .calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 10px;
-            width: 100%;
-            position: relative;
+            min-width: 700px;
+            /* Ensure grid is wide enough for 7 columns */
+            overflow-x: auto;
+            /* Ensure horizontal scrolling is possible */
         }
 
+        .day,
         .weekday {
-            font-weight: bold;
-            text-align: center;
-            padding: 10px;
-            background-color: rgb(250, 247, 244);
-        }
-
-        .day {
-            border: 1px solid #ede9e9;
-            padding: 10px;
-            min-height: 100px;
-            position: relative;
-            vertical-align: top;
+            min-width: 100px;
+            /* Ensure each day/weekday has a minimum width */
+            box-sizing: border-box;
         }
 
         .date {
@@ -126,6 +126,31 @@
             font-style: italic;
             font-size: small;
         }
+
+        @media (max-width: 768px) {
+            .calendar {
+                grid-template-columns: repeat(7, minmax(100px, 1fr));
+                /* Allow columns to shrink but maintain scroll */
+            }
+
+            .day,
+            .weekday {
+                min-width: 100px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .calendar-container {
+                overflow-x: auto;
+                /* Ensure scrolling on smaller screens */
+            }
+
+            .calendar {
+                grid-template-columns: repeat(7, minmax(120px, 1fr));
+                min-width: 840px;
+                /* Ensure enough width for scrolling */
+            }
+        }
     </style>
 </head>
 
@@ -133,61 +158,64 @@
     <h1>{{ month_year }} <span class="switcher"><a href="{{ year }}-{{ '%02d'|format(month) }}-l.html">list
                 view</a></span></h1>
 
-    <div class="calendar">
-        <div class="weekday">Monday</div>
-        <div class="weekday">Tuesday</div>
-        <div class="weekday">Wednesday</div>
-        <div class="weekday">Thursday</div>
-        <div class="weekday">Friday</div>
-        <div class="weekday">Saturday</div>
-        <div class="weekday">Sunday</div>
+    <div class="calendar-container">
+        <div class="calendar">
+            <div class="weekday">Monday</div>
+            <div class="weekday">Tuesday</div>
+            <div class="weekday">Wednesday</div>
+            <div class="weekday">Thursday</div>
+            <div class="weekday">Friday</div>
+            <div class="weekday">Saturday</div>
+            <div class="weekday">Sunday</div>
 
-        {% for week in calendar_weeks %}
-        {% for day, time_grouped_events in week %}
-        <div class="day">
-            {% if day != 0 %}
-            <div class="date">
-                {{ day }}
-            </div>
-            {% for time, events in time_grouped_events.items() %}
-            <div class="time-slot">
-                <div class="time-label">{{ time }}</div>
-                {% for event in events %}
-                <div class="event {% if time == 'All Day' %}all-day{% endif %}">
-                    <div class="event-title">{{ event.summary }}</div>
-                    <div class="event-details">
-                        {% if event.url %}
-                        <strong><a href="{{ event.url }}" target="_blank">{{ event.summary }}</a></strong>
-                        {% else %}
-                        <p><strong>{{ event.summary }}</strong></p>
-                        {% endif %}
-
-                        {% if time != 'All Day' %}
-                        <p>{{ event.start.strftime('%A %B %d - %I:%M %p') }}
-                            {% if event.end %}
-                            to {{ event.end.strftime('%I:%M %p') }}
-                            {% endif %}
+            {% for week in calendar_weeks %}
+            {% for day, time_grouped_events in week %}
+            <div class="day">
+                {% if day != 0 %}
+                <div class="date">
+                    {{ day }}
+                </div>
+                {% for time, events in time_grouped_events.items() %}
+                <div class="time-slot">
+                    <div class="time-label">{{ time }}</div>
+                    {% for event in events %}
+                    <div class="event {% if time == 'All Day' %}all-day{% endif %}">
+                        <div class="event-title">{{ event.summary }}</div>
+                        <div class="event-details">
+                            {% if event.url %}
+                            <strong><a href="{{ event.url }}" target="_blank">{{ event.summary }}</a></strong>
                             {% else %}
-                            All Day
-                            {% endif %}</p>
+                            <p><strong>{{ event.summary }}</strong></p>
+                            {% endif %}
 
-                        {% if event.location %}
-                        <p>{{ event.location }}</p>
-                        {% endif %}
-                        {% if event.description %}
-                        <p class="description">{{ event.description }}</p>
-                        {% endif %}
-                        <p>Source: {{ event.source }}</p>
+                            {% if time != 'All Day' %}
+                            <p>{{ event.start.strftime('%A %B %d - %I:%M %p') }}
+                                {% if event.end %}
+                                to {{ event.end.strftime('%I:%M %p') }}
+                                {% endif %}
+                                {% else %}
+                                All Day
+                                {% endif %}</p>
+
+                            {% if event.location %}
+                            <p>{{ event.location }}</p>
+                            {% endif %}
+                            {% if event.description %}
+                            <p class="description">{{ event.description }}</p>
+                            {% endif %}
+                            <p>Source: {{ event.source }}</p>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
                 {% endfor %}
+                {% endif %}
             </div>
             {% endfor %}
-            {% endif %}
+            {% endfor %}
         </div>
-        {% endfor %}
-        {% endfor %}
     </div>
+
     <div class="feeds-section">
         <h2>Feeds</h2>
         <table class="feeds-table sortable">
@@ -242,7 +270,6 @@
         });
     </script>
 
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const calendar = document.querySelector('.calendar');
@@ -259,7 +286,6 @@
             }
         });
     </script>
-
 
 </body>
 
