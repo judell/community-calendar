@@ -301,17 +301,20 @@ def fetch_and_process_calendar(url, default_timezone):
         newest_day = None
 
         for event in cal.walk('VEVENT'):
-            if 'CATEGORIES' in event:
-                logger.info(f"CATEGORIES {event['CATEGORIES'].to_ical().decode('utf-8')} [[{event['SUMMARY']}]]")
-            processed_event = parse_and_localize_event(event, source_tz, target_tz, cal_name)
-            processed_events.append(processed_event)
+            try:
+                if 'CATEGORIES' in event:
+                    logger.info(f"CATEGORIES {event['CATEGORIES'].to_ical().decode('utf-8')} [[{event['SUMMARY']}]]")
+                processed_event = parse_and_localize_event(event, source_tz, target_tz, cal_name)
+                processed_events.append(processed_event)
 
-            event_date = processed_event['start'].date() if isinstance(processed_event['start'], datetime) else processed_event['start']
+                event_date = processed_event['start'].date() if isinstance(processed_event['start'], datetime) else processed_event['start']
 
-            if oldest_day is None or event_date < oldest_day:
-                oldest_day = event_date
-            if newest_day is None or event_date > newest_day:
-                newest_day = event_date
+                if oldest_day is None or event_date < oldest_day:
+                    oldest_day = event_date
+                if newest_day is None or event_date > newest_day:
+                    newest_day = event_date
+            except:
+                logger.error(f"Error processing event {event}: {str(e)}")
 
         total_events = len(processed_events)
         logger.info(f"Processed {total_events} events")
@@ -346,52 +349,57 @@ def generate_calendar(file_path, year, month, default_timezone, output_dir='.'):
     grouped_events = group_events_by_date(all_events, year, month)
     render_html_calendar(grouped_events, year, month, feeds, output_dir)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate an HTML calendar from iCalendar feeds or perform a dry run.")
-    parser.add_argument("--dry-run", help="Perform a dry run on a single iCalendar URL", type=str)
-    parser.add_argument("--generate", action="store_true", help="Generate an HTML calendar from feeds.txt, a list of iCalendar feeds")
-    parser.add_argument("--timezone", help="Default timezone (default: America/Indiana/Indianapolis)", 
-                        type=str, default='America/Indiana/Indianapolis')
-    parser.add_argument("--year", help="Year for calendar generation", type=int, default=datetime.now().year)
-    parser.add_argument("--month", help="Month for calendar generation", type=int, default=datetime.now().month)
-    parser.add_argument("--location", help="Folder containing feeds.txt and for output (required for --generate)", type=str)
+def load_ics_from_url(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.content
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching URL {url}: {e}")
+        return None
+
+def load_ics_from_file(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            return file.read()
+    except Exception as e:
+        logging.error(f"Error reading file {file_path}: {e}")
+        return None
+
+def main():
+    parser = argparse.ArgumentParser(description='Process a Google Calendar ICS file.')
+    parser.add_argument('url_or_file', help='URL to the ICS file or path to a local ICS file')
+    parser.add_argument('--dry-run', action='store_true', help='Perform a dry run without making any changes')
+
     args = parser.parse_args()
 
-    if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(1)
+    ics_data = None
 
-    if args.generate and not args.location:
-        print("Error: --location is required when using --generate")
-        parser.print_help()
-        sys.exit(1)
-
-    if args.location and not os.path.isdir(args.location):
-        print(f"Error: The specified location '{args.location}' is not a valid directory.")
-        sys.exit(1)
-
-    if args.dry_run:
-        name, events, total_events, oldest_day, newest_day = fetch_and_process_calendar(args.dry_run, args.timezone)
-        print(f"Calendar Name: {name}")
-        print(f"Number of events: {total_events}")
-        print(f"Oldest event date: {oldest_day.strftime('%Y-%m-%d') if oldest_day else 'N/A'}")
-        print(f"Newest event date: {newest_day.strftime('%Y-%m-%d') if newest_day else 'N/A'}")
-        print("\nFirst few events:")
-        for event in events[:5]:
-            print(f"  - {event['summary']}")
-            if event['is_all_day']:
-                print(f"    All-day event on {event['start']}")
-            else:
-                print(f"    Original Start: {event['original_start']}")
-                print(f"    Adjusted Start: {event['start']}")
-            print()  # Add a blank line between events for readability
-    elif args.generate:
-        feeds_file = os.path.join(args.location, 'feeds.txt')
-        if not os.path.isfile(feeds_file):
-            print(f"Error: feeds.txt not found in the specified location '{args.location}'.")
-            sys.exit(1)
-        generate_calendar(feeds_file, args.year, args.month, args.timezone, args.location)
+    if args.url_or_file.startswith('http'):
+        logging.info(f"Processing URL: {args.url_or_file}")
+        ics_data = load_ics_from_url(args.url_or_file)
     else:
-        print("Please specify either --dry-run or --generate")
-        parser.print_help()
-        sys.exit(1)
+        logging.info(f"Processing file: {args.url_or_file}")
+        ics_data = load_ics_from_file(args.url_or_file)
+
+    if ics_data is None:
+        logging.error("Failed to load ICS data.")
+        return
+
+    try:
+        cal = Calendar.from_ical(ics_data)
+        logging.info(f"Calendar: {cal.get('X-WR-CALNAME', 'Unnamed Calendar')}")
+        logging.info(f"Source timezone: {cal.get('X-WR-TIMEZONE', 'Unknown')}")
+
+        # Process events
+        for component in cal.walk():
+            if component.name == "VEVENT":
+                summary = component.get('SUMMARY', 'No Title')
+                logging.info(f"Event: {summary}")
+
+    except Exception as e:
+        logging.error(f"Error processing ICS data: {e}")
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    main()
