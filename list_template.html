@@ -6,11 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ month_year }} - List View</title>
   <style>
+    /* General Styles */
     body {
       font-family: Arial, sans-serif;
       line-height: 1.6;
       padding: 20px;
-      margin-right: 300px;
+      margin-right: 0;
       font-size: smaller;
     }
 
@@ -35,39 +36,16 @@
       margin-top: 5px;
     }
 
-    .feeds-section {
-      margin-top: 40px;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    th,
-    td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f2f2f2;
-    }
-
-    /* Floating calendar styles */
     #calendar-widget {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      width: 250px;
       border: 1px solid #ddd;
       padding: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 4em;
     }
 
     #calendar-widget table {
       width: 100%;
+      border-collapse: collapse;
     }
 
     #calendar-widget th {
@@ -87,9 +65,63 @@
       font-weight: bold;
     }
 
-    .switcher {
-      font-style: italic;
-      font-size: small;
+    /* Floating calendar styles for larger screens */
+    @media (min-width: 1200px) {
+      #calendar-widget {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 250px;
+        max-width: 20%;
+      }
+
+      .event-list {
+        margin-right: 270px;
+        /* Allows the list to expand and contract naturally */
+      }
+    }
+
+    /* Styles for medium screens */
+    @media (min-width: 769px) and (max-width: 1199px) {
+      #calendar-widget {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 200px;
+        max-width: 20%;
+      }
+
+      .event-list {
+        margin-right: 220px;
+        /* Adjust based on the calendar width and padding */
+      }
+    }
+
+    /* Styles for smaller screens */
+    @media (max-width: 768px) {
+      #calendar-widget {
+        position: relative;
+        width: 50%;
+        margin-top: 20px;
+        margin-right: 0;
+        float: none;
+        clear: both;
+      }
+
+      .event-list {
+        margin-right: 0;
+        margin-left: 0;
+        width: 100%;
+        box-sizing: border-box;
+        clear: both;
+      }
+    }
+
+    /* Hide the feeds section on smaller screens */
+    @media (max-width: 768px) {
+      .feeds-section {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -122,45 +154,47 @@
     </table>
   </div>
 
-  {% for date, time_grouped_events in grouped_events.items() %}
-  <h2 id="{{ date.strftime('%Y-%m-%d') }}">{{ date.strftime('%A, %B %d, %Y') }}</h2>
+  <div class="event-list">
+    {% for date, time_grouped_events in grouped_events.items() %}
+    <h2 id="{{ date.strftime('%Y-%m-%d') }}">{{ date.strftime('%A, %B %d, %Y') }}</h2>
 
-  {% for time, events in time_grouped_events.items() %}
-  <h3>{{ time }}</h3>
+    {% for time, events in time_grouped_events.items() %}
+    <h3>{{ time }}</h3>
 
-  {% for event in events %}
-  <div class="event">
+    {% for event in events %}
+    <div class="event">
 
-    <div class="event-title">
-    {% if event.url %}
-    <a href="{{ event.url }}" target="_blank">{{ event.summary }}</a>
-    {% else %}
-    {{ event.summary }}
-    {% endif %}
+      <div class="event-title">
+        {% if event.url %}
+        <a href="{{ event.url }}" target="_blank">{{ event.summary }}</a>
+        {% else %}
+        {{ event.summary }}
+        {% endif %}
+      </div>
+
+      <div class="event-details">
+        {% if time != 'All Day' %}
+        {{ event.start.strftime('%A %B %d - %I:%M %p') }}
+        {% if event.end %}
+        to {{ event.end.strftime('%I:%M %p') }}
+        {% endif %}
+        {% else %}
+        All Day
+        {% endif %}
+        <br>
+        {% if event.location %}
+        <p>{{ event.location }}</p>
+        {% endif %}
+        {% if event.description %}
+        <p>{{ event.description }}</p>
+        {% endif %}
+        Source: {{ event.source }}
+      </div>
     </div>
-
-    <div class="event-details">
-      {% if time != 'All Day' %}
-      {{ event.start.strftime('%A %B %d - %I:%M %p') }}
-      {% if event.end %}
-      to {{ event.end.strftime('%I:%M %p') }}
-      {% endif %}
-      {% else %}
-      All Day
-      {% endif %}
-      <br>
-      {% if event.location %}
-      <p>{{ event.location }}</p>
-      {% endif %}
-      {% if event.description %}
-      <p>{{ event.description }}</p>
-      {% endif %}
-      Source: {{ event.source }}
-    </div>
+    {% endfor %}
+    {% endfor %}
+    {% endfor %}
   </div>
-  {% endfor %}
-  {% endfor %}
-  {% endfor %}
 
   <div class="feeds-section">
     <h2>Feeds</h2>
@@ -191,6 +225,39 @@
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
+
+    function adjustCalendarPosition() {
+      const calendar = document.getElementById('calendar-widget');
+      const title = document.querySelector('h1');
+      const eventList = document.querySelector('.event-list');
+
+      if (window.innerWidth <= 480) {
+        // Narrowest screens: calendar full width above the list
+        title.parentNode.insertBefore(calendar, title.nextSibling);
+        calendar.style.position = 'relative';
+        calendar.style.width = '100%';
+        calendar.style.marginTop = '20px';
+        eventList.style.marginRight = '0';
+      } else if (window.innerWidth <= 768) {
+        // Mid-sized screens: calendar below title, 50% width
+        title.parentNode.insertBefore(calendar, title.nextSibling);
+        calendar.style.position = 'relative';
+        calendar.style.width = '50%';  // Ensure it stays at 50%
+        calendar.style.marginTop = '20px';
+        eventList.style.marginRight = '0';
+      } else {
+        // Larger screens: calendar fixed in top-right
+        document.body.appendChild(calendar);
+        calendar.style.position = 'fixed';
+        calendar.style.top = '20px';
+        calendar.style.right = '20px';
+        calendar.style.width = '';
+        eventList.style.marginRight = ''; // Let the CSS handle this based on screen width
+      }
+    }
+
+    window.addEventListener('resize', adjustCalendarPosition);
+    document.addEventListener('DOMContentLoaded', adjustCalendarPosition);
   </script>
 </body>
 
