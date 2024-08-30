@@ -165,21 +165,24 @@ def group_events_by_time(events):
     return OrderedDict((k, grouped_events[k]) for k in sorted_keys)
 
 def group_events_by_date(events, year, month):
-    grouped_events = OrderedDict()
+    grouped_events = {}
     for event in events:
         date_key = event['grouping_date']
-        
+
         if date_key.year == year and date_key.month == month:
             if date_key not in grouped_events:
                 grouped_events[date_key] = []
-            
+
             grouped_events[date_key].append(event)
 
     # Group events by time for each day
     for event_date in grouped_events:
         grouped_events[event_date] = group_events_by_time(grouped_events[event_date])
-    
-    return grouped_events
+
+    # Sort the grouped_events by date
+    sorted_grouped_events = OrderedDict(sorted(grouped_events.items()))
+
+    return sorted_grouped_events
 
 def create_calendar_weeks(year, month, grouped_events):
     cal = calendar.monthcalendar(year, month)
