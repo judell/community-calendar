@@ -17,11 +17,16 @@ options:
 
 # Bloomington example
 
-Community calendar for [August 2024](https://jonudell.info/bloomington/2024-08.html)
+Community calendar for [September 2024](https://jonudell.info/bloomington/2024-0p.html)
 
-## Rendered calendar
+## Calendar view
 
 ![image](https://github.com/user-attachments/assets/280beee9-d752-47c7-be70-d1b710f08bcc)
+
+## List view
+
+![image](https://github.com/user-attachments/assets/a4cac249-d672-4405-a1b0-478ba8dfc916)
+
 
 ## Source feeds and stats
 
