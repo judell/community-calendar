@@ -313,7 +313,7 @@ def fetch_and_process_calendar(url, default_timezone):
                     oldest_day = event_date
                 if newest_day is None or event_date > newest_day:
                     newest_day = event_date
-            except:
+            except Exception as e:
                 logger.error(f"Error processing event {event}: {str(e)}")
 
         total_events = len(processed_events)
