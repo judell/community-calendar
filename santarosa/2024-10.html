@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>October 2024 Calendar</title>
+    <style>
+        body {
+            font-family: 'Open Sans', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: smaller;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .calendar-container {
+            width: 100%;
+            overflow-x: scroll;
+            overflow-y: hidden;
+        }
+
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            min-width: 700px;
+            /* Ensure grid is wide enough for 7 columns */
+            overflow-x: auto;
+            /* Ensure horizontal scrolling is possible */
+        }
+
+        .day,
+        .weekday {
+            min-width: 100px;
+            /* Ensure each day/weekday has a minimum width */
+            box-sizing: border-box;
+        }
+
+        .date {
+            margin-bottom: 10px;
+            text-align: center;
+            background-color: rgb(250, 247, 244);
+        }
+
+        .time-slot {
+            margin-top: 10px;
+        }
+
+        .time-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .event {
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .all-day {
+            border-radius: 3px;
+        }
+
+        .event-title {
+            cursor: pointer;
+        }
+
+        .event-details {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            z-index: 1000;
+            width: 300px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .event:hover .event-details {
+            display: block;
+        }
+
+        .event:not(:last-child) {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .feeds-section {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .feeds-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        .feeds-table th,
+        .feeds-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .feeds-table th {
+            background-color: #f2f2f2;
+        }
+
+        .feeds-table .url-cell {
+            max-width: 200px;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+        .switcher {
+            font-style: italic;
+            font-size: small;
+        }
+
+        @media (max-width: 768px) {
+            .calendar {
+                grid-template-columns: repeat(7, minmax(100px, 1fr));
+                /* Allow columns to shrink but maintain scroll */
+            }
+
+            .day,
+            .weekday {
+                min-width: 100px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .calendar-container {
+                overflow-x: auto;
+                /* Ensure scrolling on smaller screens */
+            }
+
+            .calendar {
+                grid-template-columns: repeat(7, minmax(120px, 1fr));
+                min-width: 840px;
+                /* Ensure enough width for scrolling */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>October 2024 <span class="switcher"><a href="2024-10-l.html">list
+                view</a></span></h1>
+
+    <div class="calendar-container">
+        <div class="calendar">
+            <div class="weekday">Monday</div>
+            <div class="weekday">Tuesday</div>
+            <div class="weekday">Wednesday</div>
+            <div class="weekday">Thursday</div>
+            <div class="weekday">Friday</div>
+            <div class="weekday">Saturday</div>
+            <div class="weekday">Sunday</div>
+
+            
+            
+            <div class="day">
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    1
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    2
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">04:00 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Climate Action Subcommittee</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Climate Action Subcommittee</strong></p>
+                            
+
+                            
+                            <p>Wednesday October 02 - 04:00 PM
+                                
+                                to 06:00 PM
+                                
+                                </p>
+
+                            
+                            <p><p>City Hall Campus &gt; 637 First Street Building</p> - 637 First Street  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Regular Climate Action Subcommittee Meeting on the 1st Wednesday of the month. https://www.srcity.org/calendar.aspx?EID=2000</p>
+                            
+                            <p>Source: SRCity: Climate Action Subcommittee</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">04:30 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Cultural Heritage Board</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Cultural Heritage Board</strong></p>
+                            
+
+                            
+                            <p>Wednesday October 02 - 04:30 PM
+                                
+                                to 09:30 PM
+                                
+                                </p>
+
+                            
+                            <p>City Hall Campus > City Council Chambers - 100 Santa Rosa Ave  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Regular Cultural Heritage Board meeting that occurs on the 1st and 3rd Wednesday of each month. 
+ https://www.srcity.org/calendar.aspx?EID=2048</p>
+                            
+                            <p>Source: SRCity: Cultural Heritage Board</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    3
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">10:30 AM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Zoning Administrator Meeting</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Zoning Administrator Meeting</strong></p>
+                            
+
+                            
+                            <p>Thursday October 03 - 10:30 AM
+                                
+                                to 11:59 AM
+                                
+                                </p>
+
+                            
+                            <p> - 637 1st Street  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Regular Zoning Administrator meeting that occurs on the 1st and 3rd Wednesday of each month. https://www.srcity.org/calendar.aspx?EID=2155</p>
+                            
+                            <p>Source: SRCity: Zoning Administrator</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">04:30 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Design Review Board</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Design Review Board</strong></p>
+                            
+
+                            
+                            <p>Thursday October 03 - 04:30 PM
+                                
+                                to 09:30 PM
+                                
+                                </p>
+
+                            
+                            <p>City Hall Campus > City Council Chambers - 100 Santa Rosa Ave  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">The regular Design Review Board meeting that occurs on the 1st and 3rd Thursday of each month. https://www.srcity.org/calendar.aspx?EID=2091</p>
+                            
+                            <p>Source: SRCity: Design Review Board</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    4
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">All Day</div>
+                    
+                    <div class="event all-day">
+                        <div class="event-title">Hold for Sterling</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Hold for Sterling</strong></p>
+                            
+
+                            
+                                All Day
+                                </p>
+
+                            
+                            <p>None</p>
+                            
+                            
+                            <p class="description">None</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    5
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">All Day</div>
+                    
+                    <div class="event all-day">
+                        <div class="event-title">Apple-y-ever</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Apple-y-ever</strong></p>
+                            
+
+                            
+                                All Day
+                                </p>
+
+                            
+                            <p>None</p>
+                            
+                            
+                            <p class="description">None</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">10:00 AM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Creek Cleanup on the Greenway</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Creek Cleanup on the Greenway</strong></p>
+                            
+
+                            
+                            <p>Saturday October 05 - 10:00 AM
+                                
+                                to 12:00 PM
+                                
+                                </p>
+
+                            
+                            <p><p><span style='color: rgb(5, 5, 5); font-family: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: pre-wrap; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;' id="isPasted">Olive Park Footbridge, near 1698 Hazel St. Click </span><span style='color: rgb(5, 5, 5); font-family: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: pre-wrap; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;' id="isPasted"><a href="https://www.srcity.org/FormCenter/Santa-Rosa-Water-7/Sign-Up-for-Creek-Cleanup-on-the-Greenwa-164" target="_blank" rel="noopener">here </a></span><span style='color: rgb(5, 5, 5); font-family: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: pre-wrap; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;' id="isPasted">to sign up.</span></p> -</p>
+                            
+                            
+                            <p class="description"> https://www.srcity.org/calendar.aspx?EID=2190</p>
+                            
+                            <p>Source: SRCity: Creek Stewardship</p>
+                        </div>
+                    </div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Creek Cleanup on the Greenway</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Creek Cleanup on the Greenway</strong></p>
+                            
+
+                            
+                            <p>Saturday October 05 - 10:00 AM
+                                
+                                to 12:00 PM
+                                
+                                </p>
+
+                            
+                            <p><p><span style='color: rgb(5, 5, 5); font-family: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: pre-wrap; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;' id="isPasted">Olive Park Footbridge, near 1698 Hazel St. Click </span><span style='color: rgb(5, 5, 5); font-family: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: pre-wrap; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;' id="isPasted"><a href="https://www.srcity.org/FormCenter/Santa-Rosa-Water-7/Sign-Up-for-Creek-Cleanup-on-the-Greenwa-164" target="_blank" rel="noopener">here </a></span><span style='color: rgb(5, 5, 5); font-family: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: pre-wrap; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;' id="isPasted">to sign up.</span></p> -</p>
+                            
+                            
+                            <p class="description"> https://www.srcity.org/calendar.aspx?EID=2190</p>
+                            
+                            <p>Source: SRCity: Main Calendar</p>
+                        </div>
+                    </div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Creek Cleanup on the Greenway</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Creek Cleanup on the Greenway</strong></p>
+                            
+
+                            
+                            <p>Saturday October 05 - 10:00 AM
+                                
+                                to 12:00 PM
+                                
+                                </p>
+
+                            
+                            <p><p><span style='color: rgb(5, 5, 5); font-family: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: pre-wrap; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;' id="isPasted">Olive Park Footbridge, near 1698 Hazel St. Click </span><span style='color: rgb(5, 5, 5); font-family: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: pre-wrap; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;' id="isPasted"><a href="https://www.srcity.org/FormCenter/Santa-Rosa-Water-7/Sign-Up-for-Creek-Cleanup-on-the-Greenwa-164" target="_blank" rel="noopener">here </a></span><span style='color: rgb(5, 5, 5); font-family: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: pre-wrap; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;' id="isPasted">to sign up.</span></p> -</p>
+                            
+                            
+                            <p class="description"> https://www.srcity.org/calendar.aspx?EID=2190</p>
+                            
+                            <p>Source: SRCity: Santa Rosa Water</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    6
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">All Day</div>
+                    
+                    <div class="event all-day">
+                        <div class="event-title">hold for Kurt Keller 2</div>
+                        <div class="event-details">
+                            
+                            <p><strong>hold for Kurt Keller 2</strong></p>
+                            
+
+                            
+                                All Day
+                                </p>
+
+                            
+                            <p>None</p>
+                            
+                            
+                            <p class="description">None</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            
+            
+            <div class="day">
+                
+                <div class="date">
+                    7
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">03:30 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Art In Public Places Committee</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Art In Public Places Committee</strong></p>
+                            
+
+                            
+                            <p>Monday October 07 - 03:30 PM
+                                
+                                to 05:30 PM
+                                
+                                </p>
+
+                            
+                            <p><p>Large Conference Room, first floor.</p> - 637 First Street  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description"> https://www.srcity.org/calendar.aspx?EID=2079</p>
+                            
+                            <p>Source: SRCity: Art in Public Places Committee</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    8
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    9
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    10
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">04:30 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Planning Commission Meeting</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Planning Commission Meeting</strong></p>
+                            
+
+                            
+                            <p>Thursday October 10 - 04:30 PM
+                                
+                                to 09:30 PM
+                                
+                                </p>
+
+                            
+                            <p>City Hall Campus > City Council Chambers - 100 Santa Rosa Ave  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Planning Commission meets on the second and fourth Thursday of each month. https://www.srcity.org/calendar.aspx?EID=2115</p>
+                            
+                            <p>Source: SRCity: Planning Commission</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    11
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">05:30 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Bitter End Booking</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Bitter End Booking</strong></p>
+                            
+
+                            
+                            <p>Friday October 11 - 05:30 PM
+                                
+                                to 11:00 PM
+                                
+                                </p>
+
+                            
+                            <p>Arlene Francis Center for Spirit, Art, and Politics, 99 6th St, Santa Rosa, CA 95401, USA</p>
+                            
+                            
+                            <p class="description">Halloween Cover Show</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    12
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">All Day</div>
+                    
+                    <div class="event all-day">
+                        <div class="event-title">Comedy show by Zipline</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Comedy show by Zipline</strong></p>
+                            
+
+                            
+                                All Day
+                                </p>
+
+                            
+                            <p>None</p>
+                            
+                            
+                            <p class="description">None</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">09:00 AM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Park-A-Month Volunteer Program: Santa Rosa Rural Cemetery</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Park-A-Month Volunteer Program: Santa Rosa Rural Cemetery</strong></p>
+                            
+
+                            
+                            <p>Saturday October 12 - 09:00 AM
+                                
+                                to 12:00 PM
+                                
+                                </p>
+
+                            
+                            <p>Santa Rosa Rural Cemetery - 1600 Franklin Avenue  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Park-A-Month Volunteer Clean-up is held the second Saturday of the month from 9 a.m. to 12 p.m. Bring your friends and work together, or come and meet new people while helping to keep our parks in great shape! https://www.srcity.org/calendar.aspx?EID=2237</p>
+                            
+                            <p>Source: SRCity: Main Calendar</p>
+                        </div>
+                    </div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Park-A-Month Volunteer Program: Santa Rosa Rural Cemetery</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Park-A-Month Volunteer Program: Santa Rosa Rural Cemetery</strong></p>
+                            
+
+                            
+                            <p>Saturday October 12 - 09:00 AM
+                                
+                                to 12:00 PM
+                                
+                                </p>
+
+                            
+                            <p>Santa Rosa Rural Cemetery - 1600 Franklin Avenue  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Park-A-Month Volunteer Clean-up is held the second Saturday of the month from 9 a.m. to 12 p.m. Bring your friends and work together, or come and meet new people while helping to keep our parks in great shape! https://www.srcity.org/calendar.aspx?EID=2237</p>
+                            
+                            <p>Source: SRCity: Recreation and Parks</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    13
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">06:00 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Hold for The Sea Shells</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Hold for The Sea Shells</strong></p>
+                            
+
+                            
+                            <p>Sunday October 13 - 06:00 PM
+                                
+                                to 11:00 PM
+                                
+                                </p>
+
+                            
+                            <p>Arlene Francis Center for Spirit, Art, and Politics, 99 6th St, Santa Rosa, CA 95401, USA</p>
+                            
+                            
+                            <p class="description">None</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            
+            
+            <div class="day">
+                
+                <div class="date">
+                    14
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    15
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    16
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">04:00 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Board of Building Regulation Appeals (BOBRA) Meeting</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Board of Building Regulation Appeals (BOBRA) Meeting</strong></p>
+                            
+
+                            
+                            <p>Wednesday October 16 - 04:00 PM
+                                
+                                to 06:00 PM
+                                
+                                </p>
+
+                            
+                            <p>City Hall Campus > City Hall Annex - 90 Santa Rosa Ave  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Meetings occur on the third Wednesday of January, April, July and October. https://www.srcity.org/calendar.aspx?EID=2145</p>
+                            
+                            <p>Source: SRCity: Board of Building Regulation Appeals</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">04:30 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Cultural Heritage Board</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Cultural Heritage Board</strong></p>
+                            
+
+                            
+                            <p>Wednesday October 16 - 04:30 PM
+                                
+                                to 09:30 PM
+                                
+                                </p>
+
+                            
+                            <p>City Hall Campus > City Council Chambers - 100 Santa Rosa Ave  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Regular Cultural Heritage Board meeting that occurs on the 1st and 3rd Wednesday of each month. 
+ https://www.srcity.org/calendar.aspx?EID=2060</p>
+                            
+                            <p>Source: SRCity: Cultural Heritage Board</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    17
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">10:30 AM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Zoning Administrator Meeting</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Zoning Administrator Meeting</strong></p>
+                            
+
+                            
+                            <p>Thursday October 17 - 10:30 AM
+                                
+                                to 11:59 AM
+                                
+                                </p>
+
+                            
+                            <p> - 637 1st Street  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Regular Zoning Administrator meeting that occurs on the 1st and 3rd Wednesday of each month. https://www.srcity.org/calendar.aspx?EID=2167</p>
+                            
+                            <p>Source: SRCity: Zoning Administrator</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">04:30 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Design Review Board</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Design Review Board</strong></p>
+                            
+
+                            
+                            <p>Thursday October 17 - 04:30 PM
+                                
+                                to 09:30 PM
+                                
+                                </p>
+
+                            
+                            <p>City Hall Campus > City Council Chambers - 100 Santa Rosa Ave  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">The regular Design Review Board meeting that occurs on the 1st and 3rd Thursday of each month. https://www.srcity.org/calendar.aspx?EID=2103</p>
+                            
+                            <p>Source: SRCity: Design Review Board</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">07:00 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Witchstock 2</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Witchstock 2</strong></p>
+                            
+
+                            
+                            <p>Thursday October 17 - 07:00 PM
+                                
+                                to 11:00 PM
+                                
+                                </p>
+
+                            
+                            <p>None</p>
+                            
+                            
+                            <p class="description">None</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    18
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">All Day</div>
+                    
+                    <div class="event all-day">
+                        <div class="event-title">Manas Itene</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Manas Itene</strong></p>
+                            
+
+                            
+                                All Day
+                                </p>
+
+                            
+                            <p>None</p>
+                            
+                            
+                            <p class="description">None</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    19
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">09:00 AM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Santa Rosa Rural Cemetery Workday</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Santa Rosa Rural Cemetery Workday</strong></p>
+                            
+
+                            
+                            <p>Saturday October 19 - 09:00 AM
+                                
+                                to 12:00 PM
+                                
+                                </p>
+
+                            
+                            <p>Santa Rosa Rural Cemetery - 1600 Franklin Avenue  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Join the Rural Cemetery Preservation Committee at their monthly volunteer workday on the third Saturday of each month. https://www.srcity.org/calendar.aspx?EID=2242</p>
+                            
+                            <p>Source: SRCity: Main Calendar</p>
+                        </div>
+                    </div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Santa Rosa Rural Cemetery Workday</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Santa Rosa Rural Cemetery Workday</strong></p>
+                            
+
+                            
+                            <p>Saturday October 19 - 09:00 AM
+                                
+                                to 12:00 PM
+                                
+                                </p>
+
+                            
+                            <p>Santa Rosa Rural Cemetery - 1600 Franklin Avenue  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Join the Rural Cemetery Preservation Committee at their monthly volunteer workday on the third Saturday of each month. https://www.srcity.org/calendar.aspx?EID=2242</p>
+                            
+                            <p>Source: SRCity: Recreation and Parks</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">10:00 AM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Creek Cleanup on the Greenway</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Creek Cleanup on the Greenway</strong></p>
+                            
+
+                            
+                            <p>Saturday October 19 - 10:00 AM
+                                
+                                to 12:00 PM
+                                
+                                </p>
+
+                            
+                            <p><p>Olive Park Footbridge, near 1698 Hazel St. Click <a href="https://www.srcity.org/FormCenter/Santa-Rosa-Water-7/Sign-Up-for-Creek-Cleanup-on-the-Greenwa-164" target="_blank" rel="noopener">here </a>to sign up.</p> -</p>
+                            
+                            
+                            <p class="description"> https://www.srcity.org/calendar.aspx?EID=2200</p>
+                            
+                            <p>Source: SRCity: Creek Stewardship</p>
+                        </div>
+                    </div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Creek Cleanup on the Greenway</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Creek Cleanup on the Greenway</strong></p>
+                            
+
+                            
+                            <p>Saturday October 19 - 10:00 AM
+                                
+                                to 12:00 PM
+                                
+                                </p>
+
+                            
+                            <p><p>Olive Park Footbridge, near 1698 Hazel St. Click <a href="https://www.srcity.org/FormCenter/Santa-Rosa-Water-7/Sign-Up-for-Creek-Cleanup-on-the-Greenwa-164" target="_blank" rel="noopener">here </a>to sign up.</p> -</p>
+                            
+                            
+                            <p class="description"> https://www.srcity.org/calendar.aspx?EID=2200</p>
+                            
+                            <p>Source: SRCity: Main Calendar</p>
+                        </div>
+                    </div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Creek Cleanup on the Greenway</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Creek Cleanup on the Greenway</strong></p>
+                            
+
+                            
+                            <p>Saturday October 19 - 10:00 AM
+                                
+                                to 12:00 PM
+                                
+                                </p>
+
+                            
+                            <p><p>Olive Park Footbridge, near 1698 Hazel St. Click <a href="https://www.srcity.org/FormCenter/Santa-Rosa-Water-7/Sign-Up-for-Creek-Cleanup-on-the-Greenwa-164" target="_blank" rel="noopener">here </a>to sign up.</p> -</p>
+                            
+                            
+                            <p class="description"> https://www.srcity.org/calendar.aspx?EID=2200</p>
+                            
+                            <p>Source: SRCity: Santa Rosa Water</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">01:30 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Floating Pumpkin Patch</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Floating Pumpkin Patch</strong></p>
+                            
+
+                            
+                            <p>Saturday October 19 - 01:30 PM
+                                
+                                to 05:45 PM
+                                
+                                </p>
+
+                            
+                            <p>Ridgway Swim Center - 455 Ridgway Avenue  Santa Rosa CA 95401</p>
+                            
+                            
+                            <p class="description">This event creates a fun spin on tradition by having a pumpkin patch in the pool! In addition to pumpkins, there are plenty of other fun activities planned for the day! https://www.srcity.org/calendar.aspx?EID=106</p>
+                            
+                            <p>Source: SRCity: Main Calendar</p>
+                        </div>
+                    </div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Floating Pumpkin Patch</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Floating Pumpkin Patch</strong></p>
+                            
+
+                            
+                            <p>Saturday October 19 - 01:30 PM
+                                
+                                to 05:45 PM
+                                
+                                </p>
+
+                            
+                            <p>Ridgway Swim Center - 455 Ridgway Avenue  Santa Rosa CA 95401</p>
+                            
+                            
+                            <p class="description">This event creates a fun spin on tradition by having a pumpkin patch in the pool! In addition to pumpkins, there are plenty of other fun activities planned for the day! https://www.srcity.org/calendar.aspx?EID=106</p>
+                            
+                            <p>Source: SRCity: Recreation and Parks</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">06:30 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Hot sauce, DJ night</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Hot sauce, DJ night</strong></p>
+                            
+
+                            
+                            <p>Saturday October 19 - 06:30 PM
+                                
+                                to 11:00 AM
+                                
+                                </p>
+
+                            
+                            <p>None</p>
+                            
+                            
+                            <p class="description">None</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    20
+                </div>
+                
+                
+            </div>
+            
+            
+            
+            <div class="day">
+                
+                <div class="date">
+                    21
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    22
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    23
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    24
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">All Day</div>
+                    
+                    <div class="event all-day">
+                        <div class="event-title">Revolving Theater</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Revolving Theater</strong></p>
+                            
+
+                            
+                                All Day
+                                </p>
+
+                            
+                            <p>None</p>
+                            
+                            
+                            <p class="description">None</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">04:30 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Planning Commission Meeting</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Planning Commission Meeting</strong></p>
+                            
+
+                            
+                            <p>Thursday October 24 - 04:30 PM
+                                
+                                to 09:30 PM
+                                
+                                </p>
+
+                            
+                            <p>City Hall Campus > City Council Chambers - 100 Santa Rosa Ave  Santa Rosa CA 95404</p>
+                            
+                            
+                            <p class="description">Planning Commission meets on the second and fourth Thursday of each month. https://www.srcity.org/calendar.aspx?EID=2127</p>
+                            
+                            <p>Source: SRCity: Planning Commission</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    25
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    26
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">All Day</div>
+                    
+                    <div class="event all-day">
+                        <div class="event-title">HA HA Halloween - Evil Comidy </div>
+                        <div class="event-details">
+                            
+                            <p><strong>HA HA Halloween - Evil Comidy </strong></p>
+                            
+
+                            
+                                All Day
+                                </p>
+
+                            
+                            <p>None</p>
+                            
+                            
+                            <p class="description">None</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">11:30 AM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Halloween at Howarth</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Halloween at Howarth</strong></p>
+                            
+
+                            
+                            <p>Saturday October 26 - 11:30 AM
+                                
+                                to 03:00 PM
+                                
+                                </p>
+
+                            
+                            <p>Howarth Memorial Park - 630 Summerfield Road  Santa Rosa CA 95405</p>
+                            
+                            
+                            <p class="description">Dress in your best costume and come trick-or-treat throughout one of Santa Rosa's most popular parks! Plus, hop on Howarth Park's train and carousel with your costumed friends!  https://www.srcity.org/calendar.aspx?EID=1088</p>
+                            
+                            <p>Source: SRCity: Main Calendar</p>
+                        </div>
+                    </div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Halloween at Howarth</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Halloween at Howarth</strong></p>
+                            
+
+                            
+                            <p>Saturday October 26 - 11:30 AM
+                                
+                                to 03:00 PM
+                                
+                                </p>
+
+                            
+                            <p>Howarth Memorial Park - 630 Summerfield Road  Santa Rosa CA 95405</p>
+                            
+                            
+                            <p class="description">Dress in your best costume and come trick-or-treat throughout one of Santa Rosa's most popular parks! Plus, hop on Howarth Park's train and carousel with your costumed friends!  https://www.srcity.org/calendar.aspx?EID=1088</p>
+                            
+                            <p>Source: SRCity: Recreation and Parks</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    27
+                </div>
+                
+                
+            </div>
+            
+            
+            
+            <div class="day">
+                
+                <div class="date">
+                    28
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    29
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    30
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+                <div class="date">
+                    31
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-label">06:00 PM</div>
+                    
+                    <div class="event ">
+                        <div class="event-title">Sonoma County For Palestine</div>
+                        <div class="event-details">
+                            
+                            <p><strong>Sonoma County For Palestine</strong></p>
+                            
+
+                            
+                            <p>Thursday October 31 - 06:00 PM
+                                
+                                to 11:00 PM
+                                
+                                </p>
+
+                            
+                            <p>None</p>
+                            
+                            
+                            <p class="description">None</p>
+                            
+                            <p>Source: AFC Events & Activities</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+            </div>
+            
+            <div class="day">
+                
+            </div>
+            
+            <div class="day">
+                
+            </div>
+            
+            <div class="day">
+                
+            </div>
+            
+            
+        </div>
+    </div>
+
+    <div class="feeds-section">
+        <h2>Feeds</h2>
+        <table class="feeds-table sortable">
+            <thead>
+                <tr>
+                    <th>Calendar Name</th>
+                    <th>Total Events</th>
+                    <th>Oldest Day</th>
+                    <th>Newest Day</th>
+                    <th>URL</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td>AFC Events & Activities</td>
+                    <td>2633</td>
+                    <td class="date-cell">2006-10-08</td>
+                    <td class="date-cell">2025-12-05</td>
+                    <td>https://calendar.google.com/calendar/ical/eventsatarlenefransictheater@gmail.com/public/basic.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>Bohemian</td>
+                    <td>1478</td>
+                    <td class="date-cell">2024-09-01</td>
+                    <td class="date-cell">2024-09-29</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/bohemian_2024_09.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>Eventbrite Santa Rosa Events</td>
+                    <td>470</td>
+                    <td class="date-cell">2024-09-02</td>
+                    <td class="date-cell">2024-09-30</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_2024_09.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>Press Democrat</td>
+                    <td>362</td>
+                    <td class="date-cell">2024-09-01</td>
+                    <td class="date-cell">2024-09-30</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/pressdemocrat_2024_09.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Art in Public Places Committee</td>
+                    <td>4</td>
+                    <td class="date-cell">2024-09-02</td>
+                    <td class="date-cell">2024-12-02</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Art_in_Public_Places_Committee.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Board of Building Regulation Appeals</td>
+                    <td>1</td>
+                    <td class="date-cell">2024-10-16</td>
+                    <td class="date-cell">2024-10-16</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Board_of_Building_Regulation_Appeals.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: COVID-19 Business Webinars</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_COVID-19_Business_Webinars.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Charter Review Committee</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Charter_Review_Committee.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: City Council</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_City_Council.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: City Offices Closed</td>
+                    <td>12</td>
+                    <td class="date-cell">2024-09-02</td>
+                    <td class="date-cell">2025-11-28</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_City_Offices_Closed.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: CityBus</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_CityBus.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Climate Action Subcommittee</td>
+                    <td>4</td>
+                    <td class="date-cell">2024-09-04</td>
+                    <td class="date-cell">2024-12-04</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Climate_Action_Subcommittee.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Community Advisory Board</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Community_Advisory_Board.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Community Calendar</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Community_Calendar.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Creek Stewardship</td>
+                    <td>12</td>
+                    <td class="date-cell">2018-01-06</td>
+                    <td class="date-cell">2024-12-21</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Creek_Stewardship.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Cultural Heritage Board</td>
+                    <td>8</td>
+                    <td class="date-cell">2024-09-04</td>
+                    <td class="date-cell">2024-12-18</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Cultural_Heritage_Board.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Design Review Board</td>
+                    <td>8</td>
+                    <td class="date-cell">2024-09-05</td>
+                    <td class="date-cell">2024-12-19</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Design_Review_Board.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Downtown Subcommittee</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Downtown_Subcommittee.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Economic Development Subcommittee</td>
+                    <td>2</td>
+                    <td class="date-cell">2024-09-10</td>
+                    <td class="date-cell">2024-11-12</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Economic_Development_Subcommittee.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Events</td>
+                    <td>1</td>
+                    <td class="date-cell">2024-09-16</td>
+                    <td class="date-cell">2024-09-16</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Events.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: HCS and Code</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_HCS_and_Code.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Main Calendar</td>
+                    <td>36</td>
+                    <td class="date-cell">2016-10-10</td>
+                    <td class="date-cell">2025-02-22</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Main_Calendar.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Neighborhood Meetings</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Neighborhood_Meetings.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Parking</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Parking.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Planning Commission</td>
+                    <td>8</td>
+                    <td class="date-cell">2024-09-12</td>
+                    <td class="date-cell">2024-12-26</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Planning_Commission.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Planning and Economic Development</td>
+                    <td>1</td>
+                    <td class="date-cell">2018-01-20</td>
+                    <td class="date-cell">2018-01-20</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Planning_and_Economic_Development.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Police</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Police.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Public Works</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Public_Works.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Recreation and Parks</td>
+                    <td>20</td>
+                    <td class="date-cell">2024-08-30</td>
+                    <td class="date-cell">2025-02-22</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Recreation_and_Parks.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Santa Rosa Water</td>
+                    <td>30</td>
+                    <td class="date-cell">2018-01-06</td>
+                    <td class="date-cell">2024-12-21</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Santa_Rosa_Water.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Subdivision Committee</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Subdivision_Committee.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Tourism Business Improvement Area Advisory Board</td>
+                    <td>2</td>
+                    <td class="date-cell">2024-09-26</td>
+                    <td class="date-cell">2024-11-28</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Tourism_Business_Improvement_Area_Advisory_Board.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Transportation and Public Works</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Transportation_and_Public_Works.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Waterways Advisory Committee</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Waterways_Advisory_Committee.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Wildfire Ready</td>
+                    <td>0</td>
+                    <td class="date-cell">N/A</td>
+                    <td class="date-cell">N/A</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Wildfire_Ready.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>SRCity: Zoning Administrator</td>
+                    <td>9</td>
+                    <td class="date-cell">2024-08-29</td>
+                    <td class="date-cell">2024-12-19</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Zoning_Administrator.ics</td>
+                </tr>
+                
+                <tr>
+                    <td>Santa Rosa Library</td>
+                    <td>475</td>
+                    <td class="date-cell">2024-09-03</td>
+                    <td class="date-cell">2024-09-29</td>
+                    <td>https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/santarosa_library_events.ics</td>
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    <script src="../sorttable.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const events = document.querySelectorAll('.event-title');
+
+            events.forEach(event => {
+                event.addEventListener('mouseenter', function () {
+                    const tooltip = this.nextElementSibling;
+                    const rect = tooltip.getBoundingClientRect();
+
+                    // Check if tooltip overflows the left edge
+                    if (rect.left < 0) {
+                        tooltip.style.left = '0';
+                        tooltip.style.transform = 'translateX(0%)';
+                    }
+
+                    // Check if tooltip overflows the right edge
+                    if (rect.right > window.innerWidth) {
+                        tooltip.style.left = 'auto';
+                        tooltip.style.right = '0';
+                        tooltip.style.transform = 'translateX(0%)';
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendar = document.querySelector('.calendar');
+            const days = calendar.querySelectorAll('.day');
+
+            if (days.length > 0) {
+                const columnWidth = days[0].offsetWidth;
+                const detailWidth = columnWidth * 2;
+
+                const eventDetails = document.querySelectorAll('.event-details');
+                eventDetails.forEach(detail => {
+                    detail.style.width = `${detailWidth}px`;
+                });
+            }
+        });
+    </script>
+
+</body>
+
+</html>
