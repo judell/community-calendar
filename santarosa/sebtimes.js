@@ -164,7 +164,8 @@ END:VEVENT
 
     icsContent += "END:VCALENDAR";
 
-    const fileName = 'sebtimes.ics';
+  const paddedTargetMonth = targetMonth.toString().padStart(2, '0');    
+  const fileName = `sebtimes_${targetYear}_${paddedTargetMonth}.ics`;
     fs.writeFileSync(fileName, icsContent);
     console.log(`${fileName} file generated successfully!`);
 

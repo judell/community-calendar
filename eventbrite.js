@@ -215,7 +215,8 @@ async function main() {
     const events = await scrapeEvents(locationConfig.url, targetYear, targetMonth);
     const icsContent = createICSContent(events, locationConfig, targetYear, targetMonth);
 
-    const fileName = `./${location}/eventbrite_${location}.ics`;
+    const paddedTargetMonth = targetMonth.toString().padStart(2, '0');       
+    const fileName = `./${location}/eventbrite_${targetYear}_${paddedTargetMonth}.ics`;
     fs.writeFileSync(fileName, icsContent);
     console.log(`${fileName} file generated successfully!`);
 }

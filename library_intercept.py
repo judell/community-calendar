@@ -109,10 +109,10 @@ def create_ical(events, library_config):
 
     return cal
 
-def main(year, month, library):
-    library_config = LIBRARY_CONFIGS.get(library)
+def main(year, month, location):
+    library_config = LIBRARY_CONFIGS.get(location)
     if not library_config:
-        raise ValueError(f"Unsupported library: {library}")
+        raise ValueError(f"Unsupported location: {location}")
 
     base_url = library_config['base_url']
     page = 1
@@ -140,7 +140,7 @@ def main(year, month, library):
 
     ical = create_ical(all_events, library_config)
 
-    output_file = f"./{library}/{library}_library_events.ics"
+    output_file = f"./{location}/library_intercept_{year}_{month:02d}.ics"
     with open(output_file, 'wb') as f:
         f.write(ical.to_ical())
 
@@ -148,12 +148,12 @@ def main(year, month, library):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Scrape library events for a specific year and month.')
+    parser.add_argument('--location', type=str, required=True, choices=['santarosa', 'bloomington'], help='Library to scrape')
     parser.add_argument('--year', type=int, required=True, help='Target year (e.g., 2024)')
     parser.add_argument('--month', type=int, required=True, help='Target month (1-12)')
-    parser.add_argument('--library', type=str, required=True, choices=['santarosa', 'bloomington'], help='Library to scrape')
     args = parser.parse_args()
 
     if args.month < 1 or args.month > 12:
         raise ValueError("Month must be between 1 and 12")
 
-    main(args.year, args.month, args.library)
+    main(args.year, args.month, args.location)
