@@ -45,8 +45,12 @@ jobs:
 
     - name: Santa Rosa, next month
       run: |
-          python cal.py --generate --location santarosa --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Los_Angeles"
+        python cal.py --generate --location santarosa --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Los_Angeles"
 
+    - name: Sebastopol, this month
+      run: |
+        python cal.py --generate --location sebastopol --year $(date +%Y) --month $(date +%m) --timezone "America/Los_Angeles"
+      
     - name: Commit and push if changes
       env:
         GITHUB_TOKEN: ${{ secrets.COMMUNITY_CALENDAR }}
