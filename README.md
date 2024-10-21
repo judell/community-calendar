@@ -17,7 +17,7 @@ options:
 
 # Bloomington example
 
-Community calendar for [September 2024](https://jonudell.info/bloomington/2024-0p.html)
+Community calendar for [September 2024](https://jonudell.info/bloomington/2024-09.html)
 
 ## Calendar view
 
