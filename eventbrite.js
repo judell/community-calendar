@@ -36,7 +36,7 @@ if (!LOCATION_CONFIGS[location] || isNaN(targetYear) || isNaN(targetMonth) || ta
 const locationConfig = LOCATION_CONFIGS[location];
 
 async function scrapeEvents(url, targetYear, targetMonth) {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(60000);
 
