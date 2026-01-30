@@ -32,8 +32,8 @@ def fetch_all_events(year, month):
         response = requests.post(url, json=payload, headers=headers)
         data = response.json()
 
-        # Check if the 'Value' key exists in the response
-        if 'Value' in data:
+        # Check if the 'Value' key exists and is not None
+        if 'Value' in data and data['Value'] is not None:
             for event in data['Value']:
                 event_start = datetime.fromisoformat(event['StartUTC'].replace('Z', '+00:00'))
                 

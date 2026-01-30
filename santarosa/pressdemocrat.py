@@ -1,117 +1,103 @@
-import argparse
 import requests
-from datetime import datetime, date
-from icalendar import Calendar, Event
-import pytz
-from dateutil.parser import parse as dateutil_parse
+import sys
+from icalendar import Calendar, Event, vText
+from datetime import datetime
 
-def fetch_events(base_url, params, year, month):
-    all_events = []
-    target_date = date(year, month, 1)
-    found_target_month = False
-    reached_next_month = False
+# Press Democrat uses CitySpark API (same as Bohemian)
+# ppid: 8662, slug: SRPressDemocrat
 
-    while not reached_next_month:
-        response = requests.get(base_url, params=params)
+def fetch_all_events(year, month):
+    results = []
+    skip = 0
+    tps = 25
+    has_more_data = True
+
+    while has_more_data:
+        url = 'https://portal.cityspark.com/v1/events/SRPressDemocrat'
+        payload = {
+            "ppid": 8662,
+            "start": f"{year}-{month:02d}-01T00:00:00",
+            "end": None,
+            "distance": 40,
+            "lat": 38.5212368,
+            "lng": -122.8540282,
+            "sort": "Popularity",
+            "skip": skip,
+            "tps": "24"
+        }
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
         data = response.json()
 
-        if not data.get("rawEvents"):
-            break  # No more events, exit the loop
+        if 'Value' in data and data['Value'] is not None:
+            for event in data['Value']:
+                event_start = datetime.fromisoformat(event['StartUTC'].replace('Z', '+00:00'))
+                
+                if event_start.year > int(year) or (event_start.year == int(year) and event_start.month > int(month)):
+                    has_more_data = False
+                    break
 
-        for event in data["rawEvents"]:
-            event_date = parse_date(event['start_date'])
-            
-            if event_date.year > year or (event_date.year == year and event_date.month > month):
-                reached_next_month = True
-                break
-            
-            if event_date.year == year and event_date.month == month:
-                all_events.append(event)
-                found_target_month = True
-            elif found_target_month:
-                # We've passed our target month
-                reached_next_month = True
-                break
+                results.append(event)
 
-        params["page"] += 1
+            if has_more_data:
+                if len(data['Value']) < tps:
+                    has_more_data = False
+                else:
+                    skip += tps
+        else:
+            print(f'No "Value" key found in response for skip={skip}. Stopping.')
+            has_more_data = False
 
-    return all_events
+    return results
 
-def parse_date(date_str):
-    return datetime.strptime(date_str, "%Y-%m-%d").date()
-
-def create_ical_event(event, timezone):
-    ical_event = Event()
-    ical_event.add('summary', event['title'])
-    ical_event.add('description', event.get('description', ''))
-
-    # Format location
-    location = ", ".join(filter(None, [
-        event['venue'].get('name'),
-        event['venue'].get('address_1'),
-        event['venue'].get('address_2'),
-        event['venue'].get('town')
-    ]))
-    ical_event.add('location', location)
-
-    # Parse and add start time
-    start = parse_datetime(event['start_date'], event.get('start_time'), timezone)
-    ical_event.add('dtstart', start)
-
-    # Parse and add end time if available, otherwise use start time
-    if event.get('end_date') or event.get('end_time'):
-        end = parse_datetime(event.get('end_date', event['start_date']), event.get('end_time'), timezone)
-        ical_event.add('dtend', end)
-    else:
-        ical_event.add('dtend', start)
-
-    return ical_event
-
-def parse_datetime(date_str, time_str, timezone):
-    if time_str:
-        # Use dateutil.parser to parse the combined date and time string
-        dt = dateutil_parse(f"{date_str}T{time_str}")
-    else:
-        dt = datetime.strptime(date_str, "%Y-%m-%d")
-    
-    # Localize the datetime to the specified timezone
-    return timezone.localize(dt.replace(tzinfo=None))
-
-def generate_ics(events, timezone, output_file):
+def generate_icalendar(events, year, month):
     cal = Calendar()
-    cal.add('prodid', '-//Press Democrat//Event Calendar//EN')
+    cal.add('prodid', '-//Press Democrat Events//pressdemocrat.com//')
     cal.add('version', '2.0')
     cal.add('x-wr-calname', 'Press Democrat')
-    cal.add('x-wr-timezone', str(timezone))
+    cal.add('x-wr-timezone', 'US/Pacific')
 
     for event in events:
-        ical_event = create_ical_event(event, timezone)
-        cal.add_component(ical_event)
+        event_start = datetime.fromisoformat(event['StartUTC'].replace('Z', '+00:00'))
+        
+        if event['EndUTC']:
+            event_end = datetime.fromisoformat(event['EndUTC'].replace('Z', '+00:00'))
+        else:
+            event_end = event_start
 
-    with open(output_file, 'wb') as f:
-        f.write(cal.to_ical())
+        if event_start.year == int(year) and event_start.month == int(month):
+            cal_event = Event()
+            cal_event.add('summary', event['Name'])
+            cal_event.add('dtstart', event_start)
+            cal_event.add('dtend', event_end)
+            cal_event.add('location', vText(event.get('Venue', '')))
+            cal_event.add('description', event.get('Description', ''))
+            cal_event.add('uid', event.get('Id', event.get('PId', '')))
+            if event.get('Links') and len(event['Links']) > 0:
+                cal_event.add('url', event['Links'][0].get('url', ''))
+            cal.add_component(cal_event)
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate an ICS file from API events for a specific month.")
-    parser.add_argument("year", type=int, help="Year for event filtering (e.g., 2023)")
-    parser.add_argument("month", type=int, help="Month for event filtering (1-12)")
-    parser.add_argument("--output", help="Output ICS file path", type=str, default='events.ics')
-    args = parser.parse_args()
+    return cal
 
-    base_url = "https://discovery.evvnt.com/api/publisher/10553/home_page_events"
-    params = {
-        "hitsPerPage": 30,
-        "multipleEventInstances": "true",
-        "publisher_id": 10553,
-        "page": 0
-    }
+def main(year, month):
+    events = fetch_all_events(year, month)
+    calendar = generate_icalendar(events, year, month)
+    
+    filename = f"pressdemocrat_{year}_{month:02d}.ics"
+    with open(filename, 'wb') as f:
+        f.write(calendar.to_ical())
+    print(f"iCalendar feed generated: {filename}")
+    print(f"Total events: {len(events)}")
 
-    timezone = pytz.timezone('US/Pacific')
+if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        print("Usage: python pressdemocrat.py <year> <month>")
+        sys.exit(1)
 
-    events = fetch_events(base_url, params, args.year, args.month)
-    generate_ics(events, timezone, args.output)
-    print(f"ICS file generated: {args.output}")
-    print(f"Total events included: {len(events)}")
+    year = sys.argv[1]
+    month = int(sys.argv[2])
 
-if __name__ == "__main__":
-    main()
+    main(year, month)

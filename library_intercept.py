@@ -72,8 +72,8 @@ def parse_event(event, target_month_end, url_prefix):
         start_datetime = date.replace(hour=start_time.hour, minute=start_time.minute)
         end_datetime = date.replace(hour=end_time.hour, minute=end_time.minute)
 
-        # Skip events after the target month
-        if start_datetime > target_month_end:
+        # Skip events in or after the next month
+        if start_datetime >= target_month_end:
             return None
 
         return {
@@ -118,7 +118,8 @@ def main(year, month, location):
     page = 1
     all_events = []
     target_month_start = datetime(year, month, 1)
-    target_month_end = target_month_start + relativedelta(months=1) - relativedelta(days=1)
+    # Use first day of next month for comparison (events on last day of month should be included)
+    target_month_end = target_month_start + relativedelta(months=1)
 
     while True:
         url = base_url + str(page)
