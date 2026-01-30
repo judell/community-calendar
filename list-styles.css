@@ -1,0 +1,277 @@
+/* Mobile-first List View Styles */
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  background: #f8f9fa;
+  color: #212529;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header */
+header {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: #fff;
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+header h1 .switcher {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: normal;
+  margin-top: 0.25rem;
+}
+
+header h1 .switcher a {
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+}
+
+/* Calendar Widget - Mobile: hidden */
+#calendar-widget {
+  background: #fff;
+  padding: 0.75rem;
+  display: none;
+}
+
+#calendar-widget table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+#calendar-widget th {
+  padding: 0.5rem 0;
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+#calendar-widget td {
+  padding: 0.4rem;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+
+#calendar-widget td:hover {
+  background: #e5e7eb;
+}
+
+#calendar-widget td.has-events {
+  font-weight: 700;
+  color: #1e40af;
+}
+
+/* Event List Container */
+.event-list {
+  padding: 0;
+}
+
+/* Day Header */
+.event-list h2 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background: #374151;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  position: sticky;
+  top: 56px;
+  z-index: 50;
+}
+
+/* Time Slot Header */
+.event-list h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Event Card */
+.event {
+  background: #fff;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.event:last-child {
+  border-bottom: none;
+}
+
+.event-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.35;
+  color: #111827;
+}
+
+.event-title a {
+  color: #1e40af;
+  text-decoration: none;
+}
+
+.event-title a:hover,
+.event-title a:active {
+  text-decoration: underline;
+}
+
+/* Event Details */
+.event-details {
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.event-details p {
+  margin: 0.4rem 0;
+}
+
+/* First paragraph is usually location */
+.event-details p:first-of-type {
+  color: #374151;
+  font-weight: 500;
+}
+
+.event-details p:first-of-type::before {
+  content: "📍 ";
+  font-size: 0.8em;
+}
+
+/* Second paragraph is description */
+.event-details p:nth-of-type(2) {
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.event-details p:nth-of-type(2)::before {
+  content: none;
+}
+
+/* Source styling - make it a badge */
+.event-source,
+.source-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+/* Links in event details */
+.event-details a {
+  color: #1e40af;
+  text-decoration: none;
+}
+
+.event-details a:hover {
+  text-decoration: underline;
+}
+
+/* All Day events */
+.event-time-allday {
+  color: #059669;
+  font-weight: 500;
+}
+
+/* Tablet and Desktop */
+@media (min-width: 768px) {
+  header h1 {
+    font-size: 1.6rem;
+  }
+  
+  .event-list h2 {
+    top: 64px;
+  }
+  
+  #calendar-widget {
+    display: block;
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    width: 240px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #e5e7eb;
+    z-index: 90;
+  }
+  
+  .event-list {
+    margin-right: 280px;
+  }
+  
+  .event {
+    padding: 1.25rem;
+    margin: 0 1rem 0.5rem;
+    border-radius: 8px;
+    border-bottom: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+  }
+  
+  .event-list h2 {
+    border-radius: 0;
+    margin: 0 1rem;
+    border-radius: 8px 8px 0 0;
+    margin-top: 1rem;
+  }
+  
+  .event-list h3 {
+    margin: 0 1rem;
+    border-radius: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* Feeds section - hidden */
+.feeds-section {
+  display: none;
+}
+
+/* Utility: hide elements */
+.hidden {
+  display: none !important;
+}
+
+/* Loading state */
+#app:empty::after {
+  content: "Loading events...";
+  display: block;
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+}

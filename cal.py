@@ -93,7 +93,7 @@ def parse_vtimezone(cal):
         logger.error(f"Error details: {e}")
     return timezones
 
-def parse_and_localize_event(event, source_tz, target_tz, cal_name):
+def parse_and_localize_event(event, source_tz, target_tz, cal_name, source_url=None):
     dtstart = event.get('dtstart')
     dtend = event.get('dtend')
     
@@ -133,7 +133,8 @@ def parse_and_localize_event(event, source_tz, target_tz, cal_name):
         'original_start': dtstart.dt,
         'original_end': dtend.dt if dtend else None,
         'grouping_date': grouping_date,
-        'source': cal_name
+        'source': cal_name,
+        'source_url': source_url
     }
 
 def group_events_by_time(events):
@@ -380,7 +381,7 @@ def fetch_and_process_calendar(url, default_timezone):
             try:
                 if 'CATEGORIES' in event:
                     logger.info(f"CATEGORIES {event['CATEGORIES'].to_ical().decode('utf-8')} [[{event['SUMMARY']}]]")
-                processed_event = parse_and_localize_event(event, source_tz, target_tz, cal_name)
+                processed_event = parse_and_localize_event(event, source_tz, target_tz, cal_name, url)
                 processed_events.append(processed_event)
 
                 event_date = processed_event['start'].date() if isinstance(processed_event['start'], datetime) else processed_event['start']
@@ -420,11 +421,51 @@ def read_and_process_feeds(file_path, default_timezone):
                 all_events.extend(events)
     return feeds, all_events
 
+def generate_index_page(output_dir, location_name):
+    """Generate an index.html that redirects to the current month's calendar."""
+    env = Environment(loader=FileSystemLoader('.'))
+    
+    # Check if index template exists, otherwise create a simple redirect
+    try:
+        index_template = env.get_template('index_template.html')
+        now = datetime.now()
+        rendered = index_template.render(
+            location_name=location_name,
+            current_year=now.year,
+            current_month=f"{now.month:02d}"
+        )
+    except:
+        # Fallback simple redirect
+        now = datetime.now()
+        rendered = f'''<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<script>window.location.href="{now.year}-{now.month:02d}-l.html";</script>
+<noscript><meta http-equiv="refresh" content="0; url={now.year}-{now.month:02d}-l.html"></noscript>
+</head><body><a href="{now.year}-{now.month:02d}-l.html">Go to calendar</a></body></html>'''
+    
+    index_path = os.path.join(output_dir, 'index.html')
+    with open(index_path, 'w') as f:
+        f.write(rendered)
+    logger.info(f"Generated {index_path}")
+
 def generate_calendar(file_path, year, month, default_timezone, output_dir='.'):
     feeds, all_events = read_and_process_feeds(file_path, default_timezone)
     all_events = deduplicate_events(all_events)
     grouped_events = group_events_by_date(all_events, year, month)
     render_html_calendar(grouped_events, year, month, feeds, output_dir)
+    
+    # Generate index.html for the location
+    location_names = {
+        'santarosa': 'Santa Rosa',
+        'sebastopol': 'Sebastopol', 
+        'bloomington': 'Bloomington'
+    }
+    dir_name = os.path.basename(output_dir)
+    location_name = location_names.get(dir_name, dir_name.replace('_', ' ').title())
+    if location_name == '.':
+        location_name = 'Community'
+    generate_index_page(output_dir, location_name)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate an HTML calendar from iCalendar feeds or perform a dry run.")
