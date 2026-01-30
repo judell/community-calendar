@@ -5,8 +5,13 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      locations:
+        description: 'Locations to process (comma-separated: santarosa,sebastopol,bloomington or "all")'
+        required: false
+        default: 'all'
   schedule:
-    - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
+    - cron: '0 0 * * *'
 
 jobs:
   generate-calendar:
@@ -39,198 +44,197 @@ jobs:
     - name: Install Node dependencies (for Puppeteer)
       run: |
         npm install puppeteer
+        npx puppeteer browsers install chrome
 
-    # ==========================================
-    # Run scrapers to get fresh event data
-    # ==========================================
-
-    - name: Scrape Library events (Santa Rosa) - this month
+    - name: Calculate dates
+      id: dates
       run: |
-        python library_intercept.py --location santarosa --year $(date +%Y) --month $(date +%m)
-      continue-on-error: true
-
-    - name: Scrape Library events (Santa Rosa) - next month
-      run: |
-        python library_intercept.py --location santarosa --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m)
-      continue-on-error: true
-
-    - name: Scrape Library events (Santa Rosa) - month after next
-      run: |
-        python library_intercept.py --location santarosa --year $(date -d "+2 months" +%Y) --month $(date -d "+2 months" +%m)
-      continue-on-error: true
-
-    - name: Scrape Library events (Bloomington) - this month
-      run: |
-        python library_intercept.py --location bloomington --year $(date +%Y) --month $(date +%m)
-      continue-on-error: true
-
-    - name: Scrape Library events (Bloomington) - next month
-      run: |
-        python library_intercept.py --location bloomington --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m)
-      continue-on-error: true
-
-    - name: Scrape Library events (Bloomington) - month after next
-      run: |
-        python library_intercept.py --location bloomington --year $(date -d "+2 months" +%Y) --month $(date -d "+2 months" +%m)
-      continue-on-error: true
-
-    - name: Scrape Eventbrite (Santa Rosa) - this month
-      run: |
-        node eventbrite.js santarosa $(date +%Y) $(date +%m)
-      continue-on-error: true
-
-    - name: Scrape Eventbrite (Santa Rosa) - next month
-      run: |
-        node eventbrite.js santarosa $(date -d "next month" +%Y) $(date -d "next month" +%m)
-      continue-on-error: true
-
-    - name: Scrape Eventbrite (Santa Rosa) - month after next
-      run: |
-        node eventbrite.js santarosa $(date -d "+2 months" +%Y) $(date -d "+2 months" +%m)
-      continue-on-error: true
-
-    - name: Scrape Eventbrite (Bloomington) - this month
-      run: |
-        node eventbrite.js bloomington $(date +%Y) $(date +%m)
-      continue-on-error: true
-
-    - name: Scrape Eventbrite (Bloomington) - next month
-      run: |
-        node eventbrite.js bloomington $(date -d "next month" +%Y) $(date -d "next month" +%m)
-      continue-on-error: true
-
-    - name: Scrape Eventbrite (Bloomington) - month after next
-      run: |
-        node eventbrite.js bloomington $(date -d "+2 months" +%Y) $(date -d "+2 months" +%m)
-      continue-on-error: true
-
-    - name: Scrape Bohemian (Santa Rosa) - this month
-      run: |
-        cd santarosa && python bohemian.py $(date +%Y) $(date +%-m)
-      continue-on-error: true
-
-    - name: Scrape Bohemian (Santa Rosa) - next month
-      run: |
-        cd santarosa && python bohemian.py $(date -d "next month" +%Y) $(date -d "next month" +%-m)
-      continue-on-error: true
-
-    - name: Scrape Bohemian (Santa Rosa) - month after next
-      run: |
-        cd santarosa && python bohemian.py $(date -d "+2 months" +%Y) $(date -d "+2 months" +%-m)
-      continue-on-error: true
-
-    - name: Scrape Press Democrat (Santa Rosa) - this month
-      run: |
-        cd santarosa && python pressdemocrat.py $(date +%Y) $(date +%-m)
-      continue-on-error: true
-
-    - name: Scrape Press Democrat (Santa Rosa) - next month
-      run: |
-        cd santarosa && python pressdemocrat.py $(date -d "next month" +%Y) $(date -d "next month" +%-m)
-      continue-on-error: true
-
-    - name: Scrape SebArts (Sebastopol) - this month
-      run: |
-        cd sebastopol && python sebarts.py --year $(date +%Y) --month $(date +%-m)
-      continue-on-error: true
-
-    - name: Scrape SebArts (Sebastopol) - next month
-      run: |
-        cd sebastopol && python sebarts.py --year $(date -d "next month" +%Y) --month $(date -d "next month" +%-m)
-      continue-on-error: true
-
-    - name: Scrape Occidental Arts (Sebastopol) - this month
-      run: |
-        cd sebastopol && python occidental_arts.py --year $(date +%Y) --month $(date +%-m)
-      continue-on-error: true
-
-    - name: Scrape Occidental Arts (Sebastopol) - next month
-      run: |
-        cd sebastopol && python occidental_arts.py --year $(date -d "next month" +%Y) --month $(date -d "next month" +%-m)
-      continue-on-error: true
-
-    # ==========================================
-    # Update feeds.txt to point to fresh ICS files
-    # ==========================================
-
-    - name: Update Santa Rosa feeds.txt with current month files
-      run: |
-        YEAR=$(date +%Y)
-        MONTH=$(date +%m)
-        NEXT_YEAR=$(date -d "next month" +%Y)
-        NEXT_MONTH=$(date -d "next month" +%m)
-        NEXT2_YEAR=$(date -d "+2 months" +%Y)
-        NEXT2_MONTH=$(date -d "+2 months" +%m)
+        # Use first of month to avoid end-of-month rollover issues
+        THIS_YEAR=$(date +%Y)
+        THIS_MONTH=$(date +%m)
         
-        # Create updated feeds.txt for santarosa
+        # Next month: go to 1st of current month, add 1 month
+        NEXT=$(date -d "$(date +%Y-%m-01) +1 month" +%Y-%m)
+        NEXT_YEAR=${NEXT%-*}
+        NEXT_MONTH=${NEXT#*-}
+        
+        # Month after next: go to 1st of current month, add 2 months  
+        NEXT2=$(date -d "$(date +%Y-%m-01) +2 months" +%Y-%m)
+        NEXT2_YEAR=${NEXT2%-*}
+        NEXT2_MONTH=${NEXT2#*-}
+        
+        echo "this_year=$THIS_YEAR" >> $GITHUB_OUTPUT
+        echo "this_month=$THIS_MONTH" >> $GITHUB_OUTPUT
+        echo "next_year=$NEXT_YEAR" >> $GITHUB_OUTPUT
+        echo "next_month=$NEXT_MONTH" >> $GITHUB_OUTPUT
+        echo "next2_year=$NEXT2_YEAR" >> $GITHUB_OUTPUT
+        echo "next2_month=$NEXT2_MONTH" >> $GITHUB_OUTPUT
+        
+        echo "Dates: $THIS_YEAR-$THIS_MONTH, $NEXT_YEAR-$NEXT_MONTH, $NEXT2_YEAR-$NEXT2_MONTH"
+
+    - name: Determine locations to process
+      id: locations
+      run: |
+        INPUT="${{ github.event.inputs.locations }}"
+        if [ -z "$INPUT" ] || [ "$INPUT" = "all" ]; then
+          echo "list=santarosa,sebastopol,bloomington" >> $GITHUB_OUTPUT
+        else
+          echo "list=$INPUT" >> $GITHUB_OUTPUT
+        fi
+
+    # ==========================================
+    # Santa Rosa scrapers
+    # ==========================================
+    - name: Scrape Santa Rosa sources
+      if: contains(steps.locations.outputs.list, 'santarosa')
+      run: |
+        echo "Processing Santa Rosa..."
+        for period in "this" "next" "next2"; do
+          if [ "$period" = "this" ]; then
+            Y=${{ steps.dates.outputs.this_year }}
+            M=${{ steps.dates.outputs.this_month }}
+          elif [ "$period" = "next" ]; then
+            Y=${{ steps.dates.outputs.next_year }}
+            M=${{ steps.dates.outputs.next_month }}
+          else
+            Y=${{ steps.dates.outputs.next2_year }}
+            M=${{ steps.dates.outputs.next2_month }}
+          fi
+          
+          echo "Scraping Santa Rosa for $Y-$M..."
+          python library_intercept.py --location santarosa --year $Y --month $M || true
+          node eventbrite.js santarosa $Y $M || true
+          cd santarosa && python bohemian.py $Y $((10#$M)) || true
+          python pressdemocrat.py $Y $((10#$M)) || true
+          cd ..
+        done
+      continue-on-error: true
+
+    # ==========================================
+    # Sebastopol scrapers
+    # ==========================================
+    - name: Scrape Sebastopol sources
+      if: contains(steps.locations.outputs.list, 'sebastopol')
+      run: |
+        echo "Processing Sebastopol..."
+        for period in "this" "next" "next2"; do
+          if [ "$period" = "this" ]; then
+            Y=${{ steps.dates.outputs.this_year }}
+            M=${{ steps.dates.outputs.this_month }}
+          elif [ "$period" = "next" ]; then
+            Y=${{ steps.dates.outputs.next_year }}
+            M=${{ steps.dates.outputs.next_month }}
+          else
+            Y=${{ steps.dates.outputs.next2_year }}
+            M=${{ steps.dates.outputs.next2_month }}
+          fi
+          
+          echo "Scraping Sebastopol for $Y-$M..."
+          cd sebastopol
+          python sebarts.py --year $Y --month $((10#$M)) || true
+          python occidental_arts.py --year $Y --month $((10#$M)) || true
+          cd ..
+        done
+      continue-on-error: true
+
+    # ==========================================
+    # Bloomington scrapers
+    # ==========================================
+    - name: Scrape Bloomington sources
+      if: contains(steps.locations.outputs.list, 'bloomington')
+      run: |
+        echo "Processing Bloomington..."
+        for period in "this" "next" "next2"; do
+          if [ "$period" = "this" ]; then
+            Y=${{ steps.dates.outputs.this_year }}
+            M=${{ steps.dates.outputs.this_month }}
+          elif [ "$period" = "next" ]; then
+            Y=${{ steps.dates.outputs.next_year }}
+            M=${{ steps.dates.outputs.next_month }}
+          else
+            Y=${{ steps.dates.outputs.next2_year }}
+            M=${{ steps.dates.outputs.next2_month }}
+          fi
+          
+          echo "Scraping Bloomington for $Y-$M..."
+          python library_intercept.py --location bloomington --year $Y --month $M || true
+          node eventbrite.js bloomington $Y $M || true
+        done
+      continue-on-error: true
+
+    # ==========================================
+    # Update feeds.txt files
+    # ==========================================
+    - name: Update Santa Rosa feeds.txt
+      if: contains(steps.locations.outputs.list, 'santarosa')
+      run: |
         cat > santarosa/feeds.txt << EOF
         # Live Google Calendar feed
         https://calendar.google.com/calendar/ical/eventsatarlenefransictheater@gmail.com/public/basic.ics
-        
+
         # Freshly scraped data (this month)
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/library_intercept_${YEAR}_${MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${YEAR}_${MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/bohemian_${YEAR}_${MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/pressdemocrat_${YEAR}_${MONTH}.ics
-        
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/library_intercept_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/bohemian_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/pressdemocrat_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+
         # Freshly scraped data (next month)
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/library_intercept_${NEXT_YEAR}_${NEXT_MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${NEXT_YEAR}_${NEXT_MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/bohemian_${NEXT_YEAR}_${NEXT_MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/pressdemocrat_${NEXT_YEAR}_${NEXT_MONTH}.ics
-        
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/library_intercept_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/bohemian_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/pressdemocrat_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+
         # Freshly scraped data (month after next)
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/library_intercept_${NEXT2_YEAR}_${NEXT2_MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${NEXT2_YEAR}_${NEXT2_MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/bohemian_${NEXT2_YEAR}_${NEXT2_MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/pressdemocrat_${NEXT2_YEAR}_${NEXT2_MONTH}.ics
-        
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/library_intercept_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/bohemian_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/pressdemocrat_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+
         # Santa Rosa City calendars
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Main_Calendar.ics
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_City_Offices_Closed.ics
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Recreation_and_Parks.ics
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Events.ics
         EOF
-        # Remove leading whitespace
         sed -i 's/^[[:space:]]*//' santarosa/feeds.txt
 
-    - name: Update Sebastopol feeds.txt with current month files
+    - name: Update Sebastopol feeds.txt
+      if: contains(steps.locations.outputs.list, 'sebastopol')
       run: |
-        YEAR=$(date +%Y)
-        MONTH=$(date +%m)
-        NEXT_YEAR=$(date -d "next month" +%Y)
-        NEXT_MONTH=$(date -d "next month" +%m)
-        
         cat > sebastopol/feeds.txt << EOF
         # Live calendar feed
         https://seb.org/?post_type=tribe_events&ical=1&eventDisplay=list
-        
+
         # Freshly scraped data (this month)
-        https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/sebarts_${YEAR}_${MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/occidental_arts_${YEAR}_${MONTH}.ics
-        
+        https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/sebarts_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/occidental_arts_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+
         # Freshly scraped data (next month)
-        https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/sebarts_${NEXT_YEAR}_${NEXT_MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/occidental_arts_${NEXT_YEAR}_${NEXT_MONTH}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/sebarts_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/occidental_arts_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+
+        # Freshly scraped data (month after next)
+        https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/sebarts_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/occidental_arts_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
         EOF
         sed -i 's/^[[:space:]]*//' sebastopol/feeds.txt
 
-    - name: Update Bloomington feeds.txt with current month files
+    - name: Update Bloomington feeds.txt
+      if: contains(steps.locations.outputs.list, 'bloomington')
       run: |
-        YEAR=$(date +%Y)
-        MONTH=$(date +%m)
-        NEXT_YEAR=$(date -d "next month" +%Y)
-        NEXT_MONTH=$(date -d "next month" +%m)
-        
         cat > bloomington/feeds.txt << EOF
         # Freshly scraped data (this month)
-        https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/library_intercept_${YEAR}_${MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/eventbrite_${YEAR}_${MONTH}.ics
-        
+        https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/library_intercept_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/eventbrite_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+
         # Freshly scraped data (next month)
-        https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/library_intercept_${NEXT_YEAR}_${NEXT_MONTH}.ics
-        https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/eventbrite_${NEXT_YEAR}_${NEXT_MONTH}.ics
-        
+        https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/library_intercept_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/eventbrite_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+
+        # Freshly scraped data (month after next)
+        https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/library_intercept_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/eventbrite_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+
         # Static feeds
         https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/bluebird.ics
         https://bgcbloomington.org/events/list/?ical=1
@@ -307,42 +311,26 @@ jobs:
     # ==========================================
     # Generate calendars
     # ==========================================
-
-    - name: Bloomington, this month
+    - name: Generate Santa Rosa calendars
+      if: contains(steps.locations.outputs.list, 'santarosa')
       run: |
-        python cal.py --generate --location bloomington --year $(date +%Y) --month $(date +%m) --timezone "America/Indiana/Indianapolis"
+        python cal.py --generate --location santarosa --year ${{ steps.dates.outputs.this_year }} --month ${{ steps.dates.outputs.this_month }} --timezone "America/Los_Angeles"
+        python cal.py --generate --location santarosa --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Los_Angeles"
+        python cal.py --generate --location santarosa --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Los_Angeles"
 
-    - name: Bloomington, next month
+    - name: Generate Sebastopol calendars
+      if: contains(steps.locations.outputs.list, 'sebastopol')
       run: |
-        python cal.py --generate --location bloomington --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Indiana/Indianapolis"
+        python cal.py --generate --location sebastopol --year ${{ steps.dates.outputs.this_year }} --month ${{ steps.dates.outputs.this_month }} --timezone "America/Los_Angeles"
+        python cal.py --generate --location sebastopol --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Los_Angeles"
+        python cal.py --generate --location sebastopol --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Los_Angeles"
 
-    - name: Bloomington, month after next
+    - name: Generate Bloomington calendars
+      if: contains(steps.locations.outputs.list, 'bloomington')
       run: |
-        python cal.py --generate --location bloomington --year $(date -d "+2 months" +%Y) --month $(date -d "+2 months" +%m) --timezone "America/Indiana/Indianapolis"
-
-    - name: Santa Rosa, this month
-      run: |
-        python cal.py --generate --location santarosa --year $(date +%Y) --month $(date +%m) --timezone "America/Los_Angeles"
-
-    - name: Santa Rosa, next month
-      run: |
-        python cal.py --generate --location santarosa --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Los_Angeles"
-
-    - name: Santa Rosa, month after next
-      run: |
-        python cal.py --generate --location santarosa --year $(date -d "+2 months" +%Y) --month $(date -d "+2 months" +%m) --timezone "America/Los_Angeles"
-
-    - name: Sebastopol, this month
-      run: |
-        python cal.py --generate --location sebastopol --year $(date +%Y) --month $(date +%m) --timezone "America/Los_Angeles"
-
-    - name: Sebastopol, next month
-      run: |
-        python cal.py --generate --location sebastopol --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Los_Angeles"
-
-    - name: Sebastopol, month after next
-      run: |
-        python cal.py --generate --location sebastopol --year $(date -d "+2 months" +%Y) --month $(date -d "+2 months" +%m) --timezone "America/Los_Angeles"
+        python cal.py --generate --location bloomington --year ${{ steps.dates.outputs.this_year }} --month ${{ steps.dates.outputs.this_month }} --timezone "America/Indiana/Indianapolis"
+        python cal.py --generate --location bloomington --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Indiana/Indianapolis"
+        python cal.py --generate --location bloomington --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Indiana/Indianapolis"
       
     - name: Commit and push if changes
       env:
