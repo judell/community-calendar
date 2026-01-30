@@ -286,23 +286,42 @@ def render_html_calendar(grouped_events, year, month, feeds, output_dir='.'):
     calendar_weeks = create_calendar_weeks(year, month, grouped_events)
     month_year = datetime(year, month, 1).strftime('%B %Y')
 
+    # Calculate prev/next month
+    if month == 1:
+        prev_month, prev_year = 12, year - 1
+    else:
+        prev_month, prev_year = month - 1, year
+    
+    if month == 12:
+        next_month, next_year = 1, year + 1
+    else:
+        next_month, next_year = month + 1, year
+
     # Render calendar view
     rendered_calendar = calendar_template.render(
         calendar_weeks=calendar_weeks,
         month_year=month_year,
         feeds=sorted(feeds, key=lambda x: x['name']),
         year=year,
-        month=month
+        month=month,
+        prev_year=prev_year,
+        prev_month=prev_month,
+        next_year=next_year,
+        next_month=next_month
     )
 
     # Render list view
     rendered_list = list_template.render(
         grouped_events=grouped_events,
-        calendar_weeks=calendar_weeks,  # Add this line
+        calendar_weeks=calendar_weeks,
         month_year=month_year,
         feeds=sorted(feeds, key=lambda x: x['name']),
         year=year,
-        month=month
+        month=month,
+        prev_year=prev_year,
+        prev_month=prev_month,
+        next_year=next_year,
+        next_month=next_month
     )
 
     # Save calendar view
