@@ -1,5 +1,6 @@
 import argparse
 import calendar
+import difflib
 import logging
 import os
 import re
@@ -163,6 +164,81 @@ def group_events_by_time(events):
 
     # Create a new OrderedDict with sorted keys
     return OrderedDict((k, grouped_events[k]) for k in sorted_keys)
+
+def normalize_title(title):
+    """Normalize event title for comparison."""
+    if not title:
+        return ""
+    # Lowercase, remove extra whitespace, common punctuation variations
+    title = title.lower().strip()
+    title = re.sub(r'[\s]+', ' ', title)  # collapse whitespace
+    title = re.sub(r'[@]', 'at', title)   # @ -> at
+    title = re.sub(r'[&]', 'and', title)  # & -> and
+    title = re.sub(r'[^a-z0-9\s]', '', title)  # remove punctuation
+    return title
+
+def events_are_similar(event1, event2, threshold=0.85):
+    """Check if two events are similar enough to be duplicates."""
+    title1 = normalize_title(event1.get('summary', ''))
+    title2 = normalize_title(event2.get('summary', ''))
+    
+    if not title1 or not title2:
+        return False
+    
+    # Use SequenceMatcher for similarity ratio
+    ratio = difflib.SequenceMatcher(None, title1, title2).ratio()
+    return ratio >= threshold
+
+def deduplicate_events(events, threshold=0.85):
+    """
+    Remove duplicate events based on similar titles on the same date/time.
+    Keeps the first occurrence (preserves source priority from feeds.txt order).
+    """
+    if not events:
+        return events
+    
+    # Group by (date, start_time) first for efficiency
+    by_datetime = {}
+    for event in events:
+        # Get date key
+        start = event.get('start')
+        if isinstance(start, datetime):
+            date_key = start.date()
+            time_key = start.strftime('%H:%M')
+        elif isinstance(start, date):
+            date_key = start
+            time_key = 'all_day'
+        else:
+            date_key = event.get('grouping_date', date.today())
+            time_key = 'unknown'
+        
+        key = (date_key, time_key)
+        if key not in by_datetime:
+            by_datetime[key] = []
+        by_datetime[key].append(event)
+    
+    # Deduplicate within each datetime group
+    deduplicated = []
+    total_dupes = 0
+    
+    for key, group in by_datetime.items():
+        kept = []
+        for event in group:
+            is_dupe = False
+            for kept_event in kept:
+                if events_are_similar(event, kept_event, threshold):
+                    is_dupe = True
+                    total_dupes += 1
+                    logger.debug(f"Duplicate found: '{event.get('summary')}' ~ '{kept_event.get('summary')}'")
+                    break
+            if not is_dupe:
+                kept.append(event)
+        deduplicated.extend(kept)
+    
+    if total_dupes > 0:
+        logger.info(f"Removed {total_dupes} duplicate events")
+    
+    return deduplicated
 
 def group_events_by_date(events, year, month):
     grouped_events = {}
@@ -346,6 +422,7 @@ def read_and_process_feeds(file_path, default_timezone):
 
 def generate_calendar(file_path, year, month, default_timezone, output_dir='.'):
     feeds, all_events = read_and_process_feeds(file_path, default_timezone)
+    all_events = deduplicate_events(all_events)
     grouped_events = group_events_by_date(all_events, year, month)
     render_html_calendar(grouped_events, year, month, feeds, output_dir)
 
