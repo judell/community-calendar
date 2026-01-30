@@ -421,11 +421,51 @@ def read_and_process_feeds(file_path, default_timezone):
                 all_events.extend(events)
     return feeds, all_events
 
+def generate_index_page(output_dir, location_name):
+    """Generate an index.html that redirects to the current month's calendar."""
+    env = Environment(loader=FileSystemLoader('.'))
+    
+    # Check if index template exists, otherwise create a simple redirect
+    try:
+        index_template = env.get_template('index_template.html')
+        now = datetime.now()
+        rendered = index_template.render(
+            location_name=location_name,
+            current_year=now.year,
+            current_month=f"{now.month:02d}"
+        )
+    except:
+        # Fallback simple redirect
+        now = datetime.now()
+        rendered = f'''<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<script>window.location.href="{now.year}-{now.month:02d}-l.html";</script>
+<noscript><meta http-equiv="refresh" content="0; url={now.year}-{now.month:02d}-l.html"></noscript>
+</head><body><a href="{now.year}-{now.month:02d}-l.html">Go to calendar</a></body></html>'''
+    
+    index_path = os.path.join(output_dir, 'index.html')
+    with open(index_path, 'w') as f:
+        f.write(rendered)
+    logger.info(f"Generated {index_path}")
+
 def generate_calendar(file_path, year, month, default_timezone, output_dir='.'):
     feeds, all_events = read_and_process_feeds(file_path, default_timezone)
     all_events = deduplicate_events(all_events)
     grouped_events = group_events_by_date(all_events, year, month)
     render_html_calendar(grouped_events, year, month, feeds, output_dir)
+    
+    # Generate index.html for the location
+    location_names = {
+        'santarosa': 'Santa Rosa',
+        'sebastopol': 'Sebastopol', 
+        'bloomington': 'Bloomington'
+    }
+    dir_name = os.path.basename(output_dir)
+    location_name = location_names.get(dir_name, dir_name.replace('_', ' ').title())
+    if location_name == '.':
+        location_name = 'Community'
+    generate_index_page(output_dir, location_name)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate an HTML calendar from iCalendar feeds or perform a dry run.")
