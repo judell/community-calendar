@@ -84,6 +84,26 @@ jobs:
         node eventbrite.js bloomington $(date -d "next month" +%Y) $(date -d "next month" +%m)
       continue-on-error: true
 
+    - name: Scrape Bohemian (Santa Rosa) - this month
+      run: |
+        cd santarosa && python bohemian.py $(date +%Y) $(date +%-m)
+      continue-on-error: true
+
+    - name: Scrape Bohemian (Santa Rosa) - next month
+      run: |
+        cd santarosa && python bohemian.py $(date -d "next month" +%Y) $(date -d "next month" +%-m)
+      continue-on-error: true
+
+    - name: Scrape Press Democrat (Santa Rosa) - this month
+      run: |
+        cd santarosa && python pressdemocrat.py $(date +%Y) $(date +%-m)
+      continue-on-error: true
+
+    - name: Scrape Press Democrat (Santa Rosa) - next month
+      run: |
+        cd santarosa && python pressdemocrat.py $(date -d "next month" +%Y) $(date -d "next month" +%-m)
+      continue-on-error: true
+
     # ==========================================
     # Update feeds.txt to point to fresh ICS files
     # ==========================================
@@ -103,10 +123,14 @@ jobs:
         # Freshly scraped data (this month)
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/library_intercept_${YEAR}_${MONTH}.ics
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${YEAR}_${MONTH}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/bohemian_${YEAR}_${MONTH}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/pressdemocrat_${YEAR}_${MONTH}.ics
         
         # Freshly scraped data (next month)
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/library_intercept_${NEXT_YEAR}_${NEXT_MONTH}.ics
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${NEXT_YEAR}_${NEXT_MONTH}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/bohemian_${NEXT_YEAR}_${NEXT_MONTH}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/pressdemocrat_${NEXT_YEAR}_${NEXT_MONTH}.ics
         
         # Santa Rosa City calendars
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Main_Calendar.ics
