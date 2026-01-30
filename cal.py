@@ -367,17 +367,28 @@ def determine_timezone(vtimezone_info, x_wr_timezone, default_timezone):
     logger.warning("Unable to determine timezone and invalid default timezone. Using UTC.")
     return pytz.UTC
 
-def fetch_and_process_calendar(url, default_timezone):
+def fetch_and_process_calendar(url_or_path, default_timezone):
     try:
-        response = requests.get(url, verify=False)
-        response.raise_for_status()
-        content = response.text
+        # Handle local file paths vs URLs
+        if url_or_path.startswith(('http://', 'https://')):
+            response = requests.get(url_or_path, verify=False)
+            response.raise_for_status()
+            content = response.text
+            source_ref = url_or_path
+        else:
+            # Local file path
+            if not os.path.isfile(url_or_path):
+                logger.warning(f"Local file not found: {url_or_path}")
+                return "Unnamed Calendar", [], 0, None, None
+            with open(url_or_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            source_ref = url_or_path
 
         # Extract calendar name
         match = re.search(r'X-WR-CALNAME:(.*?)(?:\r\n|\r|\n)', content)
         cal_name = match.group(1).strip() if match else "Unnamed Calendar"
 
-        logger.info(f'{cal_name}, {url}')
+        logger.info(f'{cal_name}, {source_ref}')
 
         # Process the calendar content
         cal = Calendar.from_ical(content)
@@ -400,7 +411,7 @@ def fetch_and_process_calendar(url, default_timezone):
             try:
                 if 'CATEGORIES' in event:
                     logger.info(f"CATEGORIES {event['CATEGORIES'].to_ical().decode('utf-8')} [[{event['SUMMARY']}]]")
-                processed_event = parse_and_localize_event(event, source_tz, target_tz, cal_name, url)
+                processed_event = parse_and_localize_event(event, source_tz, target_tz, cal_name, source_ref)
                 processed_events.append(processed_event)
 
                 event_date = processed_event['start'].date() if isinstance(processed_event['start'], datetime) else processed_event['start']
@@ -418,21 +429,25 @@ def fetch_and_process_calendar(url, default_timezone):
         return cal_name, processed_events, total_events, oldest_day, newest_day
 
     except Exception as e:
-        logger.error(f"Error processing URL {url}: {str(e)}")
+        logger.error(f"Error processing {url_or_path}: {str(e)}")
         return "Unnamed Calendar", [], 0, None, None
 
-def read_and_process_feeds(file_path, default_timezone):
+def read_and_process_feeds(file_path, default_timezone, local_only=False):
     feeds = []
     all_events = []
     with open(file_path, 'r') as file:
         for line in file:
             line = line.strip()
             if line and not line.startswith('#'):
-                url = line
-                name, events, total_events, oldest_day, newest_day = fetch_and_process_calendar(url, default_timezone)
+                source = line
+                # Skip URLs if local_only is set
+                if local_only and source.startswith(('http://', 'https://')):
+                    logger.info(f"Skipping URL (local-only mode): {source}")
+                    continue
+                name, events, total_events, oldest_day, newest_day = fetch_and_process_calendar(source, default_timezone)
                 feeds.append({
                     'name': name,
-                    'url': url,
+                    'url': source,
                     'total_events': total_events,
                     'oldest_day': oldest_day.strftime('%Y-%m-%d') if oldest_day else 'N/A',
                     'newest_day': newest_day.strftime('%Y-%m-%d') if newest_day else 'N/A'
@@ -468,8 +483,8 @@ def generate_index_page(output_dir, location_name):
         f.write(rendered)
     logger.info(f"Generated {index_path}")
 
-def generate_calendar(file_path, year, month, default_timezone, output_dir='.'):
-    feeds, all_events = read_and_process_feeds(file_path, default_timezone)
+def generate_calendar(file_path, year, month, default_timezone, output_dir='.', local_only=False):
+    feeds, all_events = read_and_process_feeds(file_path, default_timezone, local_only=local_only)
     all_events = deduplicate_events(all_events)
     grouped_events = group_events_by_date(all_events, year, month)
     render_html_calendar(grouped_events, year, month, feeds, output_dir)
@@ -495,6 +510,7 @@ if __name__ == "__main__":
     parser.add_argument("--year", help="Year for calendar generation", type=int, default=datetime.now().year)
     parser.add_argument("--month", help="Month for calendar generation", type=int, default=datetime.now().month)
     parser.add_argument("--location", help="Folder containing feeds.txt and for output (required for --generate)", type=str)
+    parser.add_argument("--local-only", action="store_true", help="Only process local files, skip URLs in feeds.txt")
     args = parser.parse_args()
 
     if len(sys.argv) == 1:
@@ -530,7 +546,7 @@ if __name__ == "__main__":
         if not os.path.isfile(feeds_file):
             print(f"Error: feeds.txt not found in the specified location '{args.location}'.")
             sys.exit(1)
-        generate_calendar(feeds_file, args.year, args.month, args.timezone, args.location)
+        generate_calendar(feeds_file, args.year, args.month, args.timezone, args.location, local_only=args.local_only)
     else:
         print("Please specify either --dry-run or --generate")
         parser.print_help()
