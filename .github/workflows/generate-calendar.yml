@@ -21,15 +21,105 @@ jobs:
       with:
         python-version: '3.10'
 
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y libxml2-dev libxslt-dev
 
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+
+    - name: Install Node dependencies (for Puppeteer)
+      run: |
+        npm install puppeteer
+
+    # ==========================================
+    # Run scrapers to get fresh event data
+    # ==========================================
+
+    - name: Scrape Library events (Santa Rosa) - this month
+      run: |
+        python library_intercept.py --location santarosa --year $(date +%Y) --month $(date +%m)
+      continue-on-error: true
+
+    - name: Scrape Library events (Santa Rosa) - next month
+      run: |
+        python library_intercept.py --location santarosa --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m)
+      continue-on-error: true
+
+    - name: Scrape Library events (Bloomington) - this month
+      run: |
+        python library_intercept.py --location bloomington --year $(date +%Y) --month $(date +%m)
+      continue-on-error: true
+
+    - name: Scrape Library events (Bloomington) - next month
+      run: |
+        python library_intercept.py --location bloomington --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m)
+      continue-on-error: true
+
+    - name: Scrape Eventbrite (Santa Rosa) - this month
+      run: |
+        node eventbrite.js santarosa $(date +%Y) $(date +%m)
+      continue-on-error: true
+
+    - name: Scrape Eventbrite (Santa Rosa) - next month
+      run: |
+        node eventbrite.js santarosa $(date -d "next month" +%Y) $(date -d "next month" +%m)
+      continue-on-error: true
+
+    - name: Scrape Eventbrite (Bloomington) - this month
+      run: |
+        node eventbrite.js bloomington $(date +%Y) $(date +%m)
+      continue-on-error: true
+
+    - name: Scrape Eventbrite (Bloomington) - next month
+      run: |
+        node eventbrite.js bloomington $(date -d "next month" +%Y) $(date -d "next month" +%m)
+      continue-on-error: true
+
+    # ==========================================
+    # Update feeds.txt to point to fresh ICS files
+    # ==========================================
+
+    - name: Update Santa Rosa feeds.txt with current month files
+      run: |
+        YEAR=$(date +%Y)
+        MONTH=$(date +%m)
+        NEXT_YEAR=$(date -d "next month" +%Y)
+        NEXT_MONTH=$(date -d "next month" +%m)
+        
+        # Create updated feeds.txt for santarosa
+        cat > santarosa/feeds.txt << EOF
+        # Live Google Calendar feed
+        https://calendar.google.com/calendar/ical/eventsatarlenefransictheater@gmail.com/public/basic.ics
+        
+        # Freshly scraped data (this month)
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/library_intercept_${YEAR}_${MONTH}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${YEAR}_${MONTH}.ics
+        
+        # Freshly scraped data (next month)
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/library_intercept_${NEXT_YEAR}_${NEXT_MONTH}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${NEXT_YEAR}_${NEXT_MONTH}.ics
+        
+        # Santa Rosa City calendars
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Main_Calendar.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_City_Offices_Closed.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Recreation_and_Parks.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Events.ics
+        EOF
+        # Remove leading whitespace
+        sed -i 's/^[[:space:]]*//' santarosa/feeds.txt
+
+    # ==========================================
+    # Generate calendars
+    # ==========================================
 
     - name: Bloomington, this month
       run: |
