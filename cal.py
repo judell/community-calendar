@@ -93,7 +93,7 @@ def parse_vtimezone(cal):
         logger.error(f"Error details: {e}")
     return timezones
 
-def parse_and_localize_event(event, source_tz, target_tz, cal_name):
+def parse_and_localize_event(event, source_tz, target_tz, cal_name, source_url=None):
     dtstart = event.get('dtstart')
     dtend = event.get('dtend')
     
@@ -133,7 +133,8 @@ def parse_and_localize_event(event, source_tz, target_tz, cal_name):
         'original_start': dtstart.dt,
         'original_end': dtend.dt if dtend else None,
         'grouping_date': grouping_date,
-        'source': cal_name
+        'source': cal_name,
+        'source_url': source_url
     }
 
 def group_events_by_time(events):
@@ -380,7 +381,7 @@ def fetch_and_process_calendar(url, default_timezone):
             try:
                 if 'CATEGORIES' in event:
                     logger.info(f"CATEGORIES {event['CATEGORIES'].to_ical().decode('utf-8')} [[{event['SUMMARY']}]]")
-                processed_event = parse_and_localize_event(event, source_tz, target_tz, cal_name)
+                processed_event = parse_and_localize_event(event, source_tz, target_tz, cal_name, url)
                 processed_events.append(processed_event)
 
                 event_date = processed_event['start'].date() if isinstance(processed_event['start'], datetime) else processed_event['start']
