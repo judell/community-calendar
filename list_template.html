@@ -25,25 +25,46 @@
     header {
       background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
       color: #fff;
-      padding: 1rem;
+      padding: 0.75rem 1rem;
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
+    .header-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .nav-arrow {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      font-size: 1.5rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      line-height: 1;
+    }
+
+    .nav-arrow:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
     header h1 {
       margin: 0;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: 600;
       text-align: center;
     }
 
     .switcher {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: normal;
-      margin-top: 0.25rem;
+      margin-top: 0.2rem;
       font-style: normal;
     }
 
@@ -252,7 +273,11 @@
 </head>
 <body>
   <header>
-    <h1>{{ month_year }} <span class="switcher"><a href="{{ year }}-{{ '%02d'|format(month) }}.html">calendar view</a></span></h1>
+    <div class="header-nav">
+      <a href="{{ prev_year }}-{{ '%02d'|format(prev_month) }}-l.html" class="nav-arrow" title="Previous month">&larr;</a>
+      <h1>{{ month_year }} <span class="switcher"><a href="{{ year }}-{{ '%02d'|format(month) }}.html">calendar view</a></span></h1>
+      <a href="{{ next_year }}-{{ '%02d'|format(next_month) }}-l.html" class="nav-arrow" title="Next month">&rarr;</a>
+    </div>
   </header>
 
   <nav id="calendar-widget">
