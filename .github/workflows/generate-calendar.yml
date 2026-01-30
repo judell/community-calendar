@@ -54,6 +54,11 @@ jobs:
         python library_intercept.py --location santarosa --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m)
       continue-on-error: true
 
+    - name: Scrape Library events (Santa Rosa) - month after next
+      run: |
+        python library_intercept.py --location santarosa --year $(date -d "+2 months" +%Y) --month $(date -d "+2 months" +%m)
+      continue-on-error: true
+
     - name: Scrape Library events (Bloomington) - this month
       run: |
         python library_intercept.py --location bloomington --year $(date +%Y) --month $(date +%m)
@@ -62,6 +67,11 @@ jobs:
     - name: Scrape Library events (Bloomington) - next month
       run: |
         python library_intercept.py --location bloomington --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m)
+      continue-on-error: true
+
+    - name: Scrape Library events (Bloomington) - month after next
+      run: |
+        python library_intercept.py --location bloomington --year $(date -d "+2 months" +%Y) --month $(date -d "+2 months" +%m)
       continue-on-error: true
 
     - name: Scrape Eventbrite (Santa Rosa) - this month
@@ -74,6 +84,11 @@ jobs:
         node eventbrite.js santarosa $(date -d "next month" +%Y) $(date -d "next month" +%m)
       continue-on-error: true
 
+    - name: Scrape Eventbrite (Santa Rosa) - month after next
+      run: |
+        node eventbrite.js santarosa $(date -d "+2 months" +%Y) $(date -d "+2 months" +%m)
+      continue-on-error: true
+
     - name: Scrape Eventbrite (Bloomington) - this month
       run: |
         node eventbrite.js bloomington $(date +%Y) $(date +%m)
@@ -84,6 +99,11 @@ jobs:
         node eventbrite.js bloomington $(date -d "next month" +%Y) $(date -d "next month" +%m)
       continue-on-error: true
 
+    - name: Scrape Eventbrite (Bloomington) - month after next
+      run: |
+        node eventbrite.js bloomington $(date -d "+2 months" +%Y) $(date -d "+2 months" +%m)
+      continue-on-error: true
+
     - name: Scrape Bohemian (Santa Rosa) - this month
       run: |
         cd santarosa && python bohemian.py $(date +%Y) $(date +%-m)
@@ -92,6 +112,11 @@ jobs:
     - name: Scrape Bohemian (Santa Rosa) - next month
       run: |
         cd santarosa && python bohemian.py $(date -d "next month" +%Y) $(date -d "next month" +%-m)
+      continue-on-error: true
+
+    - name: Scrape Bohemian (Santa Rosa) - month after next
+      run: |
+        cd santarosa && python bohemian.py $(date -d "+2 months" +%Y) $(date -d "+2 months" +%-m)
       continue-on-error: true
 
     - name: Scrape Press Democrat (Santa Rosa) - this month
@@ -134,6 +159,8 @@ jobs:
         MONTH=$(date +%m)
         NEXT_YEAR=$(date -d "next month" +%Y)
         NEXT_MONTH=$(date -d "next month" +%m)
+        NEXT2_YEAR=$(date -d "+2 months" +%Y)
+        NEXT2_MONTH=$(date -d "+2 months" +%m)
         
         # Create updated feeds.txt for santarosa
         cat > santarosa/feeds.txt << EOF
@@ -151,6 +178,12 @@ jobs:
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${NEXT_YEAR}_${NEXT_MONTH}.ics
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/bohemian_${NEXT_YEAR}_${NEXT_MONTH}.ics
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/pressdemocrat_${NEXT_YEAR}_${NEXT_MONTH}.ics
+        
+        # Freshly scraped data (month after next)
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/library_intercept_${NEXT2_YEAR}_${NEXT2_MONTH}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/eventbrite_${NEXT2_YEAR}_${NEXT2_MONTH}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/bohemian_${NEXT2_YEAR}_${NEXT2_MONTH}.ics
+        https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/pressdemocrat_${NEXT2_YEAR}_${NEXT2_MONTH}.ics
         
         # Santa Rosa City calendars
         https://raw.githubusercontent.com/judell/community-calendar/main/santarosa/SRCity_Main_Calendar.ics
@@ -283,6 +316,10 @@ jobs:
       run: |
         python cal.py --generate --location bloomington --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Indiana/Indianapolis"
 
+    - name: Bloomington, month after next
+      run: |
+        python cal.py --generate --location bloomington --year $(date -d "+2 months" +%Y) --month $(date -d "+2 months" +%m) --timezone "America/Indiana/Indianapolis"
+
     - name: Santa Rosa, this month
       run: |
         python cal.py --generate --location santarosa --year $(date +%Y) --month $(date +%m) --timezone "America/Los_Angeles"
@@ -291,6 +328,10 @@ jobs:
       run: |
         python cal.py --generate --location santarosa --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Los_Angeles"
 
+    - name: Santa Rosa, month after next
+      run: |
+        python cal.py --generate --location santarosa --year $(date -d "+2 months" +%Y) --month $(date -d "+2 months" +%m) --timezone "America/Los_Angeles"
+
     - name: Sebastopol, this month
       run: |
         python cal.py --generate --location sebastopol --year $(date +%Y) --month $(date +%m) --timezone "America/Los_Angeles"
@@ -298,6 +339,10 @@ jobs:
     - name: Sebastopol, next month
       run: |
         python cal.py --generate --location sebastopol --year $(date -d "next month" +%Y) --month $(date -d "next month" +%m) --timezone "America/Los_Angeles"
+
+    - name: Sebastopol, month after next
+      run: |
+        python cal.py --generate --location sebastopol --year $(date -d "+2 months" +%Y) --month $(date -d "+2 months" +%m) --timezone "America/Los_Angeles"
       
     - name: Commit and push if changes
       env:
@@ -307,4 +352,4 @@ jobs:
         git config --global user.email 'actions@github.com'
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         git add .
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-generate calendar for current and next month" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-generate calendar for current and next 2 months" && git push)
