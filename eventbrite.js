@@ -36,11 +36,37 @@ if (!LOCATION_CONFIGS[location] || isNaN(targetYear) || isNaN(targetMonth) || ta
 const locationConfig = LOCATION_CONFIGS[location];
 
 async function scrapeEvents(url, targetYear, targetMonth) {
-    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const browser = await puppeteer.launch({ 
+        headless: 'new',
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--window-size=1920,1080'
+        ]
+    });
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(60000);
+    
+    // Set a realistic user agent to avoid bot detection
+    await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setViewport({ width: 1920, height: 1080 });
 
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    console.log(`Navigating to ${url}...`);
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+    
+    // Wait for events to load
+    try {
+        await page.waitForSelector('[data-testid="search-event"]', { timeout: 30000 });
+        console.log('Events loaded successfully');
+    } catch (e) {
+        console.error('Failed to find events on page. Page might be blocked or have different structure.');
+        const html = await page.content();
+        console.log('Page content preview:', html.substring(0, 500));
+        await browser.close();
+        return [];
+    }
 
     let eventsInMonth = [];
     const maxPages = 40; // Maximum number of pages to process
@@ -50,6 +76,12 @@ async function scrapeEvents(url, targetYear, targetMonth) {
         const events = await page.evaluate((targetYear, targetMonth) => {
             const eventElements = document.querySelectorAll('[data-testid="search-event"]');
             const eventList = [];
+            
+            // Helper to get today/tomorrow dates
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
 
             eventElements.forEach(event => {
                 const name = event.querySelector('h3')?.innerText || 'No title provided';
@@ -60,15 +92,50 @@ async function scrapeEvents(url, targetYear, targetMonth) {
                 if (dateTimeElement) {
                     const dateTimeText = dateTimeElement.innerText.trim();
                     try {
-                        const dateMatch = dateTimeText.match(/(\w+),?\s*(\w+ \d{1,2})\s*•?\s*(\d{1,2}:\d{2} [APM]+)/);
-                        if (dateMatch) {
+                        // Handle "Today • 8:00 PM" or "Tomorrow • 7:00 PM"
+                        const todayMatch = dateTimeText.match(/Today\s*•\s*(\d{1,2}:\d{2}\s*[APM]+)/i);
+                        const tomorrowMatch = dateTimeText.match(/Tomorrow\s*•\s*(\d{1,2}:\d{2}\s*[APM]+)/i);
+                        
+                        // Handle "Sat, Mar 7 • 1:30 PM"
+                        const dateMatch = dateTimeText.match(/(\w+),?\s*(\w+\s+\d{1,2})\s*•?\s*(\d{1,2}:\d{2}\s*[APM]+)/);
+                        
+                        let dateTime = null;
+                        
+                        if (todayMatch) {
+                            const time = todayMatch[1];
+                            const [hours, minutes] = time.match(/(\d+):(\d+)/).slice(1);
+                            const isPM = /PM/i.test(time);
+                            let hour = parseInt(hours);
+                            if (isPM && hour !== 12) hour += 12;
+                            if (!isPM && hour === 12) hour = 0;
+                            dateTime = new Date(today);
+                            dateTime.setHours(hour, parseInt(minutes), 0, 0);
+                        } else if (tomorrowMatch) {
+                            const time = tomorrowMatch[1];
+                            const [hours, minutes] = time.match(/(\d+):(\d+)/).slice(1);
+                            const isPM = /PM/i.test(time);
+                            let hour = parseInt(hours);
+                            if (isPM && hour !== 12) hour += 12;
+                            if (!isPM && hour === 12) hour = 0;
+                            dateTime = new Date(tomorrow);
+                            dateTime.setHours(hour, parseInt(minutes), 0, 0);
+                        } else if (dateMatch) {
                             const [_, dayOfWeek, date, time] = dateMatch;
-                            const fullDate = `${date}, ${targetYear} ${time}`;
-                            const dateTime = new Date(fullDate);
+                            // Try current year first, then next year if date is in the past
+                            let fullDate = `${date}, ${targetYear} ${time}`;
+                            dateTime = new Date(fullDate);
+                            // If the date is more than 2 months in the past, assume next year
+                            if (dateTime < new Date(now.getTime() - 60*24*60*60*1000)) {
+                                fullDate = `${date}, ${targetYear + 1} ${time}`;
+                                dateTime = new Date(fullDate);
+                            }
+                        }
+                        
+                        if (dateTime && !isNaN(dateTime.getTime())) {
                             formattedDateTime = dateTime.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
                         }
                     } catch (error) {
-                        console.error(`Failed to parse date for event "${name}": ${dateTimeText}`);
+                        // Silent fail, will be marked as Invalid date
                     }
                 }
 
@@ -104,21 +171,37 @@ async function scrapeEvents(url, targetYear, targetMonth) {
             });
 
             const lastPageEvents = eventsInMonth[eventsInMonth.length - 1];
-            let allPastTargetDate = true;
-
+            
+            // Count valid events and check if any are in target month
+            let validEventCount = 0;
+            let eventsInTargetMonth = 0;
+            let eventsPastTargetMonth = 0;
+            
             for (let event of lastPageEvents) {
-                const lastEventDateStr = event.date;
-                const year = parseInt(lastEventDateStr.slice(0, 4), 10);
-                const month = parseInt(lastEventDateStr.slice(4, 6), 10);
+                if (event.date === 'Invalid date') continue;
+                validEventCount++;
+                
+                const year = parseInt(event.date.slice(0, 4), 10);
+                const month = parseInt(event.date.slice(4, 6), 10);
 
                 if (year === targetYear && month === targetMonth) {
-                    allPastTargetDate = false;
-                    break;
+                    eventsInTargetMonth++;
+                } else if (year > targetYear || (year === targetYear && month > targetMonth)) {
+                    eventsPastTargetMonth++;
                 }
             }
+            
+            console.log(`Page ${pageNumber}: ${lastPageEvents.length} events, ${validEventCount} valid dates, ${eventsInTargetMonth} in target month, ${eventsPastTargetMonth} past target`);
 
-            if (allPastTargetDate) {
-                console.log("\nExit condition met. All events on this page are past the target month. Stopping pagination.");
+            // Only stop if we have valid events and ALL of them are past the target month
+            if (validEventCount > 0 && eventsInTargetMonth === 0 && eventsPastTargetMonth === validEventCount) {
+                console.log("\nExit condition met. All valid events on this page are past the target month. Stopping pagination.");
+                break;
+            }
+            
+            // Also stop if we got no events at all (empty page)
+            if (lastPageEvents.length === 0) {
+                console.log("\nNo events found on page. Stopping pagination.");
                 break;
             }
 
