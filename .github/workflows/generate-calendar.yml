@@ -105,7 +105,7 @@ jobs:
           
           echo "Scraping Santa Rosa for $Y-$M..."
           python library_intercept.py --location santarosa --year $Y --month $M || true
-          node eventbrite.js santarosa $Y $M || true
+          python eventbrite.py santarosa $Y $M || true
           cd santarosa && python bohemian.py $Y $((10#$M)) || true
           python pressdemocrat.py $Y $((10#$M)) || true
           cd ..
@@ -233,7 +233,7 @@ jobs:
           
           echo "Scraping Bloomington for $Y-$M..."
           python library_intercept.py --location bloomington --year $Y --month $M || true
-          node eventbrite.js bloomington $Y $M || true
+          python eventbrite.py bloomington $Y $M || true
         done
       continue-on-error: true
 
