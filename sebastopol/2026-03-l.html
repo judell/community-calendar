@@ -1,148 +1,289 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>March 2026 - List View</title>
   <style>
-    /* General Styles */
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      padding: 20px;
-      margin-right: 0;
-      font-size: smaller;
+    /* Mobile-first List View Styles */
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    h1 {
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      background: #f8f9fa;
+      color: #212529;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: #fff;
+      padding: 0.75rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .nav-arrow {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      font-size: 1.5rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      line-height: 1;
+    }
+
+    .nav-arrow:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
       text-align: center;
     }
 
-    h2 {
-      color: #666;
+    .switcher {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: normal;
+      margin-top: 0.2rem;
+      font-style: normal;
     }
 
-    .event {
-      margin-bottom: 20px;
-      padding-left: 10px;
+    .switcher a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
     }
 
-    .event-title {
-      font-weight: bold;
-    }
-
-    .event-details {
-      margin-top: 5px;
-    }
-
+    /* Calendar Widget */
     #calendar-widget {
-      border: 1px solid #ddd;
-      padding: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      margin-bottom: 4em;
+      background: #fff;
+      padding: 0.75rem;
+      display: none;
+      border: none;
+      box-shadow: none;
     }
 
     #calendar-widget table {
       width: 100%;
       border-collapse: collapse;
+      font-size: 0.85rem;
     }
 
     #calendar-widget th {
-      background-color: rgb(250, 247, 244);
+      padding: 0.5rem 0;
+      color: #6b7280;
+      font-weight: 500;
+      font-size: 0.75rem;
+      background: transparent;
     }
 
     #calendar-widget td {
+      padding: 0.4rem;
       text-align: center;
       cursor: pointer;
+      border-radius: 50%;
+      transition: background 0.15s;
     }
 
     #calendar-widget td:hover {
-      background-color: #e6e6e6;
+      background: #e5e7eb;
     }
 
-    #calendar-widget .has-events {
-      font-weight: bold;
+    #calendar-widget td.has-events {
+      font-weight: 700;
+      color: #1e40af;
     }
 
-    .switcher {
-      font-style: italic;
-      font-size: small;
+    /* Event List */
+    .event-list {
+      padding: 0;
+    }
+
+    .event-list h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+      background: #374151;
+      margin: 0;
+      padding: 0.75rem 1rem;
+      position: sticky;
+      top: 56px;
+      z-index: 50;
+    }
+
+    .event-list h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #6b7280;
+      margin: 0;
+      padding: 0.5rem 1rem;
+      background: #f3f4f6;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Event Card */
+    .event {
+      background: #fff;
+      padding: 1rem;
+      margin-bottom: 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .event-title {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.35;
+      color: #111827;
+    }
+
+    .event-title a {
+      color: #1e40af;
+      text-decoration: none;
+    }
+
+    .event-title a:hover {
+      text-decoration: underline;
+    }
+
+    .event-details {
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+
+    .event-details p {
+      margin: 0.4rem 0;
+    }
+
+    .event-details p:first-of-type {
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .event-details p:first-of-type::before {
+      content: "📍 ";
+      font-size: 0.8em;
+    }
+
+    .event-details p:nth-of-type(2) {
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .event-details p:nth-of-type(2)::before {
+      content: none;
+    }
+
+    .source-link {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #6b7280;
+      background: #f3f4f6;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      text-decoration: none;
+    }
+
+    .source-link:hover {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    /* Tablet and Desktop */
+    @media (min-width: 768px) {
+      header h1 {
+        font-size: 1.6rem;
+      }
+      
+      .event-list h2 {
+        top: 64px;
+      }
+      
+      #calendar-widget {
+        display: block;
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        width: 240px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 1px solid #e5e7eb;
+        z-index: 90;
+        margin-bottom: 0;
+      }
+      
+      .event-list {
+        margin-right: 280px;
+      }
+      
+      .event {
+        padding: 1.25rem;
+        margin: 0 1rem 0.5rem;
+        border-radius: 8px;
+        border-bottom: none;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border: 1px solid #e5e7eb;
+      }
+      
+      .event-list h2 {
+        margin: 0 1rem;
+        border-radius: 8px 8px 0 0;
+        margin-top: 1rem;
+      }
+      
+      .event-list h3 {
+        margin: 0 1rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      body {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
     }
 
     .feeds-section {
       display: none;
     }
-
-    /* Floating calendar styles for larger screens */
-    @media (min-width: 1200px) {
-      #calendar-widget {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        width: 250px;
-        max-width: 20%;
-      }
-
-      .event-list {
-        margin-right: 270px;
-        /* Allows the list to expand and contract naturally */
-      }
-    }
-
-    /* Styles for medium screens */
-    @media (min-width: 769px) and (max-width: 1199px) {
-      #calendar-widget {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        width: 200px;
-        max-width: 20%;
-      }
-
-      .event-list {
-        margin-right: 220px;
-        /* Adjust based on the calendar width and padding */
-      }
-    }
-
-    /* Styles for smaller screens */
-    @media (max-width: 768px) {
-      #calendar-widget {
-        position: relative;
-        width: 50%;
-        margin-top: 20px;
-        margin-right: 0;
-        float: none;
-        clear: both;
-      }
-
-      .event-list {
-        margin-right: 0;
-        margin-left: 0;
-        width: 100%;
-        box-sizing: border-box;
-        clear: both;
-      }
-    }
-
   </style>
 </head>
-
 <body>
-  <h1>March 2026 <span class="switcher"><a href="2026-03.html">calendar
-        view</a></span></h1>
+  <header>
+    <div class="header-nav">
+      <a href="2026-02-l.html" class="nav-arrow" title="Previous month">&larr;</a>
+      <h1>March 2026 <span class="switcher"><a href="2026-03.html">calendar view</a></span></h1>
+      <a href="2026-04-l.html" class="nav-arrow" title="Next month">&rarr;</a>
+    </div>
+  </header>
 
-  <div id="calendar-widget">
+  <nav id="calendar-widget">
     <table>
       <tr>
-        <th>Mo</th>
-        <th>Tu</th>
-        <th>We</th>
-        <th>Th</th>
-        <th>Fr</th>
-        <th>Sa</th>
-        <th>Su</th>
+        <th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th><th>Su</th>
       </tr>
       
       <tr>
@@ -171,7 +312,7 @@
           
         </td>
         
-        <td onclick="scrollToDay('2026-03-01')"  >
+        <td onclick="scrollToDay('2026-03-01')" >
           1
         </td>
         
@@ -179,31 +320,31 @@
       
       <tr>
         
-        <td onclick="scrollToDay('2026-03-02')"  >
+        <td onclick="scrollToDay('2026-03-02')" >
           2
         </td>
         
-        <td onclick="scrollToDay('2026-03-03')"  >
+        <td onclick="scrollToDay('2026-03-03')" >
           3
         </td>
         
-        <td onclick="scrollToDay('2026-03-04')"  >
+        <td onclick="scrollToDay('2026-03-04')" >
           4
         </td>
         
-        <td onclick="scrollToDay('2026-03-05')"  >
+        <td onclick="scrollToDay('2026-03-05')" >
           5
         </td>
         
-        <td onclick="scrollToDay('2026-03-06')"  >
+        <td onclick="scrollToDay('2026-03-06')" >
           6
         </td>
         
-        <td onclick="scrollToDay('2026-03-07')"  >
+        <td onclick="scrollToDay('2026-03-07')" >
           7
         </td>
         
-        <td onclick="scrollToDay('2026-03-08')"  >
+        <td onclick="scrollToDay('2026-03-08')" >
           8
         </td>
         
@@ -211,31 +352,31 @@
       
       <tr>
         
-        <td onclick="scrollToDay('2026-03-09')"  >
+        <td onclick="scrollToDay('2026-03-09')" >
           9
         </td>
         
-        <td onclick="scrollToDay('2026-03-10')"  >
+        <td onclick="scrollToDay('2026-03-10')" >
           10
         </td>
         
-        <td onclick="scrollToDay('2026-03-11')"  >
+        <td onclick="scrollToDay('2026-03-11')" >
           11
         </td>
         
-        <td onclick="scrollToDay('2026-03-12')"  >
+        <td onclick="scrollToDay('2026-03-12')" >
           12
         </td>
         
-        <td onclick="scrollToDay('2026-03-13')"  >
+        <td onclick="scrollToDay('2026-03-13')" >
           13
         </td>
         
-        <td onclick="scrollToDay('2026-03-14')"  >
+        <td onclick="scrollToDay('2026-03-14')" >
           14
         </td>
         
-        <td onclick="scrollToDay('2026-03-15')"  >
+        <td onclick="scrollToDay('2026-03-15')" >
           15
         </td>
         
@@ -243,31 +384,31 @@
       
       <tr>
         
-        <td onclick="scrollToDay('2026-03-16')"  >
+        <td onclick="scrollToDay('2026-03-16')" >
           16
         </td>
         
-        <td onclick="scrollToDay('2026-03-17')"  >
+        <td onclick="scrollToDay('2026-03-17')" >
           17
         </td>
         
-        <td onclick="scrollToDay('2026-03-18')"  >
+        <td onclick="scrollToDay('2026-03-18')" >
           18
         </td>
         
-        <td onclick="scrollToDay('2026-03-19')"  >
+        <td onclick="scrollToDay('2026-03-19')" >
           19
         </td>
         
-        <td onclick="scrollToDay('2026-03-20')"  >
+        <td onclick="scrollToDay('2026-03-20')" >
           20
         </td>
         
-        <td onclick="scrollToDay('2026-03-21')"  >
+        <td onclick="scrollToDay('2026-03-21')" >
           21
         </td>
         
-        <td onclick="scrollToDay('2026-03-22')"  >
+        <td onclick="scrollToDay('2026-03-22')" >
           22
         </td>
         
@@ -275,31 +416,31 @@
       
       <tr>
         
-        <td onclick="scrollToDay('2026-03-23')"  >
+        <td onclick="scrollToDay('2026-03-23')" >
           23
         </td>
         
-        <td onclick="scrollToDay('2026-03-24')"  >
+        <td onclick="scrollToDay('2026-03-24')" >
           24
         </td>
         
-        <td onclick="scrollToDay('2026-03-25')"  >
+        <td onclick="scrollToDay('2026-03-25')" >
           25
         </td>
         
-        <td onclick="scrollToDay('2026-03-26')"  >
+        <td onclick="scrollToDay('2026-03-26')" >
           26
         </td>
         
-        <td onclick="scrollToDay('2026-03-27')"  >
+        <td onclick="scrollToDay('2026-03-27')" >
           27
         </td>
         
-        <td onclick="scrollToDay('2026-03-28')"  >
+        <td onclick="scrollToDay('2026-03-28')" >
           28
         </td>
         
-        <td onclick="scrollToDay('2026-03-29')"  >
+        <td onclick="scrollToDay('2026-03-29')" >
           29
         </td>
         
@@ -307,11 +448,11 @@
       
       <tr>
         
-        <td onclick="scrollToDay('2026-03-30')"  >
+        <td onclick="scrollToDay('2026-03-30')" >
           30
         </td>
         
-        <td onclick="scrollToDay('2026-03-31')"  >
+        <td onclick="scrollToDay('2026-03-31')" >
           31
         </td>
         
@@ -338,11 +479,11 @@
       </tr>
       
     </table>
-  </div>
+  </nav>
 
-  <div class="event-list">
+  <main class="event-list">
     
-  </div>
+  </main>
 
   <div class="feeds-section">
     <h2>Feeds</h2>
@@ -358,7 +499,7 @@
       <tr>
         <td>Sebastopol Community Cultural Center</td>
         <td>30</td>
-        <td>2026-01-30</td>
+        <td>2026-01-31</td>
         <td>2026-02-05</td>
         <td>https://seb.org/?post_type=tribe_events&ical=1&eventDisplay=list</td>
       </tr>
@@ -368,7 +509,7 @@
         <td>0</td>
         <td>N/A</td>
         <td>N/A</td>
-        <td>https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/sebarts_2026_01.ics</td>
+        <td>sebastopol/sebarts_2026_01.ics</td>
       </tr>
       
       <tr>
@@ -376,7 +517,7 @@
         <td>0</td>
         <td>N/A</td>
         <td>N/A</td>
-        <td>https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/occidental_arts_2026_01.ics</td>
+        <td>sebastopol/occidental_arts_2026_01.ics</td>
       </tr>
       
       <tr>
@@ -384,7 +525,7 @@
         <td>0</td>
         <td>N/A</td>
         <td>N/A</td>
-        <td>https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/sebarts_2026_03.ics</td>
+        <td>sebastopol/sebarts_2026_02.ics</td>
       </tr>
       
       <tr>
@@ -392,7 +533,23 @@
         <td>0</td>
         <td>N/A</td>
         <td>N/A</td>
-        <td>https://raw.githubusercontent.com/judell/community-calendar/main/sebastopol/occidental_arts_2026_03.ics</td>
+        <td>sebastopol/occidental_arts_2026_02.ics</td>
+      </tr>
+      
+      <tr>
+        <td>Unnamed Calendar</td>
+        <td>0</td>
+        <td>N/A</td>
+        <td>N/A</td>
+        <td>sebastopol/sebarts_2026_03.ics</td>
+      </tr>
+      
+      <tr>
+        <td>Unnamed Calendar</td>
+        <td>0</td>
+        <td>N/A</td>
+        <td>N/A</td>
+        <td>sebastopol/occidental_arts_2026_03.ics</td>
       </tr>
       
     </table>
@@ -405,40 +562,6 @@
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
-
-    function adjustCalendarPosition() {
-      const calendar = document.getElementById('calendar-widget');
-      const title = document.querySelector('h1');
-      const eventList = document.querySelector('.event-list');
-
-      if (window.innerWidth <= 480) {
-        // Narrowest screens: calendar full width above the list
-        title.parentNode.insertBefore(calendar, title.nextSibling);
-        calendar.style.position = 'relative';
-        calendar.style.width = '100%';
-        calendar.style.marginTop = '20px';
-        eventList.style.marginRight = '0';
-      } else if (window.innerWidth <= 768) {
-        // Mid-sized screens: calendar below title, 50% width
-        title.parentNode.insertBefore(calendar, title.nextSibling);
-        calendar.style.position = 'relative';
-        calendar.style.width = '50%';  // Ensure it stays at 50%
-        calendar.style.marginTop = '20px';
-        eventList.style.marginRight = '0';
-      } else {
-        // Larger screens: calendar fixed in top-right
-        document.body.appendChild(calendar);
-        calendar.style.position = 'fixed';
-        calendar.style.top = '20px';
-        calendar.style.right = '20px';
-        calendar.style.width = '';
-        eventList.style.marginRight = ''; // Let the CSS handle this based on screen width
-      }
-    }
-
-    window.addEventListener('resize', adjustCalendarPosition);
-    document.addEventListener('DOMContentLoaded', adjustCalendarPosition);
   </script>
 </body>
-
 </html>

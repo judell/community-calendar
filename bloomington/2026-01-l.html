@@ -1,148 +1,289 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>January 2026 - List View</title>
   <style>
-    /* General Styles */
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      padding: 20px;
-      margin-right: 0;
-      font-size: smaller;
+    /* Mobile-first List View Styles */
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    h1 {
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      background: #f8f9fa;
+      color: #212529;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: #fff;
+      padding: 0.75rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .nav-arrow {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      font-size: 1.5rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      line-height: 1;
+    }
+
+    .nav-arrow:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
       text-align: center;
     }
 
-    h2 {
-      color: #666;
+    .switcher {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: normal;
+      margin-top: 0.2rem;
+      font-style: normal;
     }
 
-    .event {
-      margin-bottom: 20px;
-      padding-left: 10px;
+    .switcher a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
     }
 
-    .event-title {
-      font-weight: bold;
-    }
-
-    .event-details {
-      margin-top: 5px;
-    }
-
+    /* Calendar Widget */
     #calendar-widget {
-      border: 1px solid #ddd;
-      padding: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      margin-bottom: 4em;
+      background: #fff;
+      padding: 0.75rem;
+      display: none;
+      border: none;
+      box-shadow: none;
     }
 
     #calendar-widget table {
       width: 100%;
       border-collapse: collapse;
+      font-size: 0.85rem;
     }
 
     #calendar-widget th {
-      background-color: rgb(250, 247, 244);
+      padding: 0.5rem 0;
+      color: #6b7280;
+      font-weight: 500;
+      font-size: 0.75rem;
+      background: transparent;
     }
 
     #calendar-widget td {
+      padding: 0.4rem;
       text-align: center;
       cursor: pointer;
+      border-radius: 50%;
+      transition: background 0.15s;
     }
 
     #calendar-widget td:hover {
-      background-color: #e6e6e6;
+      background: #e5e7eb;
     }
 
-    #calendar-widget .has-events {
-      font-weight: bold;
+    #calendar-widget td.has-events {
+      font-weight: 700;
+      color: #1e40af;
     }
 
-    .switcher {
-      font-style: italic;
-      font-size: small;
+    /* Event List */
+    .event-list {
+      padding: 0;
+    }
+
+    .event-list h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+      background: #374151;
+      margin: 0;
+      padding: 0.75rem 1rem;
+      position: sticky;
+      top: 56px;
+      z-index: 50;
+    }
+
+    .event-list h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #6b7280;
+      margin: 0;
+      padding: 0.5rem 1rem;
+      background: #f3f4f6;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Event Card */
+    .event {
+      background: #fff;
+      padding: 1rem;
+      margin-bottom: 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .event-title {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.35;
+      color: #111827;
+    }
+
+    .event-title a {
+      color: #1e40af;
+      text-decoration: none;
+    }
+
+    .event-title a:hover {
+      text-decoration: underline;
+    }
+
+    .event-details {
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+
+    .event-details p {
+      margin: 0.4rem 0;
+    }
+
+    .event-details p:first-of-type {
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .event-details p:first-of-type::before {
+      content: "📍 ";
+      font-size: 0.8em;
+    }
+
+    .event-details p:nth-of-type(2) {
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .event-details p:nth-of-type(2)::before {
+      content: none;
+    }
+
+    .source-link {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #6b7280;
+      background: #f3f4f6;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      text-decoration: none;
+    }
+
+    .source-link:hover {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    /* Tablet and Desktop */
+    @media (min-width: 768px) {
+      header h1 {
+        font-size: 1.6rem;
+      }
+      
+      .event-list h2 {
+        top: 64px;
+      }
+      
+      #calendar-widget {
+        display: block;
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        width: 240px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 1px solid #e5e7eb;
+        z-index: 90;
+        margin-bottom: 0;
+      }
+      
+      .event-list {
+        margin-right: 280px;
+      }
+      
+      .event {
+        padding: 1.25rem;
+        margin: 0 1rem 0.5rem;
+        border-radius: 8px;
+        border-bottom: none;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border: 1px solid #e5e7eb;
+      }
+      
+      .event-list h2 {
+        margin: 0 1rem;
+        border-radius: 8px 8px 0 0;
+        margin-top: 1rem;
+      }
+      
+      .event-list h3 {
+        margin: 0 1rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      body {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
     }
 
     .feeds-section {
       display: none;
     }
-
-    /* Floating calendar styles for larger screens */
-    @media (min-width: 1200px) {
-      #calendar-widget {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        width: 250px;
-        max-width: 20%;
-      }
-
-      .event-list {
-        margin-right: 270px;
-        /* Allows the list to expand and contract naturally */
-      }
-    }
-
-    /* Styles for medium screens */
-    @media (min-width: 769px) and (max-width: 1199px) {
-      #calendar-widget {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        width: 200px;
-        max-width: 20%;
-      }
-
-      .event-list {
-        margin-right: 220px;
-        /* Adjust based on the calendar width and padding */
-      }
-    }
-
-    /* Styles for smaller screens */
-    @media (max-width: 768px) {
-      #calendar-widget {
-        position: relative;
-        width: 50%;
-        margin-top: 20px;
-        margin-right: 0;
-        float: none;
-        clear: both;
-      }
-
-      .event-list {
-        margin-right: 0;
-        margin-left: 0;
-        width: 100%;
-        box-sizing: border-box;
-        clear: both;
-      }
-    }
-
   </style>
 </head>
-
 <body>
-  <h1>January 2026 <span class="switcher"><a href="2026-01.html">calendar
-        view</a></span></h1>
+  <header>
+    <div class="header-nav">
+      <a href="2025-12-l.html" class="nav-arrow" title="Previous month">&larr;</a>
+      <h1>January 2026 <span class="switcher"><a href="2026-01.html">calendar view</a></span></h1>
+      <a href="2026-02-l.html" class="nav-arrow" title="Next month">&rarr;</a>
+    </div>
+  </header>
 
-  <div id="calendar-widget">
+  <nav id="calendar-widget">
     <table>
       <tr>
-        <th>Mo</th>
-        <th>Tu</th>
-        <th>We</th>
-        <th>Th</th>
-        <th>Fr</th>
-        <th>Sa</th>
-        <th>Su</th>
+        <th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th><th>Su</th>
       </tr>
       
       <tr>
@@ -159,19 +300,19 @@
           
         </td>
         
-        <td onclick="scrollToDay('2026-01-01')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-01')" >
           1
         </td>
         
-        <td onclick="scrollToDay('2026-01-02')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-02')" class="has-events">
           2
         </td>
         
-        <td onclick="scrollToDay('2026-01-03')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-03')" class="has-events">
           3
         </td>
         
-        <td onclick="scrollToDay('2026-01-04')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-04')" class="has-events">
           4
         </td>
         
@@ -179,31 +320,31 @@
       
       <tr>
         
-        <td onclick="scrollToDay('2026-01-05')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-05')" >
           5
         </td>
         
-        <td onclick="scrollToDay('2026-01-06')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-06')" >
           6
         </td>
         
-        <td onclick="scrollToDay('2026-01-07')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-07')" class="has-events">
           7
         </td>
         
-        <td onclick="scrollToDay('2026-01-08')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-08')" >
           8
         </td>
         
-        <td onclick="scrollToDay('2026-01-09')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-09')" >
           9
         </td>
         
-        <td onclick="scrollToDay('2026-01-10')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-10')" >
           10
         </td>
         
-        <td onclick="scrollToDay('2026-01-11')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-11')" class="has-events">
           11
         </td>
         
@@ -211,31 +352,31 @@
       
       <tr>
         
-        <td onclick="scrollToDay('2026-01-12')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-12')" class="has-events">
           12
         </td>
         
-        <td onclick="scrollToDay('2026-01-13')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-13')" class="has-events">
           13
         </td>
         
-        <td onclick="scrollToDay('2026-01-14')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-14')" class="has-events">
           14
         </td>
         
-        <td onclick="scrollToDay('2026-01-15')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-15')" >
           15
         </td>
         
-        <td onclick="scrollToDay('2026-01-16')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-16')" class="has-events">
           16
         </td>
         
-        <td onclick="scrollToDay('2026-01-17')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-17')" class="has-events">
           17
         </td>
         
-        <td onclick="scrollToDay('2026-01-18')"  >
+        <td onclick="scrollToDay('2026-01-18')" >
           18
         </td>
         
@@ -243,31 +384,31 @@
       
       <tr>
         
-        <td onclick="scrollToDay('2026-01-19')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-19')" >
           19
         </td>
         
-        <td onclick="scrollToDay('2026-01-20')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-20')" >
           20
         </td>
         
-        <td onclick="scrollToDay('2026-01-21')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-21')" class="has-events">
           21
         </td>
         
-        <td onclick="scrollToDay('2026-01-22')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-22')" class="has-events">
           22
         </td>
         
-        <td onclick="scrollToDay('2026-01-23')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-23')" class="has-events">
           23
         </td>
         
-        <td onclick="scrollToDay('2026-01-24')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-24')" class="has-events">
           24
         </td>
         
-        <td onclick="scrollToDay('2026-01-25')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-25')" class="has-events">
           25
         </td>
         
@@ -275,27 +416,27 @@
       
       <tr>
         
-        <td onclick="scrollToDay('2026-01-26')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-26')" >
           26
         </td>
         
-        <td onclick="scrollToDay('2026-01-27')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-27')" class="has-events">
           27
         </td>
         
-        <td onclick="scrollToDay('2026-01-28')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-28')" class="has-events">
           28
         </td>
         
-        <td onclick="scrollToDay('2026-01-29')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-29')" class="has-events">
           29
         </td>
         
-        <td onclick="scrollToDay('2026-01-30')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-30')" class="has-events">
           30
         </td>
         
-        <td onclick="scrollToDay('2026-01-31')"  class="has-events" >
+        <td onclick="scrollToDay('2026-01-31')" class="has-events">
           31
         </td>
         
@@ -306,73 +447,9 @@
       </tr>
       
     </table>
-  </div>
+  </nav>
 
-  <div class="event-list">
-    
-    <h2 id="2026-01-01">Thursday, January 01, 2026</h2>
-
-    
-    <h3>04:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Historic District Subcommittee Meeting - BHPC - Monroe County History Center Deckard Room - CANCELED
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 01 - 04:00 PM
-        
-        to 05:00 PM
-        
-        
-        <br>
-        
-        <p>Monroe County History Center, 202 E 6th St, Bloomington, IN 47408, USA</p>
-        
-        
-        <p>None</p>
-        
-        Source: Bloomington Historic Preservation Commission
-      </div>
-    </div>
-    
-    
-    <h3>05:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Commission on the Status of Women - CANCELLED
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 01 - 05:30 PM
-        
-        to 06:30 PM
-        
-        
-        <br>
-        
-        <p>City Hall-2-Cityhall Hooker Conference Room (RM #245) (26)</p>
-        
-        
-        <p>https://bloomington.zoom.us/j/89357839923?pwd=d4istkYT6CWqvTWebtrKbaJNXtxkJh.1  Meeting ID: 893 5783 9923 Passcode: 772994</p>
-        
-        Source: Commission on the Status of Women
-      </div>
-    </div>
-    
-    
+  <main class="event-list">
     
     <h2 id="2026-01-02">Friday, January 02, 2026</h2>
 
@@ -380,24 +457,22 @@
     <h3>11:00 AM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1878/1767369600000" target="_blank"> 2026 Patron & Young Artist Exhibition</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1878/1767369600000" target="_blank" rel="noopener"> 2026 Patron & Young Artist Exhibition</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 02 - 11:00 AM
+         to 04:00 PM
         
-        to 04:00 PM
         
-        
-        <br>
         
         <p>Brown County Art Guild,48 South Van Buren Street, Nashville, IN 47448, USA</p>
+        
         
         
         <p>Annual Patron & Young Artist Exhibition 2026
@@ -416,32 +491,31 @@ Submissions:
 
 Framed and ready to hang ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>05:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/4/1767391200000" target="_blank"> Arts Mile</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/4/1767391200000" target="_blank" rel="noopener"> Arts Mile</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 02 - 05:00 PM
+         to 08:00 PM
         
-        to 08:00 PM
         
-        
-        <br>
         
         <p>None</p>
+        
         
         
         <p>Experience downtown Bloomington’s vibrant Arts Mile as select galleries showcase evolving live and virtual exhibits.
@@ -450,32 +524,31 @@ EVERY. FIRST. FRIDAY. Experience an exciting night of the arts as fourteen disti
 
 Stroll the v...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1538/1767398400000" target="_blank"> A Christmas Story the Musical</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1538/1767398400000" target="_blank" rel="noopener"> A Christmas Story the Musical</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 02 - 07:00 PM
+         to 09:30 PM
         
-        to 09:30 PM
         
-        
-        <br>
         
         <p>Waldron Arts Auditorium,122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
         
         
         <p>Constellation Stage & Screen present "A Christmas Story: The Musical, on stage December 11-January 4 at the Waldron Auditorium
@@ -484,32 +557,31 @@ Ralphie to the Rescue!
 
 This holiday season, join Ralphie Parker on his hilarious quest for the perfect Christmas gift! Based on the beloved 1983 film, A Christmas Story th...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>07:30 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1865/1767400200000" target="_blank"> EXTENDED DATES: An Act of God</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1865/1767400200000" target="_blank" rel="noopener"> EXTENDED DATES: An Act of God</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 02 - 07:30 PM
+         to 07:30 PM
         
-        to 07:30 PM
         
-        
-        <br>
         
         <p>Waldron Firebay,122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
         
         
         <p>EXTENDED THROUGH JANUARY 4TH DUE TO HIGH DEMAND!
@@ -518,9 +590,10 @@ The Broadway play from the creator of, well, everything.
 
 Looking for an unholy way to spend the holidays? Skip the silent nights and join us for An Act of God, a wickedly funny comedy where God, with the help of angels Michael and Gabriel, delivers ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
@@ -530,24 +603,22 @@ Looking for an unholy way to spend the holidays? Skip the silent nights and join
     <h3>02:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1539/1767466800000" target="_blank"> A Christmas Story the Musical</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1539/1767466800000" target="_blank" rel="noopener"> A Christmas Story the Musical</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 03 - 02:00 PM
+         to 04:30 PM
         
-        to 04:30 PM
         
-        
-        <br>
         
         <p>Waldron Arts Auditorium,122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
         
         
         <p>Constellation Stage & Screen present "A Christmas Story: The Musical, on stage December 11-January 4 at the Waldron Auditorium
@@ -556,32 +627,31 @@ Ralphie to the Rescue!
 
 This holiday season, join Ralphie Parker on his hilarious quest for the perfect Christmas gift! Based on the beloved 1983 film, A Christmas Story th...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>02:30 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1866/1767468600000" target="_blank"> EXTENDED DATES: An Act of God</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1866/1767468600000" target="_blank" rel="noopener"> EXTENDED DATES: An Act of God</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 03 - 02:30 PM
+         to 07:30 PM
         
-        to 07:30 PM
         
-        
-        <br>
         
         <p>Waldron Firebay,122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
         
         
         <p>EXTENDED THROUGH JANUARY 4TH DUE TO HIGH DEMAND!
@@ -590,32 +660,31 @@ The Broadway play from the creator of, well, everything.
 
 Looking for an unholy way to spend the holidays? Skip the silent nights and join us for An Act of God, a wickedly funny comedy where God, with the help of angels Michael and Gabriel, delivers ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1540/1767484800000" target="_blank"> A Christmas Story the Musical</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1540/1767484800000" target="_blank" rel="noopener"> A Christmas Story the Musical</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 03 - 07:00 PM
+         to 09:30 PM
         
-        to 09:30 PM
         
-        
-        <br>
         
         <p>Waldron Arts Auditorium,122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
         
         
         <p>Constellation Stage & Screen present "A Christmas Story: The Musical, on stage December 11-January 4 at the Waldron Auditorium
@@ -624,32 +693,31 @@ Ralphie to the Rescue!
 
 This holiday season, join Ralphie Parker on his hilarious quest for the perfect Christmas gift! Based on the beloved 1983 film, A Christmas Story th...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>07:30 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1867/1767486600000" target="_blank"> EXTENDED DATES: An Act of God</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1867/1767486600000" target="_blank" rel="noopener"> EXTENDED DATES: An Act of God</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 03 - 07:30 PM
+         to 07:30 PM
         
-        to 07:30 PM
         
-        
-        <br>
         
         <p>Waldron Firebay,122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
         
         
         <p>EXTENDED THROUGH JANUARY 4TH DUE TO HIGH DEMAND!
@@ -658,9 +726,10 @@ The Broadway play from the creator of, well, everything.
 
 Looking for an unholy way to spend the holidays? Skip the silent nights and join us for An Act of God, a wickedly funny comedy where God, with the help of angels Michael and Gabriel, delivers ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
@@ -670,24 +739,22 @@ Looking for an unholy way to spend the holidays? Skip the silent nights and join
     <h3>02:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1541/1767553200000" target="_blank"> A Christmas Story the Musical</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1541/1767553200000" target="_blank" rel="noopener"> A Christmas Story the Musical</a>
         
       </div>
 
       <div class="event-details">
         
         Sunday January 04 - 02:00 PM
+         to 04:30 PM
         
-        to 04:30 PM
         
-        
-        <br>
         
         <p>Waldron Arts Auditorium,122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
         
         
         <p>Constellation Stage & Screen present "A Christmas Story: The Musical, on stage December 11-January 4 at the Waldron Auditorium
@@ -696,32 +763,31 @@ Ralphie to the Rescue!
 
 This holiday season, join Ralphie Parker on his hilarious quest for the perfect Christmas gift! Based on the beloved 1983 film, A Christmas Story th...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>02:30 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1868/1767555000000" target="_blank"> EXTENDED DATES: An Act of God</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1868/1767555000000" target="_blank" rel="noopener"> EXTENDED DATES: An Act of God</a>
         
       </div>
 
       <div class="event-details">
         
         Sunday January 04 - 02:30 PM
+         to 07:30 PM
         
-        to 07:30 PM
         
-        
-        <br>
         
         <p>Waldron Firebay,122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
         
         
         <p>EXTENDED THROUGH JANUARY 4TH DUE TO HIGH DEMAND!
@@ -730,648 +796,89 @@ The Broadway play from the creator of, well, everything.
 
 Looking for an unholy way to spend the holidays? Skip the silent nights and join us for An Act of God, a wickedly funny comedy where God, with the help of angels Michael and Gabriel, delivers ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
-    
-    
-    <h3>04:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Dine & Donate: Noodles (East side)
-        
-      </div>
-
-      <div class="event-details">
-        
-        Sunday January 04 - 04:00 PM
-        
-        to 08:00 PM
-        
-        
-        <br>
-        
-        <p>2560 E 3rd St, Bloomington, IN 47401, USA</p>
-        
-        
-        <p>Stop in from 4 to 8 pm for dinner, and mention Mother Hubbard's Cupboard prior to paying to have 25% of your order donated to the Hub! For online and Noodles Rewards app orders, guests can apply the coupon code, “GIVING25” in the Coupon Code line at checkout. Ordering online is quick and easy and al...</p>
-        
-        Source: Website calendar
-      </div>
-    </div>
-    
-    
-    
-    <h2 id="2026-01-05">Monday, January 05, 2026</h2>
-
-    
-    <h3>All Day</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        School Resumes
-        
-      </div>
-
-      <div class="event-details">
-        
-        All Day
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: https://mccsc.edu/sndreq/generateCalendarICS.php?calendar_id=1
-      </div>
-    </div>
-    
-    
-    <h3>09:30 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        HQ: Indiana Rural Summit
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 05 - 09:30 AM
-        
-        to 12:30 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    <h3>05:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Bloomington Redevelopment Commission
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 05 - 05:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>https://bloomington.zoom.us/j/86174688339?pwd=1o88kdK67XK7tnUtD7d7YCCR5zWYDt.1</p>
-        
-        Source: Bloomington Redevelopment Commission
-      </div>
-    </div>
-    
-    
-    
-    <h2 id="2026-01-06">Tuesday, January 06, 2026</h2>
-
-    
-    <h3>05:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Environmental Commission Eco-Heroes Working Group
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 06 - 05:30 PM
-        
-        to 06:30 PM
-        
-        
-        <br>
-        
-        <p>Cityhall McCloskey Conference Room (RM #135), City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>None</p>
-        
-        Source: Environmental Commission
-      </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-07">Wednesday, January 07, 2026</h2>
 
     
-    <h3>04:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        HQ: Filing Day Event and Official Campaign Launch for Brad Meyer
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 07 - 04:00 PM
-        
-        to 10:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    <h3>06:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Environmental Commission Water Quality Working Group
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 07 - 06:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>Cityhall McCloskey Conference Room (RM #135), City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>None</p>
-        
-        Source: Environmental Commission
-      </div>
-    </div>
-    
-    
-    <h3>06:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Common Council Organizational Meeting
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 07 - 06:30 PM
-        
-        to 09:30 PM
-        
-        
-        <br>
-        
-        <p>Council Chambers (Suite 115, City Hall, 401 N. Morton), City Hall-1-Cityhall Council Chambers (RM #115) (236)</p>
-        
-        
-        <p>Agenda/Packet/Meeting Materialshttps://bloomington.in.gov/council/meetingsRegular Session meetings of the Common Council are generally held on Wednesdays at 6:30 pm, in the Council Chambers (Suite 115, City Hall, 401 N. Morton).  The Council may additionally hold Committee/Deliberation meetings in t...</p>
-        
-        Source: City Council
-      </div>
-    </div>
-    
-    
     <h3>08:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1767834000000" target="_blank"> Open Mic Night at The Comedy Attic</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1767834000000" target="_blank" rel="noopener"> Open Mic Night at The Comedy Attic</a>
         
       </div>
 
       <div class="event-details">
         
         Wednesday January 07 - 08:00 PM
+         to 10:00 PM
         
-        to 10:00 PM
         
-        
-        <br>
         
         <p>The Comedy Attic,123 S Walnut St, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>Every Wednesday at 8PM is Comedy Attic Open Mic Night. Bloomington has one of the best local comedy scenes in the country, and it all starts with our open mic night!
 
 Each comedian is asked to do no more than five minutes of completely original material. While we do not care about foul language in y...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
-    
-    
-    
-    <h2 id="2026-01-08">Thursday, January 08, 2026</h2>
-
-    
-    <h3>11:30 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        CANCELED: Environmental Commission Plan Committee Meeting
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 08 - 11:30 AM
-        
-        to 01:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Environmental Commission
-      </div>
-    </div>
-    
-    
-    <h3>05:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-         Bloomington Historic Preservation Commission - CANCELED
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 08 - 05:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>Agenda and PacketThe BHPC Meetings are being held in a hybrid manner:In Person: McCloskey Conference Room #135, City Hall, 401 N Morton St., Bloomington, IN 47404Online: Zoomhttps://bloomington.zoom.us/j/84362169109?pwd=pM8CfJov6GO2IwHcXR2s1SuTNbyWlb.1Meeting ID: 843 6216 9109Passcode: 907226</p>
-        
-        Source: Bloomington Historic Preservation Commission
-      </div>
-    </div>
-    
-    
-    <h3>06:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        HQ: Dems and Dragons
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 08 - 06:00 PM
-        
-        to 09:00 PM
-        
-        
-        <br>
-        
-        <p>Monroe County Democratic Party Headquarters, 115 E 2nd St Suite 3, Bloomington, IN 47401, USA</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    
-    <h2 id="2026-01-09">Friday, January 09, 2026</h2>
-
-    
-    <h3>12:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Monroe County Democratic Women's Caucus Monthly Meeting
-        
-      </div>
-
-      <div class="event-details">
-        
-        Friday January 09 - 12:00 PM
-        
-        to 01:00 PM
-        
-        
-        <br>
-        
-        <p>Crazy Horse, 214 W Kirkwood Ave, Bloomington, IN 47404, USA</p>
-        
-        
-        <p>Contact dwcannouncements@gmail.com for additional information.</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    
-    <h2 id="2026-01-10">Saturday, January 10, 2026</h2>
-
-    
-    <h3>08:15 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        HQ: Oliver Campaign Staff Retreat
-        
-      </div>
-
-      <div class="event-details">
-        
-        Saturday January 10 - 08:15 AM
-        
-        to 03:15 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    <h3>12:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Tonya Clark
-        
-      </div>
-
-      <div class="event-details">
-        
-        Saturday January 10 - 12:00 PM
-        
-        to 05:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Monroe County Fair Grounds Master Calendar
-      </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-11">Sunday, January 11, 2026</h2>
 
     
-    <h3>03:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        HQ: ISCI Post Card Party to Swing States
-        
-      </div>
-
-      <div class="event-details">
-        
-        Sunday January 11 - 03:00 PM
-        
-        to 06:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1812/1768176000000" target="_blank"> May Erlewine with Packy Lundholm</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1812/1768176000000" target="_blank" rel="noopener"> May Erlewine with Packy Lundholm</a>
         
       </div>
 
       <div class="event-details">
         
         Sunday January 11 - 07:00 PM
+         to 09:00 PM
         
-        to 09:00 PM
         
-        
-        <br>
         
         <p>Buskirk-Chumley Theater,114 East Kirkwood Avenue, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>May Erlewine with Packy Lundholm
 One of the Midwest’s most prolific and passionate songwriters, May Erlewine has a gift for writing songs of substance that feel both fresh and soulfully familiar. Her ability to emotionally engage with an audience has earned her a dedicated following far beyond her M...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-12">Monday, January 12, 2026</h2>
 
     
-    <h3>09:30 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Tree Commission Monthly Meeting 
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 12 - 09:30 AM
-        
-        to 10:30 AM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>None</p>
-        
-        Source: Tree Commission
-      </div>
-    </div>
-    
-    
-    <h3>12:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Public Works Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 12 - 12:00 PM
-        
-        to 01:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St, Bloomington, IN 47404, USA, City Hall-1-Cityhall Council Chambers (RM #115) (236)</p>
-        
-        
-        <p>Miranda Beaver is inviting you to a scheduled Zoom meeting.Join Zoom Meetinghttps://bloomington.zoom.us/j/88126481039?pwd=Yo9DzAbr9oBqZUv84VjtDAWM3COPOl.1Meeting ID: 881 2648 1039Passcode: 835234---One tap mobile+13052241968,,88126481039#,,,,*835234# US+13092053325,,88126481039#,,,,*835234# USJoin i...</p>
-        
-        Source: Board of Public Works
-      </div>
-    </div>
-    
-    
-    <h3>04:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Plat Committee
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 12 - 04:00 PM
-        
-        to 05:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Kelly Conference Room (RM #155) (14)</p>
-        
-        
-        <p>Karina Pazos is inviting you to a scheduled Zoom meeting.Topic: Plat CommitteeTime: This is a recurring meeting Meet anytimeJoin Zoom Meetinghttps://bloomington.zoom.us/j/86714253039?pwd=SXJ2bmNwRFhLeVZSRW44TVI0T3hZUT09Meeting ID: 867 1425 3039Passcode: 064896---One tap mobile+13126266799,,867142530...</p>
-        
-        Source: Plat Committee
-      </div>
-    </div>
-    
-    
     <h3>05:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
         Utilities Service Board Meeting
@@ -1381,882 +888,123 @@ One of the Midwest’s most prolific and passionate songwriters, May Erlewine ha
       <div class="event-details">
         
         Monday January 12 - 05:00 PM
+         to 07:00 PM
         
-        to 07:00 PM
         
-        
-        <br>
         
         <p>City of Bloomington Utilities, 600 E Miller Dr, Bloomington, IN 47401, USA, Utilities Service Center-1-Utilities Board Room (75)</p>
         
         
-        <p>Agenda/PacketThe meeting agenda and packet are available at https://bloomington.in.gov/onboard/meetingFiles?committee_id=9</p>
-        
-        Source: Utilities Service Board
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Utilities Service Board Meeting
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 12 - 05:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>City of Bloomington Utilities, 600 E Miller Dr, Bloomington, IN 47401, USA, Utilities Service Center-1-Utilities Board Room (75)</p>
-        
         
         <p>Agenda/PacketThe meeting agenda and packet are available at https://bloomington.in.gov/onboard/meetingFiles?committee_id=9</p>
         
-        Source: Utilities Service Board
+        
+        <a href="https://calendar.google.com/calendar/ical/bloomington.in.gov_1b95au4d2ueudldosb024fimp0@group.calendar.google.com/public/basic.ics" class="source-link" target="_blank" rel="noopener">📰 Utilities Service Board</a>
       </div>
-    </div>
-    
-    
-    <h3>05:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-         Animal Control Commission - CANCELLED
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 12 - 05:30 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>Bloomington Animal Shelter, Education Room, 3410 S Walnut St, Bloomington, IN 47401, USA</p>
-        
-        
-        <p>Topic: COB Animal Management CommissionJoin Zoom Meetinghttps://bloomington.zoom.us/j/83791932152?pwd=NmNUNFNPOVhYMEppWjFNNUNKSHlnUT09Meeting ID: 837 9193 2152Passcode: 297099One tap mobile+16469313860,,83791932152#,,,,*297099# US+19292056099,,83791932152#,,,,*297099# US (New York)Dial by your locat...</p>
-        
-        Source: Animal Control Commission
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Farmers' Market Advisory Council
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 12 - 05:30 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St, Bloomington, IN 47404, USA, City Hall-2-Cityhall Allison Conference Room (225) (12)</p>
-        
-        
-        <p>Join Zoom Meetinghttps://bloomington.zoom.us/j/82752806797?pwd=3mtKRS7rMClzsoSZOGb0cNAaBGB0H5.1The Farmers' Market Advisory Council consists of nine members representing two groups, Market customers and Market vendors. The Council acts in an advisory capacity to the Board of Park Commissioners and P...</p>
-        
-        Source: Farmers Market Advisory Council
-      </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-13">Tuesday, January 13, 2026</h2>
 
     
-    <h3>12:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Common Council Interview Committee Team C - Boards/Commissions Meeting 
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 13 - 12:00 PM
-        
-        to 01:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-2-Cityhall Hooker Conference Room (RM #245) (26)</p>
-        
-        
-        <p>City Clerk is inviting you to a scheduled Zoom meeting.Topic: Common Council Interview Committee Team C Meeting - Boards and Commissions Time: Jan 13, 2026 12:00 PM Eastern Time (US and Canada)Join Zoom Meetinghttps://bloomington.zoom.us/j/85624669136?pwd=KDFCOqNZxdyDgnbOtTLZXO1deB6eHC.1Meeting ID: ...</p>
-        
-        Source: City Council
-      </div>
-    </div>
-    
-    
-    <h3>05:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Kitchen to Kitchen: Coconut Lentils and Rice Workshop
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 13 - 05:00 PM
-        
-        to 06:30 PM
-        
-        
-        <br>
-        
-        <p>1100 W Allen St, Bloomington, IN 47403, USA</p>
-        
-        
-        <p>Join Elli for our Kitchen to Kitchen program to learn how to make a simple and delicious lentil dish for an easy weeknight dinner. *gluten-free and vegan. Leave with a bag full of groceries to recreate the recipe at home!
-
-Register in the pantry or at mhcfoodpantry.org/education</p>
-        
-        Source: Website calendar
-      </div>
-    </div>
-    
-    
-    <h3>05:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Public Works Meeting
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 13 - 05:30 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St, Bloomington, IN 47404, USA, City Hall-1-Cityhall Council Chambers (RM #115) (236)</p>
-        
-        
-        <p>Meeting Agenda and Packet can be found here: https://bloomington.in.gov/onboard/committees/27Miranda Beaver is inviting you to a scheduled Zoom meeting.Join Zoom Meetinghttps://bloomington.zoom.us/j/83055656981?pwd=uXahfhO21NkSndj1FFC2O2N8XVr5DP.1Meeting ID: 830 5565 6981Passcode: 788140---One tap m...</p>
-        
-        Source: Board of Public Works
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        CANCELED: Environmental Commission Plan Committee Meeting
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 13 - 05:30 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Environmental Commission
-      </div>
-    </div>
-    
-    
-    <h3>06:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Bloomington Commission on Sustainability
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 13 - 06:00 PM
-        
-        to 07:30 PM
-        
-        
-        <br>
-        
-        <p>City of Bloomington, 401 N Morton St, Bloomington, IN 47404, USA, City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>Join Zoom Meeting:https://bloomington.zoom.us/j/84327085962?pwd=naI8LVmKZSoinPUHbXuw3h7oqMyi5g.1Meeting ID: 843 2708 5962Passcode: 034238</p>
-        
-        Source: Commission on Sustainability
-      </div>
-    </div>
-    
-    
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1888/1768348800000" target="_blank"> IU Cinema 15th Anniversary Secret Screening</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1888/1768348800000" target="_blank" rel="noopener"> IU Cinema 15th Anniversary Secret Screening</a>
         
       </div>
 
       <div class="event-details">
         
         Tuesday January 13 - 07:00 PM
+         to 10:00 PM
         
-        to 10:00 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>We're ready to celebrate everything that makes IU Cinema special, especially you! Join us for a defining film of the 21st century, the reveal of our Golden Ticket winners, special guests, free giveaways (including some directly from the library of cinematic great Peter Bogdanovich as well as from Mi...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-14">Wednesday, January 14, 2026</h2>
 
     
-    <h3>12:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Canceled - Bloomington Urban Enterprise Association
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 14 - 12:00 PM
-        
-        to 01:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>None</p>
-        
-        Source: Bloomington Urban Enterprise Association
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Bloomington Urban Enterprise Association
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 14 - 12:00 PM
-        
-        to 01:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>None</p>
-        
-        Source: Bloomington Urban Enterprise Association
-      </div>
-    </div>
-    
-    
-    <h3>05:15 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Bloomington Arts Commission 
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 14 - 05:15 PM
-        
-        to 06:30 PM
-        
-        
-        <br>
-        
-        <p>Hybrid- City Hall McCloskey Conference Room or via Zoom (see details below)</p>
-        
-        
-        <p>Meeting Material packet available at https://drive.google.com/drive/folders/16H4P18HpqJXxey_oGn0Vrie6GnsHviLR?usp=sharingJoin Zoom Meetinghttps://bloomington.zoom.us/j/88691874944?pwd=NkhGeDE3Rzd4MngzQXhMc3pCcUl2dz09Meeting ID: 886 9187 4944Passcode: 868050One tap mobile+13126266799,,88691874944# US...</p>
-        
-        Source: Bloomington Arts Commission
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Bloomington Arts Commission 
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 14 - 05:15 PM
-        
-        to 06:30 PM
-        
-        
-        <br>
-        
-        <p>Hybrid- City Hall McCloskey Conference Room or via Zoom (see details below)</p>
-        
-        
-        <p>Meeting Material packet available at https://drive.google.com/drive/folders/1gIXWvDykthgXrScGgDF-IJX-H7EMtSeu?usp=share_linkJoin Zoom Meetinghttps://bloomington.zoom.us/j/88691874944?pwd=NkhGeDE3Rzd4MngzQXhMc3pCcUl2dz09Meeting ID: 886 9187 4944Passcode: 868050One tap mobile+13126266799,,88691874944#...</p>
-        
-        Source: Bloomington Arts Commission
-      </div>
-    </div>
-    
-    
-    <h3>05:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Common Council Interview Committee Team A - Boards/Commissions Meeting 
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 14 - 05:30 PM
-        
-        to 06:15 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Kelly Conference Room (RM #155) (14)</p>
-        
-        
-        <p>City Clerk is inviting you to a scheduled Zoom meeting.Topic: Common Council Interview Committee Team A Meeting - Boards/Commissions Time: Jan 14, 2026 05:30 PM Eastern Time (US and Canada)Join Zoom Meetinghttps://bloomington.zoom.us/j/85247844991?pwd=AtGUu8n1uHbEm62y2ytpbmbhbtGZMa.1Meeting ID: 852 ...</p>
-        
-        Source: City Council
-      </div>
-    </div>
-    
-    
-    <h3>06:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Common Council Regular Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 14 - 06:30 PM
-        
-        to 09:30 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Council Chambers (RM #115) (236)</p>
-        
-        
-        <p>Agenda/Packet/Meeting Materialshttps://bloomington.in.gov/council/meetingsRegular Session meetings of the Common Council are generally held on Wednesdays at 6:30 pm, in the Council Chambers (Suite 115, City Hall, 401 N. Morton).  The Council may additionally hold Committee/Deliberation meetings on s...</p>
-        
-        Source: City Council
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Common Council Regular Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 14 - 06:30 PM
-        
-        to 09:30 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Council Chambers (RM #115) (236)</p>
-        
-        
-        <p>Agenda/Packet/Meeting Materialshttps://bloomington.in.gov/council/meetingsRegular Session meetings of the Common Council are generally held on Wednesdays at 6:30 pm, in the Council Chambers (Suite 115, City Hall, 401 N. Morton).  The Council may additionally hold Committee/Deliberation meetings on s...</p>
-        
-        Source: City Council
-      </div>
-    </div>
-    
-    
     <h3>08:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1768438800000" target="_blank"> Open Mic Night at The Comedy Attic</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1768438800000" target="_blank" rel="noopener"> Open Mic Night at The Comedy Attic</a>
         
       </div>
 
       <div class="event-details">
         
         Wednesday January 14 - 08:00 PM
+         to 10:00 PM
         
-        to 10:00 PM
         
-        
-        <br>
         
         <p>The Comedy Attic,123 S Walnut St, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>Every Wednesday at 8PM is Comedy Attic Open Mic Night. Bloomington has one of the best local comedy scenes in the country, and it all starts with our open mic night!
 
 Each comedian is asked to do no more than five minutes of completely original material. While we do not care about foul language in y...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
-    
-    
-    
-    <h2 id="2026-01-15">Thursday, January 15, 2026</h2>
-
-    
-    <h3>10:20 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Public Safety Executive Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 15 - 10:20 AM
-        
-        to 10:30 AM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>None</p>
-        
-        Source: Board of Public Safety
-      </div>
-    </div>
-    
-    
-    <h3>10:30 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Public Safety Regular Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 15 - 10:30 AM
-        
-        to 12:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>None</p>
-        
-        Source: Board of Public Safety
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Public Safety Regular Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 15 - 10:30 AM
-        
-        to 12:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>Bloomington Police is inviting you to a scheduled Zoom meeting.Topic: January 15th 2026 Board of Public Safety Regular SessionTime: Jan 15, 2026 10:30 AM Eastern Time (US and Canada)Join Zoom Meetinghttps://bloomington.zoom.us/j/81299135591?pwd=CJIa6D9MvObbAINbqBXDpabgbLeylq.1Meeting ID: 812 9913 55...</p>
-        
-        Source: Board of Public Safety
-      </div>
-    </div>
-    
-    
-    <h3>11:30 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        CANCELLED - Plan Commission Lunch Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 15 - 11:30 AM
-        
-        to 12:30 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Kelly Conference Room (RM #155) (14)</p>
-        
-        
-        <p>None</p>
-        
-        Source: Plan Commission
-      </div>
-    </div>
-    
-    
-    <h3>04:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        [CANCELLED] Bloomington Digital Underground Advisory Committee
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 15 - 04:00 PM
-        
-        to 05:30 PM
-        
-        
-        <br>
-        
-        <p>https://bloomington.zoom.us/j/93947788266?pwd=ZmZ4ekIyWEVJZ0dnV1pOZnIvbWlJQT09</p>
-        
-        
-        <p>Will not meet quorum.</p>
-        
-        Source: Bloomington Digital Underground Advisory Committee
-      </div>
-    </div>
-    
-    
-    <h3>05:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Park Commissioners Meeting
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 15 - 05:00 PM
-        
-        to 06:30 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Council Chambers (RM #115) (236)</p>
-        
-        
-        <p>The meetingagenda and packet are available at:https://bloomington.in.gov/onboard/committees/22/meetingsBloomington City Council Board ofPark Commissioners meetings can be watched on the following website: CommunityAction Televisions Services (CATS) https://catstv.netThe meetingwill be conducted in-p...</p>
-        
-        Source: Board of Park Commissioners
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Simple Casseroles Workshop
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 15 - 05:00 PM
-        
-        to 06:30 PM
-        
-        
-        <br>
-        
-        <p>1100 W Allen St, Bloomington, IN 47403, USA</p>
-        
-        
-        <p>Join our friend Donetta at the Hub for a fun, hands-on class where you’ll learn the foundations of building flavorful casseroles from scratch. Casseroles are the ultimate make-ahead meal! They are warm, comforting, and surprisingly easy! 
-
-Register in the pantry or at mhcfoodpantry.org/education</p>
-        
-        Source: Website calendar
-      </div>
-    </div>
-    
-    
-    <h3>05:15 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Common Council Interview Committee Team B - Boards/Commissions Meeting 
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 15 - 05:15 PM
-        
-        to 06:15 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Kelly Conference Room (RM #155) (14)</p>
-        
-        
-        <p>City Clerk is inviting you to a scheduled Zoom meeting.Topic: Common Council Interview Committee Team B - Boards/Commissions Time: Jan 15, 2026 05:15 PM Eastern Time (US and Canada)Join Zoom Meetinghttps://bloomington.zoom.us/j/84146608547?pwd=TBMilkwQAVYDbWDxDramduCJYhMaP1.1Meeting ID: 841 4660 854...</p>
-        
-        Source: City Council
-      </div>
-    </div>
-    
-    
-    <h3>05:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Zoning Appeals
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 15 - 05:30 PM
-        
-        to 09:00 PM
-        
-        
-        <br>
-        
-        <p>Cityhall Council Chambers (RM #115)</p>
-        
-        
-        <p>Meeting Packets: https://bloomington.in.gov/onboard/meetingFiles?committee_id=4Topic: Board of Zoning AppealsTime: This is a recurring meeting Meet anytimeJoin Zoom Meetinghttps://bloomington.zoom.us/j/82448983657?pwd=enJxcnArK1pLVDlnWGROTU43dEpXdz09Meeting ID: 824 4898 3657Passcode: 319455---One ta...</p>
-        
-        Source: Board of Zoning Appeals
-      </div>
-    </div>
-    
-    
-    <h3>06:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Environmental Commission 
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 15 - 06:00 PM
-        
-        to 08:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-2-Cityhall Hooker Conference Room (RM #245) (26, City Hall-2-Cityhall Hooker Conference Room (RM #245) (26)</p>
-        
-        
-        <p>Meeting Packet: https://bloomington.in.gov/boards/environment/meetings/2025Join Zoom Meeting: https://bloomington.zoom.us/j/8657231124?pwd=mPqboSiD0AhVwKSgkuW2aO7NHixihO.1&omn=81563021562Meeting ID: 865 723 1124Passcode: COBPT</p>
-        
-        Source: Environmental Commission
-      </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-16">Friday, January 16, 2026</h2>
 
     
-    <h3>02:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        HQ: Party Open House
-        
-      </div>
-
-      <div class="event-details">
-        
-        Friday January 16 - 02:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>Monroe County Democratic Party Headquarters, 115 E 2nd St Suite 3, Bloomington, IN 47401, USA</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1856/1768608000000" target="_blank"> Princess Mononoke (1997)</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1856/1768608000000" target="_blank" rel="noopener"> Princess Mononoke (1997)</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 16 - 07:00 PM
+         to 09:30 PM
         
-        to 09:30 PM
         
-        
-        <br>
         
         <p>Buskirk-Chumley Theater,114 East Kirkwood Avenue, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>Celebrate the wondrous films of Hayao Miyazaki in a 4-film series at the Buskirk-Chumley Theater
 
 Princess Mononoke is the 10th feature-length animated film written and directed by Hayao Miyazaki and animated by Studio Ghibli. It is considered one of Miyazaki’s masterpieces, taking sixteen years to ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
@@ -2266,1163 +1014,332 @@ Princess Mononoke is the 10th feature-length animated film written and directed 
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1857/1768694400000" target="_blank"> You Got Gold (2025): A Celebration of John Prine</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1857/1768694400000" target="_blank" rel="noopener"> You Got Gold (2025): A Celebration of John Prine</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 17 - 07:00 PM
+         to 07:00 PM
         
-        to 07:00 PM
         
-        
-        <br>
         
         <p>Buskirk-Chumley Theater,114 East Kirkwood Avenue, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>BCT & Bloomington Roots Presents
 
 You Got Gold: A Celebration of John Prine http://yougotgoldmovie.com/ captures a star-studded tribute to the legendary songwriter, filmed in October 2022 at Nashville’s Ryman Auditorium. The event brought together acclaimed artists, friends, and family to share behi...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
-    
-    
-    
-    <h2 id="2026-01-19">Monday, January 19, 2026</h2>
-
-    
-    <h3>All Day</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Martin Luther King Day (No School)
-        
-      </div>
-
-      <div class="event-details">
-        
-        All Day
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: https://mccsc.edu/sndreq/generateCalendarICS.php?calendar_id=1
-      </div>
-    </div>
-    
-    
-    <h3>08:00 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        IU MLK Celebration Breakfast
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 19 - 08:00 AM
-        
-        to 10:00 AM
-        
-        
-        <br>
-        
-        <p>Indiana Memorial Union, 900 E 7th St, Bloomington, IN 47405, USA</p>
-        
-        
-        <p>https://today.iu.edu/iub/live/news/48149-honor-the-legacy-of-mlk-through-community-and</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    <h3>04:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        HQ: Letter Writing Event
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 19 - 04:00 PM
-        
-        to 06:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    <h3>06:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        City of Bloomington Annual Dr. Martin Luther King Jr. Birthday Celebration
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 19 - 06:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>Buskirk-Chumley Theater, 114 E Kirkwood Ave, Bloomington, IN 47408, USA</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    
-    <h2 id="2026-01-20">Tuesday, January 20, 2026</h2>
-
-    
-    <h3>11:00 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Dine & Donate: Chocolate Moose & Darn Good Soup
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 20 - 11:00 AM
-        
-        to 11:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>Stop in for a treat from Chocolate Moose OR Darn Good Soup, mention that you're there to support Mother Hubbard's Cupboard, and 20% of your order will be donated to the Hub!</p>
-        
-        Source: Website calendar
-      </div>
-    </div>
-    
-    
-    <h3>11:15 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Dems' Club Lunch Meeting
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 20 - 11:15 AM
-        
-        to 01:00 PM
-        
-        
-        <br>
-        
-        <p>DeAngelo's Italian Creole Restaurant, Eastland Plaza, 2620 E 3rd St, Bloomington, IN 47401, USA</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    <h3>04:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Housing Quality Appeals
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 20 - 04:00 PM
-        
-        to 05:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St suite 225, Bloomington, IN 47404, USA, City Hall-2-Cityhall Allison Conference Room (225) (12)</p>
-        
-        
-        <p>https://bloomington.zoom.us/j/84090354059?pwd=mJxCil15kPgJ0iLnlZVKW3s6bUT5qk.1</p>
-        
-        Source: Board of Housing Quality Appeals
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Housing Quality Appeals
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 20 - 04:00 PM
-        
-        to 05:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St suite 225, Bloomington, IN 47404, USA, City Hall-2-Cityhall Allison Conference Room (225) (12)</p>
-        
-        
-        <p>https://bloomington.zoom.us/j/84090354059?pwd=mJxCil15kPgJ0iLnlZVKW3s6bUT5qk.1</p>
-        
-        Source: Board of Housing Quality Appeals
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Canceled - Economic Development Commission
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 20 - 04:00 PM
-        
-        to 05:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St #135, Bloomington, IN 47404, USA #135, City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>Meeting agendas and packets can be found at onboard under the heading Economic Development CommissionMcCloskey Room at City Hall  Staff of Economic Development Commission is inviting you to a scheduled Zoom meeting.Topic: Economic Development Commission MeetingTime: Mar 19, 2024 05:00 PM America/Ind...</p>
-        
-        Source: Economic Development Commission
-      </div>
-    </div>
-    
-    
-    <h3>05:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Bloomington/Monroe County Human Rights Commission
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 20 - 05:00 PM
-        
-        to 06:30 PM
-        
-        
-        <br>
-        
-        <p>City Hall-2-Cityhall Allison Conference Room (225) (12)</p>
-        
-        
-        <p>Meeting agenda can be found here: https://bloomington.in.gov/boards/human-rights/meetings/2024Zoom info if confirmed ahead of time...https://bloomington.zoom.us/j/83083710843?pwd=V3OaAjQ1biTSta50kNT55VEC7koBpf.1Meeting ID: 830 8371 0843Passcode: 3471</p>
-        
-        Source: Bloomington Human Rights Commission
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Chili and Hot Water Cornbread Workshop
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 20 - 05:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>1100 W Allen St, Bloomington, IN 47403, USA</p>
-        
-        
-        <p>Join our friend, Wanda, and warm up with cozy comfort food! In this hands-on workshop, we’ll make a hearty pot of chili and hot water cornbread. Learn how to build flavor, adjust spice levels, and make both recipes with simple pantry ingredients.
-
-
-Register in the pantry or at mhcfoodpantry.org/educ...</p>
-        
-        Source: Website calendar
-      </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-21">Wednesday, January 21, 2026</h2>
 
     
-    <h3>05:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Library: Amy Huffman Oliver Listening Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 21 - 05:00 PM
-        
-        to 06:30 PM
-        
-        
-        <br>
-        
-        <p>Monroe County Public Library - Downtown, 303 E Kirkwood Ave, Bloomington, IN 47408, USA</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    <h3>05:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Commission on Hispanic and Latine Affairs - Extraordinary Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 21 - 05:30 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-2-Cityhall Hooker Conference Room (RM #245) (26)</p>
-        
-        
-        <p>None</p>
-        
-        Source: Commission on Hispanic and Latino Affairs
-      </div>
-    </div>
-    
-    
-    <h3>06:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Parent University: How to Help with Homework at Home
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 21 - 06:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>MCCSC's January Parent University event, How to Help Your Child with Homework, will take place virtually via Zoom on Wednesday, January 21, 2026, from 6-7pm.  Attendees will learn about strategies they can use effectively to help their child(ren) with homework, and what to do when their child might ...</p>
-        
-        Source: https://mccsc.edu/sndreq/generateCalendarICS.php?calendar_id=1
-      </div>
-    </div>
-    
-    
-    <h3>06:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Common Council Regular Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 21 - 06:30 PM
-        
-        to 09:30 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Council Chambers (RM #115) (236)</p>
-        
-        
-        <p>Agenda/Packet/Meeting Materialshttps://bloomington.in.gov/council/meetingsRegular Session meetings of the Common Council are generally held on Wednesdays at 6:30 pm, in the Council Chambers (Suite 115, City Hall, 401 N. Morton).  The Council may additionally hold Committee/Deliberation meetings on s...</p>
-        
-        Source: City Council
-      </div>
-    </div>
-    
-    
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        CANCELED: Environmental Commission Light Pollution Working Group Meeting
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1889/1769040000000" target="_blank" rel="noopener"> Yi Yi | International Art House Series</a>
         
       </div>
 
       <div class="event-details">
         
         Wednesday January 21 - 07:00 PM
-        
-        to 08:30 PM
-        
-        
-        <br>
-        
-        <p>None</p>
+         to 10:00 PM
         
         
-        <p>None</p>
-        
-        Source: Environmental Commission
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1889/1769040000000" target="_blank"> Yi Yi | International Art House Series</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 21 - 07:00 PM
-        
-        to 10:00 PM
-        
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>A film of rare emotional precision and formal grace, this deeply felt portrait of three generations of a Taipei family in quiet crisis unfolds in perfect calibration and accumulated emotional power. Middle-aged businessman NJ is facing personal and professional upheaval: his company is floundering, ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>08:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1769043600000" target="_blank"> Open Mic Night at The Comedy Attic</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1769043600000" target="_blank" rel="noopener"> Open Mic Night at The Comedy Attic</a>
         
       </div>
 
       <div class="event-details">
         
         Wednesday January 21 - 08:00 PM
+         to 10:00 PM
         
-        to 10:00 PM
         
-        
-        <br>
         
         <p>The Comedy Attic,123 S Walnut St, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>Every Wednesday at 8PM is Comedy Attic Open Mic Night. Bloomington has one of the best local comedy scenes in the country, and it all starts with our open mic night!
 
 Each comedian is asked to do no more than five minutes of completely original material. While we do not care about foul language in y...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-22">Thursday, January 22, 2026</h2>
 
     
-    <h3>05:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Bloomington Historic Preservation Commission
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 22 - 05:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>The BHPC Meetings are being held in ahybrid manner:In Person: McCloskey Conference Room #135, CityHall, 401 N Morton St., Bloomington, IN 47404Online: Zoomhttps://bloomington.zoom.us/j/84840957790?pwd=KoeAIsk0K0dXTradGZvEBzPupFm3Oc.1Meeting ID: 848 4095 7790Passcode: 374075</p>
-        
-        Source: Bloomington Historic Preservation Commission
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Fudgey Meringue Cookies Workshop
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 22 - 05:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>1100 W Allen St, Bloomington, IN 47403, USA</p>
-        
-        
-        <p>Join Jaidan to make delicious fudgy meringue cookies and pick up a few simple baking tips along the way. A fun and tasty workshop for all! 
-
-
-Register in the pantry or at mhcfoodpantry.org/education</p>
-        
-        Source: Website calendar
-      </div>
-    </div>
-    
-    
-    <h3>05:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Zoning Appeals
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 22 - 05:30 PM
-        
-        to 09:00 PM
-        
-        
-        <br>
-        
-        <p>Cityhall Council Chambers (RM #115)</p>
-        
-        
-        <p>Meeting Packets: https://bloomington.in.gov/onboard/meetingFiles?committee_id=4Topic: Board of Zoning AppealsTime: This is a recurring meeting Meet anytimeJoin Zoom Meetinghttps://bloomington.zoom.us/j/82448983657?pwd=enJxcnArK1pLVDlnWGROTU43dEpXdz09Meeting ID: 824 4898 3657Passcode: 319455---One ta...</p>
-        
-        Source: Board of Zoning Appeals
-      </div>
-    </div>
-    
-    
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        Environmental Commission Plan Committee Meeting
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1890/1769126400000" target="_blank" rel="noopener"> Dredd 3D | Additional Films and Guests</a>
         
       </div>
 
       <div class="event-details">
         
         Thursday January 22 - 07:00 PM
-        
-        to 08:30 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Kelly Conference Room (RM #155) (14)</p>
+         to 08:30 PM
         
         
-        <p>None</p>
-        
-        Source: Environmental Commission
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1890/1769126400000" target="_blank"> Dredd 3D | Additional Films and Guests</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 22 - 07:00 PM
-        
-        to 08:30 PM
-        
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>Mega City One is a vast, violent metropolis where felons rule the streets. The only law lies with cops called “judges,” who act as judge, jury and executioner, and Dredd is one of the city's most feared. One day, Dredd is partnered with Cassandra, a rookie with powerful psychic abilities. A report o...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-23">Friday, January 23, 2026</h2>
 
     
-    <h3>05:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        HQ: Party Space Hold
-        
-      </div>
-
-      <div class="event-details">
-        
-        Friday January 23 - 05:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>Doors open at 4:45pm</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Chilly Cook-Off
-        
-      </div>
-
-      <div class="event-details">
-        
-        Friday January 23 - 05:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>Switchyard Park, 1601 S Rogers St, Bloomington, IN 47403, USA</p>
-        
-        
-        <p>Join us in the Switchyard Park Pavilion, where over 20 local chefs will be sharing their chilis in hopes of claiming the People's Choice Award. Have a side of Chocolate Moose, a Two Sticks cinnamon roll, and a beer from Upland to cool your pallet! Details and tickets available at mhcfoodpantry.org/c...</p>
-        
-        Source: Website calendar
-      </div>
-    </div>
-    
-    
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1858/1769212800000" target="_blank"> Ponyo (2008)</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1858/1769212800000" target="_blank" rel="noopener"> Ponyo (2008)</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 23 - 07:00 PM
+         to 09:00 PM
         
-        to 09:00 PM
         
-        
-        <br>
         
         <p>Buskirk-Chumley Theater,114 East Kirkwood Avenue, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>Celebrate the wondrous films of Hayao Miyazaki in a 4-film series at the Buskirk-Chumley Theater.
 
 Ponyo, released in Japan as Ponyo on the Cliff, is the 16th animated film written and directed by Hayao Miyazaki and produced by Studio Ghibli. It is Miyazaki’s eighth film to be made under the studio,...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1891/1769212800000" target="_blank"> Santosh w/recorded filmmaker Q&A | International Art House Series</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1891/1769212800000" target="_blank" rel="noopener"> Santosh w/recorded filmmaker Q&A | International Art House Series</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 23 - 07:00 PM
+         to 09:00 PM
         
-        to 09:00 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>When her husband is killed on the job, young housewife Santosh is trained to take his place on the force in rural Northern India, eventually pairing with a savvy, charismatic female inspector, Sharma, who’s arrived from outside the department to investigate the murder of a girl. A gripping neorealis...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>10:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1892/1769223600000" target="_blank"> Ms. 45 | Not-Quite Midnights</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1892/1769223600000" target="_blank" rel="noopener"> Ms. 45 | Not-Quite Midnights</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 23 - 10:00 PM
+         to 11:30 PM
         
-        to 11:30 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>Wild man director Abel Ferrara's mondo revenge flick like you've never seen it before: in true grindhouse style with a perfectly imperfect 35mm print deep from the IU vault. Head back to the storied days of late-night drive-ins and scrappy single-screen indie theaters bringing the underground to the...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-24">Saturday, January 24, 2026</h2>
 
     
-    <h3>11:00 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        HQ: Private Event
-        
-      </div>
-
-      <div class="event-details">
-        
-        Saturday January 24 - 11:00 AM
-        
-        to 01:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    <h3>03:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        (CANCELED) HQ: Charlotte Zietlow Book Club Meeting
-        
-      </div>
-
-      <div class="event-details">
-        
-        Saturday January 24 - 03:00 PM
-        
-        to 04:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>This event was canceled due to extreme cold and weather concerns. Stay tuned for a rescheduled time.</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
     <h3>04:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1893/1769288400000" target="_blank"> Santosh | International Art House Series</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1893/1769288400000" target="_blank" rel="noopener"> Santosh | International Art House Series</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 24 - 04:00 PM
+         to 06:00 PM
         
-        to 06:00 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>When her husband is killed on the job, young housewife Santosh is trained to take his place on the force in rural Northern India, eventually pairing with a savvy, charismatic female inspector, Sharma, who’s arrived from outside the department to investigate the murder of a girl. A gripping neorealis...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        It Takes a Village Town Hall
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1869/1769299200000" target="_blank" rel="noopener"> 76 Days Adrift (2025)</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 24 - 07:00 PM
-        
-        to 09:00 PM
-        
-        
-        <br>
-        
-        <p>Unitarian Universalist Church, 2120 N Fee Ln, Bloomington, IN 47408, USA</p>
+         to 09:00 PM
         
         
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1869/1769299200000" target="_blank"> 76 Days Adrift (2025)</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Saturday January 24 - 07:00 PM
-        
-        to 09:00 PM
-        
-        
-        <br>
         
         <p>Buskirk-Chumley Theater,114 East Kirkwood Avenue, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>From Executive Producer Ang Lee comes 76 Days Adrift—a profoundly immersive documentary that plunges you into the heart of one man’s extraordinary survival story.
 
 Steven Callahan, the author of the New York Times bestseller Adrift: 76 Days Lost at Sea, recounts the night of February 4, 1982, when a...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1894/1769299200000" target="_blank"> Throne of Blood | McRobbie's Choice</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1894/1769299200000" target="_blank" rel="noopener"> Throne of Blood | McRobbie's Choice</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 24 - 07:00 PM
+         to 09:00 PM
         
-        to 09:00 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>A vivid, visceral Macbeth adaptation, Throne of Blood sets Shakespeare’s definitive tale of ambition and duplicity in a ghostly, fog-enshrouded landscape in feudal Japan. As a hardened warrior who rises savagely to power, Toshiro Mifune gives a remarkable, animalistic performance, as does Isuzu Yama...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-25">Sunday, January 25, 2026</h2>
 
     
-    <h3>09:00 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        HQ: Party Space Hold
-        
-      </div>
-
-      <div class="event-details">
-        
-        Sunday January 25 - 09:00 AM
-        
-        to 05:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    <h3>02:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Richland Township Listening Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Sunday January 25 - 02:00 PM
-        
-        to 04:00 PM
-        
-        
-        <br>
-        
-        <p>Monroe County Public Library - Ellettsville Branch, 600 W Temperance St, Ellettsville, IN 47429, USA</p>
-        
-        
-        <p>Join County Councilor Liz Feitl and local precinct chairs for a listening session in Richland Township.</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    <h3>02:45 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Indivisible of South Central Indiana Meeting
-        
-      </div>
-
-      <div class="event-details">
-        
-        Sunday January 25 - 02:45 PM
-        
-        to 04:30 PM
-        
-        
-        <br>
-        
-        <p>Monroe County Public Library - Southwest Branch, 890 W Gordon Pike, Bloomington, IN 47403, USA</p>
-        
-        
-        <p>We will be joined by Sheriff Ruben Marté to hear his vision for law enforcement in Monroe County. RSVP via Mobilize</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
     <h3>03:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1859/1769371200000" target="_blank"> "To the Moon!" Voces Novae Concert</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1859/1769371200000" target="_blank" rel="noopener"> "To the Moon!" Voces Novae Concert</a>
         
       </div>
 
       <div class="event-details">
         
         Sunday January 25 - 03:00 PM
+         to 04:00 PM
         
-        to 04:00 PM
         
-        
-        <br>
         
         <p>Unitarian Universalist Church,2120 North Fee Lane, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>To the Moon!
@@ -3435,90 +1352,87 @@ two FREE performances! 3:00 pm and 5:00 pm
 
 donations accepted...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1877/1769371200000" target="_blank"> Susann McDonald Tribute Concert</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1877/1769371200000" target="_blank" rel="noopener"> Susann McDonald Tribute Concert</a>
         
       </div>
 
       <div class="event-details">
         
         Sunday January 25 - 03:00 PM
+         to 05:00 PM
         
-        to 05:00 PM
         
-        
-        <br>
         
         <p>FAR Center for Contemporary Arts,202 South Rogers Street, Bloomington, IN 47404, USA</p>
         
         
+        
         <p>An event honoring the life and legacy of harpist Susann McDonald (1935-2025). Includes video screening of Miss McDonald's performances throughout her life and personal accounts from former students and other harpists. Admission is free, but please reserve your seat online: https://usaihc.org/celebra...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>04:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1895/1769374800000" target="_blank"> Twin Peaks Season 2, Episodes 1-5 | IU Cinema</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1895/1769374800000" target="_blank" rel="noopener"> Twin Peaks Season 2, Episodes 1-5 | IU Cinema</a>
         
       </div>
 
       <div class="event-details">
         
         Sunday January 25 - 04:00 PM
+         to 08:30 PM
         
-        to 08:30 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
+        
         
         
         <p>Episode 1 (“May the Giant Be With You”): A wounded Agent Cooper has a vision of a giant who gives him several clues about the murder of Laura Palmer. Shelly and Pete recover from the mill fire, but Josie and Catherine are missing.
 
 Episode 2 (“Coma”): Albert determines that two suspects didn’t kill ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>05:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1860/1769378400000" target="_blank"> "To the Moon!" Voces Novae Concert</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1860/1769378400000" target="_blank" rel="noopener"> "To the Moon!" Voces Novae Concert</a>
         
       </div>
 
       <div class="event-details">
         
         Sunday January 25 - 05:00 PM
+         to 06:00 PM
         
-        to 06:00 PM
         
-        
-        <br>
         
         <p>Unitarian Universalist Church,2120 North Fee Lane, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>To the Moon!
@@ -3531,553 +1445,107 @@ two FREE performances! 3:00 pm and 5:00 pm
 
 donations accepted...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
-    
-    
-    <h3>07:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://writersguildbloomington.com/event/last-sunday-poetry-open-mic-featuring-hiromi-yoshida-and-april-ridge/" target="_blank">Last Sunday Poetry & Open Mic featuring Hiromi Yoshida and April Ridge</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Sunday January 25 - 07:00 PM
-        
-        to 08:30 PM
-        
-        
-        <br>
-        
-        <p>Morgenstern's Bookstore & Café @ 849 S Auto Mall Rd Bloomington IN 47401</p>
-        
-        
-        <p>Responding to the weather forecast, 
-this LSP will be rescheduled 
-for 29 November or 27 December.
- 
- 
-The Writers Guild at Bloomington presents Last Sunday Poetry & Open Mic
-
-featuring Hiromi Yoshida and April Ridge
-Open mic to follow
-
-
-The Writers Guild at Bloomington presents Last Sunday Poetry, ...</p>
-        
-        Source: http://writersguildbloomington.com/?plugin=all-in-one-event-ca
-      </div>
-    </div>
-    
-    
-    
-    <h2 id="2026-01-26">Monday, January 26, 2026</h2>
-
-    
-    <h3>12:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Public Works Session - CANCELLED
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 26 - 12:00 PM
-        
-        to 01:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St, Bloomington, IN 47404, USA, City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>Meeting Agenda and Packet can be found here: https://bloomington.in.gov/onboard/committees/27Miranda Beaver is inviting you to a scheduled Zoom meeting.Join Zoom Meetinghttps://bloomington.zoom.us/j/88126481039?pwd=Yo9DzAbr9oBqZUv84VjtDAWM3COPOl.1Meeting ID: 881 2648 1039Passcode: 835234---One tap m...</p>
-        
-        Source: Board of Public Works
-      </div>
-    </div>
-    
-    
-    <h3>06:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        CANCELED-Jack Hopkins Social Services Committee Meeting 
-        
-      </div>
-
-      <div class="event-details">
-        
-        Monday January 26 - 06:00 PM
-        
-        to 08:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-2-Cityhall Allison Conference Room (225) (12)</p>
-        
-        
-        <p>City Clerk is inviting you to a scheduled Zoom meeting.Topic: Jack Hopkins Social Services Committee Meeting Time: Jan 26, 2026 06:00 PM Eastern Time (US and Canada)Join Zoom Meetinghttps://bloomington.zoom.us/j/86068735836?pwd=vKbNwia8rk4R1bJk7RlAo6r3WtZiqv.1Meeting ID: 860 6873 5836Passcode: 19160...</p>
-        
-        Source: Jack Hopkins Social Services Funding Committee
-      </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-27">Tuesday, January 27, 2026</h2>
 
     
-    <h3>All Day</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        CLOSED due to weather
-        
-      </div>
-
-      <div class="event-details">
-        
-        All Day
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Website calendar
-      </div>
-    </div>
-    
-    
-    <h3>04:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Redevelopment Commission Executive Session
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 27 - 04:00 PM
-        
-        to 05:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-2-Cityhall Allison Conference Room (225) (12)</p>
-        
-        
-        <p>https://bloomington.zoom.us/j/83391359789?pwd=WlKCpQAZpW2L00ZOFx3HleRtkrqaGV.1</p>
-        
-        Source: Bloomington Redevelopment Commission
-      </div>
-    </div>
-    
-    
-    <h3>05:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Board of Public Works Meeting
-        
-      </div>
-
-      <div class="event-details">
-        
-        Tuesday January 27 - 05:30 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St, Bloomington, IN 47404, USA, City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>Meeting Agenda and Packet can be found here: https://bloomington.in.gov/onboard/committees/27Miranda Beaver is inviting you to a scheduled Zoom meeting.Join Zoom Meetinghttps://bloomington.zoom.us/j/83055656981?pwd=uXahfhO21NkSndj1FFC2O2N8XVr5DP.1Meeting ID: 830 5565 6981Passcode: 788140---One tap m...</p>
-        
-        Source: Board of Public Works
-      </div>
-    </div>
-    
-    
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1896/1769558400000" target="_blank"> Tokyo Olympiad w/Q&A | Cinematic Sports Documentary: History, Politics, Aesthetics</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1896/1769558400000" target="_blank" rel="noopener"> Tokyo Olympiad w/Q&A | Cinematic Sports Documentary: History, Politics, Aesthetics</a>
         
       </div>
 
       <div class="event-details">
         
         Tuesday January 27 - 07:00 PM
+         to 10:30 PM
         
-        to 10:30 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>Kon Ichikawa’s Tokyo Olympiad paints a stunning picture of emotion and spectacle in capturing the 1964 Olympic Games, held in Tokyo. A feat of cutting-edge technology and cinematography, the film engages with the drama already inherent to sport, offering a vision of triumph and grief—in short, what ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-28">Wednesday, January 28, 2026</h2>
 
     
-    <h3>10:00 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Metropolitan Planning Organization Technical Advisory Committee
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 28 - 10:00 AM
-        
-        to 11:30 AM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>IN-PERSON LOCATION: Bloomington City Hall (401 N Morton St), Council Chambers (**NOTE that the 1-28-2026 meeting will take place in McCloskey Room**)VIRTUAL LOCATION: 1. Zoom Meeting Link (Meeting ID: 823 0095 7741 | Passcode: BMCMPO)2. Dial by your location: +1 312 626 6799 US (Chicago) or find you...</p>
-        
-        Source: MPO Technical Advisory Committee
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Metropolitan Planning Organization Technical Advisory Committee
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 28 - 10:00 AM
-        
-        to 11:30 AM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Council Chambers (RM #115) (236)</p>
-        
-        
-        <p>IN-PERSON LOCATION: Bloomington City Hall (401 N Morton St), Council Chambers (**NOTE that the 1-28-2026 meeting will take place in McCloskey Room**)VIRTUAL LOCATION: 1. Zoom Meeting Link (Meeting ID: 823 0095 7741 | Passcode: BMCMPO)2. Dial by your location: +1 312 626 6799 US (Chicago) or find you...</p>
-        
-        Source: MPO Technical Advisory Committee
-      </div>
-    </div>
-    
-    
-    <h3>02:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Hearing Officer
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 28 - 02:00 PM
-        
-        to 03:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Kelly Conference Room (RM #155) (14)</p>
-        
-        
-        <p>Zoom: https://bloomington.zoom.us/j/88225451589?pwd=SkQxQmQvTnBXc202M0ZPano1eW9rdz09 Meeting ID: 882 2545 1589               Passcode: 897298</p>
-        
-        Source: Hearing Officer
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        CANCELLED - Hearing Officer
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 28 - 02:00 PM
-        
-        to 03:00 PM
-        
-        
-        <br>
-        
-        <p>City Hall-1-Cityhall Kelly Conference Room (RM #155) (14)</p>
-        
-        
-        <p>Zoom: https://bloomington.zoom.us/j/88225451589?pwd=SkQxQmQvTnBXc202M0ZPano1eW9rdz09 Meeting ID: 882 2545 1589               Passcode: 897298</p>
-        
-        Source: Hearing Officer
-      </div>
-    </div>
-    
-    
-    <h3>05:30 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Commission on Hispanic & Latino Affairs
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 28 - 05:30 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St, Bloomington, IN 47404, USA, City Hall-2-Cityhall Hooker Conference Room (RM #245) (26)</p>
-        
-        
-        <p>Aubrey Seader is inviting you to a scheduled Zoom meeting.Topic: Commission on Hispanic and Latino AffairsJoin Zoom MeetingAubrey Seader is inviting you to a scheduled Zoom meeting.Join Zoom Meetinghttps://bloomington.zoom.us/j/83594825550?pwd=UZ5gCDl92ml2NLaPGNV2IbdjjdjxP6.1Meeting ID: 835 9482 555...</p>
-        
-        Source: Commission on Hispanic and Latino Affairs
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Metropolitan Planning Organization Citizens Advisory Committee
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 28 - 05:30 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St, Bloomington, IN 47404, USA, City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>IN-PERSON LOCATION: Bloomington City Hall (401 N Morton), McCloskey RoomVIRTUAL LOCATION: 1. Zoom Meeting Link (Meeting ID: 828 6550 5511 | Passcode: BMCMPO)2. Dial by your location: +1 312 626 6799 US (Chicago) or find your local numberMEETING PACKET: link to meeting packets MEETING RECORDING: link...</p>
-        
-        Source: MPO Citizens Advisory Committee
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Metropolitan Planning Organization Citizens Advisory Committee
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 28 - 05:30 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St, Bloomington, IN 47404, USA, City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>IN-PERSON LOCATION: Bloomington City Hall (401 N Morton), McCloskey RoomVIRTUAL LOCATION: 1. Zoom Meeting Link (Meeting ID: 828 6550 5511 | Passcode: BMCMPO)2. Dial by your location: +1 312 626 6799 US (Chicago) or find your local numberMEETING PACKET: link to meeting packets MEETING RECORDING: link...</p>
-        
-        Source: MPO Citizens Advisory Committee
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        HQ: Town Hall with Brad Meyer
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 28 - 05:30 PM
-        
-        to 08:30 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>No admission charge to the audience.  Brad will give an issues/policy oriented speech and answer questions on any policy or political topic.
-
-We hope to see you there!</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    
-    <h3>06:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        CANCELLED Dr. Martin Luther King Jr. Birthday Celebration Commission
-        
-      </div>
-
-      <div class="event-details">
-        
-        Wednesday January 28 - 06:00 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>City of Bloomington, 401 N Morton St, Bloomington, IN 47404, USA</p>
-        
-        
-        <p>The Dr. Martin Luther King Jr. Birthday Celebration Commission will not meet in January 2026. Interested parties are welcome to attend the next meeting, on Wednesday, February 25, 2026, from 6:00 - 7:00 P.M. in the Allison Conference Room at City Hall</p>
-        
-        Source: Dr. Martin Luther King\, Jr. Commission
-      </div>
-    </div>
-    
-    
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1897/1769644800000" target="_blank"> Altered States w/podcast taping | Additional Films and Guests</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1897/1769644800000" target="_blank" rel="noopener"> Altered States w/podcast taping | Additional Films and Guests</a>
         
       </div>
 
       <div class="event-details">
         
         Wednesday January 28 - 07:00 PM
+         to 09:30 PM
         
-        to 09:30 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>Using a sensory deprivation tank, psychophysiologist Edward Jessup (William Hurt) conducts experiments involving human consciousness using himself as the subject. His research intensifies when hallucinogenic compounds make him regress to primitive stages of human evolution, where he transforms into ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>08:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1769648400000" target="_blank"> Open Mic Night at The Comedy Attic</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1769648400000" target="_blank" rel="noopener"> Open Mic Night at The Comedy Attic</a>
         
       </div>
 
       <div class="event-details">
         
         Wednesday January 28 - 08:00 PM
+         to 10:00 PM
         
-        to 10:00 PM
         
-        
-        <br>
         
         <p>The Comedy Attic,123 S Walnut St, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>Every Wednesday at 8PM is Comedy Attic Open Mic Night. Bloomington has one of the best local comedy scenes in the country, and it all starts with our open mic night!
 
 Each comedian is asked to do no more than five minutes of completely original material. While we do not care about foul language in y...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
@@ -4087,40 +1555,38 @@ Each comedian is asked to do no more than five minutes of completely original ma
     <h3>12:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1919/1769706000000" target="_blank"> "High School Art Show" by young, local talent</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1919/1769706000000" target="_blank" rel="noopener"> "High School Art Show" by young, local talent</a>
         
       </div>
 
       <div class="event-details">
         
         Thursday January 29 - 12:00 PM
+         to 06:00 PM
         
-        to 06:00 PM
         
-        
-        <br>
         
         <p>Arts Alliance Center in College Mall,2894 E 3rd St, Bloomington, IN 47401, USA</p>
+        
         
         
         <p>Join us at the Pillar Arts Alliance Center this February as we celebrate the creativity of Bloomington’s high school artists.
 
 This special exhibition features an inspiring range of student work, from vibrant watercolors and detailed drawings to imaginative collages and mixed media pieces. The varie...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>05:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
         Utilities Service Board Meeting
@@ -4130,155 +1596,95 @@ This special exhibition features an inspiring range of student work, from vibran
       <div class="event-details">
         
         Thursday January 29 - 05:00 PM
+         to 07:00 PM
         
-        to 07:00 PM
         
-        
-        <br>
         
         <p>City of Bloomington Utilities, 600 E Miller Dr, Bloomington, IN 47401, USA, Utilities Service Center-1-Utilities Board Room (75)</p>
         
         
+        
         <p>Agenda/PacketThe meeting agenda and packet are available at https://bloomington.in.gov/onboard/meetingFiles?committee_id=9</p>
         
-        Source: Utilities Service Board
+        
+        <a href="https://calendar.google.com/calendar/ical/bloomington.in.gov_1b95au4d2ueudldosb024fimp0@group.calendar.google.com/public/basic.ics" class="source-link" target="_blank" rel="noopener">📰 Utilities Service Board</a>
       </div>
-    </div>
-    
-    
-    <h3>05:15 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Dems Club After Hours
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 29 - 05:15 PM
-        
-        to 07:00 PM
-        
-        
-        <br>
-        
-        <p>Sleeper's Bar, 2601 N Walnut St Suite 1, Bloomington, IN 47404, USA</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
+    </article>
     
     
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        CANCELED: Environmental Commission Light Pollution Working Group Meeting
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1824/1769731200000" target="_blank" rel="noopener"> Weird Academia</a>
         
       </div>
 
       <div class="event-details">
         
         Thursday January 29 - 07:00 PM
-        
-        to 08:30 PM
-        
-        
-        <br>
-        
-        <p>None</p>
+         to 09:00 PM
         
         
-        <p>None</p>
-        
-        Source: Environmental Commission
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1824/1769731200000" target="_blank"> Weird Academia</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Thursday January 29 - 07:00 PM
-        
-        to 09:00 PM
-        
-        
-        <br>
         
         <p>Buskirk-Chumley Theater,114 East Kirkwood Avenue, Bloomington, IN 47408, USA</p>
         
         
+        
         <p>Voyage to the wilder shores of thought with Weird Academia, a live conversation exploring ideas that challenge the conventional boundaries of scholarship. This event brings together artists and thinkers from both inside and outside the academy to stage an encounter with the Weird: the occult, mystic...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1898/1769731200000" target="_blank"> Megalopolis/Francis Ford Coppola's Megalopolis: A Fable | Inspiring Conversations</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1898/1769731200000" target="_blank" rel="noopener"> Megalopolis/Francis Ford Coppola's Megalopolis: A Fable | Inspiring Conversations</a>
         
       </div>
 
       <div class="event-details">
         
         Thursday January 29 - 07:00 PM
+         to 09:30 PM
         
-        to 09:30 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>Megalopolis is a Roman epic fable set in an imagined modern America. The City of New Rome must change, causing conflict between Cesar Catilina, a genius artist who seeks to leap into a utopian, idealistic future, and his opposition, Mayor Franklyn Cicero, who remains committed to a regressive status...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>07:30 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1552/1769733000000" target="_blank"> Séance: The Board Awakens</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1552/1769733000000" target="_blank" rel="noopener"> Séance: The Board Awakens</a>
         
       </div>
 
       <div class="event-details">
         
         Thursday January 29 - 07:30 PM
+         to 09:00 PM
         
-        to 09:00 PM
         
-        
-        <br>
         
         <p>Waldron Arts Center (Auditorium),122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
         
         
         <p>Constellation Stage & Screen presents "Séance: The Board Awakens", on stage January 29 - February 15, 2026 at the Waldron Auditorium.
@@ -4287,239 +1693,35 @@ Summon the Unknown.
 
 Dare to uncover the terrifying secrets of the Ouija board in this spine-chilling theatrical experience. As the magic-filled séance begins, you’l...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-30">Friday, January 30, 2026</h2>
 
     
-    <h3>All Day</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://events.iu.edu/soaadiub/event/2143432-continuum-eskenazi-faculty-exhibition-2026" target="_blank">Continuum: Eskenazi Faculty Exhibition 2026</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        All Day
-        
-        <br>
-        
-        <p>Fine Arts Building, 1201 East 7th Street, Bloomington, IN 47405 - Room Number: Grunwald Gallery</p>
-        
-        
-        <p>Work by over fifty Indiana University artists, architects, and designers comes together in "Continuum: Eskenazi Faculty Exhibition 2026" at the Grunwald Gallery of Art at the Indiana University Eskenazi School of Art, Architecture + Design. The exhibition opens with a free, public reception in the g...</p>
-        
-        Source: Indiana University Events
-      </div>
-    </div>
-    
-    
-    <h3>10:00 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://events.iu.edu/speaiub/event/2087707-leadership-workshop-nextgen-leadership-program" target="_blank">Leadership Workshop: NextGen Leadership Program</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Friday January 30 - 10:00 AM
-        
-        to 01:00 PM
-        
-        
-        <br>
-        
-        <p>SPEA /PUBLIC AND ENVIRONMENTAL AFFAIRS, PAUL H. O'NEILL GRADUATE CENTER - Room Number: A225</p>
-        
-        
-        <p>Professor Karen Gahl-Mills will lead a workshop on leadership for undergraduate students. Workshop participants will discuss preconceptions of leadership, develop a personal leadership point of view, and learn strategies for working with different leadership styles from their own.  Lunch will be pro...</p>
-        
-        Source: Indiana University Events
-      </div>
-    </div>
-    
-    
-    <h3>10:30 AM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Metropolitan Planning Organization Policy Committee
-        
-      </div>
-
-      <div class="event-details">
-        
-        Friday January 30 - 10:30 AM
-        
-        to 12:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St, Bloomington, IN 47404, USA, City Hall-1-Cityhall Council Chambers (RM #115) (236)</p>
-        
-        
-        <p>IN-PERSON LOCATION: City Hall (401 N Morton St), Council ChambersVIRTUAL LOCATIONS: 1. Zoom Meeting Link (Meeting ID: 819 5291 8056 | Passcode: BMCMPO)2. Dial by your location: +1 312 626 6799 US (Chicago) or find your local numberMEETING PACKETS: link to meeting packetsMEETING RECORDING: The City o...</p>
-        
-        Source: MPO Policy Committee
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        Metropolitan Planning Organization Policy Committee
-        
-      </div>
-
-      <div class="event-details">
-        
-        Friday January 30 - 10:30 AM
-        
-        to 12:00 PM
-        
-        
-        <br>
-        
-        <p>401 N Morton St, Bloomington, IN 47404, USA, City Hall-1-Cityhall McCloskey Conference Room (RM #135) (39)</p>
-        
-        
-        <p>IN-PERSON LOCATION: City Hall (401 N Morton St), Council ChambersVIRTUAL LOCATIONS: 1. Zoom Meeting Link (Meeting ID: 819 5291 8056 | Passcode: BMCMPO)2. Dial by your location: +1 312 626 6799 US (Chicago) or find your local numberMEETING PACKETS: link to meeting packetsMEETING RECORDING: The City o...</p>
-        
-        Source: MPO Policy Committee
-      </div>
-    </div>
-    
-    
-    <h3>12:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://events.iu.edu/lawiub/event/2167602-lunch-with-new-and-returning-international" target="_blank">Lunch with New and Returning International Students and Scholars</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Friday January 30 - 12:00 PM
-        
-        to 01:00 PM
-        
-        
-        <br>
-        
-        <p>LOWELL E. BAIER HALL/IU MAURER SCHOOL OF LAW - Room Number: 310</p>
-        
-        
-        <p>All IU Maurer international JD students, graduate students, and visiting scholars are invited to lunch!  Please RSVP below by 5 PM on Wednesday, January 28 to attend.</p>
-        
-        Source: Indiana University Events
-      </div>
-    </div>
-    
-    
-    <h3>02:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://events.iu.edu/live/events/2167496-dress-for-success-with-the-crimson-closet" target="_blank">Career Studio: Dress for Success with the Crimson Closet</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Friday January 30 - 02:00 PM
-        
-        to 04:00 PM
-        
-        
-        <br>
-        
-        <p>Ernie Pyle - Room Number: Career Studio</p>
-        
-        
-        <p>Not sure whatbusiness casual really means? Stop by the Career Studio to explore different professional styles, get tips on interview and workplace attire,learn how the new crimson closet works, andcreate your own outfit that fits your goals andpersonality. We'll also get you ready for the College Ca...</p>
-        
-        Source: Indiana University Events
-      </div>
-    </div>
-    
-    
-    <h3>06:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://events.iu.edu/iu-student-foundation/event/1784615-womens-reception" target="_blank">Women's Reception</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Friday January 30 - 06:00 PM
-        
-        to 08:30 PM
-        
-        
-        <br>
-        
-        <p>1601 S Rogers St - Room Number: Switchyard Pavilion</p>
-        
-        
-        <p>Please join us for the 2026 Little 500 Women's Reception to celebrate the role of women in sport!  The reception will take place at the Showalter House on January 30th at 6:30 PM with official programming starting at 7:15pm. Don't miss this opportunity to enjoy light refreshments and get to know you...</p>
-        
-        Source: Indiana University Events
-      </div>
-    </div>
-    
-    
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1863/1769817600000" target="_blank"> The Boy and the Heron (2023)</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1863/1769817600000" target="_blank" rel="noopener"> The Boy and the Heron (2023)</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 30 - 07:00 PM
+         to 09:00 PM
         
-        to 09:00 PM
         
-        
-        <br>
         
         <p>Buskirk-Chumley Theater,114 East Kirkwood Avenue, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>Celebrate the wondrous films of Hayao Miyazaki in a 4-film series at the Buskirk-Chumley Theater.
@@ -4528,84 +1730,81 @@ The Boy and the Heron is the 22nd animated film written and directed by Hayao Mi
 
 After losing his m...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1899/1769817600000" target="_blank"> April (2025) | International Art House Series</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1899/1769817600000" target="_blank" rel="noopener"> April (2025) | International Art House Series</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 30 - 07:00 PM
+         to 09:30 PM
         
-        to 09:30 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>Nina is a skilled obstetrician at a maternity hospital in Eastern Georgia. After a difficult delivery, an infant dies and the grief-racked father demands an inquiry into her methods. The resulting scrutiny threatens to bring to light Nina’s work—providing unsanctioned abortions to desperate girls an...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>07:30 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1885/1769819400000" target="_blank"> Transparent - A Celebration of Jazz and Community</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1885/1769819400000" target="_blank" rel="noopener"> Transparent - A Celebration of Jazz and Community</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 30 - 07:30 PM
+         to 07:30 PM
         
-        to 07:30 PM
         
-        
-        <br>
         
         <p>Constellation Playhouse,107 West 9th Street, Bloomington, IN 47401, USA</p>
         
         
+        
         <p>Transparent, an audible family portrait, introduces a suite of compositions created and recorded with the support of the Jazz Road Creative Residency program in collaboration with the Hundredth Hill under the direction of Monika Herzig. Modern, sophisticated jazz instrumentals evoke the stories and ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1553/1769819400000" target="_blank"> Séance: The Board Awakens</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1553/1769819400000" target="_blank" rel="noopener"> Séance: The Board Awakens</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 30 - 07:30 PM
+         to 09:00 PM
         
-        to 09:00 PM
         
-        
-        <br>
         
         <p>Waldron Arts Center (Auditorium),122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
         
         
         <p>Constellation Stage & Screen presents "Séance: The Board Awakens", on stage January 29 - February 15, 2026 at the Waldron Auditorium.
@@ -4614,239 +1813,93 @@ Summon the Unknown.
 
 Dare to uncover the terrifying secrets of the Ouija board in this spine-chilling theatrical experience. As the magic-filled séance begins, you’l...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
-    
-    
-    <h3>08:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://events.iu.edu/musiciub/event/1973778-university-orchestra" target="_blank">University Orchestra – Callum Smart, guest violin/leader; Bryce Burgess, viola soloist</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Friday January 30 - 08:00 PM
-        
-        to 10:00 PM
-        
-        
-        <br>
-        
-        <p>Auer Hall &amp; LIVE@jacobs</p>
-        
-        
-        <p>Enjoy this performance from almost anywhere in the world viaLIVE@jacobs!Repertoire  Rameau: 'Danse du grand calumet de la paix' from "Les Indes galantes" (1735/36)Biber: Battalia (1673)Jessie Montgomery: Strum (2006/12)Shulman: Theme and Variations for viola (1940/54)Ayanna Witter-Johnson: Dream Cit...</p>
-        
-        Source: Indiana University Events
-      </div>
-    </div>
+    </article>
     
     
     <h3>10:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1900/1769828400000" target="_blank"> Dracula (2025) | Not-Quite Midnights</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1900/1769828400000" target="_blank" rel="noopener"> Dracula (2025) | Not-Quite Midnights</a>
         
       </div>
 
       <div class="event-details">
         
         Friday January 30 - 10:00 PM
+         to 01:00 AM
         
-        to 01:00 AM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>A frustrated filmmaker, facing creative paralysis, turns to an A.I. chatbot in order to make his latest movie a hit. The result is a series of increasingly outrageous vignettes exploring the myth of Dracula in all its forms. From a wild chase through the streets of modern Transylvania to eerie haunt...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     
     <h2 id="2026-01-31">Saturday, January 31, 2026</h2>
 
     
-    <h3>All Day</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://events.iu.edu/soaadiub/event/2143432-continuum-eskenazi-faculty-exhibition-2026" target="_blank">Continuum: Eskenazi Faculty Exhibition 2026</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        All Day
-        
-        <br>
-        
-        <p>Fine Arts Building, 1201 East 7th Street, Bloomington, IN 47405 - Room Number: Grunwald Gallery</p>
-        
-        
-        <p>Work by over fifty Indiana University artists, architects, and designers comes together in "Continuum: Eskenazi Faculty Exhibition 2026" at the Grunwald Gallery of Art at the Indiana University Eskenazi School of Art, Architecture + Design. The exhibition opens with a free, public reception in the g...</p>
-        
-        Source: Indiana University Events
-      </div>
-    </div>
-    
-    
-    <h3>02:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        City Hall: Perry Township Trustee Vacancy Caucus 
-        
-      </div>
-
-      <div class="event-details">
-        
-        Saturday January 31 - 02:00 PM
-        
-        to 04:00 PM
-        
-        
-        <br>
-        
-        <p>None</p>
-        
-        
-        <p>None</p>
-        
-        Source: Public MCDP Event Calendar
-      </div>
-    </div>
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://events.iu.edu/live/events/1980430-beginnerintermediate-drawing-workshop" target="_blank">Beginner/Intermediate Drawing Workshop</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Saturday January 31 - 02:00 PM
-        
-        to 04:00 PM
-        
-        
-        <br>
-        
-        <p>SIDNEY AND LOIS ESKENAZI MUSEUM OF ART - Room Number: Check in with Guest Services on the first floor</p>
-        
-        
-        <p>Reserve your spot. If this page says, "Registration has closed" that means the waitlist is full.SuppliesBring your favorite drawing pencil (e.g. 4B), a sketchbook or drawing paper, and a phone or device to photograph artwork (without flash) as we sketch.  Know Before You GoArrive early to find parki...</p>
-        
-        Source: Indiana University Events
-      </div>
-    </div>
-    
-    
-    <h3>03:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://events.iu.edu/musiciub/event/2167311-canceled-meet-me-at-the-metz-carillon-series" target="_blank">**CANCELED** Meet Me at the Metz Carillon Series</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Saturday January 31 - 03:00 PM
-        
-        to 04:00 PM
-        
-        
-        <br>
-        
-        <p>Metz Carillon</p>
-        
-        
-        <p>None</p>
-        
-        Source: Indiana University Events
-      </div>
-    </div>
-    
-    
     <h3>04:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1901/1769893200000" target="_blank"> Good Night, and Good Luck (2005) | Screening the Semiquincentennial</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1901/1769893200000" target="_blank" rel="noopener"> Good Night, and Good Luck (2005) | Screening the Semiquincentennial</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 31 - 04:00 PM
+         to 05:30 PM
         
-        to 05:30 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>A passionate and concise cinematic civics lesson, Good Night, and Good Luck resonates today, perhaps more than ever. When Senator Joseph McCarthy begins his campaign to root out Communists in America, CBS News impresario Edward R. Murrow (David Strathairn) dedicates himself to exposing the atrocitie...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>06:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1872/1769900400000" target="_blank"> Airwaves For All: A Benefit for WFHB</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1872/1769900400000" target="_blank" rel="noopener"> Airwaves For All: A Benefit for WFHB</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 31 - 06:00 PM
+         to 11:00 PM
         
-        to 11:00 PM
         
-        
-        <br>
         
         <p>Buskirk-Chumley Theater,114 East Kirkwood Avenue, Bloomington, IN 47408, USA</p>
+        
         
         
         <p>The WFHB Benefit Concert featuring:
@@ -4861,88 +1914,85 @@ SUPPORT LOCAL! All proceeds from this benefit concert will go to the radio stati
 
 WFHB 91.3 FM is a commun...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>07:00 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1903/1769904000000" target="_blank"> The Hidden Fortress | McRobbie's Choice</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1903/1769904000000" target="_blank" rel="noopener"> The Hidden Fortress | McRobbie's Choice</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 31 - 07:00 PM
+         to 09:30 PM
         
-        to 09:30 PM
         
-        
-        <br>
         
         <p>1213 East 7th Street, Bloomington, IN 47406, USA</p>
         
         
+        
         <p>The Hidden Fortress stars the inimitable Toshiro Mifune as a general charged with guarding his defeated clan’s princess (a fierce Misa Uehara) as the two smuggle royal treasure across hostile territory. Accompanying them are a pair of bumbling, conniving peasants who may or may not be their friends....</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
     
     <h3>07:30 PM</h3>
 
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1886/1769905800000" target="_blank"> Transparent - A Celebration of Jazz and Community</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1886/1769905800000" target="_blank" rel="noopener"> Transparent - A Celebration of Jazz and Community</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 31 - 07:30 PM
+         to 07:30 PM
         
-        to 07:30 PM
         
-        
-        <br>
         
         <p>Constellation Playhouse,107 West 9th Street, Bloomington, IN 47401, USA</p>
         
         
+        
         <p>Transparent, an audible family portrait, introduces a suite of compositions created and recorded with the support of the Jazz Road Creative Residency program in collaboration with the Hundredth Hill under the direction of Monika Herzig. Modern, sophisticated jazz instrumentals evoke the stories and ...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
+    </article>
     
-    <div class="event">
-
+    <article class="event">
       <div class="event-title">
         
-        <a href="https://tockify.com/bloomington.arts.calendar/detail/1554/1769905800000" target="_blank"> Séance: The Board Awakens</a>
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1554/1769905800000" target="_blank" rel="noopener"> Séance: The Board Awakens</a>
         
       </div>
 
       <div class="event-details">
         
         Saturday January 31 - 07:30 PM
+         to 09:00 PM
         
-        to 09:00 PM
         
-        
-        <br>
         
         <p>Waldron Arts Center (Auditorium),122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
         
         
         <p>Constellation Stage & Screen presents "Séance: The Board Awakens", on stage January 29 - February 15, 2026 at the Waldron Auditorium.
@@ -4951,43 +2001,14 @@ Summon the Unknown.
 
 Dare to uncover the terrifying secrets of the Ouija board in this spine-chilling theatrical experience. As the magic-filled séance begins, you’l...</p>
         
-        Source: Bloomington's Arts Events
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
       </div>
-    </div>
-    
-    
-    <h3>08:00 PM</h3>
-
-    
-    <div class="event">
-
-      <div class="event-title">
-        
-        <a href="https://events.iu.edu/musiciub/event/1973777-concert-orchestra" target="_blank">Concert Orchestra – Joseph Young, guest conductor; José Alejandro Hernández, violin soloist</a>
-        
-      </div>
-
-      <div class="event-details">
-        
-        Saturday January 31 - 08:00 PM
-        
-        to 10:00 PM
-        
-        
-        <br>
-        
-        <p>Musical Arts Center &amp; LIVE@jacobs</p>
-        
-        
-        <p>Enjoy this performance from almost anywhere in the world viaLIVE@jacobs!Repertoire  Shostakovich: Violin Concerto No. 1 in A Minor, Op. 99 (1948/55)Brahms/Schoenberg: Piano Quartet No. 1 in G Minor, Op. 25 (1861)About the Artists  American conductor Joseph Young has emerged as one of today's most co...</p>
-        
-        Source: Indiana University Events
-      </div>
-    </div>
+    </article>
     
     
     
-  </div>
+  </main>
 
   <div class="feeds-section">
     <h2>Feeds</h2>
@@ -5001,104 +2022,32 @@ Dare to uncover the terrifying secrets of the Ouija board in this spine-chilling
       </tr>
       
       <tr>
-        <td>Animal Control Commission</td>
-        <td>67</td>
-        <td>2016-01-19</td>
-        <td>2026-01-12</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_avvoeg5e6830gs4dl4pfuvi3rk@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>BSquare Calendar of Events</td>
-        <td>49</td>
-        <td>2023-12-16</td>
-        <td>2024-12-16</td>
-        <td>https://calendar.google.com/calendar/ical/c_a69f884433e71fa9dd64f9171dfd23927e26abfe5efa234fdeb45972ba05d625%40group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Bicycle & Pedestrian Safety Commission</td>
-        <td>96</td>
-        <td>2015-01-12</td>
-        <td>2025-01-13</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_moqvjq2a3pgd01hdorhpjc1i74@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Bloomington Arts Commission</td>
-        <td>148</td>
-        <td>2016-01-13</td>
-        <td>2026-02-13</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_e6juf1jqv1f9jpuv8rit7jorh0@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Bloomington Digital Underground Advisory Committee</td>
-        <td>75</td>
-        <td>2015-12-03</td>
-        <td>2026-01-15</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_tk5to6almu9sm471e9cfc20h10@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Bloomington Historic Preservation Commission</td>
-        <td>187</td>
-        <td>2017-01-12</td>
-        <td>2026-05-28</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_tqr3t57n8oqf0ebee05ssbicsg@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Bloomington Human Rights Commission</td>
-        <td>92</td>
-        <td>2016-01-25</td>
-        <td>2026-01-20</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_mpgjiebjgu0hn0vmmjg1u3pvg0@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Bloomington Industrial Development Advisory Commission</td>
-        <td>2</td>
-        <td>2017-01-04</td>
-        <td>2017-01-11</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_j45rtttdqksanm5paj4u6jbbgo@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
         <td>Bloomington Library</td>
         <td>0</td>
         <td>N/A</td>
         <td>N/A</td>
-        <td>https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/library_intercept_2026_01.ics</td>
+        <td>bloomington/library_intercept_2026_01.ics</td>
       </tr>
       
       <tr>
         <td>Bloomington Library</td>
-        <td>181</td>
-        <td>2026-02-04</td>
-        <td>2026-03-31</td>
-        <td>https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/library_intercept_2026_03.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Bloomington Redevelopment Commission</td>
-        <td>207</td>
-        <td>2016-11-01</td>
+        <td>110</td>
         <td>2026-02-05</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_s38rkl9v1lq62jutmd1d60ei1k@group.calendar.google.com/public/basic.ics</td>
+        <td>2026-02-28</td>
+        <td>bloomington/library_intercept_2026_02.ics</td>
       </tr>
       
       <tr>
-        <td>Bloomington Urban Enterprise Association</td>
-        <td>81</td>
-        <td>2017-01-11</td>
-        <td>2026-12-09</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_47v9si34k4k4b7ls795ae8bifc@group.calendar.google.com/public/basic.ics</td>
+        <td>Bloomington Library</td>
+        <td>178</td>
+        <td>2026-02-05</td>
+        <td>2026-03-31</td>
+        <td>bloomington/library_intercept_2026_03.ics</td>
       </tr>
       
       <tr>
         <td>Bloomington's Arts Events</td>
-        <td>344</td>
+        <td>342</td>
         <td>2025-12-04</td>
         <td>2031-01-03</td>
         <td>https://tockify.com/api/feeds/ics/bloomington.arts.calendar</td>
@@ -5109,47 +2058,7 @@ Dare to uncover the terrifying secrets of the Ouija board in this spine-chilling
         <td>9</td>
         <td>2024-08-28</td>
         <td>2024-09-14</td>
-        <td>https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/bluebird.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Board of Housing Quality Appeals</td>
-        <td>63</td>
-        <td>2016-01-20</td>
-        <td>2026-02-17</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_833250fduqij1e1j3ht2afvu78@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Board of Park Commissioners</td>
-        <td>163</td>
-        <td>2016-01-26</td>
-        <td>2026-12-10</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_l9887mc9q77o7hn1toh6ggkktc@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Board of Public Safety</td>
-        <td>167</td>
-        <td>2016-01-19</td>
-        <td>2026-02-19</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_hvg1gmhhfvto0eotut0474tkec@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Board of Public Works</td>
-        <td>426</td>
-        <td>2016-01-05</td>
-        <td>2026-12-29</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_9cj462rjc0kigi2h1vjhmmbb3s@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Board of Zoning Appeals</td>
-        <td>113</td>
-        <td>2016-03-24</td>
-        <td>2026-10-22</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_qk38oap8v1hpvljtf6nrtvlohg@group.calendar.google.com/public/basic.ics</td>
+        <td>bloomington/bluebird.ics</td>
       </tr>
       
       <tr>
@@ -5161,395 +2070,27 @@ Dare to uncover the terrifying secrets of the Ouija board in this spine-chilling
       </tr>
       
       <tr>
-        <td>CDBG Funding Citizens Advisory Committee</td>
-        <td>12</td>
-        <td>2017-11-30</td>
-        <td>2025-11-13</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_5tslrk3kqr4n30m7thpkj70d9k@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Cicada Screenings</td>
-        <td>39</td>
-        <td>2023-06-02</td>
-        <td>2024-06-06</td>
-        <td>https://calendar.google.com/calendar/ical/8d96590ccc4204e8cff7f21fcd9b91bf41b37240881d482a36ea2f4b5bf4a3db%40group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>City Council</td>
-        <td>2272</td>
-        <td>1950-08-01</td>
-        <td>2026-12-16</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_61098baejufv5khvd2rcvekdtk@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Climate Action Committee</td>
-        <td>37</td>
-        <td>2020-03-11</td>
-        <td>2024-12-02</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_c8h30sa04dfe2rgb8iehlrl5uk@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Commission on Aging</td>
-        <td>49</td>
-        <td>2016-01-12</td>
-        <td>2026-11-09</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_80r816ic69gsssnnt920oemupk@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Commission on Hispanic and Latino Affairs</td>
-        <td>86</td>
-        <td>2016-01-06</td>
-        <td>2026-01-28</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_1oscb1ute6r06q3e5pbgaq3toc@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Commission on Sustainability</td>
-        <td>68</td>
-        <td>2016-01-12</td>
-        <td>2026-01-13</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_ndl6omraubla6pucoqksbbm1mg@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Commission on the Status of Black Males</td>
-        <td>46</td>
-        <td>2016-01-13</td>
-        <td>2025-02-01</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_is80iamoignhkrv607rcvfqmkc@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Commission on the Status of Children and Youth</td>
-        <td>40</td>
-        <td>2016-01-19</td>
-        <td>2025-03-18</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_6h6qp7mqju25tsc94udql1dgvc@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Commission on the Status of Women</td>
-        <td>54</td>
-        <td>2016-01-07</td>
-        <td>2026-01-01</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_6varnjkfs42dc7ess9aalvvqd8@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Committee on Council Processes</td>
-        <td>35</td>
-        <td>2023-05-04</td>
-        <td>2026-02-27</td>
-        <td>https://calendar.google.com/calendar/ical/c_66747b176289bfbacc2f3805df0fa39ffb490eba8789f55c2c3f8aa02a7f0e20%40group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Council for Community Accessibility</td>
-        <td>53</td>
-        <td>2015-06-22</td>
-        <td>2025-12-29</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_g5gnd4ua9d9243ekl6v7tnapoc@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Dr. Martin Luther King\, Jr. Commission</td>
-        <td>78</td>
-        <td>2016-01-27</td>
-        <td>2026-03-25</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_knn8pjjd96nosmv22m1dk73a0k@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Early Voting</td>
-        <td>25</td>
-        <td>2024-04-09</td>
-        <td>2025-08-07</td>
-        <td>https://calendar.google.com/calendar/ical/369d27c7a9322083baac00a06ca3b0479be0774c6f40c0ab7c86c0659426ef0b%40group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Economic Development Commission</td>
-        <td>88</td>
-        <td>2017-01-18</td>
-        <td>2026-01-20</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_ie7haqq1s9bc5ns0uni3k2uf90@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Environmental Commission</td>
-        <td>143</td>
-        <td>2016-12-08</td>
-        <td>2026-12-08</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_gifsbt66d0cra0iuha44ih41q4@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Environmental Resources Advisory Council</td>
-        <td>53</td>
-        <td>2018-02-14</td>
-        <td>2026-12-09</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_gc66ngj5ihsrg5da3t2ivrrjl4@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Farmers Market Advisory Council</td>
-        <td>67</td>
-        <td>2019-11-07</td>
-        <td>2026-01-12</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_oefraaiuk1avt9iqrrira49d6k@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Hearing Officer</td>
-        <td>120</td>
-        <td>2016-01-13</td>
-        <td>2026-02-25</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_fgs5r6durioo4qenslecptkov0@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Housing Authority Board</td>
-        <td>1</td>
-        <td>2016-02-18</td>
-        <td>2016-02-18</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_fqm6n7gvf7i872vh4k2bl2qgec@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Indiana University Events</td>
-        <td>24</td>
-        <td>2026-02-02</td>
-        <td>2026-04-22</td>
-        <td>https://events.iu.edu/live/ical/events/category_id/12/group_id/105</td>
-      </tr>
-      
-      <tr>
-        <td>Indiana University Events</td>
-        <td>167</td>
-        <td>2026-01-30</td>
-        <td>2026-06-27</td>
-        <td>https://events.iu.edu/live/ical/events/category_id/12/group_id/11</td>
-      </tr>
-      
-      <tr>
-        <td>Indiana University Events</td>
-        <td>40</td>
-        <td>2026-01-30</td>
-        <td>2026-05-08</td>
-        <td>https://events.iu.edu/live/ical/events/category_id/12/group_id/25</td>
-      </tr>
-      
-      <tr>
-        <td>Indiana University Events</td>
-        <td>422</td>
-        <td>2026-01-30</td>
-        <td>2026-05-16</td>
-        <td>https://events.iu.edu/live/ical/events/category_id/12/group_id/56</td>
-      </tr>
-      
-      <tr>
-        <td>Indiana University Events</td>
-        <td>56</td>
-        <td>2026-01-30</td>
-        <td>2026-05-29</td>
-        <td>https://events.iu.edu/live/ical/events/category_id/12/group_id/64</td>
-      </tr>
-      
-      <tr>
-        <td>Indiana University Events</td>
-        <td>19</td>
-        <td>2026-02-05</td>
-        <td>2026-05-20</td>
-        <td>https://events.iu.edu/live/ical/events/group_id/129</td>
-      </tr>
-      
-      <tr>
-        <td>Indiana University Events</td>
-        <td>36</td>
-        <td>2026-01-30</td>
-        <td>2026-04-11</td>
-        <td>https://events.iu.edu/live/ical/v2/events/category_id/12/group_id/382</td>
-      </tr>
-      
-      <tr>
-        <td>Jack Hopkins Social Services Funding Committee</td>
-        <td>70</td>
-        <td>2018-02-26</td>
-        <td>2026-01-26</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_e6448fd8fi0f52j9bkbre7g430@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>MPO Citizens Advisory Committee</td>
-        <td>91</td>
-        <td>2016-01-27</td>
-        <td>2026-12-02</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_v8fd687sbp4e6vj3u1ihtcarn8@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>MPO Policy Committee</td>
-        <td>113</td>
-        <td>2016-01-08</td>
-        <td>2026-12-04</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_q9vfi99npbo99h15h19eggr6do@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>MPO Technical Advisory Committee</td>
-        <td>44</td>
-        <td>2016-01-27</td>
-        <td>2026-12-02</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_tfp4djjctjcl3cfa7e3osqr330@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Misc Civic Events</td>
-        <td>252</td>
-        <td>2021-05-28</td>
-        <td>2024-02-28</td>
-        <td>https://calendar.google.com/calendar/ical/4dj0guhji982ca5k90ljeliul0%40group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Monroe County Domestic Violence Coalition</td>
-        <td>27</td>
-        <td>2016-01-15</td>
-        <td>2024-06-21</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_f1f8r5obe443tuqurgnofq6geo@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Monroe County Fair Grounds Master Calendar</td>
-        <td>341</td>
-        <td>2016-03-05</td>
-        <td>2026-07-03</td>
-        <td>https://calendar.google.com/calendar/ical/mocofairgrounds%40gmail.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Parking Commission</td>
-        <td>146</td>
-        <td>2017-03-28</td>
-        <td>2025-01-23</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_a33nstcgh5p6jedp3tp1744drk@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Plan Commission</td>
-        <td>229</td>
-        <td>2016-01-19</td>
-        <td>2026-12-17</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_616d8rtu6dqpm88r23f7u8vq10@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Plat Committee</td>
-        <td>84</td>
-        <td>2016-02-08</td>
-        <td>2026-01-12</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_2cffk8544baujn0nvt1jke3lns@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Public MCDP Event Calendar</td>
-        <td>162</td>
-        <td>2022-02-24</td>
-        <td>2026-05-16</td>
-        <td>https://calendar.google.com/calendar/ical/c_siu0d8ohqr5j5p936tig34emts@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Public Safety Local Income Tax Committee</td>
-        <td>33</td>
-        <td>2017-06-15</td>
-        <td>2025-07-28</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_upft0l9q6h6gh9jo1ce25tnk5k@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Sidewalk Committee</td>
-        <td>20</td>
-        <td>2018-03-12</td>
-        <td>2025-12-09</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_foeklt0pri1pnq6j5s5eaqtjkk@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Traffic Commission</td>
-        <td>118</td>
-        <td>2015-01-28</td>
-        <td>2025-02-26</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_mda9anqvkuu6ohqdv745thfub4@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Tree Commission</td>
-        <td>49</td>
-        <td>2017-06-28</td>
-        <td>2026-11-16</td>
-        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_o0tjd2ea75995hcholm1kvgs2o@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Unnamed Calendar</td>
+        <td>Eventbrite Bloomington Events</td>
         <td>0</td>
         <td>N/A</td>
         <td>N/A</td>
-        <td>https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/eventbrite_2026_01.ics</td>
+        <td>bloomington/eventbrite_2026_01.ics</td>
       </tr>
       
       <tr>
-        <td>Unnamed Calendar</td>
+        <td>Eventbrite Bloomington Events</td>
         <td>0</td>
         <td>N/A</td>
         <td>N/A</td>
-        <td>https://raw.githubusercontent.com/judell/community-calendar/main/bloomington/eventbrite_2026_03.ics</td>
+        <td>bloomington/eventbrite_2026_02.ics</td>
       </tr>
       
       <tr>
-        <td>Unnamed Calendar</td>
+        <td>Eventbrite Bloomington Events</td>
         <td>0</td>
         <td>N/A</td>
         <td>N/A</td>
-        <td>https://calendar.google.com/calendar/ical/96tdb02ghjpvqhuos76gac3s7dfh049h%40import.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Unnamed Calendar</td>
-        <td>0</td>
-        <td>N/A</td>
-        <td>N/A</td>
-        <td>https://calendar.google.com/calendar/ical/qq72qficfv7tslhdmm3s01d62jglpc9f%40import.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Unnamed Calendar</td>
-        <td>0</td>
-        <td>N/A</td>
-        <td>N/A</td>
-        <td>https://mcpl.evanced.info/signupadmin/eventsxml.aspx?dm=ical&eventid=85020</td>
-      </tr>
-      
-      <tr>
-        <td>Unnamed Calendar</td>
-        <td>0</td>
-        <td>N/A</td>
-        <td>N/A</td>
-        <td>https://www.bloomingtoncommunityband.org/events/month/?ical=1</td>
-      </tr>
-      
-      <tr>
-        <td>Unnamed Calendar</td>
-        <td>1</td>
-        <td>2023-11-12</td>
-        <td>2023-11-12</td>
-        <td>https://www.vocesnovae.org/concerts/2023/11/12/six-degrees-of-separation?format=ical</td>
+        <td>bloomington/eventbrite_2026_03.ics</td>
       </tr>
       
       <tr>
@@ -5558,30 +2099,6 @@ Dare to uncover the terrifying secrets of the Ouija board in this spine-chilling
         <td>2015-12-29</td>
         <td>2026-09-08</td>
         <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_1b95au4d2ueudldosb024fimp0@group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>Website calendar</td>
-        <td>597</td>
-        <td>2018-10-16</td>
-        <td>2026-03-17</td>
-        <td>https://calendar.google.com/calendar/ical/mhcfoodpantry.org_7001o80jf1si95gqj1h88p5558%40group.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>http://writersguildbloomington.com/?plugin=all-in-one-event-ca</td>
-        <td>200</td>
-        <td>2023-02-01</td>
-        <td>2026-01-25</td>
-        <td>https://calendar.google.com/calendar/ical/kovia38vljudopq05vqf9aori2q202rm%40import.calendar.google.com/public/basic.ics</td>
-      </tr>
-      
-      <tr>
-        <td>https://mccsc.edu/sndreq/generateCalendarICS.php?calendar_id=1</td>
-        <td>67</td>
-        <td>2025-01-31</td>
-        <td>2026-10-15</td>
-        <td>https://calendar.google.com/calendar/ical/b4j4j61ab9c7j3uh1v5ddtfpb25ibfod%40import.calendar.google.com/public/basic.ics</td>
       </tr>
       
     </table>
@@ -5594,40 +2111,6 @@ Dare to uncover the terrifying secrets of the Ouija board in this spine-chilling
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
-
-    function adjustCalendarPosition() {
-      const calendar = document.getElementById('calendar-widget');
-      const title = document.querySelector('h1');
-      const eventList = document.querySelector('.event-list');
-
-      if (window.innerWidth <= 480) {
-        // Narrowest screens: calendar full width above the list
-        title.parentNode.insertBefore(calendar, title.nextSibling);
-        calendar.style.position = 'relative';
-        calendar.style.width = '100%';
-        calendar.style.marginTop = '20px';
-        eventList.style.marginRight = '0';
-      } else if (window.innerWidth <= 768) {
-        // Mid-sized screens: calendar below title, 50% width
-        title.parentNode.insertBefore(calendar, title.nextSibling);
-        calendar.style.position = 'relative';
-        calendar.style.width = '50%';  // Ensure it stays at 50%
-        calendar.style.marginTop = '20px';
-        eventList.style.marginRight = '0';
-      } else {
-        // Larger screens: calendar fixed in top-right
-        document.body.appendChild(calendar);
-        calendar.style.position = 'fixed';
-        calendar.style.top = '20px';
-        calendar.style.right = '20px';
-        calendar.style.width = '';
-        eventList.style.marginRight = ''; // Let the CSS handle this based on screen width
-      }
-    }
-
-    window.addEventListener('resize', adjustCalendarPosition);
-    document.addEventListener('DOMContentLoaded', adjustCalendarPosition);
   </script>
 </body>
-
 </html>
