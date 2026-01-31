@@ -26,9 +26,9 @@ LOCATION_CONFIGS = {
     }
 }
 
-def fetch_events_from_page(url, headers):
+def fetch_events_from_page(url, session):
     """Fetch and parse JSON-LD events from a single page."""
-    resp = requests.get(url, headers=headers, timeout=30)
+    resp = session.get(url, timeout=30)
     resp.raise_for_status()
     
     matches = re.findall(r'<script type="application/ld\+json">(.*?)</script>', resp.text, re.DOTALL)
@@ -55,12 +55,27 @@ def scrape_eventbrite(location, target_year, target_month, max_pages=20):
     
     headers = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Linux"',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
     }
     
     all_events = []
     seen_urls = set()
+    
+    # Use a session to maintain cookies across requests
+    session = requests.Session()
+    session.headers.update(headers)
     
     for page in range(1, max_pages + 1):
         if page == 1:
@@ -71,7 +86,7 @@ def scrape_eventbrite(location, target_year, target_month, max_pages=20):
         print(f"Fetching page {page}: {url}")
         
         try:
-            events = fetch_events_from_page(url, headers)
+            events = fetch_events_from_page(url, session)
         except Exception as e:
             print(f"Error fetching page {page}: {e}")
             break
