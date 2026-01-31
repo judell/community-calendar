@@ -1,56 +1,89 @@
 import requests
 import sys
 from icalendar import Calendar, Event, vText
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Press Democrat uses CitySpark API (same as Bohemian)
 # ppid: 8662, slug: SRPressDemocrat
 
 def fetch_all_events(year, month):
     results = []
-    skip = 0
-    tps = 25
-    has_more_data = True
+    seen_ids = set()
+    tps = 100  # API caps at 100 anyway
+    
+    # Calculate end of target month
+    if month == 12:
+        end_year, end_month = year + 1, 1
+    else:
+        end_year, end_month = year, month + 1
+    month_end = datetime(int(end_year), int(end_month), 1)
+    
+    # Start from beginning of month, advance window when results run out
+    current_start = f"{year}-{month:02d}-01T00:00:00"
+    
+    while True:
+        skip = 0
+        found_any = False
+        latest_date = None
+        
+        # Paginate through results for current start date
+        while True:
+            url = 'https://portal.cityspark.com/v1/events/SRPressDemocrat'
+            payload = {
+                "ppid": 8662,
+                "start": current_start,
+                "end": None,
+                "distance": 40,
+                "lat": 38.5212368,
+                "lng": -122.8540282,
+                "sort": "Date",
+                "skip": skip,
+                "tps": str(tps)
+            }
+            headers = {'Content-Type': 'application/json'}
 
-    while has_more_data:
-        url = 'https://portal.cityspark.com/v1/events/SRPressDemocrat'
-        payload = {
-            "ppid": 8662,
-            "start": f"{year}-{month:02d}-01T00:00:00",
-            "end": None,
-            "distance": 40,
-            "lat": 38.5212368,
-            "lng": -122.8540282,
-            "sort": "Popularity",
-            "skip": skip,
-            "tps": "24"
-        }
-        headers = {
-            'Content-Type': 'application/json'
-        }
+            response = requests.post(url, json=payload, headers=headers)
+            data = response.json()
 
-        response = requests.post(url, json=payload, headers=headers)
-        data = response.json()
+            if 'Value' not in data or data['Value'] is None or len(data['Value']) == 0:
+                break
 
-        if 'Value' in data and data['Value'] is not None:
             for event in data['Value']:
                 event_start = datetime.fromisoformat(event['StartUTC'].replace('Z', '+00:00'))
                 
-                if event_start.year > int(year) or (event_start.year == int(year) and event_start.month > int(month)):
-                    has_more_data = False
-                    break
+                # Stop if beyond target month
+                if event_start.replace(tzinfo=None) >= month_end:
+                    return results
+                
+                # Track latest date seen
+                if latest_date is None or event_start > latest_date:
+                    latest_date = event_start
+                
+                # Skip duplicates
+                event_id = event.get('Id', event.get('PId', ''))
+                if event_id in seen_ids:
+                    continue
+                seen_ids.add(event_id)
+                
+                # Only include events in target month
+                if event_start.year == int(year) and event_start.month == int(month):
+                    results.append(event)
+                    found_any = True
 
-                results.append(event)
-
-            if has_more_data:
-                if len(data['Value']) < tps:
-                    has_more_data = False
-                else:
-                    skip += tps
+            if len(data['Value']) < tps:
+                break
+            skip += tps
+        
+        # If we got results, advance start to day after latest event
+        if latest_date:
+            next_day = latest_date.replace(hour=0, minute=0, second=0) + timedelta(days=1)
+            if next_day.replace(tzinfo=None) >= month_end:
+                break
+            current_start = next_day.strftime("%Y-%m-%dT%H:%M:%S")
         else:
-            print(f'No "Value" key found in response for skip={skip}. Stopping.')
-            has_more_data = False
-
+            # No results and no latest_date means we're done
+            break
+    
     return results
 
 def generate_icalendar(events, year, month):
