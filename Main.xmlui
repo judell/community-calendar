@@ -1,7 +1,7 @@
 <App name="Community Calendar">
   <DataSource
     id="events"
-    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate()}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate()}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey
     }}"
@@ -11,17 +11,19 @@
   <Text value="{events.value ? events.value.length + ' events this week' : 'Loading...'}" />
 
   <List data="{events}">
-    <HStack gap="$space-4">
-      <VStack width="80px">
-        <Text fontWeight="bold" value="{window.formatDayOfWeek($item.start_time)}" />
-        <Text value="{window.formatMonthDay($item.start_time)}" />
-        <Text fontSize="$text-sm" value="{window.formatTime($item.start_time)}" />
-      </VStack>
-      <VStack>
-        <Text fontWeight="bold" value="{$item.title}" />
-        <Text fontSize="$text-sm" color="$color-text-secondary" value="{$item.location}" />
-        <Text fontSize="$text-sm" fontStyle="italic" value="{'Source: ' + $item.source}" />
-      </VStack>
-    </HStack>
+    <Card padding="$space-3" marginBottom="$space-2">
+      <HStack gap="$space-4" verticalAlignment="top">
+        <VStack width="90px" horizontalAlignment="center">
+          <Text fontWeight="bold" value="{window.formatDayOfWeek($item.start_time)}" />
+          <Text value="{window.formatMonthDay($item.start_time)}" />
+          <Text fontSize="$text-sm" color="$color-text-secondary" value="{window.formatTime($item.start_time)}" />
+        </VStack>
+        <VStack gap="$space-1">
+          <Text fontWeight="bold" value="{$item.title}" />
+          <Text fontSize="$text-sm" color="$color-text-secondary" value="{$item.location}" />
+          <Text fontSize="$text-xs" fontStyle="italic" color="$color-text-tertiary" value="{'Source: ' + $item.source}" />
+        </VStack>
+      </HStack>
+    </Card>
   </List>
 </App>
