@@ -8,8 +8,19 @@
   />
 
   <H1>What's Happening</H1>
+  <Text value="{events.value ? events.value.length + ' events this week' : 'Loading...'}" />
 
   <List data="{events}">
-    <Text value="{$item.title}" />
+    <HStack gap="$space-4">
+      <VStack width="80px">
+        <Text fontWeight="bold" value="{window.formatDayOfWeek($item.start_time)}" />
+        <Text value="{window.formatMonthDay($item.start_time)}" />
+        <Text fontSize="$text-sm" value="{window.formatTime($item.start_time)}" />
+      </VStack>
+      <VStack>
+        <Text fontWeight="bold" value="{$item.title}" />
+        <Text fontSize="$text-sm" color="$color-text-secondary" value="{$item.location}" />
+      </VStack>
+    </HStack>
   </List>
 </App>
