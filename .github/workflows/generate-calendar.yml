@@ -79,7 +79,7 @@ jobs:
       run: |
         INPUT="${{ github.event.inputs.locations }}"
         if [ -z "$INPUT" ] || [ "$INPUT" = "all" ]; then
-          echo "list=santarosa,sebastopol,bloomington" >> $GITHUB_OUTPUT
+          echo "list=santarosa,sebastopol,cotati,bloomington" >> $GITHUB_OUTPUT
         else
           echo "list=$INPUT" >> $GITHUB_OUTPUT
         fi
@@ -112,6 +112,29 @@ jobs:
         done
       continue-on-error: true
 
+    - name: Run new Santa Rosa scrapers
+      if: contains(steps.locations.outputs.list, 'santarosa') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        for period in "this" "next" "next2"; do
+          if [ "$period" = "this" ]; then
+            Y=${{ steps.dates.outputs.this_year }}
+            M=${{ steps.dates.outputs.this_month }}
+          elif [ "$period" = "next" ]; then
+            Y=${{ steps.dates.outputs.next_year }}
+            M=${{ steps.dates.outputs.next_month }}
+          else
+            Y=${{ steps.dates.outputs.next2_year }}
+            M=${{ steps.dates.outputs.next2_month }}
+          fi
+          
+          echo "Running new scrapers for $Y-$M..."
+          python scrapers/sonoma_parks.py --year $Y --month $((10#$M)) --output santarosa/sonoma_parks_${Y}_${M}.ics || true
+          python scrapers/cal_theatre.py --year $Y --month $((10#$M)) --output santarosa/cal_theatre_${Y}_${M}.ics || true
+          python scrapers/copperfields.py --year $Y --month $((10#$M)) --output santarosa/copperfields_${Y}_${M}.ics || true
+          python scrapers/sonoma_county_gov.py --year $Y --month $((10#$M)) --output santarosa/sonoma_county_gov_${Y}_${M}.ics || true
+        done
+      continue-on-error: true
+
     - name: Update Santa Rosa feeds.txt
       if: contains(steps.locations.outputs.list, 'santarosa') && github.event.inputs.regenerate_only != 'true'
       run: |
@@ -121,22 +144,36 @@ jobs:
         https://calendar.google.com/calendar/ical/eventsatarlenefransictheater@gmail.com/public/basic.ics
         https://lutherburbankcenter.org/events/?ical=1
         https://schulzmuseum.org/events/?ical=1
+        https://www.sonoma.com/events/?ical=1
+        https://golocal.coop/?post_type=tribe_events&ical=1&eventDisplay=list
 
         # Local scraped files
         santarosa/library_intercept_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
         santarosa/eventbrite_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
         santarosa/bohemian_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
         santarosa/pressdemocrat_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        santarosa/sonoma_parks_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        santarosa/cal_theatre_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        santarosa/copperfields_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        santarosa/sonoma_county_gov_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
 
         santarosa/library_intercept_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
         santarosa/eventbrite_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
         santarosa/bohemian_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
         santarosa/pressdemocrat_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        santarosa/sonoma_parks_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        santarosa/cal_theatre_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        santarosa/copperfields_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        santarosa/sonoma_county_gov_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
 
         santarosa/library_intercept_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
         santarosa/eventbrite_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
         santarosa/bohemian_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
         santarosa/pressdemocrat_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        santarosa/sonoma_parks_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        santarosa/cal_theatre_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        santarosa/copperfields_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        santarosa/sonoma_county_gov_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
 
         # City calendars
         santarosa/SRCity_Main_Calendar.ics
@@ -213,6 +250,52 @@ jobs:
         python cal.py --generate --location sebastopol --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
 
     # ==========================================
+    # Cotati
+    # ==========================================
+    - name: Scrape Cotati sources
+      if: contains(steps.locations.outputs.list, 'cotati') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        echo "Processing Cotati..."
+        for period in "this" "next" "next2"; do
+          if [ "$period" = "this" ]; then
+            Y=${{ steps.dates.outputs.this_year }}
+            M=${{ steps.dates.outputs.this_month }}
+          elif [ "$period" = "next" ]; then
+            Y=${{ steps.dates.outputs.next_year }}
+            M=${{ steps.dates.outputs.next_month }}
+          else
+            Y=${{ steps.dates.outputs.next2_year }}
+            M=${{ steps.dates.outputs.next2_month }}
+          fi
+          
+          echo "Scraping Cotati for $Y-$M..."
+          python scrapers/redwood_cafe.py --year $Y --month $((10#$M)) --output cotati/redwood_cafe_${Y}_${M}.ics || true
+        done
+      continue-on-error: true
+
+    - name: Update Cotati feeds.txt
+      if: contains(steps.locations.outputs.list, 'cotati') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        cat > cotati/feeds.txt << EOF
+        # Redwood Cafe Cotati - Live music
+        cotati/redwood_cafe_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        cotati/redwood_cafe_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        cotati/redwood_cafe_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        EOF
+        sed -i 's/^[[:space:]]*//' cotati/feeds.txt
+
+    - name: Generate Cotati calendars
+      if: contains(steps.locations.outputs.list, 'cotati')
+      run: |
+        LOCAL_ONLY_FLAG=""
+        if [ "${{ github.event.inputs.regenerate_only }}" = "true" ]; then
+          LOCAL_ONLY_FLAG="--local-only"
+        fi
+        python cal.py --generate --location cotati --year ${{ steps.dates.outputs.this_year }} --month ${{ steps.dates.outputs.this_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
+        python cal.py --generate --location cotati --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
+        python cal.py --generate --location cotati --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
+
+    # ==========================================
     # Bloomington
     # ==========================================
     - name: Scrape Bloomington sources
@@ -276,4 +359,4 @@ jobs:
         git config --global user.email 'actions@github.com'
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         git add .
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-generate calendar for current and next 2 months" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-generate calendar for current and next 2 months" && git pull --rebase && git push)
