@@ -110,6 +110,32 @@
           .map(([source, count]) => ({ source, count }))
           .sort((a, b) => b.count - a.count);
       };
+
+      // Deduplicate events: merge events with same title + start_time, combine sources
+      window.dedupeEvents = function(events) {
+        if (!events || !events.length) return [];
+        const groups = {};
+        events.forEach(e => {
+          const key = (e.title || '').trim().toLowerCase() + '|' + (e.start_time || '');
+          if (!groups[key]) {
+            groups[key] = { ...e, sources: [e.source] };
+          } else {
+            // Add source if not already present
+            if (!groups[key].sources.includes(e.source)) {
+              groups[key].sources.push(e.source);
+            }
+            // Prefer non-empty values for other fields
+            if (!groups[key].url && e.url) groups[key].url = e.url;
+            if (!groups[key].location && e.location) groups[key].location = e.location;
+            if (!groups[key].description && e.description) groups[key].description = e.description;
+          }
+        });
+        // Convert sources array to comma-separated string
+        return Object.values(groups).map(e => ({
+          ...e,
+          source: e.sources.sort().join(', ')
+        })).sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+      };
     </script>
   </head>
   <body>
