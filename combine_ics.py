@@ -5,21 +5,50 @@ Filters to only include events from today forward.
 """
 
 import argparse
-import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Map filenames to friendly source names
+SOURCE_NAMES = {
+    'arlene_francis_theater': 'Arlene Francis Center',
+    'luther_burbank_center': 'Luther Burbank Center',
+    'schulz_museum': 'Charles M. Schulz Museum',
+    'sonoma_com': 'Sonoma.com',
+    'golocal_coop': 'GoLocal Cooperative',
+    'sonoma_county_aa': 'Sonoma County AA',
+    'sonoma_county_dsa': 'Sonoma County DSA',
+    'museumsc': 'Museum of Sonoma County',
+    'library_intercept': 'Sonoma County Library',
+    'sonoma_county_gov': 'Sonoma County Government',
+    'sonoma_parks': 'Sonoma County Parks',
+    'cal_theatre': 'Cal Theatre',
+    'copperfields': "Copperfield's Books",
+    'bohemian': 'North Bay Bohemian',
+    'eventbrite': 'Eventbrite',
+    'pressdemocrat': 'Press Democrat',
+    'SRCity': 'City of Santa Rosa',
+}
+
+
+def get_source_name(filename):
+    """Get friendly source name from filename."""
+    stem = Path(filename).stem
+    # Remove year/month suffix like _2026_02
+    base = re.sub(r'_\d{4}_\d{2}$', '', stem)
+    # Check for SRCity prefix
+    if stem.startswith('SRCity_'):
+        return 'City of Santa Rosa'
+    return SOURCE_NAMES.get(base, base.replace('_', ' ').title())
+
 
 def parse_ics_datetime(dt_str):
     """Parse an ICS datetime string to a datetime object."""
-    # Remove any TZID prefix
     if ';' in dt_str:
         dt_str = dt_str.split(':')[-1]
     
     dt_str = dt_str.strip()
     
-    # Handle different formats
     try:
         if dt_str.endswith('Z'):
             return datetime.strptime(dt_str, '%Y%m%dT%H%M%SZ').replace(tzinfo=timezone.utc)
@@ -35,19 +64,36 @@ def extract_events(ics_content, source_name=None):
     """Extract VEVENT blocks from ICS content."""
     events = []
     
-    # Find all VEVENT blocks
     pattern = r'BEGIN:VEVENT\r?\n(.*?)\r?\nEND:VEVENT'
     matches = re.findall(pattern, ics_content, re.DOTALL)
     
     for event_content in matches:
-        # Parse DTSTART to check if event is in the future
         dtstart_match = re.search(r'DTSTART[^:]*:([^\r\n]+)', event_content)
         if dtstart_match:
             dt = parse_ics_datetime(dtstart_match.group(1))
             if dt:
-                # Add source as X-SOURCE if not present and source_name provided
-                if source_name and 'X-SOURCE' not in event_content:
-                    event_content = f'X-SOURCE:{source_name}\r\n{event_content}'
+                # Add or update source in description
+                if source_name:
+                    # Check if DESCRIPTION exists
+                    desc_match = re.search(r'DESCRIPTION:([^\r\n]*(?:\r?\n [^\r\n]*)*)', event_content)
+                    source_line = f'Source: {source_name}'
+                    
+                    if desc_match:
+                        old_desc = desc_match.group(1)
+                        # Don't add if source already mentioned
+                        if 'Source:' not in old_desc:
+                            new_desc = old_desc.rstrip() + '\\n\\n' + source_line
+                            event_content = event_content.replace(
+                                f'DESCRIPTION:{old_desc}',
+                                f'DESCRIPTION:{new_desc}'
+                            )
+                    else:
+                        # Add DESCRIPTION with source
+                        event_content = f'DESCRIPTION:{source_line}\r\n{event_content}'
+                    
+                    # Also add X-SOURCE header
+                    if 'X-SOURCE' not in event_content:
+                        event_content = f'X-SOURCE:{source_name}\r\n{event_content}'
                 
                 events.append({
                     'dtstart': dt,
@@ -62,12 +108,15 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar")
     all_events = []
     now = datetime.now(timezone.utc)
     
-    # Process all .ics files
     ics_dir = Path(input_dir)
-    for ics_file in ics_dir.glob('*.ics'):
+    for ics_file in sorted(ics_dir.glob('*.ics')):
+        # Skip the output file if it exists
+        if ics_file.name == Path(output_file).name:
+            continue
+            
         try:
             content = ics_file.read_text(encoding='utf-8', errors='ignore')
-            source_name = ics_file.stem.replace('_', ' ').title()
+            source_name = get_source_name(ics_file.name)
             events = extract_events(content, source_name)
             
             # Filter to future events only
@@ -75,11 +124,11 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar")
             all_events.extend(future_events)
             
             if future_events:
-                print(f"  {len(future_events):4d} future events from {ics_file.name}")
+                print(f"  {len(future_events):4d} future events from {ics_file.name} ({source_name})")
         except Exception as e:
             print(f"  Error processing {ics_file.name}: {e}")
     
-    # Sort by start time (normalize to UTC for comparison)
+    # Sort by start time
     def normalize_dt(dt):
         if dt.tzinfo is None:
             return dt.replace(tzinfo=timezone.utc)
@@ -118,7 +167,6 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar")
     
     output.append('END:VCALENDAR')
     
-    # Write output
     Path(output_file).write_text('\r\n'.join(output), encoding='utf-8')
     
     print(f"\nCombined {len(unique_events)} unique future events into {output_file}")
