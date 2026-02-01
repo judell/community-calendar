@@ -431,4 +431,11 @@ jobs:
         git config --global user.email 'actions@github.com'
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         git add .
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-generate calendar for current and next 2 months" && git pull --rebase && git push)
+        git diff --quiet && git diff --staged --quiet || (
+          git commit -m "Auto-generate calendar for current and next 2 months"
+          for i in 1 2 3; do
+            git pull --rebase && git push && break
+            echo "Push failed, retrying in 5 seconds..."
+            sleep 5
+          done
+        )
