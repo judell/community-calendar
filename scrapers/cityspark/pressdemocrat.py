@@ -4,6 +4,9 @@ from icalendar import Calendar, Event, vText
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+# Press Democrat uses CitySpark API (same as Bohemian)
+# ppid: 8662, slug: SRPressDemocrat
+
 def fetch_all_events(year, month):
     """Fetch all events for the given year/month from CitySpark API.
     
@@ -28,14 +31,14 @@ def fetch_all_events(year, month):
     
     skip = 0
     while True:
-        url = 'https://portal.cityspark.com/v1/events/Bohemian'
+        url = 'https://portal.cityspark.com/v1/events/SRPressDemocrat'
         payload = {
-            "ppid": 9093,
+            "ppid": 8662,
             "start": start_str,
             "end": end_str,
-            "distance": 30,
-            "lat": 38.4282591,
-            "lng": -122.5548637,
+            "distance": 40,
+            "lat": 38.5212368,
+            "lng": -122.8540282,
             "sort": "Date",
             "skip": skip,
             "tps": str(tps)
@@ -52,9 +55,10 @@ def fetch_all_events(year, month):
             event_start = datetime.fromisoformat(event['StartUTC'].replace('Z', '+00:00'))
             
             # Skip duplicates
-            if event['Id'] in seen_ids:
+            event_id = event.get('Id', event.get('PId', ''))
+            if event_id in seen_ids:
                 continue
-            seen_ids.add(event['Id'])
+            seen_ids.add(event_id)
             
             # Only include events in target month (API may return edge cases)
             if event_start.year == int(year) and event_start.month == int(month):
@@ -68,9 +72,9 @@ def fetch_all_events(year, month):
 
 def generate_icalendar(events, year, month):
     cal = Calendar()
-    cal.add('prodid', '-//Bohemian Events//bohemian.com//')
+    cal.add('prodid', '-//Press Democrat Events//pressdemocrat.com//')
     cal.add('version', '2.0')
-    cal.add('x-wr-calname', 'Bohemian')
+    cal.add('x-wr-calname', 'Press Democrat')
     cal.add('x-wr-timezone', 'America/Los_Angeles')
 
     pacific = ZoneInfo('America/Los_Angeles')
@@ -84,7 +88,7 @@ def generate_icalendar(events, year, month):
             event_end_utc = datetime.fromisoformat(event['EndUTC'].replace('Z', '+00:00'))
             event_end = event_end_utc.astimezone(pacific)
         else:
-            event_end = event_start  # Default to event start if end is None
+            event_end = event_start
 
         if event_start.year == int(year) and event_start.month == int(month):
             cal_event = Event()
@@ -93,31 +97,32 @@ def generate_icalendar(events, year, month):
             cal_event.add('dtend', event_end)
             cal_event.add('location', vText(event.get('Venue', '')))
             desc = event.get('Description', '') or ''
-            desc = desc.rstrip() + '\n\nSource: North Bay Bohemian' if desc else 'Source: North Bay Bohemian'
+            desc = desc.rstrip() + '\n\nSource: Press Democrat' if desc else 'Source: Press Democrat'
             cal_event.add('description', desc)
-            cal_event.add('uid', event['Id'])
-            cal_event.add('url', event['Links'][0]['url'] if event.get('Links') else None)
-            cal_event.add('x-source', 'North Bay Bohemian')
+            cal_event.add('uid', event.get('Id', event.get('PId', '')))
+            if event.get('Links') and len(event['Links']) > 0:
+                cal_event.add('url', event['Links'][0].get('url', ''))
+            cal_event.add('x-source', 'Press Democrat')
             cal.add_component(cal_event)
 
     return cal
 
-def main(year, month):
+def main(year, month, output=None):
     events = fetch_all_events(year, month)
     calendar = generate_icalendar(events, year, month)
-    
-    # Save the .ics file
-    filename = f"bohemian_{year}_{month:02d}.ics"
+
+    filename = output or f"pressdemocrat_{year}_{month:02d}.ics"
     with open(filename, 'wb') as f:
         f.write(calendar.to_ical())
     print(f"iCalendar feed generated: {filename}")
+    print(f"Total events: {len(events)}")
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print("Usage: python bohemian.py <year> <month>")
-        sys.exit(1)
+    import argparse
+    parser = argparse.ArgumentParser(description='Scrape Press Democrat events')
+    parser.add_argument('--year', type=int, required=True, help='Year to scrape')
+    parser.add_argument('--month', type=int, required=True, help='Month to scrape')
+    parser.add_argument('--output', '-o', help='Output file path')
+    args = parser.parse_args()
 
-    year = sys.argv[1]
-    month = int(sys.argv[2])
-
-    main(year, month)
+    main(args.year, args.month, args.output)

@@ -106,9 +106,8 @@ jobs:
           echo "Scraping Santa Rosa for $Y-$M..."
           python library_intercept.py --location santarosa --year $Y --month $M || true
           # node eventbrite.js santarosa $Y $M || true  # Disabled - blocked by bot detection
-          cd santarosa && python bohemian.py $Y $((10#$M)) || true
-          python pressdemocrat.py $Y $((10#$M)) || true
-          cd ..
+          python scrapers/cityspark/bohemian.py --year $Y --month $((10#$M)) --output santarosa/bohemian_${Y}_${M}.ics || true
+          python scrapers/cityspark/pressdemocrat.py --year $Y --month $((10#$M)) --output santarosa/pressdemocrat_${Y}_${M}.ics || true
         done
       continue-on-error: true
 
@@ -132,7 +131,7 @@ jobs:
           python scrapers/cal_theatre.py --year $Y --month $((10#$M)) --output santarosa/cal_theatre_${Y}_${M}.ics || true
           python scrapers/copperfields.py --year $Y --month $((10#$M)) --output santarosa/copperfields_${Y}_${M}.ics || true
           python scrapers/sonoma_county_gov.py --year $Y --month $((10#$M)) --output santarosa/sonoma_county_gov_${Y}_${M}.ics || true
-          cd santarosa && python cafefrida.py $Y $((10#$M)) || true && cd ..
+          python scrapers/wix/cafefrida.py --year $Y --month $((10#$M)) --output santarosa/cafefrida_${Y}_${M}.ics || true
         done
       continue-on-error: true
 
@@ -238,10 +237,8 @@ jobs:
           fi
           
           echo "Scraping Sebastopol for $Y-$M..."
-          cd sebastopol
-          python sebarts.py --year $Y --month $((10#$M)) || true
-          python occidental_arts.py --year $Y --month $((10#$M)) || true
-          cd ..
+          python scrapers/sebarts.py --year $Y --month $((10#$M)) --output sebastopol/sebarts_${Y}_${M}.ics || true
+          python scrapers/occidental_arts.py --year $Y --month $((10#$M)) --output sebastopol/occidental_arts_${Y}_${M}.ics || true
         done
       continue-on-error: true
 

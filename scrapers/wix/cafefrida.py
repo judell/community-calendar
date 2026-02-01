@@ -191,7 +191,7 @@ def generate_icalendar(events, year, month):
     return cal
 
 
-def main(year, month):
+def main(year, month, output=None):
     print(f"Fetching events from {URL}", file=sys.stderr)
     html_content = fetch_html()
 
@@ -203,17 +203,18 @@ def main(year, month):
     # Count events in target month
     month_events = [e for e in events if e['start'].year == int(year) and e['start'].month == int(month)]
 
-    filename = f"cafefrida_{year}_{month:02d}.ics"
+    filename = output or f"cafefrida_{year}_{month:02d}.ics"
     with open(filename, 'wb') as f:
         f.write(calendar.to_ical())
     print(f"Generated {filename} with {len(month_events)} events")
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print("Usage: python cafefrida.py <year> <month>")
-        sys.exit(1)
+    import argparse
+    parser = argparse.ArgumentParser(description='Scrape Cafe Frida Gallery events')
+    parser.add_argument('--year', type=int, required=True, help='Year to scrape')
+    parser.add_argument('--month', type=int, required=True, help='Month to scrape')
+    parser.add_argument('--output', '-o', help='Output file path')
+    args = parser.parse_args()
 
-    year = sys.argv[1]
-    month = int(sys.argv[2])
-    main(year, month)
+    main(args.year, args.month, args.output)

@@ -101,7 +101,7 @@ def create_calendar_event(event, details):
 def event_in_target_month(event_date, target_year, target_month):
     return event_date and event_date.year == target_year and event_date.month == int(target_month)
 
-def create_calendar(target_year, target_month):
+def create_calendar(target_year, target_month, output=None):
     base_url = 'https://www.sebarts.org'
     events_url = f'{base_url}/classes-and-events'
 
@@ -132,7 +132,7 @@ def create_calendar(target_year, target_month):
         time.sleep(2)
 
     # Write the calendar to a file
-    filename = f'sebarts_{target_year}_{target_month}.ics'
+    filename = output or f'sebarts_{target_year}_{target_month}.ics'
     with open(filename, 'wb') as f:
         f.write(cal.to_ical())
     
@@ -143,6 +143,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Create an iCalendar file for Sebastopol Center for the Arts events.')
     parser.add_argument('--year', type=str, required=True, help='Target year (e.g., 2024)')
     parser.add_argument('--month', type=str, required=True, help='Target month (01-12)')
+    parser.add_argument('--output', '-o', help='Output file path')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
     args = parser.parse_args()
 
@@ -155,5 +156,5 @@ if __name__ == "__main__":
     if not args.year.isdigit() or len(args.year) != 4:
         parser.error("Year must be a four-digit string")
 
-    filename = create_calendar(int(args.year), args.month)
+    filename = create_calendar(int(args.year), args.month, args.output)
     print(f"Calendar file '{filename}' has been created.")
