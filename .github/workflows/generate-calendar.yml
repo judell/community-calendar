@@ -105,7 +105,7 @@ jobs:
           
           echo "Scraping Santa Rosa for $Y-$M..."
           python library_intercept.py --location santarosa --year $Y --month $M || true
-          node eventbrite.js santarosa $Y $M || true
+          # node eventbrite.js santarosa $Y $M || true  # Disabled - blocked by bot detection
           cd santarosa && python bohemian.py $Y $((10#$M)) || true
           python pressdemocrat.py $Y $((10#$M)) || true
           cd ..
@@ -153,7 +153,7 @@ jobs:
 
         # Local scraped files
         santarosa/library_intercept_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        santarosa/eventbrite_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        # santarosa/eventbrite_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
         santarosa/bohemian_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
         santarosa/pressdemocrat_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
         santarosa/sonoma_parks_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
@@ -162,7 +162,7 @@ jobs:
         santarosa/sonoma_county_gov_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
 
         santarosa/library_intercept_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        santarosa/eventbrite_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        # santarosa/eventbrite_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
         santarosa/bohemian_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
         santarosa/pressdemocrat_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
         santarosa/sonoma_parks_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
@@ -171,7 +171,7 @@ jobs:
         santarosa/sonoma_county_gov_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
 
         santarosa/library_intercept_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        santarosa/eventbrite_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        # santarosa/eventbrite_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
         santarosa/bohemian_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
         santarosa/pressdemocrat_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
         santarosa/sonoma_parks_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
@@ -388,7 +388,7 @@ jobs:
           
           echo "Scraping Bloomington for $Y-$M..."
           python library_intercept.py --location bloomington --year $Y --month $M || true
-          node eventbrite.js bloomington $Y $M || true
+          # node eventbrite.js bloomington $Y $M || true  # Disabled - blocked by bot detection
         done
       continue-on-error: true
 
@@ -398,11 +398,11 @@ jobs:
         cat > bloomington/feeds.txt << EOF
         # Local scraped files
         bloomington/library_intercept_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        bloomington/eventbrite_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        # bloomington/eventbrite_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
         bloomington/library_intercept_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        bloomington/eventbrite_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        # bloomington/eventbrite_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
         bloomington/library_intercept_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        bloomington/eventbrite_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        # bloomington/eventbrite_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
 
         # Static/live feeds
         bloomington/bluebird.ics
