@@ -7,31 +7,54 @@
     }}"
   />
 
-  <H1>What's Happening</H1>
-  <Text value="{events.value ? window.dedupeEvents(events.value).length + ' events this week (' + events.value.length + ' before deduplication)' : 'Loading...'}" />
+  <ModalDialog id="subscribeDialog" title="Subscribe">
+    <VStack gap="$space-3">
+      <Link to="santarosa/combined.ics">
+        <Text value="Download ICS" />
+      </Link>
+      <Link to="webcal://judell.github.io/community-calendar/santarosa/combined.ics">
+        <Text value="Add to Calendar App" />
+      </Link>
+    </VStack>
+  </ModalDialog>
 
-  <ExpandableItem summary="Events by Source (before deduplication)" marginBottom="$space-4">
-    <List data="{window.getSourceCounts(events.value)}">
-      <HStack gap="$space-2" paddingVertical="$space-1">
-        <Text width="40px" textAlign="right" fontWeight="bold" value="{$item.count}" />
-        <Text value="{$item.source}" />
+  <ModalDialog id="feedsDialog" title="Sources">
+    <VStack gap="$space-3">
+      <Text value="{events.value ? window.dedupeEvents(events.value).length + ' events this week (' + events.value.length + ' before deduplication)' : 'Loading...'}" />
+      <List data="{window.getSourceCounts(events.value)}">
+        <HStack gap="$space-2" paddingVertical="$space-1">
+          <Text width="40px" textAlign="right" fontWeight="bold" value="{$item.count}" />
+          <Text value="{$item.source}" />
+        </HStack>
+      </List>
+    </VStack>
+  </ModalDialog>
+
+  <HStack horizontalAlignment="center" width="100%">
+  <VStack maxWidth="600px" width="100%">
+    <H1>
+      <HStack width="100%" verticalAlignment="center">
+        <Text>Santa Rosa Events</Text>
+        <SpaceFiller />
+        <HStack gap="$space-1">
+          <Icon name="download" width="20px" height="20px" tooltip="Subscribe" onClick="subscribeDialog.open()" />
+          <Icon name="list" width="20px" height="20px" tooltip="Sources" onClick="feedsDialog.open()" />
+        </HStack>
       </HStack>
-    </List>
-  </ExpandableItem>
-
-  <List data="{window.dedupeEvents(events.value)}">
-    <Card padding="$space-3" marginBottom="$space-2">
-      <HStack gap="$space-4" verticalAlignment="top">
-        <Text width="140px" fontSize="$text-sm" value="{window.formatDayOfWeek($item.start_time) + ' ' + window.formatMonthDay($item.start_time) + (window.formatTime($item.start_time) ? ', ' + window.formatTime($item.start_time) : '')}" />
-        <VStack gap="$space-1">
+    </H1>
+    <List data="{window.dedupeEvents(events.value)}">
+      <Card padding="$space-2" marginBottom="$space-1">
+        <VStack gap="$space-0">
+          <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{window.formatDayOfWeek($item.start_time) + ' ' + window.formatMonthDay($item.start_time) + (window.formatTime($item.start_time) ? ', ' + window.formatTime($item.start_time) : '')}" />
           <Link when="{$item.url}" to="{$item.url}" target="_blank">
-            <Text fontWeight="bold" value="{$item.title}" />
+            <Text fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$item.title}" />
           </Link>
-          <Text when="{!$item.url}" fontWeight="bold" value="{$item.title}" />
-          <Text fontSize="$text-sm" color="$color-text-secondary" value="{$item.location}" />
-          <Text fontSize="$text-xs" fontStyle="italic" color="$color-text-tertiary" value="{'Source: ' + $item.source}" />
+          <Text when="{!$item.url}" fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$item.title}" />
+          <Text when="{$item.location}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.location}" />
+          <Text fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-tertiary" value="{'Source: ' + $item.source}" />
         </VStack>
-      </HStack>
-    </Card>
-  </List>
+      </Card>
+    </List>
+  </VStack>
+  </HStack>
 </App>
