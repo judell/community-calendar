@@ -1,0 +1,4276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>April 2026 - List View</title>
+  <style>
+    /* Mobile-first List View Styles */
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      background: #f8f9fa;
+      color: #212529;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: #fff;
+      padding: 0.75rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .nav-arrow {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      font-size: 1.5rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      line-height: 1;
+    }
+
+    .nav-arrow:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .switcher {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: normal;
+      margin-top: 0.2rem;
+      font-style: normal;
+    }
+
+    .switcher a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+    }
+
+    /* Calendar Widget */
+    #calendar-widget {
+      background: #fff;
+      padding: 0.75rem;
+      display: none;
+      border: none;
+      box-shadow: none;
+    }
+
+    #calendar-widget table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    #calendar-widget th {
+      padding: 0.5rem 0;
+      color: #6b7280;
+      font-weight: 500;
+      font-size: 0.75rem;
+      background: transparent;
+    }
+
+    #calendar-widget td {
+      padding: 0.4rem;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background 0.15s;
+    }
+
+    #calendar-widget td:hover {
+      background: #e5e7eb;
+    }
+
+    #calendar-widget td.has-events {
+      font-weight: 700;
+      color: #1e40af;
+    }
+
+    /* Event List */
+    .event-list {
+      padding: 0;
+    }
+
+    .event-list h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+      background: #374151;
+      margin: 0;
+      padding: 0.75rem 1rem;
+      position: sticky;
+      top: 56px;
+      z-index: 50;
+    }
+
+    .event-list h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #6b7280;
+      margin: 0;
+      padding: 0.5rem 1rem;
+      background: #f3f4f6;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Event Card */
+    .event {
+      background: #fff;
+      padding: 1rem;
+      margin-bottom: 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .event-title {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.35;
+      color: #111827;
+    }
+
+    .event-title a {
+      color: #1e40af;
+      text-decoration: none;
+    }
+
+    .event-title a:hover {
+      text-decoration: underline;
+    }
+
+    .event-details {
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+
+    .event-details p {
+      margin: 0.4rem 0;
+    }
+
+    .event-details p:first-of-type {
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .event-details p:first-of-type::before {
+      content: "📍 ";
+      font-size: 0.8em;
+    }
+
+    .event-details p:nth-of-type(2) {
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .event-details p:nth-of-type(2)::before {
+      content: none;
+    }
+
+    .source-link {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #6b7280;
+      background: #f3f4f6;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      text-decoration: none;
+    }
+
+    .source-link:hover {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    /* Tablet and Desktop */
+    @media (min-width: 768px) {
+      header h1 {
+        font-size: 1.6rem;
+      }
+      
+      .event-list h2 {
+        top: 64px;
+      }
+      
+      #calendar-widget {
+        display: block;
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        width: 240px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 1px solid #e5e7eb;
+        z-index: 90;
+        margin-bottom: 0;
+      }
+      
+      .event-list {
+        margin-right: 280px;
+      }
+      
+      .event {
+        padding: 1.25rem;
+        margin: 0 1rem 0.5rem;
+        border-radius: 8px;
+        border-bottom: none;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border: 1px solid #e5e7eb;
+      }
+      
+      .event-list h2 {
+        margin: 0 1rem;
+        border-radius: 8px 8px 0 0;
+        margin-top: 1rem;
+      }
+      
+      .event-list h3 {
+        margin: 0 1rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      body {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+    }
+
+    .feeds-section {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-nav">
+      <a href="2026-03-l.html" class="nav-arrow" title="Previous month">&larr;</a>
+      <h1>April 2026 <span class="switcher"><a href="2026-04.html">calendar view</a></span></h1>
+      <a href="2026-05-l.html" class="nav-arrow" title="Next month">&rarr;</a>
+    </div>
+  </header>
+
+  <nav id="calendar-widget">
+    <table>
+      <tr>
+        <th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th><th>Su</th>
+      </tr>
+      
+      <tr>
+        
+        <td  >
+          
+        </td>
+        
+        <td  >
+          
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-01')" class="has-events">
+          1
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-02')" class="has-events">
+          2
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-03')" class="has-events">
+          3
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-04')" class="has-events">
+          4
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-05')" class="has-events">
+          5
+        </td>
+        
+      </tr>
+      
+      <tr>
+        
+        <td onclick="scrollToDay('2026-04-06')" class="has-events">
+          6
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-07')" class="has-events">
+          7
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-08')" class="has-events">
+          8
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-09')" class="has-events">
+          9
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-10')" class="has-events">
+          10
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-11')" class="has-events">
+          11
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-12')" class="has-events">
+          12
+        </td>
+        
+      </tr>
+      
+      <tr>
+        
+        <td onclick="scrollToDay('2026-04-13')" class="has-events">
+          13
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-14')" class="has-events">
+          14
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-15')" class="has-events">
+          15
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-16')" class="has-events">
+          16
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-17')" class="has-events">
+          17
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-18')" class="has-events">
+          18
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-19')" class="has-events">
+          19
+        </td>
+        
+      </tr>
+      
+      <tr>
+        
+        <td onclick="scrollToDay('2026-04-20')" class="has-events">
+          20
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-21')" class="has-events">
+          21
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-22')" class="has-events">
+          22
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-23')" class="has-events">
+          23
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-24')" class="has-events">
+          24
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-25')" class="has-events">
+          25
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-26')" class="has-events">
+          26
+        </td>
+        
+      </tr>
+      
+      <tr>
+        
+        <td onclick="scrollToDay('2026-04-27')" class="has-events">
+          27
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-28')" class="has-events">
+          28
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-29')" class="has-events">
+          29
+        </td>
+        
+        <td onclick="scrollToDay('2026-04-30')" class="has-events">
+          30
+        </td>
+        
+        <td  >
+          
+        </td>
+        
+        <td  >
+          
+        </td>
+        
+        <td  >
+          
+        </td>
+        
+      </tr>
+      
+    </table>
+  </nav>
+
+  <main class="event-list">
+    
+    <h2 id="2026-04-01">Wednesday, April 01, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/preschool-story-time-65053" target="_blank" rel="noopener">Preschool Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 01 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Preschool Story Time:
+          Help your child build independent listening skills while learning and having fun! This story time -- recommended for children ages 3-5 years -- will feature longer stories, flannel...</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>01:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/midweek-movie-65550" target="_blank" rel="noopener">Midweek Movie</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 01 - 01:00 PM
+         to 03:30 PM
+        
+        
+        
+        <p>Community Rm 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Enjoy a relaxing afternoon at the library while watching a film on our big screen. It's a great way to unwind and enjoy a variety of movies in a comfortable setting. Snacks and drinks will be provided.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/tales-tails-66084" target="_blank" rel="noopener">Tales for Tails</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 01 - 06:00 PM
+         to 07:00 PM
+        
+        
+        
+        <p>Children's Department at Bloomington Public Library</p>
+        
+        
+        
+        <p>This program pairs trained and certified therapy dogs with children in Grades K-5 who want to practice reading aloud.There will be 4 time slots available for kids to meet and read to a pup in the Children's Department:</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1775088000000" target="_blank" rel="noopener"> Open Mic Night at The Comedy Attic</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 01 - 08:00 PM
+         to 10:00 PM
+        
+        
+        
+        <p>The Comedy Attic,123 S Walnut St, Bloomington, IN 47408, USA</p>
+        
+        
+        
+        <p>Every Wednesday at 8PM is Comedy Attic Open Mic Night. Bloomington has one of the best local comedy scenes in the country, and it all starts with our open mic night!
+
+Each comedian is asked to do no more than five minutes of completely original material. While we do not care about foul language in y...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-02">Thursday, April 02, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/toddler-story-time-66074" target="_blank" rel="noopener">Toddler Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 02 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Toddlers are always on the go! Come to story time to encourage their emerging skills with books, rhymes, music, and movement activities.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/books-tap-56903" target="_blank" rel="noopener">Books On Tap</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 02 - 06:00 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Offsite Event at Bloomington Public Library</p>
+        
+        
+        
+        <p>The Books on Tap Book Club will meet at Lil Beaver Brewery to discuss Some Desperate Glory by Emily Tesh.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/dd-kids-65046" target="_blank" rel="noopener">D&D for Kids</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 02 - 06:00 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>This Dungeons & Dragons experience for kids in Grades 3-5 will include a simplified, rules-light adventure.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1645/1775172600000" target="_blank" rel="noopener"> The DaVinci Code- Live on Stage</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 02 - 07:30 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Waldron Auditorium,112 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
+        
+        
+        <p>Constellation Stage & Screen presents “The DaVinci Code- Live on Stage,” on stage March 26 - April 12 at the Waldron Auditorium.
+
+Dan Brown’s international best-seller comes to life on stage in this thrilling, high-stakes adventure! When the curator of the Louvre is found murdered under mysterious c...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/phaseone-at-hi-fi-tickets-1979878135801" target="_blank" rel="noopener">PhaseOne at HI-FI</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 02 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>HI-FI, 1043 Virginia Ave Suite #4, Indianapolis, IN</p>
+        
+        
+        
+        <p>PhaseOne at HI-FI - Indianapolis</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-03">Friday, April 03, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/fun-friday-story-time-65115" target="_blank" rel="noopener">Fun Friday Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 03 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Swing by the Children’s Program Room on Fridays at 10am for 30 minutes of music, movement, giggles, and great stories! This playful and engaging story time is perfect for kids — from birth to age 11 years — and their grown-ups, too.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>05:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/4/1775250000000" target="_blank" rel="noopener"> Arts Mile</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 03 - 05:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>None</p>
+        
+        
+        
+        <p>Experience downtown Bloomington’s vibrant Arts Mile as select galleries showcase evolving live and virtual exhibits.
+
+EVERY. FIRST. FRIDAY. Experience an exciting night of the arts as fourteen distinct galleries stay open late to host special exhibits and serve refreshments from 5-8pm.
+
+Stroll the v...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1646/1775259000000" target="_blank" rel="noopener"> The DaVinci Code- Live on Stage</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 03 - 07:30 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Waldron Auditorium,112 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
+        
+        
+        <p>Constellation Stage & Screen presents “The DaVinci Code- Live on Stage,” on stage March 26 - April 12 at the Waldron Auditorium.
+
+Dan Brown’s international best-seller comes to life on stage in this thrilling, high-stakes adventure! When the curator of the Louvre is found murdered under mysterious c...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/reviving-hope-a-gala-for-the-nations-tickets-1980151725114" target="_blank" rel="noopener">Reviving Hope: A Gala for the Nations</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 03 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Switchyard Park, 1601 South Rogers Street, Bloomington, IN</p>
+        
+        
+        
+        <p>Join us for Reviving Hope's second annu fundraising gala to support our medical mission trip to Guatemala. Can't make it? Donate Info Below!</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/egg-citing-pansy-bowl-tickets-1976467711129" target="_blank" rel="noopener">Egg-Citing Pansy Bowl</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 03 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Dammann's Garden Center & Greenhouse, Inc., 4914 Rockville Road, Indianapolis, IN</p>
+        
+        
+        
+        <p>Make a live pansy display for Easter.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-04">Saturday, April 04, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/sensory-story-time-66082" target="_blank" rel="noopener">Sensory Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 04 - 10:00 AM
+         to 11:00 AM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>This inclusive story time offers stories, songs, and sensory-focused activities for children of all ages and abilities! After story time, stay for sensory play and socialization.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>02:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1647/1775325600000" target="_blank" rel="noopener"> The DaVinci Code- Live on Stage</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 04 - 02:00 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Waldron Auditorium,112 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
+        
+        
+        <p>Constellation Stage & Screen presents “The DaVinci Code- Live on Stage,” on stage March 26 - April 12 at the Waldron Auditorium.
+
+Dan Brown’s international best-seller comes to life on stage in this thrilling, high-stakes adventure! When the curator of the Louvre is found murdered under mysterious c...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/balmora-healer-w-starsfadingoutquietly-struck-eidetic-tickets-1981195574295" target="_blank" rel="noopener">BALMORA @ HEALER w/ starsfadingoutquietly, Struck, & Eidetic</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 04 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Healer, 3631 East Raymond Street, Indianapolis, IN</p>
+        
+        
+        
+        <p>BALMORA IN INDIANAPOLIS. DAZE RECORDS' CHAMPION OF METALCORE SHARPENS THEIR SWORD ON THE 317.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-05">Sunday, April 05, 2026</h2>
+
+    
+    <h3>02:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1648/1775412000000" target="_blank" rel="noopener"> The DaVinci Code- Live on Stage</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Sunday April 05 - 02:00 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Waldron Auditorium,112 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
+        
+        
+        <p>Constellation Stage & Screen presents “The DaVinci Code- Live on Stage,” on stage March 26 - April 12 at the Waldron Auditorium.
+
+Dan Brown’s international best-seller comes to life on stage in this thrilling, high-stakes adventure! When the curator of the Louvre is found murdered under mysterious c...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-06">Monday, April 06, 2026</h2>
+
+    
+    <h3>04:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/dd-kids-65049" target="_blank" rel="noopener">D&D for Kids</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Monday April 06 - 04:00 PM
+         to 05:30 PM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>This Dungeons & Dragons experience for kids in Grades 3-5 will include a simplified, rules-light adventure.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/teen-craftivism-64456" target="_blank" rel="noopener">Teen Craftivism</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Monday April 06 - 06:00 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Community Rm 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>During Teen Craftivism, teens will learn a new craft and the history behind it, focusing on both historical and modern uses of arts and crafts.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/postponed-dj-dangler-presents-working-class-rumble-tickets-1980274480278" target="_blank" rel="noopener">POSTPONED - DJ Dangler presents Working Class Rumble</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Monday April 06 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>White Rabbit Cabaret, 1116 Prospect St., Indianapolis, IN</p>
+        
+        
+        
+        <p>A Comedy Event like no other. Oh Yeah!!! 30 competitors, brother: Sketches and Improv, Pro Wrestlers, Comedians, Headlockers, Headliners.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/ballyhoo-at-hi-fi-tickets-1980471950918" target="_blank" rel="noopener">Ballyhoo! at HI-FI</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Monday April 06 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>HI-FI, 1043 Virginia Ave Suite #4, Indianapolis, IN</p>
+        
+        
+        
+        <p>Ballyhoo! at HI-FI - Indianapolis</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-07">Tuesday, April 07, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/lapsit-story-time-64932" target="_blank" rel="noopener">Lapsit Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 07 - 10:00 AM
+         to 10:45 AM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us at Lapsit Story Time for stories, music, movement, art, and play intended to help develop and enhance early literacy skills and your baby's development.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/lapsit-story-time-64941" target="_blank" rel="noopener">Lapsit Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 07 - 06:00 PM
+         to 06:45 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us at Lapsit Story Time for stories, music, movement, art, and play intended to help develop and enhance early literacy skills and your baby's development.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/teen-dating-violence-walk-walk-simulation-61136" target="_blank" rel="noopener">Dating Violence Simulation</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 07 - 06:30 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Community Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>This interactive simulation places participants in the shoes of a teen navigating an abusive relationship.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/ibc-music-fest-2026-registration-tickets-1815791755019" target="_blank" rel="noopener">IBC Music Fest 2026 Registration</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 07 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Calvary Tabernacle, 902 Fletcher Avenue, Indianapolis, IN</p>
+        
+        
+        
+        <p>Inspire, educate, and foster fellowship among apostolic worship ministers while instilling a deep commitment to worship.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-08">Wednesday, April 08, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/preschool-story-time-65054" target="_blank" rel="noopener">Preschool Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 08 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Preschool Story Time:
+          Help your child build independent listening skills while learning and having fun! This story time -- recommended for children ages 3-5 years -- will feature longer stories, flannel...</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>12:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/teen-writing-workshop-63379" target="_blank" rel="noopener">Teen Writing Workshop</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 08 - 12:00 PM
+         to 01:00 PM
+        
+        
+        
+        <p>TeenZone at Bloomington Public Library</p>
+        
+        
+        
+        <p>This writing workshop is for teens in Grades 6-12 and is perfect for homeschooled creative writers!</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/tales-tails-66085" target="_blank" rel="noopener">Tales for Tails</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 08 - 06:00 PM
+         to 07:00 PM
+        
+        
+        
+        <p>Children's Department at Bloomington Public Library</p>
+        
+        
+        
+        <p>This program pairs trained and certified therapy dogs with children in Grades K-5 who want to practice reading aloud.There will be 4 time slots available for kids to meet and read to a pup in the Children's Department:</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/bloomington-reads-program-potential-62485" target="_blank" rel="noopener">Bloomington Reads: Mini-Book Keychain Craft</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 08 - 06:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Community Rm 1 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Celebrate Bloomington Reads with this hands-on, commemorative craft! Participants will create a miniature book inspired by this year’s spotlight title, The Supremes at Earl’s All-You-Can-Eat by Edward Kelsey Moore.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1722/1775691000000" target="_blank" rel="noopener"> The DaVinci Code- Live on Stage</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 08 - 07:30 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Waldron Arts Center,122 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
+        
+        
+        <p>Constellation Stage & Screen presents “The DaVinci Code,” on stage March 26 - April 12 at the Waldron Auditorium.
+
+Dan Brown’s international best-seller comes to life on stage in this thrilling, high-stakes adventure! When the curator of the Louvre is found murdered under mysterious circumstances, s...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/economic-and-political-insights-tickets-1979684381276" target="_blank" rel="noopener">Economic and Political Insights</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 08 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Hornet Park Community Center, 5245 Hornet Avenue, Beech Grove, IN</p>
+        
+        
+        
+        <p>Get ready to dive deep into the world of economics and politics with engaging discussions and insights you won't want to miss!</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1775692800000" target="_blank" rel="noopener"> Open Mic Night at The Comedy Attic</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 08 - 08:00 PM
+         to 10:00 PM
+        
+        
+        
+        <p>The Comedy Attic,123 S Walnut St, Bloomington, IN 47408, USA</p>
+        
+        
+        
+        <p>Every Wednesday at 8PM is Comedy Attic Open Mic Night. Bloomington has one of the best local comedy scenes in the country, and it all starts with our open mic night!
+
+Each comedian is asked to do no more than five minutes of completely original material. While we do not care about foul language in y...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-09">Thursday, April 09, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/toddler-story-time-66075" target="_blank" rel="noopener">Toddler Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 09 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Toddlers are always on the go! Come to story time to encourage their emerging skills with books, rhymes, music, and movement activities.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>03:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/after-school-bpl-65297" target="_blank" rel="noopener">After School @ BPL</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 09 - 03:30 PM
+         to 05:30 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us for after-school fun! Various activities will be offered depending on the date:</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/bloomington-read-book-discussion-64945" target="_blank" rel="noopener">Bloomington Reads: Book Discussion</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 09 - 07:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Conference Room & Online at Bloomington Public Library & Online</p>
+        
+        
+        
+        <p>Bloomington Reads: Book Discussion(three different dates offered)</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1801/1775775600000" target="_blank" rel="noopener"> Stavros Halkias: The Dreamboat Tour</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 09 - 07:00 PM
+         to 09:00 PM
+        
+        
+        
+        <p>Buskirk-Chumley Theater,114 East Kirkwood Avenue, Bloomington, IN 47408, USA</p>
+        
+        
+        
+        <p>Stavros Halkias is a comedian, actor, and writer from Baltimore, Maryland, now based in New York City. He most recently wrote, produced, and starred in the indie comedy Let’s Start a Cult. His latest stand-up special, Fat Rascal, is streaming on Netflix, following his debut special Live at the Lodge...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1649/1775777400000" target="_blank" rel="noopener"> The DaVinci Code- Live on Stage</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 09 - 07:30 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Waldron Auditorium,112 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
+        
+        
+        <p>Constellation Stage & Screen presents “The DaVinci Code- Live on Stage,” on stage March 26 - April 12 at the Waldron Auditorium.
+
+Dan Brown’s international best-seller comes to life on stage in this thrilling, high-stakes adventure! When the curator of the Louvre is found murdered under mysterious c...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-10">Friday, April 10, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/fun-friday-story-time-65116" target="_blank" rel="noopener">Fun Friday Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 10 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Swing by the Children’s Program Room on Fridays at 10am for 30 minutes of music, movement, giggles, and great stories! This playful and engaging story time is perfect for kids — from birth to age 11 years — and their grown-ups, too.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1650/1775863800000" target="_blank" rel="noopener"> The DaVinci Code- Live on Stage</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 10 - 07:30 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Waldron Auditorium,112 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
+        
+        
+        <p>Constellation Stage & Screen presents “The DaVinci Code- Live on Stage,” on stage March 26 - April 12 at the Waldron Auditorium.
+
+Dan Brown’s international best-seller comes to life on stage in this thrilling, high-stakes adventure! When the curator of the Louvre is found murdered under mysterious c...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/john-conlee-jackson-live-event-center-in-seymour-indiana-tickets-1967394840930" target="_blank" rel="noopener">John Conlee @ Jackson Live & Event Center in Seymour, Indiana</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 10 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>981 C Avenue E, 981 C Avenue East, Seymour, IN</p>
+        
+        
+        
+        <p>Join us on Saturday April 11th @ 7:00 PM for a night of classic country music with John Conlee live in concert!</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/euchre-night-tournament-tickets-1980120150674" target="_blank" rel="noopener">Euchre Night Tournament</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 10 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>7615 Mooresville Rd, 7615 Mooresville Road, Indianapolis, IN</p>
+        
+        
+        
+        <p>Get ready to shuffle and deal—join us for a fun, friendly Euchre Tournament in person!</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/tpt-live-indianapolis-in-april-11-tickets-1980468483547" target="_blank" rel="noopener">TPT Live -Indianapolis, IN (April 11)</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 10 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Hilton Indianapolis Hotel & Suites, 120 West Market Street, Indianapolis, IN</p>
+        
+        
+        
+        <p>Level-up your TPT business and learn practical strategies for success — all in one fun-filled day.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-11">Saturday, April 11, 2026</h2>
+
+    
+    <h3>09:30 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/lego-construction-64948" target="_blank" rel="noopener">Lego Construction</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 11 - 09:30 AM
+         to 11:30 AM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us at the library for Lego Construction! The challenge is to build whatever you want and have your picture taken with your creation!</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://bgcbloomington.org/event/camp-rock-spring-clean-up-day/" target="_blank" rel="noopener">Camp Rock Spring Clean Up Day</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 11 - 10:00 AM
+         to 01:00 PM
+        
+        
+        
+        <p>BGCB | Camp Rock, 7599 N. Tunnel Road, Unionville, IN, 47468, United States</p>
+        
+        
+        
+        <p>Join us in preparing our beautiful Lake Lemon property for summer camp! We’ll be raking leaves, spreading mulch, sanding and staining, and a few other outdoor activities! 
+Feel free to bring leaf blowers if you have them & gloves if you feel you need them! 
+Please dress for the weather!</p>
+        
+        
+        <a href="https://bgcbloomington.org/events/list/?ical=1" class="source-link" target="_blank" rel="noopener">📰 Boys &amp; Girls Clubs of Bloomington</a>
+      </div>
+    </article>
+    
+    
+    <h3>10:15 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/bpl-go-pop-65910" target="_blank" rel="noopener">BPL On-the-Go Pop-Up</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 11 - 10:15 AM
+         to 11:30 AM
+        
+        
+        
+        <p>On-the-Go-Vehicle at Bloomington Public Library</p>
+        
+        
+        
+        <p>Have you heard about Bloomington Library's new On-the-Go vehicle? BPL On-the-Go allows library staff to travel to offsite locations, bringing with them library programs and services.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>11:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/teen-genre-book-club-51729" target="_blank" rel="noopener">Teen Genre Book Club</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 11 - 11:00 AM
+         to 12:00 PM
+        
+        
+        
+        <p>Conference Room at Bloomington Public Library</p>
+        
+        
+        
+        <p>The Teen Genre Book Club will meet monthly -- on various Saturdays -- to discuss a different genre of book, giving you more choice of what to read. Pick any book that fits the month's genre.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>01:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/disability-insurance-workshop-60772" target="_blank" rel="noopener">Disability Insurance Workshop</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 11 - 01:00 PM
+         to 03:00 PM
+        
+        
+        
+        <p>Community Rm 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>At this free workshop presented by</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>02:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1651/1775930400000" target="_blank" rel="noopener"> The DaVinci Code- Live on Stage</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 11 - 02:00 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Waldron Auditorium,112 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
+        
+        
+        <p>Constellation Stage & Screen presents “The DaVinci Code- Live on Stage,” on stage March 26 - April 12 at the Waldron Auditorium.
+
+Dan Brown’s international best-seller comes to life on stage in this thrilling, high-stakes adventure! When the curator of the Louvre is found murdered under mysterious c...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1652/1775950200000" target="_blank" rel="noopener"> The DaVinci Code- Live on Stage</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 11 - 07:30 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Waldron Auditorium,112 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
+        
+        
+        <p>Constellation Stage & Screen presents “The DaVinci Code- Live on Stage,” on stage March 26 - April 12 at the Waldron Auditorium.
+
+Dan Brown’s international best-seller comes to life on stage in this thrilling, high-stakes adventure! When the curator of the Louvre is found murdered under mysterious c...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/field-birding-on-the-indiana-birding-trail-muscatatuck-tickets-1981255381179" target="_blank" rel="noopener">Field Birding on the Indiana Birding Trail: Muscatatuck</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 11 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Muscatatuck National Wildlife Refuge, 12985 E US Highway 50, Seymour, IN</p>
+        
+        
+        
+        <p>Join Indiana Audubon for guided birding walks at select Indiana Birding Trail sites, for first-timers or #IBTChallenge2026 chasers.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/old-fashioned-favorite-pot-tickets-1976470928753" target="_blank" rel="noopener">Old Fashioned Favorite Pot</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 11 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Dammann's Garden Center & Greenhouse, Inc., 4914 Rockville Road, Indianapolis, IN</p>
+        
+        
+        
+        <p>Create a beautiful spring pot containing a filler, spiller, & thriller.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/smoked-spiced-the-ultimate-april-tasting-event-tickets-1972904968871" target="_blank" rel="noopener">Smoked & Spiced: The Ultimate April Tasting Event</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 11 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>2242 Shelby St, 2242 Shelby Street, Indianapolis, IN</p>
+        
+        
+        
+        <p>Spring into flavor! Enjoy a mashup of Hoosier BBQ & a zesty Taco Bar at our April 12 tasting.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-12">Sunday, April 12, 2026</h2>
+
+    
+    <h3>01:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/slow-looking-410-sculpture-park-61838" target="_blank" rel="noopener">Slow Looking at 410 Sculpture Park</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Sunday April 12 - 01:00 PM
+         to 03:00 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>In observation of Slow Art Day, participants will take a close look at larger-than-life artworks inspired by industrial materials before creating art in response to the work on display.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>02:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/hide-n-seek-bookmobile-edition-65222" target="_blank" rel="noopener">Hide-n-Seek: Bookmobile Edition</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Sunday April 12 - 02:00 PM
+         to 04:00 PM
+        
+        
+        
+        <p>Bookmobile</p>
+        
+        
+        
+        <p>The Bookmobile is "hiding" somewhere in Bloomington! Your job is to use posted clues to help you find the mobile library at its secret location.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1653/1776016800000" target="_blank" rel="noopener"> The DaVinci Code- Live on Stage</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Sunday April 12 - 02:00 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Waldron Auditorium,112 South Walnut Street, Bloomington, IN 47404, USA</p>
+        
+        
+        
+        <p>Constellation Stage & Screen presents “The DaVinci Code- Live on Stage,” on stage March 26 - April 12 at the Waldron Auditorium.
+
+Dan Brown’s international best-seller comes to life on stage in this thrilling, high-stakes adventure! When the curator of the Louvre is found murdered under mysterious c...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/indianapolis-speed-dating-for-singles-age-24-39-plainfield-indiana-at-lumberjaxe-tickets-1949536870259" target="_blank" rel="noopener">Indianapolis Speed Dating for Singles Age 24-39 ♥ Plainfield Indiana at LumberjAxe</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Sunday April 12 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>LumberjAxe, 351 Marketplace Mile Suite 140, Plainfield, IN</p>
+        
+        
+        
+        <p>Meet up to 12 potential matches. Join the thousands of people that have found LOVE at our events. Will you be our next success story?</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-13">Monday, April 13, 2026</h2>
+
+    
+    <h3>05:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/mini-3d-printed-catapults-65988" target="_blank" rel="noopener">Mini 3D-Printed Catapults</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Monday April 13 - 05:00 PM
+         to 07:00 PM
+        
+        
+        
+        <p>Innovation Lab at Bloomington Public Library</p>
+        
+        
+        
+        <p>Calling all teen inventors and aspiring engineers! Join us as we learn to design, 3D print, and build our very own miniature catapults!</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/lets-dish-cookbook-club-55525" target="_blank" rel="noopener">Let's Dish! A Cookbook Club</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Monday April 13 - 06:30 PM
+         to 08:30 PM
+        
+        
+        
+        <p>Community Rm 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Calling all culinary enthusiasts! At each Let's Dish gathering, we will explore a different food theme.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-14">Tuesday, April 14, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/lapsit-story-time-64933" target="_blank" rel="noopener">Lapsit Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 14 - 10:00 AM
+         to 10:45 AM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us at Lapsit Story Time for stories, music, movement, art, and play intended to help develop and enhance early literacy skills and your baby's development.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>01:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/estate-planning-63690" target="_blank" rel="noopener">Estate Planning</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 14 - 01:30 PM
+         to 03:30 PM
+        
+        
+        
+        <p>Community Rm 2 & 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>This educational class explains how wills, trusts, and powers of attorney function, and the role they can play in helping protect your wishes and your loved ones.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>04:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/teen-financial-literacy-financial-decisions-64994" target="_blank" rel="noopener">Teen Financial Literacy: Making Financial Decisions</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 14 - 04:00 PM
+         to 05:30 PM
+        
+        
+        
+        <p>Community Rm 1 at Bloomington Public Library</p>
+        
+        
+        
+        <p>During this Financial Literacy Month program, teens in grades 6-12 will learn about Financial Decisions from the</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/lapsit-story-time-64942" target="_blank" rel="noopener">Lapsit Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 14 - 06:00 PM
+         to 06:45 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us at Lapsit Story Time for stories, music, movement, art, and play intended to help develop and enhance early literacy skills and your baby's development.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/mystery-book-club-51828" target="_blank" rel="noopener">Mystery Book Club</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 14 - 07:00 PM
+         to 08:30 PM
+        
+        
+        
+        <p>Conference Room & Online at Bloomington Public Library & Online</p>
+        
+        
+        
+        <p>The Mystery Book Club will meet to discuss Listen for the Lie by Amy Tintera. Participants have the option to meet either in person at Bloomington Public Library or online via Z</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/next-to-normal-tickets-1519874979979" target="_blank" rel="noopener">Next to Normal</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 14 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Ransburg Auditorium, 1400 East Hanna Avenue, Indianapolis, IN</p>
+        
+        
+        
+        <p>A musical about the struggles of mental health and family life.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/non-member-deamcon26-registration-tickets-1366421697079" target="_blank" rel="noopener">Non-Member: DEAMcon26 Registration</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 14 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>The Westin Indianapolis, 241 West Washington Street, Indianapolis, IN</p>
+        
+        
+        
+        <p>A 2.5 day conference for HR professionals</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/non-member-nonprofit-govt-deamcon26-registration-tickets-1366417735229" target="_blank" rel="noopener">Non-Member (Nonprofit, Gov't): DEAMcon26 Registration</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 14 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>The Westin Indianapolis, 241 West Washington Street, Indianapolis, IN</p>
+        
+        
+        
+        <p>A 2.5 day conference for HR professionals</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-15">Wednesday, April 15, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/preschool-story-time-65055" target="_blank" rel="noopener">Preschool Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 15 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Preschool Story Time:
+          Help your child build independent listening skills while learning and having fun! This story time -- recommended for children ages 3-5 years -- will feature longer stories, flannel...</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>12:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/bloomington-reads-book-discussion-potential-62478" target="_blank" rel="noopener">Bloomington Reads: Book Discussion</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 15 - 12:00 PM
+         to 01:00 PM
+        
+        
+        
+        <p>Community Rm 2 & 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Bloomington Reads: Book Discussion(three different dates offered)</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/tales-tails-66086" target="_blank" rel="noopener">Tales for Tails</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 15 - 06:00 PM
+         to 07:00 PM
+        
+        
+        
+        <p>Children's Department at Bloomington Public Library</p>
+        
+        
+        
+        <p>This program pairs trained and certified therapy dogs with children in Grades K-5 who want to practice reading aloud.There will be 4 time slots available for kids to meet and read to a pup in the Children's Department:</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/foundation-for-youth-friendraiser-concert-tickets-1981938913643" target="_blank" rel="noopener">Foundation For Youth Friendraiser Concert</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 15 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Crump Theatre, 425 3rd Street, Columbus, IN</p>
+        
+        
+        
+        <p>Come chill and support the youth at the Foundation For Youth Friendraiser Concert—good vibes, great cause!</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1776297600000" target="_blank" rel="noopener"> Open Mic Night at The Comedy Attic</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 15 - 08:00 PM
+         to 10:00 PM
+        
+        
+        
+        <p>The Comedy Attic,123 S Walnut St, Bloomington, IN 47408, USA</p>
+        
+        
+        
+        <p>Every Wednesday at 8PM is Comedy Attic Open Mic Night. Bloomington has one of the best local comedy scenes in the country, and it all starts with our open mic night!
+
+Each comedian is asked to do no more than five minutes of completely original material. While we do not care about foul language in y...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-16">Thursday, April 16, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/toddler-story-time-66076" target="_blank" rel="noopener">Toddler Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 16 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Toddlers are always on the go! Come to story time to encourage their emerging skills with books, rhymes, music, and movement activities.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/dd-kids-65048" target="_blank" rel="noopener">D&D for Kids</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 16 - 06:00 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>This Dungeons & Dragons experience for kids in Grades 3-5 will include a simplified, rules-light adventure.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/bloomington-reads-book-discussion-potential-62477" target="_blank" rel="noopener">Bloomington Reads: A Classical Music Tribute</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 16 - 07:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Community Rm 2 & 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Music plays an important role in the life of Clarice, one of the Supremes, in The Supremes at Earl's All-You-Can-Eat.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/il-libraries-present-cristina-henriquez-54478" target="_blank" rel="noopener">ILP: Cristina Henríquez: Voice, Culture, and Human Connection</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 16 - 07:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Virtual Room at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join critically acclaimed, bestselling author, Cristina Henríquez, for a compelling conversation about her work.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/2026-indiana-animal-welfare-conference-registration-1979711751140" target="_blank" rel="noopener">2026 Indiana Animal Welfare Conference</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 16 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Primo Banquet Hall, 2615 National Avenue, Indianapolis, IN</p>
+        
+        
+        
+        <p>Indiana Animal Welfare Conference: Unified for Impact - Driven By Purpose</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/indianapolis-rare-book-fair-preview-night-tickets-1979526207173" target="_blank" rel="noopener">Indianapolis Rare Book Fair: Preview Night</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 16 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Columbia Club, 121 Monument Circle, Indianapolis, IN</p>
+        
+        
+        
+        <p>Enjoy wine, canapes, books and ephemera in a historic setting</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/witchz-at-hi-fi-tickets-1908000624229" target="_blank" rel="noopener">Witchz at HI-FI</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 16 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>HI-FI, 1043 Virginia Ave Suite #4, Indianapolis, IN</p>
+        
+        
+        
+        <p>WITCHZ presents ENTER AFTERLIFE World Tour 2026 at HI-FI - Indianapolis</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-17">Friday, April 17, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/fun-friday-story-time-65117" target="_blank" rel="noopener">Fun Friday Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 17 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Swing by the Children’s Program Room on Fridays at 10am for 30 minutes of music, movement, giggles, and great stories! This playful and engaging story time is perfect for kids — from birth to age 11 years — and their grown-ups, too.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/hoosier-echo-tickets-1980921941853" target="_blank" rel="noopener">Hoosier Echo</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 17 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Bartholomew County Fairgrounds Pavilion, 750 West 200 South, Columbus, IN</p>
+        
+        
+        
+        <p>Hoosier Echo: An epic showcase featuring local artists performing their original music for the masses.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/2026-unity-dinner-gala-tickets-1968863977156" target="_blank" rel="noopener">2026 Unity Dinner & Gala</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 17 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>The Heirloom at N.K. Hurst, 230 West McCarty Street, Indianapolis, IN</p>
+        
+        
+        
+        <p>Welcome to the 13th Annual Unity Dinner & Gala co-hosted by five IU McKinney Student Organizations. We are excited to have you join us!</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/first-moon-circle-art-of-the-heart-tickets-1981822924717" target="_blank" rel="noopener">First Moon Circle — Art of the Heart</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 17 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>707 Main St, 707 Main Street, Beech Grove, IN</p>
+        
+        
+        
+        <p>A gentle, empowering rite of passage for children ages 9–12 and their caregivers, building confidence, body trust, and cycle education</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/indianapolis-rare-book-fair-saturday-tickets-1979526357623" target="_blank" rel="noopener">Indianapolis Rare Book Fair: Saturday</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 17 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Columbia Club, 121 Monument Circle, Indianapolis, IN</p>
+        
+        
+        
+        <p>The Indianapolis Rare Book Fair will bring rare book and ephemera exhibitors from across the country to historic Columbia Club.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/guest-lecture-by-kermit-roosevelt-at-the-indianapolis-rare-book-fair-tickets-1979525712694" target="_blank" rel="noopener">Guest Lecture by Kermit Roosevelt at the Indianapolis Rare Book Fair</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 17 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Columbia Club, 121 Monument Circle, Indianapolis, IN</p>
+        
+        
+        
+        <p>Kermit Roosevelt III will discuss his great-great grandfather Theodore's life and legacy.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-18">Saturday, April 18, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/super-saturday-story-time-65136" target="_blank" rel="noopener">Super Saturday Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 18 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Get ready to dance, sing, and dive into magical stories at our all-ages story time! Perfect for caregivers and kids from birth to 11 years old, this event is packed with music, movement, and read-aloud fun. Come share in the joy and wonder.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>12:45 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/dd-teens-forge-spells-65965" target="_blank" rel="noopener">D&D for Teens: The Forge of Spells</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 18 - 12:45 PM
+         to 04:45 PM
+        
+        
+        
+        <p>Conference Room at Bloomington Public Library</p>
+        
+        
+        
+        <p>The long-sought Forge of Spells has finally been discovered by a local mining company after centuries of searching by countless prospectors and adventurers alike.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/girls-in-business-camp-indianapolis-2026-tickets-1978210733556" target="_blank" rel="noopener">Girls in Business Camp Indianapolis 2026</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 18 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>2602 Fortune Cir E, 2602 Fortune Circle East, Indianapolis, IN</p>
+        
+        
+        
+        <p>The Girls in Business Camp Indianapolis  introduces girls to the principles of business and entrepreneurship.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/camp-congress-for-youth-indianapolis-2026-tickets-1964546489434" target="_blank" rel="noopener">Camp Congress for Youth Indianapolis 2026</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 18 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>2602 Fortune Cir E, 2602 Fortune Circle East, Indianapolis, IN</p>
+        
+        
+        
+        <p>It's all civics & fun. Girls and boys study government, run for office, vote and convene a mock session of Congress to pass a bill.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/mini-camp-congress-for-girls-indianapolis-2026-tickets-1964471306560" target="_blank" rel="noopener">Mini Camp Congress for Girls Indianapolis 2026</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 18 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>2602 Fortune Cir E, 2602 Fortune Circle East, Indianapolis, IN</p>
+        
+        
+        
+        <p>Mini Camp Congress for Girls Indianapolis 2026 is an introduction to the United States political system for girls ages 6 and 7.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/art-retreat-in-colorado-tickets-1965613570101" target="_blank" rel="noopener">Art Retreat in  COLORADO</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 18 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Cain's Creative Chaos, 1221 Indy Way, Indianapolis, IN</p>
+        
+        
+        
+        <p>Join us for an amazing week of art at our Art Retreat in amazing Colorado Springs!</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-19">Sunday, April 19, 2026</h2>
+
+    
+    <h3>01:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/bloomington-reads-mini-book-keychain-craft-65718" target="_blank" rel="noopener">Bloomington Reads: Mini-Book Keychain Craft</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Sunday April 19 - 01:00 PM
+         to 02:00 PM
+        
+        
+        
+        <p>Community Rm 2 & 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Celebrate Bloomington Reads with this hands-on, commemorative craft!</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>02:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/bloomington-reads-potential-program-62470" target="_blank" rel="noopener">Bloomington Reads: Book Discussion</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Sunday April 19 - 02:00 PM
+         to 03:00 PM
+        
+        
+        
+        <p>Community Rm 2 & 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Bloomington Reads: Book Discussion(three different dates offered)</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/fun-games-family-game-day-65772" target="_blank" rel="noopener">Fun & Games:  Family Game Day</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Sunday April 19 - 02:00 PM
+         to 04:00 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us in the Children's Department for classic board games, card games, and puzzles. Game masters from Red Raccoon Games will join us on site to demonstrate how to play a varie</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1955/1776641400000" target="_blank" rel="noopener"> ABRA Cadabra</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Sunday April 19 - 07:30 PM
+         to 10:00 PM
+        
+        
+        
+        <p>Buskirk-Chumley Theater,114 East Kirkwood Avenue, Bloomington, IN 47408, USA</p>
+        
+        
+        
+        <p>Attention all ABBA fans! Get ready for a night of glittering costumes, irresistible melodies, and pure joy when ABRA Cadabra – the internationally acclaimed ABBA tribute band – takes the stage at Burkirk-Chumley Theater in Bloomington on April 19, 2026 @ 7:30pm.
+
+For 25 years, ABRA Cadabra has been ...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-20">Monday, April 20, 2026</h2>
+
+    
+    <h3>05:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/english-language-conversation-group-56071" target="_blank" rel="noopener">Language Conversation Group</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Monday April 20 - 05:30 PM
+         to 06:30 PM
+        
+        
+        
+        <p>Community Rm 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Are you looking to practice your language skills in a friendly and relaxed setting? Come join our Language Conversation Group!</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/tbd-program-64965" target="_blank" rel="noopener">Custom Sublimated Tumblers</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Monday April 20 - 05:30 PM
+         to 07:30 PM
+        
+        
+        
+        <p>Innovation Lab at Bloomington Public Library</p>
+        
+        
+        
+        <p>Using Canva, registered teens will design a full-color sublimation print which will be pressed onto a tumbler cup. The library's sublimation printer and sublimation oven will then bring the projects to life!</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/singing-swinging-story-time-65991" target="_blank" rel="noopener">Singing, Swinging Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Monday April 20 - 06:00 PM
+         to 06:30 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>This story time for people of all ages will deliver an evening of stories, laughter, fingerplays, and songs accompanied by guitar!</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-21">Tuesday, April 21, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/lapsit-story-time-64934" target="_blank" rel="noopener">Lapsit Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 21 - 10:00 AM
+         to 10:45 AM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us at Lapsit Story Time for stories, music, movement, art, and play intended to help develop and enhance early literacy skills and your baby's development.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>04:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/teen-financial-literacy-financial-decisions-64995" target="_blank" rel="noopener">Educación Financiera para Adolescentes: Tomando Decisiones Financieras</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 21 - 04:00 PM
+         to 05:30 PM
+        
+        
+        
+        <p>Community Rm 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Durante este programa del Mes de la Educación Financiera, los adolescentes de los grados 6 a 12 aprenderán sobre decisiones financieras con la ayuda de la Cooperativa de</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/marbled-papered-journal-65802" target="_blank" rel="noopener">Marbled Paper-Covered Journals</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 21 - 04:00 PM
+         to 05:30 PM
+        
+        
+        
+        <p>Children's Program Rm 1 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Children in Grades 3-5 will make a marbled paper-covered journal. Marbling paper is a historic art form that creates unique, decorative paper.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/lapsit-story-time-64943" target="_blank" rel="noopener">Lapsit Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 21 - 06:00 PM
+         to 06:45 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us at Lapsit Story Time for stories, music, movement, art, and play intended to help develop and enhance early literacy skills and your baby's development.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/fiction-book-club-52181" target="_blank" rel="noopener">Fiction Book Club</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 21 - 07:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Conference Room & Online at Bloomington Public Library & Online</p>
+        
+        
+        
+        <p>The Fiction Book Club will be reading The Ministry of Time by Kaliane Bradley.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-22">Wednesday, April 22, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/preschool-story-time-65056" target="_blank" rel="noopener">Preschool Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 22 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Preschool Story Time:
+          Help your child build independent listening skills while learning and having fun! This story time -- recommended for children ages 3-5 years -- will feature longer stories, flannel...</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>12:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/teen-writing-workshop-63380" target="_blank" rel="noopener">Teen Writing Workshop</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 22 - 12:00 PM
+         to 01:00 PM
+        
+        
+        
+        <p>TeenZone at Bloomington Public Library</p>
+        
+        
+        
+        <p>This writing workshop is for teens in Grades 6-12 and is perfect for homeschooled creative writers!</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/tales-tails-66087" target="_blank" rel="noopener">Tales for Tails</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 22 - 06:00 PM
+         to 07:00 PM
+        
+        
+        
+        <p>Children's Department at Bloomington Public Library</p>
+        
+        
+        
+        <p>This program pairs trained and certified therapy dogs with children in Grades K-5 who want to practice reading aloud.There will be 4 time slots available for kids to meet and read to a pup in the Children's Department:</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/make-a-wish-golf-scramble-hillview-country-club-42326-tickets-1980140520601" target="_blank" rel="noopener">Make-A-Wish Golf Scramble - Hillview Country Club  - 4/23/26</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 22 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Hillview Country Club, 1800 East King Street, Franklin, IN</p>
+        
+        
+        
+        <p>Get ready to swing those clubs and grant some wishes at the BES Make-A-Wish Golf Scramble - it's going to be a day full of fun & giving back</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.eventbrite.com/e/2026-women-in-business-retreat-tickets-1761762642489" target="_blank" rel="noopener">2026 Women in Business Retreat</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 22 - 08:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>The Alexander Hotel, 333 South Delaware Street, Indianapolis, IN</p>
+        
+        
+        
+        <p>The Indy Chamber and the Central Indiana Women's Business Center are excited to invite you to the 12th Annual Women in Business Retreat.</p>
+        
+        
+        <a href="bloomington/eventbrite_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Eventbrite Bloomington Events</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1776902400000" target="_blank" rel="noopener"> Open Mic Night at The Comedy Attic</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 22 - 08:00 PM
+         to 10:00 PM
+        
+        
+        
+        <p>The Comedy Attic,123 S Walnut St, Bloomington, IN 47408, USA</p>
+        
+        
+        
+        <p>Every Wednesday at 8PM is Comedy Attic Open Mic Night. Bloomington has one of the best local comedy scenes in the country, and it all starts with our open mic night!
+
+Each comedian is asked to do no more than five minutes of completely original material. While we do not care about foul language in y...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-23">Thursday, April 23, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/toddler-story-time-66077" target="_blank" rel="noopener">Toddler Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 23 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Toddlers are always on the go! Come to story time to encourage their emerging skills with books, rhymes, music, and movement activities.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/book-brunch-club-51965" target="_blank" rel="noopener">Book Brunch Club</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 23 - 10:00 AM
+         to 11:00 AM
+        
+        
+        
+        <p>Conference Room & Online at Bloomington Public Library & Online</p>
+        
+        
+        
+        <p>Start your day right with Book Brunch Club, a cozy book club where you bring your coffee and snacks, we provide the books, and together we dive into lively discussions!</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>03:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/after-school-bpl-65298" target="_blank" rel="noopener">After School @ BPL</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 23 - 03:30 PM
+         to 05:30 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us for after-school fun! Various activities will be offered depending on the date:</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/bloomington-reads-edward-kelsey-moore-tentative-59282" target="_blank" rel="noopener">Bloomington Reads: An Evening with Edward Kelsey Moore</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 23 - 06:00 PM
+         to 09:00 PM
+        
+        
+        
+        <p>Community Rm 1, 2, & 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Our 2026 Bloomington Reads program series concludes with an evening with Edward Kelsey Moore, author of The Supremes at Earl's All-You-Can Eat.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-24">Friday, April 24, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/fun-friday-story-time-65118" target="_blank" rel="noopener">Fun Friday Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Friday April 24 - 10:00 AM
+         to 10:30 AM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Swing by the Children’s Program Room on Fridays at 10am for 30 minutes of music, movement, giggles, and great stories! This playful and engaging story time is perfect for kids — from birth to age 11 years — and their grown-ups, too.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-25">Saturday, April 25, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/instrument-playground-65966" target="_blank" rel="noopener">Instrument Playground</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 25 - 10:00 AM
+         to 12:00 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>The Illinois Symphony Orchestra Guild of Bloomington-Normal will present an INSTRUMENT PLAYGROUND at Bloomington Public Library.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>02:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/pins-and-needles-fiber-arts-celebration-63268" target="_blank" rel="noopener">Pins and Needles: A Fiber Arts Celebration</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 25 - 02:00 PM
+         to 04:00 PM
+        
+        
+        
+        <p>Offsite Event at Bloomington Public Library</p>
+        
+        
+        
+        <p>Whether you’re a needlework novice who's thinking about a new hobby or a seasoned crafter who is looking for new techniques, this program will allow you to explore the world of fiber arts with demonstrations of spinning, knitting, crocheting,</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>03:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/rc-cars-kids-65038" target="_blank" rel="noopener">RC Cars for Kids</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Saturday April 25 - 03:00 PM
+         to 04:00 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Kids can work together repurposing cardboard boxes to build obstacles and ramps for Remote Control cars. They'll then take turns at the wheel maneuvering through their creations. Boxes and cars will be provided.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-26">Sunday, April 26, 2026</h2>
+
+    
+    <h3>02:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/el-dia-de-los-ninosel-dia-de-los-libros-65057" target="_blank" rel="noopener">El día de los niños/El día de los libros</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Sunday April 26 - 02:00 PM
+         to 04:00 PM
+        
+        
+        
+        <p>Offsite Event at Bloomington Public Library</p>
+        
+        
+        
+        <p>English</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-27">Monday, April 27, 2026</h2>
+
+    
+    <h3>04:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/sensory-art-kids-66098" target="_blank" rel="noopener">Sensory Art Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Monday April 27 - 04:00 PM
+         to 05:00 PM
+        
+        
+        
+        <p>Children's Program Rm 1 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us for a fun exploration of different sensory experiences with a variety of art supplies! Process art can be about the immersive and engaging experience of playing with one or two mediums without an end product in mind.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>07:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/true-crime-book-club-52203" target="_blank" rel="noopener">True Crime Book Club</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Monday April 27 - 07:00 PM
+         to 08:00 PM
+        
+        
+        
+        <p>Conference Room & Online at Bloomington Public Library & Online</p>
+        
+        
+        
+        <p>Lock Your Doors: A True Crime Book Club will read When the Night Comes Falling: A Requiem for the Idaho Student Murders by Howard Blum.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-28">Tuesday, April 28, 2026</h2>
+
+    
+    <h3>10:00 AM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/lapsit-story-time-64935" target="_blank" rel="noopener">Lapsit Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 28 - 10:00 AM
+         to 10:45 AM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us at Lapsit Story Time for stories, music, movement, art, and play intended to help develop and enhance early literacy skills and your baby's development.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>06:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/lapsit-story-time-64944" target="_blank" rel="noopener">Lapsit Story Time</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 28 - 06:00 PM
+         to 06:45 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us at Lapsit Story Time for stories, music, movement, art, and play intended to help develop and enhance early literacy skills and your baby's development.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/adult-craftivism-65567" target="_blank" rel="noopener">Adult Craftivism</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Tuesday April 28 - 06:00 PM
+         to 07:00 PM
+        
+        
+        
+        <p>Community Rm 3 at Bloomington Public Library</p>
+        
+        
+        
+        <p>Join us for a belated celebration of Earth Day as we sort seeds for the Bookmobile's new seed library, "Seeds on Wheels." Participants will also take home some seeds for their own gardens.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-29">Wednesday, April 29, 2026</h2>
+
+    
+    <h3>05:30 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/craftivism-kids-earth-day-65895" target="_blank" rel="noopener">Craftivism for Kids: Earth Day</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 29 - 05:30 PM
+         to 06:30 PM
+        
+        
+        
+        <p>Children's Program Rm 1 & 2 at Bloomington Public Library</p>
+        
+        
+        
+        <p>A combination of crafts and activism, "craftivism" is a way to explore historical and modern examples of arts and crafts being used to convey a message. In this session, kids in Grades 2-5 will learn about environmental justice.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://www.bloomingtonlibrary.org/event/bpl-go-pop-65911" target="_blank" rel="noopener">BPL On-the-Go Pop-Up</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 29 - 05:30 PM
+         to 06:45 PM
+        
+        
+        
+        <p>On-the-Go-Vehicle at Bloomington Public Library</p>
+        
+        
+        
+        <p>Have you heard about Bloomington Library's new On-the-Go vehicle? BPL On-the-Go allows library staff to travel to offsite locations, bringing with them library programs and services.</p>
+        
+        
+        <a href="bloomington/library_intercept_2026_04.ics" class="source-link" target="_blank" rel="noopener">📰 Bloomington Library</a>
+      </div>
+    </article>
+    
+    
+    <h3>08:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1437/1777507200000" target="_blank" rel="noopener"> Open Mic Night at The Comedy Attic</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Wednesday April 29 - 08:00 PM
+         to 10:00 PM
+        
+        
+        
+        <p>The Comedy Attic,123 S Walnut St, Bloomington, IN 47408, USA</p>
+        
+        
+        
+        <p>Every Wednesday at 8PM is Comedy Attic Open Mic Night. Bloomington has one of the best local comedy scenes in the country, and it all starts with our open mic night!
+
+Each comedian is asked to do no more than five minutes of completely original material. While we do not care about foul language in y...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    
+    <h2 id="2026-04-30">Thursday, April 30, 2026</h2>
+
+    
+    <h3>07:00 PM</h3>
+
+    
+    <article class="event">
+      <div class="event-title">
+        
+        <a href="https://tockify.com/bloomington.arts.calendar/detail/1841/1777590000000" target="_blank" rel="noopener"> UpDating</a>
+        
+      </div>
+
+      <div class="event-details">
+        
+        Thursday April 30 - 07:00 PM
+         to 09:00 PM
+        
+        
+        
+        <p>Buskirk-Chumley Theater,114 East Kirkwood Avenue, Bloomington, IN 47408, USA</p>
+        
+        
+        
+        <p>UPDATING is the critically-acclaimed New York City-based live dating & comedy show bringing two singles on blindfolded first dates in front of live audiences. Dubbed “the most raw dating show in existence,” what follows is a hilarious show with audience participation, raw moments, and relatable feed...</p>
+        
+        
+        <a href="https://tockify.com/api/feeds/ics/bloomington.arts.calendar" class="source-link" target="_blank" rel="noopener">📰 Bloomington's Arts Events</a>
+      </div>
+    </article>
+    
+    
+    
+  </main>
+
+  <div class="feeds-section">
+    <h2>Feeds</h2>
+    <table>
+      <tr>
+        <th>Calendar Name</th>
+        <th>Total Events</th>
+        <th>Oldest Day</th>
+        <th>Newest Day</th>
+        <th>URL</th>
+      </tr>
+      
+      <tr>
+        <td>Bloomington Library</td>
+        <td>105</td>
+        <td>2026-02-06</td>
+        <td>2026-02-28</td>
+        <td>bloomington/library_intercept_2026_02.ics</td>
+      </tr>
+      
+      <tr>
+        <td>Bloomington Library</td>
+        <td>173</td>
+        <td>2026-02-06</td>
+        <td>2026-03-31</td>
+        <td>bloomington/library_intercept_2026_03.ics</td>
+      </tr>
+      
+      <tr>
+        <td>Bloomington Library</td>
+        <td>247</td>
+        <td>2026-02-06</td>
+        <td>2026-04-29</td>
+        <td>bloomington/library_intercept_2026_04.ics</td>
+      </tr>
+      
+      <tr>
+        <td>Bloomington's Arts Events</td>
+        <td>340</td>
+        <td>2025-12-04</td>
+        <td>2031-01-03</td>
+        <td>https://tockify.com/api/feeds/ics/bloomington.arts.calendar</td>
+      </tr>
+      
+      <tr>
+        <td>Bluebird Nightclub</td>
+        <td>9</td>
+        <td>2024-08-28</td>
+        <td>2024-09-14</td>
+        <td>bloomington/bluebird.ics</td>
+      </tr>
+      
+      <tr>
+        <td>Boys &amp; Girls Clubs of Bloomington</td>
+        <td>19</td>
+        <td>2026-02-06</td>
+        <td>2026-09-07</td>
+        <td>https://bgcbloomington.org/events/list/?ical=1</td>
+      </tr>
+      
+      <tr>
+        <td>Eventbrite Bloomington Events</td>
+        <td>251</td>
+        <td>2026-01-31</td>
+        <td>2026-02-27</td>
+        <td>bloomington/eventbrite_2026_02.ics</td>
+      </tr>
+      
+      <tr>
+        <td>Eventbrite Bloomington Events</td>
+        <td>60</td>
+        <td>2026-02-28</td>
+        <td>2026-03-28</td>
+        <td>bloomington/eventbrite_2026_03.ics</td>
+      </tr>
+      
+      <tr>
+        <td>Eventbrite Bloomington Events</td>
+        <td>35</td>
+        <td>2026-04-02</td>
+        <td>2026-04-22</td>
+        <td>bloomington/eventbrite_2026_04.ics</td>
+      </tr>
+      
+      <tr>
+        <td>Utilities Service Board</td>
+        <td>372</td>
+        <td>2015-12-29</td>
+        <td>2026-09-08</td>
+        <td>https://calendar.google.com/calendar/ical/bloomington.in.gov_1b95au4d2ueudldosb024fimp0@group.calendar.google.com/public/basic.ics</td>
+      </tr>
+      
+    </table>
+  </div>
+
+  <script>
+    function scrollToDay(dateId) {
+      const element = document.getElementById(dateId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  </script>
+</body>
+</html>
