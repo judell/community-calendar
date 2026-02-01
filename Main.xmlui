@@ -13,13 +13,12 @@
   <List data="{events}">
     <Card padding="$space-3" marginBottom="$space-2">
       <HStack gap="$space-4" verticalAlignment="top">
-        <VStack width="90px" horizontalAlignment="center">
-          <Text fontWeight="bold" value="{window.formatDayOfWeek($item.start_time)}" />
-          <Text value="{window.formatMonthDay($item.start_time)}" />
-          <Text fontSize="$text-sm" color="$color-text-secondary" value="{window.formatTime($item.start_time)}" />
-        </VStack>
+        <Text width="140px" fontSize="$text-sm" value="{window.formatDayOfWeek($item.start_time) + ' ' + window.formatMonthDay($item.start_time) + (window.formatTime($item.start_time) ? ', ' + window.formatTime($item.start_time) : '')}" />
         <VStack gap="$space-1">
-          <Text fontWeight="bold" value="{$item.title}" />
+          <Link when="{$item.url}" to="{$item.url}" target="_blank">
+            <Text fontWeight="bold" value="{$item.title}" />
+          </Link>
+          <Text when="{!$item.url}" fontWeight="bold" value="{$item.title}" />
           <Text fontSize="$text-sm" color="$color-text-secondary" value="{$item.location}" />
           <Text fontSize="$text-xs" fontStyle="italic" color="$color-text-tertiary" value="{'Source: ' + $item.source}" />
         </VStack>
