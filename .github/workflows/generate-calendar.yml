@@ -423,6 +423,12 @@ jobs:
         python cal.py --generate --location bloomington --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Indiana/Indianapolis" $LOCAL_ONLY_FLAG
         python cal.py --generate --location bloomington --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Indiana/Indianapolis" $LOCAL_ONLY_FLAG
       
+    - name: Convert Santa Rosa ICS to JSON for Supabase
+      if: contains(steps.locations.outputs.list, 'santarosa')
+      run: |
+        python ics_to_json.py santarosa/combined.ics -o santarosa/events.json
+        echo "Converted $(cat santarosa/events.json | python -c 'import json,sys; print(len(json.load(sys.stdin)))') events to JSON"
+
     - name: Commit and push if changes
       env:
         GITHUB_TOKEN: ${{ secrets.COMMUNITY_CALENDAR }}
@@ -439,3 +445,13 @@ jobs:
             sleep 5
           done
         )
+
+    - name: Trigger Supabase events reload
+      if: contains(steps.locations.outputs.list, 'santarosa')
+      env:
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      run: |
+        echo "Triggering Supabase Edge Function to reload events..."
+        curl -sL -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
+          -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+          -H 'Content-Type: application/json' | jq .
