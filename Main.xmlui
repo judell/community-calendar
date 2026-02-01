@@ -10,6 +10,15 @@
   <H1>What's Happening</H1>
   <Text value="{events.value ? events.value.length + ' events this week' : 'Loading...'}" />
 
+  <ExpandableItem summary="Events by Source" marginBottom="$space-4">
+    <List data="{window.getSourceCounts(events.value)}">
+      <HStack gap="$space-2" paddingVertical="$space-1">
+        <Text width="40px" textAlign="right" fontWeight="bold" value="{$item.count}" />
+        <Text value="{$item.source}" />
+      </HStack>
+    </List>
+  </ExpandableItem>
+
   <List data="{events}">
     <Card padding="$space-3" marginBottom="$space-2">
       <HStack gap="$space-4" verticalAlignment="top">

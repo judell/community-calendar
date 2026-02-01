@@ -97,6 +97,19 @@
         if (text.length <= maxLen) return text;
         return text.substring(0, maxLen).trim() + '...';
       };
+
+      // Aggregate events by source, return sorted array of {source, count}
+      window.getSourceCounts = function(events) {
+        if (!events || !events.length) return [];
+        const counts = {};
+        events.forEach(e => {
+          const src = e.source || 'Unknown';
+          counts[src] = (counts[src] || 0) + 1;
+        });
+        return Object.entries(counts)
+          .map(([source, count]) => ({ source, count }))
+          .sort((a, b) => b.count - a.count);
+      };
     </script>
   </head>
   <body>
