@@ -1,26 +1,15 @@
 <App name="Community Calendar">
   <DataSource
     id="events"
-    url="{eventsUrl()}"
-    headers="{{ apikey: supabaseKey }}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate()}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey
+    }}"
   />
 
-  <H1>Upcoming Events</H1>
-  
-  <List data="{events}" gap="md">
-    <Card>
-      <HStack verticalAlignment="top" gap="lg">
-        <VStack width="100px" gap="0">
-          <Text variant="strong" value="{formatDate($item.start_time)}" />
+  <H1>What's Happening</H1>
 
-        </VStack>
-        <VStack gap="xs">
-          <Text variant="strong" value="{$item.title}" />
-          <Text variant="secondary" value="{$item.location}" when="{$item.location}" />
-          <Text value="{truncate($item.description, 150)}" when="{$item.description}" />
-          <Link to="{$item.url}" label="More info" when="{$item.url && $item.url !== 'None'}" />
-        </VStack>
-      </HStack>
-    </Card>
+  <List data="{events}">
+    <Text value="{$item.title}" />
   </List>
 </App>

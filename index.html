@@ -6,14 +6,42 @@
     <title>Community Calendar</title>
     <script src="https://xmlui.org/xmlui.js"></script>
     <script>
-      // Supabase configuration
-      window.supabaseUrl = 'https://dzpdualvwspgqghrysyz.supabase.co';
-      window.supabaseKey = 'sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5';
+      // Date range helpers for upcoming events (one hour ago to one week out)
+      // Pre-compute at load time to avoid timing issues with XMLUI expressions
+      (function() {
+        const now = new Date();
+        const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+        const oneWeekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        window.fromDate = oneHourAgo.toISOString();
+        window.toDate = oneWeekLater.toISOString();
+        console.log('Date range initialized:', window.fromDate, 'to', window.toDate);
+      })();
 
-      // Build URL for upcoming events
-      window.eventsUrl = function() {
-        const today = new Date().toISOString().split('T')[0];
-        return `${window.supabaseUrl}/rest/v1/events?select=*&order=start_time.asc&start_time=gte.${today}&limit=100`;
+      // Keep functions for debugging
+      window.getFromDate = function() { return window.fromDate; };
+      window.getToDate = function() { return window.toDate; };
+
+      // Filter events by search term
+      window.filterEvents = function(events, term) {
+        if (!events || !term) return events || [];
+        const lower = term.toLowerCase();
+        return events.filter(e =>
+          (e.title && e.title.toLowerCase().includes(lower)) ||
+          (e.location && e.location.toLowerCase().includes(lower)) ||
+          (e.description && e.description.toLowerCase().includes(lower))
+        );
+      };
+
+      // Format day of week
+      window.formatDayOfWeek = function(isoString) {
+        if (!isoString) return '';
+        return new Date(isoString).toLocaleDateString('en-US', { weekday: 'short' });
+      };
+
+      // Format month and day
+      window.formatMonthDay = function(isoString) {
+        if (!isoString) return '';
+        return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       };
 
       // Format date for display
@@ -25,7 +53,6 @@
 
       // Format time for display
       window.formatTime = function(isoString) {
-        console.log('formatTime called with:', isoString);
         if (!isoString) return '';
         const d = new Date(isoString);
         // Skip midnight times (likely means time unknown)
