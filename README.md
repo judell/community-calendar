@@ -25,15 +25,24 @@ A community event aggregator that scrapes events from multiple sources, combines
 
 ## Components
 
-### 1. Event Scrapers
+### 1. Event Sources
 
-Individual Python scrapers in `scrapers/` and location folders that produce ICS files from various sources:
-- Press Democrat
-- Bohemian
-- GoLocal Coop
-- Sonoma County Library
+**ICS feeds are preferred** when available. Many venues and organizations publish standard iCalendar feeds that we consume directly:
 - Luther Burbank Center
+- Schulz Museum
+- GoLocal Coop
+- Sonoma County AA
+- City calendars (Google Calendar)
 - And more...
+
+**Scraping is a fallback** for sources that don't provide ICS feeds:
+- Press Democrat (event listings)
+- Bohemian (event listings)
+- Sonoma County Library (via API interception)
+- Cal Theatre
+- Copperfield's Books
+
+Scrapers are in `scrapers/` and per-location folders (e.g., `santarosa/`).
 
 ### 2. ICS Combination
 
@@ -168,7 +177,30 @@ curl -L -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-even
 
 ### Automated (GitHub Actions)
 
-The workflow in `.github/workflows/generate-calendar.yml` automates scraping and ICS generation.
+The workflow in `.github/workflows/generate-calendar.yml` runs automatically.
+
+**Schedule**: Daily at midnight UTC (`0 0 * * *`)
+
+**Cities processed**:
+- `santarosa` - Santa Rosa, CA (America/Los_Angeles)
+- `sebastopol` - Sebastopol, CA (America/Los_Angeles)
+- `cotati` - Cotati, CA (America/Los_Angeles)
+- `sonoma` - Sonoma, CA (America/Los_Angeles)
+- `bloomington` - Bloomington, IN (America/Indiana/Indianapolis)
+
+**Time range**: Current month + next 2 months
+
+**Per-city workflow**:
+1. Run scrapers for sources without ICS feeds
+2. Download live ICS feeds from venues that provide them
+3. Update `feeds.txt` with all sources (live URLs + local scraped files)
+4. Generate legacy HTML calendars via `cal.py`
+5. Combine all ICS files into `combined.ics`
+6. Commit and push changes
+
+**Manual trigger**: Can also be triggered manually via GitHub Actions UI with options:
+- `locations`: Comma-separated list (e.g., `santarosa,sebastopol`) or `all`
+- `regenerate_only`: Skip scraping, just regenerate from existing ICS files
 
 ## Supabase Setup Notes
 
