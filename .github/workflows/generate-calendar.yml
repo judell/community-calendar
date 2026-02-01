@@ -79,7 +79,7 @@ jobs:
       run: |
         INPUT="${{ github.event.inputs.locations }}"
         if [ -z "$INPUT" ] || [ "$INPUT" = "all" ]; then
-          echo "list=santarosa,sebastopol,cotati,bloomington" >> $GITHUB_OUTPUT
+          echo "list=santarosa,sebastopol,cotati,sonoma,bloomington" >> $GITHUB_OUTPUT
         else
           echo "list=$INPUT" >> $GITHUB_OUTPUT
         fi
@@ -294,6 +294,58 @@ jobs:
         python cal.py --generate --location cotati --year ${{ steps.dates.outputs.this_year }} --month ${{ steps.dates.outputs.this_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
         python cal.py --generate --location cotati --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
         python cal.py --generate --location cotati --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
+
+    # ==========================================
+    # Sonoma (Sonoma Valley / City of Sonoma)
+    # ==========================================
+    - name: Scrape Sonoma sources
+      if: contains(steps.locations.outputs.list, 'sonoma') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        echo "Processing Sonoma..."
+        for period in "this" "next" "next2"; do
+          if [ "$period" = "this" ]; then
+            Y=${{ steps.dates.outputs.this_year }}
+            M=${{ steps.dates.outputs.this_month }}
+          elif [ "$period" = "next" ]; then
+            Y=${{ steps.dates.outputs.next_year }}
+            M=${{ steps.dates.outputs.next_month }}
+          else
+            Y=${{ steps.dates.outputs.next2_year }}
+            M=${{ steps.dates.outputs.next2_month }}
+          fi
+          
+          echo "Scraping Sonoma for $Y-$M..."
+          python scrapers/svma.py --year $Y --month $((10#$M)) --output sonoma/svma_${Y}_${M}.ics || true
+          python scrapers/sonoma_city.py --year $Y --month $((10#$M)) --output sonoma/sonoma_city_${Y}_${M}.ics || true
+        done
+      continue-on-error: true
+
+    - name: Update Sonoma feeds.txt
+      if: contains(steps.locations.outputs.list, 'sonoma') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        cat > sonoma/feeds.txt << EOF
+        # Sonoma Valley Museum of Art
+        sonoma/svma_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        sonoma/svma_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        sonoma/svma_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+
+        # City of Sonoma
+        sonoma/sonoma_city_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        sonoma/sonoma_city_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        sonoma/sonoma_city_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        EOF
+        sed -i 's/^[[:space:]]*//' sonoma/feeds.txt
+
+    - name: Generate Sonoma calendars
+      if: contains(steps.locations.outputs.list, 'sonoma')
+      run: |
+        LOCAL_ONLY_FLAG=""
+        if [ "${{ github.event.inputs.regenerate_only }}" = "true" ]; then
+          LOCAL_ONLY_FLAG="--local-only"
+        fi
+        python cal.py --generate --location sonoma --year ${{ steps.dates.outputs.this_year }} --month ${{ steps.dates.outputs.this_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
+        python cal.py --generate --location sonoma --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
+        python cal.py --generate --location sonoma --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
 
     # ==========================================
     # Bloomington
