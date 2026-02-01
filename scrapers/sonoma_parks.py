@@ -144,8 +144,9 @@ def create_calendar(events, year, month):
         
         if event_data.get('location'):
             event.add('location', event_data['location'])
-        if event_data.get('description'):
-            event.add('description', event_data['description'])
+        desc = event_data.get('description', '') or ''
+        desc = desc.rstrip() + '\n\nSource: Sonoma County Parks' if desc else 'Source: Sonoma County Parks'
+        event.add('description', desc)
         
         # Generate a UID
         uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"

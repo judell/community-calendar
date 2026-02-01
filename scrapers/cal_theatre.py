@@ -160,7 +160,9 @@ def create_calendar(events, year, month):
         event.add('dtend', event_data['dtend'])
         event.add('url', event_data['url'])
         event.add('location', event_data['location'])
-        event.add('description', event_data['description'])
+        desc = event_data.get('description', '') or ''
+        desc = desc.rstrip() + '\n\nSource: Cal Theatre' if desc else 'Source: Cal Theatre'
+        event.add('description', desc)
         
         # Generate a UID
         uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"

@@ -90,7 +90,9 @@ def generate_icalendar(events, year, month):
             cal_event.add('dtstart', event_start)
             cal_event.add('dtend', event_end)
             cal_event.add('location', vText(event.get('Venue', '')))
-            cal_event.add('description', event.get('Description', ''))
+            desc = event.get('Description', '') or ''
+            desc = desc.rstrip() + '\n\nSource: Press Democrat' if desc else 'Source: Press Democrat'
+            cal_event.add('description', desc)
             cal_event.add('uid', event.get('Id', event.get('PId', '')))
             if event.get('Links') and len(event['Links']) > 0:
                 cal_event.add('url', event['Links'][0].get('url', ''))

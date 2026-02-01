@@ -151,15 +151,17 @@ def create_calendar(events, site_config, year, month):
             event.add('url', event_data['url'])
         if event_data.get('location'):
             event.add('location', event_data['location'])
-        if event_data.get('description'):
-            event.add('description', event_data['description'])
+        desc = event_data.get('description', '') or ''
+        source_name = site_config['name']
+        desc = desc.rstrip() + f'\n\nSource: {source_name}' if desc else f'Source: {source_name}'
+        event.add('description', desc)
         
         # Use original UID or generate one
         uid = event_data.get('uid') or hashlib.md5(
             f"{event_data['summary']}-{event_data['dtstart']}".encode()
         ).hexdigest()
         event.add('uid', uid)
-        event.add('x-source', site_config['name'])
+        event.add('x-source', source_name)
         
         cal.add_component(event)
     

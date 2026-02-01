@@ -137,7 +137,9 @@ def create_calendar(events, year, month):
         event.add('dtend', event_data['dtend'])
         event.add('url', event_data['url'])
         event.add('location', event_data['location'])
-        event.add('description', event_data['description'])
+        desc = event_data.get('description', '') or ''
+        desc = desc.rstrip() + '\n\nSource: Sonoma Valley Museum of Art' if desc else 'Source: Sonoma Valley Museum of Art'
+        event.add('description', desc)
         
         uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"
         uid = hashlib.md5(uid_str.encode()).hexdigest()

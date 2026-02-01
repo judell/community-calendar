@@ -143,7 +143,9 @@ def create_calendar(events, year, month):
         event.add('dtend', event_data['dtend'])
         event.add('url', event_data['url'])
         event.add('location', event_data['location'])
-        event.add('description', event_data['description'])
+        desc = event_data.get('description', '') or ''
+        desc = desc.rstrip() + '\n\nSource: City of Sonoma' if desc else 'Source: City of Sonoma'
+        event.add('description', desc)
         
         uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"
         uid = hashlib.md5(uid_str.encode()).hexdigest()
