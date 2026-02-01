@@ -56,16 +56,16 @@
         );
       };
 
-      // Format day of week
+      // Format day of week (using UTC since times were stored as local but marked UTC)
       window.formatDayOfWeek = function(isoString) {
         if (!isoString) return '';
-        return new Date(isoString).toLocaleDateString('en-US', { weekday: 'short' });
+        return new Date(isoString).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
       };
 
-      // Format month and day
+      // Format month and day (using UTC since times were stored as local but marked UTC)
       window.formatMonthDay = function(isoString) {
         if (!isoString) return '';
-        return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
       };
 
       // Format date for display
@@ -76,12 +76,19 @@
       };
 
       // Format time for display
+      // Times were stored as local times but Supabase added +00:00, so use UTC values directly
       window.formatTime = function(isoString) {
         if (!isoString) return '';
         const d = new Date(isoString);
+        const hours = d.getUTCHours();
+        const mins = d.getUTCMinutes();
         // Skip midnight times (likely means time unknown)
-        if (d.getHours() === 0 && d.getMinutes() === 0) return '';
-        return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        if (hours === 0 && mins === 0) return '';
+        // Format as 12-hour time
+        const h = hours % 12 || 12;
+        const ampm = hours < 12 ? 'AM' : 'PM';
+        const m = mins.toString().padStart(2, '0');
+        return `${h}:${m} ${ampm}`;
       };
 
       // Truncate text with ellipsis
