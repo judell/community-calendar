@@ -452,6 +452,18 @@ jobs:
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       run: |
         echo "Triggering Supabase Edge Function to reload events..."
-        curl -sL -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
+        RESPONSE=$(curl -sL -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
           -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
-          -H 'Content-Type: application/json' | jq .
+          -H 'Content-Type: application/json')
+        echo "$RESPONSE" | jq .
+
+        # Check for success
+        SUCCESS=$(echo "$RESPONSE" | jq -r '.success // false')
+        if [ "$SUCCESS" = "true" ]; then
+          INSERTED=$(echo "$RESPONSE" | jq -r '.inserted')
+          echo "✓ Successfully loaded $INSERTED events into Supabase"
+        else
+          echo "✗ Failed to load events"
+          echo "$RESPONSE"
+          exit 1
+        fi
