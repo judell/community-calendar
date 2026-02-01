@@ -1,114 +1,232 @@
-# Usage
+# Community Calendar
+
+A community event aggregator that scrapes events from multiple sources, combines them into ICS feeds, and displays them via an XMLUI web app backed by Supabase.
+
+## Live App
+
+**XMLUI App**: https://judell.github.io/community-calendar/
+
+**Subscribable ICS Feed**: https://judell.github.io/community-calendar/santarosa/combined.ics
+
+## Architecture
 
 ```
-cal.py [-h] [--dry-run DRY_RUN] [--generate] [--location] [--timezone TIMEZONE] [--year YEAR] [--month MONTH]
-
-Generate an HTML calendar from iCalendar feeds or perform a dry run.
-
-options:
-  -h, --help           Show this help message and exit.
-  --dry-run DRY_RUN    Perform a dry run on a single iCalendar URL.
-  --generate           Generate an HTML calendar from {LOCATION_FOLDER}/feeds.txt, a list of iCalendar feeds.
-  --location           Folder for feeds.txt and output (e.g. 2024-08.html).
-  --timezone TIMEZONE  Default timezone (default: America/Indiana/Indianapolis).
-  --year YEAR          Year for calendar generation.
-  --month MONTH        Month for calendar generation.
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Scrapers      │────▶│   ICS Files     │────▶│  combined.ics   │
+│ (various sites) │     │ (per source)    │     │                 │
+└─────────────────┘     └─────────────────┘     └────────┬────────┘
+                                                         │
+                                                         ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   XMLUI App     │◀────│    Supabase     │◀────│  events.json    │
+│  (GitHub Pages) │     │   (database)    │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
 ```
 
-# Bloomington example
+## Components
 
-Community calendar for [November 2024](https://judell.github.io/community-calendar/bloomington/2024-11.html)
+### 1. Event Scrapers
 
-## Calendar view
+Individual Python scrapers in `scrapers/` and location folders that produce ICS files from various sources:
+- Press Democrat
+- Bohemian
+- GoLocal Coop
+- Sonoma County Library
+- Luther Burbank Center
+- And more...
 
-![image](https://github.com/user-attachments/assets/280beee9-d752-47c7-be70-d1b710f08bcc)
+### 2. ICS Combination
 
-## List view
+**`combine_ics.py`** - Combines multiple ICS files into a single subscribable feed:
 
-![image](https://github.com/user-attachments/assets/a4cac249-d672-4405-a1b0-478ba8dfc916)
+```bash
+python combine_ics.py -i santarosa -o santarosa/combined.ics --name "Santa Rosa Community Calendar"
+```
 
+### 3. ICS to JSON Conversion
 
-## Source feeds and stats
+**`ics_to_json.py`** - Converts ICS to JSON format for Supabase ingestion:
 
-![image](https://github.com/user-attachments/assets/80dfb127-eae3-4a7c-af50-65bc576a6b15)
+```bash
+python ics_to_json.py santarosa/combined.ics -o santarosa/events.json
+```
 
-# Timezone Handling Strategy
+Output format:
+```json
+{
+  "title": "Event Name",
+  "start_time": "2026-02-01T14:00:00",
+  "end_time": "2026-02-01T16:00:00",
+  "location": "Venue, Address",
+  "description": "Event description",
+  "url": "https://...",
+  "source": "Source Name",
+  "source_uid": "unique-id@source.com"
+}
+```
 
-## Overview
+### 4. XMLUI Frontend
 
-The calendar generation system deals with events from multiple sources, potentially in different timezones, and needs to display them correctly in a user-specified timezone. This document outlines the strategy used to handle these timezone conversions accurately.
+**`Main.xmlui`** - Declarative UI that fetches events from Supabase:
 
-## Key Challenges
+```xml
+<App name="Community Calendar">
+  <DataSource
+    id="events"
+    url="{appGlobals.supabaseUrl + '/rest/v1/events?...'}"
+    headers="{{ apikey: appGlobals.supabasePublishableKey }}"
+  />
+  <List data="{events}">
+    <!-- Event display -->
+  </List>
+</App>
+```
 
-1. Source calendars may specify events in different timezones.
-2. Some events may be specified without explicit timezone information.
-3. The system needs to display all events in a consistent, user-specified timezone.
-4. All-day events need special handling to prevent date shifts during timezone conversions.
+**`config.json`** - XMLUI configuration with Supabase credentials:
+```json
+{
+  "appGlobals": {
+    "supabaseUrl": "https://dzpdualvwspgqghrysyz.supabase.co",
+    "supabasePublishableKey": "sb_publishable_..."
+  }
+}
+```
 
-## Strategy
+**`index.html`** - Loads XMLUI and defines helper functions for date formatting.
 
-The system uses a three-step approach:
+### 5. Supabase Backend
 
-1. Determine the source timezone for each calendar.
-2. Parse and localize each event to its source timezone, then convert to the target timezone.
-3. Group events by their date in the target timezone to ensure correct placement in the calendar.
+#### Database Schema
 
-## Key Functions and Their Roles
+```sql
+CREATE TABLE events (
+  id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  title text NOT NULL,
+  start_time timestamptz NOT NULL,
+  end_time timestamptz,
+  location text,
+  description text,
+  url text,
+  source text,
+  source_uid text UNIQUE,
+  created_at timestamptz DEFAULT now()
+);
+```
 
-### `determine_timezone(vtimezone_info, x_wr_timezone, default_timezone)`
+#### Edge Function: `load-events`
 
-- **Role**: Determines the source timezone for a calendar.
-- **Strategy**:
-  1. Check for VTIMEZONE information in the calendar.
-  2. If not found, use X-WR-TIMEZONE property.
-  3. Fall back to the user-specified default timezone.
-  4. If all else fails, use UTC, but flag the timezone as uncertain.
+Fetches `events.json` from GitHub and upserts into the database:
 
-### `parse_vtimezone(cal)`
+```bash
+curl -L -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
+  -H 'Authorization: Bearer <LEGACY_ANON_KEY>' \
+  -H 'Content-Type: application/json'
+```
 
-- **Role**: Extracts detailed timezone information from the calendar's VTIMEZONE component.
-- **Usage**: Provides input for `determine_timezone` function.
+Returns:
+```json
+{"success":true,"fetched":9338,"unique":6404,"inserted":6404,"errors":0}
+```
 
-### `parse_and_localize_event(event, source_tz, target_tz)`
+#### Scheduled Refresh (pg_cron)
 
-- **Role**: Converts individual events from their source timezone to the target timezone.
-- **Strategy**:
-  1. Handle naive datetime objects by assuming they're in the source timezone.
-  2. Convert aware datetime objects to the target timezone.
-  3. Calculate the grouping date based on the event's date in the target timezone.
-  4. Special handling for all-day events to prevent date shifts.
+The Edge Function is scheduled to run daily at 6am UTC:
 
-### `group_events_by_date(events, year, month)`
+```sql
+SELECT cron.schedule(
+  'load-events-daily',
+  '0 6 * * *',
+  $$ SELECT net.http_post(...) $$
+);
+```
 
-- **Role**: Groups processed events by their date in the target timezone.
-- **Importance**: Ensures events appear on the correct date in the calendar, reflecting how they would occur in the target timezone.
+See `supabase_cron.sql` for the full setup.
 
-## Implementation Details
+## Deployment Workflow
 
-1. **Source Timezone Determination**:
-   - The `fetch_and_process_calendar` function uses `determine_timezone` to set the `source_tz`.
-   - This ensures all events from a single calendar are treated with the same source timezone.
+### Manual Update
 
-2. **Event Localization and Conversion**:
-   - Each event is processed by `parse_and_localize_event`.
-   - This function handles the conversion from source to target timezone.
-   - It calculates a `grouping_date` based on the event's date in the target timezone.
+```bash
+# 1. Run scrapers (produces individual ICS files)
+# (varies by scraper)
 
-3. **Event Grouping**:
-   - The `group_events_by_date` function uses the `grouping_date` to place events in the correct day.
-   - This ensures events are displayed on the day they occur in the target timezone.
+# 2. Combine ICS files
+python combine_ics.py -i santarosa -o santarosa/combined.ics
 
-4. **All-Day Event Handling**:
-   - All-day events are detected in `parse_and_localize_event`.
-   - These events maintain their original date to prevent unintended shifts across date boundaries.
+# 3. Convert to JSON
+python ics_to_json.py santarosa/combined.ics -o santarosa/events.json
 
-## Considerations for Developers
+# 4. Commit and push
+git add santarosa/events.json santarosa/combined.ics
+git commit -m "Update events"
+git push
 
-- When modifying timezone-related code, always consider the impact on both timed and all-day events.
-- Be cautious of naive datetime objects and always ensure proper timezone awareness.
-- When adding new event sources, ensure they properly specify their timezone information.
-- Consider edge cases like events spanning midnight or daylight saving time transitions.
-- Pay special attention to events near timezone boundaries to ensure they appear on the correct date in the target timezone.
+# 5. Trigger Supabase ingestion
+curl -L -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
+  -H 'Authorization: Bearer <LEGACY_ANON_KEY>'
+```
 
-By following this strategy, the system aims to accurately represent events from various sources in a unified, user-specified timezone while ensuring events are displayed on the correct dates as they would occur in the target timezone.
+### Automated (GitHub Actions)
 
+The workflow in `.github/workflows/generate-calendar.yml` automates scraping and ICS generation.
+
+## Supabase Setup Notes
+
+### API Keys
+
+Supabase has two key formats:
+- **New format**: `sb_publishable_...` - Used in `config.json` for XMLUI
+- **Legacy format**: `eyJ...` (JWT) - Required for Edge Function auth
+
+Find legacy keys in Supabase Dashboard: **Settings → API → Legacy anon, service_role API keys**
+
+### Required Extensions
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_net;    -- HTTP requests
+CREATE EXTENSION IF NOT EXISTS pg_cron;   -- Scheduled jobs
+```
+
+### Unique Constraint
+
+Required for upsert operations:
+```sql
+ALTER TABLE events ADD CONSTRAINT events_source_uid_unique UNIQUE (source_uid);
+```
+
+## XMLUI Resources
+
+- [XMLUI Documentation](https://xmlui.org)
+- [DataSource Component](https://docs.xmlui.org/components/DataSource)
+- [Supabase + XMLUI Quickstart](https://supabase.com/docs/guides/getting-started/quickstarts/xmlui)
+
+## Legacy HTML Generation
+
+The original HTML calendar generation is still available:
+
+```bash
+python cal.py --generate --location santarosa --year 2026 --month 2
+```
+
+See the legacy calendars at `/santarosa/2026-02.html` etc.
+
+---
+
+## File Structure
+
+```
+community-calendar/
+├── Main.xmlui              # XMLUI app definition
+├── config.json             # Supabase credentials for XMLUI
+├── index.html              # XMLUI loader + helper functions
+├── combine_ics.py          # Combines ICS files
+├── ics_to_json.py          # Converts ICS to JSON
+├── supabase_cron.sql       # Scheduled job setup
+├── cal.py                  # Legacy HTML generator
+├── santarosa/
+│   ├── combined.ics        # Subscribable calendar feed
+│   ├── events.json         # JSON for Supabase ingestion
+│   ├── feeds.txt           # List of ICS sources
+│   └── *.ics               # Individual source feeds
+└── scrapers/               # Event scrapers
+```
