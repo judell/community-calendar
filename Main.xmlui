@@ -1,3 +1,26 @@
 <App name="Community Calendar">
-  <Markdown data="README.md" />
+  <DataSource
+    id="events"
+    url="{eventsUrl()}"
+    headers="{{ apikey: supabaseKey }}"
+  />
+
+  <H1>Upcoming Events</H1>
+  
+  <List data="{events}" gap="md">
+    <Card>
+      <HStack verticalAlignment="top" gap="lg">
+        <VStack width="100px" gap="0">
+          <Text variant="strong" value="{formatDate($item.start_time)}" />
+
+        </VStack>
+        <VStack gap="xs">
+          <Text variant="strong" value="{$item.title}" />
+          <Text variant="secondary" value="{$item.location}" when="{$item.location}" />
+          <Text value="{truncate($item.description, 150)}" when="{$item.description}" />
+          <Link to="{$item.url}" label="More info" when="{$item.url && $item.url !== 'None'}" />
+        </VStack>
+      </HStack>
+    </Card>
+  </List>
 </App>

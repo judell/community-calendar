@@ -5,5 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Community Calendar</title>
     <script src="https://xmlui.org/xmlui.js"></script>
+    <script>
+      // Supabase configuration
+      window.supabaseUrl = 'https://dzpdualvwspgqghrysyz.supabase.co';
+      window.supabaseKey = 'sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5';
+
+      // Build URL for upcoming events
+      window.eventsUrl = function() {
+        const today = new Date().toISOString().split('T')[0];
+        return `${window.supabaseUrl}/rest/v1/events?select=*&order=start_time.asc&start_time=gte.${today}&limit=100`;
+      };
+
+      // Format date for display
+      window.formatDate = function(isoString) {
+        if (!isoString) return '';
+        const d = new Date(isoString);
+        return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      };
+
+      // Format time for display
+      window.formatTime = function(isoString) {
+        console.log('formatTime called with:', isoString);
+        if (!isoString) return '';
+        const d = new Date(isoString);
+        // Skip midnight times (likely means time unknown)
+        if (d.getHours() === 0 && d.getMinutes() === 0) return '';
+        return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      };
+
+      // Truncate text with ellipsis
+      window.truncate = function(text, maxLen) {
+        if (!text) return '';
+        if (text.length <= maxLen) return text;
+        return text.substring(0, maxLen).trim() + '...';
+      };
+    </script>
   </head>
 </html>
