@@ -2,6 +2,7 @@ import requests
 import sys
 from icalendar import Calendar, Event, vText
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 def fetch_all_events(year, month):
     """Fetch all events for the given year/month from CitySpark API.
@@ -70,13 +71,18 @@ def generate_icalendar(events, year, month):
     cal.add('prodid', '-//Bohemian Events//bohemian.com//')
     cal.add('version', '2.0')
     cal.add('x-wr-calname', 'Bohemian')
-    cal.add('x-wr-timezone', 'US/Pacific')
+    cal.add('x-wr-timezone', 'America/Los_Angeles')
+
+    pacific = ZoneInfo('America/Los_Angeles')
 
     for event in events:
-        event_start = datetime.fromisoformat(event['StartUTC'].replace('Z', '+00:00'))
-        
+        # Parse UTC time and convert to Pacific
+        event_start_utc = datetime.fromisoformat(event['StartUTC'].replace('Z', '+00:00'))
+        event_start = event_start_utc.astimezone(pacific)
+
         if event['EndUTC']:
-            event_end = datetime.fromisoformat(event['EndUTC'].replace('Z', '+00:00'))
+            event_end_utc = datetime.fromisoformat(event['EndUTC'].replace('Z', '+00:00'))
+            event_end = event_end_utc.astimezone(pacific)
         else:
             event_end = event_start  # Default to event start if end is None
 

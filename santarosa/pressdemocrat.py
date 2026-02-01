@@ -2,6 +2,7 @@ import requests
 import sys
 from icalendar import Calendar, Event, vText
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 # Press Democrat uses CitySpark API (same as Bohemian)
 # ppid: 8662, slug: SRPressDemocrat
@@ -74,13 +75,18 @@ def generate_icalendar(events, year, month):
     cal.add('prodid', '-//Press Democrat Events//pressdemocrat.com//')
     cal.add('version', '2.0')
     cal.add('x-wr-calname', 'Press Democrat')
-    cal.add('x-wr-timezone', 'US/Pacific')
+    cal.add('x-wr-timezone', 'America/Los_Angeles')
+
+    pacific = ZoneInfo('America/Los_Angeles')
 
     for event in events:
-        event_start = datetime.fromisoformat(event['StartUTC'].replace('Z', '+00:00'))
-        
+        # Parse UTC time and convert to Pacific
+        event_start_utc = datetime.fromisoformat(event['StartUTC'].replace('Z', '+00:00'))
+        event_start = event_start_utc.astimezone(pacific)
+
         if event['EndUTC']:
-            event_end = datetime.fromisoformat(event['EndUTC'].replace('Z', '+00:00'))
+            event_end_utc = datetime.fromisoformat(event['EndUTC'].replace('Z', '+00:00'))
+            event_end = event_end_utc.astimezone(pacific)
         else:
             event_end = event_start
 

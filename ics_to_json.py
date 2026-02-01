@@ -8,10 +8,15 @@ import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
+
+
+# Default timezone for converting UTC times
+PACIFIC = ZoneInfo('America/Los_Angeles')
 
 
 def parse_ics_datetime(dt_str):
-    """Parse an ICS datetime string to ISO format string."""
+    """Parse an ICS datetime string to ISO format string (in Pacific time)."""
     if not dt_str:
         return None
 
@@ -23,9 +28,12 @@ def parse_ics_datetime(dt_str):
 
     try:
         if dt_str.endswith('Z'):
+            # UTC time - convert to Pacific
             dt = datetime.strptime(dt_str, '%Y%m%dT%H%M%SZ')
+            dt = dt.replace(tzinfo=timezone.utc).astimezone(PACIFIC)
             return dt.strftime('%Y-%m-%dT%H:%M:%S')
         elif 'T' in dt_str:
+            # Local time (already in correct timezone)
             dt = datetime.strptime(dt_str, '%Y%m%dT%H%M%S')
             return dt.strftime('%Y-%m-%dT%H:%M:%S')
         else:
