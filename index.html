@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Community Calendar</title>
-    <script src="https://xmlui.org/xmlui.js"></script>
+    <script src="xmlui/0.11.33-inspector.js"></script>
     <script>
       // Date range helpers for upcoming events (one hour ago to one week out)
       // Pre-compute at load time to avoid timing issues with XMLUI expressions
@@ -26,15 +26,42 @@
       window.getFromDate = function() { return window.fromDate; };
       window.getToDate = function() { return window.toDate; };
 
-      // Filter events by search term
+      // Filter events by search term (searches title, location, source, and description)
       window.filterEvents = function(events, term) {
+        console.log('filterEvents called:', { eventCount: events?.length, term });
         if (!events || !term) return events || [];
         const lower = term.toLowerCase();
-        return events.filter(e =>
+        const filtered = events.filter(e =>
           (e.title && e.title.toLowerCase().includes(lower)) ||
           (e.location && e.location.toLowerCase().includes(lower)) ||
+          (e.source && e.source.toLowerCase().includes(lower)) ||
           (e.description && e.description.toLowerCase().includes(lower))
         );
+        console.log('filterEvents result:', { filteredCount: filtered.length });
+        return filtered;
+      };
+
+      // Get description snippet with context around search term (returns null if no match in description)
+      window.getDescriptionSnippet = function(description, term) {
+        if (!description || !term) return null;
+        const lower = description.toLowerCase();
+        const termLower = term.toLowerCase();
+        const idx = lower.indexOf(termLower);
+        if (idx === -1) return null;
+
+        // Extract context window (40 chars before and after)
+        const contextSize = 40;
+        const start = Math.max(0, idx - contextSize);
+        const end = Math.min(description.length, idx + term.length + contextSize);
+
+        let snippet = '';
+        if (start > 0) snippet += '...';
+        snippet += description.substring(start, idx);
+        snippet += '**' + description.substring(idx, idx + term.length) + '**';
+        snippet += description.substring(idx + term.length, end);
+        if (end < description.length) snippet += '...';
+
+        return snippet;
       };
 
       // Format day of week (using UTC since times were stored as local but marked UTC)
