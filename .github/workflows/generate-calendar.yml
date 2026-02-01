@@ -132,6 +132,7 @@ jobs:
           python scrapers/cal_theatre.py --year $Y --month $((10#$M)) --output santarosa/cal_theatre_${Y}_${M}.ics || true
           python scrapers/copperfields.py --year $Y --month $((10#$M)) --output santarosa/copperfields_${Y}_${M}.ics || true
           python scrapers/sonoma_county_gov.py --year $Y --month $((10#$M)) --output santarosa/sonoma_county_gov_${Y}_${M}.ics || true
+          cd santarosa && python cafefrida.py $Y $((10#$M)) || true && cd ..
         done
       continue-on-error: true
 
@@ -160,6 +161,7 @@ jobs:
         santarosa/cal_theatre_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
         santarosa/copperfields_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
         santarosa/sonoma_county_gov_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
+        santarosa/cafefrida_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
 
         santarosa/library_intercept_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
         # santarosa/eventbrite_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
@@ -169,6 +171,7 @@ jobs:
         santarosa/cal_theatre_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
         santarosa/copperfields_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
         santarosa/sonoma_county_gov_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
+        santarosa/cafefrida_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
 
         santarosa/library_intercept_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
         # santarosa/eventbrite_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
@@ -178,6 +181,7 @@ jobs:
         santarosa/cal_theatre_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
         santarosa/copperfields_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
         santarosa/sonoma_county_gov_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
+        santarosa/cafefrida_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
 
         # City calendars
         santarosa/SRCity_Main_Calendar.ics
