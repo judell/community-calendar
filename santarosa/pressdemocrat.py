@@ -94,6 +94,7 @@ def generate_icalendar(events, year, month):
             cal_event.add('uid', event.get('Id', event.get('PId', '')))
             if event.get('Links') and len(event['Links']) > 0:
                 cal_event.add('url', event['Links'][0].get('url', ''))
+            cal_event.add('x-source', 'Press Democrat')
             cal.add_component(cal_event)
 
     return cal

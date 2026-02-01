@@ -126,6 +126,7 @@ def create_calendar(events, year, month):
         uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"
         uid = hashlib.md5(uid_str.encode()).hexdigest()
         event.add('uid', f"{uid}@redwoodcafecotati.com")
+        event.add('x-source', 'Redwood Cafe')
         
         cal.add_component(event)
     

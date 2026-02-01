@@ -148,6 +148,7 @@ def create_calendar(events, year, month):
         uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"
         uid = hashlib.md5(uid_str.encode()).hexdigest()
         event.add('uid', f"{uid}@sonomacity.org")
+        event.add('x-source', 'City of Sonoma')
         
         cal.add_component(event)
     

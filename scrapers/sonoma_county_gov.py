@@ -137,6 +137,7 @@ def create_calendar(events, year, month):
         uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"
         uid = hashlib.md5(uid_str.encode()).hexdigest()
         event.add('uid', f"{uid}@sonomacounty.gov")
+        event.add('x-source', 'Sonoma County Government')
         
         cal.add_component(event)
     

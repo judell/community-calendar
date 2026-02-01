@@ -159,6 +159,7 @@ def create_calendar(events, site_config, year, month):
             f"{event_data['summary']}-{event_data['dtstart']}".encode()
         ).hexdigest()
         event.add('uid', uid)
+        event.add('x-source', site_config['name'])
         
         cal.add_component(event)
     

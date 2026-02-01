@@ -89,6 +89,7 @@ def generate_icalendar(events, year, month):
             cal_event.add('description', event.get('Description', ''))
             cal_event.add('uid', event['Id'])
             cal_event.add('url', event['Links'][0]['url'] if event.get('Links') else None)
+            cal_event.add('x-source', 'North Bay Bohemian')
             cal.add_component(cal_event)
 
     return cal

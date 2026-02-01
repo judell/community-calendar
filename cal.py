@@ -121,6 +121,10 @@ def parse_and_localize_event(event, source_tz, target_tz, cal_name, source_url=N
         url = None
 
     description = str(event.get('description'))
+    
+    # Use X-SOURCE if present in the event, otherwise fall back to calendar name
+    x_source = event.get('x-source')
+    source = str(x_source) if x_source else cal_name
 
     return {
         'summary': str(event.get('summary')),
@@ -133,7 +137,7 @@ def parse_and_localize_event(event, source_tz, target_tz, cal_name, source_url=N
         'original_start': dtstart.dt,
         'original_end': dtend.dt if dtend else None,
         'grouping_date': grouping_date,
-        'source': cal_name,
+        'source': source,
         'source_url': source_url
     }
 
