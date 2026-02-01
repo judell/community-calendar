@@ -198,6 +198,22 @@ jobs:
         python cal.py --generate --location santarosa --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
         python cal.py --generate --location santarosa --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
 
+    - name: Download Santa Rosa live feeds and combine ICS
+      if: contains(steps.locations.outputs.list, 'santarosa')
+      run: |
+        cd santarosa
+        # Download live feeds as ICS files
+        curl -sL "https://calendar.google.com/calendar/ical/eventsatarlenefransictheater@gmail.com/public/basic.ics" -o arlene_francis_theater.ics || true
+        curl -sL "https://lutherburbankcenter.org/events/?ical=1" -o luther_burbank_center.ics || true
+        curl -sL "https://schulzmuseum.org/events/?ical=1" -o schulz_museum.ics || true
+        curl -sL "https://www.sonoma.com/events/?ical=1" -o sonoma_com.ics || true
+        curl -sL "https://golocal.coop/?post_type=tribe_events&ical=1&eventDisplay=list" -o golocal_coop.ics || true
+        curl -sL "https://sonomacountyaa.org/events/?ical=1" -o sonoma_county_aa.ics || true
+        curl -sL "https://calendar.google.com/calendar/ical/dsasonomacounty%40gmail.com/public/basic.ics" -o sonoma_county_dsa.ics || true
+        cd ..
+        # Combine all ICS files into one subscribable feed
+        python combine_ics.py --input-dir santarosa --output santarosa/combined.ics --name "Santa Rosa Community Calendar"
+
     # ==========================================
     # Sebastopol
     # ==========================================
