@@ -226,11 +226,62 @@ Required for upsert operations:
 ALTER TABLE events ADD CONSTRAINT events_source_uid_unique UNIQUE (source_uid);
 ```
 
+## Recent Updates (Feb 2026)
+
+### Search Functionality
+
+The app now includes client-side search that filters events as you type:
+
+- **Search icon** in header toggles search box with auto-focus
+- **Searches** title, location, source, and description fields
+- **Description snippets**: When a match is found in description (not displayed), shows a context window with the search term **highlighted**
+
+### Performance Optimizations
+
+Rendering 900+ events required optimization:
+
+- **`fixedItemSize="true"`** - List skips per-item height measurement
+- **`limit="100"`** - Caps rendered items for faster updates
+- **Deduplication caching** - Avoids recomputing on every render
+
+Result: Specific searches like "cotati" now take ~80ms (down from 750ms).
+
+### XMLUI Inspector
+
+Added debugging tool accessible via cog icon:
+- Opens `xs-diff.html` in modal
+- Shows event traces, state changes, API calls
+- Requires `xsVerbose: true` in config.json
+
+### Upcoming: Personal Picks
+
+Planning to add authenticated personal calendar picks:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  User authenticates via GitHub OAuth                    │
+│                    ↓                                    │
+│  Browse events, click ★ to add to picks                │
+│                    ↓                                    │
+│  Personal ICS feed URL with unique token               │
+│                    ↓                                    │
+│  Subscribe in Google Calendar / Apple Calendar         │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Database tables planned:**
+- `picks` - user_id + event_id (RLS-protected)
+- `feed_tokens` - unique token per user for ICS feed URL
+
+**Edge function planned:**
+- `my-picks` - validates token, returns user's picks as ICS
+
 ## XMLUI Resources
 
 - [XMLUI Documentation](https://xmlui.org)
 - [DataSource Component](https://docs.xmlui.org/components/DataSource)
 - [Supabase + XMLUI Quickstart](https://supabase.com/docs/guides/getting-started/quickstarts/xmlui)
+- [Supabase + XMLUI Blog Post](https://blog.xmlui.org/blog/supabase-and-xmlui) - Auth pattern reference
 
 ## Legacy HTML Generation
 
@@ -249,8 +300,11 @@ See the legacy calendars at `/santarosa/2026-02.html` etc.
 ```
 community-calendar/
 ├── Main.xmlui              # XMLUI app definition
-├── config.json             # Supabase credentials for XMLUI
-├── index.html              # XMLUI loader + helper functions
+├── config.json             # Supabase credentials + xsVerbose for inspector
+├── index.html              # XMLUI loader + helper functions (filter, dedupe, etc.)
+├── xs-diff.html            # XMLUI Inspector UI
+├── xmlui/
+│   └── 0.11.33-inspector.js  # Local XMLUI engine with inspector support
 ├── combine_ics.py          # Combines ICS files
 ├── ics_to_json.py          # Converts ICS to JSON
 ├── supabase_cron.sql       # Scheduled job setup
