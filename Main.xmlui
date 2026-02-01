@@ -1,4 +1,4 @@
-<App name="Community Calendar" var.showSearch="{false}" var.searchTerm="">
+<App name="Community Calendar" var.showSearch="{false}" var.filterTerm="">
   <DataSource
     id="events"
     url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate()}"
@@ -50,12 +50,12 @@
     </H1>
     <TextBox
       when="{showSearch}"
+      autoFocus="true"
       placeholder="Search events..."
-      initialValue="{searchTerm}"
-      onDidChange="(val) => searchTerm = val"
+      onDidChange="(val) => filterTerm = val"
       marginBottom="$space-2"
     />
-    <List data="{window.filterEvents(window.dedupeEvents(events.value), searchTerm)}">
+    <List data="{window.filterEvents(window.dedupeEvents(events.value), filterTerm)}" fixedItemSize="true" limit="100">
       <Card padding="$space-2" marginBottom="$space-1">
         <VStack gap="$space-0">
           <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{window.formatDayOfWeek($item.start_time) + ' ' + window.formatMonthDay($item.start_time) + (window.formatTime($item.start_time) ? ', ' + window.formatTime($item.start_time) : '')}" />
@@ -64,7 +64,7 @@
           </Link>
           <Text when="{!$item.url}" fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$item.title}" />
           <Text when="{$item.location}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.location}" />
-          <Markdown when="{searchTerm && window.getDescriptionSnippet($item.description, searchTerm)}" fontSize="$fontSize-xs" color="$color-text-secondary" content="{window.getDescriptionSnippet($item.description, searchTerm)}" />
+          <Markdown when="{filterTerm && window.getDescriptionSnippet($item.description, filterTerm)}" fontSize="$fontSize-xs" color="$color-text-secondary" content="{window.getDescriptionSnippet($item.description, filterTerm)}" />
           <Text fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-tertiary" value="{'Source: ' + $item.source}" />
         </VStack>
       </Card>

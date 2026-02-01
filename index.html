@@ -28,17 +28,15 @@
 
       // Filter events by search term (searches title, location, source, and description)
       window.filterEvents = function(events, term) {
-        console.log('filterEvents called:', { eventCount: events?.length, term });
-        if (!events || !term) return events || [];
+        if (!events) return events || [];
+        if (!term) return events;
         const lower = term.toLowerCase();
-        const filtered = events.filter(e =>
+        return events.filter(e =>
           (e.title && e.title.toLowerCase().includes(lower)) ||
           (e.location && e.location.toLowerCase().includes(lower)) ||
           (e.source && e.source.toLowerCase().includes(lower)) ||
           (e.description && e.description.toLowerCase().includes(lower))
         );
-        console.log('filterEvents result:', { filteredCount: filtered.length });
-        return filtered;
       };
 
       // Get description snippet with context around search term (returns null if no match in description)
@@ -120,8 +118,18 @@
       };
 
       // Deduplicate events: merge events with same title + start_time, combine sources
+      // Cached to avoid recomputing on every render
+      window._dedupedEventsCache = null;
+      window._dedupedEventsCacheKey = null;
       window.dedupeEvents = function(events) {
         if (!events || !events.length) return [];
+
+        // Use cache if events array hasn't changed
+        const cacheKey = events.length + '-' + (events[0]?.id || '');
+        if (window._dedupedEventsCacheKey === cacheKey && window._dedupedEventsCache) {
+          return window._dedupedEventsCache;
+        }
+
         const groups = {};
         events.forEach(e => {
           const key = (e.title || '').trim().toLowerCase() + '|' + (e.start_time || '');
@@ -139,10 +147,15 @@
           }
         });
         // Convert sources array to comma-separated string
-        return Object.values(groups).map(e => ({
+        const result = Object.values(groups).map(e => ({
           ...e,
           source: e.sources.sort().join(', ')
         })).sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+
+        // Cache the result
+        window._dedupedEventsCache = result;
+        window._dedupedEventsCacheKey = cacheKey;
+        return result;
       };
     </script>
   </head>
