@@ -297,6 +297,56 @@ Users can now authenticate and save personal event picks:
 - Modal dialog uses `minWidth="70vw"` for mobile compatibility
 - Text uses `overflowMode="flow"` for proper wrapping
 
+### Component Architecture (Refactored)
+
+The app uses XMLUI's AppState pattern for cross-component state management, avoiding prop drilling:
+
+```
+Main.xmlui
+├── AppState (bucket="calendar")     # Shared state + action functions
+├── ChangeListener                    # Syncs auth/picks to AppState
+├── DataSources (events, picks, feedToken)
+├── Dialogs (subscribeDialog, feedsDialog, inspectorDialog)
+└── List
+    └── EventCard                     # Extracted component
+
+components/
+├── EventCard.xmlui                   # Event display with pick checkbox
+└── PickItem.xmlui                    # Pick item in My Picks dialog
+```
+
+**AppState pattern:**
+```xml
+<!-- Main.xmlui: Define shared state with DataSource reference -->
+<AppState id="calState" bucket="calendar" initialValue="{{
+  authUser: window.authUser,
+  picksData: null,
+  picksDS: null,
+  togglePick: (event) => { /* API calls */ },
+  removePick: (pickId) => { /* API call */ }
+}}"/>
+
+<!-- ChangeListener syncs DataSource to AppState -->
+<ChangeListener
+  listenTo="{picks.value}"
+  onDidChange="() => calState.update({ picksDS: picks, picksData: picks.value })"
+/>
+
+<!-- EventCard.xmlui: Access shared state -->
+<AppState id="calState" bucket="calendar" />
+<Checkbox
+  when="{calState.value.authUser}"
+  initialValue="{window.isEventPicked($props.event.mergedIds, calState.value.picksData)}"
+  onDidChange="(checked) => { calState.value.togglePick($props.event); calState.value.picksDS?.refetch(); }"
+/>
+```
+
+**Key patterns:**
+- Components declare AppState with same `bucket` to access shared state
+- DataSource reference stored in AppState enables `picksDS.refetch()` from child components
+- ChangeListener syncs DataSource values to AppState when data changes
+- Props used for item-specific data (`event="{$item}"`)
+
 ## XMLUI Resources
 
 - [XMLUI Documentation](https://xmlui.org)
@@ -344,7 +394,10 @@ See the legacy calendars at `/santarosa/2026-02.html` etc.
 
 ```
 community-calendar/
-├── Main.xmlui              # XMLUI app definition
+├── Main.xmlui              # XMLUI app definition (AppState, DataSources, dialogs)
+├── components/
+│   ├── EventCard.xmlui     # Event display card with pick checkbox
+│   └── PickItem.xmlui      # Pick item in My Picks dialog
 ├── config.json             # Supabase credentials + xsVerbose for inspector
 ├── index.html              # XMLUI loader + auth setup
 ├── helpers.js              # Pure helper functions (filter, dedupe, format, etc.)

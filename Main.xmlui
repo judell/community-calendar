@@ -8,6 +8,7 @@
       authUser: window.authUser,
       authSession: window.authSession,
       picksData: null,
+      picksDS: null,
       togglePick: (event) => {
         if (!window.authSession) {
           alert('Please sign in to pick events');
@@ -29,7 +30,6 @@
         } else {
           Actions.callApi({ method: 'post', url: appGlobals.supabaseUrl + '/rest/v1/picks', headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: { user_id: window.authUser.id, event_id: event.id }, invalidates: [] });
         }
-        window.picksRefetch && window.picksRefetch();
       },
       removePick: (pickId) => {
         Actions.callApi({
@@ -41,7 +41,6 @@
           },
           invalidates: []
         });
-        window.picksRefetch && window.picksRefetch();
       }
     }}"
   />
@@ -70,13 +69,12 @@
       Authorization: 'Bearer ' + window.authSession?.access_token,
       'Cache-Control': 'no-cache, no-store, must-revalidate'
     }}"
-    onSuccess="window.picksRefetch = () => picks.refetch(); calState.update({ picksData: picks.value })"
   />
 
   <!-- Sync picks data to AppState when it changes -->
   <ChangeListener
     listenTo="{picks.value}"
-    onDidChange="() => calState.update({ picksData: picks.value })"
+    onDidChange="() => calState.update({ picksDS: picks, picksData: picks.value })"
   />
 
   <DataSource
