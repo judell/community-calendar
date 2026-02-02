@@ -112,10 +112,13 @@
         }
       };
 
-      // Check if an event is picked (use == for type coercion since IDs may be string or number)
-      window.isEventPicked = function(eventId, picks) {
+      // Check if an event is picked (supports merged IDs from cross-source duplicates)
+      window.isEventPicked = function(mergedIds, picks) {
         if (!picks || !Array.isArray(picks)) return false;
-        return picks.some(p => p.event_id == eventId);
+        if (!mergedIds) return false;
+        // mergedIds can be an array (from dedupe) or a single ID
+        const ids = Array.isArray(mergedIds) ? mergedIds : [mergedIds];
+        return picks.some(p => ids.some(id => p.event_id == id));
       };
     </script>
     <script>
@@ -247,8 +250,10 @@
         events.forEach(e => {
           const key = (e.title || '').trim().toLowerCase() + '|' + (e.start_time || '');
           if (!groups[key]) {
-            groups[key] = { ...e, sources: [e.source] };
+            groups[key] = { ...e, sources: [e.source], mergedIds: [e.id] };
           } else {
+            // Track all merged event IDs (for picks to work across sources)
+            groups[key].mergedIds.push(e.id);
             // Add source if not already present
             if (!groups[key].sources.includes(e.source)) {
               groups[key].sources.push(e.source);

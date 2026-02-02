@@ -283,11 +283,10 @@ Users can now authenticate and save personal event picks:
 - Deploy with `--no-verify-jwt` to allow calendar app subscriptions (token provides auth)
 - Example: `https://<project>.supabase.co/functions/v1/my-picks?token=<feed_token>`
 
-**Known issue - cross-source duplicates:**
-- Same event from different sources (e.g., GoLocal + Cal Theatre) has different IDs
-- Frontend dedupe merges display but only one ID survives
-- Picks made against one ID won't show checked for the dedupe survivor
-- TODO: Track merged IDs so picks work across sources
+**Cross-source duplicate handling:**
+- Same event from different sources (e.g., GoLocal + Cal Theatre) gets merged in display
+- Dedupe tracks `mergedIds` array for all source variants
+- Picks work across sources: checking/unchecking normalizes to the primary ID
 
 ## XMLUI Resources
 

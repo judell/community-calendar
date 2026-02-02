@@ -118,12 +118,13 @@
             <SpaceFiller />
             <Checkbox
               when="{window.authUser}"
-              initialValue="{window.isEventPicked($item.id, picks.value)}"
+              initialValue="{window.isEventPicked($item.mergedIds, picks.value)}"
               onDidChange="(checked) => {
                 const headers = { apikey: appGlobals.supabasePublishableKey, Authorization: 'Bearer ' + window.authSession?.access_token };
+                const ids = $item.mergedIds || [$item.id];
                 const existing = Actions.callApi({
                   method: 'get',
-                  url: appGlobals.supabaseUrl + '/rest/v1/picks?select=id&user_id=eq.' + window.authUser.id + '&event_id=eq.' + $item.id,
+                  url: appGlobals.supabaseUrl + '/rest/v1/picks?select=id&user_id=eq.' + window.authUser.id + '&event_id=in.(' + ids.join(',') + ')',
                   headers,
                   invalidates: []
                 });
