@@ -1,4 +1,58 @@
 <App name="Community Calendar" var.showSearch="{false}" var.filterTerm="">
+
+  <!-- Shared state for auth and pick operations -->
+  <AppState
+    id="calState"
+    bucket="calendar"
+    initialValue="{{
+      authUser: window.authUser,
+      authSession: window.authSession,
+      picksData: null,
+      togglePick: (event) => {
+        if (!window.authSession) {
+          alert('Please sign in to pick events');
+          return;
+        }
+        const headers = {
+          apikey: appGlobals.supabasePublishableKey,
+          Authorization: 'Bearer ' + window.authSession?.access_token
+        };
+        const ids = event.mergedIds || [event.id];
+        const existing = Actions.callApi({
+          method: 'get',
+          url: appGlobals.supabaseUrl + '/rest/v1/picks?select=id&user_id=eq.' + window.authUser.id + '&event_id=in.(' + ids.join(',') + ')',
+          headers,
+          invalidates: []
+        });
+        if (existing?.length > 0) {
+          Actions.callApi({ method: 'delete', url: appGlobals.supabaseUrl + '/rest/v1/picks?id=eq.' + existing[0].id, headers, invalidates: [] });
+        } else {
+          Actions.callApi({ method: 'post', url: appGlobals.supabaseUrl + '/rest/v1/picks', headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: { user_id: window.authUser.id, event_id: event.id }, invalidates: [] });
+        }
+        window.picksRefetch && window.picksRefetch();
+      },
+      removePick: (pickId) => {
+        Actions.callApi({
+          method: 'delete',
+          url: appGlobals.supabaseUrl + '/rest/v1/picks?id=eq.' + pickId,
+          headers: {
+            apikey: appGlobals.supabasePublishableKey,
+            Authorization: 'Bearer ' + window.authSession?.access_token
+          },
+          invalidates: []
+        });
+        window.picksRefetch && window.picksRefetch();
+      }
+    }}"
+  />
+
+  <!-- Sync auth state changes to AppState -->
+  <ChangeListener
+    listenTo="{window.authUser}"
+    onDidChange="() => calState.update({ authUser: window.authUser, authSession: window.authSession })"
+  />
+
+  <!-- DataSources -->
   <DataSource
     id="events"
     url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate()}"
@@ -16,6 +70,13 @@
       Authorization: 'Bearer ' + window.authSession?.access_token,
       'Cache-Control': 'no-cache, no-store, must-revalidate'
     }}"
+    onSuccess="window.picksRefetch = () => picks.refetch(); calState.update({ picksData: picks.value })"
+  />
+
+  <!-- Sync picks data to AppState when it changes -->
+  <ChangeListener
+    listenTo="{picks.value}"
+    onDidChange="() => calState.update({ picksData: picks.value })"
   />
 
   <DataSource
@@ -28,33 +89,13 @@
     }}"
   />
 
+  <!-- My Picks Dialog -->
   <ModalDialog id="subscribeDialog" minWidth="70vw">
     <VStack when="{window.authUser && feedToken.value && feedToken.value[0]}" gap="$space-3">
       <Text fontWeight="bold" value="My Picks" />
       <ExpandableItem width="100%" summary="{picks.value ? picks.value.length + ' events' : 'Loading...'}">
         <List data="{picks.value}">
-          <HStack verticalAlignment="center" gap="$space-2" paddingVertical="$space-1">
-            <VStack gap="$space-0" width="90%">
-              <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{window.formatDayOfWeek($item.events?.start_time) + ' ' + window.formatMonthDay($item.events?.start_time) + (window.formatTime($item.events?.start_time) ? ', ' + window.formatTime($item.events?.start_time) : '')}" />
-              <Link when="{$item.events?.url}" to="{$item.events?.url}" target="_blank">
-                <Text fontSize="$fontSize-sm" fontWeight="bold" value="{$item.events?.title}" overflowMode="flow" />
-              </Link>
-              <Text when="{!$item.events?.url}" fontSize="$fontSize-sm" fontWeight="bold" value="{$item.events?.title}" overflowMode="flow" />
-            </VStack>
-            <SpaceFiller />
-            <Icon
-              name="close"
-              width="16px"
-              height="16px"
-              color="$color-text-tertiary"
-              onClick="Actions.callApi({
-                method: 'delete',
-                url: appGlobals.supabaseUrl + '/rest/v1/picks?id=eq.' + $item.id,
-                headers: { apikey: appGlobals.supabasePublishableKey, Authorization: 'Bearer ' + window.authSession?.access_token },
-                invalidates: []
-              }); picks.refetch()"
-            />
-          </HStack>
+          <PickItem pick="{$item}" />
         </List>
       </ExpandableItem>
       <Text>Calendar feed for your picks:</Text>
@@ -77,6 +118,7 @@
     <Text when="{!window.authUser}" value="Sign in to create a personal calendar feed" />
   </ModalDialog>
 
+  <!-- Sources Dialog -->
   <ModalDialog id="feedsDialog" title="Sources">
     <VStack gap="$space-3">
       <Text value="{events.value ? window.dedupeEvents(events.value).length + ' events this week (' + events.value.length + ' before deduplication)' : 'Loading...'}" />
@@ -89,10 +131,12 @@
     </VStack>
   </ModalDialog>
 
+  <!-- Inspector Dialog -->
   <ModalDialog id="inspectorDialog" title="XMLUI Inspector" minWidth="85vw" minHeight="85vh">
     <IFrame src="/xs-diff.html" width="100%" height="80vh"/>
   </ModalDialog>
 
+  <!-- Main Content -->
   <HStack horizontalAlignment="center" width="100%">
   <VStack maxWidth="600px" width="100%">
     <H1>
@@ -133,41 +177,7 @@
       marginBottom="$space-2"
     />
     <List data="{window.filterEvents(window.dedupeEvents(events.value), filterTerm)}" fixedItemSize="true" limit="100">
-      <Card padding="$space-2" marginBottom="$space-1">
-        <VStack gap="$space-0">
-          <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{window.formatDayOfWeek($item.start_time) + ' ' + window.formatMonthDay($item.start_time) + (window.formatTime($item.start_time) ? ', ' + window.formatTime($item.start_time) : '')}" />
-          <Link when="{$item.url}" to="{$item.url}" target="_blank">
-            <Text fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$item.title}" />
-          </Link>
-          <Text when="{!$item.url}" fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$item.title}" />
-          <Text when="{$item.location}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.location}" />
-          <Markdown when="{filterTerm && window.getDescriptionSnippet($item.description, filterTerm)}" fontSize="$fontSize-xs" color="$color-text-secondary" content="{window.getDescriptionSnippet($item.description, filterTerm)}" />
-          <HStack verticalAlignment="center">
-            <Text fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-tertiary" value="{'Source: ' + $item.source}" />
-            <SpaceFiller />
-            <Checkbox
-              when="{window.authUser}"
-              initialValue="{window.isEventPicked($item.mergedIds, picks.value)}"
-              onDidChange="(checked) => {
-                const headers = { apikey: appGlobals.supabasePublishableKey, Authorization: 'Bearer ' + window.authSession?.access_token };
-                const ids = $item.mergedIds || [$item.id];
-                const existing = Actions.callApi({
-                  method: 'get',
-                  url: appGlobals.supabaseUrl + '/rest/v1/picks?select=id&user_id=eq.' + window.authUser.id + '&event_id=in.(' + ids.join(',') + ')',
-                  headers,
-                  invalidates: []
-                });
-                if (existing?.length > 0) {
-                  Actions.callApi({ method: 'delete', url: appGlobals.supabaseUrl + '/rest/v1/picks?id=eq.' + existing[0].id, headers, invalidates: [] });
-                } else {
-                  Actions.callApi({ method: 'post', url: appGlobals.supabaseUrl + '/rest/v1/picks', headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: { user_id: window.authUser.id, event_id: $item.id }, invalidates: [] });
-                }
-                picks.refetch();
-              }"
-            />
-          </HStack>
-        </VStack>
-      </Card>
+      <EventCard event="{$item}" filterTerm="{filterTerm}" />
     </List>
   </VStack>
   </HStack>
