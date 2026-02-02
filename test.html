@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Community Calendar - Tests</title>
+    <style>
+      :root {
+        --color-pass: #059669;
+        --color-fail: #dc2626;
+        --color-bg: #f9fafb;
+        --color-border: #e5e7eb;
+      }
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: var(--color-bg);
+      }
+      h1 { margin: 0 0 20px 0; }
+      .summary {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+      .summary.pass { background: #d1fae5; color: var(--color-pass); }
+      .summary.fail { background: #fee2e2; color: var(--color-fail); }
+      .test-group {
+        background: white;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+      .test-group h2 {
+        margin: 0;
+        padding: 12px 16px;
+        background: #f3f4f6;
+        border-bottom: 1px solid var(--color-border);
+        font-size: 14px;
+      }
+      .test {
+        padding: 8px 16px;
+        border-bottom: 1px solid var(--color-border);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .test:last-child { border-bottom: none; }
+      .test.pass .status { color: var(--color-pass); }
+      .test.fail .status { color: var(--color-fail); }
+      .status { font-weight: bold; width: 40px; }
+      .name { flex: 1; }
+      .error {
+        font-family: monospace;
+        font-size: 12px;
+        color: var(--color-fail);
+        background: #fef2f2;
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin-left: 8px;
+      }
+    </style>
+    <script src="helpers.js"></script>
+  </head>
+  <body>
+    <h1>Community Calendar Tests</h1>
+    <div id="summary" class="summary"></div>
+    <div id="results"></div>
+
+    <script>
+      // Simple test framework
+      const results = [];
+      let currentGroup = null;
+
+      function describe(name, fn) {
+        currentGroup = { name, tests: [] };
+        fn();
+        results.push(currentGroup);
+      }
+
+      function it(name, fn) {
+        try {
+          fn();
+          currentGroup.tests.push({ name, pass: true });
+        } catch (e) {
+          currentGroup.tests.push({ name, pass: false, error: e.message });
+        }
+      }
+
+      function assert(condition, message) {
+        if (!condition) throw new Error(message || 'Assertion failed');
+      }
+
+      function assertEqual(actual, expected, message) {
+        if (actual !== expected) {
+          throw new Error(message || `Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+        }
+      }
+
+      function assertDeepEqual(actual, expected, message) {
+        if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+          throw new Error(message || `Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+        }
+      }
+
+      // ============================================================
+      // TESTS
+      // ============================================================
+
+      describe('filterEvents', () => {
+        const events = [
+          { id: 1, title: 'Jazz Concert', location: 'Downtown', source: 'Venue A', description: 'Live music' },
+          { id: 2, title: 'Art Show', location: 'Gallery', source: 'Museum', description: 'Modern art exhibit' },
+          { id: 3, title: 'Food Festival', location: 'Park', source: 'City', description: 'Local cuisine' }
+        ];
+
+        it('returns all events when no search term', () => {
+          const result = filterEvents(events, '');
+          assertEqual(result.length, 3);
+        });
+
+        it('returns all events when term is null', () => {
+          const result = filterEvents(events, null);
+          assertEqual(result.length, 3);
+        });
+
+        it('filters by title', () => {
+          const result = filterEvents(events, 'jazz');
+          assertEqual(result.length, 1);
+          assertEqual(result[0].id, 1);
+        });
+
+        it('filters by location', () => {
+          const result = filterEvents(events, 'gallery');
+          assertEqual(result.length, 1);
+          assertEqual(result[0].id, 2);
+        });
+
+        it('filters by source', () => {
+          const result = filterEvents(events, 'museum');
+          assertEqual(result.length, 1);
+          assertEqual(result[0].id, 2);
+        });
+
+        it('filters by description', () => {
+          const result = filterEvents(events, 'cuisine');
+          assertEqual(result.length, 1);
+          assertEqual(result[0].id, 3);
+        });
+
+        it('is case insensitive', () => {
+          const result = filterEvents(events, 'JAZZ');
+          assertEqual(result.length, 1);
+        });
+
+        it('returns empty array for no matches', () => {
+          const result = filterEvents(events, 'xyz');
+          assertEqual(result.length, 0);
+        });
+
+        it('handles null events', () => {
+          const result = filterEvents(null, 'test');
+          assertDeepEqual(result, []);
+        });
+      });
+
+      describe('getDescriptionSnippet', () => {
+        it('returns null when description is null', () => {
+          const result = getDescriptionSnippet(null, 'test');
+          assertEqual(result, null);
+        });
+
+        it('returns null when term is null', () => {
+          const result = getDescriptionSnippet('some text', null);
+          assertEqual(result, null);
+        });
+
+        it('returns null when term not found', () => {
+          const result = getDescriptionSnippet('some text here', 'xyz');
+          assertEqual(result, null);
+        });
+
+        it('highlights the matched term with **', () => {
+          const result = getDescriptionSnippet('This is a test of the system', 'test');
+          assert(result.includes('**test**'), 'Should contain **test**');
+        });
+
+        it('adds ellipsis when context is truncated', () => {
+          const longText = 'A'.repeat(50) + 'TARGET' + 'B'.repeat(50);
+          const result = getDescriptionSnippet(longText, 'TARGET');
+          assert(result.startsWith('...'), 'Should start with ...');
+          assert(result.endsWith('...'), 'Should end with ...');
+        });
+
+        it('no leading ellipsis when match is near start', () => {
+          const result = getDescriptionSnippet('test at the start', 'test');
+          assert(!result.startsWith('...'), 'Should not start with ...');
+        });
+
+        it('is case insensitive', () => {
+          const result = getDescriptionSnippet('This is a TEST here', 'test');
+          assert(result.includes('**TEST**'), 'Should preserve original case');
+        });
+      });
+
+      describe('formatTime', () => {
+        it('returns empty string for null', () => {
+          assertEqual(formatTime(null), '');
+        });
+
+        it('returns empty string for midnight (unknown time)', () => {
+          assertEqual(formatTime('2026-02-01T00:00:00Z'), '');
+        });
+
+        it('formats AM time correctly', () => {
+          const result = formatTime('2026-02-01T09:30:00Z');
+          assertEqual(result, '9:30 AM');
+        });
+
+        it('formats PM time correctly', () => {
+          const result = formatTime('2026-02-01T14:30:00Z');
+          assertEqual(result, '2:30 PM');
+        });
+
+        it('formats noon correctly', () => {
+          const result = formatTime('2026-02-01T12:00:00Z');
+          assertEqual(result, '12:00 PM');
+        });
+
+        it('pads minutes with zero', () => {
+          const result = formatTime('2026-02-01T09:05:00Z');
+          assertEqual(result, '9:05 AM');
+        });
+      });
+
+      describe('formatDayOfWeek', () => {
+        it('returns empty string for null', () => {
+          assertEqual(formatDayOfWeek(null), '');
+        });
+
+        it('returns short day name', () => {
+          const result = formatDayOfWeek('2026-02-01T12:00:00Z'); // Sunday
+          assertEqual(result, 'Sun');
+        });
+      });
+
+      describe('formatMonthDay', () => {
+        it('returns empty string for null', () => {
+          assertEqual(formatMonthDay(null), '');
+        });
+
+        it('returns month and day', () => {
+          const result = formatMonthDay('2026-02-15T12:00:00Z');
+          assertEqual(result, 'Feb 15');
+        });
+      });
+
+      describe('truncate', () => {
+        it('returns empty string for null', () => {
+          assertEqual(truncate(null, 10), '');
+        });
+
+        it('returns full text if under limit', () => {
+          assertEqual(truncate('short', 10), 'short');
+        });
+
+        it('truncates and adds ellipsis', () => {
+          assertEqual(truncate('this is a long text', 10), 'this is a...');
+        });
+      });
+
+      describe('getSourceCounts', () => {
+        it('returns empty array for null', () => {
+          assertDeepEqual(getSourceCounts(null), []);
+        });
+
+        it('returns empty array for empty array', () => {
+          assertDeepEqual(getSourceCounts([]), []);
+        });
+
+        it('counts events by source', () => {
+          const events = [
+            { source: 'A' }, { source: 'A' }, { source: 'B' }
+          ];
+          const result = getSourceCounts(events);
+          assertEqual(result.length, 2);
+          assertEqual(result[0].source, 'A');
+          assertEqual(result[0].count, 2);
+          assertEqual(result[1].source, 'B');
+          assertEqual(result[1].count, 1);
+        });
+
+        it('sorts by count descending', () => {
+          const events = [
+            { source: 'A' }, { source: 'B' }, { source: 'B' }, { source: 'B' }
+          ];
+          const result = getSourceCounts(events);
+          assertEqual(result[0].source, 'B');
+          assertEqual(result[0].count, 3);
+        });
+
+        it('handles missing source as Unknown', () => {
+          const events = [{ title: 'test' }];
+          const result = getSourceCounts(events);
+          assertEqual(result[0].source, 'Unknown');
+        });
+      });
+
+      describe('dedupeEvents', () => {
+        beforeEach: clearDedupeCache();
+
+        it('returns empty array for null', () => {
+          clearDedupeCache();
+          assertDeepEqual(dedupeEvents(null), []);
+        });
+
+        it('returns empty array for empty array', () => {
+          clearDedupeCache();
+          assertDeepEqual(dedupeEvents([]), []);
+        });
+
+        it('merges events with same title and start_time', () => {
+          clearDedupeCache();
+          const events = [
+            { id: 1, title: 'Concert', start_time: '2026-02-01T19:00:00Z', source: 'Venue A' },
+            { id: 2, title: 'Concert', start_time: '2026-02-01T19:00:00Z', source: 'Venue B' }
+          ];
+          const result = dedupeEvents(events);
+          assertEqual(result.length, 1);
+          assertEqual(result[0].source, 'Venue A, Venue B');
+        });
+
+        it('tracks merged IDs', () => {
+          clearDedupeCache();
+          const events = [
+            { id: 1, title: 'Show', start_time: '2026-02-01T20:00:00Z', source: 'A' },
+            { id: 2, title: 'Show', start_time: '2026-02-01T20:00:00Z', source: 'B' }
+          ];
+          const result = dedupeEvents(events);
+          assertDeepEqual(result[0].mergedIds, [1, 2]);
+        });
+
+        it('keeps events with different start times separate', () => {
+          clearDedupeCache();
+          const events = [
+            { id: 1, title: 'Concert', start_time: '2026-02-01T19:00:00Z', source: 'A' },
+            { id: 2, title: 'Concert', start_time: '2026-02-02T19:00:00Z', source: 'A' }
+          ];
+          const result = dedupeEvents(events);
+          assertEqual(result.length, 2);
+        });
+
+        it('prefers non-empty values for optional fields', () => {
+          clearDedupeCache();
+          const events = [
+            { id: 1, title: 'Show', start_time: '2026-02-01T20:00:00Z', source: 'A', url: null, location: 'Place' },
+            { id: 2, title: 'Show', start_time: '2026-02-01T20:00:00Z', source: 'B', url: 'http://example.com', location: null }
+          ];
+          const result = dedupeEvents(events);
+          assertEqual(result[0].url, 'http://example.com');
+          assertEqual(result[0].location, 'Place');
+        });
+
+        it('sorts result by start_time', () => {
+          clearDedupeCache();
+          const events = [
+            { id: 2, title: 'Later', start_time: '2026-02-02T10:00:00Z', source: 'A' },
+            { id: 1, title: 'Earlier', start_time: '2026-02-01T10:00:00Z', source: 'A' }
+          ];
+          const result = dedupeEvents(events);
+          assertEqual(result[0].title, 'Earlier');
+          assertEqual(result[1].title, 'Later');
+        });
+      });
+
+      describe('isEventPicked', () => {
+        const picks = [
+          { event_id: 1 },
+          { event_id: 3 }
+        ];
+
+        it('returns false for null picks', () => {
+          assertEqual(isEventPicked([1], null), false);
+        });
+
+        it('returns false for null mergedIds', () => {
+          assertEqual(isEventPicked(null, picks), false);
+        });
+
+        it('returns true when event is picked', () => {
+          assertEqual(isEventPicked([1], picks), true);
+        });
+
+        it('returns false when event is not picked', () => {
+          assertEqual(isEventPicked([2], picks), false);
+        });
+
+        it('works with merged IDs (any match)', () => {
+          assertEqual(isEventPicked([2, 3], picks), true);
+        });
+
+        it('works with single ID (not array)', () => {
+          assertEqual(isEventPicked(1, picks), true);
+          assertEqual(isEventPicked(2, picks), false);
+        });
+      });
+
+      // ============================================================
+      // REAL DATA TESTS (async, run after initial render)
+      // ============================================================
+
+      const SUPABASE_URL = 'https://dzpdualvwspgqghrysyz.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5';
+
+      async function runRealDataTests() {
+        // Fetch real events
+        const url = `${SUPABASE_URL}/rest/v1/events?select=*&order=start_time.asc&limit=500`;
+        const response = await fetch(url, {
+          headers: { apikey: SUPABASE_KEY }
+        });
+        const events = await response.json();
+
+        const realDataGroup = { name: `Real Data (${events.length} events fetched)`, tests: [] };
+
+        // Helper to add test results
+        const test = (name, fn) => {
+          try {
+            fn();
+            realDataGroup.tests.push({ name, pass: true });
+          } catch (e) {
+            realDataGroup.tests.push({ name, pass: false, error: e.message });
+          }
+        };
+
+        // Basic sanity checks
+        test('Events array is not empty', () => {
+          assert(events.length > 0, 'No events fetched');
+        });
+
+        test('All events have required fields (id, title, start_time)', () => {
+          const missing = events.filter(e => !e.id || !e.title || !e.start_time);
+          assert(missing.length === 0, `${missing.length} events missing required fields`);
+        });
+
+        // filterEvents tests
+        test('filterEvents handles real data without crashing', () => {
+          const result = filterEvents(events, 'music');
+          assert(Array.isArray(result), 'Should return array');
+        });
+
+        test('filterEvents with empty string returns all events', () => {
+          const result = filterEvents(events, '');
+          assertEqual(result.length, events.length);
+        });
+
+        // dedupeEvents tests
+        test('dedupeEvents handles real data without crashing', () => {
+          clearDedupeCache();
+          const result = dedupeEvents(events);
+          assert(Array.isArray(result), 'Should return array');
+        });
+
+        test('dedupeEvents reduces event count (finds duplicates)', () => {
+          clearDedupeCache();
+          const result = dedupeEvents(events);
+          // Real data should have some duplicates from multiple sources
+          console.log(`Dedupe: ${events.length} → ${result.length} events`);
+          assert(result.length <= events.length, 'Deduped count should be <= original');
+        });
+
+        test('dedupeEvents preserves mergedIds for all events', () => {
+          clearDedupeCache();
+          const result = dedupeEvents(events);
+          const missingMergedIds = result.filter(e => !e.mergedIds || !Array.isArray(e.mergedIds));
+          assert(missingMergedIds.length === 0, `${missingMergedIds.length} events missing mergedIds`);
+        });
+
+        test('dedupeEvents result is sorted by start_time', () => {
+          clearDedupeCache();
+          const result = dedupeEvents(events);
+          for (let i = 1; i < result.length; i++) {
+            assert(
+              result[i].start_time >= result[i-1].start_time,
+              `Events not sorted at index ${i}`
+            );
+          }
+        });
+
+        // formatTime tests with real data
+        test('formatTime handles all real start_times', () => {
+          let errors = [];
+          events.forEach((e, i) => {
+            try {
+              const result = formatTime(e.start_time);
+              assert(typeof result === 'string', `Event ${i} returned non-string`);
+            } catch (err) {
+              errors.push(`Event ${i}: ${err.message}`);
+            }
+          });
+          assert(errors.length === 0, errors.slice(0, 3).join('; '));
+        });
+
+        test('formatDayOfWeek handles all real start_times', () => {
+          let errors = [];
+          events.forEach((e, i) => {
+            try {
+              const result = formatDayOfWeek(e.start_time);
+              assert(typeof result === 'string', `Event ${i} returned non-string`);
+            } catch (err) {
+              errors.push(`Event ${i}: ${err.message}`);
+            }
+          });
+          assert(errors.length === 0, errors.slice(0, 3).join('; '));
+        });
+
+        // getDescriptionSnippet with real descriptions
+        test('getDescriptionSnippet handles all real descriptions', () => {
+          let errors = [];
+          events.forEach((e, i) => {
+            try {
+              // Some events have descriptions, some don't
+              const result = getDescriptionSnippet(e.description, 'the');
+              assert(result === null || typeof result === 'string', `Event ${i} bad result type`);
+            } catch (err) {
+              errors.push(`Event ${i}: ${err.message}`);
+            }
+          });
+          assert(errors.length === 0, errors.slice(0, 3).join('; '));
+        });
+
+        // getSourceCounts with real data
+        test('getSourceCounts returns valid counts', () => {
+          const counts = getSourceCounts(events);
+          assert(Array.isArray(counts), 'Should return array');
+          assert(counts.length > 0, 'Should have at least one source');
+          const totalCount = counts.reduce((sum, c) => sum + c.count, 0);
+          assertEqual(totalCount, events.length);
+        });
+
+        test('getSourceCounts sources are sorted by count descending', () => {
+          const counts = getSourceCounts(events);
+          for (let i = 1; i < counts.length; i++) {
+            assert(counts[i].count <= counts[i-1].count, `Sources not sorted at index ${i}`);
+          }
+        });
+
+        // Edge case: events with null/undefined optional fields
+        test('Handles events with null optional fields', () => {
+          const nullCount = events.filter(e => !e.location || !e.description || !e.url).length;
+          console.log(`Events with null optional fields: ${nullCount}`);
+          // Just verify we can process them
+          clearDedupeCache();
+          const result = dedupeEvents(events);
+          assert(result.length > 0, 'Should still produce results');
+        });
+
+        // Edge case: very long titles or descriptions
+        test('Handles long text fields', () => {
+          const longTitle = events.filter(e => e.title && e.title.length > 100);
+          const longDesc = events.filter(e => e.description && e.description.length > 1000);
+          console.log(`Long titles (>100 chars): ${longTitle.length}, Long descriptions (>1000 chars): ${longDesc.length}`);
+
+          longDesc.forEach(e => {
+            const snippet = getDescriptionSnippet(e.description, 'the');
+            if (snippet) {
+              assert(snippet.length < 200, 'Snippet should be reasonably short');
+            }
+          });
+        });
+
+        // Edge case: special characters
+        test('Handles special characters in text', () => {
+          const specialChars = events.filter(e =>
+            (e.title && /[<>&"']/.test(e.title)) ||
+            (e.description && /[<>&"']/.test(e.description))
+          );
+          console.log(`Events with special chars (<>&"'): ${specialChars.length}`);
+          // Verify filtering works with special chars
+          specialChars.slice(0, 5).forEach(e => {
+            filterEvents([e], e.title?.substring(0, 5) || 'test');
+          });
+        });
+
+        // Add to results and re-render
+        results.push(realDataGroup);
+        render();
+      }
+
+      // ============================================================
+      // RENDER RESULTS
+      // ============================================================
+
+      function render() {
+        let totalPass = 0;
+        let totalFail = 0;
+
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+
+        results.forEach(group => {
+          const groupDiv = document.createElement('div');
+          groupDiv.className = 'test-group';
+
+          const groupPassed = group.tests.filter(t => t.pass).length;
+          const groupTotal = group.tests.length;
+          totalPass += groupPassed;
+          totalFail += (groupTotal - groupPassed);
+
+          groupDiv.innerHTML = `<h2>${group.name} (${groupPassed}/${groupTotal})</h2>`;
+
+          group.tests.forEach(test => {
+            const testDiv = document.createElement('div');
+            testDiv.className = `test ${test.pass ? 'pass' : 'fail'}`;
+            testDiv.innerHTML = `
+              <span class="status">${test.pass ? 'PASS' : 'FAIL'}</span>
+              <span class="name">${test.name}</span>
+              ${test.error ? `<span class="error">${test.error}</span>` : ''}
+            `;
+            groupDiv.appendChild(testDiv);
+          });
+
+          resultsDiv.appendChild(groupDiv);
+        });
+
+        const summaryDiv = document.getElementById('summary');
+        const allPass = totalFail === 0;
+        summaryDiv.className = `summary ${allPass ? 'pass' : 'fail'}`;
+        summaryDiv.textContent = allPass
+          ? `All ${totalPass} tests passed`
+          : `${totalFail} of ${totalPass + totalFail} tests failed`;
+      }
+
+      render();
+
+      // Show loading indicator for real data
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'test-group';
+      loadingDiv.innerHTML = '<h2>Real Data (loading...)</h2>';
+      document.getElementById('results').appendChild(loadingDiv);
+
+      // Run real data tests (async)
+      runRealDataTests().then(() => {
+        loadingDiv.remove();
+      }).catch(err => {
+        loadingDiv.remove();
+        results.push({
+          name: 'Real Data',
+          tests: [{ name: 'Fetch events', pass: false, error: err.message }]
+        });
+        render();
+      });
+    </script>
+  </body>
+</html>

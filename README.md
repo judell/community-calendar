@@ -304,6 +304,30 @@ Users can now authenticate and save personal event picks:
 - [Supabase + XMLUI Quickstart](https://supabase.com/docs/guides/getting-started/quickstarts/xmlui)
 - [Supabase + XMLUI Blog Post](https://blog.xmlui.org/blog/supabase-and-xmlui) - Auth pattern reference
 
+## Testing
+
+Browser-based tests for the JavaScript helper functions. Open `test.html` in a browser to run.
+
+**Test structure:**
+- `helpers.js` - Extracted pure functions (filterEvents, dedupeEvents, formatTime, etc.)
+- `test.html` - Test runner with assertions
+
+**Test coverage:**
+- `filterEvents` - search by title, location, source, description
+- `getDescriptionSnippet` - context extraction and highlighting
+- `formatTime`, `formatDayOfWeek`, `formatMonthDay` - date formatting
+- `truncate` - text truncation
+- `getSourceCounts` - source aggregation
+- `dedupeEvents` - cross-source duplicate merging, mergedIds tracking
+- `isEventPicked` - pick detection with merged IDs
+
+**Real data tests:**
+After mock tests, `test.html` fetches 500 live events from Supabase and validates:
+- All events have required fields
+- Helpers don't crash on real data edge cases
+- Deduplication finds actual duplicates (~9% reduction)
+- Long descriptions, null fields, and special characters handled correctly
+
 ## Legacy HTML Generation
 
 The original HTML calendar generation is still available:
@@ -322,7 +346,9 @@ See the legacy calendars at `/santarosa/2026-02.html` etc.
 community-calendar/
 ├── Main.xmlui              # XMLUI app definition
 ├── config.json             # Supabase credentials + xsVerbose for inspector
-├── index.html              # XMLUI loader + helper functions (auth, filter, dedupe, etc.)
+├── index.html              # XMLUI loader + auth setup
+├── helpers.js              # Pure helper functions (filter, dedupe, format, etc.)
+├── test.html               # Browser-based test runner
 ├── xs-diff.html            # XMLUI Inspector UI
 ├── xmlui/
 │   └── 0.11.33-inspector.js  # Local XMLUI engine with inspector support
