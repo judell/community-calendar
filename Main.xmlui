@@ -57,47 +57,9 @@
     }}"
   />
 
-  <!-- My Picks Dialog -->
-  <ModalDialog id="subscribeDialog" minWidth="70vw">
-    <VStack when="{window.authUser && feedToken.value && feedToken.value[0]}" gap="$space-3">
-      <Text fontWeight="bold" value="My Picks" />
-      <ExpandableItem width="100%" summary="{picks.value ? picks.value.length + ' events' : 'Loading...'}">
-        <List data="{picks.value}">
-          <PickItem pick="{$item}" />
-        </List>
-      </ExpandableItem>
-      <Text>Calendar feed for your picks:</Text>
-      <Text
-        fontSize="$fontSize-xs"
-        overflowMode="flow"
-        value="{appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + feedToken.value[0]?.token}"
-      />
-      <HStack verticalAlignment="center" gap="$space-1">
-        <Button
-          size="xs"
-          icon="copy"
-          onClick="navigator.clipboard.writeText(appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + feedToken.value[0]?.token); toast('Copied', { duration: 1500 })"
-        />
-        <Text fontSize="$fontSize-xs" color="$color-text-secondary" overflowMode="flow">
-           Click to copy link, paste into your calendar app to subscribe.
-        </Text>
-      </HStack>
-    </VStack>
-    <Text when="{!window.authUser}" value="Sign in to create a personal calendar feed" />
-  </ModalDialog>
-
-  <!-- Sources Dialog -->
-  <ModalDialog id="feedsDialog" title="Sources">
-    <VStack gap="$space-3">
-      <Text value="{events.value ? window.dedupeEvents(events.value).length + ' events this week (' + events.value.length + ' before deduplication)' : 'Loading...'}" />
-      <List data="{window.getSourceCounts(events.value)}">
-        <HStack gap="$space-2" paddingVertical="$space-1">
-          <Text width="40px" textAlign="right" fontWeight="bold" value="{$item.count}" />
-          <Text value="{$item.source}" />
-        </HStack>
-      </List>
-    </VStack>
-  </ModalDialog>
+  <!-- Dialogs -->
+  <MyPicksDialog id="myPicksDialog" feedToken="{feedToken.value && feedToken.value[0] ? feedToken.value[0].token : null}" />
+  <SourcesDialog id="sourcesDialog" events="{events.value}" />
 
   <!-- Inspector Dialog -->
   <ModalDialog id="inspectorDialog" title="XMLUI Inspector" minWidth="85vw" minHeight="85vh">
@@ -116,10 +78,10 @@
             <Icon name="search" width="20px" height="20px" onClick="showSearch = !showSearch" />
           </Tooltip>
           <Tooltip text="My Picks Feed">
-            <Icon name="date" width="20px" height="20px" onClick="subscribeDialog.open()" />
+            <Icon name="date" width="20px" height="20px" onClick="myPicksDialog.open()" />
           </Tooltip>
           <Tooltip text="Sources">
-            <Icon name="list" width="20px" height="20px" onClick="feedsDialog.open()" />
+            <Icon name="list" width="20px" height="20px" onClick="sourcesDialog.open()" />
           </Tooltip>
           <Tooltip text="{window.authUser ? 'Sign Out' : 'Sign In'}">
             <Icon

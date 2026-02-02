@@ -1,0 +1,34 @@
+<Component
+  name="MyPicksDialog"
+  method.open="() => dialog.open()"
+>
+  <AppState id="calState" bucket="calendar" />
+
+  <ModalDialog id="dialog" minWidth="70vw">
+    <VStack when="{window.authUser && $props.feedToken}" gap="$space-3">
+      <Text fontWeight="bold" value="My Picks" />
+      <ExpandableItem width="100%" summary="{calState.value.picksData ? calState.value.picksData.length + ' events' : 'Loading...'}">
+        <List data="{calState.value.picksData}">
+          <PickItem pick="{$item}" />
+        </List>
+      </ExpandableItem>
+      <Text>Calendar feed for your picks:</Text>
+      <Text
+        fontSize="$fontSize-xs"
+        overflowMode="flow"
+        value="{appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + $props.feedToken}"
+      />
+      <HStack verticalAlignment="center" gap="$space-1">
+        <Button
+          size="xs"
+          icon="copy"
+          onClick="navigator.clipboard.writeText(appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + $props.feedToken); toast('Copied', { duration: 1500 })"
+        />
+        <Text fontSize="$fontSize-xs" color="$color-text-secondary" overflowMode="flow">
+           Click to copy link, paste into your calendar app to subscribe.
+        </Text>
+      </HStack>
+    </VStack>
+    <Text when="{!window.authUser}" value="Sign in to create a personal calendar feed" />
+  </ModalDialog>
+</Component>
