@@ -302,50 +302,48 @@ Users can now authenticate and save personal event picks:
 The app uses XMLUI's AppState pattern for cross-component state management, avoiding prop drilling:
 
 ```
-Main.xmlui
-├── AppState (bucket="calendar")     # Shared state + action functions
-├── ChangeListener                    # Syncs auth/picks to AppState
-├── DataSources (events, picks, feedToken)
-├── Dialogs (subscribeDialog, feedsDialog, inspectorDialog)
-└── List
-    └── EventCard                     # Extracted component
+Main.xmlui                            # App shell with DataSources
+Main.xmlui.xs                         # Code-behind: togglePick, removePick functions
 
 components/
-├── EventCard.xmlui                   # Event display with pick checkbox
-└── PickItem.xmlui                    # Pick item in My Picks dialog
+├── EventCard.xmlui                   # Event display card with pick checkbox
+├── PickItem.xmlui                    # Pick item in My Picks dialog
+├── MyPicksDialog.xmlui               # My Picks modal (uses method.open pattern)
+└── SourcesDialog.xmlui               # Sources modal (uses method.open pattern)
 ```
 
-**AppState pattern:**
+**Code-behind pattern:**
 ```xml
-<!-- Main.xmlui: Define shared state with DataSource reference -->
-<AppState id="calState" bucket="calendar" initialValue="{{
-  authUser: window.authUser,
-  picksData: null,
-  picksDS: null,
-  togglePick: (event) => { /* API calls */ },
-  removePick: (pickId) => { /* API call */ }
-}}"/>
+<!-- Main.xmlui: Reference code-behind file -->
+<App codeBehind="Main.xmlui.xs" ...>
+  <AppState id="calState" bucket="calendar" initialValue="{{
+    togglePick: togglePick,  // Function from code-behind
+    removePick: removePick
+  }}"/>
+</App>
+```
 
-<!-- ChangeListener syncs DataSource to AppState -->
-<ChangeListener
-  listenTo="{picks.value}"
-  onDidChange="() => calState.update({ picksDS: picks, picksData: picks.value })"
-/>
+**Dialog component pattern:**
+```xml
+<!-- MyPicksDialog.xmlui: Expose open method -->
+<Component name="MyPicksDialog" method.open="() => dialog.open()">
+  <ModalDialog id="dialog" ...>
+    <!-- Dialog content -->
+  </ModalDialog>
+</Component>
 
-<!-- EventCard.xmlui: Access shared state -->
-<AppState id="calState" bucket="calendar" />
-<Checkbox
-  when="{calState.value.authUser}"
-  initialValue="{window.isEventPicked($props.event.mergedIds, calState.value.picksData)}"
-  onDidChange="(checked) => { calState.value.togglePick($props.event); calState.value.picksDS?.refetch(); }"
-/>
+<!-- Main.xmlui: Use dialog component -->
+<MyPicksDialog id="myPicksDialog" feedToken="{...}" />
+<Icon tooltip="My Picks" onClick="myPicksDialog.open()" />
 ```
 
 **Key patterns:**
+- `codeBehind` attribute links to `.xmlui.xs` file for cleaner separation
+- `method.open` on Component exposes internal dialog's open method
 - Components declare AppState with same `bucket` to access shared state
 - DataSource reference stored in AppState enables `picksDS.refetch()` from child components
 - ChangeListener syncs DataSource values to AppState when data changes
-- Props used for item-specific data (`event="{$item}"`)
+- Inline `tooltip` prop on Icon instead of Tooltip wrapper
 
 ## XMLUI Resources
 
@@ -394,10 +392,13 @@ See the legacy calendars at `/santarosa/2026-02.html` etc.
 
 ```
 community-calendar/
-├── Main.xmlui              # XMLUI app definition (AppState, DataSources, dialogs)
+├── Main.xmlui              # XMLUI app shell (AppState, DataSources, layout)
+├── Main.xmlui.xs           # Code-behind: togglePick, removePick functions
 ├── components/
 │   ├── EventCard.xmlui     # Event display card with pick checkbox
-│   └── PickItem.xmlui      # Pick item in My Picks dialog
+│   ├── PickItem.xmlui      # Pick item in My Picks dialog
+│   ├── MyPicksDialog.xmlui # My Picks modal dialog
+│   └── SourcesDialog.xmlui # Sources modal dialog
 ├── config.json             # Supabase credentials + xsVerbose for inspector
 ├── index.html              # XMLUI loader + auth setup
 ├── helpers.js              # Pure helper functions (filter, dedupe, format, etc.)
