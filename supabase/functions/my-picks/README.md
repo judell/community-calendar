@@ -14,8 +14,8 @@ supabase login
 # Link to your project
 supabase link --project-ref dzpdualvwspgqghrysyz
 
-# Deploy the function
-supabase functions deploy my-picks
+# Deploy the function (--no-verify-jwt allows calendar apps to subscribe without auth header)
+supabase functions deploy my-picks --no-verify-jwt
 ```
 
 ## Usage

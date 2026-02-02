@@ -279,7 +279,9 @@ Users can now authenticate and save personal event picks:
 - Checkbox UI shows pick state per event card
 
 **Edge function:**
-- `my-picks` - validates token, returns user's picks as ICS (see `supabase/functions/my-picks/`)
+- `my-picks` - validates token, returns user's picks as ICS
+- Deploy with `--no-verify-jwt` to allow calendar app subscriptions (token provides auth)
+- Example: `https://<project>.supabase.co/functions/v1/my-picks?token=<feed_token>`
 
 ## XMLUI Resources
 
