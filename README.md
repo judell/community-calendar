@@ -263,7 +263,7 @@ Users can now authenticate and save personal event picks:
 │                    ↓                                    │
 │  Browse events, click checkbox to add to picks          │
 │                    ↓                                    │
-│  Personal ICS feed URL with unique token (planned)      │
+│  Personal ICS feed URL with unique token                │
 │                    ↓                                    │
 │  Subscribe in Google Calendar / Apple Calendar          │
 └─────────────────────────────────────────────────────────┘
@@ -275,11 +275,11 @@ Users can now authenticate and save personal event picks:
 
 **Implementation details:**
 - Feed token created automatically on first sign-in
-- APICall components used for pick operations (traced by XMLUI Inspector)
+- `Actions.callApi` used for pick operations with `invalidates` for selective DataSource refresh
 - Checkbox UI shows pick state per event card
 
-**Edge function (TODO):**
-- `my-picks` - validates token, returns user's picks as ICS
+**Edge function:**
+- `my-picks` - validates token, returns user's picks as ICS (see `supabase/functions/my-picks/`)
 
 ## XMLUI Resources
 
@@ -312,7 +312,9 @@ community-calendar/
 │   └── 0.11.33-inspector.js  # Local XMLUI engine with inspector support
 ├── combine_ics.py          # Combines ICS files
 ├── ics_to_json.py          # Converts ICS to JSON
-├── supabase_cron.sql       # Scheduled job setup
+├── supabase/               # Supabase configuration
+│   ├── ddl/                # Database schema (tables, RLS, cron)
+│   └── functions/          # Edge Functions (load-events, my-picks)
 ├── cal.py                  # Legacy HTML generator
 ├── santarosa/
 │   ├── combined.ics        # Subscribable calendar feed
