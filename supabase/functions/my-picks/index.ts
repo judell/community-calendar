@@ -132,11 +132,21 @@ Deno.serve(async (req) => {
     // Generate ICS
     const ics = generateICS(events, "My Picks - Community Calendar");
 
+    // Generate ETag from content hash for cache validation
+    const encoder = new TextEncoder();
+    const data = encoder.encode(ics);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const etag = `"${hashArray.slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join('')}"`;
+
     return new Response(ics, {
       headers: {
         ...corsHeaders,
         "Content-Type": "text/calendar; charset=utf-8",
         "Content-Disposition": 'attachment; filename="my-picks.ics"',
+        "Cache-Control": "no-cache, must-revalidate",
+        "ETag": etag,
+        "Last-Modified": new Date().toUTCString(),
       },
     });
   } catch (error) {
