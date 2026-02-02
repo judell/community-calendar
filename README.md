@@ -253,27 +253,32 @@ Added debugging tool accessible via cog icon:
 - Shows event traces, state changes, API calls
 - Requires `xsVerbose: true` in config.json
 
-### Upcoming: Personal Picks
+### Personal Picks (Implemented)
 
-Planning to add authenticated personal calendar picks:
+Users can now authenticate and save personal event picks:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  User authenticates via GitHub OAuth                    │
+│  User authenticates via GitHub OAuth (user icon)        │
 │                    ↓                                    │
-│  Browse events, click ★ to add to picks                │
+│  Browse events, click checkbox to add to picks          │
 │                    ↓                                    │
-│  Personal ICS feed URL with unique token               │
+│  Personal ICS feed URL with unique token (planned)      │
 │                    ↓                                    │
-│  Subscribe in Google Calendar / Apple Calendar         │
+│  Subscribe in Google Calendar / Apple Calendar          │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Database tables planned:**
+**Database tables:**
 - `picks` - user_id + event_id (RLS-protected)
 - `feed_tokens` - unique token per user for ICS feed URL
 
-**Edge function planned:**
+**Implementation details:**
+- Feed token created automatically on first sign-in
+- APICall components used for pick operations (traced by XMLUI Inspector)
+- Checkbox UI shows pick state per event card
+
+**Edge function (TODO):**
 - `my-picks` - validates token, returns user's picks as ICS
 
 ## XMLUI Resources
@@ -301,7 +306,7 @@ See the legacy calendars at `/santarosa/2026-02.html` etc.
 community-calendar/
 ├── Main.xmlui              # XMLUI app definition
 ├── config.json             # Supabase credentials + xsVerbose for inspector
-├── index.html              # XMLUI loader + helper functions (filter, dedupe, etc.)
+├── index.html              # XMLUI loader + helper functions (auth, filter, dedupe, etc.)
 ├── xs-diff.html            # XMLUI Inspector UI
 ├── xmlui/
 │   └── 0.11.33-inspector.js  # Local XMLUI engine with inspector support
