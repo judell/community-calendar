@@ -10,7 +10,7 @@
   <DataSource
     id="picks"
     when="{window.authSession}"
-    url="{appGlobals.supabaseUrl + '/rest/v1/picks?select=*'}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/picks?select=*,events(*)'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       Authorization: 'Bearer ' + window.authSession?.access_token,
@@ -28,15 +28,53 @@
     }}"
   />
 
-  <ModalDialog id="subscribeDialog" title="Subscribe">
-    <VStack gap="$space-3">
-      <Link to="santarosa/combined.ics">
-        <Text value="Download ICS" />
-      </Link>
-      <Link to="webcal://judell.github.io/community-calendar/santarosa/combined.ics">
-        <Text value="Add to Calendar App" />
-      </Link>
+  <ModalDialog id="subscribeDialog" minWidth="70vw">
+    <VStack when="{window.authUser && feedToken.value && feedToken.value[0]}" gap="$space-3">
+      <Text fontWeight="bold" value="My Picks" />
+      <ExpandableItem width="100%" summary="{picks.value ? picks.value.length + ' events' : 'Loading...'}">
+        <List data="{picks.value}">
+          <HStack verticalAlignment="center" gap="$space-2" paddingVertical="$space-1">
+            <VStack gap="$space-0" width="90%">
+              <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{window.formatDayOfWeek($item.events?.start_time) + ' ' + window.formatMonthDay($item.events?.start_time) + (window.formatTime($item.events?.start_time) ? ', ' + window.formatTime($item.events?.start_time) : '')}" />
+              <Link when="{$item.events?.url}" to="{$item.events?.url}" target="_blank">
+                <Text fontSize="$fontSize-sm" fontWeight="bold" value="{$item.events?.title}" overflowMode="flow" />
+              </Link>
+              <Text when="{!$item.events?.url}" fontSize="$fontSize-sm" fontWeight="bold" value="{$item.events?.title}" overflowMode="flow" />
+            </VStack>
+            <SpaceFiller />
+            <Icon
+              name="close"
+              width="16px"
+              height="16px"
+              color="$color-text-tertiary"
+              onClick="Actions.callApi({
+                method: 'delete',
+                url: appGlobals.supabaseUrl + '/rest/v1/picks?id=eq.' + $item.id,
+                headers: { apikey: appGlobals.supabasePublishableKey, Authorization: 'Bearer ' + window.authSession?.access_token },
+                invalidates: []
+              }); picks.refetch()"
+            />
+          </HStack>
+        </List>
+      </ExpandableItem>
+      <Text>Calendar feed for your picks:</Text>
+      <Text
+        fontSize="$fontSize-xs"
+        overflowMode="flow"
+        value="{appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + feedToken.value[0]?.token}"
+      />
+      <HStack verticalAlignment="center" gap="$space-1">
+        <Button
+          size="xs"
+          icon="copy"
+          onClick="navigator.clipboard.writeText(appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + feedToken.value[0]?.token); toast('Copied', { duration: 1500 })"
+        />
+        <Text fontSize="$fontSize-xs" color="$color-text-secondary" overflowMode="flow">
+           Click to copy link, paste into your calendar app to subscribe.
+        </Text>
+      </HStack>
     </VStack>
+    <Text when="{!window.authUser}" value="Sign in to create a personal calendar feed" />
   </ModalDialog>
 
   <ModalDialog id="feedsDialog" title="Sources">
@@ -78,17 +116,21 @@
           <Tooltip text="Search">
             <Icon name="search" width="20px" height="20px" onClick="showSearch = !showSearch" />
           </Tooltip>
-          <Tooltip text="Subscribe">
-            <Icon name="download" width="20px" height="20px" onClick="subscribeDialog.open()" />
+          <Tooltip text="My Picks Feed">
+            <Icon name="date" width="20px" height="20px" onClick="subscribeDialog.open()" />
           </Tooltip>
           <Tooltip text="Sources">
             <Icon name="list" width="20px" height="20px" onClick="feedsDialog.open()" />
           </Tooltip>
-          <Tooltip when="{!window.authUser}" text="Sign In">
-            <Icon name="user" width="20px" height="20px" onClick="window.signIn()" />
-          </Tooltip>
-          <Tooltip when="{window.authUser}" text="Sign Out">
-            <Icon name="exit" width="20px" height="20px" onClick="window.signOut()" />
+          <Tooltip text="{window.authUser ? 'Sign Out' : 'Sign In'}">
+            <Icon
+              name="user"
+              width="20px"
+              height="20px"
+              color="{window.authUser ? '$color-primary-500' : 'inherit'}"
+              backgroundColor="{window.authUser ? '$color-primary-100' : 'transparent'}"
+              onClick="{window.authUser ? window.signOut() : window.signIn()}"
+            />
           </Tooltip>
           <Tooltip text="Inspector">
             <Icon name="cog" width="20px" height="20px" onClick="inspectorDialog.open()" />
@@ -129,10 +171,11 @@
                   invalidates: []
                 });
                 if (existing?.length > 0) {
-                  Actions.callApi({ method: 'delete', url: appGlobals.supabaseUrl + '/rest/v1/picks?id=eq.' + existing[0].id, headers, invalidates: ['picks'] });
+                  Actions.callApi({ method: 'delete', url: appGlobals.supabaseUrl + '/rest/v1/picks?id=eq.' + existing[0].id, headers, invalidates: [] });
                 } else {
-                  Actions.callApi({ method: 'post', url: appGlobals.supabaseUrl + '/rest/v1/picks', headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: { user_id: window.authUser.id, event_id: $item.id }, invalidates: ['picks'] });
+                  Actions.callApi({ method: 'post', url: appGlobals.supabaseUrl + '/rest/v1/picks', headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: { user_id: window.authUser.id, event_id: $item.id }, invalidates: [] });
                 }
+                picks.refetch();
               }"
             />
           </HStack>

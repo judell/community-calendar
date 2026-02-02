@@ -263,6 +263,8 @@ Users can now authenticate and save personal event picks:
 │                    ↓                                    │
 │  Browse events, click checkbox to add to picks          │
 │                    ↓                                    │
+│  Click calendar icon to view My Picks dialog            │
+│                    ↓                                    │
 │  Personal ICS feed URL with unique token                │
 │                    ↓                                    │
 │  Subscribe in Google Calendar / Apple Calendar          │
@@ -270,23 +272,30 @@ Users can now authenticate and save personal event picks:
 ```
 
 **Database tables:**
-- `picks` - user_id + event_id (RLS-protected)
+- `picks` - user_id + event_id with joined events data (RLS-protected)
 - `feed_tokens` - unique token per user for ICS feed URL
 
 **Implementation details:**
 - Feed token created automatically on first sign-in
-- `Actions.callApi` used for pick operations with `invalidates` for selective DataSource refresh
+- `Actions.callApi` used for pick operations with `picks.refetch()` for DataSource refresh
 - Checkbox UI shows pick state per event card
+- My Picks dialog (calendar icon) shows expandable list of picked events
+- Can unpick events directly from the dialog via close icon
 
 **Edge function:**
 - `my-picks` - validates token, returns user's picks as ICS
 - Deploy with `--no-verify-jwt` to allow calendar app subscriptions (token provides auth)
 - Example: `https://<project>.supabase.co/functions/v1/my-picks?token=<feed_token>`
+- Note: Calendar apps poll ICS feeds periodically (Google: 12-24h, Apple: 15min-1h)
 
 **Cross-source duplicate handling:**
 - Same event from different sources (e.g., GoLocal + Cal Theatre) gets merged in display
 - Dedupe tracks `mergedIds` array for all source variants
 - Picks work across sources: checking/unchecking normalizes to the primary ID
+
+**Responsive UI:**
+- Modal dialog uses `minWidth="70vw"` for mobile compatibility
+- Text uses `overflowMode="flow"` for proper wrapping
 
 ## XMLUI Resources
 
