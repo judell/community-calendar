@@ -1,6 +1,7 @@
-<App name="Community Calendar" var.showSearch="{false}" var.filterTerm="">
+<App name="Community Calendar" codeBehind="Main.xmlui.xs" var.showSearch="{false}" var.filterTerm="">
 
   <!-- Shared state for auth and pick operations -->
+  <!-- Functions defined in Main.xmlui.xs: togglePick, removePick -->
   <AppState
     id="calState"
     bucket="calendar"
@@ -9,39 +10,8 @@
       authSession: window.authSession,
       picksData: null,
       picksDS: null,
-      togglePick: (event) => {
-        if (!window.authSession) {
-          alert('Please sign in to pick events');
-          return;
-        }
-        const headers = {
-          apikey: appGlobals.supabasePublishableKey,
-          Authorization: 'Bearer ' + window.authSession?.access_token
-        };
-        const ids = event.mergedIds || [event.id];
-        const existing = Actions.callApi({
-          method: 'get',
-          url: appGlobals.supabaseUrl + '/rest/v1/picks?select=id&user_id=eq.' + window.authUser.id + '&event_id=in.(' + ids.join(',') + ')',
-          headers,
-          invalidates: []
-        });
-        if (existing?.length > 0) {
-          Actions.callApi({ method: 'delete', url: appGlobals.supabaseUrl + '/rest/v1/picks?id=eq.' + existing[0].id, headers, invalidates: [] });
-        } else {
-          Actions.callApi({ method: 'post', url: appGlobals.supabaseUrl + '/rest/v1/picks', headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: { user_id: window.authUser.id, event_id: event.id }, invalidates: [] });
-        }
-      },
-      removePick: (pickId) => {
-        Actions.callApi({
-          method: 'delete',
-          url: appGlobals.supabaseUrl + '/rest/v1/picks?id=eq.' + pickId,
-          headers: {
-            apikey: appGlobals.supabasePublishableKey,
-            Authorization: 'Bearer ' + window.authSession?.access_token
-          },
-          invalidates: []
-        });
-      }
+      togglePick: togglePick,
+      removePick: removePick
     }}"
   />
 
