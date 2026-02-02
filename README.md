@@ -249,7 +249,7 @@ Result: Specific searches like "cotati" now take ~80ms (down from 750ms).
 ### XMLUI Inspector
 
 Added debugging tool accessible via cog icon:
-- Opens `xs-diff.html` in modal
+- Opens `xs-diff.html` in modal (relative path for GitHub Pages compatibility)
 - Shows event traces, state changes, API calls
 - Requires `xsVerbose: true` in config.json
 
@@ -271,15 +271,17 @@ Users can now authenticate and save personal event picks:
 └─────────────────────────────────────────────────────────┘
 ```
 
+**OAuth flow:** App → Supabase → GitHub → Supabase → App. Identity comes from the GitHub account the user is logged into. Session stored in localStorage (`sb-*-auth-token`), not cookies. To test with a different identity, use incognito or revoke the app at GitHub → Settings → Applications.
+
 **Database tables:**
 - `picks` - user_id + event_id with joined events data (RLS-protected)
 - `feed_tokens` - unique token per user for ICS feed URL
 
 **Implementation details:**
-- Feed token created automatically on first sign-in
+- Feed token created automatically on first sign-in (page reloads to sync DataSource)
 - `Actions.callApi` used for pick operations with `picks.refetch()` for DataSource refresh
 - Checkbox UI shows pick state per event card
-- My Picks dialog (calendar icon) shows expandable list of picked events
+- My Picks dialog (calendar icon) shows expandable list of picked events with loading state
 - Can unpick events directly from the dialog via close icon
 
 **Edge function:**
