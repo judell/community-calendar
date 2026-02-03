@@ -299,6 +299,43 @@ Users can now authenticate and save personal event picks:
 - Modal dialog uses `minWidth="70vw"` for mobile compatibility
 - Text uses `overflowMode="flow"` for proper wrapping
 
+### Poster Capture (New)
+
+Users can photograph an event poster and add it to their picks:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Click camera icon (when signed in)                     │
+│                    ↓                                    │
+│  Select image of event poster                           │
+│                    ↓                                    │
+│  Claude API extracts: title, date, time, location       │
+│                    ↓                                    │
+│  Review/edit extracted details in form                  │
+│                    ↓                                    │
+│  "Add to My Picks" saves event + creates pick           │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Implementation:**
+- `components/CaptureDialog.xmlui` - UI for image selection and event review
+- `supabase/functions/capture-event/index.ts` - Edge function with two modes:
+  - **Extract mode**: Receives image via `Actions.upload`, calls Claude API, returns event JSON
+  - **Commit mode**: Receives edited event, inserts into `events` table with `source='poster_capture'`, creates pick
+
+**XMLUI patterns learned:**
+- `Actions.upload` returns result synchronously (callbacks don't fire)
+- `Actions.upload` uses filename as form field name (not "file") - see [issue #2741](https://github.com/xmlui-org/xmlui/issues/2741)
+- TextBox/TextArea require `initialValue` + `id` + `setValue()` for dynamic updates (not `value` binding)
+- APICall needs `body="{$param}"` to send `execute()` parameter as request body
+- CORS must include `x-ue-client-tx-id` header for XMLUI uploads - see [issue #1942](https://github.com/xmlui-org/xmlui/issues/1942)
+
+**Deploy edge function:**
+```bash
+supabase functions deploy capture-event --no-verify-jwt
+supabase secrets set ANTHROPIC_API_KEY=<key>  # Set via Dashboard for deployed functions
+```
+
 ### Component Architecture (Refactored)
 
 The app uses XMLUI's AppState pattern for cross-component state management, avoiding prop drilling:
@@ -400,7 +437,8 @@ community-calendar/
 │   ├── EventCard.xmlui     # Event display card with pick checkbox
 │   ├── PickItem.xmlui      # Pick item in My Picks dialog
 │   ├── MyPicksDialog.xmlui # My Picks modal dialog
-│   └── SourcesDialog.xmlui # Sources modal dialog
+│   ├── SourcesDialog.xmlui # Sources modal dialog
+│   └── CaptureDialog.xmlui # Poster capture: image → Claude API → event
 ├── config.json             # Supabase credentials + xsVerbose for inspector
 ├── index.html              # XMLUI loader + auth setup
 ├── helpers.js              # Pure helper functions (filter, dedupe, format, etc.)
@@ -412,7 +450,7 @@ community-calendar/
 ├── ics_to_json.py          # Converts ICS to JSON
 ├── supabase/               # Supabase configuration
 │   ├── ddl/                # Database schema (tables, RLS, cron)
-│   └── functions/          # Edge Functions (load-events, my-picks)
+│   └── functions/          # Edge Functions (load-events, my-picks, capture-event)
 ├── cal.py                  # Legacy HTML generator
 ├── santarosa/
 │   ├── combined.ics        # Subscribable calendar feed
