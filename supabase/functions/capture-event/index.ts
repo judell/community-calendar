@@ -28,8 +28,14 @@ async function extractEventFromImage(imageBytes: Uint8Array, mediaType: string):
     throw new Error("ANTHROPIC_API_KEY not configured");
   }
 
-  // Convert bytes to base64
-  const base64 = btoa(String.fromCharCode(...imageBytes));
+  // Convert bytes to base64 (chunked to avoid stack overflow on large images)
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < imageBytes.length; i += chunkSize) {
+    const chunk = imageBytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  const base64 = btoa(binary);
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
