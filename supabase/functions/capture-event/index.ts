@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-ue-client-tx-id",
 };
 
 const EXTRACTION_PROMPT = `Extract event details from this poster image. Return ONLY valid JSON, no other text:
@@ -146,12 +146,21 @@ Deno.serve(async (req) => {
 
   try {
     const contentType = req.headers.get("content-type") || "";
+    console.log("Content-Type:", contentType);
 
     // Handle multipart/form-data (from Actions.upload)
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
       const mode = formData.get("mode") as string;
-      const file = formData.get("file") as File;
+
+      // Find the file - Actions.upload uses the filename as the field name
+      let file: File | null = null;
+      formData.forEach((value, key) => {
+        if (value instanceof File) {
+          file = value;
+        }
+      });
+      console.log("Mode:", mode, "File:", file?.name, "File type:", file?.type);
 
       if (mode === "extract") {
         if (!file) {

@@ -22,6 +22,7 @@
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + window.authSession?.access_token
     }}"
+    body="{$param}"
     onSuccess="(result) => {
       isCommitting = false;
       if (window.refreshPicks) window.refreshPicks();
@@ -49,29 +50,42 @@
             if (!files || files.length === 0) return;
             isExtracting = true;
             errorMessage = '';
-            Actions.upload({
+            const result = Actions.upload({
               file: files[0],
               url: appGlobals.supabaseUrl + '/functions/v1/capture-event',
               method: 'post',
+              asForm: true,
               headers: { apikey: appGlobals.supabasePublishableKey },
-              formParams: { mode: 'extract' },
-              onSuccess: (result) => {
-                isExtracting = false;
-                extractedEvent = result.event;
-                editTitle = result.event.title || '';
-                const startDt = result.event.start_time ? getDate(result.event.start_time) : null;
-                editDate = startDt ? formatDate(startDt, 'yyyy-MM-dd') : '';
-                editTime = startDt ? formatTime(startDt, 'HH:mm') : '';
-                const endDt = result.event.end_time ? getDate(result.event.end_time) : null;
-                editEndTime = endDt ? formatTime(endDt, 'HH:mm') : '';
-                editLocation = result.event.location || '';
-                editDescription = result.event.description || '';
-              },
-              onError: (err) => {
-                isExtracting = false;
-                errorMessage = err.message || 'Failed to extract event';
-              }
+              formParams: { mode: 'extract' }
             });
+            console.log('Upload result:', JSON.stringify(result));
+            isExtracting = false;
+            if (result && result.event) {
+              extractedEvent = result.event;
+              // Parse ISO datetime: 2025-03-15T18:30:00
+              const startTime = result.event.start_time || '';
+              const parsedDate = startTime.substring(0, 10);
+              const parsedTime = startTime.substring(11, 16);
+              const endTime = result.event.end_time || '';
+              const parsedEndTime = endTime ? endTime.substring(11, 16) : '';
+              // Update state variables
+              editTitle = result.event.title || '';
+              editDate = parsedDate;
+              editTime = parsedTime;
+              editEndTime = parsedEndTime;
+              editLocation = result.event.location || '';
+              editDescription = result.event.description || '';
+              // Use setValue() to update the TextBox/TextArea components
+              titleTextBox.setValue(editTitle);
+              dateTextBox.setValue(editDate);
+              timeTextBox.setValue(editTime);
+              endTimeTextBox.setValue(editEndTime);
+              locationTextBox.setValue(editLocation);
+              descriptionTextArea.setValue(editDescription);
+              console.log('Parsed: title=', editTitle, 'date=', editDate, 'time=', editTime);
+            } else {
+              errorMessage = 'Failed to extract event';
+            }
           }"
         />
       </VStack>
@@ -89,7 +103,8 @@
         <VStack gap="$space-1">
           <Text fontSize="$fontSize-sm" color="$color-text-secondary">Title *</Text>
           <TextBox
-            value="{editTitle}"
+            id="titleTextBox"
+            initialValue="{editTitle}"
             onDidChange="(v) => editTitle = v"
             placeholder="Event title"
           />
@@ -99,7 +114,8 @@
           <VStack gap="$space-1" width="50%">
             <Text fontSize="$fontSize-sm" color="$color-text-secondary">Date *</Text>
             <TextBox
-              value="{editDate}"
+              id="dateTextBox"
+              initialValue="{editDate}"
               onDidChange="(v) => editDate = v"
               placeholder="YYYY-MM-DD"
             />
@@ -107,7 +123,8 @@
           <VStack gap="$space-1" width="25%">
             <Text fontSize="$fontSize-sm" color="$color-text-secondary">Start</Text>
             <TextBox
-              value="{editTime}"
+              id="timeTextBox"
+              initialValue="{editTime}"
               onDidChange="(v) => editTime = v"
               placeholder="HH:MM"
             />
@@ -115,7 +132,8 @@
           <VStack gap="$space-1" width="25%">
             <Text fontSize="$fontSize-sm" color="$color-text-secondary">End</Text>
             <TextBox
-              value="{editEndTime}"
+              id="endTimeTextBox"
+              initialValue="{editEndTime}"
               onDidChange="(v) => editEndTime = v"
               placeholder="HH:MM"
             />
@@ -125,7 +143,8 @@
         <VStack gap="$space-1">
           <Text fontSize="$fontSize-sm" color="$color-text-secondary">Location</Text>
           <TextBox
-            value="{editLocation}"
+            id="locationTextBox"
+            initialValue="{editLocation}"
             onDidChange="(v) => editLocation = v"
             placeholder="Venue or address"
           />
@@ -134,7 +153,8 @@
         <VStack gap="$space-1">
           <Text fontSize="$fontSize-sm" color="$color-text-secondary">Description</Text>
           <TextArea
-            value="{editDescription}"
+            id="descriptionTextArea"
+            initialValue="{editDescription}"
             onDidChange="(v) => editDescription = v"
             placeholder="Brief description"
             rows="3"
