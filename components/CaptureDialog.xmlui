@@ -1,7 +1,9 @@
 <Component
   name="CaptureDialog"
-  method.open="() => { extractedEvent = null; errorMessage = ''; dialog.open(); }"
+  method.open="() => { extractedEvent = null; savedEventId = null; googleCalUrl = ''; errorMessage = ''; dialog.open(); }"
   var.extractedEvent="{null}"
+  var.savedEventId="{null}"
+  var.googleCalUrl=""
   var.isExtracting="{false}"
   var.isCommitting="{false}"
   var.errorMessage=""
@@ -26,8 +28,14 @@
     onSuccess="(result) => {
       isCommitting = false;
       if (window.refreshPicks) window.refreshPicks();
-      toast('Event added to your picks!');
-      dialog.close();
+      savedEventId = result.event_id;
+      googleCalUrl = window.buildGoogleCalendarUrl({
+        title: editTitle,
+        start_time: editDate + 'T' + (editTime || '00:00') + ':00',
+        end_time: editEndTime ? editDate + 'T' + editEndTime + ':00' : null,
+        location: editLocation,
+        description: editDescription
+      });
     }"
     onError="(err) => {
       isCommitting = false;
@@ -97,7 +105,7 @@
       </VStack>
 
       <!-- Step 2: Review/Edit extracted event -->
-      <VStack when="{extractedEvent && !isExtracting}" gap="$space-3">
+      <VStack when="{extractedEvent && !isExtracting && !savedEventId}" gap="$space-3">
         <Text fontWeight="bold">Review and edit event details:</Text>
 
         <VStack gap="$space-1">
@@ -194,6 +202,44 @@
             enabled="{!isCommitting && editTitle && editDate}"
           />
         </HStack>
+      </VStack>
+
+      <!-- Step 3: Success - Add to calendar -->
+      <VStack when="{savedEventId}" gap="$space-4" horizontalAlignment="center" padding="$space-4">
+        <Icon name="check" size="lg" color="$color-success-500" />
+        <Text fontWeight="bold" fontSize="$fontSize-lg">Event saved!</Text>
+        <Text color="$color-text-secondary" textAlignment="center">
+          "{editTitle}" has been added to your picks.
+        </Text>
+
+        <VStack gap="$space-2" width="100%">
+          <Text fontWeight="bold" fontSize="$fontSize-sm">Add to your calendar:</Text>
+
+          <Button
+            label="Add to Google Calendar"
+            themeColor="primary"
+            width="100%"
+            onClick="window.open(googleCalUrl, '_blank')"
+          />
+
+          <Button
+            label="Download .ics file"
+            variant="outlined"
+            icon="download"
+            width="100%"
+            onClick="window.open(appGlobals.supabaseUrl + '/functions/v1/my-picks?event_id=' + savedEventId, '_blank')"
+          />
+
+          <Text fontSize="$fontSize-xs" color="$color-text-tertiary" textAlignment="center">
+            For Apple Calendar: download .ics, then open the file.
+          </Text>
+        </VStack>
+
+        <Button
+          label="Done"
+          variant="ghost"
+          onClick="dialog.close()"
+        />
       </VStack>
 
       <!-- Error message -->

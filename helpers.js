@@ -151,6 +151,29 @@ function isEventPicked(mergedIds, picks) {
   return picks.some(p => ids.some(id => p.event_id == id));
 }
 
+// Build Google Calendar URL for an event
+function buildGoogleCalendarUrl(event) {
+  if (!event) return '';
+
+  function formatGoogleDate(isoString) {
+    if (!isoString) return '';
+    return isoString.replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  }
+
+  const startDate = formatGoogleDate(event.start_time);
+  const endDate = event.end_time ? formatGoogleDate(event.end_time) : startDate;
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: event.title || '',
+    dates: startDate + '/' + endDate,
+    location: event.location || '',
+    details: event.description || ''
+  });
+
+  return 'https://calendar.google.com/calendar/render?' + params.toString();
+}
+
 // Export for browser (attach to window)
 if (typeof window !== 'undefined') {
   window.filterEvents = filterEvents;
@@ -164,4 +187,5 @@ if (typeof window !== 'undefined') {
   window.dedupeEvents = dedupeEvents;
   window.clearDedupeCache = clearDedupeCache;
   window.isEventPicked = isEventPicked;
+  window.buildGoogleCalendarUrl = buildGoogleCalendarUrl;
 }
