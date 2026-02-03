@@ -1,6 +1,17 @@
 // Code-behind for Main.xmlui
 // These functions have access to XMLUI globals (appGlobals, Actions)
 
+// Expose refreshPicks globally for CaptureDialog to call after adding an event
+window.refreshPicks = function() {
+  // Refresh both events and picks DataSources
+  if (typeof events !== 'undefined' && events.refresh) {
+    events.refresh();
+  }
+  if (typeof picks !== 'undefined' && picks.refresh) {
+    picks.refresh();
+  }
+};
+
 function togglePick(event) {
   if (!window.authSession) {
     alert('Please sign in to pick events');

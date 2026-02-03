@@ -1,0 +1,187 @@
+<Component
+  name="CaptureDialog"
+  method.open="() => { extractedEvent = null; errorMessage = ''; dialog.open(); }"
+  var.extractedEvent="{null}"
+  var.isExtracting="{false}"
+  var.isCommitting="{false}"
+  var.errorMessage=""
+  var.editTitle=""
+  var.editDate=""
+  var.editTime=""
+  var.editEndTime=""
+  var.editLocation=""
+  var.editDescription=""
+>
+
+  <!-- APICall for commit -->
+  <APICall
+    id="commitApi"
+    method="post"
+    url="{appGlobals.supabaseUrl + '/functions/v1/capture-event'}"
+    headers="{{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.authSession?.access_token
+    }}"
+    onSuccess="(result) => {
+      isCommitting = false;
+      if (window.refreshPicks) window.refreshPicks();
+      toast('Event added to your picks!');
+      dialog.close();
+    }"
+    onError="(err) => {
+      isCommitting = false;
+      errorMessage = err.message || 'Failed to save event';
+    }"
+  />
+
+  <ModalDialog id="dialog" title="Capture Event from Poster" minWidth="400px">
+    <VStack gap="$space-3" padding="$space-2">
+
+      <!-- Step 1: Select image -->
+      <VStack when="{!extractedEvent && !isExtracting}" gap="$space-2">
+        <Text>Select an image of an event poster:</Text>
+        <FileInput
+          id="imageInput"
+          acceptsFileType="{['image/*']}"
+          buttonLabel="Select Image"
+          buttonIcon="photo"
+          onDidChange="(files) => {
+            if (!files || files.length === 0) return;
+            isExtracting = true;
+            errorMessage = '';
+            Actions.upload({
+              file: files[0],
+              url: appGlobals.supabaseUrl + '/functions/v1/capture-event',
+              method: 'post',
+              formParams: { mode: 'extract' },
+              onSuccess: (result) => {
+                isExtracting = false;
+                extractedEvent = result.event;
+                editTitle = result.event.title || '';
+                const startDt = result.event.start_time ? getDate(result.event.start_time) : null;
+                editDate = startDt ? formatDate(startDt, 'yyyy-MM-dd') : '';
+                editTime = startDt ? formatTime(startDt, 'HH:mm') : '';
+                const endDt = result.event.end_time ? getDate(result.event.end_time) : null;
+                editEndTime = endDt ? formatTime(endDt, 'HH:mm') : '';
+                editLocation = result.event.location || '';
+                editDescription = result.event.description || '';
+              },
+              onError: (err) => {
+                isExtracting = false;
+                errorMessage = err.message || 'Failed to extract event';
+              }
+            });
+          }"
+        />
+      </VStack>
+
+      <!-- Extracting spinner -->
+      <VStack when="{isExtracting}" horizontalAlignment="center" gap="$space-2" padding="$space-4">
+        <Spinner />
+        <Text>Extracting event details...</Text>
+      </VStack>
+
+      <!-- Step 2: Review/Edit extracted event -->
+      <VStack when="{extractedEvent && !isExtracting}" gap="$space-3">
+        <Text fontWeight="bold">Review and edit event details:</Text>
+
+        <VStack gap="$space-1">
+          <Text fontSize="$fontSize-sm" color="$color-text-secondary">Title *</Text>
+          <TextBox
+            value="{editTitle}"
+            onDidChange="(v) => editTitle = v"
+            placeholder="Event title"
+          />
+        </VStack>
+
+        <HStack gap="$space-2">
+          <VStack gap="$space-1" width="50%">
+            <Text fontSize="$fontSize-sm" color="$color-text-secondary">Date *</Text>
+            <TextBox
+              value="{editDate}"
+              onDidChange="(v) => editDate = v"
+              placeholder="YYYY-MM-DD"
+            />
+          </VStack>
+          <VStack gap="$space-1" width="25%">
+            <Text fontSize="$fontSize-sm" color="$color-text-secondary">Start</Text>
+            <TextBox
+              value="{editTime}"
+              onDidChange="(v) => editTime = v"
+              placeholder="HH:MM"
+            />
+          </VStack>
+          <VStack gap="$space-1" width="25%">
+            <Text fontSize="$fontSize-sm" color="$color-text-secondary">End</Text>
+            <TextBox
+              value="{editEndTime}"
+              onDidChange="(v) => editEndTime = v"
+              placeholder="HH:MM"
+            />
+          </VStack>
+        </HStack>
+
+        <VStack gap="$space-1">
+          <Text fontSize="$fontSize-sm" color="$color-text-secondary">Location</Text>
+          <TextBox
+            value="{editLocation}"
+            onDidChange="(v) => editLocation = v"
+            placeholder="Venue or address"
+          />
+        </VStack>
+
+        <VStack gap="$space-1">
+          <Text fontSize="$fontSize-sm" color="$color-text-secondary">Description</Text>
+          <TextArea
+            value="{editDescription}"
+            onDidChange="(v) => editDescription = v"
+            placeholder="Brief description"
+            rows="3"
+          />
+        </VStack>
+
+        <HStack gap="$space-2" horizontalAlignment="end">
+          <Button
+            label="Try Another"
+            variant="outlined"
+            onClick="extractedEvent = null; errorMessage = ''"
+            enabled="{!isCommitting}"
+          />
+          <Button
+            label="{isCommitting ? 'Saving...' : 'Add to My Picks'}"
+            themeColor="primary"
+            onClick="() => {
+              if (!editTitle || !editDate) {
+                errorMessage = 'Title and date are required';
+                return;
+              }
+              isCommitting = true;
+              errorMessage = '';
+              const startTime = editDate + 'T' + (editTime || '00:00') + ':00';
+              const endTime = editEndTime ? editDate + 'T' + editEndTime + ':00' : null;
+              commitApi.execute({
+                mode: 'commit',
+                event: {
+                  title: editTitle,
+                  start_time: startTime,
+                  end_time: endTime,
+                  location: editLocation || null,
+                  description: editDescription || null
+                }
+              });
+            }"
+            enabled="{!isCommitting && editTitle && editDate}"
+          />
+        </HStack>
+      </VStack>
+
+      <!-- Error message -->
+      <Text
+        when="{errorMessage}"
+        value="{errorMessage}"
+        color="$color-danger-500"
+      />
+
+    </VStack>
+  </ModalDialog>
+</Component>

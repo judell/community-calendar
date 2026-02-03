@@ -60,6 +60,7 @@
   <!-- Dialogs -->
   <MyPicksDialog id="myPicksDialog" feedToken="{feedToken.value && feedToken.value[0] ? feedToken.value[0].token : null}" />
   <SourcesDialog id="sourcesDialog" events="{events.value}" />
+  <CaptureDialog id="captureDialog" />
 
   <!-- Inspector Dialog -->
   <ModalDialog id="inspectorDialog" title="XMLUI Inspector" minWidth="85vw" minHeight="85vh">
@@ -75,6 +76,14 @@
         <SpaceFiller />
         <HStack gap="$space-1">
           <Icon name="search" tooltip="Search" width="20px" height="20px" onClick="showSearch = !showSearch" />
+          <Icon
+            when="{window.authUser}"
+            name="photo"
+            tooltip="Capture Event from Poster"
+            width="20px"
+            height="20px"
+            onClick="captureDialog.open()"
+          />
           <Icon name="date" tooltip="My Picks Feed" width="20px" height="20px" onClick="myPicksDialog.open()" />
           <Icon name="list" tooltip="Sources" width="20px" height="20px" onClick="sourcesDialog.open()" />
           <Icon
