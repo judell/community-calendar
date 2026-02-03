@@ -336,6 +336,14 @@ supabase functions deploy capture-event --no-verify-jwt
 supabase secrets set ANTHROPIC_API_KEY=<key>  # Set via Dashboard for deployed functions
 ```
 
+**API Key configuration:**
+- Currently uses a shared Anthropic API key configured as a Supabase secret
+- **Future**: Could support "bring your own key" (BYOK) where users provide their own Anthropic API key via the UI, passed in the request body
+
+**Technical notes:**
+- Base64 encoding uses chunked processing (8KB chunks) to avoid stack overflow - spreading 184K+ bytes as function arguments exceeds JavaScript's call stack limit
+- iOS Safari debugging tip: when client shows a server error, check Supabase Dashboard → Edge Functions → Logs first
+
 ### Component Architecture (Refactored)
 
 The app uses XMLUI's AppState pattern for cross-component state management, avoiding prop drilling:
