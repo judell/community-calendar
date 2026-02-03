@@ -63,7 +63,10 @@
               url: appGlobals.supabaseUrl + '/functions/v1/capture-event',
               method: 'post',
               asForm: true,
-              headers: { apikey: appGlobals.supabasePublishableKey },
+              headers: {
+                apikey: appGlobals.supabasePublishableKey,
+                Authorization: 'Bearer ' + appGlobals.supabasePublishableKey
+              },
               formParams: { mode: 'extract' }
             });
             console.log('Upload result:', JSON.stringify(result));
