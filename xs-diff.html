@@ -756,6 +756,45 @@
     <script type="module">
       import * as jsondiffpatch from "https://unpkg.com/jsondiffpatch@0.7.3/lib/index.js";
       import * as htmlFormatter from "https://unpkg.com/jsondiffpatch@0.7.3/lib/formatters/html.js";
+      import { XmluiSource } from "./xmlui-parser.es.js";
+
+      // =============================================================================
+      // LOCALSTORAGE PERSISTENCE - Survive server restarts
+      // =============================================================================
+
+      const STORAGE_KEY = "xmlui-inspector-history";
+      const MAX_STORED_ENTRIES = 5000; // Limit to prevent localStorage overflow
+
+      function getStoredEntries() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          return stored ? JSON.parse(stored) : [];
+        } catch (e) {
+          console.warn("Failed to load inspector history from localStorage:", e);
+          return [];
+        }
+      }
+
+      function saveEntriesToStorage(entries) {
+        try {
+          // Keep only the most recent entries to avoid localStorage limits
+          const toStore = entries.slice(-MAX_STORED_ENTRIES);
+          localStorage.setItem(STORAGE_KEY, safeStringify(toStore));
+        } catch (e) {
+          console.warn("Failed to save inspector history to localStorage:", e);
+        }
+      }
+
+      function clearStoredEntries() {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {
+          console.warn("Failed to clear inspector history from localStorage:", e);
+        }
+      }
+
+      // Track entries we've already stored to avoid duplicates
+      let lastStoredCount = 0;
 
       // =============================================================================
       // THEME SYNC - Bridge XMLUI theme to inspector
@@ -905,6 +944,64 @@
         }
       }
 
+      // Clean up eventArgs to extract useful data and remove DOM/React noise
+      function cleanEventArgs(args) {
+        if (!args || !Array.isArray(args)) return args;
+        return args.map(arg => {
+          if (!arg || typeof arg !== "object") return arg;
+          // React SyntheticEvent - extract useful parts
+          if (arg.nativeEvent || arg._reactName || arg.type === "click" || arg.type === "contextmenu") {
+            const cleaned = { _event: arg.type || "event" };
+            if (arg.target?.id) cleaned.targetId = arg.target.id;
+            if (arg.target?.textContent) cleaned.targetText = arg.target.textContent.substring(0, 50);
+            if (arg.clientX !== undefined) cleaned.position = { x: arg.clientX, y: arg.clientY };
+            return cleaned;
+          }
+          // Skip React internal objects
+          if (arg.$$typeof) return "[React element]";
+          // Return as-is for regular objects (message payloads, tree nodes, etc.)
+          return arg;
+        });
+      }
+
+      // Safe JSON stringify that handles circular references and DOM objects
+      function safeStringify(obj, indent = null, maxLength = 10000) {
+        try {
+          const seen = new WeakSet();
+          let length = 0;
+          const result = JSON.stringify(obj, (key, value) => {
+            // Bail out if getting too large
+            if (length > maxLength) return "[truncated]";
+            length += key.length + 10;
+            // Skip DOM nodes and Window
+            if (value instanceof Node || value instanceof Window) {
+              return `[${value.constructor.name}]`;
+            }
+            // Handle circular references
+            if (typeof value === "object" && value !== null) {
+              if (seen.has(value)) return "[circular]";
+              seen.add(value);
+              // Limit array length
+              if (Array.isArray(value) && value.length > 100) {
+                return [...value.slice(0, 100), `[...${value.length - 100} more items]`];
+              }
+            }
+            // Handle functions
+            if (typeof value === "function") {
+              return `[function ${value.name || "anonymous"}]`;
+            }
+            // Truncate long strings
+            if (typeof value === "string" && value.length > 500) {
+              return value.substring(0, 500) + "...";
+            }
+            return value;
+          }, indent);
+          return result && result.length > maxLength ? result.substring(0, maxLength) + "..." : result;
+        } catch (err) {
+          return `[stringify error: ${err.message}]`;
+        }
+      }
+
       // Convert functions to their source code for display (jsondiffpatch can't handle function objects)
       // Multi-line functions are wrapped with markers for later conversion to <details> dropdowns
       function stripFunctions(obj, seen = new WeakSet()) {
@@ -1045,6 +1142,51 @@
           return html;
         };
 
+        // Render field-level changes for modified items
+        const renderChangedItems = (items) => {
+          if (items.length === 0) return "";
+          const limit = 3; // Show details for up to 3 modified items
+          const shown = items.slice(0, limit);
+          const remaining = items.length - limit;
+
+          let html = shown.map((i) => {
+            let itemHtml = `<div class="diff-item text-warning">~ ${i.label}</div>`;
+            // Show what fields changed
+            if (i.before && i.after) {
+              const fieldChanges = [];
+              const allKeys = new Set([...Object.keys(i.before), ...Object.keys(i.after)]);
+              for (const key of allKeys) {
+                const bVal = i.before[key];
+                const aVal = i.after[key];
+                // Skip unchanged fields and complex nested objects
+                if (JSON.stringify(bVal) === JSON.stringify(aVal)) continue;
+                if (typeof bVal === 'object' && bVal !== null && !Array.isArray(bVal)) continue;
+                if (typeof aVal === 'object' && aVal !== null && !Array.isArray(aVal)) continue;
+
+                // Format the change
+                const formatVal = (v) => {
+                  if (v === undefined) return 'undefined';
+                  if (v === null) return 'null';
+                  if (typeof v === 'boolean') return v ? 'true' : 'false';
+                  if (typeof v === 'string' && v.length > 20) return `"${v.substring(0, 20)}..."`;
+                  if (typeof v === 'string') return `"${v}"`;
+                  return String(v);
+                };
+                fieldChanges.push(`<span class="field-change">${key}: <span class="text-error">${formatVal(bVal)}</span> → <span class="text-success">${formatVal(aVal)}</span></span>`);
+              }
+              if (fieldChanges.length > 0 && fieldChanges.length <= 5) {
+                itemHtml += `<div class="diff-field-changes" style="margin-left: 16px; font-size: var(--font-sm);">${fieldChanges.join('<br>')}</div>`;
+              }
+            }
+            return itemHtml;
+          }).join("");
+
+          if (remaining > 0) {
+            html += `<div class="diff-item text-faint">… and ${remaining} more</div>`;
+          }
+          return html;
+        };
+
         if (added.length > 0) {
           lines.push(`<div class="diff-added">+${added.length} added</div>`);
           lines.push(renderItems(added, "+", "text-success"));
@@ -1055,7 +1197,7 @@
         }
         if (changed.length > 0) {
           lines.push(`<div class="diff-modified">~${changed.length} modified</div>`);
-          lines.push(renderItems(changed, "~", "text-warning"));
+          lines.push(renderChangedItems(changed));
         }
 
         return lines.join("");
@@ -1075,6 +1217,28 @@
         }
         if (analysis.changed.length > 0) {
           lines.push(`~${analysis.changed.length} modified: ${analysis.changed.map((i) => i.label).join(", ")}`);
+          // Show field-level changes for modified items (up to 3)
+          const formatVal = (v) => {
+            if (v === undefined) return 'undefined';
+            if (v === null) return 'null';
+            if (typeof v === 'boolean') return v ? 'true' : 'false';
+            if (typeof v === 'string' && v.length > 20) return `"${v.substring(0, 20)}..."`;
+            if (typeof v === 'string') return `"${v}"`;
+            return String(v);
+          };
+          analysis.changed.slice(0, 3).forEach(item => {
+            if (item.before && item.after) {
+              const allKeys = new Set([...Object.keys(item.before), ...Object.keys(item.after)]);
+              for (const key of allKeys) {
+                const bVal = item.before[key];
+                const aVal = item.after[key];
+                if (JSON.stringify(bVal) === JSON.stringify(aVal)) continue;
+                if (typeof bVal === 'object' && bVal !== null && !Array.isArray(bVal)) continue;
+                if (typeof aVal === 'object' && aVal !== null && !Array.isArray(aVal)) continue;
+                lines.push(`    ${item.label}.${key}: ${formatVal(bVal)} → ${formatVal(aVal)}`);
+              }
+            }
+          });
         }
         return lines.join("\n");
       }
@@ -1100,6 +1264,11 @@
             const resp = await fetch(filePath);
             if (!resp.ok) return null;
             content = await resp.text();
+            // Validate content isn't HTML (SPA fallback returns index.html for missing files)
+            const trimmed = content.trimStart().toLowerCase();
+            if (trimmed.startsWith('<!doctype') || trimmed.startsWith('<html')) {
+              return null;
+            }
             sourceCache.set(filePath, content);
           }
           return content.slice(startChar, endChar);
@@ -1138,53 +1307,34 @@
                 const outputSections = [];
                 let handlerValue = null; // The function name from the handler attribute
 
-                // Helper to find specific handler attribute in .xmlui
+                // Helper to find specific handler attribute in .xmlui (uses XMLUI parser)
                 function findHandlerInXmlui(source, eventName, compLabel) {
                   const lines = source.split("\n");
                   const matches = [];
 
-                  // If we have a component label, find lines that have both the id and handler nearby
-                  if (compLabel) {
-                    // First find the component by id
-                    for (let i = 0; i < lines.length; i++) {
-                      const line = lines[i];
-                      const idPattern = new RegExp(`id\\s*=\\s*["']${compLabel}["']`);
-                      if (idPattern.test(line)) {
-                        // Found the component - look for handler on this line or nearby lines
-                        const searchStart = Math.max(0, i - 2);
-                        const searchEnd = Math.min(lines.length - 1, i + 5);
-                        for (let j = searchStart; j <= searchEnd; j++) {
-                          const attrPattern = new RegExp(`on${eventName}\\s*=\\s*"([^"]*)"`, "i");
-                          const attrMatch = lines[j].match(attrPattern);
-                          if (attrMatch) {
-                            matches.push({ lineNum: j, pattern: "handler-attr" });
-                            if (!handlerValue) handlerValue = attrMatch[1];
-                            break;
-                          }
-                        }
-                        break; // Found the component, stop searching
+                  try {
+                    const xmlui = new XmluiSource(source, filePath);
+
+                    if (compLabel) {
+                      // Find specific handler on specific element
+                      const handler = xmlui.findHandler(compLabel, eventName);
+                      if (handler) {
+                        matches.push({ lineNum: handler.line - 1, pattern: "handler-attr" }); // 0-indexed for formatMatches
+                        if (!handlerValue) handlerValue = handler.value;
+                      }
+                    } else {
+                      // Find all handlers matching eventName
+                      const handlers = xmlui.findHandlers(eventName);
+                      for (const h of handlers) {
+                        matches.push({ lineNum: h.line - 1, pattern: "handler-attr" }); // 0-indexed
+                        if (!handlerValue) handlerValue = h.value;
                       }
                     }
-                  } else {
-                    // No component label - find all matching handlers
-                    for (let i = 0; i < lines.length; i++) {
-                      const line = lines[i];
-
-                      // Look for on{EventName}= attribute
-                      const attrPattern = new RegExp(`on${eventName}\\s*=\\s*"([^"]*)"`, "i");
-                      const attrMatch = line.match(attrPattern);
-                      if (attrMatch) {
-                        matches.push({ lineNum: i, pattern: "handler-attr" });
-                        if (!handlerValue) handlerValue = attrMatch[1];
-                      }
-
-                      // Also look for emitEvent('{eventName}') calls
-                      const emitPattern = new RegExp(`emitEvent\\s*\\(\\s*['"]${eventName}['"]`, "i");
-                      if (emitPattern.test(line)) {
-                        matches.push({ lineNum: i, pattern: "handler-attr" });
-                      }
-                    }
+                  } catch (e) {
+                    console.warn("Parser error in findHandlerInXmlui:", e);
+                    // Fallback: return empty matches
                   }
+
                   return { lines, matches };
                 }
 
@@ -1594,8 +1744,34 @@
       }
 
       function getAllEntries() {
-        const logs = (window.parent && window.parent._xsLogs) || [];
-        return logs.map(normalizeEntry).filter((entry) => entry && (entry.kind || entry.text));
+        const liveLogs = (window.parent && window.parent._xsLogs) || [];
+        const storedEntries = getStoredEntries();
+
+        // Merge stored entries with live logs
+        // Use a Map keyed by a unique identifier to dedupe
+        const entryMap = new Map();
+
+        // Add stored entries first (older)
+        storedEntries.forEach(entry => {
+          const key = `${entry.ts || 0}-${entry.kind || ''}-${entry.traceId || ''}`;
+          entryMap.set(key, entry);
+        });
+
+        // Add live entries (may overwrite stored ones, which is fine)
+        const normalizedLive = liveLogs.map(normalizeEntry).filter(e => e && (e.kind || e.text));
+        normalizedLive.forEach(entry => {
+          const key = `${entry.ts || 0}-${entry.kind || ''}-${entry.traceId || ''}`;
+          entryMap.set(key, entry);
+        });
+
+        // Save any new entries to localStorage
+        const allEntries = Array.from(entryMap.values());
+        if (allEntries.length > lastStoredCount) {
+          saveEntriesToStorage(allEntries);
+          lastStoredCount = allEntries.length;
+        }
+
+        return allEntries;
       }
 
       /**
@@ -1747,77 +1923,29 @@
 
       /**
        * Find a component definition by id in XMLUI source.
-       * Searches for any component with id="actionId" (Action, APICall, etc.)
-       * Handles multi-line component definitions where id may be on a different line than the tag.
-       * Returns { source: string, location: string, startLine: number } or null
+       * Uses the XMLUI parser for robust AST-based lookup.
+       * Returns { source: string, location: string, startLine: number, componentType: string } or null
        */
       function findActionInSource(source, actionId, fileName) {
         if (!source || !actionId) return null;
 
-        // First, find the id attribute in the source (handles multi-line tags)
-        // Match id="actionId" or id='actionId' or id={"actionId"}
-        const idPatterns = [
-          new RegExp(`id\\s*=\\s*["']${actionId}["']`),
-          new RegExp(`id\\s*=\\s*\\{["']${actionId}["']\\}`),
-        ];
+        try {
+          const xmlui = new XmluiSource(source, fileName);
+          const element = xmlui.findById(actionId);
 
-        const lines = source.split("\n");
-        let idLineNum = -1;
-
-        // Find the line containing the id attribute
-        for (let i = 0; i < lines.length; i++) {
-          for (const pattern of idPatterns) {
-            if (pattern.test(lines[i])) {
-              idLineNum = i;
-              break;
-            }
+          if (element) {
+            return {
+              source: element.source,
+              location: `${fileName}:${element.startLine}`,
+              startLine: element.startLine,
+              componentType: element.tagName
+            };
           }
-          if (idLineNum >= 0) break;
+        } catch (e) {
+          console.warn("Parser error in findActionInSource:", e);
         }
 
-        if (idLineNum < 0) return null;
-
-        // Now search backwards to find the opening tag (< followed by ComponentName)
-        let startLine = idLineNum;
-        let componentType = null;
-
-        for (let i = idLineNum; i >= 0 && i >= idLineNum - 10; i--) {
-          // Match opening tag - allow for line ending right after tag name
-          const openTagMatch = lines[i].match(/<(\w+)(?:\s|>|$)/);
-          if (openTagMatch) {
-            startLine = i;
-            componentType = openTagMatch[1];
-            break;
-          }
-        }
-
-        if (!componentType) return null;
-
-        // Now find the end of this component (self-closing or closing tag)
-        let endLine = startLine;
-
-        // Check if self-closing - look for /> from startLine onwards
-        for (let j = startLine; j < lines.length && j < startLine + 20; j++) {
-          if (lines[j].includes("/>")) {
-            endLine = j;
-            break;
-          }
-          // Check for closing tag
-          const closeTagPattern = new RegExp(`</${componentType}>`);
-          if (closeTagPattern.test(lines[j])) {
-            endLine = j;
-            break;
-          }
-          endLine = j;
-        }
-
-        const componentLines = lines.slice(startLine, endLine + 1);
-        return {
-          source: componentLines.join("\n"),
-          location: `${fileName}:${startLine + 1}`,
-          startLine: startLine + 1,
-          componentType
-        };
+        return null;
       }
 
       function entryMatches(entry, textFilter) {
@@ -1825,6 +1953,11 @@
         if (entry.detail?.text === "Inspector" || entry.detail?.componentId === "Inspector") return false;
         if (entry.componentType === "vite-error-overlay" || entry.uid === "vite-error-overlay") return false;
         if (entry.componentLabel?.startsWith("vite-") || entry.uid?.startsWith("vite-")) return false;
+        // Hide XMLUI Inspector interactions (inspector UI itself)
+        if (entry.componentLabel === "XMLUI Inspector" || (entry.componentLabel && entry.componentLabel.includes("Inspector"))) return false;
+        // Hide inspector activation events
+        const code = entry.code || entry.arrow || entry.handlerCode || "";
+        if (code.includes("inspectorDialog.open")) return false;
         if (!textFilter) return true;
         const haystack = `${entry.kind || ""} ${entry.eventName || ""} ${entry.uid || ""} ${entry.text || ""}`.toLowerCase();
         return haystack.includes(textFilter.toLowerCase());
@@ -1867,6 +2000,83 @@
         }
       }
 
+      /**
+       * Normalize HTTP method for display.
+       * Handles XMLUI binding expressions like "{$queryParams.new == 'true' ? 'post' : 'put'}"
+       * by extracting the actual HTTP methods from the expression.
+       */
+      function normalizeMethod(method) {
+        if (!method) return "GET";
+        // If it's a binding expression (starts with {), try to extract HTTP methods
+        if (method.startsWith("{") && method.endsWith("}")) {
+          // Look for HTTP method names in the expression
+          const httpMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"];
+          const found = [];
+          const lowerMethod = method.toLowerCase();
+          for (const m of httpMethods) {
+            if (lowerMethod.includes(`'${m.toLowerCase()}'`) || lowerMethod.includes(`"${m.toLowerCase()}"`)) {
+              found.push(m);
+            }
+          }
+          if (found.length === 1) {
+            return found[0];
+          } else if (found.length > 1) {
+            return found.join("/"); // e.g., "POST/PUT"
+          }
+          return "request"; // Fallback for unrecognized binding
+        }
+        return method.toUpperCase();
+      }
+
+      /**
+       * Normalize URL for display.
+       * Handles XMLUI binding expressions by extracting any quoted path segments.
+       * E.g., "{(x ? '/foo/' : '/bar/') + id}" becomes "/foo/|/bar/"
+       */
+      function normalizeUrl(url) {
+        if (!url) return "";
+        // If it's a binding expression (starts with {), try to extract paths
+        if (url.startsWith("{") && url.endsWith("}")) {
+          // Look for any quoted path pattern like '/something/' or '/path/to/resource'
+          const pathPattern = /['"](\/([\w-]+\/?)+)['"]/g;
+          const paths = [];
+          let match;
+          while ((match = pathPattern.exec(url)) !== null) {
+            const path = match[1];
+            // Dedupe and skip very short paths
+            if (path.length > 1 && !paths.includes(path)) {
+              paths.push(path);
+            }
+          }
+          if (paths.length === 1) {
+            return paths[0];
+          } else if (paths.length > 1) {
+            // Show alternatives, e.g., "/users/|/groups/"
+            return paths.join("|");
+          }
+          // Fallback: show truncated expression
+          const inner = url.slice(1, -1).trim();
+          return inner.length > 30 ? inner.substring(0, 30) + "..." : inner;
+        }
+        return url;
+      }
+
+      function fingerprintApiCall(entry) {
+        if (!entry) return "";
+        const method = normalizeMethod(entry.method);
+        const url = entry.url || "";
+        // For api:complete, include response in fingerprint
+        if (entry.kind === "api:complete" && entry.response !== undefined) {
+          try {
+            return `${method}|${url}|${JSON.stringify(entry.response)}`;
+          } catch {
+            return `${method}|${url}`;
+          }
+        }
+        // For api:start, just method+url
+        return `${method}|${url}`;
+      }
+
       function isNoopStateChange(entry) {
         if (!entry || !Array.isArray(entry.diffJson) || entry.diffJson.length !== 1) return false;
         const only = entry.diffJson[0];
@@ -1898,7 +2108,8 @@
         if (e.ownerUid) parts.push(`uid ${e.ownerUid}`);
         if (resolvedFile) {
           // Include handler code for highlighting in modal if available
-          const highlight = e.handlerCode ? ` data-highlight="${e.handlerCode.replace(/"/g, '&quot;')}"` : "";
+          // Escape both quotes and > to prevent breaking HTML parsing and stripHtml regex
+          const highlight = e.handlerCode ? ` data-highlight="${e.handlerCode.replace(/"/g, '&quot;').replace(/>/g, '&gt;')}"` : "";
           parts.push(`file <span class="file-link" data-file="${resolvedFile}"${highlight}>${resolvedFile}</span>`);
         }
         return {
@@ -1996,7 +2207,7 @@
             expensiveParts.push({ name: `${label}.${e.eventName || "handler"}`, duration: e.duration, kind: "handler" });
           }
           if (e.kind === "api:complete" && typeof e.duration === "number" && e.duration > 10) {
-            const method = e.method || "GET";
+            const method = normalizeMethod(e.method);
             const urlPath = e.url ? new URL(e.url, "http://x").pathname : "";
             expensiveParts.push({ name: `${method} ${urlPath}`, duration: e.duration, kind: "api" });
           }
@@ -2044,13 +2255,15 @@
           // Collect all timed activities and detect gaps between handlers
           let lastHandlerEndTime = null;
           let lastHandlerLabel = null;
+          let idleCount = 0; // Track number of idle periods for Startup
           sorted.forEach(e => {
             // Detect gaps: time between last handler:complete and this handler:start
             if (e.kind === "handler:start" && lastHandlerEndTime !== null) {
               const gap = e.perfTs - lastHandlerEndTime;
               if (gap > 100) { // Only report gaps > 100ms
+                idleCount++;
                 timelineBreakdown.push({
-                  phase: "gap",
+                  phase: "idle",
                   duration: gap,
                   order: timelineOrder++
                 });
@@ -2065,7 +2278,7 @@
               }
             }
             if (e.kind === "api:complete") {
-              const method = e.method || "GET";
+              const method = normalizeMethod(e.method);
               const key = `${method}:${e.url}`;
               // Calculate duration from api:start if not already present (FIFO matching)
               let duration = e.duration;
@@ -2089,12 +2302,26 @@
             timelineBreakdown.push({ phase: "after handlers", duration: traceEnd - lastHandlerComplete.perfTs, order: timelineOrder++ });
           }
 
-          // Calculate unaccounted time
+          // Calculate unaccounted time (framework overhead, rendering, etc.)
           const accountedTime = timelineBreakdown.reduce((sum, item) => sum + item.duration, 0);
           const totalTime = traceEnd - traceStart;
           const unaccounted = totalTime - accountedTime;
           if (unaccounted > 10) {
-            timelineBreakdown.push({ phase: "other", duration: unaccounted, order: timelineOrder++ });
+            timelineBreakdown.push({ phase: "overhead", duration: unaccounted, order: timelineOrder++ });
+          }
+
+          // Collapse consecutive idle periods into a summary for cleaner display
+          if (idleCount > 3) {
+            const idleItems = timelineBreakdown.filter(t => t.phase === "idle");
+            const totalIdle = idleItems.reduce((sum, t) => sum + t.duration, 0);
+            // Remove individual idle entries
+            for (let i = timelineBreakdown.length - 1; i >= 0; i--) {
+              if (timelineBreakdown[i].phase === "idle") {
+                timelineBreakdown.splice(i, 1);
+              }
+            }
+            // Add single summary entry
+            timelineBreakdown.push({ phase: `idle (${idleCount}×)`, duration: totalIdle, order: timelineOrder++ });
           }
         }
 
@@ -2140,6 +2367,16 @@
         // Track component:vars deduplication separately with counts
         const componentVarsCounts = new Map(); // key -> { entry, count, meta }
 
+        // Track API call deduplication (for polling detection)
+        const apiCompleteCounts = new Map(); // fingerprint -> { entry, count, meta }
+        const apiStartCounts = new Map(); // method:url -> { entry, count, meta }
+
+        // Track handler deduplication (for repeated handlers from polling)
+        const handlerCounts = new Map(); // fingerprint -> { entry, count, meta }
+
+        // Track polling state changes - group by eventName, track value ranges
+        const pollingStateChanges = new Map(); // eventName -> { entries: [], firstValues: {}, lastValues: {}, paths: Set }
+
         orderedEntries.forEach((e) => {
           // Calculate API duration for api:complete (match with earliest unmatched api:start)
           if (e.kind === "api:complete" && e.url && typeof e.perfTs === "number") {
@@ -2147,16 +2384,88 @@
             const queue = apiStartQueues.get(key);
             if (queue && queue.length > 0) {
               const startTs = queue.shift(); // FIFO - take earliest
-              e._apiDuration = e.perfTs - startTs;
+              const duration = e.perfTs - startTs;
+              // Only set duration if positive (negative means mismatched events from localStorage)
+              if (duration >= 0) {
+                e._apiDuration = duration;
+              }
             }
+          }
+
+          // Deduplicate api:start events with same method+url
+          if (e.kind === "api:start" && e.url) {
+            const fp = fingerprintApiCall(e);
+            if (apiStartCounts.has(fp)) {
+              apiStartCounts.get(fp).count += 1;
+              return; // Skip duplicate
+            }
+            apiStartCounts.set(fp, { entry: e, count: 1, meta: buildEntryMeta(e) });
+            return; // Will add after loop
+          }
+
+          // Deduplicate api:complete events with same method+url+response
+          if (e.kind === "api:complete" && e.url) {
+            const fp = fingerprintApiCall(e);
+            if (apiCompleteCounts.has(fp)) {
+              apiCompleteCounts.get(fp).count += 1;
+              return; // Skip duplicate
+            }
+            apiCompleteCounts.set(fp, { entry: e, count: 1, meta: buildEntryMeta(e) });
+            return; // Will add after loop
           }
 
           if (e.kind === "state:changes") {
             if (isNoopStateChange(e)) { dedupedCount += 1; return; }
-            const fp = fingerprintStateChange(e);
-            const key = (e.eventName || e.uid || "state:changes") + "|" + (e.componentType || "");
-            if (fp && lastFingerprintByEvent.get(key) === fp) { dedupedCount += 1; return; }
-            lastFingerprintByEvent.set(key, fp);
+
+            // Check for polling pattern - same eventName with same diff structure
+            const eventName = e.eventName || e.uid || "state:changes";
+            const diffPaths = (e.diffJson || []).map(d => d.path).sort().join(",");
+            const pollingKey = `${eventName}|${diffPaths}`;
+
+            if (pollingStateChanges.has(pollingKey)) {
+              // Same structure - this is likely polling, track the range
+              const tracking = pollingStateChanges.get(pollingKey);
+              tracking.count += 1;
+              // Update last values
+              (e.diffJson || []).forEach(d => {
+                tracking.lastValues[d.path] = d.after;
+              });
+              tracking.lastEntry = e;
+              return; // Skip - will show as collapsed summary
+            }
+
+            // First occurrence - start tracking
+            const firstValues = {};
+            const lastValues = {};
+            (e.diffJson || []).forEach(d => {
+              firstValues[d.path] = d.before;
+              lastValues[d.path] = d.after;
+            });
+            pollingStateChanges.set(pollingKey, {
+              firstEntry: e,
+              lastEntry: e,
+              count: 1,
+              firstValues,
+              lastValues,
+              paths: diffPaths,
+              eventName,
+              meta: buildEntryMeta(e)
+            });
+            return; // Will add after loop
+          }
+
+          // Deduplicate handler:start and handler:complete events (e.g., repeated "loaded" handlers from polling)
+          if (e.kind === "handler:start" || e.kind === "handler:complete") {
+            const handlerName = e.eventName || "unknown";
+            const code = e.code || e.arrow || "";
+            // Fingerprint by kind + handler name + code
+            const fp = `${e.kind}|${handlerName}|${code}`;
+            if (handlerCounts.has(fp)) {
+              handlerCounts.get(fp).count += 1;
+              return; // Skip duplicate
+            }
+            handlerCounts.set(fp, { entry: e, count: 1, meta: buildEntryMeta(e) });
+            return; // Will add after loop
           }
 
           // Deduplicate component:vars events with identical values
@@ -2199,7 +2508,88 @@
           if (count > 1) dedupedCount += count - 1;
         }
 
-        // Re-sort events by timestamp after adding component:vars
+        // Add deduplicated api:start events with counts
+        for (const [, data] of apiStartCounts) {
+          const { entry, count, meta } = data;
+          const method = normalizeMethod(entry.method);
+          const url = normalizeUrl(entry.url);
+          events.push({
+            entry: { ...entry, _dedupCount: count },
+            meta,
+            eventTitle: `api:start ${method} ${url}`,
+            label: "",
+          });
+          if (count > 1) dedupedCount += count - 1;
+        }
+
+        // Add deduplicated api:complete events with counts
+        for (const [, data] of apiCompleteCounts) {
+          const { entry, count, meta } = data;
+          const method = normalizeMethod(entry.method);
+          const url = normalizeUrl(entry.url);
+          events.push({
+            entry: { ...entry, _dedupCount: count },
+            meta,
+            eventTitle: `api:complete ${method} ${url}`,
+            label: "",
+          });
+          if (count > 1) dedupedCount += count - 1;
+        }
+
+        // Add deduplicated handler events with counts
+        for (const [, data] of handlerCounts) {
+          const { entry, count, meta } = data;
+          let eventTitle = entry.kind + (entry.eventName ? ` ${entry.eventName}` : "");
+          if (entry.kind === "handler:complete" && entry.duration !== undefined) {
+            eventTitle += ` (${entry.duration.toFixed(1)}ms)`;
+          }
+          events.push({
+            entry: { ...entry, _dedupCount: count },
+            meta,
+            eventTitle,
+            label: entry.componentLabel ? `"${entry.componentLabel}"` : "",
+          });
+          if (count > 1) dedupedCount += count - 1;
+        }
+
+        // Add polling state change summaries
+        for (const [, data] of pollingStateChanges) {
+          const { firstEntry, count, firstValues, lastValues, eventName, meta } = data;
+          // Build range summary for each path
+          const ranges = Object.keys(lastValues).map(path => {
+            // Skip redundant root-level paths (same as eventName or empty)
+            if (!path || path === eventName || path === eventName.replace("DataSource:", "") || path === eventName.replace("AppState:", "")) {
+              return null;
+            }
+            const first = firstValues[path];
+            const last = lastValues[path];
+            // Format values - truncate long strings
+            const formatVal = (v) => {
+              if (v === undefined) return "undefined";
+              if (typeof v === "string" && v.length > 30) return `"${v.substring(0, 30)}..."`;
+              if (typeof v === "string") return `"${v}"`;
+              if (typeof v === "object") return JSON.stringify(v).substring(0, 40) + (JSON.stringify(v).length > 40 ? "..." : "");
+              return String(v);
+            };
+            if (first === undefined && last !== undefined) {
+              return `${path}: → ${formatVal(last)}`;
+            }
+            if (JSON.stringify(first) === JSON.stringify(last)) {
+              return null; // Same value, skip
+            }
+            return `${path}: ${formatVal(first)} → ${formatVal(last)}`;
+          }).filter(Boolean);
+
+          events.push({
+            entry: { ...firstEntry, _pollingCount: count, _pollingRanges: ranges },
+            meta,
+            eventTitle: `state:changes ${eventName}`,
+            label: "", // Count and ranges shown by renderer via _pollingCount and _pollingRanges
+          });
+          if (count > 1) dedupedCount += count - 1;
+        }
+
+        // Re-sort events by timestamp after adding deferred events
         events.sort((a, b) => sortKey(a.entry) - sortKey(b.entry));
 
         return { events, dedupedCount };
@@ -2228,7 +2618,21 @@
         for (const [key, list] of groups.entries()) {
           const uniqueInstances = new Set(list.map((e) => e.instanceId).filter(Boolean));
           if (uniqueInstances.size > 1 || list.length > 1) {
-            collisions.push({ key, entries: list.map((e) => ({ entry: e, meta: buildEntryMeta(e) })) });
+            // Deduplicate entries within this group - only show unique combinations
+            const seen = new Set();
+            const uniqueEntries = [];
+            list.forEach((e) => {
+              // Fingerprint by instanceId + url + file + source range
+              const fp = `${e.instanceId || ""}|${e.url || ""}|${e.file || ""}|${e.ownerSource?.start || ""}-${e.ownerSource?.end || ""}`;
+              if (!seen.has(fp)) {
+                seen.add(fp);
+                uniqueEntries.push({ entry: e, meta: buildEntryMeta(e) });
+              }
+            });
+            // Only show if there are multiple unique entries (actual collision)
+            if (uniqueEntries.length > 1) {
+              collisions.push({ key, entries: uniqueEntries });
+            }
           }
         }
         return collisions;
@@ -2379,8 +2783,14 @@
         });
 
         // Find startup trace and merge bootstrap orphans into it
-        const startupTraceId = Array.from(tracesMap.keys()).find(id => id.startsWith("startup-"));
-        if (startupTraceId) {
+        // If no startup trace exists, create a synthetic one to collect orphaned polling events
+        let startupTraceId = Array.from(tracesMap.keys()).find(id => id.startsWith("startup-"));
+        if (!startupTraceId) {
+          // Create synthetic startup trace
+          startupTraceId = "startup-synthetic";
+          tracesMap.set(startupTraceId, []);
+        }
+        {
           const startupEntries = tracesMap.get(startupTraceId);
           const startupMinTs = Math.min(...startupEntries.map(e => sortKey(e) || Infinity));
 
@@ -2399,6 +2809,47 @@
 
           // Remove bootstrap orphans from orphans list
           orphans = orphans.filter(e => !e._bootstrap);
+
+          // Note: We previously had "incidental interaction" merging here, but it was too aggressive.
+          // A user clicking "Save" should still show as a trace even if the handler is on "settingsForm".
+          // Now we only merge polling-only traces (where ALL handlers are "loaded").
+
+          // Merge "polling-only" traces into Startup
+          // These are traces where the only handlers are "loaded" handlers (from DataSource polling)
+          // and there's no meaningful user-triggered handler
+          const pollingTracesToMerge = [];
+          for (const [traceId, traceEntries] of tracesMap.entries()) {
+            if (traceId === startupTraceId) continue;
+
+            // Get all handler:start events
+            const handlers = traceEntries.filter(e => e.kind === "handler:start");
+            if (handlers.length === 0) {
+              // Trace with no handlers - skip (might be interaction-only)
+              continue;
+            }
+
+            // Check if ALL handlers are "loaded" handlers (polling)
+            const allAreLoaded = handlers.every(h => h.eventName === "loaded");
+            if (allAreLoaded) {
+              pollingTracesToMerge.push(traceId);
+            }
+          }
+
+          // Merge polling traces into Startup
+          pollingTracesToMerge.forEach(traceId => {
+            const entries = tracesMap.get(traceId);
+            entries.forEach(e => {
+              if (e.kind !== "interaction") {
+                startupEntries.push(e);
+              }
+            });
+            tracesMap.delete(traceId);
+          });
+
+          // Remove synthetic startup if it ended up empty
+          if (startupTraceId === "startup-synthetic" && startupEntries.length === 0) {
+            tracesMap.delete(startupTraceId);
+          }
         }
 
         // Merge orphaned API events into ChangeListener traces they triggered
@@ -2455,6 +2906,170 @@
           orphans = orphans.filter(e => !e._mergedFromOrphan);
         }
 
+        // Time-based association: Move events from Startup/orphans into interaction traces
+        // when they fall within the handler's time window (between handler:start and handler:complete)
+        // This handles cases like confirm dialogs where the API call happens after user confirms
+        // but gets the startup traceId instead of the interaction traceId
+
+        // Helper to check if an event should be moved to an interaction trace
+        const isUserActionEvent = (e) => {
+          // API events (non-status, non-license polling)
+          if ((e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error")) {
+            if (e.url && (e.url.includes("/status") || e.url.includes("/license"))) return false;
+            return true;
+          }
+          // State changes for user data (not serverInfo/polling)
+          if (e.kind === "state:changes") {
+            if (e.eventName === "DataSource:serverInfo") return false;
+            if (e.eventName?.startsWith("AppState:")) {
+              const isPolling = e.diffJson?.every(d =>
+                d.path === "stats" || d.path?.startsWith("stats.") ||
+                d.path === "status" || d.path === "logs" || d.path === "sessions"
+              );
+              if (isPolling) return false;
+            }
+            return true;
+          }
+          // Component variable changes (e.g., items array in Users component)
+          if (e.kind === "component:vars:change") {
+            // Skip serverStatus changes (polling-driven)
+            if (e.diff?.some(d => d.path === "serverStatus")) return false;
+            return true;
+          }
+          return false;
+        };
+
+        // First pass: collect interaction trace time windows
+        const interactionWindows = [];
+        for (const [traceId, traceEntries] of tracesMap.entries()) {
+          if (!traceId.startsWith("i-")) continue;
+
+          const handlerStarts = traceEntries.filter(e => e.kind === "handler:start" && typeof e.perfTs === "number");
+          const handlerCompletes = traceEntries.filter(e => e.kind === "handler:complete" && typeof e.perfTs === "number");
+
+          if (handlerStarts.length === 0 || handlerCompletes.length === 0) continue;
+
+          const traceStartTs = Math.min(...handlerStarts.map(e => e.perfTs));
+          const traceEndTs = Math.max(...handlerCompletes.map(e => e.perfTs));
+
+          interactionWindows.push({ traceId, traceEntries, traceStartTs, traceEndTs });
+        }
+
+        // Second pass: move events from Startup trace into interaction traces
+        const startupTraceEntries = tracesMap.get(startupTraceId);
+        if (startupTraceEntries && interactionWindows.length > 0) {
+          const eventsToMove = [];
+
+          startupTraceEntries.forEach(e => {
+            if (typeof e.perfTs !== "number") return;
+            if (!isUserActionEvent(e)) return;
+
+            // Find an interaction trace whose window contains this event
+            // Add small buffer after handler:complete for state changes that arrive just after
+            for (const win of interactionWindows) {
+              if (e.perfTs >= win.traceStartTs && e.perfTs <= win.traceEndTs + 500) {
+                eventsToMove.push({ event: e, targetTrace: win.traceEntries });
+                break;
+              }
+            }
+          });
+
+          // Move the events
+          eventsToMove.forEach(({ event, targetTrace }) => {
+            event._movedFromStartup = true;
+            targetTrace.push(event);
+          });
+
+          // Remove moved events from startup
+          if (eventsToMove.length > 0) {
+            const movedSet = new Set(eventsToMove.map(m => m.event));
+            tracesMap.set(startupTraceId, startupTraceEntries.filter(e => !movedSet.has(e)));
+          }
+        }
+
+        // Also check orphans (events with no traceId at all)
+        for (const win of interactionWindows) {
+          const orphansInWindow = orphans.filter(e => {
+            if (typeof e.perfTs !== "number") return false;
+            if (e.perfTs < win.traceStartTs || e.perfTs > win.traceEndTs + 500) return false;
+            return isUserActionEvent(e);
+          });
+
+          orphansInWindow.forEach(e => {
+            e._mergedByTimeWindow = true;
+            win.traceEntries.push(e);
+          });
+        }
+
+        // Remove time-window merged orphans from the orphans list
+        orphans = orphans.filter(e => !e._mergedByTimeWindow);
+
+        // Merge remaining orphaned polling events into Startup
+        // This includes API events, "loaded" handlers, and DataSource state changes
+        const startupEntries = tracesMap.get(startupTraceId);
+        if (startupEntries) {
+          // Only merge orphaned events that look like polling, not user actions
+          // Be selective: only merge "loaded" handlers and status polling, not all DataSource events
+          const pollingOrphans = orphans.filter(e => {
+            // "loaded" handlers (from DataSource polling)
+            if ((e.kind === "handler:start" || e.kind === "handler:complete") && e.eventName === "loaded") {
+              return true;
+            }
+            // Status polling API events
+            if ((e.kind === "api:start" || e.kind === "api:complete") && e.url && e.url.includes("/status")) {
+              return true;
+            }
+            // DataSource:serverInfo state changes (polling)
+            if (e.kind === "state:changes" && e.eventName === "DataSource:serverInfo") {
+              return true;
+            }
+            // AppState changes that are likely from polling (only if diff is stats-related)
+            if (e.kind === "state:changes" && e.eventName && e.eventName.startsWith("AppState:")) {
+              const isPollingChange = e.diffJson?.every(d =>
+                d.path === "stats" || d.path?.startsWith("stats.") ||
+                d.path === "status" || d.path === "logs" || d.path === "sessions"
+              );
+              if (isPollingChange) return true;
+            }
+            return false;
+          });
+          pollingOrphans.forEach(e => {
+            e._mergedToStartup = true;
+            startupEntries.push(e);
+          });
+          orphans = orphans.filter(e => !e._mergedToStartup);
+        }
+
+        // Filter polling events from interaction traces
+        // These get the interaction traceId when they happen during handler execution
+        // (e.g., serverInfo polling while waiting for confirm dialog)
+        const isPollingEvent = (e) => {
+          // serverInfo state changes
+          if (e.kind === "state:changes" && e.eventName === "DataSource:serverInfo") return true;
+          // status API calls
+          if ((e.kind === "api:start" || e.kind === "api:complete") && e.url?.includes("/status")) return true;
+          // loaded handlers for serverInfo
+          if ((e.kind === "handler:start" || e.kind === "handler:complete") &&
+              e.eventName === "loaded" && e.componentLabel === "serverInfo") return true;
+          // AppState polling changes
+          if (e.kind === "state:changes" && e.eventName?.startsWith("AppState:")) {
+            const isPolling = e.diffJson?.every(d =>
+              d.path === "stats" || d.path?.startsWith("stats.") ||
+              d.path === "status" || d.path === "logs" || d.path === "sessions"
+            );
+            if (isPolling) return true;
+          }
+          return false;
+        };
+
+        for (const [traceId, traceEntries] of tracesMap.entries()) {
+          // For interaction traces, filter out polling noise
+          if (traceId.startsWith("i-")) {
+            const filtered = traceEntries.filter(e => !isPollingEvent(e));
+            tracesMap.set(traceId, filtered);
+          }
+        }
+
         const processedTraces = [];
         for (const [traceId, traceEntries] of tracesMap.entries()) {
           const summary = buildTraceSummary(traceEntries);
@@ -2472,15 +3087,37 @@
         const timelineItems = [];
         processedTraces.forEach((trace) => timelineItems.push({ type: "trace", ...trace }));
         processedInteractions.forEach((interaction) => timelineItems.push({ type: "interaction", ...interaction }));
-        timelineItems.sort((a, b) => b.ts - a.ts);
+        // Sort by timestamp descending, but pin startup traces to the bottom
+        timelineItems.sort((a, b) => {
+          const aIsStartup = a.traceId && a.traceId.startsWith("startup-");
+          const bIsStartup = b.traceId && b.traceId.startsWith("startup-");
+          if (aIsStartup && !bIsStartup) return 1;  // a goes after b
+          if (!aIsStartup && bIsStartup) return -1; // a goes before b
+          return b.ts - a.ts; // normal descending timestamp order
+        });
 
         const dataSourceOrphans = orphans.filter((e) => e.componentType === "DataSource" || (e.eventName && e.eventName.startsWith("DataSource:")));
-        const otherOrphans = orphans.filter((e) => e.componentType !== "DataSource" && !(e.eventName && e.eventName.startsWith("DataSource:")));
+        const otherOrphans = orphans
+          .filter((e) => e.componentType !== "DataSource" && !(e.eventName && e.eventName.startsWith("DataSource:")))
+          // Filter out API events without URLs (likely incomplete/internal events)
+          .filter((e) => {
+            const isApiWithoutUrl = (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") && !e.url;
+            if (isApiWithoutUrl) {
+              console.log("[Inspector] Filtered orphan API event without URL:", JSON.stringify(e, null, 2));
+            }
+            return !isApiWithoutUrl;
+          });
 
         return {
           timelineItems,
           groupedDataSources: groupDataSourceUpdates(dataSourceOrphans),
-          otherOrphans: otherOrphans.map((e) => ({ entry: e, meta: buildEntryMeta(e), title: e.eventName ? `${e.kind} ${e.eventName}` : e.kind })),
+          otherOrphans: otherOrphans.map((e) => {
+            // Build title - include URL for API events
+            let title = e.kind;
+            if (e.eventName) title += ` ${e.eventName}`;
+            else if (e.url) title += ` ${normalizeMethod(e.method)} ${normalizeUrl(e.url)}`;
+            return { entry: e, meta: buildEntryMeta(e), title };
+          }),
           collisions: findDataSourceCollisions(entries),
           sourceFiles: getSourceFileList(),
           totalEvents: entries.length,
@@ -2591,20 +3228,21 @@
           processed.otherOrphans.slice().reverse().forEach((orphan) => blocks.push(renderOrphanPretty(orphan)));
         }
 
-        if (processed.collisions.length) {
-          const items = processed.collisions.map((c) => {
-            const rows = c.entries.map((item) => {
-              const parts = item.meta.parts.filter((p) => !p.startsWith("perfTs"));
-              return `<div class="note-item">- ${parts.join(" | ")}</div>`;
-            }).join("");
-            return `<div class="note-key">${c.key}</div>${rows}`;
-          }).join("");
-          notes.push(`
-            <div class="note-title">DataSource identity reused across components</div>
-            <div class="note-description">These are independent instances that share the same id/uid. If you intended shared state, lift the DataSource to a common parent.</div>
-            <div class="note-items">${items}</div>
-          `);
-        }
+        // Notes section disabled for now - collision detection kept in code but not rendered
+        // if (processed.collisions.length) {
+        //   const items = processed.collisions.map((c) => {
+        //     const rows = c.entries.map((item) => {
+        //       const parts = item.meta.parts.filter((p) => !p.startsWith("perfTs"));
+        //       return `<div class="note-item">- ${parts.join(" | ")}</div>`;
+        //     }).join("");
+        //     return `<div class="note-key">${c.key}</div>${rows}`;
+        //   }).join("");
+        //   notes.push(`
+        //     <div class="note-title">DataSource identity reused across components</div>
+        //     <div class="note-description">These are independent instances that share the same id/uid. If you intended shared state, lift the DataSource to a common parent.</div>
+        //     <div class="note-items">${items}</div>
+        //   `);
+        // }
 
         if (notes.length) {
           blocks.push(`
@@ -2685,14 +3323,17 @@
           bodyHtml += `<div class="trace-event">`;
 
           if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
-            const method = e.method || "GET";
-            const url = e.url || "";
+            const method = normalizeMethod(e.method);
+            const url = normalizeUrl(e.url);
             const errorClass = e.kind === "api:error" ? "text-error" : "";
             const errorInfo = e.kind === "api:error" && e.error ? ` <span class="text-error">- ${e.error.message || e.error}</span>` : "";
             const durationInfo = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
             const statusInfo = e.kind === "api:complete" && e.status ? ` <span class="badge-success">${e.status}</span>` : "";
             // Show short requestId to disambiguate multiple requests from same DataSource
             const requestIdInfo = e._requestId ? ` <span class="badge-muted">${e._requestId}</span>` : "";
+            // Show dedup count for repeated polling calls
+            const dedupCount = e._dedupCount || 1;
+            const dedupInfo = dedupCount > 1 ? ` <span class="badge-muted">×${dedupCount}</span>` : "";
 
             // Build link to paired event using requestId
             let pairLink = "";
@@ -2709,7 +3350,7 @@
               }
             }
 
-            bodyHtml += `<div class="trace-event-header ${errorClass}">[${e.kind}]${statusInfo}${durationInfo} <strong>${method}</strong> ${url}${errorInfo}${requestIdInfo}${pairLink}${metaInline}</div>`;
+            bodyHtml += `<div class="trace-event-header ${errorClass}">[${e.kind}]${statusInfo}${durationInfo}${dedupInfo} <strong>${method}</strong> ${url}${errorInfo}${requestIdInfo}${pairLink}${metaInline}</div>`;
             // Show body expression if present (for api:start)
             if (e.bodyExpression && e.kind === "api:start") {
               bodyHtml += `<div class="body-expression">body: <code>${e.bodyExpression}</code></div>`;
@@ -2770,7 +3411,16 @@
           } else if (e.kind === "state:changes" && (e.componentType === "DataSource" || (e.eventName && e.eventName.startsWith("DataSource:")))) {
             // DataSource state change - structured display
             const dsName = e.eventName?.replace("DataSource:", "") || e.uid || "unknown";
-            bodyHtml += `<div class="trace-event-header">[state:changes] <strong>DataSource:${dsName}</strong></div>`;
+            const pollingCount = e._pollingCount || 1;
+            const pollingInfo = pollingCount > 1 ? ` <span class="badge-muted">×${pollingCount}</span>` : "";
+            bodyHtml += `<div class="trace-event-header">[state:changes] <strong>DataSource:${dsName}</strong>${pollingInfo}</div>`;
+
+            // Show polling ranges if present
+            if (e._pollingRanges && e._pollingRanges.length > 0) {
+              bodyHtml += `<div class="trace-meta" style="font-size: var(--font-sm); color: var(--color-text-muted); margin-left: var(--space-4);">`;
+              bodyHtml += e._pollingRanges.map(r => `<div>${r}</div>`).join("");
+              bodyHtml += `</div>`;
+            }
 
             // Add expandable metadata section
             bodyHtml += `<div class="event-metadata">`;
@@ -2825,7 +3475,16 @@
           } else if (e.kind === "state:changes" && e.eventName && e.eventName.startsWith("AppState:")) {
             // AppState change - add link to find initialValue source
             const bucketName = e.eventName.replace("AppState:", "");
-            bodyHtml += `<div class="trace-event-header">[state:changes] <strong>AppState:${bucketName}</strong>${metaInline}</div>`;
+            const pollingCount = e._pollingCount || 1;
+            const pollingInfo = pollingCount > 1 ? ` <span class="badge-muted">×${pollingCount}</span>` : "";
+            bodyHtml += `<div class="trace-event-header">[state:changes] <strong>AppState:${bucketName}</strong>${pollingInfo}${metaInline}</div>`;
+
+            // Show polling ranges if present
+            if (e._pollingRanges && e._pollingRanges.length > 0) {
+              bodyHtml += `<div class="trace-meta" style="font-size: var(--font-sm); color: var(--color-text-muted); margin-left: var(--space-4);">`;
+              bodyHtml += e._pollingRanges.map(r => `<div>${r}</div>`).join("");
+              bodyHtml += `</div>`;
+            }
 
             // Add "View initialValue Source" expander
             bodyHtml += `<details class="appstate-source-loader" data-bucket="${bucketName}">`;
@@ -2884,13 +3543,14 @@
                 }
               }
 
-              const snapshots = buildSnapshotsFromDiff(e.diff);
-              const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
-              if (delta) {
-                const diffHtml = htmlFormatter.format(delta, snapshots.left);
-                const summary = usedArraySummary ? "Show full diff" : "Diff";
-                // Force collapsed when we already have a good summary
-                bodyHtml += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+              // Skip redundant diff when array summary already shows field-level changes
+              if (!usedArraySummary) {
+                const snapshots = buildSnapshotsFromDiff(e.diff);
+                const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
+                if (delta) {
+                  const diffHtml = htmlFormatter.format(delta, snapshots.left);
+                  bodyHtml += wrapDiffInExpander(diffHtml, "Diff", false);
+                }
               }
             } else if (e.diffPretty) {
               // Fallback to text display in expander
@@ -2901,7 +3561,26 @@
             bodyHtml += `</div>`;
           } else if (e.kind === "handler:start" || e.kind === "handler:complete") {
             // Handler events - show with source info if available
-            bodyHtml += `<div class="trace-event-header">${evt.eventTitle}${evt.label ? ` ${evt.label}` : ""}${metaInline}</div>`;
+            const handlerDedupCount = e._dedupCount || 1;
+            const handlerDedupInfo = handlerDedupCount > 1 ? ` <span class="badge-muted">×${handlerDedupCount}</span>` : "";
+            bodyHtml += `<div class="trace-event-header">${evt.eventTitle}${handlerDedupInfo}${evt.label ? ` ${evt.label}` : ""}${metaInline}</div>`;
+
+            // Show eventArgs if available (the data passed to the handler)
+            if (e.kind === "handler:start" && e.eventArgs && e.eventArgs.length > 0) {
+              try {
+                const cleanedArgs = cleanEventArgs(e.eventArgs);
+                const argsStr = safeStringify(cleanedArgs, 2);
+                if (argsStr && argsStr.length < 200) {
+                  bodyHtml += `<div class="trace-meta">args: <code>${argsStr.replace(/</g, "&lt;")}</code></div>`;
+                } else if (argsStr && argsStr.length < 5000) {
+                  bodyHtml += `<details><summary>Event Args (${e.eventArgs.length} items)</summary><pre class="source-code">${argsStr.replace(/</g, "&lt;")}</pre></details>`;
+                } else {
+                  bodyHtml += `<div class="trace-meta">args: <code>[${e.eventArgs.length} items, too large to display]</code></div>`;
+                }
+              } catch (err) {
+                bodyHtml += `<div class="trace-meta">args: <code>[${e.eventArgs.length} items, failed to serialize]</code></div>`;
+              }
+            }
 
             // Show handler code if available
             if (e.handlerCode) {
@@ -2914,8 +3593,21 @@
               const simpleFuncMatch = code.match(/^\{\s*(\w+)\s*\([^)]*\)\s*\}$/);
               // Check if it's an arrow function like (data) => { ... } or () => { ... }
               const arrowMatch = code.match(/^\([^)]*\)\s*=>\s*\{/);
+              // Check if it's an APICall handler - extract method and url
+              const apiCallMatch = code.match(/Actions\.callApi\s*\(\s*\{[^}]*method:\s*["']?([^"',}]+)["']?\s*,[^}]*url:\s*["']?([^"',}]+)["']?/s) ||
+                                   code.match(/Actions\.callApi\s*\(\s*\{[^}]*url:\s*["']?([^"',}]+)["']?\s*,[^}]*method:\s*["']?([^"',}]+)["']?/s);
 
-              if (xsFuncMatch) {
+              if (apiCallMatch) {
+                // APICall handler - show summarized method/url
+                const [, first, second] = apiCallMatch;
+                // Determine which is method vs url based on content
+                const hasSlash = (s) => s && s.includes("/");
+                const method = hasSlash(first) ? normalizeMethod(second) : normalizeMethod(first);
+                const url = hasSlash(first) ? first : second;
+                bodyHtml += `<div class="trace-meta">APICall: <code>${method} ${url}</code></div>`;
+                // Show full code in collapsed details for reference
+                bodyHtml += `<details><summary>Full Handler</summary><pre class="source-code">${code.replace(/</g, "&lt;")}</pre></details>`;
+              } else if (xsFuncMatch) {
                 // .xs function reference
                 bodyHtml += `<div class="trace-meta">.xs: <code>${xsFuncMatch[1]}()</code></div>`;
               } else if (windowMatch) {
@@ -3014,10 +3706,10 @@
             }
           }
 
-          // Skip diff for component:vars (handled separately) and AppState (AST not useful, source shown instead)
-          const isAppState = e.kind === "state:changes" && e.eventName && e.eventName.startsWith("AppState:");
-          if (Array.isArray(e.diffJson) && e.diffJson.length && e.kind !== "component:vars:init" && e.kind !== "component:vars:change" && !isAppState) {
+          // Skip diff for component:vars (handled separately with their own diff display)
+          if (Array.isArray(e.diffJson) && e.diffJson.length && e.kind !== "component:vars:init" && e.kind !== "component:vars:change") {
             let usedArraySummary = false;
+            let arrayBefore = null, arrayAfter = null;
             if (e.diffJson.length === 1) {
               const only = e.diffJson[0];
               if (Array.isArray(only.before) && Array.isArray(only.after) && (isKeyedArray(only.before) || isKeyedArray(only.after))) {
@@ -3025,6 +3717,9 @@
                 if (analysis.isSignificant) {
                   bodyHtml += `<div>${renderArrayDiffSummary(analysis)}</div>`;
                   usedArraySummary = true;
+                  // Save arrays for full diff with context
+                  arrayBefore = only.before;
+                  arrayAfter = only.after;
                 }
               } else if (Array.isArray(only.before) && only.after === undefined && isKeyedArray(only.before)) {
                 bodyHtml += `<div class="text-error">${only.before.length} item${only.before.length !== 1 ? "s" : ""} → cleared</div>`;
@@ -3032,17 +3727,18 @@
               }
             }
 
-            try {
-              const snapshots = buildSnapshotsFromDiff(e.diffJson);
-              const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
-              if (delta) {
-                const diffHtml = htmlFormatter.format(delta, snapshots.left);
-                const summary = usedArraySummary ? "Show full diff" : "Diff";
-                // Force collapsed when we already have a good summary
-                bodyHtml += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+            // Skip redundant diff when array summary already shows field-level changes
+            if (!usedArraySummary) {
+              try {
+                const snapshots = buildSnapshotsFromDiff(e.diffJson);
+                const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
+                if (delta) {
+                  const diffHtml = htmlFormatter.format(delta, snapshots.left);
+                  bodyHtml += wrapDiffInExpander(diffHtml, "Diff", false);
+                }
+              } catch (diffErr) {
+                bodyHtml += `<div class="text-warning">Could not render diff: ${diffErr.message}</div>`;
               }
-            } catch (diffErr) {
-              bodyHtml += `<div class="text-warning">Could not render diff: ${diffErr.message}</div>`;
             }
           }
 
@@ -3143,13 +3839,14 @@
                   usedArraySummary = true;
                 }
               }
-              const snapshots = buildSnapshotsFromDiff(e.diffJson);
-              const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
-              if (delta) {
-                const diffHtml = htmlFormatter.format(delta, snapshots.left);
-                const summary = usedArraySummary ? "Show full diff" : "Diff";
-                // Force collapsed when we already have a good summary
-                html += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+              // Skip redundant diff when array summary already shows field-level changes
+              if (!usedArraySummary) {
+                const snapshots = buildSnapshotsFromDiff(e.diffJson);
+                const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
+                if (delta) {
+                  const diffHtml = htmlFormatter.format(delta, snapshots.left);
+                  html += wrapDiffInExpander(diffHtml, "Diff", false);
+                }
               }
             }
             html += `</div>`;
@@ -3182,13 +3879,14 @@
               usedArraySummary = true;
             }
           }
-          const snapshots = buildSnapshotsFromDiff(entry.diffJson);
-          const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
-          if (delta) {
-            const diffHtml = htmlFormatter.format(delta, snapshots.left);
-            const summary = usedArraySummary ? "Show full diff" : "Diff";
-            // Force collapsed when we already have a good summary
-            html += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+          // Skip redundant diff when array summary already shows field-level changes
+          if (!usedArraySummary) {
+            const snapshots = buildSnapshotsFromDiff(entry.diffJson);
+            const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
+            if (delta) {
+              const diffHtml = htmlFormatter.format(delta, snapshots.left);
+              html += wrapDiffInExpander(diffHtml, "Diff", false);
+            }
           }
         }
 
@@ -3284,19 +3982,20 @@
           lines.push("");
         }
 
-        if (processed.collisions.length) {
-          lines.push("--- Notes ---");
-          lines.push("1. DataSource identity reused across components. These are independent instances that share the same id/uid.");
-          processed.collisions.forEach((c) => {
-            lines.push(`    id/uid: ${c.key}`);
-            c.entries.forEach((item) => {
-              const parts = item.meta.parts.filter((p) => !p.startsWith("perfTs"));
-              if (item.meta.hasSource) parts.push(`source: ${item.meta.sourceRange}`);
-              lines.push(`        - ${parts.join(", ")}`);
-            });
-          });
-          lines.push("");
-        }
+        // Notes section disabled for now - collision detection kept in code but not rendered
+        // if (processed.collisions.length) {
+        //   lines.push("--- Notes ---");
+        //   lines.push("1. DataSource identity reused across components. These are independent instances that share the same id/uid.");
+        //   processed.collisions.forEach((c) => {
+        //     lines.push(`    id/uid: ${c.key}`);
+        //     c.entries.forEach((item) => {
+        //       const parts = item.meta.parts.filter((p) => !p.startsWith("perfTs"));
+        //       if (item.meta.hasSource) parts.push(`source: ${item.meta.sourceRange}`);
+        //       lines.push(`        - ${parts.join(", ")}`);
+        //     });
+        //   });
+        //   lines.push("");
+        // }
 
         if (processed.sourceFiles.length) {
           lines.push("--- Source files (index → path) ---");
@@ -3329,13 +4028,15 @@
           const metaParts = evt.meta.parts.map(stripHtml);
 
           if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
-            const method = e.method || "GET";
-            const url = e.url || "";
+            const method = normalizeMethod(e.method);
+            const url = normalizeUrl(e.url);
             const errorSuffix = e.kind === "api:error" && e.error ? ` - ${e.error.message || e.error}` : "";
             const statusSuffix = e.kind === "api:complete" && e.status ? ` [${e.status}]` : "";
             const durationSuffix = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
             const requestIdSuffix = e._requestId ? ` [${e._requestId}]` : "";
-            lines.push(`    [${e.kind}]${statusSuffix}${durationSuffix} ${method} ${url}${errorSuffix}${requestIdSuffix}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            const dedupCount = e._dedupCount || 1;
+            const dedupSuffix = dedupCount > 1 ? ` ×${dedupCount}` : "";
+            lines.push(`    [${e.kind}]${statusSuffix}${durationSuffix}${dedupSuffix} ${method} ${url}${errorSuffix}${requestIdSuffix}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
             // Show body expression for api:start
             if (e.bodyExpression && e.kind === "api:start") {
               lines.push(`      body: ${e.bodyExpression}`);
@@ -3374,7 +4075,23 @@
             return;
           }
           if (e.kind === "handler:start" || e.kind === "handler:complete") {
-            lines.push(`    [${e.kind}]${e.eventName ? ` ${e.eventName}` : ""}${evt.label ? ` ${evt.label}` : ""}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            const handlerDedupCount = e._dedupCount || 1;
+            const handlerDedupSuffix = handlerDedupCount > 1 ? ` ×${handlerDedupCount}` : "";
+            lines.push(`    [${e.kind}]${handlerDedupSuffix}${e.eventName ? ` ${e.eventName}` : ""}${evt.label ? ` ${evt.label}` : ""}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            // Show eventArgs if available
+            if (e.kind === "handler:start" && e.eventArgs && e.eventArgs.length > 0) {
+              try {
+                const cleanedArgs = cleanEventArgs(e.eventArgs);
+                const argsStr = safeStringify(cleanedArgs);
+                if (argsStr && argsStr.length < 1000) {
+                  lines.push(`      args: ${argsStr.length < 100 ? argsStr : argsStr.substring(0, 100) + "..."}`);
+                } else {
+                  lines.push(`      args: [${e.eventArgs.length} items]`);
+                }
+              } catch (err) {
+                lines.push(`      args: [${e.eventArgs.length} items, failed to serialize]`);
+              }
+            }
             // Show handler code if available
             if (e.handlerCode) {
               const code = e.handlerCode.trim();
@@ -3382,8 +4099,18 @@
               const windowMatch = code.match(/^\{\s*window\.(\w+)\s*\([^)]*\)\s*\}$/);
               const simpleFuncMatch = code.match(/^\{\s*(\w+)\s*\([^)]*\)\s*\}$/);
               const arrowMatch = code.match(/^\([^)]*\)\s*=>\s*\{/);
+              // Check if it's an APICall handler - extract method and url
+              const apiCallMatch = code.match(/Actions\.callApi\s*\(\s*\{[^}]*method:\s*["']?([^"',}]+)["']?\s*,[^}]*url:\s*["']?([^"',}]+)["']?/s) ||
+                                   code.match(/Actions\.callApi\s*\(\s*\{[^}]*url:\s*["']?([^"',}]+)["']?\s*,[^}]*method:\s*["']?([^"',}]+)["']?/s);
 
-              if (xsFuncMatch) {
+              if (apiCallMatch) {
+                // APICall handler - show summarized method/url
+                const [, first, second] = apiCallMatch;
+                const hasSlash = (s) => s && s.includes("/");
+                const method = hasSlash(first) ? normalizeMethod(second) : normalizeMethod(first);
+                const url = hasSlash(first) ? first : second;
+                lines.push(`      APICall: ${method} ${url}`);
+              } else if (xsFuncMatch) {
                 lines.push(`      .xs: ${xsFuncMatch[1]}()`);
               } else if (windowMatch) {
                 lines.push(`      window: ${windowMatch[1]}()`);
@@ -3410,7 +4137,14 @@
           }
 
           const bootstrapTag = e._bootstrap ? " [bootstrap]" : "";
-          lines.push(`    [${e.kind}]${e.eventName ? ` ${e.eventName}` : ""}${evt.label ? ` ${evt.label}` : ""}${bootstrapTag}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+          const pollingCount = e._pollingCount || 1;
+          const pollingSuffix = pollingCount > 1 ? ` ×${pollingCount}` : "";
+          lines.push(`    [${e.kind}]${pollingSuffix}${e.eventName ? ` ${e.eventName}` : ""}${evt.label ? ` ${evt.label}` : ""}${bootstrapTag}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+
+          // Show polling ranges if present
+          if (e._pollingRanges && e._pollingRanges.length > 0) {
+            e._pollingRanges.forEach(r => lines.push(`        ${r}`));
+          }
 
           if (evt.meta.hasSource) lines.push(`        source ${evt.meta.sourceRange}`);
 
@@ -3508,6 +4242,21 @@
         testViewActive = false; // Reset test mode when normal render is triggered
         const showRaw = document.getElementById("viewRaw").checked;
         const container = document.getElementById("diff");
+
+        // Save expanded state before re-rendering
+        const expandedTraceIds = new Set();
+        const expandedDataSources = new Set();
+        const openDetailsIds = new Set();
+        container.querySelectorAll(".trace-group.expanded").forEach(el => {
+          if (el.dataset.traceId) expandedTraceIds.add(el.dataset.traceId);
+          if (el.dataset.datasource) expandedDataSources.add(el.dataset.datasource);
+        });
+        container.querySelectorAll("details[open]").forEach(el => {
+          // Save by a combination of attributes to identify the details element
+          const id = el.id || el.dataset.file || el.dataset.funcName || el.dataset.varName;
+          if (id) openDetailsIds.add(id);
+        });
+
         container.innerHTML = "";
 
         const allEntries = getAllEntries();
@@ -3613,7 +4362,23 @@
                   }
                 }
 
-                // 3. Fall back to _xsFunctions or window
+                // 3. Search all known source files
+                if (!result) {
+                  const allFiles = getSourceFileList();
+                  for (const file of allFiles) {
+                    if (file === sourceFile) continue; // Already checked
+                    const src = await fetchSourceRange(file, 0, 999999);
+                    if (src) {
+                      result = findFunctionInSource(src, funcName, file.split("/").pop());
+                      if (result) {
+                        result.location = file.split("/").pop() + ":" + result.startLine;
+                        break;
+                      }
+                    }
+                  }
+                }
+
+                // 4. Fall back to _xsFunctions or window
                 if (!result) {
                   result = lookupFunctionSource(funcName);
                 }
@@ -3627,11 +4392,27 @@
                   }).join("\n");
                   pre.textContent = `// ${funcName} (from ${result.location})\n${formatted}`;
                 } else {
-                  pre.textContent = `// ${funcName} not found in:\n` +
-                    `//   - ${sourceFile || "(no source file)"}\n` +
-                    `//   - ${sourceFile ? sourceFile + ".xs" : "(no .xs file)"}\n` +
-                    `//   - window._xsFunctions\n` +
-                    `//   - window.${funcName}`;
+                  // Check if this looks like a built-in component event
+                  const builtInEvents = [
+                    "loadChildren", "selectionDidChange", "nodeClick", "nodeExpand", "nodeCollapse",
+                    "rowClick", "cellClick", "headerClick", "loaded", "error", "success",
+                    "submit", "validate", "change", "didChange", "willChange",
+                    "open", "close", "toggle", "focus", "blur"
+                  ];
+                  if (builtInEvents.includes(funcName)) {
+                    pre.textContent = `// "${funcName}" is a built-in component event.\n` +
+                      `// The handler implementation is provided by the XMLUI component.\n` +
+                      `// Event args show the data passed to your handler.`;
+                  } else {
+                    // Check if we could even fetch the files
+                    const allFiles = getSourceFileList();
+                    const searchedCount = allFiles.length;
+                    pre.textContent = `// ${funcName} not found in:\n` +
+                      `//   - ${sourceFile || "(no source file)"}\n` +
+                      `//   - ${searchedCount} other source files\n` +
+                      `//   - window._xsFunctions\n` +
+                      `//   - window.${funcName}`;
+                  }
                 }
               } catch (err) {
                 pre.textContent = `// Error looking up ${funcName}: ${err.message}`;
@@ -3681,6 +4462,40 @@
                 for (const file of sourceFiles) {
                   const source = await fetchSourceRange(file, 0, 999999);
                   if (!source) continue;
+
+                  // For "default" bucket, find AppState without explicit bucket attribute
+                  if (bucketName === "default") {
+                    // Find <AppState ...> elements
+                    const lines = source.split('\n');
+                    for (let i = 0; i < lines.length; i++) {
+                      if (lines[i].includes('<AppState')) {
+                        // Find the complete AppState element
+                        let startLine = i;
+                        let endLine = i;
+                        while (endLine < lines.length && !lines[endLine].includes('/>') && !lines[endLine].includes('</AppState>') && !lines[endLine].includes('>')) endLine++;
+
+                        const appStateBlock = lines.slice(startLine, endLine + 1).join('\n');
+                        // Skip if it has an explicit bucket attribute (not the default)
+                        if (/bucket\s*=/.test(appStateBlock)) continue;
+
+                        // Found default AppState - check for initialValue
+                        const funcMatch = appStateBlock.match(/initialValue\s*=\s*["']\{\s*(\w+)\s*\(/);
+                        if (funcMatch) {
+                          foundFunc = funcMatch[1];
+                          foundFile = file;
+                          break;
+                        }
+                        // Check for inline value
+                        const inlineMatch = appStateBlock.match(/initialValue\s*=\s*["']\{\{([\s\S]*?)\}\}["']/);
+                        if (inlineMatch) {
+                          foundInlineValue = { content: inlineMatch[1].trim(), startLine: startLine + 1, file };
+                          break;
+                        }
+                      }
+                    }
+                    if (foundFunc || foundInlineValue) break;
+                    continue;
+                  }
 
                   // Look for bucket="bucketName" with initialValue function call
                   const bucketPattern = new RegExp(`bucket\\s*=\\s*["']${bucketName}["'][^>]*initialValue\\s*=\\s*["']\\{\\s*(\\w+)\\s*\\(`, 'i');
@@ -3876,6 +4691,23 @@
               }
             });
           });
+
+          // Restore expanded state after re-rendering
+          container.querySelectorAll(".trace-group[data-trace-id]").forEach(el => {
+            if (expandedTraceIds.has(el.dataset.traceId)) {
+              el.classList.add("expanded");
+              const header = el.querySelector(".trace-header");
+              if (header) header.classList.add("expanded");
+            }
+          });
+          container.querySelectorAll(".trace-group[data-datasource]").forEach(el => {
+            if (expandedDataSources.has(el.dataset.datasource)) {
+              el.classList.add("expanded");
+              const header = el.querySelector(".trace-header");
+              if (header) header.classList.add("expanded");
+            }
+          });
+          // Note: We don't restore details[open] state because lazy loaders depend on the toggle event
         }
       }
 
@@ -3888,6 +4720,8 @@
 
       document.getElementById("clear").addEventListener("click", () => {
         if (window.parent && window.parent._xsLogs) window.parent._xsLogs.length = 0;
+        clearStoredEntries(); // Also clear localStorage
+        lastStoredCount = 0; // Reset storage counter
         _requestIdCounter = 0; // Reset counter for fresh numbering
         render();
       });
@@ -4919,59 +5753,6 @@
           assertTrue(firstComplete.traceId !== traceIdB, "First api:complete should not inherit traceId from later api:start");
         });
 
-        test("Trace Processing", "orphaned API events merge into ChangeListener trace they triggered", () => {
-          // Scenario: api:start/complete without traceId triggers DataSource update,
-          // which triggers ChangeListener (with t- traceId). Should be merged.
-          const instanceId = TestFramework.instanceId();
-          const changeListenerTraceId = "t-test-changelistener";
-          const baseTs = 1000;
-          const events = [
-            // Orphaned API events (no traceId) - DataSource auto-refetch
-            { kind: "api:start", method: "GET", url: "/api/data", instanceId, perfTs: baseTs },
-            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, perfTs: baseTs + 50 },
-            // ChangeListener trace starts shortly after (within 100ms of api:complete)
-            { kind: "handler:start", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 80 },
-            { kind: "handler:complete", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 100 },
-          ];
-          const processed = processAllEntries(events);
-          // Should have one trace (ChangeListener) with the API events merged in
-          assertEqual(processed.timelineItems.length, 1, "Should have one trace");
-          const trace = processed.timelineItems[0];
-          assertEqual(trace.type, "trace", "Should be a trace");
-          // The trace should contain api:start and api:complete (merged from orphans)
-          const hasApiStart = trace.events.some(e => e.entry.kind === "api:start");
-          const hasApiComplete = trace.events.some(e => e.entry.kind === "api:complete");
-          assertTrue(hasApiStart, "ChangeListener trace should contain merged api:start");
-          assertTrue(hasApiComplete, "ChangeListener trace should contain merged api:complete");
-          // Should have no orphans
-          assertEqual(processed.otherOrphans.length, 0, "Should have no orphaned events");
-        });
-
-        test("Trace Processing", "orphaned API events NOT merged if timing gap too large", () => {
-          // Scenario: api:complete happens > 100ms before ChangeListener - should NOT merge
-          const instanceId = TestFramework.instanceId();
-          const changeListenerTraceId = "t-test-changelistener";
-          const baseTs = 1000;
-          const events = [
-            // Orphaned API events (no traceId)
-            { kind: "api:start", method: "GET", url: "/api/data", instanceId, perfTs: baseTs },
-            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, perfTs: baseTs + 50 },
-            // ChangeListener starts 200ms after api:complete (too far)
-            { kind: "handler:start", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 250 },
-            { kind: "handler:complete", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 270 },
-          ];
-          const processed = processAllEntries(events);
-          // Should have one trace (ChangeListener) WITHOUT the API events
-          assertEqual(processed.timelineItems.length, 1, "Should have one trace");
-          const trace = processed.timelineItems[0];
-          const hasApiStart = trace.events.some(e => e.entry.kind === "api:start");
-          const hasApiComplete = trace.events.some(e => e.entry.kind === "api:complete");
-          assertTrue(!hasApiStart, "ChangeListener trace should NOT contain api:start (timing gap too large)");
-          assertTrue(!hasApiComplete, "ChangeListener trace should NOT contain api:complete (timing gap too large)");
-          // Should have orphans
-          assertEqual(processed.otherOrphans.length, 2, "Should have 2 orphaned API events");
-        });
-
         test("Trace Processing", "processAllEntries separates standalone interactions", () => {
           const standaloneInteraction = TestFramework.events.interaction("click", "Orphan");
           delete standaloneInteraction.traceId;
@@ -5189,6 +5970,51 @@
           assertGreaterThan(events.length, processedEvents.length, "Processed should be shorter");
         });
 
+        test("Deduplication", "fingerprintApiCall creates fingerprint for api:start", () => {
+          const evt = { kind: "api:start", method: "GET", url: "/status" };
+          const fp = fingerprintApiCall(evt);
+          assertEqual(fp, "GET|/status");
+        });
+
+        test("Deduplication", "fingerprintApiCall includes response for api:complete", () => {
+          const evt = { kind: "api:complete", method: "GET", url: "/status", response: { ok: true } };
+          const fp = fingerprintApiCall(evt);
+          assertTrue(fp.includes("GET|/status|"), "Should include method and url");
+          assertTrue(fp.includes("ok"), "Should include response");
+        });
+
+        test("Deduplication", "identical api:complete events have same fingerprint", () => {
+          const evt1 = { kind: "api:complete", method: "GET", url: "/status", response: { count: 5 } };
+          const evt2 = { kind: "api:complete", method: "GET", url: "/status", response: { count: 5 } };
+          assertEqual(fingerprintApiCall(evt1), fingerprintApiCall(evt2));
+        });
+
+        test("Deduplication", "different api:complete responses have different fingerprints", () => {
+          const evt1 = { kind: "api:complete", method: "GET", url: "/status", response: { count: 5 } };
+          const evt2 = { kind: "api:complete", method: "GET", url: "/status", response: { count: 6 } };
+          assertTrue(fingerprintApiCall(evt1) !== fingerprintApiCall(evt2), "Different responses should have different fingerprints");
+        });
+
+        test("Deduplication", "processTraceEvents deduplicates repeated API calls", () => {
+          const traceId = "test-api-dedupe";
+          const events = [
+            { kind: "api:start", method: "GET", url: "/status", traceId, perfTs: 100 },
+            { kind: "api:complete", method: "GET", url: "/status", response: { ok: true }, traceId, perfTs: 150 },
+            { kind: "api:start", method: "GET", url: "/status", traceId, perfTs: 200 },
+            { kind: "api:complete", method: "GET", url: "/status", response: { ok: true }, traceId, perfTs: 250 },
+            { kind: "api:start", method: "GET", url: "/status", traceId, perfTs: 300 },
+            { kind: "api:complete", method: "GET", url: "/status", response: { ok: true }, traceId, perfTs: 350 },
+          ];
+          const { events: processedEvents, dedupedCount } = processTraceEvents(events);
+          assertTrue(dedupedCount > 0, "Should have deduped some API events");
+          // Should have 2 events (1 api:start + 1 api:complete, each with _dedupCount: 3)
+          assertEqual(processedEvents.length, 2, "Should collapse to 2 events");
+          const apiStart = processedEvents.find(e => e.entry.kind === "api:start");
+          const apiComplete = processedEvents.find(e => e.entry.kind === "api:complete");
+          assertEqual(apiStart.entry._dedupCount, 3, "api:start should have count 3");
+          assertEqual(apiComplete.entry._dedupCount, 3, "api:complete should have count 3");
+        });
+
         // =========================================================================
         // TEST SUITE: Function Source Lookup
         // =========================================================================
@@ -5369,6 +6195,115 @@
           const openBraces = (result.source.match(/\{/g) || []).length;
           const closeBraces = (result.source.match(/\}/g) || []).length;
           assertEqual(openBraces, closeBraces, "Braces should be balanced");
+        });
+
+        // =========================================================================
+        // TEST SUITE: XMLUI Parser Integration
+        // =========================================================================
+        test("XMLUI Parser", "XmluiSource parses valid XMLUI markup", () => {
+          const source = `<App><Button id="btn">Click</Button></App>`;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          assertEqual(xmlui.errors.length, 0, "Should have no parse errors");
+          assertTrue(xmlui.ast !== null, "Should have AST");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findById finds element by id", () => {
+          const source = `
+            <App>
+              <Button id="submitBtn" variant="primary">Submit</Button>
+              <Button id="cancelBtn" variant="secondary">Cancel</Button>
+            </App>
+          `;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const btn = xmlui.findById("submitBtn");
+          assertTrue(btn !== null, "Should find submitBtn");
+          assertEqual(btn.tagName, "Button");
+          assertEqual(btn.attributes.id, "submitBtn");
+          assertEqual(btn.attributes.variant, "primary");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findById returns null for missing id", () => {
+          const source = `<App><Button id="exists">Click</Button></App>`;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const result = xmlui.findById("notHere");
+          assertEqual(result, null, "Should return null for missing id");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findHandler finds specific handler on element", () => {
+          const source = `
+            <App>
+              <Button id="myBtn" onClick="handleClick" onHover="handleHover">Click</Button>
+            </App>
+          `;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const handler = xmlui.findHandler("myBtn", "Click");
+          assertTrue(handler !== null, "Should find onClick handler");
+          assertEqual(handler.key, "onClick");
+          assertEqual(handler.value, "handleClick");
+          assertTrue(handler.line > 0, "Should have line number");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findHandler returns null for missing handler", () => {
+          const source = `<App><Button id="btn" onClick="doThing">Click</Button></App>`;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const result = xmlui.findHandler("btn", "Submit");
+          assertEqual(result, null, "Should return null for missing handler");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findHandlers finds all handlers of event type", () => {
+          const source = `
+            <App>
+              <Button id="btn1" onClick="handler1">One</Button>
+              <Button id="btn2" onClick="handler2" onHover="hover2">Two</Button>
+              <Action id="action" onExecute="doAction" />
+            </App>
+          `;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const clickHandlers = xmlui.findHandlers("Click");
+          assertEqual(clickHandlers.length, 2, "Should find 2 onClick handlers");
+          assertTrue(clickHandlers.some(h => h.value === "handler1"), "Should include handler1");
+          assertTrue(clickHandlers.some(h => h.value === "handler2"), "Should include handler2");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findHandlers finds all handlers when no event specified", () => {
+          const source = `
+            <App>
+              <Button id="btn" onClick="click" onHover="hover">Click</Button>
+              <Action id="act" onExecute="exec" />
+            </App>
+          `;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const allHandlers = xmlui.findHandlers();
+          assertEqual(allHandlers.length, 3, "Should find 3 handlers total");
+        });
+
+        test("XMLUI Parser", "XmluiSource handles multi-line elements", () => {
+          const source = `
+            <App>
+              <Button
+                id="multiLineBtn"
+                onClick="handleClick"
+                variant="primary"
+                disabled={isLoading}>
+                Submit Form
+              </Button>
+            </App>
+          `;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const btn = xmlui.findById("multiLineBtn");
+          assertTrue(btn !== null, "Should find multi-line element");
+          assertEqual(btn.tagName, "Button");
+          assertEqual(btn.attributes.onClick, "handleClick");
+          assertEqual(btn.attributes.variant, "primary");
+        });
+
+        test("XMLUI Parser", "XmluiSource handles binding expressions in id", () => {
+          // Note: binding expressions like id={foo} may need special handling
+          // This test documents current behavior
+          const source = `<App><Button id="staticId">Click</Button></App>`;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const btn = xmlui.findById("staticId");
+          assertTrue(btn !== null, "Should find element with static id");
         });
 
         // =========================================================================
@@ -5947,7 +6882,7 @@
               if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
                 const durationSuffix = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
                 const requestIdSuffix = e._requestId ? ` \`[${e._requestId}]\`` : "";
-                lines.push(`- \`[${e.kind}]\`${durationSuffix} **${e.method || "GET"}** ${e.url || ""}${requestIdSuffix}${meta}`);
+                lines.push(`- \`[${e.kind}]\`${durationSuffix} **${normalizeMethod(e.method)}** ${normalizeUrl(e.url)}${requestIdSuffix}${meta}`);
                 if (e.body) {
                   const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body);
                   const truncatedBody = bodyStr.length > 100 ? bodyStr.substring(0, 100) + "..." : bodyStr;
