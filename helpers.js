@@ -174,8 +174,183 @@ function buildGoogleCalendarUrl(event) {
   return 'https://calendar.google.com/calendar/render?' + params.toString();
 }
 
+// ============================================
+// Enrichment helpers (RRULE, save/load)
+// ============================================
+
+// Local cache for enrichments (keyed by event_id)
+let _enrichmentsCache = {};
+
+// Build RRULE string from UI selections using rrule library
+function buildRRule(frequency, selectedDays) {
+  if (!frequency || frequency === 'none') return null;
+
+  // Map day codes to rrule weekday constants
+  const dayMap = {
+    'SU': rrule.RRule.SU,
+    'MO': rrule.RRule.MO,
+    'TU': rrule.RRule.TU,
+    'WE': rrule.RRule.WE,
+    'TH': rrule.RRule.TH,
+    'FR': rrule.RRule.FR,
+    'SA': rrule.RRule.SA
+  };
+
+  const options = {
+    freq: frequency === 'WEEKLY' ? rrule.RRule.WEEKLY : rrule.RRule.MONTHLY
+  };
+
+  if (frequency === 'WEEKLY' && selectedDays && selectedDays.length > 0) {
+    options.byweekday = selectedDays.map(d => dayMap[d]).filter(Boolean);
+  }
+
+  const rule = new rrule.RRule(options);
+  // Return just the rule part without "RRULE:" prefix (we add that in ICS generation)
+  return rule.toString().replace('RRULE:', '');
+}
+
+// Parse RRULE string back to frequency + days for UI
+function parseRRule(rruleString) {
+  if (!rruleString) return { frequency: 'none', days: [] };
+
+  try {
+    // Add RRULE: prefix if not present for parsing
+    const fullRule = rruleString.startsWith('RRULE:') ? rruleString : 'RRULE:' + rruleString;
+    const rule = rrule.RRule.fromString(fullRule);
+
+    const freqMap = {
+      [rrule.RRule.WEEKLY]: 'WEEKLY',
+      [rrule.RRule.MONTHLY]: 'MONTHLY',
+      [rrule.RRule.DAILY]: 'DAILY',
+      [rrule.RRule.YEARLY]: 'YEARLY'
+    };
+
+    const dayCodeMap = {
+      0: 'MO', 1: 'TU', 2: 'WE', 3: 'TH', 4: 'FR', 5: 'SA', 6: 'SU'
+    };
+
+    const frequency = freqMap[rule.options.freq] || 'none';
+    const days = (rule.options.byweekday || []).map(d => {
+      // byweekday can be Weekday objects or numbers
+      const dayNum = typeof d === 'number' ? d : d.weekday;
+      return dayCodeMap[dayNum];
+    }).filter(Boolean);
+
+    return { frequency, days };
+  } catch (e) {
+    console.error('Error parsing RRULE:', e);
+    return { frequency: 'none', days: [] };
+  }
+}
+
+// Save enrichment to Supabase (upsert)
+async function saveEnrichment(eventId, data) {
+  if (!window.authSession) {
+    alert('Please sign in to save enrichments');
+    return null;
+  }
+
+  const headers = {
+    'apikey': window.SUPABASE_KEY,
+    'Authorization': 'Bearer ' + window.authSession.access_token,
+    'Content-Type': 'application/json',
+    'Prefer': 'resolution=merge-duplicates,return=representation'
+  };
+
+  const payload = {
+    event_id: eventId,
+    curator_id: window.authUser.id,
+    rrule: data.rrule || null,
+    url: data.url || null,
+    description: data.description || null,
+    location: data.location || null,
+    end_time: data.end_time || null,
+    categories: data.categories || null,
+    notes: data.notes || null,
+    updated_at: new Date().toISOString()
+  };
+
+  const url = `${window.SUPABASE_URL}/rest/v1/event_enrichments`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload)
+  });
+
+  if (res.ok) {
+    const result = await res.json();
+    // Update local cache
+    _enrichmentsCache[eventId] = result[0] || payload;
+    return _enrichmentsCache[eventId];
+  } else {
+    console.error('Error saving enrichment:', res.status, await res.text());
+    return null;
+  }
+}
+
+// Load enrichment from cache or fetch from Supabase
+async function loadEnrichment(eventId) {
+  // Return cached if available
+  if (_enrichmentsCache[eventId]) {
+    return _enrichmentsCache[eventId];
+  }
+
+  if (!window.authSession) return null;
+
+  const headers = {
+    'apikey': window.SUPABASE_KEY,
+    'Authorization': 'Bearer ' + window.authSession.access_token
+  };
+
+  const url = `${window.SUPABASE_URL}/rest/v1/event_enrichments?event_id=eq.${eventId}&curator_id=eq.${window.authUser.id}`;
+  const res = await fetch(url, { headers });
+
+  if (res.ok) {
+    const data = await res.json();
+    if (data && data.length > 0) {
+      _enrichmentsCache[eventId] = data[0];
+      return data[0];
+    }
+  }
+  return null;
+}
+
+// Load all enrichments for current user (for bulk prefetch)
+async function loadAllEnrichments() {
+  if (!window.authSession) return [];
+
+  const headers = {
+    'apikey': window.SUPABASE_KEY,
+    'Authorization': 'Bearer ' + window.authSession.access_token
+  };
+
+  const url = `${window.SUPABASE_URL}/rest/v1/event_enrichments?curator_id=eq.${window.authUser.id}`;
+  const res = await fetch(url, { headers });
+
+  if (res.ok) {
+    const data = await res.json();
+    // Populate cache
+    data.forEach(e => {
+      _enrichmentsCache[e.event_id] = e;
+    });
+    return data;
+  }
+  return [];
+}
+
+// Get enrichment from cache (synchronous, for UI)
+function getEnrichmentFromCache(eventId) {
+  return _enrichmentsCache[eventId] || null;
+}
+
+// Toggle a day in/out of an array (for RRULE day picker)
+function toggleDay(days, day) {
+  return days.includes(day) ? days.filter(d => d !== day) : [...days, day];
+}
+
 // Export for browser (attach to window)
 if (typeof window !== 'undefined') {
+  window.toggleDay = toggleDay;
   window.filterEvents = filterEvents;
   window.getDescriptionSnippet = getDescriptionSnippet;
   window.formatDayOfWeek = formatDayOfWeek;
@@ -188,4 +363,11 @@ if (typeof window !== 'undefined') {
   window.clearDedupeCache = clearDedupeCache;
   window.isEventPicked = isEventPicked;
   window.buildGoogleCalendarUrl = buildGoogleCalendarUrl;
+  // Enrichment helpers
+  window.buildRRule = buildRRule;
+  window.parseRRule = parseRRule;
+  window.saveEnrichment = saveEnrichment;
+  window.loadEnrichment = loadEnrichment;
+  window.loadAllEnrichments = loadAllEnrichments;
+  window.getEnrichmentFromCache = getEnrichmentFromCache;
 }
