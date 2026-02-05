@@ -174,6 +174,71 @@ function buildGoogleCalendarUrl(event) {
   return 'https://calendar.google.com/calendar/render?' + params.toString();
 }
 
+// Format date for ICS (YYYYMMDDTHHMMSSZ)
+function formatICSDate(isoString) {
+  if (!isoString) return '';
+  const d = new Date(isoString);
+  return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+// Escape text for ICS format
+function escapeICS(text) {
+  if (!text) return '';
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\n/g, '\\n');
+}
+
+// Generate ICS content for a single event and trigger download
+function downloadEventICS(event) {
+  if (!event) return;
+
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Community Calendar//Event//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:event-${event.id}@community-calendar`,
+    `DTSTAMP:${formatICSDate(new Date().toISOString())}`,
+    `DTSTART:${formatICSDate(event.start_time)}`
+  ];
+
+  if (event.end_time) {
+    lines.push(`DTEND:${formatICSDate(event.end_time)}`);
+  }
+
+  lines.push(`SUMMARY:${escapeICS(event.title)}`);
+
+  if (event.location) {
+    lines.push(`LOCATION:${escapeICS(event.location)}`);
+  }
+  if (event.description) {
+    lines.push(`DESCRIPTION:${escapeICS(event.description)}`);
+  }
+  if (event.url) {
+    lines.push(`URL:${event.url}`);
+  }
+
+  lines.push('END:VEVENT');
+  lines.push('END:VCALENDAR');
+
+  const icsContent = lines.join('\r\n');
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${(event.title || 'event').replace(/[^a-z0-9]/gi, '_').substring(0, 30)}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // ============================================
 // Enrichment helpers (RRULE, save/load)
 // ============================================
@@ -363,6 +428,7 @@ if (typeof window !== 'undefined') {
   window.clearDedupeCache = clearDedupeCache;
   window.isEventPicked = isEventPicked;
   window.buildGoogleCalendarUrl = buildGoogleCalendarUrl;
+  window.downloadEventICS = downloadEventICS;
   // Enrichment helpers
   window.buildRRule = buildRRule;
   window.parseRRule = parseRRule;

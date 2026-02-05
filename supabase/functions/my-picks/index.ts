@@ -41,15 +41,30 @@ function generateICS(events: any[], calendarName: string): string {
     if (event.end_time) {
       lines.push(`DTEND:${formatICSDate(event.end_time)}`);
     }
+    // RRULE for recurring events (from enrichment)
+    if (event.rrule) {
+      lines.push(`RRULE:${event.rrule}`);
+    }
     lines.push(`SUMMARY:${escapeICS(event.title)}`);
     if (event.location) {
       lines.push(`LOCATION:${escapeICS(event.location)}`);
     }
-    if (event.description) {
-      lines.push(`DESCRIPTION:${escapeICS(event.description)}`);
+    // Build description: original + curator notes
+    let description = event.description || "";
+    if (event.notes) {
+      description = description
+        ? `${description}\n\n--- Curator notes ---\n${event.notes}`
+        : event.notes;
+    }
+    if (description) {
+      lines.push(`DESCRIPTION:${escapeICS(description)}`);
     }
     if (event.url) {
       lines.push(`URL:${event.url}`);
+    }
+    // Categories from enrichment
+    if (event.categories && event.categories.length > 0) {
+      lines.push(`CATEGORIES:${event.categories.join(",")}`);
     }
     lines.push("END:VEVENT");
   }
@@ -97,7 +112,7 @@ Deno.serve(async (req) => {
 
     const userId = tokenData.user_id;
 
-    // Get user's picks with event details
+    // Get user's picks with event details and enrichments
     const { data: picks, error: picksError } = await supabase
       .from("picks")
       .select(`
@@ -115,6 +130,19 @@ Deno.serve(async (req) => {
       `)
       .eq("user_id", userId);
 
+    // Get user's enrichments for these events
+    const eventIds = (picks || []).map((p: any) => p.event_id).filter(Boolean);
+    const { data: enrichments } = await supabase
+      .from("event_enrichments")
+      .select("*")
+      .eq("curator_id", userId)
+      .in("event_id", eventIds);
+
+    // Create a map of enrichments by event_id
+    const enrichmentMap = new Map(
+      (enrichments || []).map((e: any) => [e.event_id, e])
+    );
+
     if (picksError) {
       console.error("Error fetching picks:", picksError);
       return new Response(JSON.stringify({ error: "Failed to fetch picks" }), {
@@ -123,9 +151,23 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Extract events from picks (flatten the join)
+    // Extract events from picks and merge with enrichments
     const events = (picks || [])
-      .map((p: any) => p.events)
+      .map((p: any) => {
+        const event = p.events;
+        if (!event) return null;
+        const enrichment = enrichmentMap.get(event.id);
+        return {
+          ...event,
+          // Enrichment overrides
+          rrule: enrichment?.rrule || null,
+          categories: enrichment?.categories || null,
+          notes: enrichment?.notes || null,
+          // Enrichment can override these if present
+          description: enrichment?.description || event.description,
+          location: enrichment?.location || event.location,
+        };
+      })
       .filter((e: any) => e !== null)
       .sort((a: any, b: any) => a.start_time.localeCompare(b.start_time));
 
