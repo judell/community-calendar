@@ -12,7 +12,7 @@ LIBRARY_CONFIGS = {
     'santarosa': {
         'base_url': 'https://events.sonomalibrary.org/events/list?page=',
         'url_prefix': 'https://events.sonomalibrary.org',
-        'timezone': 'US/Pacific',
+        'timezone': 'America/Los_Angeles',
         'prodid': '-//Santa Rosa Library Events//',
         'calname': 'Santa Rosa Library'
     },
