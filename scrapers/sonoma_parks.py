@@ -4,6 +4,9 @@ Scraper for Sonoma County Regional Parks calendar
 https://parks.sonomacounty.ca.gov/play/calendar
 """
 
+import sys
+sys.path.insert(0, str(__file__).rsplit('/', 1)[0])  # Add scrapers/ to path
+
 import requests
 from bs4 import BeautifulSoup
 from icalendar import Calendar, Event
@@ -11,7 +14,8 @@ from datetime import datetime
 import re
 import argparse
 import logging
-import hashlib
+
+from lib.utils import generate_uid, append_source
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -144,14 +148,8 @@ def create_calendar(events, year, month):
         
         if event_data.get('location'):
             event.add('location', event_data['location'])
-        desc = event_data.get('description', '') or ''
-        desc = desc.rstrip() + '\n\nSource: Sonoma County Parks' if desc else 'Source: Sonoma County Parks'
-        event.add('description', desc)
-        
-        # Generate a UID
-        uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"
-        uid = hashlib.md5(uid_str.encode()).hexdigest()
-        event.add('uid', f"{uid}@parks.sonomacounty.ca.gov")
+        event.add('description', append_source(event_data.get('description', ''), 'Sonoma County Parks'))
+        event.add('uid', generate_uid(event_data['title'], event_data['dtstart'], 'parks.sonomacounty.ca.gov'))
         event.add('x-source', 'Sonoma County Parks')
         
         cal.add_component(event)

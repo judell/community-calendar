@@ -7,6 +7,9 @@ This is a Wix site with a calendar widget. We need to use browser automation
 or parse the rendered HTML since data is loaded via JavaScript.
 """
 
+import sys
+sys.path.insert(0, str(__file__).rsplit('/', 1)[0])  # Add scrapers/ to path
+
 import requests
 from bs4 import BeautifulSoup
 from icalendar import Calendar, Event
@@ -14,9 +17,9 @@ from datetime import datetime, timedelta
 import re
 import argparse
 import logging
-import hashlib
-import json
 import time
+
+from lib.utils import generate_uid, append_source, DEFAULT_HEADERS
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -79,10 +82,7 @@ def fetch_with_selenium(year, month):
 def fetch_calendar_static():
     """Attempt to fetch calendar with static request (may not work for JS sites)."""
     logger.info(f"Fetching {CALENDAR_URL}")
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-    }
-    response = requests.get(CALENDAR_URL, headers=headers, timeout=30)
+    response = requests.get(CALENDAR_URL, headers=DEFAULT_HEADERS, timeout=30)
     response.raise_for_status()
     return response.text
 
@@ -160,14 +160,8 @@ def create_calendar(events, year, month):
         event.add('dtend', event_data['dtend'])
         event.add('url', event_data['url'])
         event.add('location', event_data['location'])
-        desc = event_data.get('description', '') or ''
-        desc = desc.rstrip() + '\n\nSource: Cal Theatre' if desc else 'Source: Cal Theatre'
-        event.add('description', desc)
-        
-        # Generate a UID
-        uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"
-        uid = hashlib.md5(uid_str.encode()).hexdigest()
-        event.add('uid', f"{uid}@caltheatre.com")
+        event.add('description', append_source(event_data.get('description', ''), 'Cal Theatre'))
+        event.add('uid', generate_uid(event_data['title'], event_data['dtstart'], 'caltheatre.com'))
         event.add('x-source', 'Cal Theatre')
         
         cal.add_component(event)

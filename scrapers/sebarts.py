@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, str(__file__).rsplit('/', 1)[0])  # Add scrapers/ to path
+
 import requests
 from bs4 import BeautifulSoup
 from icalendar import Calendar, Event
@@ -7,26 +10,12 @@ import argparse
 from urllib.parse import urljoin
 import logging
 import time
-import random
+
+from lib.utils import fetch_with_retry
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-def fetch_with_retry(url, max_retries=5, base_delay=1):
-    for attempt in range(max_retries):
-        try:
-            logger.info(f"Fetching URL: {url}")
-            response = requests.get(url)
-            response.raise_for_status()
-            return response.text
-        except requests.exceptions.RequestException as e:
-            if attempt == max_retries - 1:
-                logger.error(f"Failed to fetch {url} after {max_retries} attempts. Error: {str(e)}")
-                raise
-            delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
-            logger.warning(f"Request to {url} failed. Retrying in {delay:.2f} seconds... (Attempt {attempt + 1}/{max_retries})")
-            time.sleep(delay)
 
 def parse_events(html_content, base_url):
     soup = BeautifulSoup(html_content, 'html.parser')

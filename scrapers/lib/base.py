@@ -1,0 +1,145 @@
+"""Base scraper class with common functionality."""
+
+import argparse
+import logging
+from abc import ABC, abstractmethod
+from datetime import datetime
+from typing import Any, Optional
+
+from icalendar import Calendar, Event
+
+from .utils import append_source, generate_uid
+
+
+class BaseScraper(ABC):
+    """
+    Base class for event scrapers.
+    
+    Subclasses must implement:
+    - name: str - Source name (e.g., "Redwood Cafe")
+    - domain: str - Domain for UIDs (e.g., "redwoodcafecotati.com")
+    - fetch_events(year, month) -> list[dict]
+    
+    Each event dict should have:
+    - title: str (required)
+    - dtstart: datetime (required)
+    - dtend: datetime (optional, defaults to dtstart)
+    - url: str (optional)
+    - location: str (optional)
+    - description: str (optional)
+    """
+    
+    name: str = "Unknown Source"
+    domain: str = "example.com"
+    timezone: str = "America/Los_Angeles"
+    
+    def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+    
+    @classmethod
+    def setup_logging(cls, level: int = logging.INFO):
+        """Configure logging for scrapers."""
+        logging.basicConfig(
+            level=level,
+            format='%(asctime)s - %(levelname)s - %(message)s'
+        )
+    
+    @classmethod
+    def parse_args(cls, description: Optional[str] = None) -> argparse.Namespace:
+        """Parse standard command-line arguments."""
+        parser = argparse.ArgumentParser(
+            description=description or f'Scrape events from {cls.name}'
+        )
+        parser.add_argument('--year', type=int, required=True, help='Target year')
+        parser.add_argument('--month', type=int, required=True, help='Target month (1-12)')
+        parser.add_argument('--output', '-o', type=str, help='Output filename')
+        parser.add_argument('--debug', action='store_true', help='Enable debug logging')
+        return parser.parse_args()
+    
+    @abstractmethod
+    def fetch_events(self, year: int, month: int) -> list[dict[str, Any]]:
+        """
+        Fetch and parse events for the given year/month.
+        
+        Returns list of event dicts with keys:
+        - title, dtstart, dtend, url, location, description
+        """
+        pass
+    
+    def create_calendar(self, events: list[dict], year: int, month: int) -> Calendar:
+        """Create an iCalendar from parsed events."""
+        cal = Calendar()
+        cal.add('prodid', f'-//{self.name}//{self.domain}//')
+        cal.add('version', '2.0')
+        cal.add('x-wr-calname', f'{self.name} - {year}/{month:02d}')
+        cal.add('x-wr-timezone', self.timezone)
+        
+        for event_data in events:
+            event = self.create_event(event_data)
+            if event:
+                cal.add_component(event)
+        
+        return cal
+    
+    def create_event(self, data: dict[str, Any]) -> Optional[Event]:
+        """Create an iCalendar Event from event data."""
+        title = data.get('title')
+        dtstart = data.get('dtstart')
+        
+        if not title or not dtstart:
+            self.logger.warning(f"Skipping event with missing title or dtstart: {data}")
+            return None
+        
+        event = Event()
+        event.add('summary', title)
+        event.add('dtstart', dtstart)
+        event.add('dtend', data.get('dtend') or dtstart)
+        
+        if data.get('url'):
+            event.add('url', data['url'])
+        
+        if data.get('location'):
+            event.add('location', data['location'])
+        
+        description = append_source(data.get('description', ''), self.name)
+        event.add('description', description)
+        
+        uid = data.get('uid') or generate_uid(title, dtstart, self.domain)
+        event.add('uid', uid)
+        event.add('x-source', self.name)
+        
+        return event
+    
+    def default_output_filename(self, year: int, month: int) -> str:
+        """Generate default output filename."""
+        # Convert name to snake_case
+        name_slug = self.name.lower().replace(' ', '_').replace("'", '')
+        return f"{name_slug}_{year}_{month:02d}.ics"
+    
+    def run(self, year: int, month: int, output: Optional[str] = None) -> str:
+        """Main entry point: fetch events and write calendar."""
+        self.logger.info(f"Scraping {self.name} for {year}-{month:02d}")
+        
+        events = self.fetch_events(year, month)
+        self.logger.info(f"Found {len(events)} events")
+        
+        calendar = self.create_calendar(events, year, month)
+        
+        filename = output or self.default_output_filename(year, month)
+        with open(filename, 'wb') as f:
+            f.write(calendar.to_ical())
+        
+        self.logger.info(f"Written to {filename}")
+        return filename
+    
+    @classmethod
+    def main(cls):
+        """CLI entry point."""
+        cls.setup_logging()
+        args = cls.parse_args()
+        
+        if args.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
+        
+        scraper = cls()
+        scraper.run(args.year, args.month, args.output)

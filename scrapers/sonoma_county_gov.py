@@ -6,12 +6,16 @@ https://sonomacounty.gov/sonoma-county-calendar
 Uses JSON API endpoint - includes county meetings, parks events, and more.
 """
 
+import sys
+sys.path.insert(0, str(__file__).rsplit('/', 1)[0])  # Add scrapers/ to path
+
 import requests
 from icalendar import Calendar, Event
 from datetime import datetime
 import argparse
 import logging
-import hashlib
+
+from lib.utils import generate_uid, append_source
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -130,14 +134,8 @@ def create_calendar(events, year, month):
         event.add('url', event_data['url'])
         event.add('location', event_data['location'])
         
-        desc = event_data.get('description', '') or ''
-        desc = desc.rstrip() + '\n\nSource: Sonoma County Government' if desc else 'Source: Sonoma County Government'
-        event.add('description', desc)
-        
-        # Generate a UID
-        uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"
-        uid = hashlib.md5(uid_str.encode()).hexdigest()
-        event.add('uid', f"{uid}@sonomacounty.gov")
+        event.add('description', append_source(event_data.get('description', ''), 'Sonoma County Government'))
+        event.add('uid', generate_uid(event_data['title'], event_data['dtstart'], 'sonomacounty.gov'))
         event.add('x-source', 'Sonoma County Government')
         
         cal.add_component(event)

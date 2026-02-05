@@ -6,6 +6,9 @@ https://www.sonomacity.org/calendar
 Includes city council meetings, commission meetings, and special events.
 """
 
+import sys
+sys.path.insert(0, str(__file__).rsplit('/', 1)[0])  # Add scrapers/ to path
+
 import requests
 from bs4 import BeautifulSoup
 from icalendar import Calendar, Event
@@ -13,7 +16,8 @@ from datetime import datetime, timedelta
 import re
 import argparse
 import logging
-import hashlib
+
+from lib.utils import generate_uid, append_source, DEFAULT_HEADERS, MONTH_MAP
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -25,10 +29,7 @@ DEFAULT_LOCATION = "City Council Chambers, 177 First St. West, Sonoma, CA 95476"
 def fetch_calendar_page():
     """Fetch the main calendar page."""
     logger.info(f"Fetching {CALENDAR_URL}")
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-    }
-    response = requests.get(CALENDAR_URL, headers=headers, timeout=30)
+    response = requests.get(CALENDAR_URL, headers=DEFAULT_HEADERS, timeout=30)
     response.raise_for_status()
     return response.text
 
@@ -66,9 +67,7 @@ def parse_events(html_content, target_year, target_month):
             day = int(day)
             
             # Convert month name to number
-            month_map = {'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
-                        'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12}
-            month = month_map.get(month_name.lower())
+            month = MONTH_MAP.get(month_name.lower())
             if not month:
                 continue
             
@@ -143,13 +142,8 @@ def create_calendar(events, year, month):
         event.add('dtend', event_data['dtend'])
         event.add('url', event_data['url'])
         event.add('location', event_data['location'])
-        desc = event_data.get('description', '') or ''
-        desc = desc.rstrip() + '\n\nSource: City of Sonoma' if desc else 'Source: City of Sonoma'
-        event.add('description', desc)
-        
-        uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"
-        uid = hashlib.md5(uid_str.encode()).hexdigest()
-        event.add('uid', f"{uid}@sonomacity.org")
+        event.add('description', append_source(event_data.get('description', ''), 'City of Sonoma'))
+        event.add('uid', generate_uid(event_data['title'], event_data['dtstart'], 'sonomacity.org'))
         event.add('x-source', 'City of Sonoma')
         
         cal.add_component(event)

@@ -6,6 +6,9 @@ https://copperfieldsbooks.com/upcoming-events
 Drupal site with clean HTML structure.
 """
 
+import sys
+sys.path.insert(0, str(__file__).rsplit('/', 1)[0])  # Add scrapers/ to path
+
 import requests
 from bs4 import BeautifulSoup
 from icalendar import Calendar, Event
@@ -13,7 +16,8 @@ from datetime import datetime, timedelta
 import re
 import argparse
 import logging
-import hashlib
+
+from lib.utils import generate_uid, append_source, DEFAULT_HEADERS, MONTH_MAP
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -35,21 +39,15 @@ STORE_LOCATIONS = {
 def fetch_events_page():
     """Fetch the main events page."""
     logger.info(f"Fetching {EVENTS_URL}")
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-    }
-    response = requests.get(EVENTS_URL, headers=headers, timeout=30)
+    response = requests.get(EVENTS_URL, headers=DEFAULT_HEADERS, timeout=30)
     response.raise_for_status()
     return response.text
 
 def fetch_event_details(event_url):
     """Fetch detailed event page."""
     logger.info(f"Fetching event details: {event_url}")
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-    }
     try:
-        response = requests.get(event_url, headers=headers, timeout=30)
+        response = requests.get(event_url, headers=DEFAULT_HEADERS, timeout=30)
         response.raise_for_status()
         return response.text
     except Exception as e:
@@ -117,9 +115,7 @@ def parse_events(html_content, target_year, target_month):
             day = int(date_match.group(2))
             
             # Convert month abbreviation to number
-            month_map = {'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
-                        'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12}
-            month = month_map.get(month_abbr.lower())
+            month = MONTH_MAP.get(month_abbr.lower())
             if not month:
                 continue
             
@@ -213,14 +209,8 @@ def create_calendar(events, year, month):
         event.add('dtend', event_data['dtend'])
         event.add('url', event_data['url'])
         event.add('location', event_data['location'])
-        desc = event_data.get('description', '') or ''
-        desc = desc.rstrip() + "\n\nSource: Copperfield's Books" if desc else "Source: Copperfield's Books"
-        event.add('description', desc)
-        
-        # Generate a UID
-        uid_str = f"{event_data['title']}-{event_data['dtstart'].isoformat()}"
-        uid = hashlib.md5(uid_str.encode()).hexdigest()
-        event.add('uid', f"{uid}@copperfieldsbooks.com")
+        event.add('description', append_source(event_data.get('description', ''), "Copperfield's Books"))
+        event.add('uid', generate_uid(event_data['title'], event_data['dtstart'], 'copperfieldsbooks.com'))
         event.add('x-source', "Copperfield's Books")
         
         cal.add_component(event)
