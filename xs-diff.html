@@ -2458,8 +2458,10 @@
           if (e.kind === "handler:start" || e.kind === "handler:complete") {
             const handlerName = e.eventName || "unknown";
             const code = e.code || e.arrow || "";
-            // Fingerprint by kind + handler name + code
-            const fp = `${e.kind}|${handlerName}|${code}`;
+            const componentId = e.uid || e.instanceId || "";
+            const fileId = e.ownerFileId ?? "";
+            // Fingerprint by kind + handler name + code + component + file (to distinguish same handler on different components/files)
+            const fp = `${e.kind}|${handlerName}|${code}|${componentId}|${fileId}`;
             if (handlerCounts.has(fp)) {
               handlerCounts.get(fp).count += 1;
               return; // Skip duplicate
@@ -6013,6 +6015,60 @@
           const apiComplete = processedEvents.find(e => e.entry.kind === "api:complete");
           assertEqual(apiStart.entry._dedupCount, 3, "api:start should have count 3");
           assertEqual(apiComplete.entry._dedupCount, 3, "api:complete should have count 3");
+        });
+
+        test("Deduplication", "handler events from same file with same code are deduplicated", () => {
+          const traceId = "test-handler-dedupe-same";
+          const events = [
+            { kind: "handler:start", eventName: "messageReceived", code: "(msg) => {}", uid: "comp1", ownerFileId: 0, traceId, perfTs: 100 },
+            { kind: "handler:start", eventName: "messageReceived", code: "(msg) => {}", uid: "comp1", ownerFileId: 0, traceId, perfTs: 101 },
+            { kind: "handler:complete", eventName: "messageReceived", code: "(msg) => {}", uid: "comp1", ownerFileId: 0, traceId, perfTs: 102 },
+            { kind: "handler:complete", eventName: "messageReceived", code: "(msg) => {}", uid: "comp1", ownerFileId: 0, traceId, perfTs: 103 },
+          ];
+          const { events: processedEvents } = processTraceEvents(events);
+          // Should collapse to 2 events (1 handler:start + 1 handler:complete with _dedupCount: 2 each)
+          assertEqual(processedEvents.length, 2, "Should collapse same-file handlers");
+          const start = processedEvents.find(e => e.entry.kind === "handler:start");
+          const complete = processedEvents.find(e => e.entry.kind === "handler:complete");
+          assertEqual(start.entry._dedupCount, 2, "handler:start should have count 2");
+          assertEqual(complete.entry._dedupCount, 2, "handler:complete should have count 2");
+        });
+
+        test("Deduplication", "handler events from different files are NOT deduplicated", () => {
+          const traceId = "test-handler-dedupe-files";
+          const events = [
+            { kind: "handler:start", eventName: "messageReceived", arrow: "(msg) => {", uid: "", ownerFileId: 0, traceId, perfTs: 100 },
+            { kind: "handler:start", eventName: "messageReceived", arrow: "(msg) => {", uid: "", ownerFileId: 1, traceId, perfTs: 101 },
+            { kind: "handler:start", eventName: "messageReceived", arrow: "(msg) => {", uid: "", ownerFileId: 2, traceId, perfTs: 102 },
+          ];
+          const { events: processedEvents } = processTraceEvents(events);
+          // Should NOT collapse - each file should be separate
+          const handlerStarts = processedEvents.filter(e => e.entry.kind === "handler:start");
+          assertEqual(handlerStarts.length, 3, "Handlers from different files should remain separate");
+        });
+
+        test("Deduplication", "handler events with different componentIds are NOT deduplicated", () => {
+          const traceId = "test-handler-dedupe-components";
+          const events = [
+            { kind: "handler:start", eventName: "messageReceived", code: "(msg) => handle(msg)", uid: "filesContainer", ownerFileId: 3, traceId, perfTs: 100 },
+            { kind: "handler:start", eventName: "messageReceived", code: "(msg) => handle(msg)", uid: "foldersTree", ownerFileId: 3, traceId, perfTs: 101 },
+          ];
+          const { events: processedEvents } = processTraceEvents(events);
+          // Should NOT collapse - different component IDs
+          const handlerStarts = processedEvents.filter(e => e.entry.kind === "handler:start");
+          assertEqual(handlerStarts.length, 2, "Handlers from different components should remain separate");
+        });
+
+        test("Deduplication", "handler events with different code are NOT deduplicated", () => {
+          const traceId = "test-handler-dedupe-code";
+          const events = [
+            { kind: "handler:start", eventName: "messageReceived", code: "(msg) => handleFileOperation(msg)", uid: "", ownerFileId: 0, traceId, perfTs: 100 },
+            { kind: "handler:start", eventName: "messageReceived", arrow: "(msg) => {", uid: "", ownerFileId: 0, traceId, perfTs: 101 },
+          ];
+          const { events: processedEvents } = processTraceEvents(events);
+          // Should NOT collapse - different code
+          const handlerStarts = processedEvents.filter(e => e.entry.kind === "handler:start");
+          assertEqual(handlerStarts.length, 2, "Handlers with different code should remain separate");
         });
 
         // =========================================================================
