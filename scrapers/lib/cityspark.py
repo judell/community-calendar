@@ -15,7 +15,7 @@ from .base import BaseScraper
 class CitySparkScraper(BaseScraper):
     """
     Scraper for CitySpark-powered event calendars.
-    
+
     Subclasses must set:
     - name: str - Source name
     - domain: str - Domain for UIDs
@@ -24,13 +24,15 @@ class CitySparkScraper(BaseScraper):
     - lat: float - Latitude for geo search
     - lng: float - Longitude for geo search
     - distance: int - Search radius in miles (default: 30)
+    - calendar_url: str - Fallback calendar URL when event has no link
     """
-    
+
     api_slug: str = ""
     ppid: int = 0
     lat: float = 0.0
     lng: float = 0.0
     distance: int = 30
+    calendar_url: str = ""
     
     API_BASE = "https://portal.cityspark.com/v1/events"
     
@@ -114,12 +116,16 @@ class CitySparkScraper(BaseScraper):
         else:
             event_end = event_start
         
-        # Get URL from links
-        url = None
+        # Get URL from links, fall back to CitySpark event page
+        url = ''
         links = event.get('Links') or []
         if links and isinstance(links, list) and len(links) > 0:
-            url = links[0].get('url', '')
-        
+            url = links[0].get('url') or ''
+
+        # If no link URL, use publisher's calendar page as fallback
+        if not url and self.calendar_url:
+            url = self.calendar_url
+
         return {
             'title': event.get('Name', 'Untitled Event'),
             'dtstart': event_start,
@@ -133,7 +139,7 @@ class CitySparkScraper(BaseScraper):
 
 class BohemianScraper(CitySparkScraper):
     """Scraper for North Bay Bohemian events."""
-    
+
     name = "North Bay Bohemian"
     domain = "bohemian.com"
     api_slug = "Bohemian"
@@ -141,11 +147,12 @@ class BohemianScraper(CitySparkScraper):
     lat = 38.4282591
     lng = -122.5548637
     distance = 30
+    calendar_url = "https://bohemian.com/events-calendar/"
 
 
 class PressDemocratScraper(CitySparkScraper):
     """Scraper for Press Democrat events."""
-    
+
     name = "Press Democrat"
     domain = "pressdemocrat.com"
     api_slug = "SRPressDemocrat"
@@ -153,3 +160,4 @@ class PressDemocratScraper(CitySparkScraper):
     lat = 38.5212368
     lng = -122.8540282
     distance = 40
+    calendar_url = "https://www.pressdemocrat.com/events/"
