@@ -58,7 +58,6 @@
   />
 
   <!-- Dialogs -->
-  <MyPicksDialog id="myPicksDialog" feedToken="{feedToken.value && feedToken.value[0] ? feedToken.value[0].token : null}" />
   <SourcesDialog id="sourcesDialog" events="{events.value}" />
   <CaptureDialog id="captureDialog" />
 
@@ -84,7 +83,6 @@
             height="20px"
             onClick="captureDialog.open()"
           />
-          <Icon name="date" tooltip="My Picks Feed" width="20px" height="20px" onClick="myPicksDialog.open()" />
           <Icon name="list" tooltip="Sources" width="20px" height="20px" onClick="sourcesDialog.open()" />
           <Icon
             name="user"
@@ -115,9 +113,22 @@
     <List when="{viewMode === 'all'}" data="{events.value}" fixedItemSize="true" limit="100">
       <EventCard event="{$item}" filterTerm="{filterTerm}" />
     </List>
-    <List when="{viewMode === 'picks'}" data="{(picks.value || []).map(p => p.events)}" fixedItemSize="true" limit="100">
-      <EventCard event="{$item}" filterTerm="{filterTerm}" />
-    </List>
+    <VStack when="{viewMode === 'picks'}" gap="$space-2">
+      <Text fontSize="$fontSize-sm" value="{(picks.value || []).length + ' events'}" />
+      <Text fontSize="$fontSize-xs" color="$color-text-secondary">Calendar feed for your picks:</Text>
+      <Text fontSize="$fontSize-xs" overflowMode="flow" value="{feedToken.value && feedToken.value[0] ? appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + feedToken.value[0].token : ''}" />
+      <HStack verticalAlignment="center" gap="$space-1">
+        <Button
+          size="xs"
+          icon="copy"
+          onClick="navigator.clipboard.writeText(appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + feedToken.value[0].token); toast('Copied', { duration: 1500 })"
+        />
+        <Text fontSize="$fontSize-xs" color="$color-text-secondary">Click to copy link, paste into your calendar app to subscribe.</Text>
+      </HStack>
+      <List data="{picks.value || []}" fixedItemSize="true" limit="100">
+        <PickItem pick="{$item}" />
+      </List>
+    </VStack>
   </VStack>
   </HStack>
 </App>
