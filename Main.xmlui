@@ -110,7 +110,7 @@
         <Option value="picks" label="my picks" />
       </HStack>
     </RadioGroup>
-    <List when="{viewMode === 'all'}" data="{events.value}" fixedItemSize="true" limit="100">
+    <List when="{viewMode === 'all'}" data="{window.filterEvents(window.dedupeEvents(events.value), filterTerm)}" fixedItemSize="true" limit="100">
       <EventCard event="{$item}" filterTerm="{filterTerm}" />
     </List>
     <VStack when="{viewMode === 'picks'}" gap="$space-2">
