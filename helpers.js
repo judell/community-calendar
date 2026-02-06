@@ -155,9 +155,12 @@ function isEventPicked(mergedIds, picks) {
 function buildGoogleCalendarUrl(event) {
   if (!event) return '';
 
+  // Format date for Google Calendar (YYYYMMDDTHHMMSSZ format)
+  // Must parse as Date first to handle timezone offset properly
   function formatGoogleDate(isoString) {
     if (!isoString) return '';
-    return isoString.replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const d = new Date(isoString);
+    return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   }
 
   const startDate = formatGoogleDate(event.start_time);
