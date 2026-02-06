@@ -72,7 +72,9 @@ def ics_to_json(ics_file, output_file=None, future_only=True):
     content = unfold_ics_lines(content)
 
     events = []
-    now = datetime.now(timezone.utc)
+    # Use 24 hours ago to avoid filtering out same-day events due to timezone differences
+    from datetime import timedelta
+    now = datetime.now(timezone.utc) - timedelta(hours=24)
 
     # Extract all VEVENT blocks
     pattern = r'BEGIN:VEVENT\r?\n(.*?)\r?\nEND:VEVENT'

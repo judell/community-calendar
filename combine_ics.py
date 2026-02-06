@@ -30,6 +30,23 @@ SOURCE_NAMES = {
     'SRCity': 'City of Santa Rosa',
 }
 
+# Fallback URLs for sources that don't provide event URLs
+SOURCE_URLS = {
+    'arlene_francis_theater': 'https://arlenefranciscenter.org/calendar/',
+    'luther_burbank_center': 'https://lutherburbankcenter.org/events/',
+    'schulz_museum': 'https://schulzmuseum.org/events/',
+    'sonoma_com': 'https://www.sonoma.com/events/',
+    'golocal_coop': 'https://golocal.coop/events/',
+    'sonoma_county_aa': 'https://sonomacountyaa.org/events/',
+    'sonoma_county_dsa': 'https://dsasonomacounty.org/events/',
+    'library_intercept': 'https://sonomalibrary.org/events',
+    'sonoma_county_gov': 'https://sonomacounty.ca.gov/calendar/',
+    'sonoma_parks': 'https://parks.sonomacounty.ca.gov/events/',
+    'cal_theatre': 'https://www.facebook.com/CalTheatrePT/',
+    'copperfields': 'https://www.copperfieldsbooks.com/events',
+    'SRCity': 'https://srcity.org/calendar.aspx',
+}
+
 
 def get_source_name(filename):
     """Get friendly source name from filename."""
@@ -40,6 +57,15 @@ def get_source_name(filename):
     if stem.startswith('SRCity_'):
         return 'City of Santa Rosa'
     return SOURCE_NAMES.get(base, base.replace('_', ' ').title())
+
+
+def get_fallback_url(filename):
+    """Get fallback URL for a source."""
+    stem = Path(filename).stem
+    base = re.sub(r'_\d{4}_\d{2}$', '', stem)
+    if stem.startswith('SRCity_'):
+        return SOURCE_URLS.get('SRCity')
+    return SOURCE_URLS.get(base)
 
 
 def parse_ics_datetime(dt_str):
@@ -60,18 +86,22 @@ def parse_ics_datetime(dt_str):
         return None
 
 
-def extract_events(ics_content, source_name=None):
+def extract_events(ics_content, source_name=None, fallback_url=None):
     """Extract VEVENT blocks from ICS content."""
     events = []
-    
+
     pattern = r'BEGIN:VEVENT\r?\n(.*?)\r?\nEND:VEVENT'
     matches = re.findall(pattern, ics_content, re.DOTALL)
-    
+
     for event_content in matches:
         dtstart_match = re.search(r'DTSTART[^:]*:([^\r\n]+)', event_content)
         if dtstart_match:
             dt = parse_ics_datetime(dtstart_match.group(1))
             if dt:
+                # Add fallback URL if no URL exists
+                if fallback_url and 'URL:' not in event_content:
+                    event_content = f'URL:{fallback_url}\r\n{event_content}'
+
                 # Add or update source in description
                 if source_name:
                     # Check if DESCRIPTION exists
@@ -106,7 +136,9 @@ def extract_events(ics_content, source_name=None):
 def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar"):
     """Combine all ICS files in a directory into one."""
     all_events = []
-    now = datetime.now(timezone.utc)
+    # Use 24 hours ago to avoid filtering out same-day events due to timezone differences
+    from datetime import timedelta
+    now = datetime.now(timezone.utc) - timedelta(hours=24)
     
     ics_dir = Path(input_dir)
     for ics_file in sorted(ics_dir.glob('*.ics')):
@@ -117,7 +149,8 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar")
         try:
             content = ics_file.read_text(encoding='utf-8', errors='ignore')
             source_name = get_source_name(ics_file.name)
-            events = extract_events(content, source_name)
+            fallback_url = get_fallback_url(ics_file.name)
+            events = extract_events(content, source_name, fallback_url)
             
             # Filter to future events only
             future_events = [e for e in events if e['dtstart'].replace(tzinfo=timezone.utc) >= now]
