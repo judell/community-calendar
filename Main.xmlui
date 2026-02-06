@@ -1,4 +1,4 @@
-<App name="Community Calendar" codeBehind="Main.xmlui.xs" var.showSearch="{false}" var.filterTerm="">
+<App name="Community Calendar" codeBehind="Main.xmlui.xs" var.showSearch="{false}" var.filterTerm="" var.viewMode="{'all'}">
 
   <!-- Shared state for auth and pick operations -->
   <!-- Functions defined in Main.xmlui.xs: togglePick, removePick -->
@@ -106,7 +106,16 @@
       onDidChange="(val) => filterTerm = val"
       marginBottom="$space-2"
     />
-    <List data="{window.filterEvents(window.dedupeEvents(events.value), filterTerm)}" fixedItemSize="true" limit="100">
+    <RadioGroup when="{window.authUser}" initialValue="{viewMode}" onDidChange="(val) => viewMode = val">
+      <HStack>
+        <Option value="all" label="all" />
+        <Option value="picks" label="my picks" />
+      </HStack>
+    </RadioGroup>
+    <List when="{viewMode === 'all'}" data="{events.value}" fixedItemSize="true" limit="100">
+      <EventCard event="{$item}" filterTerm="{filterTerm}" />
+    </List>
+    <List when="{viewMode === 'picks'}" data="{(picks.value || []).map(p => p.events)}" fixedItemSize="true" limit="100">
       <EventCard event="{$item}" filterTerm="{filterTerm}" />
     </List>
   </VStack>

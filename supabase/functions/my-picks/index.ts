@@ -80,9 +80,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Get token from query params
+    // Get token and format from query params
     const url = new URL(req.url);
     const token = url.searchParams.get("token");
+    const format = url.searchParams.get("format") || "ics";
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Missing token parameter" }), {
@@ -170,6 +171,17 @@ Deno.serve(async (req) => {
       })
       .filter((e: any) => e !== null)
       .sort((a: any, b: any) => a.start_time.localeCompare(b.start_time));
+
+    // Return JSON or ICS based on format parameter
+    if (format === "json") {
+      return new Response(JSON.stringify(events), {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, must-revalidate",
+        },
+      });
+    }
 
     // Generate ICS
     const ics = generateICS(events, "My Picks - Community Calendar");
