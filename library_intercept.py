@@ -1,160 +1,182 @@
+#!/usr/bin/env python3
+"""
+Scraper for library events (Sonoma County Library, Bloomington Library)
+Fetches all upcoming events from the library event pages.
+"""
+
+import sys
+sys.path.insert(0, 'scrapers')
+
+import argparse
+import re
+from datetime import datetime, timedelta
+from typing import Any
+
 import requests
 from bs4 import BeautifulSoup
-from icalendar import Calendar, Event
-from datetime import datetime
-import pytz
-import re
-import argparse
-from dateutil.relativedelta import relativedelta
+from zoneinfo import ZoneInfo
 
-# Library-specific configurations
-LIBRARY_CONFIGS = {
-    'santarosa': {
-        'base_url': 'https://events.sonomalibrary.org/events/list?page=',
-        'url_prefix': 'https://events.sonomalibrary.org',
-        'timezone': 'America/Los_Angeles',
-        'prodid': '-//Santa Rosa Library Events//',
-        'calname': 'Santa Rosa Library'
-    },
-    'bloomington': {
-        'base_url': 'https://www.bloomingtonlibrary.org/events/list?page=',
-        'url_prefix': 'https://www.bloomingtonlibrary.org',
-        'timezone': 'America/Indiana/Indianapolis',
-        'prodid': '-//Bloomington Library Events//',
-        'calname': 'Bloomington Library'
-    }
-}
+from lib.base import BaseScraper
 
-def scrape_events(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    events = soup.find_all('div', class_='lc-list-event-content-container')
-    return events
 
-def parse_event(event, target_month_end, url_prefix):
-    try:
-        title_element = event.find('h2')
-        if not title_element or not title_element.find('a'):
-            print("Debug - Event missing title or URL")
-            return None
-        title = title_element.text.strip()
-        url = url_prefix + title_element.find('a')['href']
+class LibraryScraper(BaseScraper):
+    """Scraper for library events."""
 
-        date_element = event.find('div', class_='lc-list-event-info-item--date')
-        if not date_element:
-            print("Debug - Event missing date information")
-            return None
-        date_str = date_element.text.strip()
+    # These will be set based on location
+    name = "Library"
+    domain = "library.org"
+    base_url = ""
+    url_prefix = ""
+    timezone = "America/Los_Angeles"
 
-        location_element = event.find('div', class_='lc-list-event-location')
-        location = location_element.text.strip() if location_element else "Location not specified"
-
-        description_element = event.find('div', class_='lc-list-event-description')
-        description = description_element.text.strip() if description_element else "No description available"
-
-        # Clean up the date string
-        date_str = ' '.join(date_str.split())
-
-        # Parse date and time
-        date_pattern = r'(\w+, \w+ \d{1,2}, \d{4}) at (\d{1,2}:\d{2}(?:am|pm)) - (\d{1,2}:\d{2}(?:am|pm))'
-        match = re.match(date_pattern, date_str)
-
-        if not match:
-            print(f"Debug - Failed to parse date or time from: {date_str}")
-            return None
-
-        date_str, start_time_str, end_time_str = match.groups()
-
-        date = datetime.strptime(date_str, '%A, %B %d, %Y')
-        start_time = datetime.strptime(start_time_str, '%I:%M%p')
-        end_time = datetime.strptime(end_time_str, '%I:%M%p')
-
-        start_datetime = date.replace(hour=start_time.hour, minute=start_time.minute)
-        end_datetime = date.replace(hour=end_time.hour, minute=end_time.minute)
-
-        # Skip events in or after the next month
-        if start_datetime >= target_month_end:
-            return None
-
-        return {
-            'summary': title,
-            'description': description,
-            'location': location,
-            'dtstart': start_datetime,
-            'dtend': end_datetime,
-            'url': url
+    # Library-specific configurations
+    CONFIGS = {
+        'santarosa': {
+            'name': 'Sonoma County Library',
+            'domain': 'sonomalibrary.org',
+            'base_url': 'https://events.sonomalibrary.org/events/list?page=',
+            'url_prefix': 'https://events.sonomalibrary.org',
+            'timezone': 'America/Los_Angeles',
+        },
+        'bloomington': {
+            'name': 'Bloomington Library',
+            'domain': 'bloomingtonlibrary.org',
+            'base_url': 'https://www.bloomingtonlibrary.org/events/list?page=',
+            'url_prefix': 'https://www.bloomingtonlibrary.org',
+            'timezone': 'America/Indiana/Indianapolis',
         }
-    except Exception as e:
-        print(f"Debug - Error parsing event: {str(e)}")
-        return None
+    }
 
-def create_ical(events, library_config):
-    cal = Calendar()
-    cal.add('prodid', library_config['prodid'])
-    cal.add('x-wr-calname', library_config['calname'])
+    def __init__(self, location: str = 'santarosa'):
+        super().__init__()
+        config = self.CONFIGS.get(location)
+        if not config:
+            raise ValueError(f"Unsupported location: {location}. Use: {list(self.CONFIGS.keys())}")
 
-    tz = pytz.timezone(library_config['timezone'])
+        self.location = location
+        self.name = config['name']
+        self.domain = config['domain']
+        self.base_url = config['base_url']
+        self.url_prefix = config['url_prefix']
+        self.timezone = config['timezone']
 
-    for event_data in events:
-        if event_data is None:
-            continue
-        event = Event()
-        event.add('summary', event_data['summary'])
-        event.add('description', event_data['description'])
-        event.add('location', event_data['location'])
-        event.add('dtstart', tz.localize(event_data['dtstart']))
-        event.add('dtend', tz.localize(event_data['dtend']))
-        event.add('url', event_data['url'])
-        cal.add_component(event)
+    def fetch_events(self) -> list[dict[str, Any]]:
+        """Fetch events from the library event pages up to months_ahead."""
+        page = 1
+        all_events = []
+        cutoff = datetime.now().astimezone() + timedelta(days=self.months_ahead * 31)
 
-    return cal
+        while True:
+            url = self.base_url + str(page)
+            self.logger.info(f"Scraping page {page}")
 
-def main(year, month, location):
-    library_config = LIBRARY_CONFIGS.get(location)
-    if not library_config:
-        raise ValueError(f"Unsupported location: {location}")
+            events = self._scrape_page(url)
+            if not events:
+                break
 
-    base_url = library_config['base_url']
-    page = 1
-    all_events = []
-    target_month_start = datetime(year, month, 1)
-    # Use first day of next month for comparison (events on last day of month should be included)
-    target_month_end = target_month_start + relativedelta(months=1)
+            parsed_events = [self._parse_event(e) for e in events]
+            parsed_events = [e for e in parsed_events if e is not None]
 
-    while True:
-        url = base_url + str(page)
-        print(f"Scraping page {page}")
-        events = scrape_events(url)
+            if not parsed_events:
+                break
 
-        if not events:
-            break
+            # Stop paginating if all events on this page are beyond the cutoff
+            if all(e['dtstart'] > cutoff for e in parsed_events):
+                self.logger.info(f"Stopping: page {page} events are beyond {self.months_ahead} months")
+                break
 
-        parsed_events = [parse_event(event, target_month_end, library_config['url_prefix']) for event in events]
-        parsed_events = [event for event in parsed_events if event is not None]
+            all_events.extend(parsed_events)
+            page += 1
 
-        if not parsed_events:
-            # If all events on the page are after the target month or couldn't be parsed, stop scraping
-            break
+        return all_events
 
-        all_events.extend(parsed_events)
-        page += 1
+    def _scrape_page(self, url: str) -> list:
+        """Scrape events from a single page."""
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
+            return soup.find_all('div', class_='lc-list-event-content-container')
+        except Exception as e:
+            self.logger.warning(f"Error scraping {url}: {e}")
+            return []
 
-    ical = create_ical(all_events, library_config)
+    def _parse_event(self, event) -> dict[str, Any] | None:
+        """Parse a single event."""
+        try:
+            title_element = event.find('h2')
+            if not title_element or not title_element.find('a'):
+                return None
 
-    output_file = f"./{location}/library_intercept_{year}_{month:02d}.ics"
-    with open(output_file, 'wb') as f:
-        f.write(ical.to_ical())
+            title = title_element.text.strip()
+            url = self.url_prefix + title_element.find('a')['href']
 
-    print(f"Exported {len(all_events)} events to {output_file}")
+            date_element = event.find('div', class_='lc-list-event-info-item--date')
+            if not date_element:
+                return None
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Scrape library events for a specific year and month.')
-    parser.add_argument('--location', type=str, required=True, choices=['santarosa', 'bloomington'], help='Library to scrape')
-    parser.add_argument('--year', type=int, required=True, help='Target year (e.g., 2024)')
-    parser.add_argument('--month', type=int, required=True, help='Target month (1-12)')
+            date_str = ' '.join(date_element.text.strip().split())
+
+            location_element = event.find('div', class_='lc-list-event-location')
+            location = location_element.text.strip() if location_element else "Location not specified"
+
+            description_element = event.find('div', class_='lc-list-event-description')
+            description = description_element.text.strip() if description_element else ""
+
+            # Parse date and time
+            date_pattern = r'(\w+, \w+ \d{1,2}, \d{4}) at (\d{1,2}:\d{2}(?:am|pm)) - (\d{1,2}:\d{2}(?:am|pm))'
+            match = re.match(date_pattern, date_str)
+
+            if not match:
+                self.logger.debug(f"Failed to parse date: {date_str}")
+                return None
+
+            date_str, start_time_str, end_time_str = match.groups()
+
+            date = datetime.strptime(date_str, '%A, %B %d, %Y')
+            start_time = datetime.strptime(start_time_str, '%I:%M%p')
+            end_time = datetime.strptime(end_time_str, '%I:%M%p')
+
+            tz = ZoneInfo(self.timezone)
+            dt_start = date.replace(hour=start_time.hour, minute=start_time.minute, tzinfo=tz)
+            dt_end = date.replace(hour=end_time.hour, minute=end_time.minute, tzinfo=tz)
+
+            self.logger.info(f"Found event: {title} on {dt_start}")
+
+            return {
+                'title': title,
+                'description': description,
+                'location': location,
+                'dtstart': dt_start,
+                'dtend': dt_end,
+                'url': url
+            }
+        except Exception as e:
+            self.logger.debug(f"Error parsing event: {e}")
+            return None
+
+    def default_output_filename(self) -> str:
+        """Generate default output filename including location."""
+        return f"{self.location}/library_intercept.ics"
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Scrape library events.')
+    parser.add_argument('--location', type=str, required=True,
+                        choices=['santarosa', 'bloomington'],
+                        help='Library to scrape')
+    parser.add_argument('--output', '-o', type=str, help='Output filename')
+    parser.add_argument('--debug', action='store_true', help='Enable debug logging')
     args = parser.parse_args()
 
-    if args.month < 1 or args.month > 12:
-        raise ValueError("Month must be between 1 and 12")
+    LibraryScraper.setup_logging()
+    if args.debug:
+        import logging
+        logging.getLogger().setLevel(logging.DEBUG)
 
-    main(args.year, args.month, args.location)
+    scraper = LibraryScraper(args.location)
+    scraper.run(args.output)
+
+
+if __name__ == '__main__':
+    main()

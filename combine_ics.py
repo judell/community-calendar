@@ -28,6 +28,18 @@ SOURCE_NAMES = {
     'eventbrite': 'Eventbrite',
     'pressdemocrat': 'Press Democrat',
     'SRCity': 'City of Santa Rosa',
+    'srcc': 'Santa Rosa Cycling Club',
+    'cafefrida': 'Cafe Frida',
+    'sebastopol_community': 'Sebastopol Community Center',
+    'redwood_cafe': 'Redwood Cafe',
+    'sebarts': 'Sebastopol Center for the Arts',
+    'occidental_arts': 'Occidental Arts & Ecology Center',
+    'svma': 'Sonoma Valley Museum of Art',
+    'sonoma_city': 'City of Sonoma',
+    'bgc_bloomington': 'Boys & Girls Club Bloomington',
+    'bloomington_gov': 'City of Bloomington',
+    'bloomington_arts': 'Bloomington Arts',
+    'bluebird': 'The Bluebird',
 }
 
 # Fallback URLs for sources that don't provide event URLs
@@ -51,21 +63,17 @@ SOURCE_URLS = {
 def get_source_name(filename):
     """Get friendly source name from filename."""
     stem = Path(filename).stem
-    # Remove year/month suffix like _2026_02
-    base = re.sub(r'_\d{4}_\d{2}$', '', stem)
-    # Check for SRCity prefix
     if stem.startswith('SRCity_'):
         return 'City of Santa Rosa'
-    return SOURCE_NAMES.get(base, base.replace('_', ' ').title())
+    return SOURCE_NAMES.get(stem, stem.replace('_', ' ').title())
 
 
 def get_fallback_url(filename):
     """Get fallback URL for a source."""
     stem = Path(filename).stem
-    base = re.sub(r'_\d{4}_\d{2}$', '', stem)
     if stem.startswith('SRCity_'):
         return SOURCE_URLS.get('SRCity')
-    return SOURCE_URLS.get(base)
+    return SOURCE_URLS.get(stem)
 
 
 def parse_ics_datetime(dt_str):

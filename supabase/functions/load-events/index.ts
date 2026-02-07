@@ -5,7 +5,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const EVENTS_JSON_URL = "https://judell.github.io/community-calendar/santarosa/events.json";
+// Events JSON URLs by city
+const EVENTS_URLS: Record<string, string> = {
+  santarosa: "https://judell.github.io/community-calendar/santarosa/events.json",
+  sebastopol: "https://judell.github.io/community-calendar/sebastopol/events.json",
+  cotati: "https://judell.github.io/community-calendar/cotati/events.json",
+  sonoma: "https://judell.github.io/community-calendar/sonoma/events.json",
+  bloomington: "https://judell.github.io/community-calendar/bloomington/events.json",
+  davis: "https://judell.github.io/community-calendar/davis/events.json",
+};
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -19,19 +27,32 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch events.json from GitHub Pages
-    console.log("Fetching events from:", EVENTS_JSON_URL);
-    const response = await fetch(EVENTS_JSON_URL);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch events: ${response.status}`);
+    // Fetch events from all cities
+    const allEvents: any[] = [];
+    for (const [city, url] of Object.entries(EVENTS_URLS)) {
+      console.log(`Fetching events from ${city}:`, url);
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          console.error(`Failed to fetch ${city}: ${response.status}`);
+          continue;
+        }
+        const events = await response.json();
+        // Ensure city is set on each event
+        for (const event of events) {
+          event.city = event.city || city;
+        }
+        allEvents.push(...events);
+        console.log(`Fetched ${events.length} events from ${city}`);
+      } catch (e) {
+        console.error(`Error fetching ${city}:`, e);
+      }
     }
-
-    const events = await response.json();
-    console.log(`Fetched ${events.length} events`);
+    console.log(`Total fetched: ${allEvents.length} events`);
 
     // Deduplicate by source_uid
     const uniqueEvents = new Map();
-    for (const event of events) {
+    for (const event of allEvents) {
       if (event.source_uid && !uniqueEvents.has(event.source_uid)) {
         uniqueEvents.set(event.source_uid, event);
       }
@@ -64,7 +85,7 @@ Deno.serve(async (req) => {
 
     const result = {
       success: true,
-      fetched: events.length,
+      fetched: allEvents.length,
       unique: uniqueEvents.size,
       inserted,
       errors,

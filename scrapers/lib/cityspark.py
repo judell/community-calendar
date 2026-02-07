@@ -3,7 +3,7 @@
 Used by Bohemian and Press Democrat event calendars.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -33,25 +33,22 @@ class CitySparkScraper(BaseScraper):
     lng: float = 0.0
     distance: int = 30
     calendar_url: str = ""
-    
     API_BASE = "https://portal.cityspark.com/v1/events"
-    
-    def fetch_events(self, year: int, month: int) -> list[dict[str, Any]]:
+
+    def fetch_events(self) -> list[dict[str, Any]]:
         """Fetch events from CitySpark API."""
         results = []
         seen_ids = set()
         page_size = 100  # API max
-        
-        # Calculate month boundaries
-        month_start = datetime(year, month, 1)
-        if month == 12:
-            month_end = datetime(year + 1, 1, 1)
-        else:
-            month_end = datetime(year, month + 1, 1)
-        
-        start_str = month_start.strftime("%Y-%m-%dT%H:%M:%S")
-        end_str = month_end.strftime("%Y-%m-%dT%H:%M:%S")
-        
+
+        # Fetch from today to N months ahead
+        now = datetime.now()
+        start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = start_date + timedelta(days=self.months_ahead * 31)
+
+        start_str = start_date.strftime("%Y-%m-%dT%H:%M:%S")
+        end_str = end_date.strftime("%Y-%m-%dT%H:%M:%S")
+
         skip = 0
         while True:
             url = f"{self.API_BASE}/{self.api_slug}"
@@ -66,48 +63,44 @@ class CitySparkScraper(BaseScraper):
                 "skip": skip,
                 "tps": str(page_size)
             }
-            
+
             self.logger.info(f"Fetching page at skip={skip}")
             response = requests.post(url, json=payload, headers={'Content-Type': 'application/json'})
             response.raise_for_status()
             data = response.json()
-            
+
             events = data.get('Value') or []
             if not events:
                 break
-            
+
             for event in events:
                 event_id = event.get('Id') or event.get('PId', '')
                 if event_id in seen_ids:
                     continue
                 seen_ids.add(event_id)
-                
-                parsed = self._parse_event(event, year, month)
+
+                parsed = self._parse_event(event)
                 if parsed:
                     results.append(parsed)
-            
+
             if len(events) < page_size:
                 break
             skip += page_size
-        
+
         return results
-    
-    def _parse_event(self, event: dict, year: int, month: int) -> dict[str, Any] | None:
+
+    def _parse_event(self, event: dict) -> dict[str, Any] | None:
         """Parse a single event from API response."""
         pacific = ZoneInfo('America/Los_Angeles')
-        
+
         # Parse UTC times and convert to Pacific
         start_utc = event.get('StartUTC')
         if not start_utc:
             return None
-        
+
         event_start_utc = datetime.fromisoformat(start_utc.replace('Z', '+00:00'))
         event_start = event_start_utc.astimezone(pacific)
-        
-        # Filter by target month
-        if event_start.year != year or event_start.month != month:
-            return None
-        
+
         # Parse end time
         end_utc = event.get('EndUTC')
         if end_utc:
@@ -115,7 +108,7 @@ class CitySparkScraper(BaseScraper):
             event_end = event_end_utc.astimezone(pacific)
         else:
             event_end = event_start
-        
+
         # Get URL from links, fall back to CitySpark event page
         url = ''
         links = event.get('Links') or []

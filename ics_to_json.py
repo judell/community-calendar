@@ -64,7 +64,7 @@ def extract_field(event_content, field_name):
     return None
 
 
-def ics_to_json(ics_file, output_file=None, future_only=True):
+def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
     """Convert an ICS file to JSON format for Supabase."""
     content = Path(ics_file).read_text(encoding='utf-8', errors='ignore')
 
@@ -106,6 +106,7 @@ def ics_to_json(ics_file, output_file=None, future_only=True):
             except ValueError:
                 pass
 
+
         event = {
             'title': title,
             'start_time': start_time,
@@ -113,6 +114,7 @@ def ics_to_json(ics_file, output_file=None, future_only=True):
             'location': location or '',
             'description': description or '',
             'url': url or '',
+            'city': city or '',
             'source': source or '',
             'source_uid': uid or ''
         }
@@ -137,8 +139,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert ICS to JSON for Supabase')
     parser.add_argument('input', help='Input ICS file')
     parser.add_argument('-o', '--output', help='Output JSON file (stdout if not specified)')
+    parser.add_argument('--city', help='City name (e.g., santarosa, sebastopol)')
     parser.add_argument('--all', action='store_true', help='Include past events (default: future only)')
 
     args = parser.parse_args()
 
-    ics_to_json(args.input, args.output, future_only=not args.all)
+    ics_to_json(args.input, args.output, future_only=not args.all, city=args.city)

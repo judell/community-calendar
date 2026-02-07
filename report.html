@@ -15,9 +15,9 @@
             --danger: #e74c3c;
             --success: #27ae60;
         }
-        
+
         * { box-sizing: border-box; }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
@@ -26,92 +26,174 @@
             padding: 20px;
             line-height: 1.5;
         }
-        
+
         h1 {
             color: var(--accent);
             margin-bottom: 5px;
         }
-        
+
         .generated {
             color: var(--text-muted);
             font-size: 0.9em;
             margin-bottom: 30px;
         }
-        
+
+        .summary {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .summary-city {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .summary-city .count {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .summary-city .label {
+            text-transform: capitalize;
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+
         .anomalies {
             background: var(--card-bg);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 30px;
         }
-        
+
         .anomalies h2 {
             margin-top: 0;
             color: var(--danger);
         }
-        
+
         .anomaly {
             padding: 10px;
             margin: 8px 0;
             border-radius: 4px;
             border-left: 4px solid;
         }
-        
+
         .anomaly.high {
             background: rgba(231, 76, 60, 0.1);
             border-color: var(--danger);
         }
-        
+
         .anomaly.medium {
             background: rgba(255, 193, 7, 0.1);
             border-color: var(--warning);
         }
-        
+
         .anomaly .meta {
             font-size: 0.85em;
             color: var(--text-muted);
         }
-        
+
         .no-anomalies {
             color: var(--success);
         }
-        
-        .city {
+
+        details.city {
             background: var(--card-bg);
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
-        
-        .city h2 {
-            margin-top: 0;
-            color: var(--accent);
-            text-transform: capitalize;
-        }
-        
-        .feeds {
-            display: grid;
-            gap: 15px;
-        }
-        
-        .feed {
-            background: rgba(255,255,255,0.03);
-            border-radius: 6px;
-            padding: 15px;
-        }
-        
-        .feed-header {
+
+        details.city > summary {
+            padding: 16px 20px;
+            cursor: pointer;
+            list-style: none;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            border-radius: 8px;
         }
-        
+
+        details.city > summary::-webkit-details-marker { display: none; }
+
+        details.city > summary::before {
+            content: '\25b6';
+            margin-right: 10px;
+            font-size: 0.7em;
+            transition: transform 0.2s;
+        }
+
+        details.city[open] > summary::before {
+            transform: rotate(90deg);
+        }
+
+        .city-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: capitalize;
+        }
+
+        .city-total {
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+
+        .city-total strong {
+            color: var(--accent);
+            font-size: 1.1em;
+        }
+
+        .city-content {
+            padding: 0 20px 16px;
+        }
+
+        details.feed {
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        details.feed > summary {
+            padding: 12px 15px;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        details.feed > summary::-webkit-details-marker { display: none; }
+
+        details.feed > summary::before {
+            content: '\25b6';
+            margin-right: 8px;
+            font-size: 0.6em;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        details.feed[open] > summary::before {
+            transform: rotate(90deg);
+        }
+
+        .feed-summary-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .feed-name {
             font-weight: 600;
             color: var(--text);
         }
-        
+
         .feed-type {
             font-size: 0.75em;
             padding: 2px 8px;
@@ -119,33 +201,28 @@
             background: rgba(78, 204, 163, 0.2);
             color: var(--accent);
         }
-        
-        .feed-current {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 10px;
+
+        .feed-count {
+            font-weight: 600;
+            min-width: 80px;
+            text-align: right;
         }
-        
-        .feed-current.zero {
-            color: var(--danger);
+
+        .feed-count.zero { color: var(--danger); }
+        .feed-count.healthy { color: var(--success); }
+        .feed-count.error { color: var(--danger); }
+
+        .feed-detail {
+            padding: 0 15px 15px;
         }
-        
-        .feed-current.healthy {
-            color: var(--success);
-        }
-        
-        .feed-current.error {
-            color: var(--danger);
-            font-size: 1em;
-        }
-        
+
         .sparkline {
             height: 40px;
             display: flex;
             align-items: flex-end;
             gap: 2px;
         }
-        
+
         .sparkline .bar {
             flex: 1;
             min-width: 3px;
@@ -154,26 +231,26 @@
             border-radius: 2px 2px 0 0;
             transition: background 0.2s;
         }
-        
+
         .sparkline .bar:hover {
             background: var(--text);
         }
-        
+
         .sparkline .bar.error {
             background: var(--danger);
         }
-        
+
         .sparkline .bar.zero {
             background: var(--warning);
             min-height: 2px;
         }
-        
+
         .history-label {
             font-size: 0.75em;
             color: var(--text-muted);
             margin-top: 5px;
         }
-        
+
         .loading {
             text-align: center;
             padding: 50px;
@@ -182,25 +259,26 @@
 
         @media (max-width: 600px) {
             body { padding: 10px; }
-            .feed-header { flex-direction: column; align-items: flex-start; gap: 5px; }
         }
     </style>
 </head>
 <body>
-    <h1>📊 Calendar Feed Health Report</h1>
+    <h1>Calendar Feed Health Report</h1>
     <div class="generated" id="generated">Loading...</div>
-    
+
+    <div class="summary" id="summary"></div>
+
     <div class="anomalies" id="anomalies">
-        <h2>⚠️ Anomalies</h2>
+        <h2>Anomalies</h2>
         <div id="anomaly-list" class="loading">Loading...</div>
     </div>
-    
+
     <div id="cities"></div>
-    
+
     <script>
         const REPORT_URL = 'report.json';
-        const MAX_HISTORY_DISPLAY = 30; // Show last 30 days in sparkline
-        
+        const MAX_HISTORY_DISPLAY = 30;
+
         async function loadReport() {
             try {
                 const response = await fetch(REPORT_URL);
@@ -211,98 +289,124 @@
                 document.getElementById('generated').textContent = 'Error loading report: ' + e.message;
             }
         }
-        
+
         function renderReport(data) {
-            // Generated timestamp
             const genDate = new Date(data.generated);
-            document.getElementById('generated').textContent = 
+            document.getElementById('generated').textContent =
                 `Last updated: ${genDate.toLocaleString()}`;
-            
-            // Anomalies (recent first)
+
+            // Summary totals per city
+            const summaryEl = document.getElementById('summary');
+            const cityTotals = {};
+            for (const [city, cityData] of Object.entries(data.cities || {})) {
+                cityTotals[city] = Object.values(cityData.feeds || {}).reduce((sum, feed) => {
+                    const latest = (feed.history || []).slice(-1)[0];
+                    return sum + (latest && !latest.error ? latest.count : 0);
+                }, 0);
+            }
+            summaryEl.innerHTML = Object.entries(cityTotals).map(([city, total]) =>
+                `<div class="summary-city">
+                    <div class="count">${total.toLocaleString()}</div>
+                    <div class="label">${city}</div>
+                </div>`
+            ).join('');
+
+            // Anomalies
             const recentAnomalies = (data.anomalies || [])
                 .sort((a, b) => b.date.localeCompare(a.date))
                 .slice(0, 20);
-            
+
             const anomalyList = document.getElementById('anomaly-list');
             if (recentAnomalies.length === 0) {
-                anomalyList.innerHTML = '<div class="no-anomalies">✅ No anomalies detected</div>';
+                anomalyList.innerHTML = '<div class="no-anomalies">No anomalies detected</div>';
             } else {
                 anomalyList.innerHTML = recentAnomalies.map(a => `
                     <div class="anomaly ${a.severity}">
                         <strong>${a.feed}</strong>: ${a.message}
-                        <div class="meta">${a.city} • ${a.date}</div>
+                        <div class="meta">${a.city} &bull; ${a.date}</div>
                     </div>
                 `).join('');
             }
-            
-            // Cities
+
+            // Cities as collapsible sections
             const citiesContainer = document.getElementById('cities');
             citiesContainer.innerHTML = '';
-            
+
             for (const [cityName, cityData] of Object.entries(data.cities || {})) {
-                const cityDiv = document.createElement('div');
-                cityDiv.className = 'city';
-                
                 const feeds = Object.entries(cityData.feeds || {})
-                    .sort((a, b) => a[0].localeCompare(b[0]));
-                
-                cityDiv.innerHTML = `
-                    <h2>${cityName}</h2>
-                    <div class="feeds">
+                    .sort((a, b) => {
+                        const aCount = ((a[1].history || []).slice(-1)[0] || {}).count || 0;
+                        const bCount = ((b[1].history || []).slice(-1)[0] || {}).count || 0;
+                        return bCount - aCount;
+                    });
+
+                const feedCount = feeds.length;
+                const total = cityTotals[cityName] || 0;
+
+                const cityEl = document.createElement('details');
+                cityEl.className = 'city';
+                cityEl.innerHTML = `
+                    <summary>
+                        <span class="city-name">${cityName}</span>
+                        <span class="city-total"><strong>${total.toLocaleString()}</strong> events from ${feedCount} feeds</span>
+                    </summary>
+                    <div class="city-content">
                         ${feeds.map(([name, feed]) => renderFeed(name, feed)).join('')}
                     </div>
                 `;
-                
-                citiesContainer.appendChild(cityDiv);
+
+                citiesContainer.appendChild(cityEl);
             }
         }
-        
+
         function renderFeed(name, feed) {
             const history = (feed.history || []).slice(-MAX_HISTORY_DISPLAY);
             const latest = history[history.length - 1] || {};
             const maxCount = Math.max(...history.map(h => h.count || 0), 1);
-            
-            let currentClass = 'healthy';
-            let currentText = latest.count || 0;
-            
+
+            let countClass = 'healthy';
+            let countText = `${latest.count || 0} events`;
+
             if (latest.error) {
-                currentClass = 'error';
-                currentText = `Error: ${latest.error}`;
+                countClass = 'error';
+                countText = `Error: ${latest.error}`;
             } else if (latest.count === 0) {
-                currentClass = 'zero';
-                currentText = '0 events';
-            } else {
-                currentText = `${latest.count} events`;
+                countClass = 'zero';
+                countText = '0 events';
             }
-            
+
             const sparkline = history.map(h => {
                 const height = h.count ? Math.max(10, (h.count / maxCount) * 100) : 0;
                 let barClass = '';
                 if (h.error) barClass = 'error';
                 else if (h.count === 0) barClass = 'zero';
-                
-                return `<div class="bar ${barClass}" 
-                    style="height: ${height}%" 
+
+                return `<div class="bar ${barClass}"
+                    style="height: ${height}%"
                     title="${h.date}: ${h.error || h.count + ' events'}"></div>`;
             }).join('');
-            
-            const historyRange = history.length > 1 
+
+            const historyRange = history.length > 1
                 ? `${history[0].date} to ${history[history.length-1].date}`
                 : (history[0]?.date || 'No data');
-            
+
             return `
-                <div class="feed">
-                    <div class="feed-header">
-                        <span class="feed-name">${name}</span>
-                        <span class="feed-type">${feed.type}</span>
+                <details class="feed">
+                    <summary>
+                        <span class="feed-summary-left">
+                            <span class="feed-name">${name}</span>
+                            <span class="feed-type">${feed.type}</span>
+                        </span>
+                        <span class="feed-count ${countClass}">${countText}</span>
+                    </summary>
+                    <div class="feed-detail">
+                        <div class="sparkline">${sparkline}</div>
+                        <div class="history-label">${historyRange} (${history.length} days)</div>
                     </div>
-                    <div class="feed-current ${currentClass}">${currentText}</div>
-                    <div class="sparkline">${sparkline}</div>
-                    <div class="history-label">${historyRange} (${history.length} days)</div>
-                </div>
+                </details>
             `;
         }
-        
+
         loadReport();
     </script>
 </body>
