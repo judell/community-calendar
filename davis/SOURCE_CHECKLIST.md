@@ -104,6 +104,12 @@ Well-structured pages that would need HTML scrapers.
 | Instagram-only venues | No structured data |
 | Eventbrite (general) | No clean public feed |
 | City of Davis | CDN blocking |
+| Hattie Weber Museum | DNS not resolving |
+| Davis Community Church | 404 - site changed |
+| Armadillo Music events | 404 - page removed |
+| Davis Farmers Market | No events calendar (market schedule only) |
+| Sophia's Thai Kitchen | No structured events |
+| Woodstock's Pizza | Just deals, no events |
 
 ---
 
