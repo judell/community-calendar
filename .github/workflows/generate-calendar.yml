@@ -221,9 +221,12 @@ jobs:
         )
 
     - name: Trigger Supabase events reload
+      env:
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       run: |
         echo "Triggering Supabase Edge Function to reload events..."
         RESPONSE=$(curl -sL -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
+          -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
           -H 'Content-Type: application/json')
         echo "$RESPONSE" | jq .
 
