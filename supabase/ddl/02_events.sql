@@ -8,8 +8,9 @@ CREATE TABLE IF NOT EXISTS events (
   location text,
   description text,
   url text,
-  source text,
-  source_uid text UNIQUE,
+  city text,                -- e.g., 'santarosa', 'sebastopol', 'cotati'
+  source text,              -- e.g., 'bohemian', 'pressdemocrat' (no date suffix)
+  source_uid text UNIQUE,   -- unique ID from source for deduplication
   created_at timestamptz DEFAULT now()
 );
 
@@ -18,6 +19,9 @@ CREATE INDEX IF NOT EXISTS events_start_time_idx ON events (start_time);
 
 -- Index for source filtering
 CREATE INDEX IF NOT EXISTS events_source_idx ON events (source);
+
+-- Index for city filtering
+CREATE INDEX IF NOT EXISTS events_city_idx ON events (city);
 
 -- Enable Row Level Security (public read access)
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;

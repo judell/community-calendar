@@ -424,11 +424,14 @@ jobs:
         python cal.py --generate --location bloomington --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Indiana/Indianapolis" $LOCAL_ONLY_FLAG
         python cal.py --generate --location bloomington --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Indiana/Indianapolis" $LOCAL_ONLY_FLAG
       
-    - name: Convert Santa Rosa ICS to JSON for Supabase
-      if: contains(steps.locations.outputs.list, 'santarosa')
+    - name: Convert ICS to JSON for Supabase
       run: |
-        python ics_to_json.py santarosa/combined.ics -o santarosa/events.json
-        echo "Converted $(cat santarosa/events.json | python -c 'import json,sys; print(len(json.load(sys.stdin)))') events to JSON"
+        for city in santarosa sebastopol cotati sonoma bloomington; do
+          if [ -f "$city/combined.ics" ]; then
+            python ics_to_json.py "$city/combined.ics" -o "$city/events.json" --city "$city"
+            echo "$city: Converted $(cat $city/events.json | python -c 'import json,sys; print(len(json.load(sys.stdin)))') events to JSON"
+          fi
+        done
 
     - name: Generate feed health report
       run: |
