@@ -226,6 +226,21 @@ jobs:
           done
         )
 
+    - name: Wait for GitHub Pages to update
+      run: |
+        echo "Waiting for GitHub Pages to update..."
+        sleep 120  # Wait 2 minutes for GitHub Pages cache to update
+        
+        # Verify at least one JSON file is accessible
+        for i in 1 2 3; do
+          if curl -sL "https://judell.github.io/community-calendar/santarosa/events.json" | head -c 100 | grep -q '"title"'; then
+            echo "GitHub Pages is serving updated content"
+            break
+          fi
+          echo "Waiting for GitHub Pages (attempt $i)..."
+          sleep 30
+        done
+
     - name: Trigger Supabase events reload
       env:
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
