@@ -123,11 +123,11 @@ Well-structured pages that would need HTML scrapers.
 7. [~] Davis Food Co-op - BLOCKED: Captcha redirect
 
 ### Phase 4 (Music Venues)
-8. [ ] Sophia's Thai Kitchen scraper
-9. [ ] Woodstock's Pizza scraper
+8. [~] Sophia's Thai Kitchen - No structured events calendar (restaurant site only)
+9. [~] Woodstock's Pizza - "Events" page is just weekly deals, no actual event listings
 
 ### Phase 5 (Schools - if needed)
-10. [ ] DJUSD calendar (complex)
+10. [~] DJUSD calendar - Has export feature but no subscribable feed URL. Would need manual refresh or scraping.
 
 ---
 
