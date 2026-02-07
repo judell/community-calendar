@@ -123,7 +123,17 @@ class BaseScraper(ABC):
         events = self.fetch_events()
         cutoff = datetime.now().astimezone() + timedelta(days=self.months_ahead * 31)
         before = len(events)
-        events = [e for e in events if e.get('dtstart') and e['dtstart'] <= cutoff]
+        # Handle both datetime and date objects
+        def is_before_cutoff(e):
+            dt = e.get('dtstart')
+            if not dt:
+                return False
+            if hasattr(dt, 'tzinfo') and dt.tzinfo is None:
+                dt = dt.replace(tzinfo=cutoff.tzinfo)
+            elif not hasattr(dt, 'hour'):  # date object, not datetime
+                dt = datetime.combine(dt, datetime.min.time()).replace(tzinfo=cutoff.tzinfo)
+            return dt <= cutoff
+        events = [e for e in events if is_before_cutoff(e)]
         if len(events) < before:
             self.logger.info(f"Filtered {before - len(events)} events beyond {self.months_ahead} months out")
         self.logger.info(f"Found {len(events)} events")

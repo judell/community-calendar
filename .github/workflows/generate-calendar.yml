@@ -62,7 +62,7 @@ jobs:
       run: |
         INPUT="${{ github.event.inputs.locations }}"
         if [ -z "$INPUT" ] || [ "$INPUT" = "all" ]; then
-          echo "list=santarosa,sebastopol,cotati,sonoma,bloomington" >> $GITHUB_OUTPUT
+          echo "list=santarosa,sebastopol,cotati,sonoma,bloomington,davis" >> $GITHUB_OUTPUT
         else
           echo "list=$INPUT" >> $GITHUB_OUTPUT
         fi
@@ -168,6 +168,23 @@ jobs:
         curl -sL "https://tockify.com/api/feeds/ics/bloomington.arts.calendar" -o bloomington_arts.ics || true
         cd ..
         python combine_ics.py --input-dir bloomington --output bloomington/combined.ics --name "Bloomington Community Calendar"
+
+    # ==========================================
+    # Davis
+    # ==========================================
+    - name: Scrape Davis sources
+      if: contains(steps.locations.outputs.list, 'davis') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        echo "Scraping Davis..."
+        python scrapers/ucdavis_arts.py --output davis/ucdavis_arts.ics || true
+        python scrapers/davis_downtown.py --output davis/davis_downtown.ics || true
+        python scrapers/yolo_library.py --output davis/yolo_library.ics || true
+      continue-on-error: true
+
+    - name: Combine Davis ICS
+      if: contains(steps.locations.outputs.list, 'davis')
+      run: |
+        python combine_ics.py --input-dir davis --output davis/combined.ics --name "Davis Community Calendar"
 
     # ==========================================
     # Post-processing (all cities)
