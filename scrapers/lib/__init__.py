@@ -1,5 +1,6 @@
 from .base import BaseScraper
 from .cityspark import CitySparkScraper, BohemianScraper, PressDemocratScraper
+from .ics import IcsScraper, GoogleCalendarScraper
 from .rss import RssScraper
 from .utils import (
     fetch_with_retry,
@@ -15,6 +16,8 @@ __all__ = [
     'CitySparkScraper',
     'BohemianScraper',
     'PressDemocratScraper',
+    'IcsScraper',
+    'GoogleCalendarScraper',
     'RssScraper',
     'fetch_with_retry',
     'generate_uid',
