@@ -426,7 +426,8 @@ jobs:
       
     - name: Convert ICS to JSON for Supabase
       run: |
-        for city in santarosa sebastopol cotati sonoma bloomington; do
+        IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
+        for city in "${CITIES[@]}"; do
           if [ -f "$city/combined.ics" ]; then
             python ics_to_json.py "$city/combined.ics" -o "$city/events.json" --city "$city"
             echo "$city: Converted $(cat $city/events.json | python -c 'import json,sys; print(len(json.load(sys.stdin)))') events to JSON"
@@ -435,7 +436,7 @@ jobs:
 
     - name: Generate feed health report
       run: |
-        python report.py --cities santarosa,sebastopol,cotati,sonoma,bloomington
+        python report.py --cities ${{ steps.locations.outputs.list }}
 
     - name: Commit and push if changes
       env:
