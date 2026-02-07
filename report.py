@@ -101,9 +101,7 @@ def extract_feed_name_from_url(url: str) -> str:
 def extract_feed_name_from_path(path: str) -> str:
     """Extract a readable name from a local file path."""
     filename = os.path.basename(path)
-    # Remove date suffix and extension
-    name = re.sub(r'_\d{4}_\d{2}\.ics$', '', filename)
-    name = name.replace('.ics', '')
+    name = filename.replace('.ics', '')
     return name
 
 

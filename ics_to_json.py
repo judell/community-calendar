@@ -106,10 +106,6 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
             except ValueError:
                 pass
 
-        # Strip date suffix from source (e.g., 'bohemian_2026_02' -> 'bohemian')
-        if source:
-            import re as re_inner
-            source = re_inner.sub(r'_\d{4}_\d{2}$', '', source)
 
         event = {
             'title': title,
