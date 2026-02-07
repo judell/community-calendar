@@ -4,9 +4,13 @@ A community event aggregator that scrapes events from multiple sources, combines
 
 ## Live App
 
-**XMLUI App**: https://judell.github.io/community-calendar/
+**XMLUI App (Santa Rosa)**: https://judell.github.io/community-calendar/
 
-**Subscribable ICS Feed**: https://judell.github.io/community-calendar/santarosa/combined.ics
+**XMLUI App (Davis)**: https://judell.github.io/community-calendar/davis.html
+
+**Subscribable ICS Feeds**:
+- Santa Rosa: https://judell.github.io/community-calendar/santarosa/combined.ics
+- Davis: https://judell.github.io/community-calendar/davis/combined.ics
 
 ## Architecture
 
@@ -116,7 +120,8 @@ CREATE TABLE events (
   location text,
   description text,
   url text,
-  source text,
+  city text,           -- e.g., 'santarosa', 'davis'
+  source text,         -- e.g., 'bohemian', 'yolo_library'
   source_uid text UNIQUE,
   created_at timestamptz DEFAULT now()
 );
@@ -187,6 +192,7 @@ The workflow in `.github/workflows/generate-calendar.yml` runs automatically.
 - `cotati` - Cotati, CA (America/Los_Angeles)
 - `sonoma` - Sonoma, CA (America/Los_Angeles)
 - `bloomington` - Bloomington, IN (America/Indiana/Indianapolis)
+- `davis` - Davis, CA (America/Los_Angeles)
 
 **Time range**: Current month + next 2 months
 
@@ -465,5 +471,10 @@ community-calendar/
 │   ├── events.json         # JSON for Supabase ingestion
 │   ├── feeds.txt           # List of ICS sources
 │   └── *.ics               # Individual source feeds
+├── davis/
+│   ├── combined.ics        # Davis subscribable calendar feed
+│   ├── events.json         # Davis JSON for Supabase ingestion
+│   ├── feeds.txt           # Davis feed sources
+│   └── *.ics               # UC Davis Arts, Davis Downtown, Yolo Library
 └── scrapers/               # Event scrapers
 ```
