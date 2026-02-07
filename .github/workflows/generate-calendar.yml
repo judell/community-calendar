@@ -177,8 +177,14 @@ jobs:
       run: |
         echo "Scraping Davis..."
         python scrapers/ucdavis_arts.py --output davis/ucdavis_arts.ics || true
+        python scrapers/ucdavis_library.py --output davis/ucdavis_library.ics || true
+        python scrapers/ucdavis_campusgroups.py --output davis/ucdavis_campusgroups.ics || true
         python scrapers/davis_downtown.py --output davis/davis_downtown.ics || true
         python scrapers/yolo_library.py --output davis/yolo_library.ics || true
+        python scrapers/uudavis.py --output davis/uudavis.ics || true
+        python davis/scrapers/mondavi_center.py --output davis/mondavi_center.ics || true
+        python scrapers/davis_chamber.py --output davis/davis_chamber.ics || true
+        python scrapers/ucdavis_athletics.py --output davis/ucdavis_athletics.ics || true
       continue-on-error: true
 
     - name: Combine Davis ICS
