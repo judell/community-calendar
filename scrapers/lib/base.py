@@ -41,7 +41,7 @@ class BaseScraper(ABC):
         """Configure logging for scrapers."""
         logging.basicConfig(
             level=level,
-            format='%(asctime)s - %(levelname)s - %(message)s'
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         )
 
     @classmethod
