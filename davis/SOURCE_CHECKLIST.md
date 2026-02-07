@@ -106,11 +106,11 @@ Well-structured pages that would need HTML scrapers.
 ## 📋 Implementation Roadmap
 
 ### Phase 1 (Quick wins)
-1. [ ] Pence Gallery RSS scraper
-2. [ ] UU Davis Google Calendar ICS extraction
+1. [x] UU Davis Google Calendar ICS extraction
+2. [~] Pence Gallery - BLOCKED: RSS empty, My Calendar API disabled. Needs HTML scraper.
 
 ### Phase 2 (High-value HTML scrapers)
-3. [ ] Mondavi Center scraper
+3. [x] Mondavi Center scraper
 4. [ ] Manetti Shrem Museum scraper
 5. [ ] Davis Chamber (MemberClicks) scraper
 
