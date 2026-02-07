@@ -6,11 +6,14 @@ Prioritized list of potential event sources for the Davis community calendar.
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
-| UC Davis Arts | ICS | ~36 | `arts.ucdavis.edu` monthly ICS feeds |
-| UC Davis Library | ICS | ~88 | `events.library.ucdavis.edu/calendar/1.ics` |
-| UC Davis CampusGroups | ICS | ~293 | `aggielife.ucdavis.edu` - student orgs |
+| UC Davis Arts | ICS | ~152 | `arts.ucdavis.edu` monthly ICS feeds |
+| UC Davis Library | ICS | ~89 | `events.library.ucdavis.edu/calendar/1.ics` |
+| UC Davis CampusGroups | ICS | ~297 | `aggielife.ucdavis.edu` - student orgs |
 | Yolo County Library | RSS | ~129 | LibCal RSS, filtered to Davis branches |
 | Davis Downtown | ICS | ~5 | WordPress Events Calendar plugin |
+| UU Davis | ICS | ~17 | Google Calendar ICS feeds |
+| Mondavi Center | Scraper | ~12 | HTML scraper for performing arts |
+| Davis Chamber | XML | ~16 | MemberClicks XML API |
 
 ---
 
@@ -111,8 +114,8 @@ Well-structured pages that would need HTML scrapers.
 
 ### Phase 2 (High-value HTML scrapers)
 3. [x] Mondavi Center scraper
-4. [ ] Manetti Shrem Museum scraper
-5. [ ] Davis Chamber (MemberClicks) scraper
+4. [~] Manetti Shrem Museum - BLOCKED: Cloudflare Turnstile. Also currently shows "no events".
+5. [x] Davis Chamber - MemberClicks XML API works!
 
 ### Phase 3 (Sports & Recreation)
 6. [ ] UC Davis Athletics scraper
