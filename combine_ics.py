@@ -28,6 +28,18 @@ SOURCE_NAMES = {
     'eventbrite': 'Eventbrite',
     'pressdemocrat': 'Press Democrat',
     'SRCity': 'City of Santa Rosa',
+    'srcc': 'Santa Rosa Cycling Club',
+    'cafefrida': 'Cafe Frida',
+    'sebastopol_community': 'Sebastopol Community Center',
+    'redwood_cafe': 'Redwood Cafe',
+    'sebarts': 'Sebastopol Center for the Arts',
+    'occidental_arts': 'Occidental Arts & Ecology Center',
+    'svma': 'Sonoma Valley Museum of Art',
+    'sonoma_city': 'City of Sonoma',
+    'bgc_bloomington': 'Boys & Girls Club Bloomington',
+    'bloomington_gov': 'City of Bloomington',
+    'bloomington_arts': 'Bloomington Arts',
+    'bluebird': 'The Bluebird',
 }
 
 # Fallback URLs for sources that don't provide event URLs

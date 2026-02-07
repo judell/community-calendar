@@ -38,6 +38,34 @@
             margin-bottom: 30px;
         }
         
+        .summary {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .summary-city {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .summary-city .count {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .summary-city .label {
+            text-transform: capitalize;
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+
         .anomalies {
             background: var(--card-bg);
             border-radius: 8px;
@@ -189,7 +217,9 @@
 <body>
     <h1>📊 Calendar Feed Health Report</h1>
     <div class="generated" id="generated">Loading...</div>
-    
+
+    <div class="summary" id="summary"></div>
+
     <div class="anomalies" id="anomalies">
         <h2>⚠️ Anomalies</h2>
         <div id="anomaly-list" class="loading">Loading...</div>
@@ -218,6 +248,19 @@
             document.getElementById('generated').textContent = 
                 `Last updated: ${genDate.toLocaleString()}`;
             
+            // Summary totals per city
+            const summaryEl = document.getElementById('summary');
+            summaryEl.innerHTML = Object.entries(data.cities || {}).map(([city, cityData]) => {
+                const total = Object.values(cityData.feeds || {}).reduce((sum, feed) => {
+                    const latest = (feed.history || []).slice(-1)[0];
+                    return sum + (latest && !latest.error ? latest.count : 0);
+                }, 0);
+                return `<div class="summary-city">
+                    <div class="count">${total.toLocaleString()}</div>
+                    <div class="label">${city}</div>
+                </div>`;
+            }).join('');
+
             // Anomalies (recent first)
             const recentAnomalies = (data.anomalies || [])
                 .sort((a, b) => b.date.localeCompare(a.date))
