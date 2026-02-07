@@ -3,7 +3,7 @@
 import argparse
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Optional
 
 from icalendar import Calendar, Event
@@ -119,6 +119,11 @@ class BaseScraper(ABC):
         self.logger.info(f"Scraping {self.name}")
 
         events = self.fetch_events()
+        cutoff = datetime.now().astimezone() + timedelta(days=365)
+        before = len(events)
+        events = [e for e in events if e.get('dtstart') and e['dtstart'] <= cutoff]
+        if len(events) < before:
+            self.logger.info(f"Filtered {before - len(events)} events beyond 1 year out")
         self.logger.info(f"Found {len(events)} events")
 
         calendar = self.create_calendar(events)
