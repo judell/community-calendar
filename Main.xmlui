@@ -24,7 +24,7 @@
   <!-- DataSources -->
   <DataSource
     id="events"
-    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate()}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate() + (window.cityFilter ? '&city=eq.' + window.cityFilter : '')}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey
     }}"
@@ -71,7 +71,7 @@
   <VStack maxWidth="600px" width="100%">
     <H1>
       <HStack width="100%" verticalAlignment="center">
-        <Text>Santa Rosa Events</Text>
+        <Text>{window.cityName || 'Santa Rosa'} Events</Text>
         <SpaceFiller />
         <HStack gap="$space-1">
           <Icon name="search" tooltip="Search" width="20px" height="20px" onClick="showSearch = !showSearch" />
