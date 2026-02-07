@@ -1,5 +1,6 @@
 from .base import BaseScraper
 from .cityspark import CitySparkScraper, BohemianScraper, PressDemocratScraper
+from .rss import RssScraper
 from .utils import (
     fetch_with_retry,
     generate_uid,
@@ -14,6 +15,7 @@ __all__ = [
     'CitySparkScraper',
     'BohemianScraper',
     'PressDemocratScraper',
+    'RssScraper',
     'fetch_with_retry',
     'generate_uid',
     'append_source',
