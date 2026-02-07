@@ -14,6 +14,7 @@ Prioritized list of potential event sources for the Davis community calendar.
 | UU Davis | ICS | ~17 | Google Calendar ICS feeds |
 | Mondavi Center | Scraper | ~12 | HTML scraper for performing arts |
 | Davis Chamber | XML | ~16 | MemberClicks XML API |
+| UC Davis Athletics | ICS | ~309 | Sidearm Sports ICS feed |
 
 ---
 
@@ -118,8 +119,8 @@ Well-structured pages that would need HTML scrapers.
 5. [x] Davis Chamber - MemberClicks XML API works!
 
 ### Phase 3 (Sports & Recreation)
-6. [ ] UC Davis Athletics scraper
-7. [ ] Davis Food Co-op scraper
+6. [x] UC Davis Athletics - Sidearm ICS feed works!
+7. [~] Davis Food Co-op - BLOCKED: Captcha redirect
 
 ### Phase 4 (Music Venues)
 8. [ ] Sophia's Thai Kitchen scraper
