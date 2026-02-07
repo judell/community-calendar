@@ -30,8 +30,6 @@ class CalTheatreScraper(BaseScraper):
     BASE_URL = 'https://www.caltheatre.com'
     CALENDAR_URL = f'{BASE_URL}/calendar'
     VENUE_ADDRESS = "California Theatre, 528 7th St, Santa Rosa, CA 95401"
-    months_ahead = 3
-
     def fetch_events(self) -> list[dict[str, Any]]:
         """Fetch events using static request or Selenium."""
         # Try static first

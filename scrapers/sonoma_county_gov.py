@@ -25,8 +25,6 @@ class SonomaCountyGovScraper(BaseScraper):
 
     API_URL = 'https://sonomacounty.gov/api/FeedData/CalendarEvents'
     PAGE_ID = 'x116193'
-    months_ahead = 3
-
     def fetch_events(self) -> list[dict[str, Any]]:
         """Fetch events from the JSON API."""
         results = []

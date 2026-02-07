@@ -15,12 +15,18 @@ on:
         required: false
         type: boolean
         default: false
+      months:
+        description: 'Number of months ahead to scrape (default: 6)'
+        required: false
+        default: '6'
   schedule:
     - cron: '0 0 * * *'
 
 jobs:
   generate-calendar:
     runs-on: ubuntu-latest
+    env:
+      SCRAPE_MONTHS: ${{ github.event.inputs.months || '6' }}
 
     steps:
     - name: Check out repository

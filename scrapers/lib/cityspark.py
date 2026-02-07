@@ -33,8 +33,6 @@ class CitySparkScraper(BaseScraper):
     lng: float = 0.0
     distance: int = 30
     calendar_url: str = ""
-    months_ahead: int = 3  # How many months ahead to fetch
-
     API_BASE = "https://portal.cityspark.com/v1/events"
 
     def fetch_events(self) -> list[dict[str, Any]]:

@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from typing import Any, Optional
@@ -35,6 +36,7 @@ class BaseScraper(ABC):
 
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.months_ahead = int(os.environ.get('SCRAPE_MONTHS', 6))
 
     @classmethod
     def setup_logging(cls, level: int = logging.INFO):
@@ -119,11 +121,11 @@ class BaseScraper(ABC):
         self.logger.info(f"Scraping {self.name}")
 
         events = self.fetch_events()
-        cutoff = datetime.now().astimezone() + timedelta(days=365)
+        cutoff = datetime.now().astimezone() + timedelta(days=self.months_ahead * 31)
         before = len(events)
         events = [e for e in events if e.get('dtstart') and e['dtstart'] <= cutoff]
         if len(events) < before:
-            self.logger.info(f"Filtered {before - len(events)} events beyond 1 year out")
+            self.logger.info(f"Filtered {before - len(events)} events beyond {self.months_ahead} months out")
         self.logger.info(f"Found {len(events)} events")
 
         calendar = self.create_calendar(events)

@@ -28,8 +28,6 @@ class RedwoodCafeScraper(BaseScraper):
     BASE_URL = 'https://redwoodcafecotati.com'
     EVENTS_URL = f'{BASE_URL}/events/'
     VENUE_ADDRESS = "Redwood Cafe, 8240 Old Redwood Hwy, Cotati, CA 94931"
-    months_ahead = 3
-
     def fetch_events(self) -> list[dict[str, Any]]:
         """Fetch events for current and upcoming months."""
         all_events = []
