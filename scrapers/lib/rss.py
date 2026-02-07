@@ -14,42 +14,41 @@ from .base import BaseScraper
 class RssScraper(BaseScraper):
     """
     Base class for RSS feed scrapers.
-    
+
     Subclasses must set:
     - name: str - Source name
     - domain: str - Domain for UIDs
     - rss_url: str - URL of the RSS feed
-    
+
     And implement:
-    - parse_entry(entry, year, month) -> dict | None
+    - parse_entry(entry) -> dict | None
     """
-    
+
     rss_url: str = ""
     timezone: str = "America/Los_Angeles"
-    
-    def fetch_events(self, year: int, month: int) -> list[dict[str, Any]]:
+
+    def fetch_events(self) -> list[dict[str, Any]]:
         """Fetch and parse events from RSS feed."""
         self.logger.info(f"Fetching RSS feed: {self.rss_url}")
         feed = feedparser.parse(self.rss_url)
         self.logger.info(f"Found {len(feed.entries)} entries in RSS feed")
-        
+
         events = []
         for entry in feed.entries:
-            event = self.parse_entry(entry, year, month)
+            event = self.parse_entry(entry)
             if event:
                 events.append(event)
                 self.logger.info(f"Found event: {event['title']} on {event['dtstart']}")
-        
+
         return events
-    
+
     @abstractmethod
-    def parse_entry(self, entry: dict, year: int, month: int) -> Optional[dict[str, Any]]:
+    def parse_entry(self, entry: dict) -> Optional[dict[str, Any]]:
         """
         Parse a single RSS entry into event data.
-        
-        Should return None if entry doesn't match target year/month
-        or if parsing fails.
-        
+
+        Returns None if parsing fails.
+
         Returns dict with: title, dtstart, dtend, url, location, description
         """
         pass

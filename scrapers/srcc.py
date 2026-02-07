@@ -26,16 +26,12 @@ class SRCCScraper(RssScraper):
     domain = "srcc.com"
     rss_url = "https://srcc.com/Calendar/RSS"
     
-    def parse_entry(self, entry: dict, year: int, month: int) -> Optional[dict[str, Any]]:
+    def parse_entry(self, entry: dict) -> Optional[dict[str, Any]]:
         """Parse a single RSS entry into event data."""
         dt_start = self.parse_rss_date(entry)
         if not dt_start:
             return None
-        
-        # Filter by target month
-        if dt_start.year != year or dt_start.month != month:
-            return None
-        
+
         # Parse title - format: "Event Name (Day, Month DD, YYYY)"
         title = entry.get('title', '')
         title = re.sub(r'\s*\([^)]+\d{4}\)\s*$', '', title).strip()

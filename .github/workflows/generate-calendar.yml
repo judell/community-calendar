@@ -11,7 +11,7 @@ on:
         required: false
         default: 'all'
       regenerate_only:
-        description: 'Skip scraping, only regenerate HTML from existing local ICS files'
+        description: 'Skip scraping, only regenerate from existing local ICS files'
         required: false
         type: boolean
         default: false
@@ -21,7 +21,7 @@ on:
 jobs:
   generate-calendar:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Check out repository
       uses: actions/checkout@v2
@@ -51,29 +51,6 @@ jobs:
         npm install puppeteer-extra puppeteer-extra-plugin-stealth
         npx puppeteer browsers install chrome
 
-    - name: Calculate dates
-      id: dates
-      run: |
-        THIS_YEAR=$(date +%Y)
-        THIS_MONTH=$(date +%m)
-        
-        NEXT=$(date -d "$(date +%Y-%m-01) +1 month" +%Y-%m)
-        NEXT_YEAR=${NEXT%-*}
-        NEXT_MONTH=${NEXT#*-}
-        
-        NEXT2=$(date -d "$(date +%Y-%m-01) +2 months" +%Y-%m)
-        NEXT2_YEAR=${NEXT2%-*}
-        NEXT2_MONTH=${NEXT2#*-}
-        
-        echo "this_year=$THIS_YEAR" >> $GITHUB_OUTPUT
-        echo "this_month=$THIS_MONTH" >> $GITHUB_OUTPUT
-        echo "next_year=$NEXT_YEAR" >> $GITHUB_OUTPUT
-        echo "next_month=$NEXT_MONTH" >> $GITHUB_OUTPUT
-        echo "next2_year=$NEXT2_YEAR" >> $GITHUB_OUTPUT
-        echo "next2_month=$NEXT2_MONTH" >> $GITHUB_OUTPUT
-        
-        echo "Dates: $THIS_YEAR-$THIS_MONTH, $NEXT_YEAR-$NEXT_MONTH, $NEXT2_YEAR-$NEXT2_MONTH"
-
     - name: Determine locations to process
       id: locations
       run: |
@@ -90,122 +67,21 @@ jobs:
     - name: Scrape Santa Rosa sources
       if: contains(steps.locations.outputs.list, 'santarosa') && github.event.inputs.regenerate_only != 'true'
       run: |
-        echo "Processing Santa Rosa..."
-        for period in "this" "next" "next2"; do
-          if [ "$period" = "this" ]; then
-            Y=${{ steps.dates.outputs.this_year }}
-            M=${{ steps.dates.outputs.this_month }}
-          elif [ "$period" = "next" ]; then
-            Y=${{ steps.dates.outputs.next_year }}
-            M=${{ steps.dates.outputs.next_month }}
-          else
-            Y=${{ steps.dates.outputs.next2_year }}
-            M=${{ steps.dates.outputs.next2_month }}
-          fi
-          
-          echo "Scraping Santa Rosa for $Y-$M..."
-          python library_intercept.py --location santarosa --year $Y --month $M || true
-          # node eventbrite.js santarosa $Y $M || true  # Disabled - blocked by bot detection
-          python scrapers/cityspark/bohemian.py --year $Y --month $((10#$M)) --output santarosa/bohemian_${Y}_${M}.ics || true
-          python scrapers/cityspark/pressdemocrat.py --year $Y --month $((10#$M)) --output santarosa/pressdemocrat_${Y}_${M}.ics || true
-        done
+        echo "Scraping Santa Rosa..."
+        python library_intercept.py --location santarosa --output santarosa/library_intercept.ics || true
+        python scrapers/cityspark/bohemian.py --output santarosa/bohemian.ics || true
+        python scrapers/cityspark/pressdemocrat.py --output santarosa/pressdemocrat.ics || true
+        python scrapers/sonoma_parks.py --output santarosa/sonoma_parks.ics || true
+        python scrapers/cal_theatre.py --output santarosa/cal_theatre.ics || true
+        python scrapers/copperfields.py --output santarosa/copperfields.ics || true
+        python scrapers/sonoma_county_gov.py --output santarosa/sonoma_county_gov.ics || true
+        python scrapers/wix/cafefrida.py --output santarosa/cafefrida.ics || true
       continue-on-error: true
-
-    - name: Run new Santa Rosa scrapers
-      if: contains(steps.locations.outputs.list, 'santarosa') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        for period in "this" "next" "next2"; do
-          if [ "$period" = "this" ]; then
-            Y=${{ steps.dates.outputs.this_year }}
-            M=${{ steps.dates.outputs.this_month }}
-          elif [ "$period" = "next" ]; then
-            Y=${{ steps.dates.outputs.next_year }}
-            M=${{ steps.dates.outputs.next_month }}
-          else
-            Y=${{ steps.dates.outputs.next2_year }}
-            M=${{ steps.dates.outputs.next2_month }}
-          fi
-          
-          echo "Running new scrapers for $Y-$M..."
-          python scrapers/sonoma_parks.py --year $Y --month $((10#$M)) --output santarosa/sonoma_parks_${Y}_${M}.ics || true
-          python scrapers/cal_theatre.py --year $Y --month $((10#$M)) --output santarosa/cal_theatre_${Y}_${M}.ics || true
-          python scrapers/copperfields.py --year $Y --month $((10#$M)) --output santarosa/copperfields_${Y}_${M}.ics || true
-          python scrapers/sonoma_county_gov.py --year $Y --month $((10#$M)) --output santarosa/sonoma_county_gov_${Y}_${M}.ics || true
-          python scrapers/wix/cafefrida.py --year $Y --month $((10#$M)) --output santarosa/cafefrida_${Y}_${M}.ics || true
-        done
-      continue-on-error: true
-
-    - name: Update Santa Rosa feeds.txt
-      if: contains(steps.locations.outputs.list, 'santarosa') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        # Create feeds.txt with LOCAL paths for generation
-        cat > santarosa/feeds.txt << EOF
-        # Live feeds (fetched directly)
-        https://calendar.google.com/calendar/ical/eventsatarlenefransictheater@gmail.com/public/basic.ics
-        https://lutherburbankcenter.org/events/?ical=1
-        https://schulzmuseum.org/events/?ical=1
-        https://www.sonoma.com/events/?ical=1
-        https://golocal.coop/?post_type=tribe_events&ical=1&eventDisplay=list
-
-        # Community organizations
-        https://sonomacountyaa.org/events/?ical=1
-        https://calendar.google.com/calendar/ical/dsasonomacounty%40gmail.com/public/basic.ics
-
-        # Local scraped files
-        santarosa/library_intercept_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        # santarosa/eventbrite_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        santarosa/bohemian_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        santarosa/pressdemocrat_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        santarosa/sonoma_parks_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        santarosa/cal_theatre_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        santarosa/copperfields_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        santarosa/sonoma_county_gov_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        santarosa/cafefrida_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-
-        santarosa/library_intercept_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        # santarosa/eventbrite_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        santarosa/bohemian_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        santarosa/pressdemocrat_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        santarosa/sonoma_parks_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        santarosa/cal_theatre_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        santarosa/copperfields_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        santarosa/sonoma_county_gov_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        santarosa/cafefrida_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-
-        santarosa/library_intercept_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        # santarosa/eventbrite_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        santarosa/bohemian_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        santarosa/pressdemocrat_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        santarosa/sonoma_parks_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        santarosa/cal_theatre_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        santarosa/copperfields_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        santarosa/sonoma_county_gov_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        santarosa/cafefrida_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-
-        # City calendars
-        santarosa/SRCity_Main_Calendar.ics
-        santarosa/SRCity_City_Offices_Closed.ics
-        santarosa/SRCity_Recreation_and_Parks.ics
-        santarosa/SRCity_Events.ics
-        EOF
-        sed -i 's/^[[:space:]]*//' santarosa/feeds.txt
-
-    - name: Generate Santa Rosa calendars
-      if: contains(steps.locations.outputs.list, 'santarosa')
-      run: |
-        LOCAL_ONLY_FLAG=""
-        if [ "${{ github.event.inputs.regenerate_only }}" = "true" ]; then
-          LOCAL_ONLY_FLAG="--local-only"
-        fi
-        python cal.py --generate --location santarosa --year ${{ steps.dates.outputs.this_year }} --month ${{ steps.dates.outputs.this_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
-        python cal.py --generate --location santarosa --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
-        python cal.py --generate --location santarosa --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
 
     - name: Download Santa Rosa live feeds and combine ICS
       if: contains(steps.locations.outputs.list, 'santarosa')
       run: |
         cd santarosa
-        # Download live feeds as ICS files
         curl -sL "https://calendar.google.com/calendar/ical/eventsatarlenefransictheater@gmail.com/public/basic.ics" -o arlene_francis_theater.ics || true
         curl -sL "https://lutherburbankcenter.org/events/?ical=1" -o luther_burbank_center.ics || true
         curl -sL "https://schulzmuseum.org/events/?ical=1" -o schulz_museum.ics || true
@@ -214,7 +90,6 @@ jobs:
         curl -sL "https://sonomacountyaa.org/events/?ical=1" -o sonoma_county_aa.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/dsasonomacounty%40gmail.com/public/basic.ics" -o sonoma_county_dsa.ics || true
         cd ..
-        # Combine all ICS files into one subscribable feed
         python combine_ics.py --input-dir santarosa --output santarosa/combined.ics --name "Santa Rosa Community Calendar"
 
     # ==========================================
@@ -223,52 +98,18 @@ jobs:
     - name: Scrape Sebastopol sources
       if: contains(steps.locations.outputs.list, 'sebastopol') && github.event.inputs.regenerate_only != 'true'
       run: |
-        echo "Processing Sebastopol..."
-        for period in "this" "next" "next2"; do
-          if [ "$period" = "this" ]; then
-            Y=${{ steps.dates.outputs.this_year }}
-            M=${{ steps.dates.outputs.this_month }}
-          elif [ "$period" = "next" ]; then
-            Y=${{ steps.dates.outputs.next_year }}
-            M=${{ steps.dates.outputs.next_month }}
-          else
-            Y=${{ steps.dates.outputs.next2_year }}
-            M=${{ steps.dates.outputs.next2_month }}
-          fi
-          
-          echo "Scraping Sebastopol for $Y-$M..."
-          python scrapers/sebarts.py --year $Y --month $((10#$M)) --output sebastopol/sebarts_${Y}_${M}.ics || true
-          python scrapers/occidental_arts.py --year $Y --month $((10#$M)) --output sebastopol/occidental_arts_${Y}_${M}.ics || true
-        done
+        echo "Scraping Sebastopol..."
+        python scrapers/sebarts.py --output sebastopol/sebarts.ics || true
+        python scrapers/occidental_arts.py --output sebastopol/occidental_arts.ics || true
       continue-on-error: true
 
-    - name: Update Sebastopol feeds.txt
-      if: contains(steps.locations.outputs.list, 'sebastopol') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        cat > sebastopol/feeds.txt << EOF
-        # Live feed
-        https://seb.org/?post_type=tribe_events&ical=1&eventDisplay=list
-
-        # Local scraped files
-        sebastopol/sebarts_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        sebastopol/occidental_arts_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        sebastopol/sebarts_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        sebastopol/occidental_arts_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        sebastopol/sebarts_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        sebastopol/occidental_arts_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        EOF
-        sed -i 's/^[[:space:]]*//' sebastopol/feeds.txt
-
-    - name: Generate Sebastopol calendars
+    - name: Download Sebastopol live feeds and combine ICS
       if: contains(steps.locations.outputs.list, 'sebastopol')
       run: |
-        LOCAL_ONLY_FLAG=""
-        if [ "${{ github.event.inputs.regenerate_only }}" = "true" ]; then
-          LOCAL_ONLY_FLAG="--local-only"
-        fi
-        python cal.py --generate --location sebastopol --year ${{ steps.dates.outputs.this_year }} --month ${{ steps.dates.outputs.this_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
-        python cal.py --generate --location sebastopol --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
-        python cal.py --generate --location sebastopol --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
+        cd sebastopol
+        curl -sL "https://seb.org/?post_type=tribe_events&ical=1&eventDisplay=list" -o sebastopol_community.ics || true
+        cd ..
+        python combine_ics.py --input-dir sebastopol --output sebastopol/combined.ics --name "Sebastopol Community Calendar"
 
     # ==========================================
     # Cotati
@@ -276,97 +117,30 @@ jobs:
     - name: Scrape Cotati sources
       if: contains(steps.locations.outputs.list, 'cotati') && github.event.inputs.regenerate_only != 'true'
       run: |
-        echo "Processing Cotati..."
-        for period in "this" "next" "next2"; do
-          if [ "$period" = "this" ]; then
-            Y=${{ steps.dates.outputs.this_year }}
-            M=${{ steps.dates.outputs.this_month }}
-          elif [ "$period" = "next" ]; then
-            Y=${{ steps.dates.outputs.next_year }}
-            M=${{ steps.dates.outputs.next_month }}
-          else
-            Y=${{ steps.dates.outputs.next2_year }}
-            M=${{ steps.dates.outputs.next2_month }}
-          fi
-          
-          echo "Scraping Cotati for $Y-$M..."
-          python scrapers/redwood_cafe.py --year $Y --month $((10#$M)) --output cotati/redwood_cafe_${Y}_${M}.ics || true
-        done
+        echo "Scraping Cotati..."
+        python scrapers/redwood_cafe.py --output cotati/redwood_cafe.ics || true
       continue-on-error: true
 
-    - name: Update Cotati feeds.txt
-      if: contains(steps.locations.outputs.list, 'cotati') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        cat > cotati/feeds.txt << EOF
-        # Redwood Cafe Cotati - Live music
-        cotati/redwood_cafe_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        cotati/redwood_cafe_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        cotati/redwood_cafe_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        EOF
-        sed -i 's/^[[:space:]]*//' cotati/feeds.txt
-
-    - name: Generate Cotati calendars
+    - name: Combine Cotati ICS
       if: contains(steps.locations.outputs.list, 'cotati')
       run: |
-        LOCAL_ONLY_FLAG=""
-        if [ "${{ github.event.inputs.regenerate_only }}" = "true" ]; then
-          LOCAL_ONLY_FLAG="--local-only"
-        fi
-        python cal.py --generate --location cotati --year ${{ steps.dates.outputs.this_year }} --month ${{ steps.dates.outputs.this_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
-        python cal.py --generate --location cotati --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
-        python cal.py --generate --location cotati --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
+        python combine_ics.py --input-dir cotati --output cotati/combined.ics --name "Cotati Community Calendar"
 
     # ==========================================
-    # Sonoma (Sonoma Valley / City of Sonoma)
+    # Sonoma
     # ==========================================
     - name: Scrape Sonoma sources
       if: contains(steps.locations.outputs.list, 'sonoma') && github.event.inputs.regenerate_only != 'true'
       run: |
-        echo "Processing Sonoma..."
-        for period in "this" "next" "next2"; do
-          if [ "$period" = "this" ]; then
-            Y=${{ steps.dates.outputs.this_year }}
-            M=${{ steps.dates.outputs.this_month }}
-          elif [ "$period" = "next" ]; then
-            Y=${{ steps.dates.outputs.next_year }}
-            M=${{ steps.dates.outputs.next_month }}
-          else
-            Y=${{ steps.dates.outputs.next2_year }}
-            M=${{ steps.dates.outputs.next2_month }}
-          fi
-          
-          echo "Scraping Sonoma for $Y-$M..."
-          python scrapers/svma.py --year $Y --month $((10#$M)) --output sonoma/svma_${Y}_${M}.ics || true
-          python scrapers/sonoma_city.py --year $Y --month $((10#$M)) --output sonoma/sonoma_city_${Y}_${M}.ics || true
-        done
+        echo "Scraping Sonoma..."
+        python scrapers/svma.py --output sonoma/svma.ics || true
+        python scrapers/sonoma_city.py --output sonoma/sonoma_city.ics || true
       continue-on-error: true
 
-    - name: Update Sonoma feeds.txt
-      if: contains(steps.locations.outputs.list, 'sonoma') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        cat > sonoma/feeds.txt << EOF
-        # Sonoma Valley Museum of Art
-        sonoma/svma_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        sonoma/svma_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        sonoma/svma_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-
-        # City of Sonoma
-        sonoma/sonoma_city_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        sonoma/sonoma_city_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        sonoma/sonoma_city_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        EOF
-        sed -i 's/^[[:space:]]*//' sonoma/feeds.txt
-
-    - name: Generate Sonoma calendars
+    - name: Combine Sonoma ICS
       if: contains(steps.locations.outputs.list, 'sonoma')
       run: |
-        LOCAL_ONLY_FLAG=""
-        if [ "${{ github.event.inputs.regenerate_only }}" = "true" ]; then
-          LOCAL_ONLY_FLAG="--local-only"
-        fi
-        python cal.py --generate --location sonoma --year ${{ steps.dates.outputs.this_year }} --month ${{ steps.dates.outputs.this_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
-        python cal.py --generate --location sonoma --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
-        python cal.py --generate --location sonoma --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Los_Angeles" $LOCAL_ONLY_FLAG
+        python combine_ics.py --input-dir sonoma --output sonoma/combined.ics --name "Sonoma Community Calendar"
 
     # ==========================================
     # Bloomington
@@ -374,56 +148,23 @@ jobs:
     - name: Scrape Bloomington sources
       if: contains(steps.locations.outputs.list, 'bloomington') && github.event.inputs.regenerate_only != 'true'
       run: |
-        echo "Processing Bloomington..."
-        for period in "this" "next" "next2"; do
-          if [ "$period" = "this" ]; then
-            Y=${{ steps.dates.outputs.this_year }}
-            M=${{ steps.dates.outputs.this_month }}
-          elif [ "$period" = "next" ]; then
-            Y=${{ steps.dates.outputs.next_year }}
-            M=${{ steps.dates.outputs.next_month }}
-          else
-            Y=${{ steps.dates.outputs.next2_year }}
-            M=${{ steps.dates.outputs.next2_month }}
-          fi
-          
-          echo "Scraping Bloomington for $Y-$M..."
-          python library_intercept.py --location bloomington --year $Y --month $M || true
-          # node eventbrite.js bloomington $Y $M || true  # Disabled - blocked by bot detection
-        done
+        echo "Scraping Bloomington..."
+        python library_intercept.py --location bloomington --output bloomington/library_intercept.ics || true
       continue-on-error: true
 
-    - name: Update Bloomington feeds.txt
-      if: contains(steps.locations.outputs.list, 'bloomington') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        cat > bloomington/feeds.txt << EOF
-        # Local scraped files
-        bloomington/library_intercept_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        # bloomington/eventbrite_${{ steps.dates.outputs.this_year }}_${{ steps.dates.outputs.this_month }}.ics
-        bloomington/library_intercept_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        # bloomington/eventbrite_${{ steps.dates.outputs.next_year }}_${{ steps.dates.outputs.next_month }}.ics
-        bloomington/library_intercept_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-        # bloomington/eventbrite_${{ steps.dates.outputs.next2_year }}_${{ steps.dates.outputs.next2_month }}.ics
-
-        # Static/live feeds
-        bloomington/bluebird.ics
-        https://bgcbloomington.org/events/list/?ical=1
-        https://calendar.google.com/calendar/ical/bloomington.in.gov_1b95au4d2ueudldosb024fimp0@group.calendar.google.com/public/basic.ics
-        https://tockify.com/api/feeds/ics/bloomington.arts.calendar
-        EOF
-        sed -i 's/^[[:space:]]*//' bloomington/feeds.txt
-
-    - name: Generate Bloomington calendars
+    - name: Download Bloomington live feeds and combine ICS
       if: contains(steps.locations.outputs.list, 'bloomington')
       run: |
-        LOCAL_ONLY_FLAG=""
-        if [ "${{ github.event.inputs.regenerate_only }}" = "true" ]; then
-          LOCAL_ONLY_FLAG="--local-only"
-        fi
-        python cal.py --generate --location bloomington --year ${{ steps.dates.outputs.this_year }} --month ${{ steps.dates.outputs.this_month }} --timezone "America/Indiana/Indianapolis" $LOCAL_ONLY_FLAG
-        python cal.py --generate --location bloomington --year ${{ steps.dates.outputs.next_year }} --month ${{ steps.dates.outputs.next_month }} --timezone "America/Indiana/Indianapolis" $LOCAL_ONLY_FLAG
-        python cal.py --generate --location bloomington --year ${{ steps.dates.outputs.next2_year }} --month ${{ steps.dates.outputs.next2_month }} --timezone "America/Indiana/Indianapolis" $LOCAL_ONLY_FLAG
-      
+        cd bloomington
+        curl -sL "https://bgcbloomington.org/events/list/?ical=1" -o bgc_bloomington.ics || true
+        curl -sL "https://calendar.google.com/calendar/ical/bloomington.in.gov_1b95au4d2ueudldosb024fimp0@group.calendar.google.com/public/basic.ics" -o bloomington_gov.ics || true
+        curl -sL "https://tockify.com/api/feeds/ics/bloomington.arts.calendar" -o bloomington_arts.ics || true
+        cd ..
+        python combine_ics.py --input-dir bloomington --output bloomington/combined.ics --name "Bloomington Community Calendar"
+
+    # ==========================================
+    # Post-processing (all cities)
+    # ==========================================
     - name: Convert ICS to JSON for Supabase
       run: |
         IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
@@ -447,7 +188,7 @@ jobs:
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         git add .
         git diff --quiet && git diff --staged --quiet || (
-          git commit -m "Auto-generate calendar for current and next 2 months"
+          git commit -m "Auto-generate calendar"
           for i in 1 2 3; do
             git pull --rebase && git push && break
             echo "Push failed, retrying in 5 seconds..."
@@ -456,7 +197,6 @@ jobs:
         )
 
     - name: Trigger Supabase events reload
-      if: contains(steps.locations.outputs.list, 'santarosa')
       run: |
         echo "Triggering Supabase Edge Function to reload events..."
         RESPONSE=$(curl -sL -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
@@ -467,9 +207,9 @@ jobs:
         SUCCESS=$(echo "$RESPONSE" | jq -r '.success // false')
         if [ "$SUCCESS" = "true" ]; then
           INSERTED=$(echo "$RESPONSE" | jq -r '.inserted')
-          echo "✓ Successfully loaded $INSERTED events into Supabase"
+          echo "Successfully loaded $INSERTED events into Supabase"
         else
-          echo "✗ Failed to load events"
+          echo "Failed to load events"
           echo "$RESPONSE"
           exit 1
         fi
