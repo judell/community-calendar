@@ -9,7 +9,7 @@ sys.path.insert(0, 'scrapers')
 
 import argparse
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 import requests
@@ -61,9 +61,10 @@ class LibraryScraper(BaseScraper):
         self.timezone = config['timezone']
 
     def fetch_events(self) -> list[dict[str, Any]]:
-        """Fetch all events from the library event pages."""
+        """Fetch events from the library event pages up to months_ahead."""
         page = 1
         all_events = []
+        cutoff = datetime.now().astimezone() + timedelta(days=self.months_ahead * 31)
 
         while True:
             url = self.base_url + str(page)
@@ -77,6 +78,11 @@ class LibraryScraper(BaseScraper):
             parsed_events = [e for e in parsed_events if e is not None]
 
             if not parsed_events:
+                break
+
+            # Stop paginating if all events on this page are beyond the cutoff
+            if all(e['dtstart'] > cutoff for e in parsed_events):
+                self.logger.info(f"Stopping: page {page} events are beyond {self.months_ahead} months")
                 break
 
             all_events.extend(parsed_events)
