@@ -54,6 +54,72 @@ This serves as institutional memory so future work doesn't duplicate effort.
 
 ---
 
+## Web Search Discovery Strategy
+
+**Use search engines to find calendar platforms and feeds.** DuckDuckGo is recommended (Google may block automated queries).
+
+### Platform Site Searches (High Value)
+
+These searches find platforms that typically have ICS feeds:
+
+```
+{city} {state} site:meetup.com          # Meetup groups (have ICS feeds)
+{city} site:tockify.com                   # Tockify calendars (have ICS feeds)
+{city} {state} inurl:/localist/           # University/govt calendars (often have feeds)
+```
+
+### Discovery Searches
+
+These help identify what events exist (may need scrapers):
+
+```
+{city} {state} events site:facebook.com/events    # Shows local event activity
+{city} {state} events site:eventbrite.com         # Eventbrite (needs scraper)
+{city} {state} "community calendar"               # Local aggregators
+```
+
+### Platform Detection Searches
+
+```
+{city} {state} inurl:/tribe_events/       # WordPress Tribe Events Calendar
+{city} {state} inurl:/events/             # Generic events pages
+{city} {state} events "add to google calendar"   # Sites with calendar exports
+```
+
+### DuckDuckGo URL Templates
+
+Ready-to-use (replace CITY and STATE):
+
+```
+https://duckduckgo.com/?q=CITY+STATE+site%3Ameetup.com
+https://duckduckgo.com/?q=CITY+site%3Atockify.com
+https://duckduckgo.com/?q=CITY+STATE+inurl%3A%2Flocalist%2F
+https://duckduckgo.com/?q=CITY+STATE+events+site%3Afacebook.com%2Fevents
+https://duckduckgo.com/?q=CITY+STATE+events+site%3Aeventbrite.com
+https://duckduckgo.com/?q=CITY+STATE+%22community+calendar%22
+```
+
+### Testing Discovered Feeds
+
+**Tockify** (URL like `tockify.com/calendarname/...`):
+```bash
+curl -sL "https://tockify.com/api/feeds/ics/CALENDAR_NAME" | grep -c "BEGIN:VEVENT"
+```
+
+**Meetup** (URL like `meetup.com/groupname/`):
+```bash
+curl -sL "https://www.meetup.com/GROUP_NAME/events/ical/" -A "Mozilla/5.0" | grep -c "BEGIN:VEVENT"
+```
+
+**Localist**:
+```bash
+curl -sL "https://DOMAIN/api/2/events" | head -50
+```
+
+See [docs/curator-guide.md](docs/curator-guide.md) for the complete curator workflow.
+
+---
+
 ## Feed Discovery Strategies
 
 ### 1. Direct ICS/RSS Probing
