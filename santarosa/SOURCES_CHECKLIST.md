@@ -52,8 +52,10 @@ Ran Meetup discovery playbook. Found 66 groups, 33 with active events.
 | nataraja-school-of-traditional-yoga | `meetup.com/nataraja-school-of-traditional-yoga/events/ical/` | 7 | Wellness | Yoga/pranayama classes |
 | santa-rosa-womens-creativity-collective | `meetup.com/santa-rosa-womens-creativity-collective/events/ical/` | 6 | Arts | Creative workshops at The Arthaus |
 | sonoma-county-boomers | `meetup.com/sonoma-county-boomers/events/ical/` | 6 | Social | Social events for boomers |
-| The-International-Wanderers | `meetup.com/The-International-Wanderers/events/ical/` | 6 | Travel/Outdoor | Travel trips + local hiking retreats |
-| culturelovers | `meetup.com/culturelovers/events/ical/` | 10 | Travel | International travel (may be less local) |
+
+**EXCLUDED** (events are international destinations, not local):
+- ~~The-International-Wanderers~~ - Travel trips to Patagonia, Ireland, Alaska, etc.
+- ~~culturelovers~~ - International travel to Thailand, Egypt, Japan, etc.
 
 ### Other Active Groups (Lower Priority)
 
