@@ -1,6 +1,14 @@
 <Component
   name="SourcesDialog"
-  method.open="() => dialog.open()"
+  method.open="() => { suggestName = ''; suggestUrl = ''; suggestFeedType = ''; suggestNotes = ''; suggestSuccess = false; suggestError = ''; showSuggestForm = false; dialog.open(); }"
+  var.showSuggestForm="{false}"
+  var.suggestName=""
+  var.suggestUrl=""
+  var.suggestFeedType=""
+  var.suggestNotes=""
+  var.isSubmitting="{false}"
+  var.suggestSuccess="{false}"
+  var.suggestError=""
 >
   <ModalDialog id="dialog" title="Sources">
     <VStack gap="$space-3">
@@ -11,6 +19,141 @@
           <Text value="{$item.source}" />
         </HStack>
       </List>
+
+      <!-- Suggest a source button -->
+      <Button
+        when="{!showSuggestForm}"
+        label="Suggest a source"
+        variant="outlined"
+        icon="plus"
+        onClick="showSuggestForm = true; suggestSuccess = false; suggestError = ''"
+      />
+
+      <!-- Suggest form -->
+      <VStack when="{showSuggestForm && !suggestSuccess}" gap="$space-3" paddingTop="$space-2">
+        <Text fontSize="$fontSize-sm" color="$color-text-secondary">
+          Know of a local calendar source we're missing? An ICS feed URL is ideal. An RSS feed also works. If you only have a link to an events page, that's fine too.
+        </Text>
+
+        <VStack gap="$space-1">
+          <Text fontSize="$fontSize-sm" color="$color-text-secondary">Source name *</Text>
+          <TextBox
+            id="suggestNameBox"
+            initialValue=""
+            onDidChange="(v) => suggestName = v"
+            placeholder="Venue or organization name"
+          />
+        </VStack>
+
+        <VStack gap="$space-1">
+          <Text fontSize="$fontSize-sm" color="$color-text-secondary">URL *</Text>
+          <TextBox
+            id="suggestUrlBox"
+            initialValue=""
+            onDidChange="(v) => suggestUrl = v"
+            placeholder="Link to events page or feed"
+          />
+        </VStack>
+
+        <VStack gap="$space-1">
+          <Text fontSize="$fontSize-sm" color="$color-text-secondary">Feed type</Text>
+          <Select
+            id="suggestFeedTypeSelect"
+            placeholder="Select type (if known)"
+            onDidChange="(v) => suggestFeedType = v"
+          >
+            <Option value="ics" label="ICS feed" />
+            <Option value="rss" label="RSS feed" />
+            <Option value="webpage" label="Events page / other" />
+            <Option value="unknown" label="Not sure" />
+          </Select>
+        </VStack>
+
+        <VStack gap="$space-1">
+          <Text fontSize="$fontSize-sm" color="$color-text-secondary">Notes</Text>
+          <TextArea
+            id="suggestNotesBox"
+            initialValue=""
+            onDidChange="(v) => suggestNotes = v"
+            placeholder="Anything else we should know?"
+            rows="2"
+          />
+        </VStack>
+
+        <HStack gap="$space-2" horizontalAlignment="end">
+          <Button
+            label="Cancel"
+            variant="ghost"
+            onClick="showSuggestForm = false"
+            enabled="{!isSubmitting}"
+          />
+          <Button
+            label="{isSubmitting ? 'Submitting...' : 'Submit'}"
+            themeColor="primary"
+            enabled="{!isSubmitting && suggestName && suggestUrl}"
+            onClick="() => {
+              isSubmitting = true;
+              suggestError = '';
+              fetch(appGlobals.supabaseUrl + '/rest/v1/source_suggestions', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'apikey': appGlobals.supabasePublishableKey,
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                  city: window.cityFilter || 'unknown',
+                  name: suggestName,
+                  url: suggestUrl,
+                  feed_type: suggestFeedType || null,
+                  notes: suggestNotes || null
+                })
+              }).then(response => {
+                isSubmitting = false;
+                if (response.ok) {
+                  suggestSuccess = true;
+                } else {
+                  suggestError = 'Failed to submit suggestion. Please try again.';
+                }
+              }).catch(err => {
+                isSubmitting = false;
+                suggestError = 'Network error. Please try again.';
+              });
+            }"
+          />
+        </HStack>
+
+        <Text
+          when="{suggestError}"
+          value="{suggestError}"
+          color="$color-danger-500"
+        />
+      </VStack>
+
+      <!-- Success message -->
+      <VStack when="{suggestSuccess}" gap="$space-2" horizontalAlignment="center" padding="$space-3">
+        <Icon name="check" size="lg" color="$color-success-500" />
+        <Text fontWeight="bold">Thanks for the suggestion!</Text>
+        <Text fontSize="$fontSize-sm" color="$color-text-secondary" textAlignment="center">
+          We'll look into adding this source.
+        </Text>
+        <Button
+          label="Suggest another"
+          variant="ghost"
+          onClick="() => {
+            suggestSuccess = false;
+            suggestName = '';
+            suggestUrl = '';
+            suggestFeedType = '';
+            suggestNotes = '';
+            suggestNameBox.setValue('');
+            suggestUrlBox.setValue('');
+            suggestFeedTypeSelect.setValue('');
+            suggestNotesBox.setValue('');
+          }"
+        />
+      </VStack>
+
     </VStack>
   </ModalDialog>
 </Component>

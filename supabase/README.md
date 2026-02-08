@@ -12,7 +12,8 @@ supabase/
 │   ├── 03_picks.sql               # User picks with RLS
 │   ├── 04_feed_tokens.sql         # Feed tokens with RLS
 │   ├── 05_cron_jobs.sql           # Scheduled event loading
-│   └── 06_event_enrichments.sql   # Curator overrides per event
+│   ├── 06_event_enrichments.sql   # Curator overrides per event
+│   └── 07_source_suggestions.sql  # Anonymous source suggestions
 │
 ├── migrations/                    # One-off migrations (already applied)
 │   └── 001_add_city_column.sql
@@ -37,6 +38,7 @@ The publishable key identifies the *application* (not the user) and provides onl
 | `picks` | None | SELECT/INSERT/DELETE own rows only |
 | `feed_tokens` | None | SELECT/INSERT own row only |
 | `event_enrichments` | SELECT (read all) | SELECT all, INSERT/UPDATE/DELETE own rows only |
+| `source_suggestions` | SELECT/INSERT (anyone can suggest) | SELECT/INSERT (anyone can suggest) |
 
 So anyone with the publishable key can read events (which is the whole point — it's a public calendar). But only authenticated users can manage their own picks, and RLS ensures they can't see or modify other users' data.
 
