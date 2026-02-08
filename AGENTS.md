@@ -104,6 +104,35 @@ This can reveal:
 Meetup.com is particularly valuable - groups have ICS feeds at:
 `https://www.meetup.com/{group-name}/events/ical/`
 
+**Meetup Discovery Process:**
+```bash
+# Find groups near a location
+curl -sL "https://www.meetup.com/cities/us/in/bloomington/" -A "Mozilla/5.0" | grep -o '"urlname":"[^"]*"'
+
+# Validate group location
+curl -sL "https://www.meetup.com/{group-name}/" -A "Mozilla/5.0" | grep -o '"city":"[^"]*"'
+
+# Test ICS feed
+curl -sL "https://www.meetup.com/{group-name}/events/ical/" -A "Mozilla/5.0" | grep -c "BEGIN:VEVENT"
+```
+
+### 8. WordPress Plugin Detection
+**Identify upstream sources by checking what plugins a site uses:**
+
+```bash
+# List WordPress plugins
+curl -sL "https://example.com/events/" -A "Mozilla/5.0" | grep -o "wp-content/plugins/[^/]*" | sort -u
+```
+
+Useful discoveries:
+- `import-eventbrite-events` → Events come from Eventbrite
+- `widget-for-eventbrite-api` → Same as above
+- `tribe-events-calendar` → Try `?ical=1` endpoint
+- `events-manager` → Check for ICS export option
+- `the-events-calendar` → Tribe Events, try ICS
+
+Example: Indiana Audubon uses Eventbrite plugins, meaning their events originate from an Eventbrite organizer page.
+
 ## Anti-Scraping Workarounds
 
 ### Blocked by 403/406
@@ -144,3 +173,21 @@ When adding sources, check for overlap:
 - Same venue appearing in multiple aggregators
 - Regional calendars that scrape local venues
 - Newspaper event listings (usually derivative)
+
+## Validation Checklist
+Before adding a source, verify:
+1. **Location relevance** - Is it actually in the target area?
+2. **Event count** - Does it have enough events to be worth adding?
+3. **Feed validity** - Does the ICS parse correctly?
+4. **Content type** - Are events public community events vs internal meetings?
+5. **Overlap** - Does it duplicate events from existing sources?
+
+## Known Platform Limitations
+
+| Platform | Issue |
+|----------|-------|
+| **Planning Center/Church Center** | No public API; requires login |
+| **Simpleview CMS** | Tourism sites; no public events API |
+| **OpenDate** | Ticketing platform; no public feed |
+| **Cloudflare-protected sites** | Challenge pages block scrapers |
+| **Facebook Events** | No public API since 2018 |
