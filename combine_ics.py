@@ -40,6 +40,13 @@ SOURCE_NAMES = {
     'bloomington_gov': 'City of Bloomington',
     'bloomington_arts': 'Bloomington Arts',
     'bluebird': 'The Bluebird',
+    'iu_jacobs_music': 'IU Jacobs School of Music',
+    'iu_auditorium': 'IU Auditorium',
+    'iu_eskenazi_museum': 'Eskenazi Museum of Art',
+    'bsquare_government': 'Bloomington Government',
+    'bsquare_misc_civic': 'Bloomington Civic Events',
+    'bsquare_critical_mass': 'Critical Mass Bloomington',
+    'bsquare_bptc': 'Bloomington Public Transit',
 }
 
 # Fallback URLs for sources that don't provide event URLs
@@ -57,6 +64,13 @@ SOURCE_URLS = {
     'cal_theatre': 'https://www.facebook.com/CalTheatrePT/',
     'copperfields': 'https://www.copperfieldsbooks.com/events',
     'SRCity': 'https://srcity.org/calendar.aspx',
+    'iu_jacobs_music': 'https://events.iu.edu/musiciub/',
+    'iu_auditorium': 'https://events.iu.edu/iu-auditorium/',
+    'iu_eskenazi_museum': 'https://events.iu.edu/artmuseum/',
+    'bsquare_government': 'https://bloomington.in.gov/',
+    'bsquare_misc_civic': 'https://bsquarebulletin.com/b-there-or-b-square/',
+    'bsquare_critical_mass': 'https://bsquarebulletin.com/b-there-or-b-square/',
+    'bsquare_bptc': 'https://bloomingtontransit.com/',
 }
 
 
