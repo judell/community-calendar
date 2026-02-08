@@ -10,6 +10,27 @@
   var.suggestSuccess="{false}"
   var.suggestError=""
 >
+
+  <APICall
+    id="suggestApi"
+    method="post"
+    url="{appGlobals.supabaseUrl + '/rest/v1/source_suggestions'}"
+    headers="{{
+      'Content-Type': 'application/json',
+      'apikey': appGlobals.supabasePublishableKey,
+      'Prefer': 'return=minimal'
+    }}"
+    body="{$param}"
+    onSuccess="() => {
+      isSubmitting = false;
+      suggestSuccess = true;
+    }"
+    onError="(err) => {
+      isSubmitting = false;
+      suggestError = 'Failed to submit suggestion. Please try again.';
+    }"
+  />
+
   <ModalDialog id="dialog" title="Sources">
     <VStack gap="$space-3">
       <Text value="{$props.events ? window.dedupeEvents($props.events).length + ' events this week (' + $props.events.length + ' before deduplication)' : 'Loading...'}" />
@@ -94,30 +115,12 @@
             onClick="() => {
               isSubmitting = true;
               suggestError = '';
-              window.fetch(appGlobals.supabaseUrl + '/rest/v1/source_suggestions', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'apikey': appGlobals.supabasePublishableKey,
-                  'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({
-                  city: window.cityFilter || 'unknown',
-                  name: suggestName,
-                  url: suggestUrl,
-                  feed_type: suggestFeedType || null,
-                  notes: suggestNotes || null
-                })
-              }).then(response => {
-                isSubmitting = false;
-                if (response.ok) {
-                  suggestSuccess = true;
-                } else {
-                  suggestError = 'Failed to submit suggestion. Please try again.';
-                }
-              }).catch(err => {
-                isSubmitting = false;
-                suggestError = 'Network error. Please try again.';
+              suggestApi.execute({
+                city: window.cityFilter || 'unknown',
+                name: suggestName,
+                url: suggestUrl,
+                feed_type: suggestFeedType || null,
+                notes: suggestNotes || null
               });
             }"
           />
