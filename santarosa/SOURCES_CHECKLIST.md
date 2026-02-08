@@ -87,6 +87,31 @@ Sonoma-County-Photography-Group, Sonoma-County-Wanderers, womens-wellness-meetup
 
 ---
 
+## Eventbrite (Discovered 2025-02-08)
+
+Used web scraping approach since Eventbrite doesn't have public feeds:
+1. Fetched event URLs from `eventbrite.com/d/ca--santa-rosa/` pages
+2. Extracted JSON-LD structured data from each event page
+3. Filtered by location (Santa Rosa, Petaluma, Sebastopol, Rohnert Park, Cotati, Sonoma, Healdsburg, Windsor)
+
+**Results:** 50 local events from 96 scraped URLs
+
+**Key venues discovered:**
+- Flamingo Resort (concerts)
+- Sonoma County Fairgrounds (festivals)
+- HenHouse Brewing Company (beer events)
+- HopMonk Tavern Sebastopol
+- Lagunitas Brewing Company
+- Santa Rosa Veterans Memorial Building
+- Hook & Ladder Vineyards
+- Finley Community Center
+
+**Scraper:** `scrapers/eventbrite_scraper.py`
+
+**Note:** This requires periodic re-scraping since Eventbrite has no feed. Could be automated as a weekly cron job.
+
+---
+
 ## Potential Additional Sources
 
 ### Venues to Investigate
