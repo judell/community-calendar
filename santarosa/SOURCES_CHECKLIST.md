@@ -36,27 +36,52 @@ Multiple ICS feeds from `srcity.org`:
 
 ---
 
-## TODO: Meetup Discovery
+## Meetup Groups (Discovered 2025-02-08)
 
-Run the Meetup playbook to find local groups:
-```bash
-# Find groups near Santa Rosa
-curl -sL "https://www.meetup.com/find/?keywords=&location=us--ca--Santa%20Rosa&source=GROUPS" -A "Mozilla/5.0" | grep -o '"urlname":"[^"]*"' | sort -u
+Ran Meetup discovery playbook. Found 66 groups, 33 with active events.
 
-# For each group, validate location
-curl -sL "https://www.meetup.com/{group-name}/" -A "Mozilla/5.0" | grep -o '"city":"[^"]*"'
+### Recommended High-Value Groups (Ready to Add)
 
-# Test ICS feed
-curl -sL "https://www.meetup.com/{group-name}/events/ical/" -A "Mozilla/5.0" | grep -c "BEGIN:VEVENT"
-```
+| Group | ICS URL | Events | Category | Notes |
+|-------|---------|--------|----------|-------|
+| sonoma-county-go-wild-hikers | `meetup.com/sonoma-county-go-wild-hikers/events/ical/` | 3 | Outdoor | Local hiking group - "Islands in the Sky", "Lake Sonoma Hike" |
+| shutupandwritewinecountry | `meetup.com/shutupandwritewinecountry/events/ical/` | 10 | Arts | Writing meetups in Petaluma/Sebastopol |
+| scottish-country-dancing | `meetup.com/scottish-country-dancing/events/ical/` | 10 | Dance | Weekly classes at Monroe Hall |
+| sonoma-county-womens-wine-club | `meetup.com/sonoma-county-womens-wine-club/events/ical/` | 9 | Social/Wine | Wine club + social events |
+| santa-rosa-toastmasters-public-speaking-meetup-group | `meetup.com/santa-rosa-toastmasters-public-speaking-meetup-group/events/ical/` | 10 | Professional | Weekly meetings |
+| nataraja-school-of-traditional-yoga | `meetup.com/nataraja-school-of-traditional-yoga/events/ical/` | 7 | Wellness | Yoga/pranayama classes |
+| santa-rosa-womens-creativity-collective | `meetup.com/santa-rosa-womens-creativity-collective/events/ical/` | 6 | Arts | Creative workshops at The Arthaus |
+| sonoma-county-boomers | `meetup.com/sonoma-county-boomers/events/ical/` | 6 | Social | Social events for boomers |
+| The-International-Wanderers | `meetup.com/The-International-Wanderers/events/ical/` | 6 | Travel/Outdoor | Travel trips + local hiking retreats |
+| culturelovers | `meetup.com/culturelovers/events/ical/` | 10 | Travel | International travel (may be less local) |
 
-### Topics to search:
-- Hiking / outdoor recreation
-- Wine / food
-- Tech / maker
-- Arts / music
-- Sustainability / environment
-- Birding / nature
+### Other Active Groups (Lower Priority)
+
+| Group | Events | Notes |
+|-------|--------|-------|
+| Hidden-Backroads-Adventures | 10 | Speed dating / social events |
+| PlayYourCourt-Santa-Rosa-Tennis | 10 | Tennis - may be commercial |
+| apa-pool-league | 10 | Pool league |
+| real-estate-investor-community-santa-rosa | 10 | Real estate networking |
+| Alternative-Healing-Exploration | 10 | Healing workshops |
+| northern-california-plant-medicine-community | 10 | Plant medicine events |
+| the-unstruck-drum-center-for-shamanism-healing | 8 | Shamanism events |
+| sarogn | 7 | Unknown category |
+| the-santa-rosa-spiritual-experiences-group | 6 | Spiritual events |
+| north-bay-social-group-20s-and-30s | 3 | Young adult social |
+| bce-before-christian-era | 3 | Historical interest |
+| entheogens-in-sonoma | 3 | Entheogens |
+| Woodworking-Workshops-for-Women | 2 | Woodworking |
+| lets-go-golden-girls | 2 | Women's social |
+| full-circle-studio | 2 | Studio events |
+
+### Groups with No Current Events
+The following groups exist but had no upcoming events at time of discovery:
+ai-northbay, ambgroup, bootstrapped-af-podcast-mastermind-group, happy-over-50, 
+kayaking-sonoma-beyond, ladieswithnobabies, localbitcoin-meetup, north-bay-adventures, 
+north-bay-hikers-born-1990-2000, santa-rosa-30s-40s-50s-meet-and-hangout-group, 
+senior-walkabouters, sonoma-county-millennials, sonoma-county-shenanigans, 
+Sonoma-County-Photography-Group, Sonoma-County-Wanderers, womens-wellness-meetup-group
 
 ---
 
