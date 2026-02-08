@@ -74,21 +74,21 @@ jobs:
       if: contains(steps.locations.outputs.list, 'santarosa') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Santa Rosa..."
-        python library_intercept.py --location santarosa --output santarosa/library_intercept.ics || true
-        python scrapers/cityspark/bohemian.py --output santarosa/bohemian.ics || true
-        python scrapers/cityspark/pressdemocrat.py --output santarosa/pressdemocrat.ics || true
-        python scrapers/sonoma_parks.py --output santarosa/sonoma_parks.ics || true
-        python scrapers/cal_theatre.py --output santarosa/cal_theatre.ics || true
-        python scrapers/copperfields.py --output santarosa/copperfields.ics || true
-        python scrapers/sonoma_county_gov.py --output santarosa/sonoma_county_gov.ics || true
-        python scrapers/wix/cafefrida.py --output santarosa/cafefrida.ics || true
-        python scrapers/srcc.py --output santarosa/srcc.ics || true
+        python library_intercept.py --location santarosa --output cities/santarosa/library_intercept.ics || true
+        python scrapers/cityspark/bohemian.py --output cities/santarosa/bohemian.ics || true
+        python scrapers/cityspark/pressdemocrat.py --output cities/santarosa/pressdemocrat.ics || true
+        python scrapers/sonoma_parks.py --output cities/santarosa/sonoma_parks.ics || true
+        python scrapers/cal_theatre.py --output cities/santarosa/cal_theatre.ics || true
+        python scrapers/copperfields.py --output cities/santarosa/copperfields.ics || true
+        python scrapers/sonoma_county_gov.py --output cities/santarosa/sonoma_county_gov.ics || true
+        python scrapers/wix/cafefrida.py --output cities/santarosa/cafefrida.ics || true
+        python scrapers/srcc.py --output cities/santarosa/srcc.ics || true
       continue-on-error: true
 
     - name: Download Santa Rosa live feeds and combine ICS
       if: contains(steps.locations.outputs.list, 'santarosa')
       run: |
-        cd santarosa
+        cd cities/santarosa
         curl -sL "https://calendar.google.com/calendar/ical/eventsatarlenefransictheater@gmail.com/public/basic.ics" -o arlene_francis_theater.ics || true
         curl -sL "https://lutherburbankcenter.org/events/?ical=1" -o luther_burbank_center.ics || true
         curl -sL "https://schulzmuseum.org/events/?ical=1" -o schulz_museum.ics || true
@@ -105,10 +105,10 @@ jobs:
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/nataraja-school-of-traditional-yoga/events/ical/" -o meetup_yoga.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/santa-rosa-womens-creativity-collective/events/ical/" -o meetup_creativity.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-boomers/events/ical/" -o meetup_boomers.ics || true
-        cd ..
+        cd ../..
         # Eventbrite scrape
-        python scrapers/eventbrite_scraper.py --location ca--santa-rosa --months ${SCRAPE_MONTHS:-2} > santarosa/eventbrite.ics || true
-        python combine_ics.py --input-dir santarosa --output santarosa/combined.ics --name "Santa Rosa Community Calendar"
+        python scrapers/eventbrite_scraper.py --location ca--santa-rosa --months ${SCRAPE_MONTHS:-2} > cities/santarosa/eventbrite.ics || true
+        python combine_ics.py --input-dir cities/santarosa --output cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
 
     # ==========================================
     # Sebastopol
@@ -117,17 +117,17 @@ jobs:
       if: contains(steps.locations.outputs.list, 'sebastopol') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Sebastopol..."
-        python scrapers/sebarts.py --output sebastopol/sebarts.ics || true
-        python scrapers/occidental_arts.py --output sebastopol/occidental_arts.ics || true
+        python scrapers/sebarts.py --output cities/sebastopol/sebarts.ics || true
+        python scrapers/occidental_arts.py --output cities/sebastopol/occidental_arts.ics || true
       continue-on-error: true
 
     - name: Download Sebastopol live feeds and combine ICS
       if: contains(steps.locations.outputs.list, 'sebastopol')
       run: |
-        cd sebastopol
+        cd cities/sebastopol
         curl -sL "https://seb.org/?post_type=tribe_events&ical=1&eventDisplay=list" -o sebastopol_community.ics || true
-        cd ..
-        python combine_ics.py --input-dir sebastopol --output sebastopol/combined.ics --name "Sebastopol Community Calendar"
+        cd ../..
+        python combine_ics.py --input-dir cities/sebastopol --output cities/sebastopol/combined.ics --name "Sebastopol Community Calendar"
 
     # ==========================================
     # Cotati
@@ -136,13 +136,13 @@ jobs:
       if: contains(steps.locations.outputs.list, 'cotati') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Cotati..."
-        python scrapers/redwood_cafe.py --output cotati/redwood_cafe.ics || true
+        python scrapers/redwood_cafe.py --output cities/cotati/redwood_cafe.ics || true
       continue-on-error: true
 
     - name: Combine Cotati ICS
       if: contains(steps.locations.outputs.list, 'cotati')
       run: |
-        python combine_ics.py --input-dir cotati --output cotati/combined.ics --name "Cotati Community Calendar"
+        python combine_ics.py --input-dir cities/cotati --output cities/cotati/combined.ics --name "Cotati Community Calendar"
 
     # ==========================================
     # Sonoma
@@ -151,14 +151,14 @@ jobs:
       if: contains(steps.locations.outputs.list, 'sonoma') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Sonoma..."
-        python scrapers/svma.py --output sonoma/svma.ics || true
-        python scrapers/sonoma_city.py --output sonoma/sonoma_city.ics || true
+        python scrapers/svma.py --output cities/sonoma/svma.ics || true
+        python scrapers/sonoma_city.py --output cities/sonoma/sonoma_city.ics || true
       continue-on-error: true
 
     - name: Combine Sonoma ICS
       if: contains(steps.locations.outputs.list, 'sonoma')
       run: |
-        python combine_ics.py --input-dir sonoma --output sonoma/combined.ics --name "Sonoma Community Calendar"
+        python combine_ics.py --input-dir cities/sonoma --output cities/sonoma/combined.ics --name "Sonoma Community Calendar"
 
     # ==========================================
     # Bloomington
@@ -167,13 +167,13 @@ jobs:
       if: contains(steps.locations.outputs.list, 'bloomington') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Bloomington..."
-        python library_intercept.py --location bloomington --output bloomington/library_intercept.ics || true
+        python library_intercept.py --location bloomington --output cities/bloomington/library_intercept.ics || true
       continue-on-error: true
 
     - name: Download Bloomington live feeds and combine ICS
       if: contains(steps.locations.outputs.list, 'bloomington')
       run: |
-        cd bloomington
+        cd cities/bloomington
         curl -sL "https://bgcbloomington.org/events/list/?ical=1" -o bgc_bloomington.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/bloomington.in.gov_1b95au4d2ueudldosb024fimp0@group.calendar.google.com/public/basic.ics" -o bloomington_gov.ics || true
         curl -sL "https://tockify.com/api/feeds/ics/bloomington.arts.calendar" -o bloomington_arts.ics || true
@@ -186,8 +186,8 @@ jobs:
         curl -sL "https://calendar.google.com/calendar/ical/4dj0guhji982ca5k90ljeliul0@group.calendar.google.com/public/basic.ics" -o bsquare_misc_civic.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/2gd73d7gc46mstrdnr6k7v7b2o@group.calendar.google.com/public/basic.ics" -o bsquare_critical_mass.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/c_02o6fd3erhdmhe4oc5so149ir0@group.calendar.google.com/public/basic.ics" -o bsquare_bptc.ics || true
-        cd ..
-        python combine_ics.py --input-dir bloomington --output bloomington/combined.ics --name "Bloomington Community Calendar"
+        cd ../..
+        python combine_ics.py --input-dir cities/bloomington --output cities/bloomington/combined.ics --name "Bloomington Community Calendar"
 
     # ==========================================
     # Davis
@@ -196,21 +196,21 @@ jobs:
       if: contains(steps.locations.outputs.list, 'davis') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Davis..."
-        python scrapers/ucdavis_arts.py --output davis/ucdavis_arts.ics || true
-        python scrapers/ucdavis_library.py --output davis/ucdavis_library.ics || true
-        python scrapers/ucdavis_campusgroups.py --output davis/ucdavis_campusgroups.ics || true
-        python scrapers/davis_downtown.py --output davis/davis_downtown.ics || true
-        python scrapers/yolo_library.py --output davis/yolo_library.ics || true
-        python scrapers/uudavis.py --output davis/uudavis.ics || true
-        python davis/scrapers/mondavi_center.py --output davis/mondavi_center.ics || true
-        python scrapers/davis_chamber.py --output davis/davis_chamber.ics || true
-        python scrapers/ucdavis_athletics.py --output davis/ucdavis_athletics.ics || true
+        python scrapers/ucdavis_arts.py --output cities/davis/ucdavis_arts.ics || true
+        python scrapers/ucdavis_library.py --output cities/davis/ucdavis_library.ics || true
+        python scrapers/ucdavis_campusgroups.py --output cities/davis/ucdavis_campusgroups.ics || true
+        python scrapers/davis_downtown.py --output cities/davis/davis_downtown.ics || true
+        python scrapers/yolo_library.py --output cities/davis/yolo_library.ics || true
+        python scrapers/uudavis.py --output cities/davis/uudavis.ics || true
+        python cities/davis/scrapers/mondavi_center.py --output cities/davis/mondavi_center.ics || true
+        python scrapers/davis_chamber.py --output cities/davis/davis_chamber.ics || true
+        python scrapers/ucdavis_athletics.py --output cities/davis/ucdavis_athletics.ics || true
       continue-on-error: true
 
     - name: Download Davis Meetup feeds and Eventbrite
       if: contains(steps.locations.outputs.list, 'davis')
       run: |
-        cd davis
+        cd cities/davis
         # Meetup groups
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mosaics/events/ical/" -o meetup_mosaics.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/intercultural-mosaics/events/ical/" -o meetup_intercultural.ics || true
@@ -219,14 +219,14 @@ jobs:
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/art-in-action/events/ical/" -o meetup_art_in_action.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mindful-embodied-spirituality/events/ical/" -o meetup_mindful.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/winters-shut-up-and-write-meetup-group/events/ical/" -o meetup_winters_write.ics || true
-        cd ..
+        cd ../..
         # Eventbrite scrape
-        python scrapers/eventbrite_scraper.py --location ca--davis --months ${SCRAPE_MONTHS:-2} --cities davis woodland dixon winters "west sacramento" > davis/eventbrite.ics || true
+        python scrapers/eventbrite_scraper.py --location ca--davis --months ${SCRAPE_MONTHS:-2} --cities davis woodland dixon winters "west sacramento" > cities/davis/eventbrite.ics || true
 
     - name: Combine Davis ICS
       if: contains(steps.locations.outputs.list, 'davis')
       run: |
-        python combine_ics.py --input-dir davis --output davis/combined.ics --name "Davis Community Calendar"
+        python combine_ics.py --input-dir cities/davis --output cities/davis/combined.ics --name "Davis Community Calendar"
 
     # ==========================================
     # Post-processing (all cities)
@@ -235,9 +235,9 @@ jobs:
       run: |
         IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
         for city in "${CITIES[@]}"; do
-          if [ -f "$city/combined.ics" ]; then
-            python ics_to_json.py "$city/combined.ics" -o "$city/events.json" --city "$city"
-            echo "$city: Converted $(cat $city/events.json | python -c 'import json,sys; print(len(json.load(sys.stdin)))') events to JSON"
+          if [ -f "cities/$city/combined.ics" ]; then
+            python ics_to_json.py "cities/$city/combined.ics" -o "cities/$city/events.json" --city "$city"
+            echo "$city: Converted $(cat cities/$city/events.json | python -c 'import json,sys; print(len(json.load(sys.stdin)))') events to JSON"
           fi
         done
 
@@ -266,10 +266,10 @@ jobs:
       run: |
         echo "Waiting for GitHub Pages to update..."
         sleep 120  # Wait 2 minutes for GitHub Pages cache to update
-        
+
         # Verify at least one JSON file is accessible
         for i in 1 2 3; do
-          if curl -sL "https://judell.github.io/community-calendar/santarosa/events.json" | head -c 100 | grep -q '"title"'; then
+          if curl -sL "https://judell.github.io/community-calendar/cities/santarosa/events.json" | head -c 100 | grep -q '"title"'; then
             echo "GitHub Pages is serving updated content"
             break
           fi

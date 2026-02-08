@@ -173,7 +173,7 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
     all_anomalies = []
     
     for city in cities:
-        feeds_file = f'{city}/feeds.txt'
+        feeds_file = f'cities/{city}/feeds.txt'
         feeds = parse_feeds_file(feeds_file)
         
         if city not in report['cities']:

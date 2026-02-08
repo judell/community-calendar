@@ -2,7 +2,7 @@
 
 ## Quick Reference: Adding a New City
 
-1. **Create city directory** with `feeds.txt` and `SOURCES_CHECKLIST.md`
+1. **Create city directory** under `cities/` with `feeds.txt` and `SOURCES_CHECKLIST.md`
 2. **Run Meetup discovery** (Section 7) - find local groups with ICS feeds
 3. **Run Eventbrite scraper** (Section 8) - scrape local ticketed events
 4. **Update the GitHub Actions workflow** (`.github/workflows/generate-calendar.yml`):
@@ -10,8 +10,24 @@
    - Add Eventbrite scraper command
    - Add combine_ics.py step
 5. **Update `combine_ics.py`** - add SOURCE_NAMES entries for new Meetup groups
-6. **Update SOURCES_CHECKLIST.md** - document findings, track pending sources
-7. **Commit and push** - workflow runs daily or trigger manually
+6. **Add city to `index.html`** - add entry to `cityNames` map and a Button in `Main.xmlui`'s city picker
+7. **Update SOURCES_CHECKLIST.md** - document findings, track pending sources
+8. **Commit and push** - workflow runs daily or trigger manually
+
+## App Architecture
+
+The XMLUI app lives at the repo root and serves all cities from a single set of files:
+
+- **`index.html`** — Entry point. Reads `?city=` URL param to set `window.cityFilter` and `window.cityName`. No param shows the city picker.
+- **`Main.xmlui`** — App layout. Shows city picker when `!window.cityFilter`, calendar UI when a city is selected. Queries Supabase filtered by `window.cityFilter`.
+- **`components/`** — Shared XMLUI components (EventCard, PickItem, etc.)
+- **`helpers.js`**, **`config.json`**, **`Main.xmlui.xs`** — Shared app logic
+
+**URLs:** `index.html?city=santarosa`, `index.html?city=davis`, `index.html?city=bloomington`, etc.
+
+**Do not duplicate app files into city directories.** City directories (`cities/<name>/`) hold only data (ICS files, events.json) and city-specific docs (SOURCES_CHECKLIST.md). Bloomington's legacy static HTML files are an exception.
+
+Legacy HTML generation code (`cal.py`, templates, `sorttable.js`) lives in `legacy/`.
 
 ### SOURCES_CHECKLIST.md
 
