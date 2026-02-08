@@ -189,8 +189,8 @@ Discovered via topic search - all have ICS feeds at `https://www.meetup.com/{url
 
 | Group | URL Name | Events | Notes |
 |-------|----------|--------|-------|
-| Bloomington Atheists | `Bloomington-Atheists-and-Rationally-Awesome-People` | ~10 | Local social/discussion group |
-| Knobstone Hiking Trail Assoc | `knobstone-hiking-trail-association-of-indiana-meetup` | ~10 | Indiana hiking, some near Bloomington |
+| Bloomington Atheists | `Bloomington-Atheists-and-Rationally-Awesome-People` | ~10 | ✅ ADDED - Local social/discussion group |
+| Knobstone Hiking Trail Assoc | `knobstone-hiking-trail-association-of-indiana-meetup` | ~10 | Based in Martinsville (~20mi) - regional |
 
 ---
 
