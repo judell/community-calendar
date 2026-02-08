@@ -4,13 +4,17 @@ A community event aggregator that scrapes events from multiple sources, combines
 
 ## Live App
 
-**XMLUI App (Santa Rosa)**: https://judell.github.io/community-calendar/
-
-**XMLUI App (Davis)**: https://judell.github.io/community-calendar/davis.html
+**XMLUI App**: https://judell.github.io/community-calendar/ (city picker)
+- Santa Rosa: `index.html?city=santarosa`
+- Sebastopol: `index.html?city=sebastopol`
+- Cotati: `index.html?city=cotati`
+- Sonoma: `index.html?city=sonoma`
+- Bloomington: `index.html?city=bloomington`
+- Davis: `index.html?city=davis`
 
 **Subscribable ICS Feeds**:
-- Santa Rosa: https://judell.github.io/community-calendar/santarosa/combined.ics
-- Davis: https://judell.github.io/community-calendar/davis/combined.ics
+- Santa Rosa: https://judell.github.io/community-calendar/cities/santarosa/combined.ics
+- Davis: https://judell.github.io/community-calendar/cities/davis/combined.ics
 
 ## Architecture
 
@@ -46,22 +50,22 @@ A community event aggregator that scrapes events from multiple sources, combines
 - Cal Theatre
 - Copperfield's Books
 
-Scrapers are in `scrapers/` and per-location folders (e.g., `santarosa/`).
+Scrapers are in `scrapers/` and per-city data lives in `cities/<name>/`.
 
 ### 2. ICS Combination
 
-**`combine_ics.py`** - Combines multiple ICS files into a single subscribable feed:
+**`scripts/combine_ics.py`** - Combines multiple ICS files into a single subscribable feed:
 
 ```bash
-python combine_ics.py -i santarosa -o santarosa/combined.ics --name "Santa Rosa Community Calendar"
+python scripts/combine_ics.py -i cities/santarosa -o cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
 ```
 
 ### 3. ICS to JSON Conversion
 
-**`ics_to_json.py`** - Converts ICS to JSON format for Supabase ingestion:
+**`scripts/ics_to_json.py`** - Converts ICS to JSON format for Supabase ingestion:
 
 ```bash
-python ics_to_json.py santarosa/combined.ics -o santarosa/events.json
+python scripts/ics_to_json.py cities/santarosa/combined.ics -o cities/santarosa/events.json
 ```
 
 Output format:
@@ -105,7 +109,7 @@ Output format:
 }
 ```
 
-**`index.html`** - Loads XMLUI and defines helper functions for date formatting.
+**`index.html`** - Loads XMLUI, reads `?city=` URL param, defines helper functions for date formatting.
 
 ### 5. Supabase Backend
 
@@ -154,7 +158,7 @@ SELECT cron.schedule(
 );
 ```
 
-See `supabase_cron.sql` for the full setup.
+See `supabase/ddl/05_cron_jobs.sql` for the full setup.
 
 ## Deployment Workflow
 
@@ -165,13 +169,13 @@ See `supabase_cron.sql` for the full setup.
 # (varies by scraper)
 
 # 2. Combine ICS files
-python combine_ics.py -i santarosa -o santarosa/combined.ics
+python scripts/combine_ics.py -i cities/santarosa -o cities/santarosa/combined.ics
 
 # 3. Convert to JSON
-python ics_to_json.py santarosa/combined.ics -o santarosa/events.json
+python scripts/ics_to_json.py cities/santarosa/combined.ics -o cities/santarosa/events.json
 
 # 4. Commit and push
-git add santarosa/events.json santarosa/combined.ics
+git add cities/santarosa/events.json cities/santarosa/combined.ics
 git commit -m "Update events"
 git push
 
@@ -291,7 +295,7 @@ Users can now authenticate and save personal event picks:
 - Can unpick events directly from the dialog via close icon
 
 **Edge function:**
-- `my-picks` - validates token, returns user's picks as ICS
+- `my-picks` - validates token, returns user's picks as ICS (default) or JSON (`?format=json`)
 - Deploy with `--no-verify-jwt` to allow calendar app subscriptions (token provides auth)
 - Example: `https://<project>.supabase.co/functions/v1/my-picks?token=<feed_token>`
 - Note: Calendar apps poll ICS feeds periodically (Google: 12-24h, Apple: 15min-1h)
@@ -431,13 +435,13 @@ After mock tests, `test.html` fetches 500 live events from Supabase and validate
 
 ## Legacy HTML Generation
 
-The original HTML calendar generation is still available:
+The original HTML calendar generation lives in `legacy/`:
 
 ```bash
-python cal.py --generate --location santarosa --year 2026 --month 2
+python legacy/cal.py --generate --location santarosa --year 2026 --month 2
 ```
 
-See the legacy calendars at `/santarosa/2026-02.html` etc.
+See the legacy calendars at `/cities/bloomington/2026-02.html` etc.
 
 ---
 
@@ -450,31 +454,29 @@ community-calendar/
 ├── components/
 │   ├── EventCard.xmlui     # Event display card with pick checkbox
 │   ├── PickItem.xmlui      # Pick item in My Picks dialog
-│   ├── MyPicksDialog.xmlui # My Picks modal dialog
 │   ├── SourcesDialog.xmlui # Sources modal dialog
 │   └── CaptureDialog.xmlui # Poster capture: image → Claude API → event
 ├── config.json             # Supabase credentials + xsVerbose for inspector
-├── index.html              # XMLUI loader + auth setup
+├── index.html              # XMLUI loader + auth setup + ?city= param routing
 ├── helpers.js              # Pure helper functions (filter, dedupe, format, etc.)
 ├── test.html               # Browser-based test runner
 ├── xs-diff.html            # XMLUI Inspector UI
-├── xmlui/
-│   └── 0.11.33-inspector.js  # Local XMLUI engine with inspector support
-├── combine_ics.py          # Combines ICS files
-├── ics_to_json.py          # Converts ICS to JSON
-├── supabase/               # Supabase configuration
-│   ├── ddl/                # Database schema (tables, RLS, cron)
+├── xmlui/                  # Local XMLUI engine
+├── cities/                 # Per-city data (ICS files, events.json, feeds.txt)
+│   ├── santarosa/
+│   ├── sebastopol/
+│   ├── cotati/
+│   ├── sonoma/
+│   ├── bloomington/
+│   └── davis/
+├── scripts/                # Build scripts
+│   ├── combine_ics.py      # Combines ICS files into combined.ics
+│   ├── ics_to_json.py      # Converts ICS to JSON for Supabase
+│   ├── library_intercept.py # Sonoma County Library scraper
+│   └── report.py           # Feed health report
+├── scrapers/               # Event scrapers (Eventbrite, CitySpark, RSS, etc.)
+├── supabase/
+│   ├── ddl/                # Database schema documentation (01-06)
 │   └── functions/          # Edge Functions (load-events, my-picks, capture-event)
-├── cal.py                  # Legacy HTML generator
-├── santarosa/
-│   ├── combined.ics        # Subscribable calendar feed
-│   ├── events.json         # JSON for Supabase ingestion
-│   ├── feeds.txt           # List of ICS sources
-│   └── *.ics               # Individual source feeds
-├── davis/
-│   ├── combined.ics        # Davis subscribable calendar feed
-│   ├── events.json         # Davis JSON for Supabase ingestion
-│   ├── feeds.txt           # Davis feed sources
-│   └── *.ics               # UC Davis Arts, Davis Downtown, Yolo Library
-└── scrapers/               # Event scrapers
+└── legacy/                 # Legacy HTML calendar generator (cal.py, templates)
 ```

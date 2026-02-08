@@ -29,7 +29,9 @@ The XMLUI app lives at the repo root and serves all cities from a single set of 
 
 Legacy HTML generation code (`cal.py`, templates, `sorttable.js`) lives in `legacy/`.
 
-**Edge function gotcha:** Redeploying `load-events` via the Supabase MCP tool resets "Require JWT" to ON. The workflow calls this function with the anon key, so after redeploying you must manually turn off "Require JWT" in the Supabase dashboard (Edge Functions > load-events > Settings).
+**Edge function gotcha:** Redeploying any edge function via the Supabase MCP tool resets "Require JWT" to ON. The workflow calls `load-events` with the anon key, so after redeploying you must manually turn off "Require JWT" in the Supabase dashboard (Edge Functions > function-name > Settings).
+
+**DDL files (`supabase/ddl/`)** document the live database state — they are not migration scripts. When the schema changes in Supabase, update the corresponding DDL file to stay in sync. Files: 01_extensions, 02_events, 03_picks, 04_feed_tokens, 05_cron_jobs, 06_event_enrichments.
 
 ### SOURCES_CHECKLIST.md
 
