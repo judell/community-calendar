@@ -78,6 +78,32 @@ Example workflow:
 4. If found on Eventbrite, check if venue has organizer page with feed
 5. If on Facebook, events may be accessible via their API or third-party scrapers
 
+### 7. Topic-Based Discovery
+**Search for events by activity/interest rather than by venue:**
+
+Useful when you want to find sources for specific community interests that may not be covered by major venues.
+
+```bash
+# Search patterns for topic-based event discovery
+"birding events" bloomington calendar
+"hiking club" bloomington events
+"astronomy" bloomington "star party" OR "public viewing"
+"garden club" bloomington events calendar
+"book club" bloomington library events
+"running club" bloomington calendar
+"cycling" bloomington "group ride" calendar
+```
+
+This can reveal:
+- Meetup.com groups (which have ICS feeds)
+- Facebook groups with event calendars
+- Niche organizations with their own calendars
+- Parks/nature centers with outdoor programming
+- Library branches with special interest events
+
+Meetup.com is particularly valuable - groups have ICS feeds at:
+`https://www.meetup.com/{group-name}/events/ical/`
+
 ## Anti-Scraping Workarounds
 
 ### Blocked by 403/406

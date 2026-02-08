@@ -184,6 +184,14 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 - [~] Neighborhood associations — Sites appear inactive/down
 - [~] Visit Bloomington — BLOCKED: Simpleview CMS, no API
 
+### Phase 4: Topic-Based Discovery (Meetup Groups)
+Discovered via topic search - all have ICS feeds at `https://www.meetup.com/{urlname}/events/ical/`
+
+| Group | URL Name | Events | Notes |
+|-------|----------|--------|-------|
+| Bloomington Atheists | `Bloomington-Atheists-and-Rationally-Awesome-People` | ~10 | Local social/discussion group |
+| Knobstone Hiking Trail Assoc | `knobstone-hiking-trail-association-of-indiana-meetup` | ~10 | Indiana hiking, some near Bloomington |
+
 ---
 
 ## Notes
