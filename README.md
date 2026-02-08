@@ -6,14 +6,12 @@ A community event aggregator that scrapes events from multiple sources, combines
 
 **XMLUI App**: https://judell.github.io/community-calendar/ (city picker)
 - Santa Rosa: `index.html?city=santarosa`
-- Sebastopol: `index.html?city=sebastopol`
-- Cotati: `index.html?city=cotati`
-- Sonoma: `index.html?city=sonoma`
 - Bloomington: `index.html?city=bloomington`
 - Davis: `index.html?city=davis`
 
 **Subscribable ICS Feeds**:
 - Santa Rosa: https://judell.github.io/community-calendar/cities/santarosa/combined.ics
+- Bloomington: https://judell.github.io/community-calendar/cities/davis/combined.ics
 - Davis: https://judell.github.io/community-calendar/cities/davis/combined.ics
 
 ## Architecture
@@ -442,6 +440,114 @@ python legacy/cal.py --generate --location santarosa --year 2026 --month 2
 ```
 
 See the legacy calendars at `/cities/bloomington/2026-02.html` etc.
+
+---
+
+## Adding a New City (with an AI Agent)
+
+Source discovery is a collaboration between you and an AI coding agent (like Claude Code). You bring local knowledge — what venues, organizations, and activities matter in your city. The agent brings technical ability — probing URLs for feeds, testing ICS files, writing scrapers, and updating config. Here's how to guide the process.
+
+### 1. Set up the city
+
+> "Add a new city called {cityname} to the community calendar."
+
+The agent creates `cities/{cityname}/`, adds a `feeds.txt` and `SOURCES_CHECKLIST.md`, adds the city to the `cityNames` map in `index.html`, and adds a button to the city picker in `Main.xmlui`.
+
+### 2. Seed with what you know
+
+You know your city. The agent doesn't. List the venues, organizations, and calendars you're aware of:
+
+> "Here are some event sources in {cityname}:
+> - The public library at {url}
+> - {Venue name} at {url}
+> - The city government calendar at {url}
+> - {College name} events at {url}
+> - A Google Calendar I know about: {url or name}"
+
+The agent probes each URL looking for ICS feeds, RSS feeds, Google Calendar embeds, or scrapeable HTML, and reports what it finds. Expect a mix — some sites have feeds, some need scrapers, some are dead ends. Here's how to read the results:
+
+- **"Found ICS feed"** — Goes straight into the workflow
+- **"Found Google Calendar embed"** — Agent can extract the calendar ID and build an ICS URL
+- **"Site returns 403/406"** — Blocked; ask the agent to try a User-Agent header, or look for the same events elsewhere
+- **"Cloudflare challenge"** — Usually a dead end; move on
+- **"Uses WordPress with Tribe Events"** — Ask the agent to try appending `?ical=1`
+- **"Found JSON-LD / Schema.org Event markup"** — Scrapeable, but needs a custom scraper
+
+### 3. Meetup discovery
+
+Meetup groups are high-value because they always have ICS feeds. Discovering them requires a browser — the agent can't browse Meetup's search page directly.
+
+**You do this part:**
+
+1. Go to `https://www.meetup.com/find/?keywords=&location=us--{state}--{City}&source=GROUPS`
+2. Scroll to load more groups
+3. Open browser console (F12) and paste:
+   ```javascript
+   const links = Array.from(document.querySelectorAll('a')).filter(a =>
+     a.href.match(/meetup\.com\/[^\/]+\/?$/) && !a.href.includes('/find'));
+   copy([...new Set(links.map(a =>
+     a.href.match(/meetup\.com\/([^\/\?]+)/)?.[1]).filter(Boolean))].join('\n'));
+   ```
+4. This copies group URL names to your clipboard
+
+Then tell the agent:
+
+> "Here are Meetup groups near {cityname}. Test their ICS feeds, check which ones have upcoming events, verify they're actually in {cityname}, and exclude travel groups whose events are at international destinations."
+
+Paste the group list. The agent tests each one and produces a table. You decide which to include.
+
+### 4. Eventbrite
+
+> "Run the Eventbrite scraper for {cityname}."
+
+If the city area includes neighboring towns:
+
+> "Include events from {nearby town 1} and {nearby town 2} too."
+
+Eventbrite results also reveal venues you might not have known about — check the output for surprises.
+
+### 5. Topic-based discovery
+
+Think about what people do in your city:
+
+> "Search for {cityname} groups related to: hiking, birding, astronomy, book clubs, running, cycling, gardening, board games, coding."
+
+The agent web-searches and may find more Meetup groups, organization websites with calendars, or niche sources (parks departments, nature centers, makerspaces). Facebook groups are usually dead ends (no public API since 2018).
+
+### 6. Wire it up
+
+Once you've agreed on sources:
+
+> "Add these sources to the workflow."
+
+The agent adds curl commands to the GitHub Actions workflow, adds Eventbrite scraper commands, updates `scripts/combine_ics.py` with source names, updates `cities/{cityname}/feeds.txt`, adds the city to the `load-events` edge function, and updates `SOURCES_CHECKLIST.md`.
+
+### 7. Review and iterate
+
+After the first run, check results:
+
+> "Run the workflow for {cityname} and let's see what we get."
+
+Common issues:
+- **Too many events from one source** — might need date filtering (e.g., a Google Calendar with years of history)
+- **Duplicate events** — same event from multiple sources (the app deduplicates, but verify)
+- **Wrong city** — a Meetup group nearby but events are actually in another town
+- **Stale feeds** — ICS feed exists but hasn't been updated in months
+
+Then iterate:
+
+> "Remove {source} — it's all duplicates of {other source}."
+> "That library feed has events from all branches statewide. Can we filter to just {cityname}?"
+> "I found another venue: {url}. Can you check if it has a feed?"
+
+### Tips
+
+- **Be specific about geography.** "Santa Rosa" could be California or Florida. Give the state and region.
+- **Share what you know about the local scene.** "The main music venues are X, Y, and Z" saves guessing.
+- **Don't expect 100% coverage.** Some venues (Facebook-only, Cloudflare-protected, no web presence) can't be scraped.
+- **Check SOURCES_CHECKLIST.md first** when returning to a city — it records what was already tried, so you don't repeat dead ends.
+- **Meetup and Eventbrite are the two biggest wins** for any new city. Start there, then fill in with local sources.
+- **The technical details are in `AGENTS.md`** — feed URL patterns, scraping strategies, platform-specific APIs, anti-scraping workarounds, and the full validation checklist.
 
 ---
 
