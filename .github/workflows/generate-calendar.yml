@@ -74,7 +74,7 @@ jobs:
       if: contains(steps.locations.outputs.list, 'santarosa') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Santa Rosa..."
-        python library_intercept.py --location santarosa --output cities/santarosa/library_intercept.ics || true
+        python scripts/library_intercept.py --location santarosa --output cities/santarosa/library_intercept.ics || true
         python scrapers/cityspark/bohemian.py --output cities/santarosa/bohemian.ics || true
         python scrapers/cityspark/pressdemocrat.py --output cities/santarosa/pressdemocrat.ics || true
         python scrapers/sonoma_parks.py --output cities/santarosa/sonoma_parks.ics || true
@@ -108,7 +108,7 @@ jobs:
         cd ../..
         # Eventbrite scrape
         python scrapers/eventbrite_scraper.py --location ca--santa-rosa --months ${SCRAPE_MONTHS:-2} > cities/santarosa/eventbrite.ics || true
-        python combine_ics.py --input-dir cities/santarosa --output cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
+        python scripts/combine_ics.py --input-dir cities/santarosa --output cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
 
     # ==========================================
     # Sebastopol
@@ -127,7 +127,7 @@ jobs:
         cd cities/sebastopol
         curl -sL "https://seb.org/?post_type=tribe_events&ical=1&eventDisplay=list" -o sebastopol_community.ics || true
         cd ../..
-        python combine_ics.py --input-dir cities/sebastopol --output cities/sebastopol/combined.ics --name "Sebastopol Community Calendar"
+        python scripts/combine_ics.py --input-dir cities/sebastopol --output cities/sebastopol/combined.ics --name "Sebastopol Community Calendar"
 
     # ==========================================
     # Cotati
@@ -142,7 +142,7 @@ jobs:
     - name: Combine Cotati ICS
       if: contains(steps.locations.outputs.list, 'cotati')
       run: |
-        python combine_ics.py --input-dir cities/cotati --output cities/cotati/combined.ics --name "Cotati Community Calendar"
+        python scripts/combine_ics.py --input-dir cities/cotati --output cities/cotati/combined.ics --name "Cotati Community Calendar"
 
     # ==========================================
     # Sonoma
@@ -158,7 +158,7 @@ jobs:
     - name: Combine Sonoma ICS
       if: contains(steps.locations.outputs.list, 'sonoma')
       run: |
-        python combine_ics.py --input-dir cities/sonoma --output cities/sonoma/combined.ics --name "Sonoma Community Calendar"
+        python scripts/combine_ics.py --input-dir cities/sonoma --output cities/sonoma/combined.ics --name "Sonoma Community Calendar"
 
     # ==========================================
     # Bloomington
@@ -167,7 +167,7 @@ jobs:
       if: contains(steps.locations.outputs.list, 'bloomington') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Bloomington..."
-        python library_intercept.py --location bloomington --output cities/bloomington/library_intercept.ics || true
+        python scripts/library_intercept.py --location bloomington --output cities/bloomington/library_intercept.ics || true
       continue-on-error: true
 
     - name: Download Bloomington live feeds and combine ICS
@@ -187,7 +187,7 @@ jobs:
         curl -sL "https://calendar.google.com/calendar/ical/2gd73d7gc46mstrdnr6k7v7b2o@group.calendar.google.com/public/basic.ics" -o bsquare_critical_mass.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/c_02o6fd3erhdmhe4oc5so149ir0@group.calendar.google.com/public/basic.ics" -o bsquare_bptc.ics || true
         cd ../..
-        python combine_ics.py --input-dir cities/bloomington --output cities/bloomington/combined.ics --name "Bloomington Community Calendar"
+        python scripts/combine_ics.py --input-dir cities/bloomington --output cities/bloomington/combined.ics --name "Bloomington Community Calendar"
 
     # ==========================================
     # Davis
@@ -226,7 +226,7 @@ jobs:
     - name: Combine Davis ICS
       if: contains(steps.locations.outputs.list, 'davis')
       run: |
-        python combine_ics.py --input-dir cities/davis --output cities/davis/combined.ics --name "Davis Community Calendar"
+        python scripts/combine_ics.py --input-dir cities/davis --output cities/davis/combined.ics --name "Davis Community Calendar"
 
     # ==========================================
     # Post-processing (all cities)
@@ -236,14 +236,14 @@ jobs:
         IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
         for city in "${CITIES[@]}"; do
           if [ -f "cities/$city/combined.ics" ]; then
-            python ics_to_json.py "cities/$city/combined.ics" -o "cities/$city/events.json" --city "$city"
+            python scripts/ics_to_json.py "cities/$city/combined.ics" -o "cities/$city/events.json" --city "$city"
             echo "$city: Converted $(cat cities/$city/events.json | python -c 'import json,sys; print(len(json.load(sys.stdin)))') events to JSON"
           fi
         done
 
     - name: Generate feed health report
       run: |
-        python report.py --cities ${{ steps.locations.outputs.list }}
+        python scripts/report.py --cities ${{ steps.locations.outputs.list }}
 
     - name: Commit and push if changes
       env:
