@@ -96,7 +96,18 @@ jobs:
         curl -sL "https://golocal.coop/?post_type=tribe_events&ical=1&eventDisplay=list" -o golocal_coop.ics || true
         curl -sL "https://sonomacountyaa.org/events/?ical=1" -o sonoma_county_aa.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/dsasonomacounty%40gmail.com/public/basic.ics" -o sonoma_county_dsa.ics || true
+        # Meetup groups
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-go-wild-hikers/events/ical/" -o meetup_go_wild_hikers.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/shutupandwritewinecountry/events/ical/" -o meetup_shutupandwrite.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/scottish-country-dancing/events/ical/" -o meetup_scottish_dancing.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-womens-wine-club/events/ical/" -o meetup_womens_wine_club.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/santa-rosa-toastmasters-public-speaking-meetup-group/events/ical/" -o meetup_toastmasters.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/nataraja-school-of-traditional-yoga/events/ical/" -o meetup_yoga.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/santa-rosa-womens-creativity-collective/events/ical/" -o meetup_creativity.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-boomers/events/ical/" -o meetup_boomers.ics || true
         cd ..
+        # Eventbrite scrape
+        python scrapers/eventbrite_scraper.py --location ca--santa-rosa --months ${SCRAPE_MONTHS:-2} > santarosa/eventbrite.ics || true
         python combine_ics.py --input-dir santarosa --output santarosa/combined.ics --name "Santa Rosa Community Calendar"
 
     # ==========================================
@@ -195,6 +206,22 @@ jobs:
         python scrapers/davis_chamber.py --output davis/davis_chamber.ics || true
         python scrapers/ucdavis_athletics.py --output davis/ucdavis_athletics.ics || true
       continue-on-error: true
+
+    - name: Download Davis Meetup feeds and Eventbrite
+      if: contains(steps.locations.outputs.list, 'davis')
+      run: |
+        cd davis
+        # Meetup groups
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mosaics/events/ical/" -o meetup_mosaics.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/intercultural-mosaics/events/ical/" -o meetup_intercultural.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/yolo-county-board-game-gathering/events/ical/" -o meetup_board_games.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/pence-adult-art-programs/events/ical/" -o meetup_pence_art.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/art-in-action/events/ical/" -o meetup_art_in_action.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mindful-embodied-spirituality/events/ical/" -o meetup_mindful.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/winters-shut-up-and-write-meetup-group/events/ical/" -o meetup_winters_write.ics || true
+        cd ..
+        # Eventbrite scrape
+        python scrapers/eventbrite_scraper.py --location ca--davis --months ${SCRAPE_MONTHS:-2} --cities davis woodland dixon winters "west sacramento" > davis/eventbrite.ics || true
 
     - name: Combine Davis ICS
       if: contains(steps.locations.outputs.list, 'davis')
