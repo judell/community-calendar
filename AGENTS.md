@@ -10,7 +10,19 @@
    - Add Eventbrite scraper command
    - Add combine_ics.py step
 5. **Update `combine_ics.py`** - add SOURCE_NAMES entries for new Meetup groups
-6. **Commit and push** - workflow runs daily or trigger manually
+6. **Update SOURCES_CHECKLIST.md** - document findings, track pending sources
+7. **Commit and push** - workflow runs daily or trigger manually
+
+### SOURCES_CHECKLIST.md
+
+Each city should have a `SOURCES_CHECKLIST.md` to track ongoing discovery:
+- **Currently Implemented** - sources already in the workflow
+- **Meetup Groups** - results of Meetup discovery with dates
+- **Eventbrite** - scraper results and key venues found
+- **Potential Additional Sources** - venues/orgs to investigate
+- **Non-Starters** - sources that were checked but don't work (and why)
+
+This serves as institutional memory so future work doesn't duplicate effort.
 
 ## Quick Reference: Meetup + Eventbrite for Existing City
 
