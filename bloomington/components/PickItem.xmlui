@@ -1,0 +1,26 @@
+<Component name="PickItem">
+  <AppState id="calState" bucket="calendar" />
+
+  <HStack verticalAlignment="center" gap="$space-2" paddingVertical="$space-1">
+    <VStack gap="$space-0" width="90%">
+      <Text
+        fontSize="$fontSize-xs"
+        color="$color-text-secondary"
+        value="{window.formatDayOfWeek($props.pick.events?.start_time) + ' ' + window.formatMonthDay($props.pick.events?.start_time) + (window.formatTime($props.pick.events?.start_time) ? ', ' + window.formatTime($props.pick.events?.start_time) : '')}"
+      />
+      <Link when="{$props.pick.events?.url}" to="{$props.pick.events?.url}" target="_blank">
+        <Text fontSize="$fontSize-sm" fontWeight="bold" value="{$props.pick.events?.title}" overflowMode="flow" />
+      </Link>
+      <Text when="{!$props.pick.events?.url}" fontSize="$fontSize-sm" fontWeight="bold" value="{$props.pick.events?.title}" overflowMode="flow" />
+    </VStack>
+    <SpaceFiller />
+    <AddToCalendar event="{$props.pick.events}" />
+    <Icon
+      name="close"
+      width="16px"
+      height="16px"
+      color="$color-text-tertiary"
+      onClick="calState.value.removePick($props.pick.id); calState.value.picksDS?.refetch()"
+    />
+  </HStack>
+</Component>
