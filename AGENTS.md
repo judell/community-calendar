@@ -29,6 +29,8 @@ The XMLUI app lives at the repo root and serves all cities from a single set of 
 
 Legacy HTML generation code (`cal.py`, templates, `sorttable.js`) lives in `legacy/`.
 
+**Edge function gotcha:** Redeploying `load-events` via the Supabase MCP tool resets "Require JWT" to ON. The workflow calls this function with the anon key, so after redeploying you must manually turn off "Require JWT" in the Supabase dashboard (Edge Functions > load-events > Settings).
+
 ### SOURCES_CHECKLIST.md
 
 Each city should have a `SOURCES_CHECKLIST.md` to track ongoing discovery:
