@@ -59,7 +59,7 @@ class CitySparkScraper(BaseScraper):
                 "distance": self.distance,
                 "lat": self.lat,
                 "lng": self.lng,
-                "sort": "Date",
+                # Note: omit 'sort' param - with sort='Date', API returns from end of range
                 "skip": skip,
                 "tps": str(page_size)
             }
