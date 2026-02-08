@@ -18,6 +18,8 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | B-Square: Misc Civic Events | ICS | ~252 | Google Calendar |
 | B-Square: Critical Mass | ICS | ~8 | Google Calendar (monthly group bike ride) |
 | B-Square: BPTC Public Meetings | ICS | ~15 | Google Calendar (transit board meetings) |
+| The Comedy Attic | Scraper | ~32 | `comedy_attic.py` |
+| The Bishop | Scraper | ~4 | `the_bishop.py` |
 
 ---
 
@@ -59,15 +61,15 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
-| **Buskirk-Chumley Theater** | `buskirkchumley.org/events/` | PENDING | HTML scrape |
-| **The Bishop** | `thebishopbar.com/events` | PENDING | HTML scrape |
+| **Buskirk-Chumley Theater** | `buskirkchumley.org/events/` | BLOCKED | Site blocks scrapers (403); RSS feed limited to 3 items |
+| **The Bishop** | `thebishopbar.com/events` | DONE | `the_bishop.py` scraper |
 | **IU Auditorium (public site)** | `iuauditorium.com/events` | SKIP | Covered by LiveWhale feed |
 
 ### Comedy / Talk / Nightlife
 
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
-| **Comedy Attic** | `comedyattic.com/events` | PENDING | HTML scrape |
+| **Comedy Attic** | `comedyattic.com/events` | DONE | `comedy_attic.py` scraper |
 
 ### Museums / Arts / Lectures
 
@@ -80,7 +82,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
-| **WonderLab Museum** | `wonderlab.org/events/` | PENDING | Has per-event ICS links |
+| **WonderLab Museum** | `wonderlab.org/events/` | BLOCKED | Behind Cloudflare challenge |
 
 ### Libraries
 
@@ -92,7 +94,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
-| **WFHB Community Calendar** | `wfhb.org/calendar/` | PENDING | Has JSON endpoint |
+| **WFHB Community Calendar** | `wfhb.org/calendar/` | BLOCKED | Site blocks scrapers |
 
 ### Visit Bloomington
 
