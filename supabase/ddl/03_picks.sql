@@ -8,9 +8,6 @@ CREATE TABLE IF NOT EXISTS picks (
   UNIQUE(user_id, event_id)
 );
 
--- Index for user queries
-CREATE INDEX IF NOT EXISTS picks_user_id_idx ON picks (user_id);
-
 -- Enable Row Level Security
 ALTER TABLE picks ENABLE ROW LEVEL SECURITY;
 

@@ -14,11 +14,8 @@ CREATE TABLE IF NOT EXISTS events (
   created_at timestamptz DEFAULT now()
 );
 
--- Index for date range queries
-CREATE INDEX IF NOT EXISTS events_start_time_idx ON events (start_time);
-
--- Index for source filtering
-CREATE INDEX IF NOT EXISTS events_source_idx ON events (source);
+-- Compound unique index for deduplication by source
+CREATE UNIQUE INDEX IF NOT EXISTS events_source_source_uid_key ON events (source, source_uid);
 
 -- Index for city filtering
 CREATE INDEX IF NOT EXISTS events_city_idx ON events (city);
@@ -27,6 +24,11 @@ CREATE INDEX IF NOT EXISTS events_city_idx ON events (city);
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 
 -- Allow anyone to read events
-CREATE POLICY "Events are publicly readable"
+CREATE POLICY "Anyone can read events"
   ON events FOR SELECT
   USING (true);
+
+-- Allow service functions to insert events
+CREATE POLICY "Service function can insert events"
+  ON events FOR INSERT
+  WITH CHECK (true);
