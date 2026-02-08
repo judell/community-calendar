@@ -66,12 +66,26 @@
     <IFrame src="xs-diff.html" width="100%" height="80vh"/>
   </ModalDialog>
 
+  <!-- City picker (shown when no city selected) -->
+  <VStack when="{!window.cityFilter}" horizontalAlignment="center" width="100%" padding="$space-8">
+    <H1>Community Calendar</H1>
+    <Text marginBottom="$space-4">Choose your city:</Text>
+    <VStack gap="$space-2" maxWidth="300px" width="100%">
+      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=santarosa'">Santa Rosa</Button>
+      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=sebastopol'">Sebastopol</Button>
+      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=cotati'">Cotati</Button>
+      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=sonoma'">Sonoma</Button>
+      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=davis'">Davis</Button>
+      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=bloomington'">Bloomington</Button>
+    </VStack>
+  </VStack>
+
   <!-- Main Content -->
-  <HStack horizontalAlignment="center" width="100%">
+  <HStack when="{!!window.cityFilter}" horizontalAlignment="center" width="100%">
   <VStack maxWidth="600px" width="100%">
     <H1>
       <HStack width="100%" verticalAlignment="center">
-        <Text>{window.cityName || 'Santa Rosa'} Events</Text>
+        <Text>{window.cityName} Events</Text>
         <SpaceFiller />
         <HStack gap="$space-1">
           <Icon name="search" tooltip="Search" width="20px" height="20px" onClick="showSearch = !showSearch" />
