@@ -18,6 +18,49 @@ Prioritized list of potential event sources for the Davis community calendar.
 
 ---
 
+## ✅ Meetup Groups (Discovered 2025-02-08)
+
+Ran Meetup discovery for Davis area. Found 29 groups, 10 with active events.
+
+### Added to feeds.txt
+
+| Group | Events | Category | Notes |
+|-------|--------|----------|-------|
+| mosaics | 10 | Cultural | Lunar New Year, language classes |
+| intercultural-mosaics | 10 | Cultural | Davis-based cultural events |
+| yolo-county-board-game-gathering | 10 | Social | Weekly Game Night at Blue Note (Woodland) |
+| pence-adult-art-programs | 3 | Arts | Artist talks, workshops at Pence Gallery |
+| art-in-action | 2 | Arts | Davis art events |
+| mindful-embodied-spirituality | 10 | Wellness | Yoga, conscious conversations |
+| winters-shut-up-and-write-meetup-group | 1 | Writing | Nearby Winters |
+
+### Online-only (not added)
+- mosaics-zoom (10 events) - Zoom language classes
+- womens-sci-fi-fantasy-book-club-online (2 events) - Online book club
+- PlayYourCourt-Davis-Tennis (10 events) - May be commercial
+
+---
+
+## ✅ Eventbrite (Scraped 2025-02-08)
+
+Used `scrapers/eventbrite_scraper.py --location ca--davis --months 2`
+
+**Results:** 7 local events from 20 scraped
+
+| Event | Location | Venue |
+|-------|----------|-------|
+| Andre Nickatina | Davis | G St Wunderbar |
+| Singles Only Party | West Sacramento | |
+| Valentine's Day at Franquette | West Sacramento | Franquette |
+| Dixon Rotary Crab Feed | Dixon | |
+| The Portal Marketplace | Woodland | |
+| We All Grown Up Throwbacks | West Sacramento | Kick N Mule |
+| Mass Timber On Site | West Sacramento | Public School Campus |
+
+**Note:** Re-run periodically as Eventbrite has no feed.
+
+---
+
 ## 🎯 Tier 1: Easy Wins (ICS/RSS Available)
 
 These have machine-readable feeds ready to use.
@@ -134,6 +177,33 @@ Well-structured pages that would need HTML scrapers.
 
 ### Phase 5 (Schools - if needed)
 10. [~] DJUSD calendar - Has export feature but no subscribable feed URL. Would need manual refresh or scraping.
+
+---
+
+## 🔍 Recently Investigated (2024-02)
+
+### UC Davis Main Events (ucdavis.edu/events)
+- **Status**: No RSS/ICS found
+- **Platform**: Drupal 10 (SiteFarm theme)
+- Checked common Drupal feed paths: `/events/rss`, `/events/feed`, `/events.xml` - all return HTML or 404
+- No `?_format=rss` support
+- Would need HTML scraper to extract events from the listing page
+- **Effort**: Medium - structured HTML but no feeds
+
+### Davis Enterprise (davisenterprise.com/events)
+- **Status**: RSS AVAILABLE but rate-limited
+- **Feed URL**: `https://www.davisenterprise.com/search/?f=rss&t=article&c=events&l=50&s=start_time&sd=desc`
+- Platform: TownNews (BLOX CMS)
+- Uses Evvnt calendar widget for event display
+- RSS exists but returns "Too Many Requests" - aggressive rate limiting
+- **Effort**: Low if we can work around rate limits (add delays, caching)
+
+### Explorit Science Center (explorit.org)
+- **Status**: Wix site - no standard feeds
+- Events page: `https://www.explorit.org/about-3`
+- Note: Currently "paused programming" per their homepage
+- Wix sites don't expose ICS/RSS - would need Puppeteer scraper
+- **Effort**: Medium-High - Wix dynamic rendering
 
 ---
 
