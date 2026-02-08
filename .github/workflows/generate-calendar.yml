@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       locations:
-        description: 'Locations to process (comma-separated: santarosa,sebastopol,bloomington or "all")'
+        description: 'Locations to process (comma-separated: santarosa,bloomington,davis or "all")'
         required: false
         default: 'all'
       regenerate_only:
@@ -62,7 +62,7 @@ jobs:
       run: |
         INPUT="${{ github.event.inputs.locations }}"
         if [ -z "$INPUT" ] || [ "$INPUT" = "all" ]; then
-          echo "list=santarosa,sebastopol,cotati,sonoma,bloomington,davis" >> $GITHUB_OUTPUT
+          echo "list=santarosa,bloomington,davis" >> $GITHUB_OUTPUT
         else
           echo "list=$INPUT" >> $GITHUB_OUTPUT
         fi
@@ -109,56 +109,6 @@ jobs:
         # Eventbrite scrape
         python scrapers/eventbrite_scraper.py --location ca--santa-rosa --months ${SCRAPE_MONTHS:-2} > cities/santarosa/eventbrite.ics || true
         python scripts/combine_ics.py --input-dir cities/santarosa --output cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
-
-    # ==========================================
-    # Sebastopol
-    # ==========================================
-    - name: Scrape Sebastopol sources
-      if: contains(steps.locations.outputs.list, 'sebastopol') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        echo "Scraping Sebastopol..."
-        python scrapers/sebarts.py --output cities/sebastopol/sebarts.ics || true
-        python scrapers/occidental_arts.py --output cities/sebastopol/occidental_arts.ics || true
-      continue-on-error: true
-
-    - name: Download Sebastopol live feeds and combine ICS
-      if: contains(steps.locations.outputs.list, 'sebastopol')
-      run: |
-        cd cities/sebastopol
-        curl -sL "https://seb.org/?post_type=tribe_events&ical=1&eventDisplay=list" -o sebastopol_community.ics || true
-        cd ../..
-        python scripts/combine_ics.py --input-dir cities/sebastopol --output cities/sebastopol/combined.ics --name "Sebastopol Community Calendar"
-
-    # ==========================================
-    # Cotati
-    # ==========================================
-    - name: Scrape Cotati sources
-      if: contains(steps.locations.outputs.list, 'cotati') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        echo "Scraping Cotati..."
-        python scrapers/redwood_cafe.py --output cities/cotati/redwood_cafe.ics || true
-      continue-on-error: true
-
-    - name: Combine Cotati ICS
-      if: contains(steps.locations.outputs.list, 'cotati')
-      run: |
-        python scripts/combine_ics.py --input-dir cities/cotati --output cities/cotati/combined.ics --name "Cotati Community Calendar"
-
-    # ==========================================
-    # Sonoma
-    # ==========================================
-    - name: Scrape Sonoma sources
-      if: contains(steps.locations.outputs.list, 'sonoma') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        echo "Scraping Sonoma..."
-        python scrapers/svma.py --output cities/sonoma/svma.ics || true
-        python scrapers/sonoma_city.py --output cities/sonoma/sonoma_city.ics || true
-      continue-on-error: true
-
-    - name: Combine Sonoma ICS
-      if: contains(steps.locations.outputs.list, 'sonoma')
-      run: |
-        python scripts/combine_ics.py --input-dir cities/sonoma --output cities/sonoma/combined.ics --name "Sonoma Community Calendar"
 
     # ==========================================
     # Bloomington

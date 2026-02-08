@@ -266,7 +266,7 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
 
 def main():
     parser = argparse.ArgumentParser(description='Generate feed health report')
-    parser.add_argument('--cities', type=str, default='santarosa,sebastopol,cotati,sonoma,bloomington',
+    parser.add_argument('--cities', type=str, default='santarosa,bloomington,davis',
                         help='Comma-separated list of cities')
     parser.add_argument('--output', type=str, default='report.json',
                         help='Output JSON file path')
