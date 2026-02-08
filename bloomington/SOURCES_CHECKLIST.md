@@ -100,7 +100,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
-| **Visit Bloomington** | `visitbloomington.com/events/` | PENDING | Tourism aggregator |
+| **Visit Bloomington** | `visitbloomington.com/events/` | BLOCKED | Simpleview CMS - no public API; would need HTML scraping |
 
 ---
 
@@ -140,7 +140,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
-| **UU Church of Bloomington** | `uubloomington.org/events/` | PENDING | May have hidden GCal |
+| **UU Church of Bloomington** | `uubloomington.org/` | LOW PRIORITY | Uses Planning Center/Church Center (no public API); events mostly internal church activities |
 | **Friends Meeting** | `bloomingtonfriendsmeeting.org/calendar` | PENDING | |
 
 ### Alt-Weeklies / Regional
@@ -180,9 +180,9 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 - [ ] WFHB Community Calendar (JSON endpoint)
 
 ### Phase 3: Community / Civic
-- [ ] UU Church of Bloomington
-- [ ] Neighborhood associations
-- [ ] Visit Bloomington
+- [~] UU Church of Bloomington — LOW PRIORITY: mostly internal events
+- [~] Neighborhood associations — Sites appear inactive/down
+- [~] Visit Bloomington — BLOCKED: Simpleview CMS, no API
 
 ---
 
