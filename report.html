@@ -73,6 +73,14 @@
             margin-bottom: 30px;
         }
 
+        .anomalies > summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 0;
+        }
+
+        .anomalies > summary::-webkit-details-marker { display: none; }
+
         .anomalies h2 {
             margin-top: 0;
             color: var(--danger);
@@ -268,10 +276,10 @@
 
     <div class="summary" id="summary"></div>
 
-    <div class="anomalies" id="anomalies">
-        <h2>Anomalies</h2>
+    <details class="anomalies" id="anomalies">
+        <summary><h2 style="display:inline;margin:0">Anomalies (<span id="anomaly-count">0</span>)</h2></summary>
         <div id="anomaly-list" class="loading">Loading...</div>
-    </div>
+    </details>
 
     <div id="cities"></div>
 
@@ -316,6 +324,7 @@
                 .sort((a, b) => b.date.localeCompare(a.date))
                 .slice(0, 20);
 
+            document.getElementById('anomaly-count').textContent = recentAnomalies.length;
             const anomalyList = document.getElementById('anomaly-list');
             if (recentAnomalies.length === 0) {
                 anomalyList.innerHTML = '<div class="no-anomalies">No anomalies detected</div>';
