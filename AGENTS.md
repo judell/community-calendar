@@ -1,5 +1,27 @@
 # Agent Strategies for Calendar Source Discovery
 
+## Quick Reference: Adding a New City
+
+1. **Create city directory** with `feeds.txt` and `SOURCES_CHECKLIST.md`
+2. **Run Meetup discovery** (Section 7) - find local groups with ICS feeds
+3. **Run Eventbrite scraper** (Section 8) - scrape local ticketed events
+4. **Update the GitHub Actions workflow** (`.github/workflows/generate-calendar.yml`):
+   - Add curl commands for Meetup ICS feeds
+   - Add Eventbrite scraper command
+   - Add combine_ics.py step
+5. **Update `combine_ics.py`** - add SOURCE_NAMES entries for new Meetup groups
+6. **Commit and push** - workflow runs daily or trigger manually
+
+## Quick Reference: Meetup + Eventbrite for Existing City
+
+1. **Meetup**: Browse `meetup.com/find/?location=us--{state}--{City}`, extract groups, test ICS feeds, verify locations
+2. **Eventbrite**: Run `python scrapers/eventbrite_scraper.py --location {state}--{city} --months 2`
+3. **Update workflow**: Add curl commands for Meetup, add eventbrite_scraper.py command
+4. **Update combine_ics.py**: Add SOURCE_NAMES for Meetup groups
+5. **Update SOURCES_CHECKLIST.md**: Document what was found
+
+---
+
 ## Feed Discovery Strategies
 
 ### 1. Direct ICS/RSS Probing
@@ -105,18 +127,73 @@ Meetup.com is particularly valuable - groups have ICS feeds at:
 `https://www.meetup.com/{group-name}/events/ical/`
 
 **Meetup Discovery Process:**
+
+1. **Browse groups near location** using browser:
+   ```
+   https://www.meetup.com/find/?keywords=&location=us--ca--Santa%20Rosa&source=GROUPS
+   ```
+
+2. **Extract group URLs** from the page using browser JS:
+   ```javascript
+   const links = Array.from(document.querySelectorAll('a')).filter(a => 
+     a.href.match(/meetup\.com\/[^\/]+\/?$/) && 
+     !a.href.includes('/find')
+   );
+   const groups = [...new Set(links.map(a => a.href.match(/meetup\.com\/([^\/\?]+)/)?.[1]).filter(Boolean))];
+   ```
+
+3. **Test ICS feeds** for each group:
+   ```bash
+   curl -sL "https://www.meetup.com/{group-name}/events/ical/" -A "Mozilla/5.0" | grep -c "BEGIN:VEVENT"
+   ```
+
+4. **Verify location** (some groups may be nearby but not in target city):
+   ```bash
+   curl -sL "https://www.meetup.com/{group-name}/" -A "Mozilla/5.0" | grep -oP '"city"\s*:\s*"\K[^"]+'
+   ```
+
+5. **Check event content** - exclude travel groups whose events are international destinations
+
+6. **Update workflow** - After adding feeds to `feeds.txt`, also add to `.github/workflows/generate-calendar.yml`:
+   ```yaml
+   # In the "Download [City] live feeds" step:
+   curl -sL -A "Mozilla/5.0" "https://www.meetup.com/{group-name}/events/ical/" -o meetup_{short_name}.ics || true
+   ```
+
+7. **Add source name** to `combine_ics.py` SOURCE_NAMES dict:
+   ```python
+   'meetup_{short_name}': 'Meetup: Group Display Name',
+   ```
+
+### 8. Eventbrite Scraping
+
+**Eventbrite has no public feed, but individual event pages have JSON-LD structured data.**
+
+Use `scrapers/eventbrite_scraper.py`:
 ```bash
-# Find groups near a location
-curl -sL "https://www.meetup.com/cities/us/in/bloomington/" -A "Mozilla/5.0" | grep -o '"urlname":"[^"]*"'
+# Scrape events for a location, limited to next N months
+python scrapers/eventbrite_scraper.py --location ca--santa-rosa --months 2
 
-# Validate group location
-curl -sL "https://www.meetup.com/{group-name}/" -A "Mozilla/5.0" | grep -o '"city":"[^"]*"'
-
-# Test ICS feed
-curl -sL "https://www.meetup.com/{group-name}/events/ical/" -A "Mozilla/5.0" | grep -c "BEGIN:VEVENT"
+# For Davis area with multiple cities
+python scrapers/eventbrite_scraper.py --location ca--davis --months 2 \
+  --cities davis woodland dixon winters "west sacramento"
 ```
 
-### 8. WordPress Plugin Detection
+The scraper:
+1. Fetches event URLs from `eventbrite.com/d/{location}/all-events/?end_date={date}`
+2. Extracts JSON-LD Schema.org Event data from each page
+3. Filters by city (addressLocality field)
+4. Outputs ICS format
+
+**Add to workflow** in `.github/workflows/generate-calendar.yml`:
+```yaml
+# In scraper or download step:
+python scrapers/eventbrite_scraper.py --location ca--{city} --months ${SCRAPE_MONTHS:-2} > {city}/eventbrite.ics || true
+```
+
+**Note:** Eventbrite requires periodic re-scraping (no live feed). The `--months` flag uses Eventbrite's `end_date` URL parameter to pre-filter, reducing scrape time.
+
+### 9. WordPress Plugin Detection
 **Identify upstream sources by checking what plugins a site uses:**
 
 ```bash
