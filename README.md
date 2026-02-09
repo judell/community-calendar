@@ -453,7 +453,48 @@ Source discovery is a collaboration between you and an AI coding agent (like Cla
 
 The agent creates `cities/{cityname}/`, adds a `feeds.txt` and `SOURCES_CHECKLIST.md`, adds the city to the `cityNames` map in `index.html`, and adds a button to the city picker in `Main.xmlui`.
 
-### 2. Seed with what you know
+### 2. Run the search pattern playbook
+
+Before seeding with local knowledge, run these web searches to discover feeds systematically. These patterns work across any city.
+
+**High-value feed searches** (platforms that have ICS feeds):
+```
+{city} {state} site:meetup.com              # Meetup groups → ICS feeds
+{city} site:tockify.com                      # Tockify calendars → ICS feeds
+{city} {state} inurl:/localist/             # University/govt calendars → API + ICS
+"add to calendar" events {city} {state}     # Sites with calendar export → ICS/Google Calendar feeds
+```
+
+**Discovery searches** (identify sources, may need scrapers):
+```
+{city} {state} events site:eventbrite.com   # Eventbrite (needs scraper)
+{city} {state} "community calendar"         # Local aggregators
+```
+
+**Test each discovery:**
+- **Tockify**: `curl -sL "https://tockify.com/api/feeds/ics/{name}" | grep -c "BEGIN:VEVENT"`
+- **Meetup**: `curl -sL "https://www.meetup.com/{group}/events/ical/" -A "Mozilla/5.0" | grep -c "BEGIN:VEVENT"`
+- **LiveWhale** (colleges): `curl -sL "https://{domain}/live/ical/events" -A "Mozilla/5.0" | grep -c "BEGIN:VEVENT"`
+- **Localist**: `curl -sL "https://{domain}/api/2/events" | head -50`
+
+**Platform feed availability:**
+
+| Platform | Has Feed? | Notes |
+|----------|-----------|-------|
+| Tockify | Yes | `tockify.com/api/feeds/ics/{name}` |
+| Meetup | Yes | `meetup.com/{group}/events/ical/` |
+| LiveWhale | Yes | `{domain}/live/ical/events` — common at colleges |
+| Localist | Yes | `/api/2/events` or ICS export |
+| CampusGroups | Yes | `/ical/{school}/ical_{school}.ics` |
+| CitySpark | Scraper | Local media calendars (Bohemian, Press Democrat, etc.) |
+| Eventbrite | Scraper | JSON-LD structured data per event page |
+| Facebook | Limited | No API; browser-only search finds individual events, not feeds |
+| Squarespace/Wix | No | No calendar export |
+| Simpleview | No | Tourism sites, no public feed |
+
+See `docs/search-pattern-tests.md` for detailed test results by city.
+
+### 3. Seed with what you know
 
 You know your city. The agent doesn't. List the venues, organizations, and calendars you're aware of:
 
@@ -473,7 +514,7 @@ The agent probes each URL looking for ICS feeds, RSS feeds, Google Calendar embe
 - **"Uses WordPress with Tribe Events"** — Ask the agent to try appending `?ical=1`
 - **"Found JSON-LD / Schema.org Event markup"** — Scrapeable, but needs a custom scraper
 
-### 3. Meetup discovery
+### 4. Meetup discovery
 
 Meetup groups are high-value because they always have ICS feeds. Discovering them requires a browser — the agent can't browse Meetup's search page directly.
 
@@ -496,7 +537,7 @@ Then tell the agent:
 
 Paste the group list. The agent tests each one and produces a table. You decide which to include.
 
-### 4. Eventbrite
+### 5. Eventbrite
 
 > "Run the Eventbrite scraper for {cityname}."
 
@@ -506,7 +547,7 @@ If the city area includes neighboring towns:
 
 Eventbrite results also reveal venues you might not have known about — check the output for surprises.
 
-### 5. Topic-based discovery
+### 6. Topic-based discovery
 
 Think about what people do in your city:
 
@@ -514,7 +555,7 @@ Think about what people do in your city:
 
 The agent web-searches and may find more Meetup groups, organization websites with calendars, or niche sources (parks departments, nature centers, makerspaces). Facebook groups are usually dead ends (no public API since 2018).
 
-### 6. Wire it up
+### 7. Wire it up
 
 Once you've agreed on sources:
 
@@ -522,7 +563,7 @@ Once you've agreed on sources:
 
 The agent adds curl commands to the GitHub Actions workflow, adds Eventbrite scraper commands, updates `scripts/combine_ics.py` with source names, updates `cities/{cityname}/feeds.txt`, adds the city to the `load-events` edge function, and updates `SOURCES_CHECKLIST.md`.
 
-### 7. Review and iterate
+### 8. Review and iterate
 
 After the first run, check results:
 

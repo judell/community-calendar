@@ -132,8 +132,46 @@ Used web scraping approach since Eventbrite doesn't have public feeds:
 ### Colleges
 | Source | URL | Status |
 |--------|-----|--------|
-| Santa Rosa Junior College | `santarosa.edu/events` | PENDING |
+| Santa Rosa Junior College | `calendar.santarosa.edu/live/ical/events` | ✅ ADDED (LiveWhale, 114 events) |
 | Sonoma State University | `sonoma.edu/events` | PENDING |
+
+---
+
+## Tockify Calendars (Discovered 2026-02-08)
+
+| Source | ICS URL | Events | Notes |
+|--------|---------|--------|-------|
+| Rileystreet Art Supply | `tockify.com/api/feeds/ics/rileystreet.art.com` | 561 | Multi-location art supply store, events tagged by location |
+
+## Additional Meetup Groups (Discovered 2026-02-08)
+
+| Group | ICS URL | Events | Notes |
+|-------|---------|--------|-------|
+| amorc-santa-rosa-pronaos | `meetup.com/amorc-santa-rosa-pronaos/events/ical/` | 10 | Monthly Mystical Seekers Series |
+| sarogn (Game Night) | `meetup.com/sarogn/events/ical/` | 7 | 3rd Saturday board/card games |
+
+## CitySpark / Shared Upstream (Discovered 2026-02-08)
+
+The Bohemian, Press Democrat, and NorCal Public Media calendars all use **CitySpark** as their upstream platform. ~58% of events overlap between Bohemian and Press Democrat. NorCal Public Media (acct #6164) would mostly duplicate existing coverage.
+
+| Publisher | CitySpark Slug | PPID | Geo Radius |
+|-----------|---------------|------|------------|
+| Bohemian | `Bohemian` | 9093 | 30mi |
+| Press Democrat | `SRPressDemocrat` | 8662 | 40mi |
+| NorCal Public Media | `norcalpublicmedia` | 6164 | unknown |
+
+## Non-Starters (Investigated 2026-02-08)
+
+| Source | Platform | Why |
+|--------|----------|-----|
+| Cal Theatre (caltheatre.com) | Wix | No calendar export |
+| Downtown Santa Rosa (downtownsantarosa.org) | Unknown | No discoverable feed |
+| Santa Rosa Metro Chamber | Unknown | No discoverable feed |
+| Sonoma Valley Events (sonomavalleyevents.com) | GatherBoard | RSS page says "Coming Soon" |
+| Bandsintown | Proprietary | 403, no public feed |
+| Visit Santa Rosa (visitsantarosa.com) | Simpleview | Tourism site, no public feed |
+| Happy over 50 Meetup | Meetup | 0 events |
+| NorCal Public Media | CitySpark | Would mostly duplicate Bohemian + Press Democrat |
 
 ---
 

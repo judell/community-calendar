@@ -68,14 +68,24 @@ These searches find platforms that typically have ICS feeds:
 {city} {state} inurl:/localist/           # University/govt calendars (often have feeds)
 ```
 
+### Calendar Export Searches (High Value)
+
+Sites with "add to calendar" functionality often have discoverable ICS feeds:
+
+```
+"add to calendar" events {city} {state}           # Surfaces sites with ICS/iCal export
+```
+
+This pattern found Google Calendar feeds and LiveWhale ICS endpoints in testing.
+
 ### Discovery Searches
 
 These help identify what events exist (may need scrapers):
 
 ```
-{city} {state} events site:facebook.com/events    # Shows local event activity
 {city} {state} events site:eventbrite.com         # Eventbrite (needs scraper)
 {city} {state} "community calendar"               # Local aggregators
+{city} {state} events site:facebook.com/events    # Limited: browser-only, no feeds, individual events only
 ```
 
 ### Platform Detection Searches
@@ -144,7 +154,7 @@ Known platforms with discoverable feeds:
 
 | Platform | Discovery Method |
 |----------|------------------|
-| **LiveWhale** (IU) | `https://events.iu.edu/live/ical/events/group_id/{id}` - find group_id in page source |
+| **LiveWhale** | `https://{domain}/live/ical/events` - common at colleges (SRJC: 114 events, IU: 923 events) |
 | **Tockify** | `https://tockify.com/api/feeds/ics/{calendar_name}` |
 | **CitySpark** | POST to `https://portal.cityspark.com/v1/events/{slug}` |
 | **Localist** | `https://{domain}/api/2/events` |
@@ -365,4 +375,4 @@ Before adding a source, verify:
 | **Simpleview CMS** | Tourism sites; no public events API |
 | **OpenDate** | Ticketing platform; no public feed |
 | **Cloudflare-protected sites** | Challenge pages block scrapers |
-| **Facebook Events** | No public API since 2018 |
+| **Facebook Events** | No public API since 2018; `site:facebook.com/events` only works in browser, not via search APIs; finds individual events, not feeds |

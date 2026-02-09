@@ -8,12 +8,13 @@
 
 | Search Pattern | Effectiveness | Notes |
 |----------------|---------------|-------|
-| `site:facebook.com/events {city} {state}` | ✅ Excellent | Finds FB events index + individual events |
+| `site:facebook.com/events {city} {state}` | ⚠️ Limited | Browser-only (search APIs won't return FB URLs). Finds individual events, not feeds — each URL must be scraped separately with no recurring feed |
 | `site:meetup.com {city} {state}` | ✅ Excellent | Finds groups (which have ICS feeds) |
 | `site:eventbrite.com {city} {state}` | ✅ Excellent | Finds event listings |
 | `site:tockify.com {city}` | ✅ Good | Tockify calendars have ICS feeds |
 | `{city} {state} inurl:/localist/` | ✅ Good | Finds university/govt calendars |
 | `{city} {state} "community calendar"` | ✅ Good | Finds local aggregators |
+| `"add to calendar" events {city} {state}` | ✅ Good | Surfaces sites with calendar export (ICS/iCal). Found Google Calendar feeds and LiveWhale ICS endpoints |
 
 ### What Has Limitations
 
@@ -29,7 +30,7 @@
 |----------|-----------|------------------|
 | **Tockify** | ✅ Yes | `https://tockify.com/api/feeds/ics/{calendar_name}` |
 | **Meetup** | ✅ Yes | `https://www.meetup.com/{group}/events/ical/` |
-| **Facebook Events** | ❌ No | No public API since 2018 |
+| **Facebook Events** | ⚠️ Indirect | No public API, but search the open web for Facebook event URLs and scrape them |
 | **Eventbrite** | ❌ No | Requires scraping |
 | **Squarespace** | ❌ No | No standard calendar export |
 | **Wix** | ❌ No | No standard calendar export |
