@@ -1,5 +1,4 @@
 <Component name="EventCard">
-  <AppState id="calState" bucket="calendar" />
 
   <Card padding="$space-2" marginBottom="$space-1">
     <VStack gap="$space-0">
@@ -24,10 +23,10 @@
         <SpaceFiller />
         <AddToCalendar event="{$props.event}" />
         <Checkbox
-          when="{calState.value.authUser}"
+          when="{window.authUser}"
           readOnly="true"
-          initialValue="{window.isEventPicked($props.event.mergedIds || $props.event.id, calState.value.picksData)}"
-          onClick="calState.value.togglePick($props.event); calState.value.picksDS?.refetch();"
+          initialValue="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData)}"
+          onClick="togglePick($props.event)"
         />
       </HStack>
     </VStack>

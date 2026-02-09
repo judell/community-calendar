@@ -108,7 +108,10 @@ function dedupeEvents(events) {
 
   const groups = {};
   events.forEach(e => {
-    const key = (e.title || '').trim().toLowerCase() + '|' + (e.start_time || '');
+    // Normalize start_time to ISO string for consistent dedup across formats
+    // e.g. '2026-02-11T18:00:00+00:00' and '2026-02-11T18:00:00.000Z' are the same instant
+    const normalizedTime = e.start_time ? new Date(e.start_time).toISOString() : '';
+    const key = (e.title || '').trim().toLowerCase() + '|' + normalizedTime;
     if (!groups[key]) {
       groups[key] = { ...e, sources: [e.source], mergedIds: [e.id] };
     } else {
@@ -125,9 +128,11 @@ function dedupeEvents(events) {
     }
   });
   // Convert sources array to comma-separated string
+  // Filter mergedIds to only include numeric IDs (exclude synthetic enrichment IDs)
   const result = Object.values(groups).map(e => ({
     ...e,
-    source: e.sources.sort().join(', ')
+    source: e.sources.sort().join(', '),
+    mergedIds: e.mergedIds.filter(id => typeof id === 'number' || /^\d+$/.test(id))
   })).sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
 
   // Cache the result
@@ -213,6 +218,10 @@ function downloadEventICS(event) {
   if (event.end_time) {
     lines.push(`DTEND:${formatICSDate(event.end_time)}`);
   }
+  if (event.rrule) {
+    const rruleStr = event.rrule.startsWith('RRULE:') ? event.rrule : 'RRULE:' + event.rrule;
+    lines.push(rruleStr);
+  }
 
   lines.push(`SUMMARY:${escapeICS(event.title)}`);
 
@@ -250,7 +259,9 @@ function downloadEventICS(event) {
 let _enrichmentsCache = {};
 
 // Build RRULE string from UI selections using rrule library
-function buildRRule(frequency, selectedDays) {
+// For WEEKLY: pass selectedDays (e.g. ['MO','WE'])
+// For MONTHLY: pass ordinal (1-4) and monthDay (e.g. 'TU') for "1st Tuesday"
+function buildRRule(frequency, selectedDays, ordinal, monthDay) {
   if (!frequency || frequency === 'none') return null;
 
   // Map day codes to rrule weekday constants
@@ -270,6 +281,10 @@ function buildRRule(frequency, selectedDays) {
 
   if (frequency === 'WEEKLY' && selectedDays && selectedDays.length > 0) {
     options.byweekday = selectedDays.map(d => dayMap[d]).filter(Boolean);
+  }
+
+  if (frequency === 'MONTHLY' && monthDay && ordinal) {
+    options.byweekday = [dayMap[monthDay].nth(ordinal)];
   }
 
   const rule = new rrule.RRule(options);
@@ -416,6 +431,96 @@ function toggleDay(days, day) {
   return days.includes(day) ? days.filter(d => d !== day) : [...days, day];
 }
 
+// Compute ordinal weekday from a date string, e.g. '2026-03-03' → { ordinal: 1, day: 'TU' }
+function getOrdinalWeekday(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + 'T12:00:00Z'); // noon UTC to avoid timezone issues
+  const dayOfMonth = d.getUTCDate();
+  const ordinal = Math.ceil(dayOfMonth / 7); // 1st, 2nd, 3rd, 4th, 5th
+  const dayCodes = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+  const day = dayCodes[d.getUTCDay()];
+  return { ordinal, day };
+}
+
+// Detect recurrence patterns in text (description or title)
+function detectRecurrence(text) {
+  if (!text) return null;
+  const lower = text.toLowerCase();
+  // Match "every Monday", "every Wednesday", etc.
+  const everyDay = lower.match(/every\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/);
+  if (everyDay) {
+    const dayMap = { sunday: 'SU', monday: 'MO', tuesday: 'TU', wednesday: 'WE', thursday: 'TH', friday: 'FR', saturday: 'SA' };
+    return { frequency: 'WEEKLY', days: [dayMap[everyDay[1]]] };
+  }
+  // Match "weekly", "every week"
+  if (/\bevery\s+week\b|\bweekly\b/.test(lower)) {
+    return { frequency: 'WEEKLY', days: [] };
+  }
+  // Match "1st Tuesday", "2nd and 4th Friday", etc. — extract ordinal + day
+  const ordinalMatch = lower.match(/(\d+)(?:st|nd|rd|th)\s+(?:and\s+\d+(?:st|nd|rd|th)\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/);
+  if (ordinalMatch) {
+    const dayMap = { sunday: 'SU', monday: 'MO', tuesday: 'TU', wednesday: 'WE', thursday: 'TH', friday: 'FR', saturday: 'SA' };
+    return { frequency: 'MONTHLY', days: [], ordinal: parseInt(ordinalMatch[1]), monthDay: dayMap[ordinalMatch[2]] };
+  }
+  // Match "biweekly", "monthly"
+  if (/\bmonthly\b/.test(lower)) return { frequency: 'MONTHLY', days: [] };
+  return null;
+}
+
+// Expand enrichments with RRULEs into virtual events within a date range
+function expandEnrichments(enrichments, fromDateStr, toDateStr) {
+  if (!enrichments || !enrichments.length) return [];
+
+  const fromDate = new Date(fromDateStr);
+  const toDate = new Date(toDateStr);
+  const virtualEvents = [];
+
+  enrichments.forEach(enrichment => {
+    if (!enrichment.rrule || !enrichment.start_time || !enrichment.title) return;
+
+    try {
+      // Parse the original start_time to get time-of-day
+      const dtstart = new Date(enrichment.start_time);
+
+      // Build the full RRULE string with dtstart
+      const ruleStr = enrichment.rrule.startsWith('RRULE:') ? enrichment.rrule : 'RRULE:' + enrichment.rrule;
+      const rule = rrule.RRule.fromString(ruleStr);
+
+      // Create new rule with dtstart set
+      const ruleWithStart = new rrule.RRule({
+        ...rule.origOptions,
+        dtstart: dtstart
+      });
+
+      // Get occurrences within the date range
+      const occurrences = ruleWithStart.between(fromDate, toDate, true);
+
+      occurrences.forEach(date => {
+        // Build ISO string preserving the original time-of-day
+        const isoDate = date.toISOString();
+
+        virtualEvents.push({
+          id: 'enrichment-' + enrichment.id + '-' + isoDate,
+          title: enrichment.title,
+          start_time: isoDate,
+          end_time: enrichment.end_time || null,
+          location: enrichment.location || null,
+          description: enrichment.description || null,
+          url: enrichment.url || null,
+          source: 'Picks: ' + (enrichment.curator_name || 'curator'),
+          city: enrichment.city || null,
+          rrule: enrichment.rrule,
+          _enrichment_id: enrichment.id
+        });
+      });
+    } catch (e) {
+      console.error('Error expanding enrichment', enrichment.id, e);
+    }
+  });
+
+  return virtualEvents;
+}
+
 // Export for browser (attach to window)
 if (typeof window !== 'undefined') {
   window.toggleDay = toggleDay;
@@ -439,4 +544,7 @@ if (typeof window !== 'undefined') {
   window.loadEnrichment = loadEnrichment;
   window.loadAllEnrichments = loadAllEnrichments;
   window.getEnrichmentFromCache = getEnrichmentFromCache;
+  window.expandEnrichments = expandEnrichments;
+  window.detectRecurrence = detectRecurrence;
+  window.getOrdinalWeekday = getOrdinalWeekday;
 }

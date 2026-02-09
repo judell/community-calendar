@@ -1,25 +1,6 @@
 <App name="Community Calendar" codeBehind="Main.xmlui.xs" var.showSearch="{false}" var.filterTerm="" var.viewMode="{'all'}">
 
-  <!-- Shared state for auth and pick operations -->
-  <!-- Functions defined in Main.xmlui.xs: togglePick, removePick -->
-  <AppState
-    id="calState"
-    bucket="calendar"
-    initialValue="{{
-      authUser: window.authUser,
-      authSession: window.authSession,
-      picksData: null,
-      picksDS: null,
-      togglePick: togglePick,
-      removePick: removePick
-    }}"
-  />
-
-  <!-- Sync auth state changes to AppState -->
-  <ChangeListener
-    listenTo="{window.authUser}"
-    onDidChange="() => calState.update({ authUser: window.authUser, authSession: window.authSession })"
-  />
+  <!-- Sync picks data to Globals.xs var for child components -->
 
   <!-- DataSources -->
   <DataSource
@@ -41,10 +22,9 @@
     }}"
   />
 
-  <!-- Sync picks data to AppState when it changes -->
   <ChangeListener
     listenTo="{picks.value}"
-    onDidChange="() => calState.update({ picksDS: picks, picksData: picks.value })"
+    onDidChange="() => picksData = picks.value"
   />
 
   <DataSource
@@ -57,10 +37,18 @@
     }}"
   />
 
+  <DataSource
+    id="enrichments"
+    url="{appGlobals.supabaseUrl + '/rest/v1/event_enrichments?select=*&rrule=not.is.null' + (window.cityFilter ? '&city=eq.' + window.cityFilter : '')}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey
+    }}"
+  />
+
   <!-- Dialogs -->
   <SourcesDialog id="sourcesDialog" events="{events.value}" />
   <CaptureDialog id="captureDialog" />
-  <PickEditor when="{!!pickEvent}" event="{pickEvent}" onClose="pickEvent = null" onSaved="picks.refetch(); events.refetch();" />
+  <PickEditor when="{!!pickEvent}" event="{pickEvent}" onClose="pickEvent = null" onSaved="picks.refetch(); events.refetch(); enrichments.refetch();" />
 
   <!-- Inspector Dialog -->
   <ModalDialog id="inspectorDialog" title="XMLUI Inspector" minWidth="85vw" minHeight="85vh">
@@ -123,7 +111,7 @@
       </HStack>
     </RadioGroup>
     <Spinner when="{!events.loaded && viewMode === 'all'}" />
-    <List when="{events.value && viewMode === 'all'}" data="{window.filterEvents(window.dedupeEvents(events.value), filterTerm)}" fixedItemSize="true" limit="100">
+    <List when="{events.value && viewMode === 'all'}" data="{window.filterEvents(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), filterTerm)}" fixedItemSize="true" limit="100">
       <EventCard event="{$item}" filterTerm="{filterTerm}" />
     </List>
     <VStack when="{viewMode === 'picks'}" gap="$space-2">

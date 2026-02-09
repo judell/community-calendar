@@ -2,13 +2,12 @@
   name="MyPicksDialog"
   method.open="() => dialog.open()"
 >
-  <AppState id="calState" bucket="calendar" />
 
   <ModalDialog id="dialog" minWidth="70vw">
     <VStack when="{window.authUser && $props.feedToken}" gap="$space-3">
       <Text fontWeight="bold" value="My Picks" />
-      <ExpandableItem width="100%" summary="{calState.value.picksData ? calState.value.picksData.length + ' events' : 'Loading...'}">
-        <List data="{calState.value.picksData}">
+      <ExpandableItem width="100%" summary="{picksData ? picksData.length + ' events' : 'Loading...'}">
+        <List data="{picksData}">
           <PickItem pick="{$item}" />
         </List>
       </ExpandableItem>

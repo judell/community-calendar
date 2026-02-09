@@ -544,14 +544,58 @@
           assert(result.includes('WE'), 'Should contain WE');
         });
 
-        it('builds MONTHLY rule', () => {
+        it('builds MONTHLY rule without ordinal', () => {
           const result = buildRRule('MONTHLY', []);
           assert(result.includes('FREQ=MONTHLY'), 'Should contain FREQ=MONTHLY');
+        });
+
+        it('builds MONTHLY rule with ordinal + day (1st Tuesday)', () => {
+          const result = buildRRule('MONTHLY', [], 1, 'TU');
+          assert(result.includes('FREQ=MONTHLY'), 'Should contain FREQ=MONTHLY');
+          assert(result.includes('TU'), 'Should contain TU');
+          assert(result.includes('+1'), 'Should contain +1 for 1st');
+        });
+
+        it('builds MONTHLY rule with ordinal + day (3rd Friday)', () => {
+          const result = buildRRule('MONTHLY', [], 3, 'FR');
+          assert(result.includes('FREQ=MONTHLY'), 'Should contain FREQ=MONTHLY');
+          assert(result.includes('FR'), 'Should contain FR');
+          assert(result.includes('+3'), 'Should contain +3 for 3rd');
         });
 
         it('result does not include RRULE: prefix', () => {
           const result = buildRRule('WEEKLY', ['FR']);
           assert(!result.startsWith('RRULE:'), 'Should not start with RRULE:');
+        });
+      });
+
+      describe('getOrdinalWeekday', () => {
+        it('returns null for null', () => {
+          assertEqual(getOrdinalWeekday(null), null);
+        });
+
+        it('computes 1st Tuesday from 2026-03-03', () => {
+          const result = getOrdinalWeekday('2026-03-03');
+          assertEqual(result.ordinal, 1);
+          assertEqual(result.day, 'TU');
+        });
+
+        it('computes 2nd Wednesday from 2026-02-11', () => {
+          const result = getOrdinalWeekday('2026-02-11');
+          assertEqual(result.ordinal, 2);
+          assertEqual(result.day, 'WE');
+        });
+
+        it('computes 4th Friday from 2026-02-27', () => {
+          const result = getOrdinalWeekday('2026-02-27');
+          assertEqual(result.ordinal, 4);
+          assertEqual(result.day, 'FR');
+        });
+
+        it('computes 1st Sunday from 2026-02-01', () => {
+          const result = getOrdinalWeekday('2026-02-01');
+          assertEqual(result.ordinal, 1);
+          assertEqual(result.day, 'SU');
         });
       });
 
@@ -587,6 +631,160 @@
           assertEqual(parsed.frequency, 'WEEKLY');
           assert(parsed.days.includes('MO'), 'Should include MO');
           assert(parsed.days.includes('TH'), 'Should include TH');
+        });
+      });
+
+      describe('detectRecurrence', () => {
+        it('returns null for null', () => {
+          assertEqual(detectRecurrence(null), null);
+        });
+
+        it('returns null for non-recurring text', () => {
+          assertEqual(detectRecurrence('Join us for a concert this Saturday'), null);
+        });
+
+        it('detects "every Wednesday"', () => {
+          const result = detectRecurrence('Circus jam every Wednesday at 7pm');
+          assertEqual(result.frequency, 'WEEKLY');
+          assertDeepEqual(result.days, ['WE']);
+        });
+
+        it('detects "every Monday" (case insensitive)', () => {
+          const result = detectRecurrence('Trivia Every Monday');
+          assertEqual(result.frequency, 'WEEKLY');
+          assertDeepEqual(result.days, ['MO']);
+        });
+
+        it('detects "weekly"', () => {
+          const result = detectRecurrence('Weekly open mic night');
+          assertEqual(result.frequency, 'WEEKLY');
+          assertDeepEqual(result.days, []);
+        });
+
+        it('detects "every week"', () => {
+          const result = detectRecurrence('Happens every week');
+          assertEqual(result.frequency, 'WEEKLY');
+        });
+
+        it('detects "monthly"', () => {
+          const result = detectRecurrence('Monthly meetup');
+          assertEqual(result.frequency, 'MONTHLY');
+        });
+
+        it('detects ordinal day patterns like "1st Tuesday"', () => {
+          const result = detectRecurrence('Bluegrass Jam Night - 1st Tuesday of Every Month');
+          assertEqual(result.frequency, 'MONTHLY');
+          assertEqual(result.ordinal, 1);
+          assertEqual(result.monthDay, 'TU');
+        });
+
+        it('detects "1st and 3rd Monday" (extracts first ordinal)', () => {
+          const result = detectRecurrence('Meets 1st and 3rd Monday of each month');
+          assertEqual(result.frequency, 'MONTHLY');
+          assertEqual(result.ordinal, 1);
+          assertEqual(result.monthDay, 'MO');
+        });
+
+        it('detects "2nd Friday"', () => {
+          const result = detectRecurrence('2nd Friday open mic');
+          assertEqual(result.frequency, 'MONTHLY');
+          assertEqual(result.ordinal, 2);
+          assertEqual(result.monthDay, 'FR');
+        });
+      });
+
+      describe('expandEnrichments', () => {
+        it('returns empty array for null', () => {
+          assertDeepEqual(expandEnrichments(null, '2026-01-01', '2026-03-01'), []);
+        });
+
+        it('returns empty array for empty array', () => {
+          assertDeepEqual(expandEnrichments([], '2026-01-01', '2026-03-01'), []);
+        });
+
+        it('skips enrichments without rrule', () => {
+          const enrichments = [{ id: 1, title: 'Test', start_time: '2026-02-01T19:00:00Z', rrule: null }];
+          const result = expandEnrichments(enrichments, '2026-01-01', '2026-03-01');
+          assertEqual(result.length, 0);
+        });
+
+        it('skips enrichments without title', () => {
+          const enrichments = [{ id: 1, title: null, start_time: '2026-02-01T19:00:00Z', rrule: 'FREQ=WEEKLY;BYDAY=WE' }];
+          const result = expandEnrichments(enrichments, '2026-01-01', '2026-03-01');
+          assertEqual(result.length, 0);
+        });
+
+        it('expands WEEKLY rrule into occurrences', () => {
+          const enrichments = [{
+            id: 1,
+            title: 'Weekly Jam',
+            start_time: '2026-02-04T19:00:00Z', // a Wednesday
+            rrule: 'FREQ=WEEKLY;BYDAY=WE',
+            curator_name: 'jon',
+            location: 'Cafe',
+            city: 'davis'
+          }];
+          // 4 weeks range: should produce ~4 Wednesdays
+          const result = expandEnrichments(enrichments, '2026-02-01T00:00:00Z', '2026-02-28T23:59:59Z');
+          assert(result.length >= 3, 'Should produce at least 3 occurrences, got ' + result.length);
+          assert(result.length <= 5, 'Should produce at most 5 occurrences, got ' + result.length);
+        });
+
+        it('sets source to "Picks: curator_name"', () => {
+          const enrichments = [{
+            id: 1,
+            title: 'Weekly Jam',
+            start_time: '2026-02-04T19:00:00Z',
+            rrule: 'FREQ=WEEKLY;BYDAY=WE',
+            curator_name: 'jon'
+          }];
+          const result = expandEnrichments(enrichments, '2026-02-01T00:00:00Z', '2026-02-28T23:59:59Z');
+          assert(result.length > 0, 'Should have results');
+          assertEqual(result[0].source, 'Picks: jon');
+        });
+
+        it('generates unique IDs per occurrence', () => {
+          const enrichments = [{
+            id: 1,
+            title: 'Weekly Jam',
+            start_time: '2026-02-04T19:00:00Z',
+            rrule: 'FREQ=WEEKLY;BYDAY=WE',
+            curator_name: 'jon'
+          }];
+          const result = expandEnrichments(enrichments, '2026-02-01T00:00:00Z', '2026-02-28T23:59:59Z');
+          const ids = result.map(e => e.id);
+          const uniqueIds = new Set(ids);
+          assertEqual(uniqueIds.size, ids.length, 'All IDs should be unique');
+        });
+
+        it('copies fields from enrichment', () => {
+          const enrichments = [{
+            id: 1,
+            title: 'Weekly Jam',
+            start_time: '2026-02-04T19:00:00Z',
+            rrule: 'FREQ=WEEKLY;BYDAY=WE',
+            curator_name: 'jon',
+            location: 'Cafe',
+            description: 'Fun times',
+            url: 'http://example.com'
+          }];
+          const result = expandEnrichments(enrichments, '2026-02-01T00:00:00Z', '2026-02-28T23:59:59Z');
+          assertEqual(result[0].location, 'Cafe');
+          assertEqual(result[0].description, 'Fun times');
+          assertEqual(result[0].url, 'http://example.com');
+        });
+
+        it('only produces occurrences within date range', () => {
+          const enrichments = [{
+            id: 1,
+            title: 'Weekly Jam',
+            start_time: '2026-02-04T19:00:00Z',
+            rrule: 'FREQ=WEEKLY;BYDAY=WE',
+            curator_name: 'jon'
+          }];
+          // Narrow range: one week
+          const result = expandEnrichments(enrichments, '2026-02-09T00:00:00Z', '2026-02-15T23:59:59Z');
+          assertEqual(result.length, 1, 'Should produce exactly 1 occurrence');
         });
       });
 
