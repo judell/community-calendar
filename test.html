@@ -693,6 +693,115 @@
         });
       });
 
+      describe('getNextOccurrence', () => {
+        const enrichments = [{
+          event_id: 42,
+          rrule: 'FREQ=WEEKLY;BYDAY=WE',
+          start_time: '2026-02-04T19:00:00Z'
+        }];
+
+        it('returns originalStartTime when enrichments is null', () => {
+          assertEqual(getNextOccurrence(null, 42, '2026-02-04T19:00:00Z'), '2026-02-04T19:00:00Z');
+        });
+
+        it('returns originalStartTime when enrichments is empty array', () => {
+          assertEqual(getNextOccurrence([], 42, '2026-02-04T19:00:00Z'), '2026-02-04T19:00:00Z');
+        });
+
+        it('returns originalStartTime when eventId has no matching enrichment', () => {
+          assertEqual(getNextOccurrence(enrichments, 999, '2026-02-04T19:00:00Z'), '2026-02-04T19:00:00Z');
+        });
+
+        it('returns originalStartTime when enrichment has no rrule', () => {
+          const noRrule = [{ event_id: 42, rrule: null, start_time: '2026-02-04T19:00:00Z' }];
+          assertEqual(getNextOccurrence(noRrule, 42, '2026-02-04T19:00:00Z'), '2026-02-04T19:00:00Z');
+        });
+
+        it('returns empty string when originalStartTime is null', () => {
+          assertEqual(getNextOccurrence(enrichments, 42, null), '');
+        });
+
+        it('returns a future date for a weekly enrichment', () => {
+          const result = getNextOccurrence(enrichments, 42, '2026-02-04T19:00:00Z');
+          assert(result, 'Should return a date string');
+          const d = new Date(result);
+          assert(!isNaN(d.getTime()), 'Should be a valid date');
+          assert(d >= new Date('2026-02-09'), 'Should be today or later');
+        });
+
+        it('matches eventId with loose equality (string vs number)', () => {
+          const result = getNextOccurrence(enrichments, '42', '2026-02-04T19:00:00Z');
+          assert(result, 'Should return a date string');
+          const d = new Date(result);
+          assert(d >= new Date('2026-02-09'), 'Should find enrichment via loose equality');
+        });
+      });
+
+      describe('formatPickDate', () => {
+        const enrichments = [{
+          event_id: 42,
+          rrule: 'FREQ=WEEKLY;BYDAY=WE',
+          start_time: '2026-02-04T19:00:00Z'
+        }];
+
+        it('returns formatted date for non-recurring pick', () => {
+          const result = window.formatPickDate([], 42, '2026-02-15T19:00:00Z');
+          assert(result.includes('Feb 15'), 'Should contain Feb 15, got: ' + result);
+          assert(result.includes('Sun'), 'Should contain Sun, got: ' + result);
+        });
+
+        it('returns formatted date with time', () => {
+          const result = window.formatPickDate([], 42, '2026-02-15T19:00:00Z');
+          assert(result.includes('7:00 PM'), 'Should contain time, got: ' + result);
+        });
+
+        it('returns formatted date for recurring pick (next occurrence)', () => {
+          const result = window.formatPickDate(enrichments, 42, '2026-02-04T19:00:00Z');
+          assert(result.includes('Wed'), 'Should be a Wednesday, got: ' + result);
+          assert(result.includes('7:00 PM'), 'Should contain time, got: ' + result);
+        });
+
+        it('handles null startTime gracefully', () => {
+          const result = window.formatPickDate([], 42, null);
+          assertEqual(typeof result, 'string');
+        });
+      });
+
+      describe('dedupeEvents - rrule carry-through', () => {
+        it('carries rrule from enrichment event to merged result', () => {
+          clearDedupeCache();
+          const events = [
+            { id: 1, title: 'Circus jam', start_time: '2026-02-11T18:00:00Z', source: 'Bohemian' },
+            { id: 'enrichment-5-2026-02-11T18:00:00.000Z', title: 'Circus jam', start_time: '2026-02-11T18:00:00.000Z', source: 'Picks: jon', rrule: 'FREQ=WEEKLY;BYDAY=WE' }
+          ];
+          const result = dedupeEvents(events);
+          assertEqual(result.length, 1, 'Should merge into one event');
+          assertEqual(result[0].rrule, 'FREQ=WEEKLY;BYDAY=WE', 'Should carry rrule');
+          assert(result[0].source.includes('Bohemian'), 'Should include Bohemian source');
+          assert(result[0].source.includes('Picks: jon'), 'Should include Picks source');
+        });
+
+        it('does not overwrite existing rrule', () => {
+          clearDedupeCache();
+          const events = [
+            { id: 1, title: 'Test', start_time: '2026-02-11T18:00:00Z', source: 'A', rrule: 'FREQ=DAILY' },
+            { id: 2, title: 'Test', start_time: '2026-02-11T18:00:00Z', source: 'B', rrule: 'FREQ=WEEKLY;BYDAY=MO' }
+          ];
+          const result = dedupeEvents(events);
+          assertEqual(result[0].rrule, 'FREQ=DAILY', 'Should keep first rrule');
+        });
+
+        it('merged event without rrule has no rrule', () => {
+          clearDedupeCache();
+          const events = [
+            { id: 1, title: 'Show', start_time: '2026-02-11T18:00:00Z', source: 'A' },
+            { id: 2, title: 'Show', start_time: '2026-02-11T18:00:00Z', source: 'B' }
+          ];
+          const result = dedupeEvents(events);
+          assert(!result[0].rrule, 'Should have no rrule');
+        });
+      });
+
       describe('expandEnrichments', () => {
         it('returns empty array for null', () => {
           assertDeepEqual(expandEnrichments(null, '2026-01-01', '2026-03-01'), []);

@@ -522,6 +522,35 @@ function expandEnrichments(enrichments, fromDateStr, toDateStr) {
   return virtualEvents;
 }
 
+// Get the next occurrence of a recurring event from today (or the original date if not recurring)
+// enrichments: array of enrichment objects (from enrichments DataSource)
+// eventId: the event ID to look up
+// originalStartTime: fallback if no rrule
+function getNextOccurrence(enrichments, eventId, originalStartTime) {
+  if (!originalStartTime) return '';
+  if (!enrichments || !Array.isArray(enrichments) || !eventId) return originalStartTime;
+
+  var enrichment = enrichments.find(function(e) { return e.event_id == eventId; });
+  if (!enrichment || !enrichment.rrule) return originalStartTime;
+
+  try {
+    var ruleStr = enrichment.rrule.startsWith('RRULE:') ? enrichment.rrule : 'RRULE:' + enrichment.rrule;
+    var rule = rrule.RRule.fromString(ruleStr);
+    var dtstart = new Date(enrichment.start_time || originalStartTime);
+    var ruleWithStart = new rrule.RRule({
+      ...rule.origOptions,
+      dtstart: dtstart
+    });
+    var now = new Date();
+    var next = ruleWithStart.after(now, true);
+    console.log('getNextOccurrence', { eventId: eventId, enrichmentsLen: enrichments.length, rrule: enrichment.rrule, next: next ? next.toISOString() : null, original: originalStartTime });
+    return next ? next.toISOString() : originalStartTime;
+  } catch (e) {
+    console.error('getNextOccurrence error', e);
+    return originalStartTime;
+  }
+}
+
 // Export for browser (attach to window)
 if (typeof window !== 'undefined') {
   window.toggleDay = toggleDay;
@@ -546,6 +575,14 @@ if (typeof window !== 'undefined') {
   window.loadAllEnrichments = loadAllEnrichments;
   window.getEnrichmentFromCache = getEnrichmentFromCache;
   window.expandEnrichments = expandEnrichments;
+  window.getNextOccurrence = getNextOccurrence;
+  window.formatPickDate = function(enrichments, eventId, startTime) {
+    var d = getNextOccurrence(enrichments, eventId, startTime);
+    var day = formatDayOfWeek(d);
+    var md = formatMonthDay(d);
+    var t = formatTime(startTime);
+    return day + ' ' + md + (t ? ', ' + t : '');
+  };
   window.detectRecurrence = detectRecurrence;
   window.getOrdinalWeekday = getOrdinalWeekday;
 }
