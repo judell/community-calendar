@@ -62,6 +62,7 @@
         margin-left: 8px;
       }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/rrule@2.8.1/dist/es5/rrule.min.js"></script>
     <script src="helpers.js"></script>
   </head>
   <body>
@@ -404,6 +405,188 @@
         it('works with single ID (not array)', () => {
           assertEqual(isEventPicked(1, picks), true);
           assertEqual(isEventPicked(2, picks), false);
+        });
+      });
+
+      describe('formatDate', () => {
+        it('returns empty string for null', () => {
+          assertEqual(formatDate(null), '');
+        });
+
+        it('returns formatted date', () => {
+          const result = formatDate('2026-02-15T12:00:00Z');
+          assert(result.includes('Feb'), 'Should contain month');
+          assert(result.includes('15'), 'Should contain day');
+        });
+      });
+
+      describe('buildGoogleCalendarUrl', () => {
+        it('returns empty string for null event', () => {
+          assertEqual(buildGoogleCalendarUrl(null), '');
+        });
+
+        it('builds valid Google Calendar URL', () => {
+          const event = {
+            title: 'Test Event',
+            start_time: '2026-02-15T19:00:00Z',
+            end_time: '2026-02-15T21:00:00Z',
+            location: 'Downtown',
+            description: 'A fun event'
+          };
+          const url = buildGoogleCalendarUrl(event);
+          assert(url.startsWith('https://calendar.google.com/calendar/render?'), 'Should be Google Calendar URL');
+          assert(url.includes('Test+Event') || url.includes('Test%20Event'), 'Should contain title');
+          assert(url.includes('Downtown'), 'Should contain location');
+        });
+
+        it('uses start_time as end_time when end_time is null', () => {
+          const event = {
+            title: 'No End',
+            start_time: '2026-02-15T19:00:00Z',
+            end_time: null
+          };
+          const url = buildGoogleCalendarUrl(event);
+          // dates param should have same start and end
+          const datesMatch = url.match(/dates=([^&]+)/);
+          assert(datesMatch, 'Should have dates param');
+          const parts = decodeURIComponent(datesMatch[1]).split('/');
+          assertEqual(parts[0], parts[1], 'Start and end should be the same');
+        });
+
+        it('handles special characters in title', () => {
+          const event = {
+            title: 'Music & Art <Show>',
+            start_time: '2026-02-15T19:00:00Z'
+          };
+          const url = buildGoogleCalendarUrl(event);
+          assert(url.length > 0, 'Should produce a URL');
+        });
+      });
+
+      describe('formatICSDate', () => {
+        it('returns empty string for null', () => {
+          assertEqual(formatICSDate(null), '');
+        });
+
+        it('formats to ICS date format (YYYYMMDDTHHMMSSZ)', () => {
+          const result = formatICSDate('2026-02-15T19:30:00Z');
+          assertEqual(result, '20260215T193000Z');
+        });
+
+        it('handles midnight', () => {
+          const result = formatICSDate('2026-02-15T00:00:00Z');
+          assertEqual(result, '20260215T000000Z');
+        });
+      });
+
+      describe('escapeICS', () => {
+        it('returns empty string for null', () => {
+          assertEqual(escapeICS(null), '');
+        });
+
+        it('escapes backslashes', () => {
+          assertEqual(escapeICS('path\\to'), 'path\\\\to');
+        });
+
+        it('escapes semicolons', () => {
+          assertEqual(escapeICS('a;b'), 'a\\;b');
+        });
+
+        it('escapes commas', () => {
+          assertEqual(escapeICS('a,b'), 'a\\,b');
+        });
+
+        it('escapes newlines', () => {
+          assertEqual(escapeICS('line1\nline2'), 'line1\\nline2');
+        });
+
+        it('handles multiple special chars', () => {
+          assertEqual(escapeICS('a;b,c\nd'), 'a\\;b\\,c\\nd');
+        });
+      });
+
+      describe('toggleDay', () => {
+        it('adds a day not in array', () => {
+          const result = toggleDay(['MO', 'WE'], 'FR');
+          assertDeepEqual(result, ['MO', 'WE', 'FR']);
+        });
+
+        it('removes a day already in array', () => {
+          const result = toggleDay(['MO', 'WE', 'FR'], 'WE');
+          assertDeepEqual(result, ['MO', 'FR']);
+        });
+
+        it('adds to empty array', () => {
+          const result = toggleDay([], 'TU');
+          assertDeepEqual(result, ['TU']);
+        });
+
+        it('does not mutate original array', () => {
+          const original = ['MO', 'WE'];
+          toggleDay(original, 'FR');
+          assertDeepEqual(original, ['MO', 'WE']);
+        });
+      });
+
+      describe('buildRRule', () => {
+        it('returns null for frequency "none"', () => {
+          assertEqual(buildRRule('none', []), null);
+        });
+
+        it('returns null for null frequency', () => {
+          assertEqual(buildRRule(null, []), null);
+        });
+
+        it('builds WEEKLY rule', () => {
+          const result = buildRRule('WEEKLY', ['MO', 'WE']);
+          assert(result.includes('FREQ=WEEKLY'), 'Should contain FREQ=WEEKLY');
+          assert(result.includes('MO'), 'Should contain MO');
+          assert(result.includes('WE'), 'Should contain WE');
+        });
+
+        it('builds MONTHLY rule', () => {
+          const result = buildRRule('MONTHLY', []);
+          assert(result.includes('FREQ=MONTHLY'), 'Should contain FREQ=MONTHLY');
+        });
+
+        it('result does not include RRULE: prefix', () => {
+          const result = buildRRule('WEEKLY', ['FR']);
+          assert(!result.startsWith('RRULE:'), 'Should not start with RRULE:');
+        });
+      });
+
+      describe('parseRRule', () => {
+        it('returns none/empty for null', () => {
+          const result = parseRRule(null);
+          assertEqual(result.frequency, 'none');
+          assertDeepEqual(result.days, []);
+        });
+
+        it('parses WEEKLY with days', () => {
+          const result = parseRRule('FREQ=WEEKLY;BYDAY=MO,WE,FR');
+          assertEqual(result.frequency, 'WEEKLY');
+          assert(result.days.includes('MO'), 'Should include MO');
+          assert(result.days.includes('WE'), 'Should include WE');
+          assert(result.days.includes('FR'), 'Should include FR');
+        });
+
+        it('parses MONTHLY', () => {
+          const result = parseRRule('FREQ=MONTHLY');
+          assertEqual(result.frequency, 'MONTHLY');
+        });
+
+        it('handles RRULE: prefix', () => {
+          const result = parseRRule('RRULE:FREQ=WEEKLY;BYDAY=TU');
+          assertEqual(result.frequency, 'WEEKLY');
+          assert(result.days.includes('TU'), 'Should include TU');
+        });
+
+        it('roundtrips with buildRRule', () => {
+          const original = buildRRule('WEEKLY', ['MO', 'TH']);
+          const parsed = parseRRule(original);
+          assertEqual(parsed.frequency, 'WEEKLY');
+          assert(parsed.days.includes('MO'), 'Should include MO');
+          assert(parsed.days.includes('TH'), 'Should include TH');
         });
       });
 

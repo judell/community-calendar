@@ -1,8 +1,10 @@
 -- Event enrichments table - curator overrides/additions per event
+-- Self-standing: enrichments store their own title/start_time/city so they
+-- survive even if the original event row is deleted.
 
 CREATE TABLE IF NOT EXISTS event_enrichments (
   id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  event_id bigint REFERENCES events(id) ON DELETE CASCADE,
+  event_id bigint REFERENCES events(id) ON DELETE CASCADE,  -- nullable
   curator_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
   rrule text,
   url text,
@@ -11,6 +13,10 @@ CREATE TABLE IF NOT EXISTS event_enrichments (
   end_time timestamptz,
   categories text[],
   notes text,
+  title text,            -- copied from event at creation
+  start_time timestamptz, -- copied from event at creation
+  city text,             -- copied from event at creation
+  curator_name text,     -- display name for source attribution
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),
   UNIQUE(event_id, curator_id)

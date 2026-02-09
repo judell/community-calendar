@@ -1,0 +1,151 @@
+<Component
+  name="PickEditor"
+  var.savedPickId="{null}"
+  var.errorMessage=""
+  var.isSaving="{false}"
+  var.submittedData="{null}"
+>
+
+  <!-- API for picking an existing event -->
+  <APICall
+    id="createPickApi"
+    method="post"
+    url="{appGlobals.supabaseUrl + '/rest/v1/picks'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + window.authSession?.access_token,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation'
+    }}"
+    body="{$param}"
+    onSuccess="(result) => {
+      isSaving = false;
+      if (!result || !result[0] || !result[0].id) {
+        errorMessage = 'Pick was not created — no row returned';
+        return;
+      }
+      savedPickId = result[0].id;
+      submittedData = pickForm.getData();
+      emitEvent('saved');
+    }"
+    onError="(err) => {
+      isSaving = false;
+      const msg = (err?.message || '').toLowerCase();
+      if (msg.includes('duplicate') || msg.includes('unique') || msg.includes('409')) {
+        errorMessage = 'This event is already in your picks';
+      } else {
+        errorMessage = err?.message || 'Failed to create pick';
+      }
+    }"
+  />
+
+  <!-- API for capturing a new event from a poster -->
+  <APICall
+    id="captureApi"
+    method="post"
+    url="{appGlobals.supabaseUrl + '/functions/v1/capture-event'}"
+    headers="{{
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + window.authSession?.access_token
+    }}"
+    body="{$param}"
+    onSuccess="(result) => {
+      isSaving = false;
+      savedPickId = result.event_id || 'captured';
+      submittedData = pickForm.getData();
+      emitEvent('saved');
+    }"
+    onError="(err) => {
+      isSaving = false;
+      errorMessage = err?.message || 'Failed to save event';
+    }"
+  />
+
+  <ModalDialog
+    id="dialog"
+    title="{$props.event?.id ? 'Add to My Picks' : 'Save Captured Event'}"
+    minWidth="400px"
+    when="{!!$props.event}"
+    onClose="emitEvent('close')"
+  >
+
+    <Form
+      id="pickForm"
+      data="{{
+        title: $props.event?.title || '',
+        date: ($props.event?.start_time || '').substring(0, 10),
+        time: ($props.event?.start_time || '').substring(11, 16),
+        endTime: $props.event?.end_time ? $props.event.end_time.substring(11, 16) : '',
+        location: $props.event?.location || '',
+        description: $props.event?.description || ''
+      }}"
+      keepModalOpenOnSubmit="true"
+      hideButtonRow="{!!savedPickId}"
+      saveLabel="{isSaving ? 'Saving...' : 'Add to My Picks'}"
+      enableSubmit="{!isSaving}"
+      onSubmit="(data) => {
+        if (!window.authUser?.id) {
+          errorMessage = 'Please sign in to pick events';
+          return;
+        }
+        isSaving = true;
+        errorMessage = '';
+        const formData = pickForm.getData();
+        if ($props.event?.id) {
+          createPickApi.execute({
+            user_id: window.authUser.id,
+            event_id: $props.event.id
+          });
+        } else {
+          const startTime = (formData.date || '') + 'T' + (formData.time || '00:00') + ':00';
+          const endTime = formData.endTime ? (formData.date || '') + 'T' + formData.endTime + ':00' : null;
+          captureApi.execute({
+            mode: 'commit',
+            event: {
+              title: formData.title,
+              start_time: startTime,
+              end_time: endTime,
+              location: formData.location || null,
+              description: formData.description || null
+            }
+          });
+        }
+      }"
+    >
+      <Fragment when="{!savedPickId}">
+        <FormItem bindTo="title" label="Title" required="true" />
+        <FormItem bindTo="date" label="Date" required="true" />
+        <HStack gap="$space-2">
+          <FormItem bindTo="time" label="Start" width="50%" />
+          <FormItem bindTo="endTime" label="End" width="50%" />
+        </HStack>
+        <FormItem bindTo="location" label="Location" />
+        <FormItem bindTo="description" label="Description" type="textarea" />
+      </Fragment>
+    </Form>
+
+    <!-- Success state -->
+    <VStack when="{savedPickId}" gap="$space-4" horizontalAlignment="center" padding="$space-4">
+      <Icon name="check" size="lg" color="$color-success-500" />
+      <Text fontWeight="bold" fontSize="$fontSize-lg">Event picked!</Text>
+      <Text color="$color-text-secondary" textAlignment="center">"{submittedData?.title}" has been added to your picks.</Text>
+      <VStack gap="$space-2" width="100%">
+        <Text fontWeight="bold" fontSize="$fontSize-sm">Add to your calendar:</Text>
+        <AddToCalendar event="{{
+          id: $props.event?.id,
+          title: submittedData?.title,
+          start_time: (submittedData?.date || '') + 'T' + (submittedData?.time || '00:00') + ':00',
+          end_time: submittedData?.endTime ? (submittedData?.date || '') + 'T' + submittedData.endTime + ':00' : null,
+          location: submittedData?.location,
+          description: submittedData?.description
+        }}" />
+        <Text fontSize="$fontSize-xs" color="$color-text-tertiary" textAlignment="center">For Apple Calendar: download .ics, then open the file.</Text>
+      </VStack>
+      <Button label="Done" variant="ghost" onClick="emitEvent('close')" />
+    </VStack>
+
+    <!-- Error message -->
+    <Text when="{errorMessage}" value="{errorMessage}" color="$color-danger-500" />
+
+  </ModalDialog>
+</Component>

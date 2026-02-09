@@ -29,6 +29,7 @@ function togglePick(event) {
     invalidates: []
   });
   if (existing?.length > 0) {
+    // Unpicking: one-click remove, no modal
     Actions.callApi({
       method: 'delete',
       url: appGlobals.supabaseUrl + '/rest/v1/picks?id=eq.' + existing[0].id,
@@ -36,13 +37,8 @@ function togglePick(event) {
       invalidates: []
     });
   } else {
-    Actions.callApi({
-      method: 'post',
-      url: appGlobals.supabaseUrl + '/rest/v1/picks',
-      headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-      body: { user_id: window.authUser.id, event_id: event.id },
-      invalidates: []
-    });
+    // Picking: set pickEvent to trigger PickEditor via when
+    pickEvent = event;
   }
 }
 
