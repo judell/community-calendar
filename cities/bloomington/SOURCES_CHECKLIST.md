@@ -152,6 +152,58 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 
 ---
 
+## Discovery Run: 2026-02-08
+
+### New Google Calendar Feeds (via BloomingtonOnline.com)
+
+bloomingtononline.com embeds a master Google Calendar with 8 source calendars. Several are new and unique:
+
+| Source | Events | Status | Notes |
+|--------|--------|--------|-------|
+| **Events** | ~217 | ✅ ADDED | Community events, film screenings, workshops |
+| **Shopping & Deals** | ~18 | ✅ ADDED | Farmers' market, vintage market, store demos |
+| **Food & Drink Specials** | ~133 | ✅ ADDED | Restaurant/brewery specials |
+| **Cool Family Events** | ~6 | ✅ ADDED | Regional festivals |
+| **Music** | ~461 | SKIP | Heavy overlap with IU Jacobs LiveWhale feed |
+| **IU Events (import)** | ~457 | SKIP | Duplicate of IU LiveWhale |
+| **Ivy Tech** | ~1169 | SKIP | Statewide academic calendar, not community events |
+
+### City of Bloomington Parks and Recreation
+
+| Source | Events | Status | Notes |
+|--------|--------|--------|-------|
+| **Parks and Recreation** | ~1612 | ✅ ADDED | Concerts, fitness, nature, family events. Different from existing USB calendar |
+
+**Note:** The existing `bloomington.in.gov_1b95au4d2ueudldosb024fimp0` is actually "Utilities Service Board" (board meetings). The Parks & Rec calendar is the community-relevant one.
+
+### IU LiveWhale All-Events Feed
+
+| Source | Events | Status | Notes |
+|--------|--------|--------|-------|
+| **IU All Events** | ~923 | ✅ ADDED | Subsumes Jacobs/Auditorium/Eskenazi + ~330 more IU events |
+
+### Meetup Groups (New)
+
+| Group | Events | Status | Notes |
+|-------|--------|--------|-------|
+| Knobstone Hiking Trail Assoc | 10 | ✅ ADDED | Southern Indiana hiking |
+| Bloomington Board Games | 0 | BLOCKED | Meetup disabled ICS for this group |
+| GDG Bloomington | 0 | INACTIVE | Feed works but no events |
+| Fun 50+ Active Singles | 0 | INACTIVE | Feed works but no events |
+
+### Dead Ends (2026-02-08)
+
+| Source | Reason |
+|--------|--------|
+| The Back Door (Tockify) | ICS export disabled on their plan |
+| WFHB Community Calendar | Mod_Security blocks ICS export |
+| Indiana Public Media | Brightspot CMS, no ICS/RSS for events |
+| WCLS 97.7 | Site suspended |
+| IDS Events Calendar | No ICS feed |
+| Chamber of Commerce Atlas | No ICS feed |
+
+---
+
 ## Non-Starters
 
 | Source | Reason |
