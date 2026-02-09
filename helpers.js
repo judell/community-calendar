@@ -125,6 +125,7 @@ function dedupeEvents(events) {
       if (!groups[key].url && e.url) groups[key].url = e.url;
       if (!groups[key].location && e.location) groups[key].location = e.location;
       if (!groups[key].description && e.description) groups[key].description = e.description;
+      if (!groups[key].rrule && e.rrule) groups[key].rrule = e.rrule;
     }
   });
   // Convert sources array to comma-separated string

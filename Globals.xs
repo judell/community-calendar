@@ -2,6 +2,7 @@
 
 var pickEvent = null;
 var picksData = null;
+var refreshCounter = 0;
 
 function togglePick(event) {
   if (!window.authSession) {
@@ -36,7 +37,7 @@ function togglePick(event) {
         invalidates: []
       });
     });
-    window.refreshPicks();
+    refreshCounter = refreshCounter + 1;
   } else {
     // Picking: set pickEvent to trigger PickEditor via when
     pickEvent = event;
@@ -53,5 +54,5 @@ function removePick(pickId) {
     },
     invalidates: []
   });
-  window.refreshPicks();
+  refreshCounter = refreshCounter + 1;
 }

@@ -27,6 +27,11 @@
     onDidChange="() => picksData = picks.value"
   />
 
+  <ChangeListener
+    listenTo="{refreshCounter}"
+    onDidChange="picks.refetch(); events.refetch(); enrichments.refetch()"
+  />
+
   <DataSource
     id="feedToken"
     when="{window.authSession}"

@@ -69,12 +69,12 @@
   <APICall
     id="enrichmentApi"
     method="post"
-    url="{appGlobals.supabaseUrl + '/rest/v1/event_enrichments'}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/event_enrichments?on_conflict=event_id,curator_id'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       Authorization: 'Bearer ' + window.authSession?.access_token,
       'Content-Type': 'application/json',
-      Prefer: 'return=minimal'
+      Prefer: 'return=minimal,resolution=merge-duplicates'
     }}"
     body="{$param}"
   />
