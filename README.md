@@ -11,7 +11,7 @@ A community event aggregator that scrapes events from multiple sources, combines
 
 **Subscribable ICS Feeds**:
 - Santa Rosa: https://judell.github.io/community-calendar/cities/santarosa/combined.ics
-- Bloomington: https://judell.github.io/community-calendar/cities/davis/combined.ics
+- Bloomington: https://judell.github.io/community-calendar/cities/bloomington/combined.ics
 - Davis: https://judell.github.io/community-calendar/cities/davis/combined.ics
 
 ## Architecture
@@ -190,9 +190,6 @@ The workflow in `.github/workflows/generate-calendar.yml` runs automatically.
 
 **Cities processed**:
 - `santarosa` - Santa Rosa, CA (America/Los_Angeles)
-- `sebastopol` - Sebastopol, CA (America/Los_Angeles)
-- `cotati` - Cotati, CA (America/Los_Angeles)
-- `sonoma` - Sonoma, CA (America/Los_Angeles)
 - `bloomington` - Bloomington, IN (America/Indiana/Indianapolis)
 - `davis` - Davis, CA (America/Los_Angeles)
 
@@ -207,7 +204,7 @@ The workflow in `.github/workflows/generate-calendar.yml` runs automatically.
 6. Commit and push changes
 
 **Manual trigger**: Can also be triggered manually via GitHub Actions UI with options:
-- `locations`: Comma-separated list (e.g., `santarosa,sebastopol`) or `all`
+- `locations`: Comma-separated list (e.g., `santarosa,bloomington`) or `all`
 - `regenerate_only`: Skip scraping, just regenerate from existing ICS files
 
 ## Supabase Setup Notes
@@ -287,10 +284,10 @@ Users can now authenticate and save personal event picks:
 
 **Implementation details:**
 - Feed token created automatically on first sign-in (page reloads to sync DataSource)
-- `Actions.callApi` used for pick operations with `picks.refetch()` for DataSource refresh
-- Checkbox UI shows pick state per event card
-- My Picks dialog (calendar icon) shows expandable list of picked events with loading state
-- Can unpick events directly from the dialog via close icon
+- Picking: checkbox opens PickEditor modal for confirmation + optional recurrence enrichment
+- Unpicking: one-click checkbox remove (no modal), deletes pick + any associated enrichment
+- "all" / "my picks" radio group toggles between full feed and personal picks view
+- DataSource refresh via `refreshCounter` in Globals.xs + ChangeListener in Main.xmlui
 
 **Edge function:**
 - `my-picks` - validates token, returns user's picks as ICS (default) or JSON (`?format=json`)
@@ -352,55 +349,44 @@ supabase secrets set ANTHROPIC_API_KEY=<key>  # Set via Dashboard for deployed f
 - Base64 encoding uses chunked processing (8KB chunks) to avoid stack overflow - spreading 184K+ bytes as function arguments exceeds JavaScript's call stack limit
 - iOS Safari debugging tip: when client shows a server error, check Supabase Dashboard → Edge Functions → Logs first
 
-### Component Architecture (Refactored)
+### Component Architecture
 
-The app uses XMLUI's `Globals.xs` for cross-component state and functions, and `Main.xmlui.xs` as a code-behind for DataSource-referencing functions:
+The app uses XMLUI's `Globals.xs` for cross-component state and functions:
 
 ```
-Globals.xs                            # Shared vars (pickEvent, picksData) and functions (togglePick, removePick)
-Main.xmlui                            # App shell with DataSources
-Main.xmlui.xs                         # Code-behind: window.refreshPicks (references DataSource IDs)
+Globals.xs                            # Shared vars (pickEvent, picksData, enrichmentsData, refreshCounter)
+                                      # and functions (togglePick, removePick)
+Main.xmlui                            # App shell with DataSources + ChangeListeners for reactive sync
+helpers.js                            # Pure functions (filter, dedupe, format, detectRecurrence, expandEnrichments)
 
 components/
 ├── EventCard.xmlui                   # Event display card with pick checkbox
 ├── PickItem.xmlui                    # Pick item in My Picks view
 ├── PickEditor.xmlui                  # Modal for confirming picks + optional recurrence enrichment
+├── AddToCalendar.xmlui               # ICS download button (includes RRULE when available)
 ├── CaptureDialog.xmlui               # Poster capture: image → Claude API → PickEditor
-├── MyPicksDialog.xmlui               # My Picks modal (uses method.open pattern)
 └── SourcesDialog.xmlui               # Sources modal (uses method.open pattern)
 ```
 
 **Globals.xs pattern:**
 ```javascript
 // Globals.xs — vars and functions accessible from all components
-var pickEvent = null;
-var picksData = null;
+var pickEvent = null;       // set to event object to open PickEditor
+var picksData = null;       // synced from picks DataSource via ChangeListener
+var enrichmentsData = null; // synced from enrichments DataSource via ChangeListener
+var refreshCounter = 0;     // increment to trigger DataSource refetch
 
 function togglePick(event) { ... }
 function removePick(pickId) { ... }
 ```
 
-**Important:** Functions that reference DataSource IDs (like `events.refresh()`) must live in `Main.xmlui.xs` as plain `window` functions, not in `Globals.xs`. XMLUI's reactive system tracks Globals.xs references, and a function there that touches a DataSource creates an infinite render loop (React error #185).
-
-**Dialog component pattern:**
-```xml
-<!-- MyPicksDialog.xmlui: Expose open method -->
-<Component name="MyPicksDialog" method.open="() => dialog.open()">
-  <ModalDialog id="dialog" ...>
-    <!-- Dialog content -->
-  </ModalDialog>
-</Component>
-
-<!-- Main.xmlui: Use dialog component -->
-<MyPicksDialog id="myPicksDialog" feedToken="{...}" />
-<Icon tooltip="My Picks" onClick="myPicksDialog.open()" />
-```
+**DataSource refresh pattern:** Globals.xs functions can't reference DataSource IDs directly (they're XMLUI context variables, not JS scope). Instead, incrementing `refreshCounter` triggers a `ChangeListener` in Main.xmlui that calls `refetch()` in XMLUI context where DataSource IDs are valid.
 
 **Key patterns:**
 - `Globals.xs` for shared state and functions — no prop drilling needed
-- `codeBehind` attribute links to `.xmlui.xs` file for DataSource-aware functions
+- ChangeListeners sync DataSource values to Globals.xs vars (`picksData`, `enrichmentsData`)
+- ChangeListener on `refreshCounter` triggers `picks.refetch(); events.refetch(); enrichments.refetch()`
 - `method.open` on Component exposes internal dialog's open method
-- ChangeListener syncs DataSource values to Globals.xs vars
 - Inline `tooltip` prop on Icon instead of Tooltip wrapper
 
 ## XMLUI Resources
@@ -424,8 +410,11 @@ Browser-based tests for the JavaScript helper functions. Open `test.html` in a b
 - `formatTime`, `formatDayOfWeek`, `formatMonthDay` - date formatting
 - `truncate` - text truncation
 - `getSourceCounts` - source aggregation
-- `dedupeEvents` - cross-source duplicate merging, mergedIds tracking
+- `dedupeEvents` - cross-source duplicate merging, mergedIds tracking, RRULE carry-through
 - `isEventPicked` - pick detection with merged IDs
+- `detectRecurrence` - recurrence pattern detection (numeric ordinals, word-form ordinals, multi-arg)
+- `getNextOccurrence` - next occurrence computation from RRULE enrichments
+- `formatPickDate` - pick date display with next-occurrence fallback
 
 **Real data tests:**
 After mock tests, `test.html` fetches 500 live events from Supabase and validates:
@@ -697,26 +686,23 @@ The `AddToCalendar` component generates a downloadable `.ics` file for any event
 
 ```
 community-calendar/
-├── Main.xmlui              # XMLUI app shell (DataSources, layout)
-├── Main.xmlui.xs           # Code-behind: window.refreshPicks
-├── Globals.xs              # Shared vars + functions (togglePick, removePick)
+├── Main.xmlui              # XMLUI app shell (DataSources, ChangeListeners, layout)
+├── Globals.xs              # Shared vars + functions (togglePick, removePick, refreshCounter)
+├── helpers.js              # Pure helper functions (filter, dedupe, format, detectRecurrence, etc.)
 ├── components/
 │   ├── EventCard.xmlui     # Event display card with pick checkbox
 │   ├── PickItem.xmlui      # Pick item in My Picks view
 │   ├── PickEditor.xmlui    # Pick confirmation modal with recurrence enrichment
-│   ├── SourcesDialog.xmlui # Sources modal dialog
-│   └── CaptureDialog.xmlui # Poster capture: image → Claude API → PickEditor
+│   ├── AddToCalendar.xmlui # ICS download button (includes RRULE when available)
+│   ├── CaptureDialog.xmlui # Poster capture: image → Claude API → PickEditor
+│   └── SourcesDialog.xmlui # Sources modal dialog
 ├── config.json             # Supabase credentials + xsVerbose for inspector
 ├── index.html              # XMLUI loader + auth setup + ?city= param routing
-├── helpers.js              # Pure helper functions (filter, dedupe, format, etc.)
 ├── test.html               # Browser-based test runner
 ├── xs-diff.html            # XMLUI Inspector UI
 ├── xmlui/                  # Local XMLUI engine
 ├── cities/                 # Per-city data (ICS files, events.json, feeds.txt)
 │   ├── santarosa/
-│   ├── sebastopol/
-│   ├── cotati/
-│   ├── sonoma/
 │   ├── bloomington/
 │   └── davis/
 ├── scripts/                # Build scripts
