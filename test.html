@@ -691,6 +691,48 @@
           assertEqual(result.ordinal, 2);
           assertEqual(result.monthDay, 'FR');
         });
+
+        it('detects "first Wednesday" (word-form ordinal)', () => {
+          const result = detectRecurrence('meets the first Wednesday of each month');
+          assertEqual(result.frequency, 'MONTHLY');
+          assertEqual(result.ordinal, 1);
+          assertEqual(result.monthDay, 'WE');
+        });
+
+        it('detects "second Tuesday" (word-form ordinal)', () => {
+          const result = detectRecurrence('second Tuesday of every month');
+          assertEqual(result.frequency, 'MONTHLY');
+          assertEqual(result.ordinal, 2);
+          assertEqual(result.monthDay, 'TU');
+        });
+
+        it('detects "fourth Friday" (word-form ordinal)', () => {
+          const result = detectRecurrence('fourth Friday happy hour');
+          assertEqual(result.frequency, 'MONTHLY');
+          assertEqual(result.ordinal, 4);
+          assertEqual(result.monthDay, 'FR');
+        });
+
+        it('checks multiple arguments — finds recurrence in title when description has none', () => {
+          const result = detectRecurrence('A fun event this Saturday', 'Circus jam every Wednesday');
+          assertEqual(result.frequency, 'WEEKLY');
+          assertDeepEqual(result.days, ['WE']);
+        });
+
+        it('checks multiple arguments — finds recurrence in description first', () => {
+          const result = detectRecurrence('Happens every week', 'Weekly jam session');
+          assertEqual(result.frequency, 'WEEKLY');
+          assertDeepEqual(result.days, []);
+        });
+
+        it('checks multiple arguments — returns null when neither matches', () => {
+          assertEqual(detectRecurrence('A concert', 'Fun times'), null);
+        });
+
+        it('checks multiple arguments — skips null/undefined args', () => {
+          const result = detectRecurrence(null, undefined, 'Monthly meetup');
+          assertEqual(result.frequency, 'MONTHLY');
+        });
       });
 
       describe('getNextOccurrence', () => {

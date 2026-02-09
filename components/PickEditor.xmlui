@@ -4,8 +4,8 @@
   var.errorMessage=""
   var.isSaving="{false}"
   var.submittedData="{null}"
-  var.rruleFrequency="{window.detectRecurrence($props.event?.description || $props.event?.title)?.frequency || 'none'}"
-  var.rruleDays="{window.detectRecurrence($props.event?.description || $props.event?.title)?.days || []}"
+  var.rruleFrequency="{window.detectRecurrence($props.event?.description, $props.event?.title)?.frequency || 'none'}"
+  var.rruleDays="{window.detectRecurrence($props.event?.description, $props.event?.title)?.days || []}"
   var.rruleOrdinal="{1}"
   var.rruleMonthDay="{'MO'}"
 >
@@ -161,12 +161,12 @@
         <ExpandableItem
           id="recurrenceExpander"
           summary="Recurrence"
-          initiallyExpanded="{!!window.detectRecurrence($props.event?.description || $props.event?.title)}"
+          initiallyExpanded="{!!window.detectRecurrence($props.event?.description, $props.event?.title)}"
         >
           <VStack gap="$space-2" padding="$space-2">
             <Select
               id="freqSelect"
-              initialValue="{window.detectRecurrence($props.event?.description || $props.event?.title)?.frequency || 'none'}"
+              initialValue="{window.detectRecurrence($props.event?.description, $props.event?.title)?.frequency || 'none'}"
               onDidChange="(val) => rruleFrequency = val"
             >
               <Option value="none" label="No recurrence" />
@@ -188,13 +188,13 @@
             <VStack when="{rruleFrequency === 'MONTHLY'}" gap="$space-1">
               <Text fontSize="$fontSize-xs" color="$color-text-secondary">Repeat on:</Text>
               <HStack gap="$space-2">
-                <Select initialValue="{String(window.detectRecurrence($props.event?.description || $props.event?.title)?.ordinal || window.getOrdinalWeekday(($props.event?.start_time || '').substring(0, 10))?.ordinal || 1)}" onDidChange="(val) => rruleOrdinal = parseInt(val)">
+                <Select initialValue="{String(window.detectRecurrence($props.event?.description, $props.event?.title)?.ordinal || window.getOrdinalWeekday(($props.event?.start_time || '').substring(0, 10))?.ordinal || 1)}" onDidChange="(val) => rruleOrdinal = parseInt(val)">
                   <Option value="1" label="1st" />
                   <Option value="2" label="2nd" />
                   <Option value="3" label="3rd" />
                   <Option value="4" label="4th" />
                 </Select>
-                <Select initialValue="{window.detectRecurrence($props.event?.description || $props.event?.title)?.monthDay || window.getOrdinalWeekday(($props.event?.start_time || '').substring(0, 10))?.day || 'MO'}" onDidChange="(val) => rruleMonthDay = val">
+                <Select initialValue="{window.detectRecurrence($props.event?.description, $props.event?.title)?.monthDay || window.getOrdinalWeekday(($props.event?.start_time || '').substring(0, 10))?.day || 'MO'}" onDidChange="(val) => rruleMonthDay = val">
                   <Option value="SU" label="Sunday" />
                   <Option value="MO" label="Monday" />
                   <Option value="TU" label="Tuesday" />

@@ -443,8 +443,16 @@ function getOrdinalWeekday(dateStr) {
   return { ordinal, day };
 }
 
-// Detect recurrence patterns in text (description or title)
-function detectRecurrence(text) {
+// Detect recurrence patterns in text — accepts multiple strings, returns first match
+function detectRecurrence() {
+  for (var i = 0; i < arguments.length; i++) {
+    var result = _detectRecurrenceInText(arguments[i]);
+    if (result) return result;
+  }
+  return null;
+}
+
+function _detectRecurrenceInText(text) {
   if (!text) return null;
   const lower = text.toLowerCase();
   // Match "every Monday", "every Wednesday", etc.
@@ -462,6 +470,13 @@ function detectRecurrence(text) {
   if (ordinalMatch) {
     const dayMap = { sunday: 'SU', monday: 'MO', tuesday: 'TU', wednesday: 'WE', thursday: 'TH', friday: 'FR', saturday: 'SA' };
     return { frequency: 'MONTHLY', days: [], ordinal: parseInt(ordinalMatch[1]), monthDay: dayMap[ordinalMatch[2]] };
+  }
+  // Match word-form ordinals: "first Wednesday", "second Tuesday", "third Friday", "fourth Monday"
+  const wordOrdinalMap = { first: 1, second: 2, third: 3, fourth: 4 };
+  const wordOrdinalMatch = lower.match(/(first|second|third|fourth)\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/);
+  if (wordOrdinalMatch) {
+    const dayMap = { sunday: 'SU', monday: 'MO', tuesday: 'TU', wednesday: 'WE', thursday: 'TH', friday: 'FR', saturday: 'SA' };
+    return { frequency: 'MONTHLY', days: [], ordinal: wordOrdinalMap[wordOrdinalMatch[1]], monthDay: dayMap[wordOrdinalMatch[2]] };
   }
   // Match "biweekly", "monthly"
   if (/\bmonthly\b/.test(lower)) return { frequency: 'MONTHLY', days: [] };
