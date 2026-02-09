@@ -354,29 +354,33 @@ supabase secrets set ANTHROPIC_API_KEY=<key>  # Set via Dashboard for deployed f
 
 ### Component Architecture (Refactored)
 
-The app uses XMLUI's AppState pattern for cross-component state management, avoiding prop drilling:
+The app uses XMLUI's `Globals.xs` for cross-component state and functions, and `Main.xmlui.xs` as a code-behind for DataSource-referencing functions:
 
 ```
+Globals.xs                            # Shared vars (pickEvent, picksData) and functions (togglePick, removePick)
 Main.xmlui                            # App shell with DataSources
-Main.xmlui.xs                         # Code-behind: togglePick, removePick functions
+Main.xmlui.xs                         # Code-behind: window.refreshPicks (references DataSource IDs)
 
 components/
 ├── EventCard.xmlui                   # Event display card with pick checkbox
-├── PickItem.xmlui                    # Pick item in My Picks dialog
+├── PickItem.xmlui                    # Pick item in My Picks view
+├── PickEditor.xmlui                  # Modal for confirming picks + optional recurrence enrichment
+├── CaptureDialog.xmlui               # Poster capture: image → Claude API → PickEditor
 ├── MyPicksDialog.xmlui               # My Picks modal (uses method.open pattern)
 └── SourcesDialog.xmlui               # Sources modal (uses method.open pattern)
 ```
 
-**Code-behind pattern:**
-```xml
-<!-- Main.xmlui: Reference code-behind file -->
-<App codeBehind="Main.xmlui.xs" ...>
-  <AppState id="calState" bucket="calendar" initialValue="{{
-    togglePick: togglePick,  // Function from code-behind
-    removePick: removePick
-  }}"/>
-</App>
+**Globals.xs pattern:**
+```javascript
+// Globals.xs — vars and functions accessible from all components
+var pickEvent = null;
+var picksData = null;
+
+function togglePick(event) { ... }
+function removePick(pickId) { ... }
 ```
+
+**Important:** Functions that reference DataSource IDs (like `events.refresh()`) must live in `Main.xmlui.xs` as plain `window` functions, not in `Globals.xs`. XMLUI's reactive system tracks Globals.xs references, and a function there that touches a DataSource creates an infinite render loop (React error #185).
 
 **Dialog component pattern:**
 ```xml
@@ -393,11 +397,10 @@ components/
 ```
 
 **Key patterns:**
-- `codeBehind` attribute links to `.xmlui.xs` file for cleaner separation
+- `Globals.xs` for shared state and functions — no prop drilling needed
+- `codeBehind` attribute links to `.xmlui.xs` file for DataSource-aware functions
 - `method.open` on Component exposes internal dialog's open method
-- Components declare AppState with same `bucket` to access shared state
-- DataSource reference stored in AppState enables `picksDS.refetch()` from child components
-- ChangeListener syncs DataSource values to AppState when data changes
+- ChangeListener syncs DataSource values to Globals.xs vars
 - Inline `tooltip` prop on Icon instead of Tooltip wrapper
 
 ## XMLUI Resources
@@ -592,17 +595,23 @@ Then iterate:
 
 ---
 
+## Planned Improvements
+
+- **my-picks edge function**: Update to handle self-standing enrichments. When a curator adds an RRULE enrichment and the original event is later deleted, the enrichment's own `title`/`start_time`/`location` fields should be used as fallback. The edge function should also emit RRULE in VEVENT output so subscribing calendar apps show recurrence natively.
+
 ## File Structure
 
 ```
 community-calendar/
-├── Main.xmlui              # XMLUI app shell (AppState, DataSources, layout)
-├── Main.xmlui.xs           # Code-behind: togglePick, removePick functions
+├── Main.xmlui              # XMLUI app shell (DataSources, layout)
+├── Main.xmlui.xs           # Code-behind: window.refreshPicks
+├── Globals.xs              # Shared vars + functions (togglePick, removePick)
 ├── components/
 │   ├── EventCard.xmlui     # Event display card with pick checkbox
-│   ├── PickItem.xmlui      # Pick item in My Picks dialog
+│   ├── PickItem.xmlui      # Pick item in My Picks view
+│   ├── PickEditor.xmlui    # Pick confirmation modal with recurrence enrichment
 │   ├── SourcesDialog.xmlui # Sources modal dialog
-│   └── CaptureDialog.xmlui # Poster capture: image → Claude API → event
+│   └── CaptureDialog.xmlui # Poster capture: image → Claude API → PickEditor
 ├── config.json             # Supabase credentials + xsVerbose for inspector
 ├── index.html              # XMLUI loader + auth setup + ?city= param routing
 ├── helpers.js              # Pure helper functions (filter, dedupe, format, etc.)
