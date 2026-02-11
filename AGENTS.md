@@ -436,6 +436,50 @@ Before adding a source, verify:
 4. **Content type** - Are events public community events vs internal meetings?
 5. **Overlap** - Does it duplicate events from existing sources?
 
+## Pipeline Validation & Debugging
+
+The pipeline has several safeguards against silent failures:
+
+### Validation Script
+
+`scripts/validate_pipeline.py` runs after ICS generation to catch issues:
+
+```bash
+python scripts/validate_pipeline.py --cities santarosa,bloomington,davis
+python scripts/validate_pipeline.py --cities santarosa --strict  # warnings = errors
+```
+
+Checks:
+- combined.ics exists and has events
+- events.json exists, is valid JSON, and roughly matches combined.ics
+- Critical sources are present (configurable per city)
+- Event counts above minimum thresholds
+- Source diversity (not all from one source)
+
+### Workflow Diagnostics
+
+The workflow now outputs:
+1. **Scraper results summary**: Shows event count per ICS file after scraping
+2. **ics_to_json debug output**: Shows which cities are being processed
+3. **Validation report**: Pass/fail with specific errors
+
+### Common Silent Failure Causes
+
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| events.json not updated | Whitespace in city name | `xargs` trim in workflow |
+| events.json clobbered after rebase | Concurrent push during workflow | Backup/restore in commit step |
+| Scraper produces 0 events | Site changed, blocked, or down | Check scraper logs, update scraper |
+| Source missing from events.json | Scraper not in workflow | Run `add_scraper.py` |
+| Load-events succeeds but DB empty | Wrong events.json committed | Check git history |
+
+### Debugging a Failed Build
+
+1. Check GitHub Actions log for the "Convert ICS to JSON" step output
+2. Look for "WARNING: cities/X/combined.ics not found!" messages
+3. Check validation step for specific errors
+4. Compare event counts in scraper results vs combined.ics
+
 ## Known Platform Limitations
 
 | Platform | Issue |
