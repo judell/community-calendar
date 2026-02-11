@@ -113,7 +113,25 @@ Optional for cal_theatre.py with --use-selenium:
 
 ## Adding a New Scraper to the Pipeline
 
-Creating a scraper is not enough - you must also integrate it into the build:
+Creating a scraper is not enough - you must also integrate it into the build.
+
+### Recommended: Use the add_scraper script
+
+```bash
+# After creating your scraper, run:
+python scripts/add_scraper.py myscraper santarosa "My Source Name"
+
+# This automatically:
+# - Verifies the scraper exists
+# - Adds it to the GitHub workflow
+# - Adds the source name to combine_ics.py
+
+# Options:
+#   --test      Test the scraper first
+#   --dry-run   Preview changes without applying
+```
+
+### Manual steps (if not using the script)
 
 1. **Create & test the scraper locally**
    ```bash

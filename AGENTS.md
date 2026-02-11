@@ -58,6 +58,25 @@ This serves as institutional memory so future work doesn't duplicate effort.
 When creating a new scraper for an existing city, **all three steps are required**:
 
 1. **Create the scraper** in `scrapers/` directory
+2. **Add to workflow** (`.github/workflows/generate-calendar.yml`)
+3. **Add source name** (`scripts/combine_ics.py`)
+
+### Recommended: Use the add_scraper script
+
+```bash
+# Automatically adds to workflow and combine_ics.py:
+python scripts/add_scraper.py myscraper santarosa "My Source Name"
+
+# With testing:
+python scripts/add_scraper.py myscraper santarosa "My Source Name" --test
+
+# Preview without making changes:
+python scripts/add_scraper.py myscraper santarosa "My Source Name" --dry-run
+```
+
+### Manual steps (if not using the script)
+
+1. **Create the scraper** in `scrapers/` directory
    - Test it locally: `python scrapers/myscraper.py --output /tmp/test.ics`
    - Verify output: `grep -c "BEGIN:VEVENT" /tmp/test.ics`
 
