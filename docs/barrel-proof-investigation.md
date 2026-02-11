@@ -56,6 +56,9 @@ By the time information reaches the end user, it's been through multiple broken 
 ### Step 1: Website Analysis
 
 I examined barrelprooflounge.com and found:
+
+![Barrel Proof Lounge Homepage](screenshots/01-barrel-proof-homepage.png)
+*The venue's homepage showing their stand-up comedy schedule*
 - WordPress site using Elementor
 - Events displayed via "Widget for Eventbrite API" plugin
 - Homepage shows upcoming events with dates, times, descriptions, and RSVP links
@@ -67,6 +70,9 @@ Key events visible on their homepage (Feb 10-11, 2026):
 - Live Music Happy Hour – Pickin' Peaches: 5:00 pm – 7:00 pm
 - Wednesday Night Comedy Open Mic: **6:00 pm – 9:00 pm**
 - Big Stage Karaoke: 9:00 pm – 1:30 am
+
+![Barrel Proof events showing correct 6pm time](screenshots/03-barrel-proof-wednesday-comedy-6pm.png)
+*Wednesday Night Comedy Open Mic clearly showing 6:00 pm – 9:00 pm on the venue's website*
 
 ### Step 2: Our Feed Analysis
 
@@ -91,6 +97,15 @@ I traced the data upstream:
    - Has 31 upcoming events
    - Tony Sparks show IS listed here
    - Wednesday Comedy Open Mic JSON-LD shows `startDate: "2026-01-07T19:00:00-08:00"` (7pm)
+
+![Eventbrite organizer page](screenshots/04-eventbrite-organizer-page.png)
+*Barrel Proof's Eventbrite organizer page*
+
+![Eventbrite events list](screenshots/05-eventbrite-events-list.png)
+*Events listed on Eventbrite — Tony Sparks show is here but wasn't making it to aggregators*
+
+![Eventbrite Comedy Open Mic detail](screenshots/06-eventbrite-comedy-open-mic-detail.png)
+*The Eventbrite detail page — notice the image says "SHOW 6PM-9PM" but the ticketing system has 7pm*
 
 2. **Eventbrite JSON-LD vs Website Display**
    - Eventbrite's structured data says 7pm
