@@ -15,8 +15,9 @@ const EVENT_JSON_FORMAT = `{
 }`;
 
 const SHARED_RULES = `Rules:
-- If you cannot determine the year, assume 2025 or 2026 based on context (current year is 2026).
+- The current year is 2026. Always use 2026 for dates unless a different year is explicitly stated.
 - If you cannot determine the exact time, make a reasonable guess (e.g., evening events at 19:00).
+- If end_time is unknown, estimate a reasonable duration (e.g., 1 hour for meetups, 2-3 hours for concerts/festivals).
 - If the date/time is completely unreadable, set start_time to null.
 - Keep description brief (1-2 sentences max).
 - Return ONLY the JSON object, no markdown or explanation.`;
@@ -154,21 +155,24 @@ async function transcribeAudio(audioBytes: Uint8Array, mediaType: string): Promi
   return result.text;
 }
 
-async function extractEventFromAudio(audioBytes: Uint8Array, mediaType: string): Promise<any> {
+async function extractEventFromAudio(audioBytes: Uint8Array, mediaType: string): Promise<{ event: any; transcript: string }> {
   const transcript = await transcribeAudio(audioBytes, mediaType);
 
-  return callClaude([
+  const event = await callClaude([
     {
       type: "text",
       text: `${AUDIO_EXTRACTION_PROMPT}\n\nTranscript:\n${transcript}`,
     },
   ]);
+
+  return { event, transcript };
 }
 
 async function commitEvent(
   supabase: any,
   event: any,
-  userId: string
+  userId: string,
+  transcript?: string
 ): Promise<{ event_id: number }> {
   // Generate unique source_uid
   const sourceUid = `poster_capture:${userId}:${crypto.randomUUID()}`;
@@ -185,6 +189,7 @@ async function commitEvent(
       url: event.url || null,
       source: "poster_capture",
       source_uid: sourceUid,
+      transcript: transcript || null,
     })
     .select("id")
     .single();
@@ -253,20 +258,24 @@ Deno.serve(async (req) => {
 
         console.log(`Extracting event from ${isAudio ? "audio" : "image"}, mediaType: ${mediaType}, size: ${fileBytes.length}`);
 
-        const extractedEvent = isAudio
-          ? await extractEventFromAudio(fileBytes, mediaType)
-          : await extractEventFromImage(fileBytes, mediaType);
-
-        return new Response(JSON.stringify({ event: extractedEvent }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        if (isAudio) {
+          const { event: extractedEvent, transcript } = await extractEventFromAudio(fileBytes, mediaType);
+          return new Response(JSON.stringify({ event: extractedEvent, transcript }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        } else {
+          const extractedEvent = await extractEventFromImage(fileBytes, mediaType);
+          return new Response(JSON.stringify({ event: extractedEvent }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
       }
     }
 
     // Handle application/json (for commit mode and legacy base64 extract)
     if (contentType.includes("application/json")) {
       const body = await req.json();
-      const { mode, image, media_type, event } = body;
+      const { mode, image, media_type, event, transcript } = body;
 
       if (mode === "extract") {
         // Legacy base64 mode
@@ -338,7 +347,7 @@ Deno.serve(async (req) => {
           });
         }
 
-        const result = await commitEvent(supabase, event, userData.user.id);
+        const result = await commitEvent(supabase, event, userData.user.id, transcript);
 
         return new Response(JSON.stringify({ success: true, ...result }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },

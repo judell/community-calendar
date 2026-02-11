@@ -141,8 +141,10 @@
               start_time: startTime,
               end_time: endTime,
               location: formData.location || null,
-              description: formData.description || null
-            }
+              description: formData.description || null,
+              url: $props.event?.url || null
+            },
+            transcript: $props.event?.transcript || null
           });
         }
       }"
@@ -223,7 +225,9 @@
           start_time: (submittedData?.date || '') + 'T' + (submittedData?.time || '00:00') + ':00',
           end_time: submittedData?.endTime ? (submittedData?.date || '') + 'T' + submittedData.endTime + ':00' : null,
           location: submittedData?.location,
-          description: submittedData?.description
+          description: submittedData?.description,
+          url: $props.event?.url || null,
+          rrule: rruleFrequency !== 'none' ? window.buildRRule(rruleFrequency, rruleDays, rruleOrdinal, rruleMonthDay) : null
         }}" />
         <Text fontSize="$fontSize-xs" color="$color-text-tertiary" textAlignment="center">For Apple Calendar: download .ics, then open the file.</Text>
       </VStack>

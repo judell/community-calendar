@@ -213,13 +213,18 @@ function buildGoogleCalendarUrl(event) {
   const startDate = formatGoogleDate(event.start_time);
   const endDate = event.end_time ? formatGoogleDate(event.end_time) : startDate;
 
-  const params = new URLSearchParams({
+  var params = new URLSearchParams({
     action: 'TEMPLATE',
     text: event.title || '',
     dates: startDate + '/' + endDate,
     location: event.location || '',
     details: event.description || ''
   });
+
+  if (event.rrule) {
+    var rrule = event.rrule.startsWith('RRULE:') ? event.rrule : 'RRULE:' + event.rrule;
+    params.set('recur', rrule);
+  }
 
   return 'https://calendar.google.com/calendar/render?' + params.toString();
 }
