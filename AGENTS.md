@@ -53,6 +53,23 @@ This serves as institutional memory so future work doesn't duplicate effort.
 4. **Update combine_ics.py**: Add SOURCE_NAMES for Meetup groups
 5. **Update SOURCES_CHECKLIST.md**: Document what was found
 
+## Quick Reference: Adding a New Scraper
+
+When creating a new scraper for an existing city, **all three steps are required**:
+
+1. **Create the scraper** in `scrapers/` directory
+   - Test it locally: `python scrapers/myscraper.py --output /tmp/test.ics`
+   - Verify output: `grep -c "BEGIN:VEVENT" /tmp/test.ics`
+
+2. **Add to workflow** (`.github/workflows/generate-calendar.yml`):
+   - Find the city's "Scrape {City} sources" step
+   - Add: `python scrapers/myscraper.py --output cities/{city}/myscraper.ics || true`
+
+3. **Add source name** (`scripts/combine_ics.py`):
+   - Add entry to `SOURCE_NAMES` dict: `'myscraper': 'My Source Name',`
+
+**If you skip steps 2-3, the scraper won't run in CI and events won't appear!**
+
 ---
 
 ## Web Search Discovery Strategy

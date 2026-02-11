@@ -110,3 +110,22 @@ Optional for cal_theatre.py with --use-selenium:
 - Events for future months may be empty if the venue hasn't posted them yet
 - Most venues post events 1-2 months in advance
 - SebArts (sebastopol/sebarts.py) was already implemented in the project
+
+## Adding a New Scraper to the Pipeline
+
+Creating a scraper is not enough - you must also integrate it into the build:
+
+1. **Create & test the scraper locally**
+   ```bash
+   python scrapers/myscraper.py --output /tmp/test.ics
+   grep -c "BEGIN:VEVENT" /tmp/test.ics  # Verify events
+   ```
+
+2. **Add to GitHub workflow** (`.github/workflows/generate-calendar.yml`):
+   - Find the "Scrape {City} sources" step for your city
+   - Add a line: `python scrapers/myscraper.py --output cities/{city}/myscraper.ics || true`
+
+3. **Add source name mapping** (`scripts/combine_ics.py`):
+   - Add to `SOURCE_NAMES` dict: `'myscraper': 'Human Readable Name',`
+
+**All three steps are required or events won't appear in the calendar!**
