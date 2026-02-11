@@ -5,37 +5,52 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-ue-client-tx-id",
 };
 
-const EXTRACTION_PROMPT = `Extract event details from this poster image. Return ONLY valid JSON, no other text:
-{
+const EVENT_JSON_FORMAT = `{
   "title": "event name",
   "start_time": "ISO8601 datetime (YYYY-MM-DDTHH:MM:SS)",
   "end_time": "ISO8601 datetime or null",
   "location": "venue/address or null",
   "description": "brief description or null",
   "url": "website if visible or null"
-}
+}`;
 
-Rules:
+const SHARED_RULES = `Rules:
 - If you cannot determine the year, assume 2025 or 2026 based on context (current year is 2025).
 - If you cannot determine the exact time, make a reasonable guess (e.g., evening events at 19:00).
 - If the date/time is completely unreadable, set start_time to null.
 - Keep description brief (1-2 sentences max).
 - Return ONLY the JSON object, no markdown or explanation.`;
 
-async function extractEventFromImage(imageBytes: Uint8Array, mediaType: string): Promise<any> {
+const IMAGE_EXTRACTION_PROMPT = `Extract event details from this poster image. Return ONLY valid JSON, no other text:
+${EVENT_JSON_FORMAT}
+
+${SHARED_RULES}`;
+
+const AUDIO_EXTRACTION_PROMPT = `Extract event details from this transcript of an audio recording (e.g., a voice memo, radio ad, or voicemail about an event). Return ONLY valid JSON, no other text:
+${EVENT_JSON_FORMAT}
+
+${SHARED_RULES}
+- The transcript may contain filler words, false starts, or informal speech — extract the key event details.
+- If multiple events are mentioned, extract only the first/primary one.`;
+
+function parseEventJson(text: string): any {
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    // Try to extract JSON from the response if it has extra text
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    throw new Error("Failed to parse event JSON from response");
+  }
+}
+
+async function callClaude(content: any[]): Promise<any> {
   const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
   if (!anthropicKey) {
     throw new Error("ANTHROPIC_API_KEY not configured");
   }
-
-  // Convert bytes to base64 (chunked to avoid stack overflow on large images)
-  let binary = '';
-  const chunkSize = 8192;
-  for (let i = 0; i < imageBytes.length; i += chunkSize) {
-    const chunk = imageBytes.subarray(i, i + chunkSize);
-    binary += String.fromCharCode(...chunk);
-  }
-  const base64 = btoa(binary);
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -47,25 +62,7 @@ async function extractEventFromImage(imageBytes: Uint8Array, mediaType: string):
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1024,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: mediaType,
-                data: base64,
-              },
-            },
-            {
-              type: "text",
-              text: EXTRACTION_PROMPT,
-            },
-          ],
-        },
-      ],
+      messages: [{ role: "user", content }],
     }),
   });
 
@@ -81,17 +78,83 @@ async function extractEventFromImage(imageBytes: Uint8Array, mediaType: string):
     throw new Error("No text response from Claude");
   }
 
-  // Parse the JSON response
-  try {
-    return JSON.parse(textContent.text);
-  } catch (e) {
-    // Try to extract JSON from the response if it has extra text
-    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    throw new Error("Failed to parse event JSON from response");
+  return parseEventJson(textContent.text);
+}
+
+async function extractEventFromImage(imageBytes: Uint8Array, mediaType: string): Promise<any> {
+  // Convert bytes to base64 (chunked to avoid stack overflow on large images)
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < imageBytes.length; i += chunkSize) {
+    const chunk = imageBytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
   }
+  const base64 = btoa(binary);
+
+  return callClaude([
+    {
+      type: "image",
+      source: { type: "base64", media_type: mediaType, data: base64 },
+    },
+    { type: "text", text: IMAGE_EXTRACTION_PROMPT },
+  ]);
+}
+
+async function transcribeAudio(audioBytes: Uint8Array, mediaType: string): Promise<string> {
+  const openaiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!openaiKey) {
+    throw new Error("OPENAI_API_KEY not configured");
+  }
+
+  // Map MIME type to file extension for Whisper
+  const extMap: Record<string, string> = {
+    "audio/mpeg": "mp3",
+    "audio/mp3": "mp3",
+    "audio/mp4": "mp4",
+    "audio/m4a": "m4a",
+    "audio/x-m4a": "m4a",
+    "audio/wav": "wav",
+    "audio/x-wav": "wav",
+    "audio/webm": "webm",
+    "audio/ogg": "ogg",
+    "audio/flac": "flac",
+  };
+  const ext = extMap[mediaType] || "mp3";
+
+  const formData = new FormData();
+  formData.append("file", new File([audioBytes], `audio.${ext}`, { type: mediaType }));
+  formData.append("model", "whisper-1");
+
+  const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${openaiKey}` },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Whisper API error:", errorText);
+    throw new Error(`Whisper API error: ${response.status}`);
+  }
+
+  const result = await response.json();
+  if (!result.text) {
+    throw new Error("No transcript returned from Whisper");
+  }
+
+  console.log("Transcript:", result.text.substring(0, 200));
+  return result.text;
+}
+
+async function extractEventFromAudio(audioBytes: Uint8Array, mediaType: string): Promise<any> {
+  const transcript = await transcribeAudio(audioBytes, mediaType);
+
+  return callClaude([
+    {
+      type: "text",
+      text: `${AUDIO_EXTRACTION_PROMPT}\n\nTranscript:\n${transcript}`,
+    },
+  ]);
 }
 
 async function commitEvent(
@@ -176,9 +239,15 @@ Deno.serve(async (req) => {
           });
         }
 
-        const imageBytes = new Uint8Array(await file.arrayBuffer());
+        const fileBytes = new Uint8Array(await file.arrayBuffer());
         const mediaType = file.type || "image/jpeg";
-        const extractedEvent = await extractEventFromImage(imageBytes, mediaType);
+        const isAudio = mediaType.startsWith("audio/");
+
+        console.log(`Extracting event from ${isAudio ? "audio" : "image"}, mediaType: ${mediaType}, size: ${fileBytes.length}`);
+
+        const extractedEvent = isAudio
+          ? await extractEventFromAudio(fileBytes, mediaType)
+          : await extractEventFromImage(fileBytes, mediaType);
 
         return new Response(JSON.stringify({ event: extractedEvent }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },

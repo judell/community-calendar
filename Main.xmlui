@@ -60,6 +60,7 @@
   <!-- Dialogs -->
   <SourcesDialog id="sourcesDialog" events="{events.value}" />
   <CaptureDialog id="captureDialog" />
+  <AudioCaptureDialog id="audioCaptureDialog" />
   <PickEditor when="{!!pickEvent}" event="{pickEvent}" onClose="pickEvent = null" onSaved="picks.refetch(); events.refetch(); enrichments.refetch();" />
 
   <!-- Inspector Dialog -->
@@ -94,6 +95,15 @@
             width="20px"
             height="20px"
             onClick="captureDialog.open()"
+          />
+          <Icon
+            when="{window.authUser?.user_metadata?.user_name === 'judell'}"
+            name="microphone"
+            fallback="audio"
+            tooltip="Capture Event from Audio"
+            width="20px"
+            height="20px"
+            onClick="audioCaptureDialog.open()"
           />
           <Icon name="list" tooltip="Sources" width="20px" height="20px" onClick="sourcesDialog.open()" />
           <Icon

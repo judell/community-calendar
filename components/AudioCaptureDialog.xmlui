@@ -1,0 +1,63 @@
+<Component
+  name="AudioCaptureDialog"
+  method.open="() => { isExtracting = false; errorMessage = ''; dialog.open(); }"
+  var.isExtracting="{false}"
+  var.errorMessage=""
+>
+
+  <ModalDialog id="dialog" title="Capture Event from Audio" minWidth="400px">
+    <VStack gap="$space-3" padding="$space-2">
+
+      <!-- Select audio file -->
+      <VStack when="{!isExtracting}" gap="$space-2">
+        <Text>Select an audio recording of event info:</Text>
+        <FileInput
+          id="audioInput"
+          acceptsFileType="{['audio/*']}"
+          buttonLabel="Select Audio"
+          buttonIcon="microphone"
+          onDidChange="(files) => {
+            if (!files || files.length === 0) return;
+            isExtracting = true;
+            errorMessage = '';
+            const result = Actions.upload({
+              file: files[0],
+              url: appGlobals.supabaseUrl + '/functions/v1/capture-event',
+              method: 'post',
+              asForm: true,
+              headers: { apikey: appGlobals.supabasePublishableKey },
+              formParams: { mode: 'extract' }
+            });
+            isExtracting = false;
+            if (result && result.event) {
+              pickEvent = {
+                title: result.event.title || '',
+                start_time: result.event.start_time || '',
+                end_time: result.event.end_time || '',
+                location: result.event.location || '',
+                description: result.event.description || ''
+              };
+              dialog.close();
+            } else {
+              errorMessage = result?.error || 'Failed to extract event from audio';
+            }
+          }"
+        />
+      </VStack>
+
+      <!-- Extracting spinner -->
+      <VStack when="{isExtracting}" horizontalAlignment="center" gap="$space-2" padding="$space-4">
+        <Spinner />
+        <Text>Transcribing and extracting event details...</Text>
+      </VStack>
+
+      <!-- Error message -->
+      <Text
+        when="{errorMessage}"
+        value="{errorMessage}"
+        color="$color-danger-500"
+      />
+
+    </VStack>
+  </ModalDialog>
+</Component>
