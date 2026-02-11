@@ -222,3 +222,54 @@ Found 5 events
 2. **Periodic audits** - Spot-check popular venues against their websites to catch data drift
 
 3. **User feedback mechanism** - Make it easy for users to report "this event info seems wrong" with a link to the source
+
+---
+
+## On Human-Agent Collaboration
+
+This investigation illustrates a model of human-agent collaboration that goes beyond "AI writes code."
+
+### What the human did
+- Used the product as a real user would
+- Noticed something was wrong (clicked a link, saw mismatched info)
+- Articulated the problem: "their page has better info than our feeds"
+- Made judgment calls ("yes, kick off another build")
+- Provided context an agent can't see ("the build finished 6 minutes ago")
+
+### What the agent did
+- Investigated across multiple systems: our database, the venue's website, Eventbrite, the aggregator sources
+- Navigated websites visually, taking screenshots that the human could verify matched what they were seeing
+- Traced data flow upstream to find where corruption occurred
+- Wrote and tested a fix
+- Handled the administrative tedium: git commits, workflow files, documentation
+- Tracked deployment status, checked if builds included the fix
+
+### Why this matters
+
+The human's time is precious. In this session, the human spent their time on:
+- Noticing a problem (irreplaceable—agents don't browse the calendar for fun)
+- Verifying the agent's screenshots matched reality (trust but verify)
+- Reading the analysis and agreeing with the diagnosis
+- Kicking off builds (the agent can't push that button)
+
+The human did NOT have to:
+- Manually diff JSON files to find what was missing
+- Write curl commands to probe APIs
+- Figure out what WordPress plugins the venue uses
+- Write a scraper from scratch
+- Update workflow YAML files
+- Write git commit messages
+- Create documentation
+- Track whether the build included the fix
+
+This is the leverage. The agent handles the mechanical, tedious, error-prone parts—not because they're unimportant, but because they're exactly the kind of work where agents excel and humans get fatigued.
+
+### The visual back-and-forth
+
+A key part of this collaboration was the agent navigating websites and sharing screenshots. This isn't just "showing work"—it's establishing shared reality. When the agent said "the website shows 6pm" and the human could see the same screenshot (and verify it on their own screen), we had alignment. No ambiguity, no miscommunication.
+
+This is different from an agent that just reports conclusions. Seeing IS believing, and in a collaboration where trust matters, showing the evidence matters.
+
+### The debugging loop
+
+At the end, we had to check: did the fix actually deploy? The agent checked git logs, commit timestamps, and the events.json file to determine that no, the workflow that ran 6 minutes ago didn't have our code yet. This kind of build-tracing and deployment verification is exactly the tedious administrative work that humans shouldn't have to do manually—but someone has to do it, or you don't actually know if your fix shipped.
