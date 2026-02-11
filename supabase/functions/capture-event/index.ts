@@ -36,7 +36,7 @@ ${SHARED_RULES}
 - If a day of the week is mentioned or implied (e.g., "Thursday night trivia", "Saturday morning farmers market"), set start_time to the NEXT upcoming occurrence of that day.
 - If the event sounds recurring (e.g., "every week", "weekly", a named day implying regularity), mention the recurrence in the description (e.g., "Weekly on Thursdays").
 - If the speaker mentions where to find more info (e.g., "check meetup for details", "it's on eventbrite", "search Facebook for downtown art walk"), construct a plausible search URL for the url field:
-  - Facebook: https://www.facebook.com/search/events?q={event+name+city}
+  - Facebook: https://www.facebook.com/search/top/?q={event+name+city}
   - Meetup: https://www.meetup.com/find/?keywords={event+name}&location={city}
   - Eventbrite: https://www.eventbrite.com/d/{state}--{city}/{event-name}
   - Generic: https://www.google.com/search?q={event+name+city}
