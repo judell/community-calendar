@@ -160,6 +160,26 @@ See `supabase/ddl/05_cron_jobs.sql` for the full setup.
 
 ## Deployment Workflow
 
+### Adding a New Scraper
+
+When you create a new scraper, use the `add_scraper.py` script to integrate it into the pipeline:
+
+```bash
+# After creating scrapers/myscraper.py, run:
+python scripts/add_scraper.py myscraper santarosa "My Source Name"
+
+# This automatically:
+# 1. Verifies the scraper exists
+# 2. Adds it to .github/workflows/generate-calendar.yml
+# 3. Adds the source name to scripts/combine_ics.py
+
+# Options:
+#   --test      Run the scraper first to verify it works
+#   --dry-run   Preview changes without applying them
+```
+
+**All three steps are required** — if you skip the workflow or source name, events won't appear in the calendar.
+
 ### Manual Update
 
 ```bash
