@@ -186,10 +186,17 @@ jobs:
     - name: Convert ICS to JSON for Supabase
       run: |
         IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
+        echo "Processing cities: ${CITIES[*]}"
         for city in "${CITIES[@]}"; do
+          # Trim whitespace from city name
+          city=$(echo "$city" | xargs)
+          echo "Checking city: '$city'"
           if [ -f "cities/$city/combined.ics" ]; then
+            echo "Running ics_to_json for $city..."
             python scripts/ics_to_json.py "cities/$city/combined.ics" -o "cities/$city/events.json" --city "$city"
             echo "$city: Converted $(cat cities/$city/events.json | python -c 'import json,sys; print(len(json.load(sys.stdin)))') events to JSON"
+          else
+            echo "WARNING: cities/$city/combined.ics not found!"
           fi
         done
 
