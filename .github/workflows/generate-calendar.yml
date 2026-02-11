@@ -204,12 +204,30 @@ jobs:
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+        
+        # Save generated files before any git operations
+        for city in santarosa bloomington davis; do
+          if [ -f "cities/$city/events.json" ]; then
+            cp "cities/$city/events.json" "/tmp/${city}_events.json"
+          fi
+        done
+        
         git add .
         git diff --quiet && git diff --staged --quiet || (
           git commit -m "Auto-generate calendar"
           for i in 1 2 3; do
-            git pull --rebase && git push && break
-            echo "Push failed, retrying in 5 seconds..."
+            if git pull --rebase && git push; then
+              break
+            fi
+            echo "Push failed, restoring generated files and retrying..."
+            # Restore generated files that may have been clobbered by rebase
+            for city in santarosa bloomington davis; do
+              if [ -f "/tmp/${city}_events.json" ]; then
+                cp "/tmp/${city}_events.json" "cities/$city/events.json"
+              fi
+            done
+            git add .
+            git diff --staged --quiet || git commit --amend --no-edit
             sleep 5
           done
         )
