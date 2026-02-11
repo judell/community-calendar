@@ -31,6 +31,26 @@ A user was browsing the Santa Rosa community calendar as a normal user would. Th
 
 This is exactly the kind of data quality issue that erodes user trust—when clicking through reveals "the real info is different."
 
+## Why This Matters (The Bigger Picture)
+
+This investigation revealed a fundamental truth about event data: **correct information exists at the source, and it degrades as it flows through syndication pipelines.**
+
+Here's what happened to Barrel Proof's event data:
+
+1. **The venue** knows their Wednesday Comedy Open Mic starts at 6pm. Their website says 6pm. Their promotional images say 6pm.
+
+2. **Eventbrite** has 7pm in their database—likely a data entry mistake when the recurring event was created. The venue may not even know this is wrong.
+
+3. **Aggregators** (North Bay Bohemian, Press Democrat, GoLocal) pull from Eventbrite or from each other, propagating the error. Some events don't make it through at all—the Tony Sparks Tuesday show was completely missing from all three.
+
+4. **Our calendar** ingests from the aggregators, inheriting their errors and gaps.
+
+By the time information reaches the end user, it's been through multiple broken syndication pipelines and layers of shitty software, each one an opportunity for data to be lost, corrupted, or simply never picked up.
+
+**The lesson for venues:** You want to own and control the information you provide to the world. You want to provide it on your terms. You want people coming directly to you—not getting a degraded copy from some third party who scraped it from another third party.
+
+**The lesson for aggregators (us):** When possible, go directly to the source. Every intermediary is a point of failure.
+
 ## Investigation Process
 
 ### Step 1: Website Analysis
