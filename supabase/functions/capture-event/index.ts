@@ -348,6 +348,12 @@ Deno.serve(async (req) => {
           });
         }
 
+        // Append transcript to description if present
+        if (transcript) {
+          const username = userData.user.user_metadata?.user_name || userData.user.email || "unknown";
+          event.description = (event.description || "") + `\n\nTranscribed audio from ${username}:\n${transcript}`;
+        }
+
         const result = await commitEvent(supabase, event, userData.user.id, transcript);
 
         return new Response(JSON.stringify({ success: true, ...result }), {
