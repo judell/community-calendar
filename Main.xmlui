@@ -7,7 +7,8 @@
     id="events"
     url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate() + (window.cityFilter ? '&city=eq.' + window.cityFilter : '')}"
     headers="{{
-      apikey: appGlobals.supabasePublishableKey
+      apikey: appGlobals.supabasePublishableKey,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
     }}"
   />
 
@@ -51,7 +52,8 @@
     id="enrichments"
     url="{appGlobals.supabaseUrl + '/rest/v1/event_enrichments?select=*&rrule=not.is.null' + (window.cityFilter ? '&city=eq.' + window.cityFilter : '')}"
     headers="{{
-      apikey: appGlobals.supabasePublishableKey
+      apikey: appGlobals.supabasePublishableKey,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
     }}"
   />
 
