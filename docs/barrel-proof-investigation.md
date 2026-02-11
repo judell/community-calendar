@@ -1,5 +1,7 @@
 # Barrel Proof Lounge Data Quality Investigation
 
+> *This document prepared by Shelley, under the direction of Jon, to provide raw material for a blog post.*
+
 **Date:** February 11, 2026  
 **Investigator:** Shelley (AI coding assistant)  
 **Status:** Fix deployed and validated  
