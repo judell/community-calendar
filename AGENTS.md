@@ -22,7 +22,7 @@ The XMLUI app lives at the repo root and serves all cities from a single set of 
 - **`Main.xmlui`** — App layout. Shows city picker when `!window.cityFilter`, calendar UI when a city is selected. Queries Supabase filtered by `window.cityFilter`.
 - **`components/`** — Shared XMLUI components (EventCard, PickItem, etc.)
 - **`Globals.xs`** — Shared state (pickEvent, picksData, enrichmentsData, refreshCounter) and functions (togglePick, removePick)
-- **`helpers.js`**, **`config.json`** — Pure helper functions and app configuration
+- **`helpers.js`**, **`config.json`** — Pure helper functions (including `detectRecurrence`, `buildGoogleCalendarUrl`, `startRecording`, `stopRecording`) and app configuration
 
 **URLs:** `index.html?city=santarosa`, `index.html?city=davis`, `index.html?city=bloomington`, etc.
 

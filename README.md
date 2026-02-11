@@ -125,6 +125,7 @@ CREATE TABLE events (
   city text,           -- e.g., 'santarosa', 'davis'
   source text,         -- e.g., 'bohemian', 'yolo_library'
   source_uid text UNIQUE,
+  transcript text,     -- Whisper transcript for audio-captured events
   created_at timestamptz DEFAULT now()
 );
 ```
@@ -324,50 +325,57 @@ Users can now authenticate and save personal event picks:
 - Modal dialog uses `minWidth="70vw"` for mobile compatibility
 - Text uses `overflowMode="flow"` for proper wrapping
 
-### Poster Capture (New)
+### Event Capture (Image + Audio)
 
-Users can photograph an event poster and add it to their picks:
+Users can photograph an event poster or speak/upload audio to capture events:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Click camera icon (when signed in)                     │
+│  Click camera icon (image) or play icon (audio)         │
 │                    ↓                                    │
-│  Select image of event poster                           │
+│  Image: select photo of event poster                    │
+│  Audio: record from microphone or select audio file     │
 │                    ↓                                    │
-│  Claude API extracts: title, date, time, location       │
+│  Image → Claude API extracts event details              │
+│  Audio → Whisper transcribes → Claude extracts details  │
 │                    ↓                                    │
-│  Review/edit extracted details in form                  │
+│  Review/edit extracted details in PickEditor form       │
+│  (recurrence auto-detected from text, city auto-set)    │
 │                    ↓                                    │
-│  "Add to My Picks" saves event + creates pick           │
+│  "Add to My Picks" saves event + pick + enrichment      │
+│  Transcript appended to description with attribution    │
 └─────────────────────────────────────────────────────────┘
 ```
 
 **Implementation:**
-- `components/CaptureDialog.xmlui` - UI for image selection and event review
-- `supabase/functions/capture-event/index.ts` - Edge function with two modes:
-  - **Extract mode**: Receives image via `Actions.upload`, calls Claude API, returns event JSON
-  - **Commit mode**: Receives edited event, inserts into `events` table with `source='poster_capture'`, creates pick
+- `components/CaptureDialog.xmlui` — image selection → Claude API → PickEditor
+- `components/AudioCaptureDialog.xmlui` — audio file/microphone → Whisper + Claude → PickEditor
+- `supabase/functions/capture-event/index.ts` (v23) — edge function with two modes:
+  - **Extract mode**: Receives image or audio via multipart upload. Images go to Claude directly. Audio goes to Whisper for transcription, then Claude extracts event JSON from the transcript.
+  - **Commit mode**: Receives edited event JSON, inserts into `events` table with `source='poster_capture'`, creates pick. For audio: appends transcript to description ("Transcribed audio from {username}:"), saves transcript in dedicated column, saves city from client.
+
+**Audio-specific features:**
+- Provenance URLs: Saying "check Facebook for it" generates a search URL (`facebook.com/search/top/?q=...`)
+- Day inference: "Tuesday ride" → next upcoming Tuesday
+- End time estimation: Unknown durations get reasonable guesses (1hr meetup, 2-3hr concert)
+- Recurrence detection: "weekly" or "on Tuesdays" auto-populates recurrence in PickEditor
+- See [docs/audio-capture.md](docs/audio-capture.md) for the full development history
 
 **XMLUI patterns learned:**
 - `Actions.upload` returns result synchronously (callbacks don't fire)
-- `Actions.upload` uses filename as form field name (not "file") - see [issue #2741](https://github.com/xmlui-org/xmlui/issues/2741)
+- `Actions.upload` uses filename as form field name (not "file") — see [issue #2741](https://github.com/xmlui-org/xmlui/issues/2741)
 - TextBox/TextArea require `initialValue` + `id` + `setValue()` for dynamic updates (not `value` binding)
 - APICall needs `body="{$param}"` to send `execute()` parameter as request body
-- CORS must include `x-ue-client-tx-id` header for XMLUI uploads - see [issue #1942](https://github.com/xmlui-org/xmlui/issues/1942)
+- CORS must include `x-ue-client-tx-id` header for XMLUI uploads — see [issue #1942](https://github.com/xmlui-org/xmlui/issues/1942)
 
-**Deploy edge function:**
-```bash
-supabase functions deploy capture-event --no-verify-jwt
-supabase secrets set ANTHROPIC_API_KEY=<key>  # Set via Dashboard for deployed functions
-```
-
-**API Key configuration:**
-- Currently uses a shared Anthropic API key configured as a Supabase secret
-- **Future**: Could support "bring your own key" (BYOK) where users provide their own Anthropic API key via the UI, passed in the request body
+**Secrets required:**
+- `ANTHROPIC_API_KEY` — Claude extraction (image and audio text)
+- `OPENAI_API_KEY` — Whisper transcription (audio only)
 
 **Technical notes:**
-- Base64 encoding uses chunked processing (8KB chunks) to avoid stack overflow - spreading 184K+ bytes as function arguments exceeds JavaScript's call stack limit
+- Base64 encoding uses chunked processing (8KB chunks) to avoid stack overflow — spreading 184K+ bytes as function arguments exceeds JavaScript's call stack limit
 - iOS Safari debugging tip: when client shows a server error, check Supabase Dashboard → Edge Functions → Logs first
+- Browser MediaRecorder produces WebM (Chrome) or MP4 (Safari), both handled by Whisper
 
 ### Component Architecture
 
@@ -377,7 +385,7 @@ The app uses XMLUI's `Globals.xs` for cross-component state and functions:
 Globals.xs                            # Shared vars (pickEvent, picksData, enrichmentsData, refreshCounter)
                                       # and functions (togglePick, removePick)
 Main.xmlui                            # App shell with DataSources + ChangeListeners for reactive sync
-helpers.js                            # Pure functions (filter, dedupe, format, detectRecurrence, expandEnrichments)
+helpers.js                            # Pure functions (filter, dedupe, format, detectRecurrence, expandEnrichments, buildGoogleCalendarUrl)
 
 components/
 ├── EventCard.xmlui                   # Event display card with pick checkbox
@@ -385,6 +393,7 @@ components/
 ├── PickEditor.xmlui                  # Modal for confirming picks + optional recurrence enrichment
 ├── AddToCalendar.xmlui               # ICS download button (includes RRULE when available)
 ├── CaptureDialog.xmlui               # Poster capture: image → Claude API → PickEditor
+├── AudioCaptureDialog.xmlui          # Audio capture: mic/file → Whisper → Claude → PickEditor
 └── SourcesDialog.xmlui               # Sources modal (uses method.open pattern)
 ```
 
@@ -685,14 +694,15 @@ Recurring picks stay pinned in the "my picks" view regardless of whether the ori
 - **Unpicking**: Click checkbox on already-picked event → one-click remove (no modal), deletes both the pick and any associated enrichment
 - **DataSource refresh**: Both paths increment a `refreshCounter` var in `Globals.xs`, which triggers a `ChangeListener` in `Main.xmlui` to call `refetch()` on the events, picks, and enrichments DataSources
 
-### Two capture paths, one editor
+### Three capture paths, one editor
 
-Both paths converge on the same `PickEditor` component:
+All paths converge on the same `PickEditor` component:
 
 | Path | Entry point | Pre-population |
 |------|-------------|----------------|
 | **Feed pick** | Checkbox on EventCard | Event data from feed |
 | **Photo capture** | Camera icon → CaptureDialog | Claude API extraction from poster image |
+| **Audio capture** | Play icon → AudioCaptureDialog | Whisper transcription → Claude extraction from audio |
 
 ### ICS download
 
@@ -715,6 +725,7 @@ community-calendar/
 │   ├── PickEditor.xmlui    # Pick confirmation modal with recurrence enrichment
 │   ├── AddToCalendar.xmlui # ICS download button (includes RRULE when available)
 │   ├── CaptureDialog.xmlui # Poster capture: image → Claude API → PickEditor
+│   ├── AudioCaptureDialog.xmlui # Audio capture: mic/file → Whisper → Claude → PickEditor
 │   └── SourcesDialog.xmlui # Sources modal dialog
 ├── config.json             # Supabase credentials + xsVerbose for inspector
 ├── index.html              # XMLUI loader + auth setup + ?city= param routing

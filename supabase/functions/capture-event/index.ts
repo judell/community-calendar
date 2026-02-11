@@ -14,23 +14,29 @@ const EVENT_JSON_FORMAT = `{
   "url": "website if visible or null"
 }`;
 
-const SHARED_RULES = `Rules:
-- The current year is 2026. Always use 2026 for dates unless a different year is explicitly stated.
+function getSharedRules(): string {
+  const today = new Date().toISOString().substring(0, 10);
+  return `Rules:
+- Today's date is ${today}. Use this to calculate upcoming dates (e.g., "next Tuesday" means the next Tuesday on or after today).
 - If you cannot determine the exact time, make a reasonable guess (e.g., evening events at 19:00).
 - If end_time is unknown, estimate a reasonable duration (e.g., 1 hour for meetups, 2-3 hours for concerts/festivals).
 - If the date/time is completely unreadable, set start_time to null.
 - Keep description brief (1-2 sentences max).
 - Return ONLY the JSON object, no markdown or explanation.`;
+}
 
-const IMAGE_EXTRACTION_PROMPT = `Extract event details from this poster image. Return ONLY valid JSON, no other text:
+function getImageExtractionPrompt(): string {
+  return `Extract event details from this poster image. Return ONLY valid JSON, no other text:
 ${EVENT_JSON_FORMAT}
 
-${SHARED_RULES}`;
+${getSharedRules()}`;
+}
 
-const AUDIO_EXTRACTION_PROMPT = `Extract event details from this transcript of an audio recording (e.g., a voice memo, radio ad, or voicemail about an event). Return ONLY valid JSON, no other text:
+function getAudioExtractionPrompt(): string {
+  return `Extract event details from this transcript of an audio recording (e.g., a voice memo, radio ad, or voicemail about an event). Return ONLY valid JSON, no other text:
 ${EVENT_JSON_FORMAT}
 
-${SHARED_RULES}
+${getSharedRules()}
 - The transcript may contain filler words, false starts, or informal speech — extract the key event details.
 - If multiple events are mentioned, extract only the first/primary one.
 - If a day of the week is mentioned or implied (e.g., "Thursday night trivia", "Saturday morning farmers market"), set start_time to the NEXT upcoming occurrence of that day.
@@ -41,6 +47,7 @@ ${SHARED_RULES}
   - Eventbrite: https://www.eventbrite.com/d/{state}--{city}/{event-name}
   - Generic: https://www.google.com/search?q={event+name+city}
 - If no source is mentioned, leave url as null.`;
+}
 
 function parseEventJson(text: string): any {
   try {
@@ -105,7 +112,7 @@ async function extractEventFromImage(imageBytes: Uint8Array, mediaType: string):
       type: "image",
       source: { type: "base64", media_type: mediaType, data: base64 },
     },
-    { type: "text", text: IMAGE_EXTRACTION_PROMPT },
+    { type: "text", text: getImageExtractionPrompt() },
   ]);
 }
 
@@ -161,7 +168,7 @@ async function extractEventFromAudio(audioBytes: Uint8Array, mediaType: string):
   const event = await callClaude([
     {
       type: "text",
-      text: `${AUDIO_EXTRACTION_PROMPT}\n\nTranscript:\n${transcript}`,
+      text: `${getAudioExtractionPrompt()}\n\nTranscript:\n${transcript}`,
     },
   ]);
 

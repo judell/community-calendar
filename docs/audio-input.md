@@ -1,4 +1,6 @@
-# Audio Input: Implementation Plan
+# Audio Input: Implementation Plan (Superseded)
+
+> **Note:** This was the original planning document. Audio capture is now fully implemented. See [audio-capture.md](audio-capture.md) for the current documentation.
 
 ## Goal
 
@@ -120,12 +122,12 @@ Route in the main handler: detect audio MIME types (`audio/*`) and call `extract
 - Claude extraction: same as current image extraction (~$0.003 per call)
 - Total per capture: ~$0.006
 
-## Open Questions
+## Open Questions (Resolved)
 
-1. **Live recording vs file upload?** File upload is simpler (select an audio file). Live recording via `MediaRecorder` API is possible but adds UI complexity (start/stop buttons, waveform display). Could start with file upload only.
+1. **Live recording vs file upload?** Both were implemented. AudioCaptureDialog supports file upload and live microphone recording via the MediaRecorder API.
 
-2. **Source field value?** Use `poster_capture` for both image and audio? Or distinguish with `audio_capture`?
+2. **Source field value?** Uses `poster_capture` for both image and audio captures.
 
-3. **Max audio length?** Whisper supports up to 25MB files. Should we cap at e.g. 2 minutes to control costs and relevance?
+3. **Max audio length?** No explicit cap implemented. Whisper supports up to 25MB files.
 
-4. **Wait for Claude native audio?** If Anthropic adds audio input to the Messages API, the Whisper step becomes unnecessary. The two-step architecture means we could swap it out later with minimal changes.
+4. **Wait for Claude native audio?** Went with the two-step Whisper+Claude architecture. Can swap out Whisper if Claude adds native audio support later.
