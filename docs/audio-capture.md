@@ -28,8 +28,8 @@ The edge function returns extracted event fields (title, date, time, location, d
 
 The extraction prompt includes several contextual hints:
 
-- **Year**: Hardcoded to 2026 to prevent defaulting to training-data years. Earlier attempts that said "assume 2025 or 2026" confused the model — mentioning any other year causes it to pick that year instead.
-- **Day inference**: If you say "Tuesday ride," it maps to the next upcoming Tuesday
+- **Today's date**: Injected dynamically (e.g., `Today's date is 2026-02-10`). Earlier versions only said "the current year is 2026" — without the full date, the model couldn't compute "next Tuesday" and consistently returned January 7 (a Wednesday). Even saying "assume 2025 or 2026" confused the model into picking 2025. The lesson: give the model exactly the date, computed at runtime, and mention no other dates.
+- **Day inference**: If you say "Tuesday ride," it maps to the next upcoming Tuesday from today's date
 - **Recurrence**: Mentions of "weekly" or named days produce recurrence descriptions
 - **Duration**: Unknown end times get reasonable estimates (1hr for meetups, 2-3hr for concerts)
 - **Provenance URLs**: Mentioning "check Facebook" or "it's on Meetup" generates a search URL for that platform. Facebook uses `/search/top/?q=` (not `/search/events?q=` which doesn't work).
@@ -61,7 +61,7 @@ This required fixing several data flow gaps:
 
 ## Development History
 
-The audio capture feature evolved through rapid iteration (v17–v23 of the capture-event edge function):
+The audio capture feature evolved through rapid iteration (v17–v24 of the capture-event edge function):
 
 | Version | Changes |
 |---------|---------|
@@ -72,10 +72,13 @@ The audio capture feature evolved through rapid iteration (v17–v23 of the capt
 | v21 | Save city from client, fix detectRecurrence day detection, fix "on Tuesdays" pattern |
 | v22 | Fix Facebook URL template: `/search/top/?q=` not `/search/events?q=` |
 | v23 | Append transcript to event description with "Transcribed audio from {username}:" heading |
+| v24 | Inject dynamic today's date in prompt; fix record mode missing transcript/url |
 
 Key lessons learned:
-- **Year hallucination**: Any mention of a wrong year in the prompt causes the model to use it. The fix was to remove all mention of other years.
+- **Date, not just year**: Telling the model "the current year is 2026" isn't enough — it needs today's full date to compute "next Tuesday." Without it, all five test captures returned January 7 (a Wednesday, not even a Tuesday). The fix: `getSharedRules()` computes `new Date().toISOString().substring(0, 10)` at request time and injects it into the prompt.
+- **Year hallucination**: Any mention of a wrong year in the prompt causes the model to use it. v17 said "assume 2025 or 2026" and the model picked 2025 every time.
 - **Recurrence day detection**: "Weekly bike ride on Tuesdays" matched "weekly" first, returning `WEEKLY` with no day. Fixed by also scanning for day names when "weekly" is matched.
+- **Two code paths, same dialog**: AudioCaptureDialog has file-upload and record modes. The file-upload path included `url` and `transcript` in the pickEvent object; the record path didn't. This caused null transcript/city/url in the DB for microphone recordings. Both paths must set identical fields.
 - **Data flow through capture path**: The captured event path (no event ID) was missing enrichment creation, city assignment, and transcript/url passthrough — each had to be wired separately.
 - **GitHub Pages deploy lag**: Client code changes require push → CI build → Pages deploy (1-2 min). Tests before deployment use old client code and produce confusing results.
 
@@ -86,7 +89,7 @@ Key lessons learned:
 
 ## Key Files
 
-- `supabase/functions/capture-event/index.ts` — edge function (v23)
+- `supabase/functions/capture-event/index.ts` — edge function (v24)
 - `components/AudioCaptureDialog.xmlui` — UI dialog (file picker, microphone recording)
 - `components/PickEditor.xmlui` — review/edit form, commit, enrichment creation
 - `components/AddToCalendar.xmlui` — ICS download + Google Calendar link (includes RRULE)
