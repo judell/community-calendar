@@ -15,7 +15,7 @@ const EVENT_JSON_FORMAT = `{
 }`;
 
 const SHARED_RULES = `Rules:
-- If you cannot determine the year, assume 2025 or 2026 based on context (current year is 2025).
+- If you cannot determine the year, assume 2025 or 2026 based on context (current year is 2026).
 - If you cannot determine the exact time, make a reasonable guess (e.g., evening events at 19:00).
 - If the date/time is completely unreadable, set start_time to null.
 - Keep description brief (1-2 sentences max).
@@ -31,7 +31,9 @@ ${EVENT_JSON_FORMAT}
 
 ${SHARED_RULES}
 - The transcript may contain filler words, false starts, or informal speech — extract the key event details.
-- If multiple events are mentioned, extract only the first/primary one.`;
+- If multiple events are mentioned, extract only the first/primary one.
+- If a day of the week is mentioned or implied (e.g., "Thursday night trivia", "Saturday morning farmers market"), set start_time to the NEXT upcoming occurrence of that day.
+- If the event sounds recurring (e.g., "every week", "weekly", a named day implying regularity), mention the recurrence in the description (e.g., "Weekly on Thursdays").`;
 
 function parseEventJson(text: string): any {
   try {
