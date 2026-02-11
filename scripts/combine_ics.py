@@ -48,6 +48,7 @@ SOURCE_NAMES = {
     'srcc': 'Santa Rosa Cycling Club',
     'cafefrida': 'Cafe Frida',
     'barrel_proof': 'Barrel Proof Lounge',
+    'sportsbasement': 'Sports Basement',
     'sebastopol_community': 'Sebastopol Community Center',
     'redwood_cafe': 'Redwood Cafe',
     'sebarts': 'Sebastopol Center for the Arts',
