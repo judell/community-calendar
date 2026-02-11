@@ -1,21 +1,30 @@
 <Component
   name="AudioCaptureDialog"
-  method.open="() => { isExtracting = false; errorMessage = ''; dialog.open(); }"
+  method.open="() => { isExtracting = false; isRecording = false; captureMode = ''; errorMessage = ''; dialog.open(); }"
   var.isExtracting="{false}"
+  var.isRecording="{false}"
+  var.captureMode=""
   var.errorMessage=""
 >
 
   <ModalDialog id="dialog" title="Capture Event from Audio" minWidth="400px">
     <VStack gap="$space-3" padding="$space-2">
 
-      <!-- Select audio file -->
-      <VStack when="{!isExtracting}" gap="$space-2">
+      <!-- Mode selection -->
+      <VStack when="{!captureMode && !isExtracting}" gap="$space-2">
+        <Text>How would you like to capture audio?</Text>
+        <Button label="Select Audio File" icon="upload" onClick="captureMode = 'file'" />
+        <Button label="Record from Microphone" icon="play" onClick="captureMode = 'record'" />
+      </VStack>
+
+      <!-- File upload mode -->
+      <VStack when="{captureMode === 'file' && !isExtracting}" gap="$space-2">
         <Text>Select an audio recording of event info:</Text>
         <FileInput
           id="audioInput"
           acceptsFileType="{['audio/*']}"
-          buttonLabel="Select Audio"
-          buttonIcon="microphone"
+          buttonLabel="Select Audio File"
+          buttonIcon="upload"
           onDidChange="(files) => {
             if (!files || files.length === 0) return;
             isExtracting = true;
@@ -42,6 +51,64 @@
               errorMessage = result?.error || 'Failed to extract event from audio';
             }
           }"
+        />
+        <Button label="Back" size="xs" variant="outlined" onClick="captureMode = ''" />
+      </VStack>
+
+      <!-- Record mode: ready to record -->
+      <VStack when="{captureMode === 'record' && !isRecording && !isExtracting}" gap="$space-2">
+        <Text>Tap Start, describe the event, then tap Stop.</Text>
+        <Button
+          label="Start Recording"
+          icon="play"
+          onClick="window.startRecording(); isRecording = true; errorMessage = ''"
+        />
+        <Button label="Back" size="xs" variant="outlined" onClick="captureMode = ''" />
+      </VStack>
+
+      <!-- Record mode: recording in progress -->
+      <VStack when="{isRecording}" gap="$space-2">
+        <HStack verticalAlignment="center" gap="$space-2">
+          <Spinner />
+          <Text>Recording...</Text>
+        </HStack>
+        <Button
+          label="Stop and Process"
+          icon="stop"
+          variant="danger"
+          onClick="
+            window.stopRecording();
+            isRecording = false;
+            const file = window.getRecordingFile();
+            if (!file) {
+              errorMessage = 'Recording too short, please try again';
+              captureMode = 'record';
+              return;
+            }
+            isExtracting = true;
+            const result = Actions.upload({
+              file: file,
+              url: appGlobals.supabaseUrl + '/functions/v1/capture-event',
+              method: 'post',
+              asForm: true,
+              headers: { apikey: appGlobals.supabasePublishableKey },
+              formParams: { mode: 'extract' }
+            });
+            isExtracting = false;
+            if (result && result.event) {
+              pickEvent = {
+                title: result.event.title || '',
+                start_time: result.event.start_time || '',
+                end_time: result.event.end_time || '',
+                location: result.event.location || '',
+                description: result.event.description || ''
+              };
+              dialog.close();
+            } else {
+              errorMessage = result?.error || 'Failed to extract event from audio';
+              captureMode = 'record';
+            }
+          "
         />
       </VStack>
 

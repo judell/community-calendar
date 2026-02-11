@@ -1,6 +1,47 @@
 // Community Calendar Helper Functions
 // Pure functions for filtering, formatting, and deduplication
 
+// --- Audio Recording ---
+window.audioRecorder = null;
+window.audioChunks = [];
+window.audioBlob = null;
+window.audioMimeType = null;
+
+window.startRecording = async function() {
+  try {
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    var mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+    window.audioRecorder = new MediaRecorder(stream, { mimeType: mimeType });
+    window.audioChunks = [];
+    window.audioBlob = null;
+    window.audioMimeType = mimeType;
+    window.audioRecorder.ondataavailable = function(e) {
+      if (e.data.size > 0) {
+        window.audioChunks.push(e.data);
+        window.audioBlob = new Blob(window.audioChunks, { type: mimeType });
+      }
+    };
+    window.audioRecorder.start(500);
+    return true;
+  } catch(e) {
+    console.error('Failed to start recording:', e);
+    return false;
+  }
+};
+
+window.stopRecording = function() {
+  if (window.audioRecorder && window.audioRecorder.state === 'recording') {
+    window.audioRecorder.stop();
+    window.audioRecorder.stream.getTracks().forEach(function(t) { t.stop(); });
+  }
+};
+
+window.getRecordingFile = function() {
+  if (!window.audioBlob) return null;
+  var ext = window.audioMimeType === 'audio/webm' ? 'webm' : 'm4a';
+  return new File([window.audioBlob], 'recording.' + ext, { type: window.audioMimeType });
+};
+
 // Filter events by search term (searches title, location, source, and description)
 function filterEvents(events, term) {
   if (!events) return events || [];
