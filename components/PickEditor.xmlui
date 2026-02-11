@@ -57,6 +57,23 @@
       isSaving = false;
       savedPickId = result.event_id || 'captured';
       submittedData = pickForm.getData();
+      if (result.event_id && rruleFrequency !== 'none') {
+        const formData = pickForm.getData();
+        const startTime = (formData.date || '') + 'T' + (formData.time || '00:00') + ':00';
+        const endTime = formData.endTime ? (formData.date || '') + 'T' + formData.endTime + ':00' : null;
+        enrichmentApi.execute({
+          event_id: result.event_id,
+          curator_id: window.authUser.id,
+          rrule: window.buildRRule(rruleFrequency, rruleDays, rruleOrdinal, rruleMonthDay),
+          title: formData.title,
+          start_time: startTime,
+          end_time: endTime,
+          location: formData.location || null,
+          description: formData.description || null,
+          city: window.cityFilter || null,
+          curator_name: window.authUser.user_metadata?.user_name || window.authUser.email || 'curator'
+        });
+      }
       emitEvent('saved');
     }"
     onError="(err) => {
