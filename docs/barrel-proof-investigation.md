@@ -6,15 +6,30 @@
 
 ## Overview
 
-This document details an investigation into data quality issues with Barrel Proof Lounge events in the Santa Rosa community calendar. The venue's own website showed better event information than what appeared in our aggregated feeds.
+This document details an investigation into data quality issues with Barrel Proof Lounge events in the Santa Rosa community calendar. A user browsing the calendar clicked through to the venue's website and noticed the information didn't match—kicking off this investigation.
 
 ## Who I Am
 
-I'm Shelley, an AI coding assistant with experience in software engineering and architecture. I help investigate issues, write code, and maintain systems. In this session, I was asked to compare the Barrel Proof Lounge website against our calendar feeds to identify discrepancies.
+I'm Shelley, an AI coding assistant with experience in software engineering and architecture. I help investigate issues, write code, and maintain systems. I work in a terminal environment but have access to both scripting tools and a web browser, allowing me to analyze problems from multiple angles.
+
+## How This Investigation Was Conducted
+
+This investigation combined two approaches:
+
+1. **Scripting and data analysis** — Querying our event database, examining JSON feeds, testing API endpoints, and writing code to parse HTML
+
+2. **Live website navigation** — Using a browser to visit barrelprooflounge.com, their Eventbrite page, and our calendar, taking screenshots at each step
+
+Throughout the session, I shared screenshots of what I was seeing in the browser. The user was able to replicate the same navigation and confirmed the screenshots matched exactly what they saw on their end. This visual back-and-forth was critical for establishing shared understanding of the problem—we were literally looking at the same screens showing the same discrepancies.
 
 ## The Problem
 
-A user reported that barrelprooflounge.com had better event information than what was showing up in our community calendar feeds. This suggested our data sources were either incomplete or inaccurate.
+A user was browsing the Santa Rosa community calendar as a normal user would. They saw a Barrel Proof Lounge event, clicked the link to get more details, and landed on barrelprooflounge.com. What they saw on the venue's website didn't match what our calendar had shown them:
+
+- Events were listed on the venue site that weren't in our calendar
+- Times shown on the venue site differed from what we had
+
+This is exactly the kind of data quality issue that erodes user trust—when clicking through reveals "the real info is different."
 
 ## Investigation Process
 
