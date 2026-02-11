@@ -161,6 +161,7 @@ Known platforms with discoverable feeds:
 | **Localist** | `https://{domain}/api/2/events` |
 | **LibCal** | Check for `/calendar/ical/` endpoints |
 | **Google Calendar** | Extract calendar ID from embed code |
+| **Elfsight Event Calendar** | JSON API - see below |
 
 ### 3. HTML Scraping Patterns
 When no feed exists, scrape structured HTML:
@@ -172,6 +173,37 @@ When no feed exists, scrape structured HTML:
 | **Date in URL slug** | Buskirk-Chumley |
 | **SeatEngine** | Comedy Attic |
 | **FullCalendar JSON** | Many modern sites |
+
+### Elfsight Event Calendar
+
+[Elfsight](https://elfsight.com/event-calendar-widget/) is a popular embeddable widget platform. Sites using their Event Calendar widget have all event data available via a JSON API.
+
+**Detection:** Look in page source for `elfsight-app-` or `class="eapps-event-calendar-"` followed by a UUID.
+
+**API Endpoint:**
+```bash
+# widget_id is the UUID found in the page source
+curl -sL "https://core.service.elfsight.com/p/boot/?page={source_page_url}&w={widget_id}"
+```
+
+**Response:** JSON containing `events`, `locations`, `eventTypes`, `hosts` arrays with full event data including recurring event rules.
+
+**Scraper Library:** Use `scrapers/lib/elfsight.py`:
+```python
+from scrapers.lib.elfsight import ElfsightCalendarScraper
+
+class MySiteScraper(ElfsightCalendarScraper):
+    name = "My Site Events"
+    domain = "mysite.com"
+    widget_id = "c18b022b-4e3e-4ab7-9baa-a3214cef181f"  # From page source
+    source_page = "https://mysite.com/calendar"
+
+if __name__ == '__main__':
+    MySiteScraper.main()
+```
+
+**Known sites using Elfsight:**
+- Sports Basement (`scrapers/sportsbasement.py`) - Bay Area sporting goods chain
 
 ### 4. WordPress REST API
 Many WordPress sites expose event data:

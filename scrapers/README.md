@@ -1,6 +1,36 @@
 # Event Scrapers
 
-Python scrapers for extracting events from various Sonoma County venues that don't provide standard iCal feeds.
+Python scrapers for extracting events from various venues that don't provide standard iCal feeds.
+
+## Scraper Libraries (`lib/`)
+
+Reusable base classes for common calendar platforms:
+
+### `lib/elfsight.py` - Elfsight Event Calendar
+For sites using the [Elfsight Event Calendar](https://elfsight.com/event-calendar-widget/) widget.
+
+```python
+from scrapers.lib.elfsight import ElfsightCalendarScraper
+
+class MySiteScraper(ElfsightCalendarScraper):
+    name = "My Site Events"
+    domain = "mysite.com"
+    widget_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # From page source
+    source_page = "https://mysite.com/events"
+
+if __name__ == '__main__':
+    MySiteScraper.main()
+```
+
+To find the widget_id, inspect the page source and look for `elfsight-app-` or `eapps-event-calendar-` followed by a UUID.
+
+CLI options: `--location`, `--type`, `--list-locations`, `--list-types`, `--months`
+
+### `lib/cityspark.py` - CitySpark Calendars
+For sites using CitySpark (e.g., Bohemian, Press Democrat).
+
+### `lib/base.py` - Base Scraper
+Abstract base class for all scrapers with common ICS generation.
 
 ## Scrapers
 
@@ -29,6 +59,24 @@ Copperfield's Books (multiple locations)
 - Events: Author readings, book signings, kids events
 - Locations: Petaluma, Sebastopol, Healdsburg, San Rafael, Napa, Calistoga, Montgomery Village
 - Method: Drupal HTML scraping
+
+### sportsbasement.py
+Sports Basement Community Events (Bay Area chain)
+- URL: https://shop.sportsbasement.com/pages/calendar
+- Events: Run clubs, bike rides, fitness classes, ski events, community events
+- Locations: Santa Rosa, Novato, Berkeley, Presidio, and 13 other Bay Area stores
+- Method: Elfsight calendar widget API (uses `lib/elfsight.py`)
+
+```bash
+# List locations
+python sportsbasement.py --list-locations
+
+# Santa Rosa events
+python sportsbasement.py --location "Santa Rosa" -o sportsbasement.ics
+
+# Filter by event type
+python sportsbasement.py --location "Santa Rosa" --type "Run Events"
+```
 
 ## Usage
 
