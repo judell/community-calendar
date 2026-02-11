@@ -243,7 +243,7 @@
           start_time: (submittedData?.date || '') + 'T' + (submittedData?.time || '00:00') + ':00',
           end_time: submittedData?.endTime ? (submittedData?.date || '') + 'T' + submittedData.endTime + ':00' : null,
           location: submittedData?.location,
-          description: submittedData?.description,
+          description: $props.event?.transcript ? (submittedData?.description || '') + '\n\nTranscribed audio:\n' + $props.event.transcript : submittedData?.description,
           url: $props.event?.url || null,
           rrule: rruleFrequency !== 'none' ? window.buildRRule(rruleFrequency, rruleDays, rruleOrdinal, rruleMonthDay) : null
         }}" />
