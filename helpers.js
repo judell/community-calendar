@@ -491,9 +491,25 @@ function getOrdinalWeekday(dateStr) {
 
 // Detect recurrence patterns in text — accepts multiple strings, returns first match
 function detectRecurrence() {
-  for (var i = 0; i < arguments.length; i++) {
-    var result = _detectRecurrenceInText(arguments[i]);
-    if (result) return result;
+  var allArgs = arguments;
+  for (var i = 0; i < allArgs.length; i++) {
+    var result = _detectRecurrenceInText(allArgs[i]);
+    if (result) {
+      // If WEEKLY with no days, scan ALL arguments for a day name
+      if (result.frequency === 'WEEKLY' && result.days.length === 0) {
+        var dayMap = { sunday: 'SU', monday: 'MO', tuesday: 'TU', wednesday: 'WE', thursday: 'TH', friday: 'FR', saturday: 'SA' };
+        for (var j = 0; j < allArgs.length; j++) {
+          if (allArgs[j]) {
+            var dayMatch = allArgs[j].toLowerCase().match(/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)s?\b/);
+            if (dayMatch) {
+              result.days = [dayMap[dayMatch[1]]];
+              break;
+            }
+          }
+        }
+      }
+      return result;
+    }
   }
   return null;
 }
