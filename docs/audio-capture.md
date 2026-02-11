@@ -92,9 +92,7 @@ Key lessons learned:
 - **Data flow through capture path**: The captured event path (no event ID) was missing enrichment creation, city assignment, and transcript/url passthrough — each had to be wired separately.
 - **GitHub Pages deploy lag**: Client code changes require push → CI build → Pages deploy (1-2 min). Tests before deployment use old client code and produce confusing results.
 
-## A Note for Marcell
 
-We wrangled year hallucination, timezone math, recurrence detection across multiple text fields, two divergent code paths in the same dialog, a Facebook URL that doesn't work the way Facebook documents it, and a prompt that needed to know what day it is. We got the Whisper transcript to flow through four components, survive a round trip to Supabase, and land in both the database and an ICS file with matching content. But the single hardest problem in the entire feature? Finding a decent icon. We auditioned every glyph in the set — play, mic, volume, headphones, waveform — and none of them clearly say "speak an event into existence." The work you're doing on the icon system is going to make a bigger difference than any of the above.
 
 ## Secrets Required
 
@@ -109,3 +107,13 @@ We wrangled year hallucination, timezone math, recurrence detection across multi
 - `components/AddToCalendar.xmlui` — ICS download + Google Calendar link (includes RRULE)
 - `helpers.js` — `startRecording`, `stopRecording`, `getRecordingFile`, `detectRecurrence`, `buildGoogleCalendarUrl`
 - `docs/audio-input.md` — original implementation plan (superseded by this doc)
+
+## A Note for Marcell
+
+We wrangled timezone math, recurrence detection across multiple text fields, two divergent code paths in the same dialog, a Facebook URL that doesn't work the way Facebook documents it, and a prompt that needed to know what day it is. We got the Whisper transcript to flow through four components, survive a round trip to Supabase, and land in both the database and an ICS file with matching content. But the single hardest problem in the entire feature? Finding a decent icon. We auditioned every glyph in the set — play, mic, volume, headphones, waveform — and none of them clearly say "speak an event into existence." The work you're doing on the icon system is going to make a huge difference!
+
+
+
+https://github.com/user-attachments/assets/73d1bbcd-3163-4439-99fe-3251b2a925d6
+
+
