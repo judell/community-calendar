@@ -187,6 +187,7 @@ async function commitEvent(
       location: event.location || null,
       description: event.description || null,
       url: event.url || null,
+      city: event.city || null,
       source: "poster_capture",
       source_uid: sourceUid,
       transcript: transcript || null,

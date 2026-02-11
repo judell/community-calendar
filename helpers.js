@@ -501,15 +501,17 @@ function detectRecurrence() {
 function _detectRecurrenceInText(text) {
   if (!text) return null;
   const lower = text.toLowerCase();
-  // Match "every Monday", "every Wednesday", etc.
-  const everyDay = lower.match(/every\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/);
+  // Match "every Monday", "on Mondays", "every Wednesday", "on Wednesdays", etc.
+  const everyDay = lower.match(/(?:every|on)\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)s?/);
   if (everyDay) {
     const dayMap = { sunday: 'SU', monday: 'MO', tuesday: 'TU', wednesday: 'WE', thursday: 'TH', friday: 'FR', saturday: 'SA' };
     return { frequency: 'WEEKLY', days: [dayMap[everyDay[1]]] };
   }
-  // Match "weekly", "every week"
+  // Match "weekly", "every week" — also look for a day name in the same text
   if (/\bevery\s+week\b|\bweekly\b/.test(lower)) {
-    return { frequency: 'WEEKLY', days: [] };
+    const dayMap = { sunday: 'SU', monday: 'MO', tuesday: 'TU', wednesday: 'WE', thursday: 'TH', friday: 'FR', saturday: 'SA' };
+    const dayInText = lower.match(/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)s?\b/);
+    return { frequency: 'WEEKLY', days: dayInText ? [dayMap[dayInText[1]]] : [] };
   }
   // Match "1st Tuesday", "2nd and 4th Friday", etc. — extract ordinal + day
   const ordinalMatch = lower.match(/(\d+)(?:st|nd|rd|th)\s+(?:and\s+\d+(?:st|nd|rd|th)\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/);
