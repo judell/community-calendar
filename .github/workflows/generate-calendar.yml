@@ -204,6 +204,7 @@ jobs:
       run: |
         echo "Scraping Petaluma..."
         python scripts/library_intercept.py --location petaluma --output cities/petaluma/library_intercept.ics || true
+        python scrapers/mystic_theatre.py --output cities/petaluma/mystic_theatre.ics || true
       continue-on-error: true
 
     - name: Download Petaluma live feeds and combine ICS
@@ -212,6 +213,8 @@ jobs:
         cd cities/petaluma
         # Tockify feeds
         curl -sL "https://tockify.com/api/feeds/ics/pdaevents" -o petaluma_downtown.ics || true
+        # Aqus Community (MembershipWorks)
+        curl -sL "https://api.membershipworks.com/v2/events?_op=ics&org=15499" -o aqus_community.ics || true
         # Meetup groups
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mindfulnesspetaluma/events/ical/" -o meetup_mindful_petaluma.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/the-rebel-craft-collective/events/ical/" -o meetup_rebel_craft.ics || true

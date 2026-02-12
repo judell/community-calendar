@@ -90,14 +90,47 @@ Searched: `meetup.com/find/?location=us--ca--Petaluma&source=GROUPS`
 
 ## Potential Additional Sources
 
-### Venues to Investigate
+### Major Discovery: Petaluma Chamber of Commerce (GrowthZone API)
 
-| Venue | URL | Status | Notes |
-|-------|-----|--------|-------|
-| Mystic Theatre | mystictheatre.com | No feed | WordPress/SeeTickets, concerts & comedy |
-| Petaluma Arts Center | petalumaartscenter.org | No feed | Squarespace, exhibitions & events |
-| Lagunitas Brewing | lagunitas.com | Age gate | Events on Eventbrite |
-| Hotel Petaluma | | | Hosts yoga meetup, may have own calendar |
+- **URL:** `https://business.petalumachamber.us/api/events`
+- **Format:** XML API (GrowthZone platform)
+- **Events:** 262 events!
+- **Content:** Business events, CPR classes, community events, Butter & Egg Days, Antique Faire
+- **Status:** API available - needs XML-to-ICS scraper
+- **Key events:**
+  - Butter & Egg Days Parade & Festival 2026 (major local festival)
+  - Petaluma Spring Antique Faire
+  - Petaluma Business Connections (recurring)
+  - Petaluma Chamber Women in Business (recurring)
+  - Various CPR/First Aid classes
+
+### Phoenix Theater (Wix - needs scraper)
+
+- **URL:** thephoenixtheater.com
+- **Platform:** Wix
+- **Events:** ~8 events visible
+- **Content:** Punk shows, wrestling, classical orchestra - diverse alternative venue
+- **Status:** Would need custom Wix scraper (site-specific CSS classes)
+- **Sample events:**
+  - Squid Pisser, Right to Remain, Death Certificate, Dread (Feb 13)
+  - Mugslug, Shooting Losers, A.B.P. and the Spites, POOCH (Feb 20)
+  - Phoenix Pro Wrestling (Mar 20)
+  - Young People's Chamber Orchestra (Mar 6)
+
+### Sonoma-Marin Fairgrounds
+
+- **URL:** sonoma-marinfair.org/calendar
+- **Platform:** WordPress + The Events Calendar Pro
+- **Status:** iCal endpoint returns HTML (disabled?)
+- **Note:** May have events but feed not working
+
+### Already Covered Elsewhere
+
+| Venue | Status | Notes |
+|-------|--------|-------|
+| Mystic Theatre | ✅ Scraped | mystic_theatre.py scraper |
+| Lagunitas Brewing | ✅ Via Eventbrite | Events appear in Eventbrite scrape |
+| Hotel Petaluma | Skip | Just event space rentals, no calendar |
 
 ### City/Government
 

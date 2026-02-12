@@ -1,9 +1,43 @@
 # Petaluma, CA - City Discovery Progress
 
 **Started:** 2025-02-12
+**Last Updated:** 2026-02-12
 
 ## Overview
 Petaluma is a city in Sonoma County, CA, about 40 miles north of San Francisco. Population ~60,000.
+
+## Current Status: 343 events from 10 sources
+
+### Implemented Sources
+| Source | Events | Type | Status |
+|--------|--------|------|--------|
+| Petaluma Regional Library | 155 | Scraper | ✅ |
+| Aqus Community | 87 | ICS Feed | ✅ |
+| Petaluma Downtown Association | 46 | Tockify ICS | ✅ |
+| Eventbrite Petaluma | 14 | Scraper | ✅ |
+| Mystic Theatre | 12 | Scraper | ✅ |
+| 5 Meetup groups | 29 | ICS Feeds | ✅ |
+
+### New Discoveries (2026-02-12)
+
+#### Petaluma Chamber of Commerce - MAJOR FIND
+- **API:** `https://business.petalumachamber.us/api/events`
+- **Events:** 262 events!
+- **Platform:** GrowthZone (XML API)
+- **Content:** Business events, Butter & Egg Days, Antique Faire, CPR classes
+- **Status:** Scraper written (`scrapers/growthzone.py`) - needs testing
+
+#### Phoenix Theater
+- **URL:** thephoenixtheater.com  
+- **Events:** ~8 events (punk, wrestling, orchestra)
+- **Platform:** Wix with embedded event widget (cross-origin iframe)
+- **Status:** Would need browser-based scraping - complex
+
+### TODO: Schools & Sports
+- [ ] Petaluma High School athletics/theater
+- [ ] Casa Grande High School athletics/theater
+- [ ] SRJC Petaluma campus events
+- [ ] Youth sports leagues
 
 ## Discovery Status
 

@@ -1,5 +1,26 @@
 # Agent Strategies for Calendar Source Discovery
 
+## Discovery Philosophy
+
+**We want COMPLETE coverage, not curated coverage.** This means:
+
+1. **Long-tail events matter** - A book club with 5 members, a small craft meetup, a neighborhood cleanup - these ARE our target. Don't skip sources just because they seem niche or low-volume.
+
+2. **Schools are gold mines** - High schools and colleges have:
+   - Athletic events (football, basketball, soccer, etc.)
+   - Theater/drama productions  
+   - Band/orchestra concerts
+   - Art shows
+   - Parent nights, open houses
+   - Graduation ceremonies
+   Check: Petaluma High, Casa Grande High, SRJC Petaluma, etc.
+
+3. **Churches and community centers** - Weekly services may not be interesting, but special events (concerts, fundraisers, community dinners) are.
+
+4. **Youth sports leagues** - Little League, youth soccer, swim teams often have public calendars.
+
+5. **If in doubt, add it** - We can always filter later. Missing events is worse than having too many.
+
 ## Quick Reference: Adding a New City
 
 1. **Create city directory** under `cities/` with `feeds.txt` and `SOURCES_CHECKLIST.md`
