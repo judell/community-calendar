@@ -33,6 +33,22 @@ A community event aggregator that scrapes events from multiple sources, combines
 
 ### 1. Event Sources
 
+#### Discovery Philosophy
+
+**We want COMPLETE coverage, not curated coverage.** This means:
+
+- **Long-tail events matter** - A book club with 5 members, a small craft meetup, a neighborhood cleanup - these ARE our target. Don't skip sources just because they seem niche or low-volume.
+
+- **Schools are gold mines** - High schools and colleges have athletics, theater productions, band concerts, art shows, parent nights, and graduations.
+
+- **Churches and community centers** - Special events like concerts, fundraisers, and community dinners are valuable even if weekly services aren't.
+
+- **Youth sports leagues** - Little League, youth soccer, swim teams often have public calendars.
+
+- **If in doubt, add it** - We can always filter later. Missing events is worse than having too many.
+
+#### Source Types
+
 **ICS feeds are preferred** when available. Many venues and organizations publish standard iCalendar feeds that we consume directly:
 - Luther Burbank Center
 - Schulz Museum

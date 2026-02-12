@@ -186,6 +186,26 @@ Searched: `meetup.com/find/?location=us--ca--Petaluma&source=GROUPS`
 
 ---
 
+## Schools Discovery (2026-02-12)
+
+### MaxPreps - High School Athletics
+- **Petaluma High School (Trojans):** https://www.maxpreps.com/ca/petaluma/petaluma-trojans/events/
+- **Casa Grande High School (Gauchos):** https://www.maxpreps.com/ca/petaluma/casa-grande-gauchos/events/
+- **Data format:** JSON-LD SportsEvent schema embedded in page
+- **Content:** Basketball, soccer, baseball, volleyball, etc.
+- **Status:** Scrapeable - structured data available
+
+### Petaluma City Schools (K-8)
+- **URL:** petalumacityschools.org
+- **Status:** Has school tour dates but no general event calendar found
+
+### TODO
+- [ ] Build MaxPreps scraper for both high schools
+- [ ] Check SRJC Petaluma campus events
+- [ ] Youth sports leagues (Little League, AYSO, etc.)
+
+---
+
 ## Overlap with Santa Rosa
 
 Petaluma is part of Sonoma County, which has significant overlap with Santa Rosa sources:
