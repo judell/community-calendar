@@ -112,6 +112,80 @@ python scripts/add_scraper.py myscraper santarosa "My Source Name" --dry-run
 
 ---
 
+## Reusable Scrapers (Generic)
+
+These scrapers work across multiple sites/cities:
+
+### MaxPreps (`scrapers/maxpreps.py`) - High School Athletics
+```bash
+# Known schools:
+python scrapers/maxpreps.py --school petaluma-trojans -o events.ics
+python scrapers/maxpreps.py --school davis-blue-devils -o events.ics
+
+# Any school via URL:
+python scrapers/maxpreps.py --url "https://www.maxpreps.com/ca/davis/davis-blue-devils/events/" --name "Davis High" -o events.ics
+```
+**Technique:** Extracts JSON-LD structured data (schema.org HighSchool with events array)
+
+### GrowthZone (`scrapers/growthzone.py`) - Chamber of Commerce
+```bash
+# Known sites:
+python scrapers/growthzone.py --site petalumachamber -o events.ics
+
+# Any GrowthZone site:
+python scrapers/growthzone.py --url "https://business.example.com/api/events" -o events.ics
+```
+**Technique:** Parses XML API at `/api/events` endpoint
+
+### Eventbrite (`scrapers/eventbrite_scraper.py`)
+```bash
+python scrapers/eventbrite_scraper.py --location ca--petaluma --months 2 > events.ics
+```
+
+### Library Intercept (`scripts/library_intercept.py`)
+```bash
+python scripts/library_intercept.py --location petaluma -o library.ics
+python scripts/library_intercept.py --location santarosa -o library.ics
+```
+
+---
+
+## Platform-Specific Techniques
+
+### MembershipWorks (ICS Feed)
+Look for "Subscribe" dropdown on calendars. Feed URL pattern:
+```
+https://api.membershipworks.com/v2/events?_op=ics&org={ORG_ID}
+```
+Example: Aqus Community in Petaluma
+
+### Tockify (ICS Feed)
+Look for embedded Tockify calendars. Feed URL pattern:
+```
+https://tockify.com/api/feeds/ics/{CALENDAR_ID}
+```
+Example: Petaluma Downtown Association (`pdaevents`)
+
+### SeeTickets Widgets
+Venues using SeeTickets have structured HTML classes:
+- `.title a` - event title
+- `.date` - date string  
+- `.see-showtime`, `.see-doortime` - times
+- `.genre`, `.ages`, `.price` - metadata
+Example: Mystic Theatre (`scrapers/mystic_theatre.py`)
+
+### Wix Events
+Wix sites often embed events in cross-origin iframes from `geteventviewer.com`. These are complex to scrape - consider if the venue has events on Eventbrite instead.
+
+### Squarespace
+Squarespace sites with native Events collections may have ICS at:
+```
+https://example.com/events?format=ical
+```
+But many use custom page layouts without feeds.
+
+---
+
 ## Web Search Discovery Strategy
 
 **Use search engines to find calendar platforms and feeds.** DuckDuckGo is recommended (Google may block automated queries).

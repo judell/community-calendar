@@ -64,6 +64,12 @@ A community event aggregator that scrapes events from multiple sources, combines
 - Cal Theatre
 - Copperfield's Books
 
+**Generic/reusable scrapers** work across multiple sites:
+- `maxpreps.py` - High school athletics (any school)
+- `growthzone.py` - Chamber of Commerce sites
+- `eventbrite_scraper.py` - Eventbrite events by location
+- `library_intercept.py` - Library event calendars
+
 Scrapers are in `scrapers/` and per-city data lives in `cities/<name>/`.
 
 ### 2. ICS Combination
