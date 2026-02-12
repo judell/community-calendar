@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       locations:
-        description: 'Locations to process (comma-separated: santarosa,bloomington,davis or "all")'
+        description: 'Locations to process (comma-separated: santarosa,bloomington,davis,petaluma or "all")'
         required: false
         default: 'all'
       regenerate_only:
@@ -62,7 +62,7 @@ jobs:
       run: |
         INPUT="${{ github.event.inputs.locations }}"
         if [ -z "$INPUT" ] || [ "$INPUT" = "all" ]; then
-          echo "list=santarosa,bloomington,davis" >> $GITHUB_OUTPUT
+          echo "list=santarosa,bloomington,davis,petaluma" >> $GITHUB_OUTPUT
         else
           echo "list=$INPUT" >> $GITHUB_OUTPUT
         fi
@@ -195,6 +195,33 @@ jobs:
       if: contains(steps.locations.outputs.list, 'davis')
       run: |
         python scripts/combine_ics.py --input-dir cities/davis --output cities/davis/combined.ics --name "Davis Community Calendar"
+
+    # ==========================================
+    # Petaluma
+    # ==========================================
+    - name: Scrape Petaluma sources
+      if: contains(steps.locations.outputs.list, 'petaluma') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        echo "Scraping Petaluma..."
+        python scripts/library_intercept.py --location petaluma --output cities/petaluma/library_intercept.ics || true
+      continue-on-error: true
+
+    - name: Download Petaluma live feeds and combine ICS
+      if: contains(steps.locations.outputs.list, 'petaluma')
+      run: |
+        cd cities/petaluma
+        # Tockify feeds
+        curl -sL "https://tockify.com/api/feeds/ics/pdaevents" -o petaluma_downtown.ics || true
+        # Meetup groups
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mindfulnesspetaluma/events/ical/" -o meetup_mindful_petaluma.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/the-rebel-craft-collective/events/ical/" -o meetup_rebel_craft.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/meetup-group-bwkyqavs/events/ical/" -o meetup_candlelight_yoga.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-figure-drawing-meetup-group/events/ical/" -o meetup_figure_drawing.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-marin-brat-pack/events/ical/" -o meetup_brat_pack.ics || true
+        cd ../..
+        # Eventbrite scrape
+        python scrapers/eventbrite_scraper.py --location ca--petaluma --months ${SCRAPE_MONTHS:-2} > cities/petaluma/eventbrite.ics || true
+        python scripts/combine_ics.py --input-dir cities/petaluma --output cities/petaluma/combined.ics --name "Petaluma Community Calendar"
 
     # ==========================================
     # Post-processing (all cities)

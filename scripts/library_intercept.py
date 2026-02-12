@@ -44,6 +44,13 @@ class LibraryScraper(BaseScraper):
             'base_url': 'https://www.bloomingtonlibrary.org/events/list?page=',
             'url_prefix': 'https://www.bloomingtonlibrary.org',
             'timezone': 'America/Indiana/Indianapolis',
+        },
+        'petaluma': {
+            'name': 'Petaluma Regional Library',
+            'domain': 'sonomalibrary.org',
+            'base_url': 'https://events.sonomalibrary.org/events/list?branches%5B99%5D=99&page=',
+            'url_prefix': 'https://events.sonomalibrary.org',
+            'timezone': 'America/Los_Angeles',
         }
     }
 
@@ -163,7 +170,7 @@ class LibraryScraper(BaseScraper):
 def main():
     parser = argparse.ArgumentParser(description='Scrape library events.')
     parser.add_argument('--location', type=str, required=True,
-                        choices=['santarosa', 'bloomington'],
+                        choices=['santarosa', 'bloomington', 'petaluma'],
                         help='Library to scrape')
     parser.add_argument('--output', '-o', type=str, help='Output filename')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
