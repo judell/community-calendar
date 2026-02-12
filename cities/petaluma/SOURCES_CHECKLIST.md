@@ -132,8 +132,13 @@ Searched: `meetup.com/find/?location=us--ca--Petaluma&source=GROUPS`
 
 | Venue | Platform | Events | Notes |
 |-------|----------|--------|-------|
-| Mystic Theatre | SeeTickets/WordPress | 40+ | Concerts, comedy, tribute acts. Structured HTML data. |
-| Aqus Cafe | WordPress/Salient | ~10+ | Community dinners, live music. Has Subscribe button. |
+| Mystic Theatre | SeeTickets/WordPress | 12+ | Concerts, comedy, tribute acts. Structured HTML data - needs scraper. |
+
+### ICS Feeds Discovered (2026-02-12)
+
+| Venue | Feed URL | Events | Notes |
+|-------|----------|--------|-------|
+| **Aqus Community** | `https://api.membershipworks.com/v2/events?_op=ics&org=15499` | **87** | Live music, community dinners, salsa, comedy - all at aqus.com venues |
 
 ---
 

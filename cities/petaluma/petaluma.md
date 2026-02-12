@@ -157,16 +157,36 @@ Petaluma is a city in Sonoma County, CA, about 40 miles north of San Francisco. 
 
 ### Mystic Theatre
 - **URL:** mystictheatre.com/calendar
-- **Platform:** WordPress + SeeTickets widget
-- **Events:** 40+ events (concerts, comedy, tribute acts)
-- **Status:** Scrapeable - HTML has structured event data
-- **Data available:** Title, date, time (doors/show), venue, ticket link, genre
-- **Pagination:** 4 pages of events
-- **Recommendation:** Build scraper - high value venue
+- **Platform:** WordPress + SeeTickets widget (calendar view)
+- **Events:** 12+ events currently visible (Feb-Mar 2026)
+- **Status:** Scrapeable - HTML has well-structured event data
+- **Data available per event:**
+  - Title (`.title a`)
+  - Date (`.date`) - e.g. "Thu Feb 12"
+  - Show time (`.see-showtime`)
+  - Doors time (`.see-doortime`)
+  - Venue (`.venue`) - includes room info like "Red Bull Room"
+  - Genre (`.genre`) - Stand-Up, DJ/Dance, Jazz, Alternative, etc.
+  - Ages/Price (`.ages`, `.price`) - e.g. "21+, $18.75-$25.00"
+  - Ticket URL (SeeTickets link)
+  - Header/Presenter (`.header`) - e.g. "Grindhouse Comedy Presents"
+- **Sample events found:**
+  - Jackie Kashian (Stand-Up) - Thu Feb 12
+  - Fantasías Valentine's Day Party! (DJ/Dance) - Sat Feb 14
+  - The English Beat (Alternative) - Fri Feb 20
+  - Fleetwood Macramé (Tribute) - Sat Feb 28
+- **No pagination needed** - single calendar view shows all upcoming
+- **Recommendation:** Build scraper - high value concert venue
 
-### Aqus Cafe (aqus.com/calendar)
+### Aqus Community (aqus.com/calendar) ✅
 - **URL:** aqus.com/calendar
-- **Platform:** WordPress (Salient theme)
-- **Events:** Community dinners, live music
-- **Status:** Has Subscribe dropdown - may have ICS feed
-- **Recommendation:** Investigate further - community venue with regular events
+- **Platform:** MembershipWorks calendar
+- **Events:** 87 events! Community dinners, live music, salsa, comedy, nonprofit gatherings
+- **ICS Feed:** `https://api.membershipworks.com/v2/events?_op=ics&org=15499`
+- **Status:** READY - ICS feed works perfectly
+- **Sample events:**
+  - Gen X Community Dinner
+  - R. Moone with Billy Bramblett
+  - Petaluma Prom: A Valentine's Blast from the Past
+  - An Afternoon of Jewish Comedy!
+  - Salsa Dance
