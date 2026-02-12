@@ -2,7 +2,20 @@
 
 ## Currently Implemented
 
-*None yet - city in discovery phase*
+| Source | Type | Events | Status |
+|--------|------|--------|--------|
+| Petaluma Downtown Association | Tockify ICS | 46 | ✅ Ready |
+| Aqus Community | MembershipWorks ICS | 87 | ✅ Ready |
+| Petaluma Regional Library | Scraper | 155 | ✅ Ready |
+| Mystic Theatre | Scraper | 12 | ✅ Ready |
+| Eventbrite Petaluma | Scraper | 14 | ✅ Ready |
+| Meetup: Mindful Petaluma | ICS | 10 | ✅ Ready |
+| Meetup: Candlelight Yoga | ICS | 10 | ✅ Ready |
+| Meetup: Rebel Craft Collective | ICS | 6 | ✅ Ready |
+| Meetup: Sonoma-Marin Brat Pack | ICS | 2 | ✅ Ready |
+| Meetup: Figure Drawing | ICS | 1 | ✅ Ready |
+
+**Total: 343 unique events**
 
 ---
 
@@ -130,9 +143,7 @@ Searched: `meetup.com/find/?location=us--ca--Petaluma&source=GROUPS`
 
 ### Venues Worth Scraping
 
-| Venue | Platform | Events | Notes |
-|-------|----------|--------|-------|
-| Mystic Theatre | SeeTickets/WordPress | 12+ | Concerts, comedy, tribute acts. Structured HTML data - needs scraper. |
+*All identified venues have been scraped or have ICS feeds.*
 
 ### ICS Feeds Discovered (2026-02-12)
 

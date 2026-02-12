@@ -66,6 +66,15 @@ SOURCE_NAMES = {
     'bsquare_misc_civic': 'Bloomington Civic Events',
     'bsquare_critical_mass': 'Critical Mass Bloomington',
     'bsquare_bptc': 'Bloomington Public Transit',
+    # Petaluma
+    'petaluma_downtown': 'Petaluma Downtown Association',
+    'meetup_mindful_petaluma': 'Meetup: Mindful Petaluma',
+    'meetup_rebel_craft': 'Meetup: Rebel Craft Collective',
+    'meetup_candlelight_yoga': 'Meetup: Candlelight Yoga Petaluma',
+    'meetup_figure_drawing': 'Meetup: Petaluma Figure Drawing',
+    'meetup_brat_pack': 'Meetup: Sonoma-Marin Brat Pack',
+    'aqus_community': 'Aqus Community',
+    'mystic_theatre': 'Mystic Theatre',
 }
 
 # Fallback URLs for sources that don't provide event URLs
