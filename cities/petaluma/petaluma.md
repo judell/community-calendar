@@ -64,8 +64,13 @@ Petaluma is a city in Sonoma County, CA, about 40 miles north of San Francisco. 
 
 ### Phase 4: Integration
 - [ ] Add to workflow
-- [ ] Add to combine_ics.py
+- [ ] Add to combine_ics.py  
 - [ ] Add to index.html
+
+### Phase 5: Additional Discovery
+- [x] Search for other Tockify calendars - Found Petaluma Wildlife Museum (81 events but mostly private)
+- [x] Check Petaluma Historical Museum - No feed available
+- [x] Check Petaluma Wetlands Alliance - No feed available
 
 ---
 
@@ -117,3 +122,31 @@ Petaluma is a city in Sonoma County, CA, about 40 miles north of San Francisco. 
    - Some Meetup groups serve both cities
    - Sonoma County Library already scraped for Santa Rosa
    - Consider sharing sources vs dedicated Petaluma city
+
+5. **Additional Source Search**
+   - Petaluma Wildlife Museum has 81 events but mostly school tours/private
+   - Petaluma Historical Museum has events but no feed
+   - Petaluma Wetlands Alliance does regular walks but no feed
+
+---
+
+## Summary - Ready to Implement
+
+### High-Value Sources (98+ events total)
+
+| Source | Type | Events | Priority |
+|--------|------|--------|----------|
+| Petaluma Downtown Association | Tockify | 71 | HIGH |
+| Eventbrite Petaluma | Scraper | 14 | HIGH |
+| mindfulnesspetaluma | Meetup | 10 | MEDIUM |
+| meetup-group-bwkyqavs (Yoga) | Meetup | 10 | MEDIUM |
+| the-rebel-craft-collective | Meetup | 6 | MEDIUM |
+| sonoma-marin-brat-pack | Meetup | 2 | LOW |
+| petaluma-figure-drawing | Meetup | 1 | LOW |
+
+### Next Steps
+1. Add Tockify feed to workflow
+2. Add Eventbrite scraper command
+3. Add 5 Meetup ICS feeds
+4. Add SOURCE_NAMES to combine_ics.py
+5. Add Petaluma to index.html city picker

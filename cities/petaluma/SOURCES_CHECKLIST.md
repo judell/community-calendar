@@ -95,6 +95,28 @@ Searched: `meetup.com/find/?location=us--ca--Petaluma&source=GROUPS`
 
 ---
 
+## Additional Discoveries (2025-02-12)
+
+### Petaluma Wildlife Museum (Tockify)
+- **URL:** `https://tockify.com/api/feeds/ics/petaluma.wildlife.musuem`
+- **Events:** 81 events
+- **Content:** Mostly school tours, birthday parties, Open Houses
+- **Recommendation:** Skip - not public community events
+
+### Petaluma Historical Library & Museum
+- **URL:** petalumamuseum.com/events/calendar-of-events
+- **Status:** No discoverable feed
+- **Content:** Concerts, guest speakers (ticketed events)
+- **Recommendation:** Would need scraper
+
+### Petaluma Wetlands Alliance
+- **URL:** petalumawetlands.org
+- **Content:** Regular nature walks (4th Saturday, 2nd Saturday)
+- **Status:** Divi WordPress, no calendar feed
+- **Recommendation:** Manual tracking or custom scraper
+
+---
+
 ## Non-Starters
 
 | Source | Reason |
@@ -103,6 +125,8 @@ Searched: `meetup.com/find/?location=us--ca--Petaluma&source=GROUPS`
 | Petaluma Arts Center | Squarespace, no easy feed |
 | Various Marin-based Meetup groups | Too far from Petaluma |
 | Mindful-Monday Meetup | Virtual conference calls, not local |
+| Petaluma Wildlife Museum | School tours/private events, not public |
+| Mystic Theatre | No feed, needs scraper, may duplicate Eventbrite |
 
 ---
 
