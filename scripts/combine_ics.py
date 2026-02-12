@@ -75,6 +75,8 @@ SOURCE_NAMES = {
     'meetup_brat_pack': 'Meetup: Sonoma-Marin Brat Pack',
     'aqus_community': 'Aqus Community',
     'mystic_theatre': 'Mystic Theatre',
+    'maxpreps_petaluma_high': 'Petaluma High School Athletics',
+    'maxpreps_casa_grande': 'Casa Grande High School Athletics',
 }
 
 # Fallback URLs for sources that don't provide event URLs
