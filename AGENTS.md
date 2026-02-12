@@ -31,7 +31,9 @@
    - Add Eventbrite scraper command
    - Add combine_ics.py step
 5. **Update `combine_ics.py`** - add SOURCE_NAMES entries for new Meetup groups
-6. **Add city to `index.html`** - add entry to `cityNames` map and a Button in `Main.xmlui`'s city picker
+6. **Add city to UI** - TWO places must be updated:
+   - `index.html`: add entry to `cityNames` map (e.g., `petaluma: 'Petaluma'`)
+   - `Main.xmlui`: add a Button in the city picker VStack (search for "Choose your city")
 7. **Update SOURCES_CHECKLIST.md** - document findings, track pending sources
 8. **Commit and push** - workflow runs daily or trigger manually
 
