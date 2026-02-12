@@ -134,8 +134,13 @@ Searched: `meetup.com/find/?location=us--ca--Petaluma&source=GROUPS`
 
 Petaluma is part of Sonoma County, which has significant overlap with Santa Rosa sources:
 
-1. **Sonoma County Library** - Already scraped, includes Petaluma branch
-2. **Regional Meetup groups** - Some serve both cities
+1. **Sonoma County Library** - Already scraped, includes Petaluma branch (245+ Petaluma mentions!)
+2. **Regional Meetup groups** - Some serve both cities (e.g., shutupandwritewinecountry)
 3. **Eventbrite Sonoma County** - May include Petaluma events
 
 **Decision:** Create dedicated Petaluma city with focused local sources.
+
+**Note:** The library_intercept.py scraper for Santa Rosa already captures Petaluma Regional Library events. For Petaluma city, we could either:
+- Re-run the same scraper (events are already mixed)
+- Filter the Santa Rosa output for Petaluma locations
+- Create a separate Petaluma library configuration (probably overkill)
