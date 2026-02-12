@@ -150,3 +150,23 @@ Petaluma is a city in Sonoma County, CA, about 40 miles north of San Francisco. 
 3. Add 5 Meetup ICS feeds
 4. Add SOURCE_NAMES to combine_ics.py
 5. Add Petaluma to index.html city picker
+
+---
+
+## Additional Venues Investigated (2025-02-12)
+
+### Mystic Theatre
+- **URL:** mystictheatre.com/calendar
+- **Platform:** WordPress + SeeTickets widget
+- **Events:** 40+ events (concerts, comedy, tribute acts)
+- **Status:** Scrapeable - HTML has structured event data
+- **Data available:** Title, date, time (doors/show), venue, ticket link, genre
+- **Pagination:** 4 pages of events
+- **Recommendation:** Build scraper - high value venue
+
+### Aqus Cafe (aqus.com/calendar)
+- **URL:** aqus.com/calendar
+- **Platform:** WordPress (Salient theme)
+- **Events:** Community dinners, live music
+- **Status:** Has Subscribe dropdown - may have ICS feed
+- **Recommendation:** Investigate further - community venue with regular events

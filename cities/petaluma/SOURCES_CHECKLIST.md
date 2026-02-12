@@ -126,7 +126,14 @@ Searched: `meetup.com/find/?location=us--ca--Petaluma&source=GROUPS`
 | Various Marin-based Meetup groups | Too far from Petaluma |
 | Mindful-Monday Meetup | Virtual conference calls, not local |
 | Petaluma Wildlife Museum | School tours/private events, not public |
-| Mystic Theatre | No feed, needs scraper, may duplicate Eventbrite |
+| Mystic Theatre | Scrapeable (SeeTickets widget) - 40+ events, worth building scraper |
+
+### Venues Worth Scraping
+
+| Venue | Platform | Events | Notes |
+|-------|----------|--------|-------|
+| Mystic Theatre | SeeTickets/WordPress | 40+ | Concerts, comedy, tribute acts. Structured HTML data. |
+| Aqus Cafe | WordPress/Salient | ~10+ | Community dinners, live music. Has Subscribe button. |
 
 ---
 
