@@ -6,8 +6,12 @@ MaxPreps embeds JSON-LD structured data (schema.org HighSchool with events)
 in their school pages. This scraper extracts that data.
 
 Usage:
+    # Using known school shortnames:
     python scrapers/maxpreps.py --school petaluma-trojans --output events.ics
     python scrapers/maxpreps.py --school casa-grande-gauchos --output events.ics
+    
+    # Using any MaxPreps school URL:
+    python scrapers/maxpreps.py --url "https://www.maxpreps.com/ca/davis/davis-blue-devils/events/" --name "Davis High" -o davis.ics
 """
 
 import sys
@@ -28,8 +32,10 @@ from lib.utils import DEFAULT_HEADERS
 
 PACIFIC = ZoneInfo('America/Los_Angeles')
 
-# Known schools
+# Known schools - add more as needed
+# URL pattern: https://www.maxpreps.com/{state}/{city}/{school-mascot}/events/
 KNOWN_SCHOOLS = {
+    # Petaluma
     'petaluma-trojans': {
         'name': 'Petaluma High School',
         'url': 'https://www.maxpreps.com/ca/petaluma/petaluma-trojans/events/',
@@ -39,6 +45,34 @@ KNOWN_SCHOOLS = {
         'name': 'Casa Grande High School', 
         'url': 'https://www.maxpreps.com/ca/petaluma/casa-grande-gauchos/events/',
         'location': 'Casa Grande High School, 333 Casa Grande Rd, Petaluma, CA 94954',
+    },
+    # Santa Rosa
+    'santa-rosa-panthers': {
+        'name': 'Santa Rosa High School',
+        'url': 'https://www.maxpreps.com/ca/santa-rosa/santa-rosa-panthers/events/',
+        'location': 'Santa Rosa High School, 1235 Mendocino Ave, Santa Rosa, CA',
+    },
+    'montgomery-vikings': {
+        'name': 'Montgomery High School',
+        'url': 'https://www.maxpreps.com/ca/santa-rosa/montgomery-vikings/events/',
+        'location': 'Montgomery High School, 1250 Hahman Dr, Santa Rosa, CA',
+    },
+    # Davis
+    'davis-blue-devils': {
+        'name': 'Davis Senior High School',
+        'url': 'https://www.maxpreps.com/ca/davis/davis-blue-devils/events/',
+        'location': 'Davis Senior High School, 315 W 14th St, Davis, CA',
+    },
+    # Bloomington
+    'bloomington-south-panthers': {
+        'name': 'Bloomington South High School',
+        'url': 'https://www.maxpreps.com/in/bloomington/bloomington-south-panthers/events/',
+        'location': 'Bloomington South High School, 1965 S Walnut St, Bloomington, IN',
+    },
+    'bloomington-north-cougars': {
+        'name': 'Bloomington North High School',
+        'url': 'https://www.maxpreps.com/in/bloomington/bloomington-north-cougars/events/',
+        'location': 'Bloomington North High School, 10750 N Kinser Pike, Bloomington, IN',
     },
 }
 
