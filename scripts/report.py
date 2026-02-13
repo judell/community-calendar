@@ -67,13 +67,22 @@ def parse_feeds_file(feeds_path: str) -> list[dict]:
                 if not line or line.startswith('#'):
                     continue
                 
-                # Determine if URL or local file
-                if line.startswith('http://') or line.startswith('https://'):
-                    name = extract_feed_name_from_url(line)
-                    feeds.append({'type': 'url', 'path': line, 'name': name})
+                # Handle "URL | Source Name" format - extract URL and optional name
+                if ' | ' in line:
+                    url, source_name = line.split(' | ', 1)
+                    url = url.strip()
+                    source_name = source_name.strip()
                 else:
-                    name = extract_feed_name_from_path(line)
-                    feeds.append({'type': 'file', 'path': line, 'name': name})
+                    url = line
+                    source_name = None
+                
+                # Determine if URL or local file
+                if url.startswith('http://') or url.startswith('https://'):
+                    name = source_name or extract_feed_name_from_url(url)
+                    feeds.append({'type': 'url', 'path': url, 'name': name})
+                else:
+                    name = source_name or extract_feed_name_from_path(url)
+                    feeds.append({'type': 'file', 'path': url, 'name': name})
     except FileNotFoundError:
         pass
     return feeds
