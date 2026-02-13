@@ -1,6 +1,39 @@
 # Community Calendar Curator Guide
 
-This guide helps curators discover and add event sources for new or existing cities.
+## Overview
+
+Public events are trapped in information silos. The library posts to their website, the YMCA uses Google Calendar, the theater uses Eventbrite, Meetup groups have their own pages. Anyone wanting to know "what's happening this weekend?" must check a dozen different sites.
+
+Existing local aggregators typically expect event producers to "submit" events via a web form. This means producers must submit to several aggregators to reach their audience—tedious and error-prone. Worse, if event details change, producers must update each aggregator separately.
+
+This project takes a different approach: **event producers are the authoritative sources for their own events**. They publish once to their own calendar, and individuals and aggregators pull from those sources. When details change, the change propagates automatically. This is how RSS transformed blogging, and iCalendar can do the same for events.
+
+The gold standard is **iCalendar (ICS) feeds**—a format that machines can read, merge, and republish. If you're an event producer and your platform supports ICS export, use it. But ICS isn't the only way. The real requirement is to **embrace the open web**: publish your events in a way that's scrapable and linkable. A clean HTML page with structured event data works. A public Google Calendar works. A Meetup group works. What doesn't work: events locked in Facebook, behind login walls, or buried in PDFs and images.
+
+## The Curator Role
+
+A **curator** builds and maintains the calendar for their community. You don't create events—you discover and connect existing event sources:
+
+- Find organizations publishing calendars
+- Test that feeds work and contain relevant events
+- Add working feeds to the aggregator
+- Filter out noise (events too far away, duplicates, off-topic)
+
+The goal is a comprehensive, low-maintenance calendar that updates automatically as source organizations post their events.
+
+## What Makes a Good Source
+
+**Best**: Native ICS feeds (Meetup groups, Tockify calendars, Google Calendar public links). These "just work" and stay current automatically. Unfortunately, native ICS is rarer than it used to be.
+
+**Fallback 1 — Platform APIs**: Some platforms (Eventbrite, LibCal) offer APIs or structured data that scrapers can convert to ICS. The project includes scrapers for common platforms.
+
+**Fallback 2 — Custom scrapers**: For sites with no feed or API, an LLM can help write a scraper. Describe the calendar page structure to Claude or ChatGPT, and it can generate BeautifulSoup or Puppeteer code to extract events.
+
+**Skip**: Facebook events (API restrictions), Cloudflare-protected sites, PDFs and images.
+
+When you find a source that needs a scraper, document it in the city's `SOURCES_CHECKLIST.md` with the URL and any notes about the page structure. A developer (or you, with LLM assistance) can then build the scraper.
+
+---
 
 ## Quick Start
 
