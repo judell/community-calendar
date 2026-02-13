@@ -31,7 +31,7 @@ The goal is a comprehensive, low-maintenance calendar that updates automatically
 
 **Fallback 3 — Event posters**: For events promoted only via images (posters, flyers), an LLM can extract event details from a photo. Point your phone at a poster, and the system can parse it into calendar data.
 
-<!-- TODO: Add video demo of capturing event poster -->
+<!-- Video: ~/Desktop/event-poster-capture.mp4 -->
 
 **Skip**: Facebook events (API restrictions), Cloudflare-protected sites.
 
