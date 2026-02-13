@@ -34,8 +34,9 @@
 6. **Add city to UI** - TWO places must be updated:
    - `index.html`: add entry to `cityNames` map (e.g., `petaluma: 'Petaluma'`)
    - `Main.xmlui`: add a Button in the city picker VStack (search for "Choose your city")
-7. **Update SOURCES_CHECKLIST.md** - document findings, track pending sources
-8. **Commit and push** - workflow runs daily or trigger manually
+7. **Add city to load-events function** - add URL entry to `EVENTS_URLS` in `supabase/functions/load-events/index.ts`, then redeploy the edge function
+8. **Update SOURCES_CHECKLIST.md** - document findings, track pending sources
+9. **Commit and push** - workflow runs daily or trigger manually
 
 ## App Architecture
 
