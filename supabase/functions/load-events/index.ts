@@ -8,6 +8,7 @@ const corsHeaders = {
 // Events JSON URLs by city
 const EVENTS_URLS: Record<string, string> = {
   santarosa: "https://judell.github.io/community-calendar/cities/santarosa/events.json",
+  petaluma: "https://judell.github.io/community-calendar/cities/petaluma/events.json",
   bloomington: "https://judell.github.io/community-calendar/cities/bloomington/events.json",
   davis: "https://judell.github.io/community-calendar/cities/davis/events.json",
 };
