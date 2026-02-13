@@ -4,18 +4,24 @@
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
-| Petaluma Downtown Association | Tockify ICS | 46 | ✅ Ready |
+| Petaluma Downtown Association | Tockify ICS | 71 | ✅ Ready |
 | Aqus Community | MembershipWorks ICS | 87 | ✅ Ready |
 | Petaluma Regional Library | Scraper | 155 | ✅ Ready |
+| Petaluma Chamber of Commerce | GrowthZone Scraper | 80 | ✅ Ready |
 | Mystic Theatre | Scraper | 12 | ✅ Ready |
 | Eventbrite Petaluma | Scraper | 14 | ✅ Ready |
+| Petaluma High School Athletics | MaxPreps Scraper | 9 | ✅ Ready |
+| Casa Grande High School Athletics | MaxPreps Scraper | 8 | ✅ Ready |
 | Meetup: Mindful Petaluma | ICS | 10 | ✅ Ready |
 | Meetup: Candlelight Yoga | ICS | 10 | ✅ Ready |
 | Meetup: Rebel Craft Collective | ICS | 6 | ✅ Ready |
 | Meetup: Sonoma-Marin Brat Pack | ICS | 2 | ✅ Ready |
 | Meetup: Figure Drawing | ICS | 1 | ✅ Ready |
+| Meetup: Petaluma Salon | ICS | 1 | ✅ Ready |
+| Meetup: Book & Brew Club | ICS | 1 | ✅ Ready |
+| Meetup: Active 20-30 | ICS | 2 | ✅ Ready |
 
-**Total: 343 unique events**
+**Total: ~430+ unique events**
 
 ---
 
