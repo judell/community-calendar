@@ -77,6 +77,10 @@ SOURCE_NAMES = {
     'mystic_theatre': 'Mystic Theatre',
     'maxpreps_petaluma_high': 'Petaluma High School Athletics',
     'maxpreps_casa_grande': 'Casa Grande High School Athletics',
+    'petaluma_chamber': 'Petaluma Chamber of Commerce',
+    'meetup_petaluma_salon': 'Meetup: Petaluma Salon',
+    'meetup_book_brew': 'Meetup: Petaluma Book & Brew Club',
+    'meetup_active_20_30': 'Meetup: Petaluma Active 20-30',
 }
 
 # Fallback URLs for sources that don't provide event URLs

@@ -174,8 +174,7 @@ def main():
         parser.error('Either --site or --url is required')
     
     scraper = GrowthZoneScraper(config)
-    events = scraper.fetch_events()
-    scraper.write_ics(events, args.output)
+    scraper.run(args.output)
 
 
 if __name__ == '__main__':

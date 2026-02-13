@@ -208,6 +208,8 @@ jobs:
         # High school athletics
         python scrapers/maxpreps.py --school petaluma-trojans --output cities/petaluma/maxpreps_petaluma_high.ics || true
         python scrapers/maxpreps.py --school casa-grande-gauchos --output cities/petaluma/maxpreps_casa_grande.ics || true
+        # Petaluma Chamber of Commerce (GrowthZone)
+        python scrapers/growthzone.py --site petalumachamber --output cities/petaluma/petaluma_chamber.ics || true
       continue-on-error: true
 
     - name: Download Petaluma live feeds and combine ICS
@@ -224,6 +226,10 @@ jobs:
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/meetup-group-bwkyqavs/events/ical/" -o meetup_candlelight_yoga.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-figure-drawing-meetup-group/events/ical/" -o meetup_figure_drawing.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-marin-brat-pack/events/ical/" -o meetup_brat_pack.ics || true
+        # Additional Meetup groups
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-salon/events/ical/" -o meetup_petaluma_salon.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-book-and-brew-club/events/ical/" -o meetup_book_brew.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-active-20-30/events/ical/" -o meetup_active_20_30.ics || true
         cd ../..
         # Eventbrite scrape
         python scrapers/eventbrite_scraper.py --location ca--petaluma --months ${SCRAPE_MONTHS:-2} > cities/petaluma/eventbrite.ics || true
