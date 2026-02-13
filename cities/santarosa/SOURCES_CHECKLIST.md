@@ -181,3 +181,32 @@ The Bohemian, Press Democrat, and NorCal Public Media calendars all use **CitySp
 - Many events are wine/food related
 - Strong outdoor recreation community (hiking, biking)
 - Arts scene centered around downtown Santa Rosa
+
+## Direct Scraper Sources (Added 2026-02-13)
+
+### Sebastopol Center for the Arts (SebArts)
+| Field | Value |
+|-------|-------|
+| URL | https://www.sebarts.org/classes-and-events |
+| Platform | Squarespace |
+| Scraper | `scrapers/sebarts.py` |
+| Output | `cities/santarosa/sebarts.ics` |
+| Events Found | 29 (as of 2026-02-13) |
+
+**Note:** SebArts events were already appearing via the Bohemian (CitySpark) feed, but this direct scraper provides:
+- Faster updates (no dependency on Bohemian's crawl schedule)
+- All events (not just those Bohemian editors select)
+- More reliable event details
+
+### Sebastopol Documentary Film Festival
+| Field | Value |
+|-------|-------|
+| URL | https://www.sebastopolfilm.org/ |
+| Platform | Squarespace (static pages) |
+| Status | No dedicated events feed needed |
+
+**Note:** SDFF events appear on SebArts calendar (they're hosted there). For example:
+- SDFF 2026 Launch Party (Feb 20, 2026) shows on SebArts as "SDFF Program LAUNCH/ Q&A"
+- Festival dates: April 9-12, 2026
+
+The film festival doesn't maintain its own events feed - it's more of a promotional site. Their events are listed through SebArts and may also appear in Bohemian/Press Democrat coverage.

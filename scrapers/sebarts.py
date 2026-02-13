@@ -52,13 +52,17 @@ class SebArtsScraper(BaseScraper):
     def _parse_event_links(self, html_content: str) -> list[dict]:
         """Parse event links from the main page."""
         soup = BeautifulSoup(html_content, 'html.parser')
+        seen_urls = set()
         events = []
 
         for event_elem in soup.find_all('a', href=re.compile(r'/classes-lectures/')):
-            events.append({
-                'url': urljoin(self.BASE_URL, event_elem['href']),
-                'title': event_elem.text.strip()
-            })
+            url = urljoin(self.BASE_URL, event_elem['href'])
+            if url not in seen_urls:
+                seen_urls.add(url)
+                events.append({
+                    'url': url,
+                    'title': event_elem.text.strip()
+                })
 
         return events
 
