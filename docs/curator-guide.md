@@ -8,7 +8,7 @@ Existing local aggregators typically expect event producers to "submit" events v
 
 This project takes a different approach: **event producers are the authoritative sources for their own events**. They publish once to their own calendar, and individuals and aggregators pull from those sources. When details change, the change propagates automatically. This is how RSS transformed blogging, and iCalendar can do the same for events.
 
-The gold standard is **iCalendar (ICS) feeds**—a format that machines can read, merge, and republish. If you're an event producer and your platform supports ICS export, use it. But ICS isn't the only way. The real requirement is to **embrace the open web**: publish your events in a way that's scrapable and linkable. A clean HTML page with structured event data works. A public Google Calendar works. A Meetup group works. What doesn't work: events locked in Facebook, behind login walls, or buried in PDFs and images.
+The gold standard is **iCalendar (ICS) feeds**—a format that machines can read, merge, and republish. If you're an event producer and your platform supports ICS export, use it. But ICS isn't the only way. The real requirement is to **embrace the open web**: publish your events in a way that's scrapable and linkable. A clean HTML page with structured event data works. A public Google Calendar works. A Meetup group works. What doesn't work: events locked in Facebook or behind login walls.
 
 ## The Curator Role
 
@@ -29,7 +29,11 @@ The goal is a comprehensive, low-maintenance calendar that updates automatically
 
 **Fallback 2 — Custom scrapers**: For sites with no feed or API, an LLM can help write a scraper. Describe the calendar page structure to Claude or ChatGPT, and it can generate BeautifulSoup or Puppeteer code to extract events.
 
-**Skip**: Facebook events (API restrictions), Cloudflare-protected sites, PDFs and images.
+**Fallback 3 — Event posters**: For events promoted only via images (posters, flyers), an LLM can extract event details from a photo. Point your phone at a poster, and the system can parse it into calendar data.
+
+<!-- TODO: Add video demo of capturing event poster -->
+
+**Skip**: Facebook events (API restrictions), Cloudflare-protected sites.
 
 When you find a source that needs a scraper, document it in the city's `SOURCES_CHECKLIST.md` with the URL and any notes about the page structure. A developer (or you, with LLM assistance) can then build the scraper.
 
