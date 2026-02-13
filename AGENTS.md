@@ -72,11 +72,26 @@ Each city should have a `SOURCES_CHECKLIST.md` to track ongoing discovery:
 
 ## Quick Reference: Adding a New Scraper
 
-When creating a new scraper for an existing city, **all three steps are required**:
+When creating a new scraper for an existing city, **all steps are required**:
 
 1. **Create the scraper** in `scrapers/` directory
-2. **Add to workflow** (`.github/workflows/generate-calendar.yml`)
-3. **Add source name** (`scripts/combine_ics.py`)
+2. **Run the scraper** to generate initial ICS file in `cities/{city}/`
+3. **Add ICS to feeds.txt** (`cities/{city}/feeds.txt`)
+4. **Add scraper to workflow** (`.github/workflows/generate-calendar.yml`)
+5. **Update SOURCES_CHECKLIST.md** - document what was added
+6. **Commit and push** - include the ICS file
+
+### Verification Checklist
+
+Before considering a scraper "done", verify:
+
+| Step | Command/Check |
+|------|---------------|
+| Scraper runs | `python scrapers/myscraper.py -o cities/{city}/myscraper.ics` |
+| ICS has events | `grep -c 'BEGIN:VEVENT' cities/{city}/myscraper.ics` |
+| In feeds.txt | `grep myscraper cities/{city}/feeds.txt` |
+| In workflow | `grep myscraper .github/workflows/generate-calendar.yml` |
+| Committed | `git status` shows no uncommitted scraper files |
 
 ### Recommended: Use the add_scraper script
 
@@ -86,7 +101,7 @@ python scripts/add_scraper.py myscraper santarosa "My Source Name" --test      #
 python scripts/add_scraper.py myscraper santarosa "My Source Name" --dry-run   # preview
 ```
 
-**If you skip steps 2-3, the scraper won't run in CI and events won't appear!**
+**If you skip any step, events won't appear in the calendar!**
 
 ---
 
