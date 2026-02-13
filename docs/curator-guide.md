@@ -8,7 +8,7 @@ Existing local aggregators typically expect event producers to "submit" events v
 
 This project takes a different approach: **event producers are the authoritative sources for their own events**. They publish once to their own calendar, and individuals and aggregators pull from those sources. When details change, the change propagates automatically. This is how RSS transformed blogging, and iCalendar can do the same for events.
 
-The gold standard is **iCalendar (ICS) feeds**—a format that machines can read, merge, and republish. If you're an event producer and your platform supports ICS export, use it. But ICS isn't the only way. The real requirement is to **embrace the open web**: publish your events in a way that's scrapable and linkable. A clean HTML page with structured event data works. A public Google Calendar works. A Meetup group works. What doesn't work: events locked in Facebook or behind login walls.
+The gold standard is **iCalendar (ICS) feeds**—a format that machines can read, merge, and republish. If you're an event producer and your platform can publish a ICS feed, that's great. But ICS isn't the only way. The real requirement is to **embrace the open web**. A clean HTML page with well-structured event data works. What doesn't work: events locked in Facebook or behind login walls.
 
 ## The Curator Role
 
