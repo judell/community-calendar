@@ -24,19 +24,29 @@
 ## Quick Reference: Adding a New City
 
 1. **Create city directory** under `cities/` with `feeds.txt` and `SOURCES_CHECKLIST.md`
-2. **Run Meetup discovery** (Section 7) - find local groups with ICS feeds
-3. **Run Eventbrite scraper** (Section 8) - scrape local ticketed events
-4. **Update the GitHub Actions workflow** (`.github/workflows/generate-calendar.yml`):
+2. **Set up geo-filtering** - create `allowed_cities.txt` with center, radius, and allowed cities:
+   ```
+   # center: 38.5449, -121.7405
+   # radius: 30
+   # state: CA
+   Davis
+   Woodland
+   Sacramento
+   ```
+   Then run: `python scripts/geocode_cities.py --city {cityname}`
+3. **Run Meetup discovery** (Section 7) - find local groups with ICS feeds
+4. **Run Eventbrite scraper** (Section 8) - scrape local ticketed events
+5. **Update the GitHub Actions workflow** (`.github/workflows/generate-calendar.yml`):
    - Add curl commands for Meetup ICS feeds
    - Add Eventbrite scraper command
    - Add combine_ics.py step
-5. **Update `combine_ics.py`** - add SOURCE_NAMES entries for new Meetup groups
-6. **Add city to UI** - TWO places must be updated:
+6. **Update `combine_ics.py`** - add SOURCE_NAMES entries for new Meetup groups
+7. **Add city to UI** - TWO places must be updated:
    - `index.html`: add entry to `cityNames` map (e.g., `petaluma: 'Petaluma'`)
    - `Main.xmlui`: add a Button in the city picker VStack (search for "Choose your city")
-7. **Add city to load-events function** - add URL entry to `EVENTS_URLS` in `supabase/functions/load-events/index.ts`, then redeploy the edge function
-8. **Update SOURCES_CHECKLIST.md** - document findings, track pending sources
-9. **Commit and push** - workflow runs daily or trigger manually
+8. **Add city to load-events function** - add URL entry to `EVENTS_URLS` in `supabase/functions/load-events/index.ts`, then redeploy the edge function
+9. **Update SOURCES_CHECKLIST.md** - document findings, track pending sources
+10. **Commit and push** - workflow runs daily or trigger manually
 
 ## App Architecture
 

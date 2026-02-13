@@ -192,3 +192,87 @@ Add to `combine_ics.py`:
 6. **Test feeds before adding** - Some groups are inactive or have travel events
 
 7. **Check event locations** - Meetup groups may have events outside your target city
+
+---
+
+## Step 5: Geo-Filtering Setup
+
+When adding a new city, set up geo-filtering to prevent events from distant locations from appearing in the calendar.
+
+### Create allowed_cities.txt
+
+Create `cities/{cityname}/allowed_cities.txt` with:
+
+```
+# center: {lat}, {lng}
+# radius: {miles}
+# state: {state_abbrev}
+#
+# List cities to allow:
+CityName1
+CityName2
+CityName3
+```
+
+Example for a new city "Davis":
+```
+# center: 38.5449, -121.7405
+# radius: 30
+# state: CA
+#
+Davis
+Woodland
+Sacramento
+West Sacramento
+Dixon
+Winters
+```
+
+### Geocode and Validate
+
+Run the geocoding script to add coordinates and validate distances:
+
+```bash
+python scripts/geocode_cities.py --city {cityname}
+```
+
+This will:
+1. Geocode each city using OpenStreetMap (rate-limited, cached)
+2. Calculate distance from center
+3. Warn about any cities outside the radius
+4. Update the file with coordinates
+
+Example output:
+```
+Center: (38.5449, -121.7405)
+Radius: 30.0 miles
+State: CA
+Cities: 6
+
+Distance report:
+  Davis: 0.0 mi
+  Dixon: 12.3 mi
+  Sacramento: 15.2 mi
+  West Sacramento: 13.1 mi
+  Winters: 14.8 mi
+  Woodland: 8.7 mi
+```
+
+### How Geo-Filtering Works
+
+The filter only applies to events with **address-like locations** containing:
+- State abbreviation (", CA")
+- ZIP code
+- Street address pattern ("123 Main St")
+
+Events with just venue names ("Theater", "Community Center") pass through unfiltered.
+
+Virtual events (Zoom, online, webinar) always pass through.
+
+### Validate-Only Mode
+
+To check existing config without making API calls:
+
+```bash
+python scripts/geocode_cities.py --city {cityname} --validate-only
+```

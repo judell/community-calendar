@@ -119,7 +119,10 @@ def load_allowed_cities(input_dir):
     for line in cities_file.read_text().splitlines():
         line = line.strip()
         if line and not line.startswith('#'):
-            cities.add(line.lower())
+            # Strip trailing comment (e.g., "Petaluma  # 38.23, -122.63 (0.0 mi)")
+            city = line.split('#')[0].strip().lower()
+            if city:
+                cities.add(city)
     return cities
 
 
