@@ -48,6 +48,8 @@ When you find a source that needs a scraper, document it in the city's `SOURCES_
 5. **Configure geo-filtering** if feeds include events outside your area (Step 6)
 6. **Request scrapers** for sources that need them by filing issues or documenting in the checklist
 
+You can do these things by hand, or with any kind and amount of LLM assistance that you are comfortable with.
+
 ---
 
 ## Step 1: Platform Searches
