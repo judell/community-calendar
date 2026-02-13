@@ -291,10 +291,6 @@ python scripts/geocode_cities.py --city {cityname} --validate-only
 
 ---
 
-## Tips
+## Duplicates
 
-- **Check for duplicates** - Same venue may appear in multiple aggregators
-- **Prefer ICS feeds** over scraping when available
-- **Schools are gold mines** - Check MaxPreps for high school athletics
-- **Libraries often have APIs** - Look for BiblioCommons, LibCal, etc.
-- **Chamber of Commerce** - Often use GrowthZone platform with XML API
+Don't worry about the same event appearing in multiple sources. The calendar deduplicates events that are identical, but when the same event comes from different sources it preserves the event and lists all the sources. For example, a concert might show sources: `Bohemian, GoLocal, Eventbrite`. This is a feature, not a bug — it reveals provenance and syndication patterns, showing how events flow through the local information ecosystem.
