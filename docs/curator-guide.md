@@ -212,22 +212,9 @@ Geo-filtering prevents events from distant locations (e.g., away games, regional
 
 ### Create allowed_cities.txt
 
-Create `cities/{cityname}/allowed_cities.txt`:
+Create `cities/{cityname}/allowed_cities.txt` with a radius, state, and the names of nearby cities to include:
 
 ```
-# center: {lat}, {lng}
-# radius: {miles}
-# state: {state_abbrev}
-#
-# List cities to allow:
-CityName1
-CityName2
-CityName3
-```
-
-Example for Davis:
-```
-# center: 38.5449, -121.7405
 # radius: 30
 # state: CA
 #
@@ -239,6 +226,8 @@ Dixon
 Winters
 ```
 
+You don't need to look up coordinates — the script does that automatically.
+
 ### Geocode and Validate
 
 Run the geocoding script to add coordinates and validate distances:
@@ -248,13 +237,15 @@ python scripts/geocode_cities.py --city {cityname}
 ```
 
 This will:
-1. Geocode each city using OpenStreetMap (rate-limited, cached)
-2. Calculate distance from center
-3. Warn about any cities outside the radius
-4. Update the file with coordinates
+1. Geocode the city name to determine the center point
+2. Geocode each allowed city using OpenStreetMap (rate-limited, cached)
+3. Calculate distance from center
+4. Warn about any cities outside the radius
+5. Update the file with coordinates
 
 Example output:
 ```
+No center defined, geocoding 'davis'... OK (38.5449, -121.7405)
 Center: (38.5449, -121.7405)
 Radius: 30.0 miles
 Cities: 6

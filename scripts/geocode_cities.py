@@ -174,9 +174,20 @@ def main():
     if args.state:
         config['state'] = args.state
     
+    # Load geocoding cache
+    cache = load_cache()
+
     if not config['center']:
-        print("Error: No center defined. Use --center or add '# center: lat, lng' to file")
-        return 1
+        # Auto-geocode the city name to get center coordinates
+        print(f"  No center defined, geocoding '{args.city}'...", end=' ', flush=True)
+        coords = geocode(args.city, config['state'], cache)
+        if coords:
+            config['center'] = (coords['lat'], coords['lng'])
+            print(f"OK ({coords['lat']:.4f}, {coords['lng']:.4f})")
+        else:
+            print("FAILED")
+            print("Error: Could not geocode city. Use --center to specify manually.")
+            return 1
     if not config['radius']:
         print("Error: No radius defined. Use --radius or add '# radius: N' to file")
         return 1
@@ -187,8 +198,6 @@ def main():
     print(f"Cities: {len(config['cities'])}")
     print()
     
-    # Load geocoding cache
-    cache = load_cache()
     city_coords = {}
     
     # Geocode cities
