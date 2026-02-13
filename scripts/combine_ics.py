@@ -81,6 +81,7 @@ SOURCE_NAMES = {
     'meetup_petaluma_salon': 'Meetup: Petaluma Salon',
     'meetup_book_brew': 'Meetup: Petaluma Book & Brew Club',
     'meetup_active_20_30': 'Meetup: Petaluma Active 20-30',
+    'srjc_petaluma': 'SRJC Petaluma Campus',
 }
 
 # Fallback URLs for sources that don't provide event URLs

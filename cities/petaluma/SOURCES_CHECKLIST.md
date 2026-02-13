@@ -20,8 +20,9 @@
 | Meetup: Petaluma Salon | ICS | 1 | ✅ Ready |
 | Meetup: Book & Brew Club | ICS | 1 | ✅ Ready |
 | Meetup: Active 20-30 | ICS | 2 | ✅ Ready |
+| SRJC Petaluma Campus | LiveWhale Scraper | 17 | ✅ Ready |
 
-**Total: ~430+ unique events**
+**Total: ~305+ unique events (deduplicated)**
 
 ---
 
@@ -226,3 +227,52 @@ Petaluma is part of Sonoma County, which has significant overlap with Santa Rosa
 - Re-run the same scraper (events are already mixed)
 - Filter the Santa Rosa output for Petaluma locations
 - Create a separate Petaluma library configuration (probably overkill)
+
+---
+
+## SRJC Petaluma Campus Discovery (2026-02-12)
+
+**Source:** Santa Rosa Junior College LiveWhale Calendar
+**URL:** `https://calendar.santarosa.edu/live/ical/events`
+**Scraper:** `scrapers/srjc_petaluma.py`
+
+**Method:** The SRJC calendar uses LiveWhale platform with a JSON API. The scraper fetches all events and filters for those containing "Petaluma" in the title or URL.
+
+**Events Found:** 17 Petaluma-specific events including:
+- Petaluma Cinema Series (weekly film screenings)
+- Free Farmer's Market - Petaluma Campus
+- Financial Aid Fun Fair - Petaluma Campus
+- Sonoma State Rep appointments at Petaluma
+
+**Notes:** 
+- Full SRJC feed has 130+ events across all campuses
+- Santa Rosa campus events are already covered in the Santa Rosa calendar
+
+---
+
+## Phoenix Theater Discovery (2026-02-12)
+
+**Source:** Phoenix Theater (thephoenixtheater.com)
+**Platform:** Wix
+**Events:** ~8 visible shows (punk, wrestling, classical)
+
+**Finding:** Phoenix Theater events ARE on Eventbrite but may not appear in the default `ca--petaluma` search. Events are found when searching directly for "phoenix theater petaluma".
+
+**Eventbrite URLs:**
+- https://www.eventbrite.com/e/phoenix-pro-wrestling-tickets-1980789577949
+- https://www.eventbrite.com/e/suicide-queen-our-graves-lust-4-blood-circle-of-ruin-tickets-1976808813375
+- https://www.eventbrite.com/e/agent-orange-tickets-1982288226447
+
+**Recommendation:** These events have `addressLocality: "Petaluma"` so they should be captured by Eventbrite scraper with proper city filter.
+
+---
+
+## Sonoma-Marin Fairgrounds (2026-02-12)
+
+**Source:** sonoma-marinfair.org/calendar
+**Platform:** WordPress + The Events Calendar (FullCalendar display)
+**Status:** Calendar appears empty for Feb 2026
+
+**Feed Attempt:** ICS endpoint at `?ical=1` returns HTML (disabled?)
+
+**Recommendation:** Skip for now - check again closer to summer fair season (June-July).
