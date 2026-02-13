@@ -43,9 +43,9 @@ When you find a source that needs a scraper, document it in the city's `SOURCES_
 
 1. **Search** for event sources using platform-specific searches (Step 1 below)
 2. **Test** each discovered feed to verify it works and has events (Step 2)
-3. **Document** findings in `cities/{city}/SOURCES_CHECKLIST.md` (Step 4)
-4. **Add** working ICS feeds to the GitHub Actions workflow (Step 5)
-5. **Configure geo-filtering** if feeds include events outside your area (Step 6)
+3. **Document** findings in `cities/{city}/SOURCES_CHECKLIST.md` (Step 3)
+4. **Add** working feed URLs to `cities/{city}/feeds.txt` (Step 4)
+5. **Configure geo-filtering** if feeds include events outside your area (Step 5)
 6. **Request scrapers** for sources that need them by filing issues or documenting in the checklist
 
 You can do these things by hand, or with any kind and amount of LLM assistance that you are comfortable with.
@@ -84,6 +84,35 @@ https://duckduckgo.com/?q=CITY+STATE+inurl%3A%2Flocalist%2F
 https://duckduckgo.com/?q=CITY+STATE+events+site%3Aeventbrite.com
 https://duckduckgo.com/?q=CITY+STATE+%22community+calendar%22
 ```
+
+### Meetup Deep Dive
+
+1. **Browse groups near location** in browser:
+   ```
+   https://www.meetup.com/find/?keywords=&location=us--ca--Santa%20Rosa&source=GROUPS
+   ```
+
+2. **Extract group URLs** using browser console:
+   ```javascript
+   const links = Array.from(document.querySelectorAll('a')).filter(a =>
+     a.href.match(/meetup\.com\/[^\/]+\/?$/) &&
+     !a.href.includes('/find')
+   );
+   const groups = [...new Set(links.map(a => a.href.match(/meetup\.com\/([^\/\?]+)/)?.[1]).filter(Boolean))];
+   console.log(groups.join('\n'));
+   ```
+
+3. **Test ICS feeds** for each group:
+   ```bash
+   curl -sL "https://www.meetup.com/{group-name}/events/ical/" -A "Mozilla/5.0" | grep -c "BEGIN:VEVENT"
+   ```
+
+4. **Verify location** (some groups may be nearby but not in target city):
+   ```bash
+   curl -sL "https://www.meetup.com/{group-name}/" -A "Mozilla/5.0" | grep -oP '"city"\s*:\s*"\K[^"]+'
+   ```
+
+5. **Exclude travel groups** whose events are international destinations
 
 ---
 
@@ -126,38 +155,7 @@ https://api.membershipworks.com/v2/events?_op=ics&org={ORG_ID}
 
 ---
 
-## Step 3: Meetup Discovery Process
-
-1. **Browse groups near location** in browser:
-   ```
-   https://www.meetup.com/find/?keywords=&location=us--ca--Santa%20Rosa&source=GROUPS
-   ```
-
-2. **Extract group URLs** using browser console:
-   ```javascript
-   const links = Array.from(document.querySelectorAll('a')).filter(a => 
-     a.href.match(/meetup\.com\/[^\/]+\/?$/) && 
-     !a.href.includes('/find')
-   );
-   const groups = [...new Set(links.map(a => a.href.match(/meetup\.com\/([^\/\?]+)/)?.[1]).filter(Boolean))];
-   console.log(groups.join('\n'));
-   ```
-
-3. **Test ICS feeds** for each group:
-   ```bash
-   curl -sL "https://www.meetup.com/{group-name}/events/ical/" -A "Mozilla/5.0" | grep -c "BEGIN:VEVENT"
-   ```
-
-4. **Verify location** (some groups may be nearby but not in target city):
-   ```bash
-   curl -sL "https://www.meetup.com/{group-name}/" -A "Mozilla/5.0" | grep -oP '"city"\s*:\s*"\K[^"]+'
-   ```
-
-5. **Exclude travel groups** whose events are international destinations
-
----
-
-## Step 4: Document Findings
+## Step 3: Document Findings
 
 Create/update `cities/{cityname}/SOURCES_CHECKLIST.md`:
 
@@ -191,31 +189,24 @@ Create/update `cities/{cityname}/SOURCES_CHECKLIST.md`:
 
 ---
 
-## Step 5: Add Working Feeds
+## Step 4: Add Working Feeds
 
-### Add Meetup Feed to Workflow
+Add working feed URLs to `cities/{city}/feeds.txt`, one per line. Comments starting with `#` are supported for organization:
 
-In `.github/workflows/generate-calendar.yml`, find the city's download step and add:
-```yaml
-curl -sL -A "Mozilla/5.0" "https://www.meetup.com/{group-name}/events/ical/" -o meetup_{short_name}.ics || true
+```
+# Meetup groups
+https://www.meetup.com/go-wild-hikers/events/ical/
+https://www.meetup.com/local-book-club/events/ical/
+
+# Tockify calendars
+https://tockify.com/api/feeds/ics/downtown_events
 ```
 
-### Add Source Name
-
-In `scripts/combine_ics.py`, add to SOURCE_NAMES dict:
-```python
-'meetup_{short_name}': 'Meetup: Group Display Name',
-```
-
-### Run Eventbrite Scraper
-
-```bash
-python scrapers/eventbrite_scraper.py --location ca--{city} --months 2 > cities/{city}/eventbrite.ics
-```
+The automated pipeline reads this file and fetches each URL during the daily build.
 
 ---
 
-## Step 6: Geo-Filtering Setup
+## Step 5: Geo-Filtering Setup
 
 Geo-filtering prevents events from distant locations (e.g., away games, regional feeds) from appearing.
 
