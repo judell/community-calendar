@@ -154,14 +154,12 @@ function dedupeEvents(events) {
     const normalizedTime = e.start_time ? new Date(e.start_time).toISOString() : '';
     const key = (e.title || '').trim().toLowerCase() + '|' + normalizedTime;
     if (!groups[key]) {
-      groups[key] = { ...e, sources: [e.source], mergedIds: [e.id] };
+      groups[key] = { ...e, sources: new Set([e.source]), mergedIds: [e.id] };
     } else {
       // Track all merged event IDs (for picks to work across sources)
       groups[key].mergedIds.push(e.id);
-      // Add source if not already present
-      if (!groups[key].sources.includes(e.source)) {
-        groups[key].sources.push(e.source);
-      }
+      // Add source (Set handles deduplication automatically)
+      groups[key].sources.add(e.source);
       // Prefer non-empty values for other fields
       if (!groups[key].url && e.url) groups[key].url = e.url;
       if (!groups[key].location && e.location) groups[key].location = e.location;
@@ -169,18 +167,87 @@ function dedupeEvents(events) {
       if (!groups[key].rrule && e.rrule) groups[key].rrule = e.rrule;
     }
   });
-  // Convert sources array to comma-separated string
+  // Convert sources Set to comma-separated string
   // Filter mergedIds to only include numeric IDs (exclude synthetic enrichment IDs)
-  const result = Object.values(groups).map(e => ({
+  let result = Object.values(groups).map(e => ({
     ...e,
-    source: e.sources.sort().join(', '),
+    source: Array.from(e.sources).sort().join(', '),
     mergedIds: e.mergedIds.filter(id => typeof id === 'number' || /^\d+$/.test(id))
   })).sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+
+  // Collapse long-running events (exhibitions, recurring services)
+  result = collapseLongRunningEvents(result);
 
   // Cache the result
   _dedupedEventsCache = result;
   _dedupedEventsCacheKey = cacheKey;
   return result;
+}
+
+// For long-running events (exhibitions, recurring services), show only once per week.
+// This reduces clutter while keeping events visible throughout their run.
+function collapseLongRunningEvents(events) {
+  const MIN_OCCURRENCES = 5;  // Need at least this many to consider "long-running"
+
+  // Helper: get ISO week string (YYYY-Www) for a date
+  function getWeekKey(dateStr) {
+    const d = new Date(dateStr);
+    // Get Thursday of the week (ISO week date algorithm)
+    const thursday = new Date(d);
+    thursday.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7) + 3);
+    const firstThursday = new Date(thursday.getUTCFullYear(), 0, 4);
+    const weekNum = 1 + Math.round(((thursday - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
+    return thursday.getUTCFullYear() + '-W' + String(weekNum).padStart(2, '0');
+  }
+
+  // Group by title + location + time-of-day to identify long-running events
+  const groups = {};
+  events.forEach(e => {
+    const d = new Date(e.start_time);
+    const timeOfDay = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+    const key = (e.title || '').trim().toLowerCase() + '|' + (e.location || '').trim().toLowerCase() + '|' + timeOfDay;
+    if (!groups[key]) {
+      groups[key] = [];
+    }
+    groups[key].push(e);
+  });
+
+  // Identify which event keys are "long-running"
+  const longRunningKeys = new Set();
+  for (const [key, groupEvents] of Object.entries(groups)) {
+    if (groupEvents.length >= MIN_OCCURRENCES) {
+      longRunningKeys.add(key);
+    }
+  }
+
+  // For long-running events, track which weeks we've seen
+  // key -> Set of week strings
+  const seenWeeks = {};
+
+  // Build result: for long-running events, include only first occurrence per week
+  const result = [];
+
+  events.forEach(e => {
+    const d = new Date(e.start_time);
+    const timeOfDay = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+    const key = (e.title || '').trim().toLowerCase() + '|' + (e.location || '').trim().toLowerCase() + '|' + timeOfDay;
+
+    if (longRunningKeys.has(key)) {
+      const weekKey = getWeekKey(e.start_time);
+      if (!seenWeeks[key]) {
+        seenWeeks[key] = new Set();
+      }
+      if (!seenWeeks[key].has(weekKey)) {
+        seenWeeks[key].add(weekKey);
+        // Mark as recurring so UI can indicate it
+        result.push({ ...e, isRecurring: true });
+      }
+    } else {
+      result.push(e);
+    }
+  });
+
+  return result.sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
 }
 
 // Clear dedupe cache (useful for testing)
@@ -642,6 +709,7 @@ if (typeof window !== 'undefined') {
   window.truncate = truncate;
   window.getSourceCounts = getSourceCounts;
   window.dedupeEvents = dedupeEvents;
+  window.collapseLongRunningEvents = collapseLongRunningEvents;
   window.clearDedupeCache = clearDedupeCache;
   window.isEventPicked = isEventPicked;
   window.buildGoogleCalendarUrl = buildGoogleCalendarUrl;

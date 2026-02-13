@@ -294,3 +294,18 @@ python scripts/geocode_cities.py --city {cityname} --validate-only
 ## Duplicates
 
 Don't worry about the same event appearing in multiple sources. The calendar deduplicates events that are identical, but when the same event comes from different sources it preserves the event and lists all the sources. For example, a concert might show sources: `Bohemian, GoLocal, Eventbrite`. This is a feature, not a bug — it reveals provenance and syndication patterns, showing how events flow through the local information ecosystem.
+
+---
+
+## Long-Running Events
+
+Some sources (particularly CitySpark-powered calendars like North Bay Bohemian and Press Democrat) return multi-day events as separate daily occurrences. For example, an art exhibition like "The Unknown Wayne Thiebaud: Passionate Printmaker" at Sebastopol Center for the Arts might run for two months — and would appear as 60+ separate events, one for each day the gallery is open.
+
+The calendar automatically collapses these long-running events to **show once per week**. This keeps exhibitions, recurring library programs, and ongoing classes visible without cluttering every single day.
+
+**How it works:**
+- Events with the same title + location + time-of-day that appear 5+ times are identified as "long-running"
+- Only the first occurrence in each calendar week is displayed
+- The event remains visible throughout its run, just not every day
+
+This reduces event count significantly (typically 10-15% fewer displayed events) while maintaining weekly visibility of ongoing attractions. Curators don't need to do anything — this happens automatically in the display layer.
