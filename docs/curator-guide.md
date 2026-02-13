@@ -1,6 +1,6 @@
 # Community Calendar Curator Guide
 
-This guide helps curators discover and add event sources for new cities.
+This guide helps curators discover and add event sources for new or existing cities.
 
 ## Quick Start
 
@@ -8,6 +8,7 @@ This guide helps curators discover and add event sources for new cities.
 2. **Test discovered feeds** to verify they work
 3. **Document findings** in the city's `SOURCES_CHECKLIST.md`
 4. **Add working feeds** to the GitHub Actions workflow
+5. **Set up geo-filtering** to exclude distant locations
 
 ---
 
@@ -22,17 +23,17 @@ Use DuckDuckGo (Google may block automated queries). Replace `{city}` and `{stat
 | `{city} {state} site:meetup.com` | Meetup groups with ICS feeds |
 | `{city} site:tockify.com` | Tockify calendars with ICS feeds |
 | `{city} {state} inurl:/localist/` | University/govt Localist calendars |
+| `"add to calendar" events {city} {state}` | Sites with ICS/iCal export |
 
 ### Discovery Searches (find potential sources)
 
 | Search | What You'll Find |
 |--------|------------------|
-| `{city} {state} events site:facebook.com/events` | Active local events (no feed, but shows what exists) |
 | `{city} {state} events site:eventbrite.com` | Eventbrite events (requires scraper) |
 | `{city} {state} "community calendar"` | Local event aggregators |
-| `{city} {state} events calendar` | General discovery |
+| `{city} {state} inurl:/tribe_events/` | WordPress Tribe Events Calendar |
 
-### Ready-to-Use URLs
+### Ready-to-Use DuckDuckGo URLs
 
 Copy these and replace `CITY` and `STATE`:
 
@@ -40,7 +41,6 @@ Copy these and replace `CITY` and `STATE`:
 https://duckduckgo.com/?q=CITY+STATE+site%3Ameetup.com
 https://duckduckgo.com/?q=CITY+site%3Atockify.com
 https://duckduckgo.com/?q=CITY+STATE+inurl%3A%2Flocalist%2F
-https://duckduckgo.com/?q=CITY+STATE+events+site%3Afacebook.com%2Fevents
 https://duckduckgo.com/?q=CITY+STATE+events+site%3Aeventbrite.com
 https://duckduckgo.com/?q=CITY+STATE+%22community+calendar%22
 ```
@@ -50,158 +50,138 @@ https://duckduckgo.com/?q=CITY+STATE+%22community+calendar%22
 ## Step 2: Test Discovered Feeds
 
 ### Tockify Calendar
-
-If you find a Tockify calendar (URL like `tockify.com/calendarname/...`):
-
 ```bash
-# Extract calendar name from URL and test
+# Extract calendar name from URL (e.g., tockify.com/pdaevents)
 curl -sL "https://tockify.com/api/feeds/ics/CALENDAR_NAME" | grep -c "BEGIN:VEVENT"
 ```
 
-If it returns a number > 0, the feed works!
-
 ### Meetup Group
-
-If you find a Meetup group (URL like `meetup.com/groupname/`):
-
 ```bash
-# Test ICS feed
+# Extract group name from URL (e.g., meetup.com/go-wild-hikers)
 curl -sL "https://www.meetup.com/GROUP_NAME/events/ical/" -A "Mozilla/5.0" | grep -c "BEGIN:VEVENT"
 ```
 
-**Important**: Also verify the group's events are actually in your target city:
+### LiveWhale/Localist (Universities)
 ```bash
-curl -sL "https://www.meetup.com/GROUP_NAME/" -A "Mozilla/5.0" | grep -oP '"city"\s*:\s*"\K[^"]+'
-```
-
-### Localist Site
-
-If you find a Localist calendar:
-
-```bash
-# Check for API
+curl -sL "https://DOMAIN/live/ical/events" | grep -c "BEGIN:VEVENT"
+# or
 curl -sL "https://DOMAIN/api/2/events" | head -50
-
-# Or look for ICS export option on the site
 ```
 
 ### WordPress Site
-
-If you find a WordPress events page:
-
 ```bash
 # Check what plugins they use
-curl -sL "URL" -A "Mozilla/5.0" | grep -o "wp-content/plugins/[^/]*" | sort -u
+curl -sL "https://example.com/events/" -A "Mozilla/5.0" | grep -o "wp-content/plugins/[^/]*" | sort -u
 
 # Try common feed endpoints
-curl -sL "URL/?ical=1" | head -20
-curl -sL "URL/feed/" | head -20
+curl -sL "https://example.com/events/?ical=1" | head -20
+curl -sL "https://example.com/events/feed/" | head -20
+```
+
+### MembershipWorks
+Look for "Subscribe" dropdown on calendar pages. Feed URL pattern:
+```
+https://api.membershipworks.com/v2/events?_op=ics&org={ORG_ID}
 ```
 
 ---
 
-## Step 3: Document Findings
+## Step 3: Meetup Discovery Process
 
-Create or update `{city}/SOURCES_CHECKLIST.md`:
+1. **Browse groups near location** in browser:
+   ```
+   https://www.meetup.com/find/?keywords=&location=us--ca--Santa%20Rosa&source=GROUPS
+   ```
+
+2. **Extract group URLs** using browser console:
+   ```javascript
+   const links = Array.from(document.querySelectorAll('a')).filter(a => 
+     a.href.match(/meetup\.com\/[^\/]+\/?$/) && 
+     !a.href.includes('/find')
+   );
+   const groups = [...new Set(links.map(a => a.href.match(/meetup\.com\/([^\/\?]+)/)?.[1]).filter(Boolean))];
+   console.log(groups.join('\n'));
+   ```
+
+3. **Test ICS feeds** for each group:
+   ```bash
+   curl -sL "https://www.meetup.com/{group-name}/events/ical/" -A "Mozilla/5.0" | grep -c "BEGIN:VEVENT"
+   ```
+
+4. **Verify location** (some groups may be nearby but not in target city):
+   ```bash
+   curl -sL "https://www.meetup.com/{group-name}/" -A "Mozilla/5.0" | grep -oP '"city"\s*:\s*"\K[^"]+'
+   ```
+
+5. **Exclude travel groups** whose events are international destinations
+
+---
+
+## Step 4: Document Findings
+
+Create/update `cities/{cityname}/SOURCES_CHECKLIST.md`:
 
 ```markdown
 # {City} Sources Checklist
 
 ## Currently Implemented
-- [ ] Source 1 - feed URL
-- [ ] Source 2 - feed URL
+| Source | Type | Events | Status |
+|--------|------|--------|--------|
+| Downtown Association | Tockify ICS | 45 | ✅ Ready |
 
 ## Discovered - Ready to Add
-- [ ] Tockify: calendar_name (X events)
-- [ ] Meetup: group_name (verified in-city)
+| Source | Feed URL | Events | Notes |
+|--------|----------|--------|-------|
+| Go Wild Hikers | meetup.com/go-wild-hikers/events/ical/ | 12 | Outdoor hikes |
 
 ## Discovered - Needs Scraper
-- [ ] Site name - platform (Eventbrite, etc.)
+| Source | URL | Notes |
+|--------|-----|-------|
+| Local Theatre | example.com/events | SeeTickets widget |
 
 ## Non-Starters
-- Site name - reason (Wix - no feed, Cloudflare blocked, etc.)
+| Source | Reason |
+|--------|--------|
+| City Website | Cloudflare protection |
 
 ## To Investigate
-- Site name - URL - notes
+- [ ] Local library system
+- [ ] High school athletics
 ```
 
 ---
 
-## Step 4: Add Working Feeds
+## Step 5: Add Working Feeds
 
-### Tockify Feed
+### Add Meetup Feed to Workflow
 
-Add to `.github/workflows/generate-calendar.yml`:
-
+In `.github/workflows/generate-calendar.yml`, find the city's download step and add:
 ```yaml
-- name: Download {city} Tockify feeds
-  run: |
-    curl -sL "https://tockify.com/api/feeds/ics/CALENDAR_NAME" -o {city}/tockify_name.ics || true
+curl -sL -A "Mozilla/5.0" "https://www.meetup.com/{group-name}/events/ical/" -o meetup_{short_name}.ics || true
 ```
 
-Add to `combine_ics.py` SOURCE_NAMES:
+### Add Source Name
+
+In `scripts/combine_ics.py`, add to SOURCE_NAMES dict:
 ```python
-'tockify_name': 'Calendar Display Name',
+'meetup_{short_name}': 'Meetup: Group Display Name',
 ```
 
-### Meetup Feed
+### Run Eventbrite Scraper
 
-Add to workflow:
-```yaml
-- name: Download {city} Meetup feeds  
-  run: |
-    curl -sL -A "Mozilla/5.0" "https://www.meetup.com/GROUP_NAME/events/ical/" -o {city}/meetup_name.ics || true
-```
-
-Add to `combine_ics.py`:
-```python
-'meetup_name': 'Meetup: Group Display Name',
+```bash
+python scrapers/eventbrite_scraper.py --location ca--{city} --months 2 > cities/{city}/eventbrite.ics
 ```
 
 ---
 
-## Platform Reference
+## Step 6: Geo-Filtering Setup
 
-| Platform | Has Feed? | How to Get It |
-|----------|-----------|---------------|
-| **Tockify** | ✅ Yes | `tockify.com/api/feeds/ics/{name}` |
-| **Meetup** | ✅ Yes | `meetup.com/{group}/events/ical/` |
-| **Localist** | ✅ Usually | Check `/api/2/events` or site UI |
-| **Google Calendar** | ✅ Yes | Extract calendar ID from embed |
-| **The Events Calendar (WordPress)** | ✅ Usually | Try `?ical=1` on events page |
-| **Facebook Events** | ❌ No | No public API since 2018 |
-| **Eventbrite** | ❌ No | Use `eventbrite_scraper.py` |
-| **Wix** | ❌ No | No calendar export |
-| **Squarespace** | ❌ No | No standard export |
-| **Simpleview (tourism sites)** | ❌ No | No public feed |
-
----
-
-## Tips
-
-1. **Start with Meetup** - Most groups have working ICS feeds
-
-2. **Tockify is a goldmine** - When you find one, it usually has lots of events
-
-3. **University calendars often use Localist** - Search for nearby colleges
-
-4. **Tourism/visitor bureau sites rarely have feeds** - Don't spend time on these
-
-5. **Facebook shows activity but no feeds** - Use it to discover what events exist, then find alternate sources
-
-6. **Test feeds before adding** - Some groups are inactive or have travel events
-
-7. **Check event locations** - Meetup groups may have events outside your target city
-
----
-
-## Step 5: Geo-Filtering Setup
-
-When adding a new city, set up geo-filtering to prevent events from distant locations from appearing in the calendar.
+Geo-filtering prevents events from distant locations (e.g., away games, regional feeds) from appearing.
 
 ### Create allowed_cities.txt
 
-Create `cities/{cityname}/allowed_cities.txt` with:
+Create `cities/{cityname}/allowed_cities.txt`:
 
 ```
 # center: {lat}, {lng}
@@ -214,7 +194,7 @@ CityName2
 CityName3
 ```
 
-Example for a new city "Davis":
+Example for Davis:
 ```
 # center: 38.5449, -121.7405
 # radius: 30
@@ -246,27 +226,24 @@ Example output:
 ```
 Center: (38.5449, -121.7405)
 Radius: 30.0 miles
-State: CA
 Cities: 6
 
 Distance report:
   Davis: 0.0 mi
   Dixon: 12.3 mi
   Sacramento: 15.2 mi
-  West Sacramento: 13.1 mi
-  Winters: 14.8 mi
   Woodland: 8.7 mi
+  Winters: 14.8 mi ⚠️ OUTSIDE RADIUS
 ```
 
 ### How Geo-Filtering Works
 
 The filter only applies to events with **address-like locations** containing:
-- State abbreviation (", CA")
+- State abbreviation (", CA")  
 - ZIP code
 - Street address pattern ("123 Main St")
 
 Events with just venue names ("Theater", "Community Center") pass through unfiltered.
-
 Virtual events (Zoom, online, webinar) always pass through.
 
 ### Validate-Only Mode
@@ -276,3 +253,26 @@ To check existing config without making API calls:
 ```bash
 python scripts/geocode_cities.py --city {cityname} --validate-only
 ```
+
+---
+
+## Platform Reference
+
+| Platform | Feed Discovery |
+|----------|----------------|
+| **Tockify** | `https://tockify.com/api/feeds/ics/{calendar_name}` |
+| **Meetup** | `https://www.meetup.com/{group}/events/ical/` |
+| **LiveWhale** | `https://{domain}/live/ical/events` |
+| **MembershipWorks** | `https://api.membershipworks.com/v2/events?_op=ics&org={ID}` |
+| **WordPress Tribe** | `https://example.com/events/?ical=1` |
+| **Google Calendar** | Extract calendar ID from embed code |
+
+---
+
+## Tips
+
+- **Check for duplicates** - Same venue may appear in multiple aggregators
+- **Prefer ICS feeds** over scraping when available
+- **Schools are gold mines** - Check MaxPreps for high school athletics
+- **Libraries often have APIs** - Look for BiblioCommons, LibCal, etc.
+- **Chamber of Commerce** - Often use GrowthZone platform with XML API
