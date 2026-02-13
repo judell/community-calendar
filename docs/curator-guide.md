@@ -39,13 +39,14 @@ When you find a source that needs a scraper, document it in the city's `SOURCES_
 
 ---
 
-## Quick Start
+## Playbook for Launching a New Citywide Calendar
 
-1. **Search for existing feeds** using platform searches
-2. **Test discovered feeds** to verify they work
-3. **Document findings** in the city's `SOURCES_CHECKLIST.md`
-4. **Add working feeds** to the GitHub Actions workflow
-5. **Set up geo-filtering** to exclude distant locations
+1. **Search** for event sources using platform-specific searches (Step 1 below)
+2. **Test** each discovered feed to verify it works and has events (Step 2)
+3. **Document** findings in `cities/{city}/SOURCES_CHECKLIST.md` (Step 4)
+4. **Add** working ICS feeds to the GitHub Actions workflow (Step 5)
+5. **Configure geo-filtering** if feeds include events outside your area (Step 6)
+6. **Request scrapers** for sources that need them by filing issues or documenting in the checklist
 
 ---
 
