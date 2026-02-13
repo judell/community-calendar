@@ -109,6 +109,75 @@ SOURCE_URLS = {
 }
 
 
+def load_allowed_cities(input_dir):
+    """Load allowed cities from city directory if file exists."""
+    cities_file = Path(input_dir) / 'allowed_cities.txt'
+    if not cities_file.exists():
+        return None
+    
+    cities = set()
+    for line in cities_file.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith('#'):
+            cities.add(line.lower())
+    return cities
+
+
+# Locations that should always be allowed (virtual events, etc.)
+VIRTUAL_LOCATION_PATTERNS = [
+    'zoom',
+    'online',
+    'virtual',
+    'webinar',
+    'http://',
+    'https://',
+    'america/los_angeles',  # Malformed Meetup timezone-as-location
+    'america/new_york',
+]
+
+# Patterns that indicate location is a real address (worth geo-filtering)
+# If none of these match, we skip geo-filtering for that event
+ADDRESS_INDICATORS = re.compile(
+    r'(?:'
+    r', [A-Z]{2}\b|'              # State abbreviation: ", CA"
+    r'\b\d{5}\b|'                 # ZIP code
+    r', [A-Z][a-z]+ [A-Z]{2}|'     # City, State: ", Santa Rosa CA"
+    r'\d+\s+\w+\s+(?:street|st|avenue|ave|road|rd|drive|dr|boulevard|blvd|lane|ln|way|court|ct)\b'  # Street address: "123 Main St"
+    r')',
+    re.IGNORECASE
+)
+
+
+def location_matches_allowed_cities(location, allowed_cities):
+    """Check if a location string contains any allowed city name.
+    
+    Only applies geo-filter to locations that look like real addresses.
+    Venue-only names ("Theater", "BiblioBus") are allowed through.
+    """
+    if not allowed_cities:
+        return True  # No filter configured
+    if not location:
+        return True  # No location to check, allow it
+    
+    location_lower = location.lower()
+    
+    # Always allow virtual/online events
+    for pattern in VIRTUAL_LOCATION_PATTERNS:
+        if pattern in location_lower:
+            return True
+    
+    # Check if location looks like an address
+    # If not, allow it through (venue name only, no geo info to filter on)
+    if not ADDRESS_INDICATORS.search(location):
+        return True
+    
+    # Location has address info - check against allowed cities
+    for city in allowed_cities:
+        if city in location_lower:
+            return True
+    return False
+
+
 def get_source_name(filename):
     """Get friendly source name from filename."""
     stem = Path(filename).stem
@@ -193,9 +262,15 @@ def extract_events(ics_content, source_name=None, fallback_url=None):
 def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar"):
     """Combine all ICS files in a directory into one."""
     all_events = []
+    geo_filtered_count = 0
     # Use 24 hours ago to avoid filtering out same-day events due to timezone differences
     from datetime import timedelta
     now = datetime.now(timezone.utc) - timedelta(hours=24)
+    
+    # Load allowed cities for geo filtering
+    allowed_cities = load_allowed_cities(input_dir)
+    if allowed_cities:
+        print(f"  Geo filter active: {len(allowed_cities)} allowed cities")
     
     ics_dir = Path(input_dir)
     for ics_file in sorted(ics_dir.glob('*.ics')):
@@ -211,6 +286,25 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar")
             
             # Filter to future events only
             future_events = [e for e in events if e['dtstart'].replace(tzinfo=timezone.utc) >= now]
+            
+            # Apply geo filter if configured
+            if allowed_cities:
+                filtered_events = []
+                for e in future_events:
+                    # Handle ICS line folding (continuation lines start with space/tab)
+                    # Use ^LOCATION to avoid matching X-LIC-LOCATION
+                    location_match = re.search(r'^LOCATION:([^\n]+(?:\n[ \t][^\n]+)*)', e['content'], re.MULTILINE)
+                    if location_match:
+                        # Unfold: remove newline+space/tab
+                        location = re.sub(r'\n[ \t]', '', location_match.group(1))
+                    else:
+                        location = ''
+                    if location_matches_allowed_cities(location, allowed_cities):
+                        filtered_events.append(e)
+                    else:
+                        geo_filtered_count += 1
+                future_events = filtered_events
+            
             all_events.extend(future_events)
             
             if future_events:
@@ -259,6 +353,8 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar")
     
     Path(output_file).write_text('\r\n'.join(output), encoding='utf-8')
     
+    if geo_filtered_count > 0:
+        print(f"  (Geo-filtered {geo_filtered_count} events outside allowed cities)")
     print(f"\nCombined {len(unique_events)} unique future events into {output_file}")
     return len(unique_events)
 
