@@ -21,8 +21,10 @@
 | Meetup: Book & Brew Club | ICS | 1 | ✅ Ready |
 | Meetup: Active 20-30 | ICS | 2 | ✅ Ready |
 | SRJC Petaluma Campus | LiveWhale Scraper | 17 | ✅ Ready |
+| HenHouse Brewing Petaluma | Scraper | 2-3 | ✅ Ready |
+| Phoenix Theater | Eventbrite Scraper | 13 | ✅ Ready |
 
-**Total: ~305+ unique events (deduplicated)**
+**Total: ~320+ unique events (deduplicated)**
 
 ---
 
@@ -87,11 +89,25 @@ Searched: `meetup.com/find/?location=us--ca--Petaluma&source=GROUPS`
 | petaluma-active-20-30 | 2 | Professional | ✅ Petaluma |
 | aligned-profitable-business-growth-for-women | 1 | Professional | ✅ Petaluma |
 
-**Nearby groups (not Petaluma-based):**
+**Nearby groups (not Petaluma-based but relevant):**
 - Meditate-with-a-Monk-in-Sonoma-County (Penngrove) - 10 events
 - Alternative-Healing-Exploration (Cotati) - 10 events
 - Hidden-Backroads-Adventures (Santa Rosa) - 10 events
 - Several Marin/Novato groups
+
+### Additional Meetup Groups Discovered (2026-02-14)
+
+Topical search found more regional groups with Petaluma events:
+
+| Group | ICS URL | Events | Notes |
+|-------|---------|--------|-------|
+| sonoma-county-outdoors | `meetup.com/sonoma-county-outdoors/events/ical/` | ~10 | Hiking/walking, weekly in Petaluma |
+| north-bay-contra-dance | `meetup.com/north-bay-contra-dance/events/ical/` | ~10 | Includes Petaluma dances |
+| sonoma-county-boomers | `meetup.com/sonoma-county-boomers/events/ical/` | ~7 | Social events, some in Petaluma |
+| sonoma-county-go-wild-hikers | `meetup.com/sonoma-county-go-wild-hikers/events/ical/` | ~3 | Hiking |
+| meditate-with-a-monk-in-sonoma-county | `meetup.com/meditate-with-a-monk-in-sonoma-county/events/ical/` | ~10 | Penngrove area |
+
+**Status:** Ready to add - all have working ICS feeds
 
 ---
 
@@ -250,20 +266,46 @@ Petaluma is part of Sonoma County, which has significant overlap with Santa Rosa
 
 ---
 
-## Phoenix Theater Discovery (2026-02-12)
+## Phoenix Theater Discovery (2026-02-12, updated 2026-02-14)
 
 **Source:** Phoenix Theater (thephoenixtheater.com)
-**Platform:** Wix
-**Events:** ~8 visible shows (punk, wrestling, classical)
+**Platform:** Wix (hard to scrape directly)
+**Ticketing:** Eventbrite
+**Events:** 13 events found
 
-**Finding:** Phoenix Theater events ARE on Eventbrite but may not appear in the default `ca--petaluma` search. Events are found when searching directly for "phoenix theater petaluma".
+**Key Insight:** The Wix site was a nightmare (heavy JS, no static content). But searching Eventbrite for "phoenix theater petaluma" returns all events with clean JSON-LD structured data.
 
-**Eventbrite URLs:**
-- https://www.eventbrite.com/e/phoenix-pro-wrestling-tickets-1980789577949
-- https://www.eventbrite.com/e/suicide-queen-our-graves-lust-4-blood-circle-of-ruin-tickets-1976808813375
-- https://www.eventbrite.com/e/agent-orange-tickets-1982288226447
+**Scraper:** `scrapers/phoenix_theater.py`
+- Searches Eventbrite for Phoenix Theater Petaluma
+- Filters results by venue address (201 Washington St)
+- Extracts JSON-LD event data
+- Outputs ICS format
 
-**Recommendation:** These events have `addressLocality: "Petaluma"` so they should be captured by Eventbrite scraper with proper city filter.
+**Sample events:**
+- Phoenix Pro Wrestling (Mar 20)
+- Agent Orange (May 9)
+- Young People's Chamber Orchestra (Mar 28)
+- Suicide Queen, Our Graves, Lust 4 Blood (Mar 6)
+
+**Lesson learned:** When a venue's website is hard to scrape, check their ticketing platform (Eventbrite, SeeTickets, Dice, etc.) - the ticketing site often has much cleaner data.
+
+---
+
+## HenHouse Brewing Discovery (2026-02-14)
+
+**Source:** HenHouse Brewing Petaluma (henhousebrewing.com/events/)
+**Platform:** WordPress
+**Events:** 2-3 Petaluma events (plus recurring trivia)
+
+**Scraper:** `scrapers/henhouse.py`
+- Parses WordPress events page
+- Filters for Petaluma location only (they have 3 locations)
+- Handles recurring events (Trivia Thursdays noted but not expanded)
+
+**Events found:**
+- Trivia Night - Petaluma (Every Thursday 6-8pm) - recurring
+- artXcursion: Brushes + Brew (paint nights)
+- Big Fried Chicken Cook-Off (Mar 1)
 
 ---
 

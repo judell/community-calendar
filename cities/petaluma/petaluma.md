@@ -1,7 +1,7 @@
 # Petaluma, CA - City Discovery Progress
 
 **Started:** 2025-02-12  
-**Last Updated:** 2026-02-12  
+**Last Updated:** 2026-02-14  
 **Status:** ✅ READY TO DEPLOY
 
 ## Current Status: ~360+ events from 12 sources
@@ -105,13 +105,57 @@ Venues using SeeTickets (like Mystic Theatre) have well-structured HTML:
 
 ---
 
-## Non-Starters
+## Additional Sources Discovered (Feb 2026 Survey)
 
+### Priority 1: Meetup ICS Feeds (Easy Wins)
+| Source | URL | Events | Notes |
+|--------|-----|--------|-------|
+| Sonoma County Outdoors | `meetup.com/sonoma-county-outdoors/events/ical/` | ~10 | Hiking/walking, weekly in Petaluma |
+| North Bay Contra Dance | `meetup.com/north-bay-contra-dance/events/ical/` | ~10 | Includes Petaluma dances |
+| Sonoma County Boomers | `meetup.com/sonoma-county-boomers/events/ical/` | ~7 | Social events, some in Petaluma |
+| Go Wild Hikers | `meetup.com/sonoma-county-go-wild-hikers/events/ical/` | ~3 | Hiking |
+| Meditate with a Monk | `meetup.com/meditate-with-a-monk-in-sonoma-county/events/ical/` | ~10 | Penngrove/Petaluma area |
+| Petaluma Book Club | `meetup.com/petaluma-book-and-brew-club/events/ical/` | ~1 | Monthly |
+
+### Priority 2: Venues with Structured Calendars
+| Source | URL | Events | Status | Notes |
+|--------|-----|--------|--------|-------|
+| HenHouse Brewing | henhousebrewing.com/events/ | 2-3 | ✅ `henhouse.py` | Trivia Thursdays, paint nights |
+| Phoenix Theater | thephoenixtheater.com/ | 13 | ✅ `phoenix_theater.py` | Via Eventbrite search |
+| Lagunitas Taproom | lagunitas.com/taproom/petaluma/ | Recurring | 🔧 | Trivia Wed, Music Bingo Thu |
+| Mercury Theater | mercurytheater.org/ | ~5 | 🔧 | New theater at old Cinnabar venue |
+| Adobe Road Winery | adoberoadwines.com/calendar/ | ~5-10 | 🔧 | Wine events, live music |
+| Cinnabar Theater | cinnabartheater.org/season-53/ | ~5 | 🔧 | Now at SSU |
+
+### Priority 3: Community Organizations (Need Scrapers)
+| Source | URL | Events | Notes |
+|--------|-----|--------|-------|
+| Village Network | villagenetworkofpetaluma.org/events/ | ~30+ | Senior activities, many weekly |
+| Cool Petaluma | coolpetaluma.org/events | ~5-10 | Environmental/community |
+| Petaluma Arts Center | petalumaartscenter.org/events/ | ~5 | Exhibitions, workshops |
+| Petaluma Garden Club | petalumagardenclub.org/calendar/ | Monthly | 2nd Monday meetings |
+| Calvary Chapel | calvarypetaluma.org/events | ~5-10 | Church events |
+| UU Petaluma | uupetaluma.org | Weekly | Sunday services |
+
+### Priority 4: Dance & Fitness
+| Source | URL | Events | Notes |
+|--------|-----|--------|-------|
+| Jasmine Worrell Swing | jasmineworrelldance.com/petaluma-swing-dance/ | Weekly | Thursdays at Hermann Sons |
+| Fred Astaire Petaluma | fredastaire.com/petaluma/calendar/ | Ongoing | Dance classes |
+| Bike Petaluma | bikepetaluma.org/about/events/ | 2/month | First Friday, Second Saturday rides |
+
+### Lower Priority / Aggregators
+| Source | URL | Notes |
+|--------|-----|-------|
+| Visit Petaluma | visitpetaluma.com/find-events/ | Aggregator, may have unique events |
+| Petaluma Argus-Courier | petalumanews.com/events/ | Community calendar, aggregated |
+| ACE Farmers Markets | ilovefarmersmarkets.org | 3 Petaluma markets (recurring) |
+
+### Non-Starters
 | Source | Reason |
 |--------|--------|
 | City of Petaluma | Cloudflare protection |
-| Petaluma Arts Center | Squarespace, no easy feed |
-| Phoenix Theater | Wix with cross-origin iframe |
+| Petaluma Running Club | Facebook group only |
 | Petaluma Wildlife Museum | School tours/private events |
 | Mindful-Monday Meetup | Virtual conference calls |
 

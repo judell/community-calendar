@@ -161,6 +161,63 @@ Complex - cross-origin iframes from `geteventviewer.com`. Often easier to check 
 - DuckDuckGo search templates
 - Meetup discovery process
 
+### Strategy 1: Ticketing Platform Indirection
+
+When a venue's website is hard to scrape (Wix, heavy JS, Squarespace, etc.), **check what ticketing platform they use**. The ticketing site often has:
+- Structured data (JSON-LD)
+- Search APIs
+- Much cleaner HTML
+
+**Example:** Phoenix Theater Petaluma uses a Wix site (heavy JS, no static content). But their events are ticketed via **Eventbrite**. Searching `eventbrite.com/d/ca--petaluma/phoenix-theater/` returns all events with clean structured data.
+
+**Common ticketing platforms to check:**
+- Eventbrite (search by venue name + city)
+- SeeTickets (often embedded in venue sites)
+- Dice.fm (music venues)
+- AXS (larger venues)
+- Ticketmaster (arenas, major venues)
+
+### Strategy 2: Topical Search for New Cities
+
+For discovering sources in a new city, search **DuckDuckGo** (Google often blocks) for `[topic] + [city name]` across many topics:
+
+```
+music, hiking, dance, dogs, yoga, art, running, cycling, wine, 
+beer, trivia, book club, garden, comedy, theater, kids, seniors, church
+```
+
+City names like "Petaluma" or "Bloomington" are discriminatory enough to filter results effectively. Move quickly - assess what's worth pursuing, don't get bogged down.
+
+**What to look for:**
+- Meetup groups (add ICS feed)
+- Venues with event calendars
+- Community organizations
+- Recurring events (trivia nights, farmers markets)
+
+### Strategy 3: Meetup ICS Pattern
+
+Every Meetup group has a public ICS feed at:
+```
+https://www.meetup.com/{group-slug}/events/ical/
+```
+
+No scraping needed - just discover groups and add their feeds. Test with:
+```bash
+curl -s "https://www.meetup.com/{group-slug}/events/ical/" | head -30
+```
+
+### Strategy 4: Platform-Specific Discovery
+
+Many event platforms have predictable feed URLs:
+
+| Platform | Discovery Method |
+|----------|------------------|
+| **MembershipWorks** | Look for "Subscribe" button, org ID in URL |
+| **Tockify** | Calendar ID in embed code or `tockify.com/api/feeds/ics/{id}` |
+| **GrowthZone** | Chamber sites: `business.{chamber}.us/api/events` |
+| **LiveWhale** | University sites: `{domain}/live/ical/events` |
+| **WordPress Tribe** | `{domain}/events/?ical=1` |
+
 ---
 
 ## Pipeline Validation
