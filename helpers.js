@@ -55,6 +55,44 @@ function filterEvents(events, term) {
   );
 }
 
+// Return a fixed-size page from a start index.
+// Uses one-item overlap so prior page's last item is first on next page.
+function getPagedEvents(events, term, startIndex, pageSize) {
+  const filtered = filterEvents(events, term) || [];
+  const size = pageSize || 50;
+  const index = Number.isFinite(startIndex) ? Math.max(0, startIndex) : 0;
+
+  if (!filtered.length) {
+    if (typeof window !== 'undefined') {
+      window._moreHasMore = false;
+      window._moreNextIndex = null;
+    }
+    return [];
+  }
+
+  // During search we keep first-N behavior and hide paging controls in UI.
+  if (term) {
+    const clampedIndex = Math.max(0, Math.min(index, Math.max(0, filtered.length - 1)));
+    const page = filtered.slice(clampedIndex, clampedIndex + size);
+    if (typeof window !== 'undefined') {
+      window._moreHasMore = false;
+      window._moreNextIndex = null;
+    }
+    return page;
+  }
+
+  const page = filtered.slice(index, index + size);
+  const hasMore = (index + size) < filtered.length;
+  const nextIndex = hasMore ? (index + size - 1) : null;
+
+  if (typeof window !== 'undefined') {
+    window._moreHasMore = hasMore;
+    window._moreNextIndex = nextIndex;
+  }
+
+  return page;
+}
+
 // Get description snippet with context around search term (returns null if no match in description)
 function getDescriptionSnippet(description, term) {
   if (!description || !term) return null;
@@ -728,6 +766,7 @@ if (typeof window !== 'undefined') {
   window.filterEvents = function(events, term) {
     return window.xsTrace ? window.xsTrace("filterEvents", function() { return _filterEvents(events, term); }) : _filterEvents(events, term);
   };
+  window.getPagedEvents = getPagedEvents;
   window.getDescriptionSnippet = getDescriptionSnippet;
   window.formatDayOfWeek = formatDayOfWeek;
   window.formatMonthDay = formatMonthDay;

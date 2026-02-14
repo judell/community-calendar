@@ -1,4 +1,4 @@
-<App name="Community Calendar" codeBehind="Main.xmlui.xs" var.showSearch="{false}" var.filterTerm="" var.viewMode="{'all'}">
+<App name="Community Calendar" codeBehind="Main.xmlui.xs" var.showSearch="{false}" var.filterTerm="" var.viewMode="{'all'}" var.displayStartIndex="{0}" var.browseStartIndex="{0}" var.scrollRequest="{0}">
 
   <!-- DataSources -->
   <DataSource
@@ -34,6 +34,16 @@
   <ChangeListener
     listenTo="{refreshCounter}"
     onDidChange="picks.refetch(); events.refetch(); enrichments.refetch()"
+  />
+
+  <ChangeListener
+    listenTo="{filterTerm}"
+    onDidChange="displayStartIndex = browseStartIndex;"
+  />
+
+  <ChangeListener
+    listenTo="{scrollRequest}"
+    onDidChange="topAnchor.scrollIntoView()"
   />
 
   <DataSource
@@ -81,47 +91,49 @@
   <!-- Main Content -->
   <HStack when="{!!window.cityFilter}" horizontalAlignment="center" width="100%">
   <VStack maxWidth="600px" width="100%">
-    <H1>
-      <HStack width="100%" verticalAlignment="center">
-        <Text>{window.cityName} Events</Text>
-        <SpaceFiller />
-        <HStack gap="$space-1">
-          <Icon name="search" tooltip="Search" width="20px" height="20px" onClick="showSearch = !showSearch" />
-          <Icon
-            when="{window.authUser}"
-            name="photo"
-            tooltip="Capture Event from Poster"
-            width="20px"
-            height="20px"
-            onClick="captureDialog.open()"
-          />
-          <Icon
-            when="{window.authUser?.user_metadata?.user_name === 'judell'}"
-            name="play"
-            tooltip="Capture Event from Audio"
-            width="20px"
-            height="20px"
-            onClick="audioCaptureDialog.open()"
-          />
-          <Icon name="list" tooltip="Sources" width="20px" height="20px" onClick="sourcesDialog.open()" />
-          <Icon
-            name="user"
-            tooltip="{window.authUser ? 'Sign Out' : 'Sign In'}"
-            width="20px"
-            height="20px"
-            color="{window.authUser ? '$color-primary-500' : 'inherit'}"
-            backgroundColor="{window.authUser ? '$color-primary-100' : 'transparent'}"
-            onClick="{window.authUser ? window.signOut() : window.signIn()}"
-          />
-          <Icon name="cog" tooltip="Inspector" width="20px" height="20px" onClick="inspectorDialog.open()" />
+    <Bookmark id="topAnchor">
+      <H1>
+        <HStack width="100%" verticalAlignment="center">
+          <Text>{window.cityName} Events</Text>
+          <SpaceFiller />
+          <HStack gap="$space-1">
+            <Icon name="search" tooltip="Search" width="20px" height="20px" onClick="showSearch = !showSearch" />
+            <Icon
+              when="{window.authUser}"
+              name="photo"
+              tooltip="Capture Event from Poster"
+              width="20px"
+              height="20px"
+              onClick="captureDialog.open()"
+            />
+            <Icon
+              when="{window.authUser?.user_metadata?.user_name === 'judell'}"
+              name="play"
+              tooltip="Capture Event from Audio"
+              width="20px"
+              height="20px"
+              onClick="audioCaptureDialog.open()"
+            />
+            <Icon name="list" tooltip="Sources" width="20px" height="20px" onClick="sourcesDialog.open()" />
+            <Icon
+              name="user"
+              tooltip="{window.authUser ? 'Sign Out' : 'Sign In'}"
+              width="20px"
+              height="20px"
+              color="{window.authUser ? '$color-primary-500' : 'inherit'}"
+              backgroundColor="{window.authUser ? '$color-primary-100' : 'transparent'}"
+              onClick="{window.authUser ? window.signOut() : window.signIn()}"
+            />
+            <Icon name="cog" tooltip="Inspector" width="20px" height="20px" onClick="inspectorDialog.open()" />
+          </HStack>
         </HStack>
-      </HStack>
-    </H1>
+      </H1>
+    </Bookmark>
     <TextBox
       when="{showSearch}"
       autoFocus="true"
       placeholder="Search events..."
-      onDidChange="(val) => filterTerm = val"
+      onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; }"
       marginBottom="$space-2"
     />
     <RadioGroup when="{window.authUser}" initialValue="{viewMode}" onDidChange="(val) => viewMode = val">
@@ -131,9 +143,17 @@
       </HStack>
     </RadioGroup>
     <Spinner when="{!events.loaded && viewMode === 'all'}" />
-    <List when="{events.loaded && viewMode === 'all'}" data="{window.filterEvents(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), filterTerm)}" fixedItemSize="true" limit="50">
+    <List id="eventsList" when="{events.loaded && viewMode === 'all'}" data="{window.getPagedEvents(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), filterTerm, displayStartIndex, 50)}" fixedItemSize="true" limit="50">
       <EventCard event="{$item}" filterTerm="{filterTerm}" />
     </List>
+    <Button
+      when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasMore}"
+      label="More events..."
+      variant="outlined"
+      width="100%"
+      marginTop="$space-2"
+      onClick="const nextIndex = window._moreNextIndex || displayStartIndex; displayStartIndex = nextIndex; browseStartIndex = nextIndex; scrollRequest = scrollRequest + 1;"
+    />
     <VStack when="{viewMode === 'picks'}" gap="$space-2">
       <Text fontSize="$fontSize-sm" value="{(picks.value || []).length + ' events'}" />
       <Text fontSize="$fontSize-xs" color="$color-text-secondary">Calendar feed for your picks:</Text>
