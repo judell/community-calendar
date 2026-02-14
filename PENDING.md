@@ -1,59 +1,49 @@
-# Pending: "More" Button for Calendar Display
+# Pending / Done
 
-## Problem
-List is capped at `limit="50"` for search keystroke performance (531ms vs 859ms at 100). Users can only browse 50 events before needing to search.
+## Table of Contents
+- [PENDING: Bidirectional Infinite Scroll](#pending-bidirectional-infinite-scroll)
+- [DONE: "More" Button for Calendar Display](#done-more-button-for-calendar-display)
 
-## Three Approaches
+# PENDING: Bidirectional Infinite Scroll
 
-### Option A: Dynamic limit (recommended)
-`limit="{filterTerm ? 50 : displayLimit}"`
+Discovery:
+- Not blocked by XMLUI runtime.
+- `List` has internal scroll-threshold fetch hooks for both directions:
+  - `requestFetchPrevPage`
+  - `requestFetchNextPage`
+- These are wired in source but under-documented in component docs/metadata.
+- `ScrollViewer` does not expose a generic scroll event, so this should be implemented through `List` pagination hooks, not custom viewport scroll listeners.
 
-- Browsing: "More" button increments `displayLimit` by 50 (100, 150, etc.). No keystroke diffing happening, virtualization handles DOM fine.
-- Searching: limit snaps back to 50 automatically — fast keystrokes preserved.
-- The perf problem is specifically on keystrokes. When not typing, 100+ items in the virtualizer costs nothing measurable (README confirms: "virtualization handles that").
+Evidence (XMLUI source):
+- `/Users/jonudell/xmlui/xmlui/src/components/List/List.tsx` wires `requestFetchPrevPage` and `requestFetchNextPage` to `ListNative`.
+- `/Users/jonudell/xmlui/xmlui/src/components/List/ListNative.tsx` invokes those callbacks near top/bottom during scroll.
+- `/Users/jonudell/xmlui/xmlui/src/components-core/ApiBoundComponent.tsx` auto-injects pagination handlers for API-bound list data.
 
-Changes:
-1. `Main.xmlui` — add `var.displayLimit="{50}"`, change `limit="50"` to `limit="{filterTerm ? 50 : displayLimit}"`, add "More" button after List
-2. `helpers.js` — stash `window._lastFilteredCount` in filterEvents wrapper so button knows when to hide
-3. Button hidden during search and when all events are already visible
+Analysis:
+- Current app paging is manual/index-window (`More events...`), so infinite scroll requires moving from "single window + jump" to "accumulated window + append/prepend".
+- This is feasible in both directions with stable anchors if we keep deterministic item ids and clamp bounds.
+- Main risk is UX/state coherence with search:
+  - search should operate within current browse baseline, not reset to origin
+  - fetch triggers should be disabled or adjusted during active search to avoid surprising jumps.
 
-```xml
-<Button
-  when="{events.loaded && viewMode === 'all' && !filterTerm && window._lastFilteredCount > displayLimit}"
-  label="More events..."
-  variant="outlined"
-  onClick="displayLimit = displayLimit + 50"
-  width="100%"
-  marginTop="$space-2"
-/>
-```
+Plan (high level):
+1. Replace manual `More` progression with list-driven page requests (`requestFetchNextPage` / `requestFetchPrevPage`).
+2. Keep a cursor/index state model that supports append (future) and prepend (earlier) slices.
+3. Preserve viewport anchor on prepend so content doesn’t jump.
+4. Define search contract: retain current baseline, suppress auto-fetch while typing.
+5. Keep `More` as temporary fallback behind a flag until infinite scroll is validated, then remove.
 
-### Option B: Slice-based pagination
-`.slice(displayOffset, displayOffset + 50)` in the data expression.
+# DONE: "More" Button for Calendar Display
 
-- Always exactly 50 items, zero perf concern
-- Earlier events disappear when paging forward (needs "Back" button too)
-- True time-based paging through events
-- All data already client-side, no re-fetch needed
+Implemented:
+- `More events...` pagination in `Main.xmlui` with fixed 50-item windows.
+- Deterministic index-based paging in `helpers.js` with one-item overlap (last item stays visible as first on next page).
+- Search continuity with paging state:
+  - browse position is preserved
+  - entering/exiting search does not lose the current `More` position
+  - `More` hides during active search
+- Reliable top jump on `More` using `Bookmark` anchor scroll (`topAnchor.scrollIntoView()`), without changing page centering/layout.
 
-### Option C: Time-cursor paging (new)
-Keep a `displayStartTime` cursor and always render the first 50 events at/after that time.
-
-- Default cursor is `now` (or selected day start)
-- `MORE` moves cursor to the start time of the last visible event
-- If you hit item `#50` and it is still the same day (for example `7:30pm`), next page starts from that time and reveals later events
-- Keeps page size fixed at 50 for predictable performance
-- Matches browsing intent better than pure count growth
-
-Implementation sketch:
-1. `Main.xmlui`: add `var.displayStartTime` and compute a `pagedEvents` array from filtered events where `event.start_time >= displayStartTime`, then `slice(0, 50)`
-2. `Main.xmlui`: `MORE` button sets `displayStartTime` to last visible event start time (plus a tiny tie-breaker if needed)
-3. `helpers.js`: add stable cursor bump helper so same-timestamp events do not repeat forever
-4. Reset `displayStartTime` when city/day/filter context changes
-
-## Key Facts
-- All events (up to 5000) are already fetched client-side
-- `limit` on XMLUI List is a client-side truncation, not a fetch limit
-- The perf issue is React virtual DOM diffing per keystroke, not DOM rendering (virtualization handles that)
-- `window._lastFilteredCount` avoids the AppState reactive loop gotcha (lives on window, not in AppState)
-- Time-cursor paging is useful when the first 50 events do not get past the current evening; `MORE` should advance time, not just count
+Result:
+- Browse beyond 50 items without keystroke perf regression.
+- Preserve context while paging and searching.
