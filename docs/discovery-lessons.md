@@ -94,3 +94,31 @@ Regional Meetup groups (e.g., "Sonoma County Outdoors") cover a wide area. Addin
 Universities using LiveWhale have iCal at `{domain}/live/ical/events`. For multi-campus schools, you may need to filter by campus in the scraper.
 
 **Example:** SRJC has 130+ events across campuses; `scrapers/srjc_petaluma.py` filters for Petaluma-specific events (17 events).
+
+## Legistar WebAPI for Government Meetings
+
+Cities using Legistar (Granicus) for agenda management often have a public WebAPI. The API provides structured JSON for all government meetings.
+
+**API endpoint pattern:**
+```
+https://webapi.legistar.com/v1/{client}/events
+```
+
+**Finding the client name:**
+- Check the Legistar URL (e.g., `santa-rosa.legistar.com` → client is `santa-rosa`)
+- Try variations: `santarosa`, `santa-rosa`, `SantaRosa`
+
+**OData query examples:**
+```bash
+# Future events only
+curl "https://webapi.legistar.com/v1/santa-rosa/events?\$filter=EventDate%20ge%20datetime'2026-02-14'&\$orderby=EventDate%20asc"
+
+# Specific board/commission
+curl "https://webapi.legistar.com/v1/santa-rosa/events?\$filter=EventBodyName%20eq%20'City%20Council'"
+```
+
+**Script:** `scrapers/legistar.py --client {client} --source "Source Name" -o output.ics`
+
+**Note:** Not all Legistar instances have the WebAPI enabled. Test with a simple events request first. If you get a "Key or Token is required" error, the API may require authentication.
+
+**Example:** Santa Rosa — 3,995 total records, WebAPI returns future scheduled meetings.

@@ -132,6 +132,13 @@ python scripts/library_intercept.py --location petaluma -o library.ics
 ### Elfsight Calendar (`scrapers/lib/elfsight.py`)
 For sites using Elfsight Event Calendar widget. See `scrapers/sportsbasement.py` for example.
 
+### Legistar (`scrapers/legistar.py`) - City Government Meetings
+```bash
+python scrapers/legistar.py --client santa-rosa -o events.ics
+python scrapers/legistar.py --client santa-rosa --source "City of Santa Rosa" -o events.ics
+```
+For cities using Legistar (Granicus) for agenda management. Client name is from the Legistar URL (e.g., `santa-rosa.legistar.com` → `santa-rosa`).
+
 ---
 
 ## Platform-Specific Techniques

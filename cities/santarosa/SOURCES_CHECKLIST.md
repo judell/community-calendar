@@ -210,3 +210,19 @@ The Bohemian, Press Democrat, and NorCal Public Media calendars all use **CitySp
 - Festival dates: April 9-12, 2026
 
 The film festival doesn't maintain its own events feed - it's more of a promotional site. Their events are listed through SebArts and may also appear in Bohemian/Press Democrat coverage.
+
+## City of Santa Rosa Legistar (Added 2026-02-14)
+
+| Field | Value |
+|-------|-------|
+| URL | https://santa-rosa.legistar.com/Calendar.aspx |
+| API | `https://webapi.legistar.com/v1/santa-rosa/events` |
+| Platform | Legistar (Granicus) |
+| Script | `scrapers/legistar.py --client santa-rosa` |
+| Output | `cities/santarosa/legistar.ics` |
+
+**Note:** The Legistar WebAPI provides structured JSON data for all city government meetings - City Council, Planning Commission, Board of Public Utilities, Design Review Board, and many other boards and commissions. This replaces the stale srcity.org ICS feeds which were not being updated.
+
+**Coverage:** Future meetings only (events are added to Legistar as they're scheduled, typically a few weeks/months ahead). Historical meetings remain in Legistar but are filtered out.
+
+**Cancelled meetings:** The script automatically skips events with `EventAgendaStatusName: "Cancelled"`.

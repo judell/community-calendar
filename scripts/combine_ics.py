@@ -45,6 +45,7 @@ SOURCE_NAMES = {
     'meetup_mindful': 'Meetup: Mindful Embodied Spirituality',
     'meetup_winters_write': 'Meetup: Winters Shut Up & Write',
     'SRCity': 'City of Santa Rosa',
+    'legistar': 'City of Santa Rosa Legistar',
     'srcc': 'Santa Rosa Cycling Club',
     'cafefrida': 'Cafe Frida',
     'barrel_proof': 'Barrel Proof Lounge',
