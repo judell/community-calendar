@@ -186,18 +186,22 @@ function dedupeEvents(events) {
 
 // For long-running events (exhibitions, recurring services), show only once per week.
 // This reduces clutter while keeping events visible throughout their run.
+// Weeks are anchored to "today" so the first occurrence shown is today or later,
+// then subsequent occurrences appear ~7 days apart.
 function collapseLongRunningEvents(events) {
   const MIN_OCCURRENCES = 5;  // Need at least this many to consider "long-running"
+  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-  // Helper: get ISO week string (YYYY-Www) for a date
-  function getWeekKey(dateStr) {
+  // Get start of today (midnight UTC)
+  const now = new Date();
+  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+  // Helper: get week number relative to today (0 = this week, 1 = next week, etc.)
+  function getWeekFromToday(dateStr) {
     const d = new Date(dateStr);
-    // Get Thursday of the week (ISO week date algorithm)
-    const thursday = new Date(d);
-    thursday.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7) + 3);
-    const firstThursday = new Date(thursday.getUTCFullYear(), 0, 4);
-    const weekNum = 1 + Math.round(((thursday - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
-    return thursday.getUTCFullYear() + '-W' + String(weekNum).padStart(2, '0');
+    const eventDay = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    const daysDiff = Math.floor((eventDay - todayStart) / (24 * 60 * 60 * 1000));
+    return Math.floor(daysDiff / 7);
   }
 
   // Group by title + location + time-of-day to identify long-running events
@@ -220,8 +224,8 @@ function collapseLongRunningEvents(events) {
     }
   }
 
-  // For long-running events, track which weeks we've seen
-  // key -> Set of week strings
+  // For long-running events, track which weeks we've seen (relative to today)
+  // key -> Set of week numbers
   const seenWeeks = {};
 
   // Build result: for long-running events, include only first occurrence per week
@@ -233,12 +237,12 @@ function collapseLongRunningEvents(events) {
     const key = (e.title || '').trim().toLowerCase() + '|' + (e.location || '').trim().toLowerCase() + '|' + timeOfDay;
 
     if (longRunningKeys.has(key)) {
-      const weekKey = getWeekKey(e.start_time);
+      const weekNum = getWeekFromToday(e.start_time);
       if (!seenWeeks[key]) {
         seenWeeks[key] = new Set();
       }
-      if (!seenWeeks[key].has(weekKey)) {
-        seenWeeks[key].add(weekKey);
+      if (!seenWeeks[key].has(weekNum)) {
+        seenWeeks[key].add(weekNum);
         // Mark as recurring so UI can indicate it
         result.push({ ...e, isRecurring: true });
       }
