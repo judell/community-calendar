@@ -104,7 +104,6 @@ The goal is a comprehensive, low-maintenance calendar that updates automatically
 - `maxpreps.py` - High school athletics (any school)
 - `growthzone.py` - Chamber of Commerce sites
 - `eventbrite_scraper.py` - Eventbrite events by location
-- `library_intercept.py` - Library event calendars
 
 Scrapers are in `scrapers/` and per-city data lives in `cities/<name>/`.
 
@@ -278,8 +277,7 @@ The workflow in `.github/workflows/generate-calendar.yml` runs automatically.
 1. Run scrapers for sources without ICS feeds
 2. Download live ICS feeds from venues that provide them
 3. Update `feeds.txt` with all sources (live URLs + local scraped files)
-4. Generate legacy HTML calendars via `cal.py`
-5. Combine all ICS files into `combined.ics`
+4. Combine all ICS files into `combined.ics`
 6. Commit and push changes
 
 **Manual trigger**: Can also be triggered manually via GitHub Actions UI with options:
@@ -440,7 +438,7 @@ Users photograph an event poster or speak/upload audio to capture events:
 **Implementation:**
 - `components/CaptureDialog.xmlui` — image selection → Claude API → PickEditor
 - `components/AudioCaptureDialog.xmlui` — audio file/microphone → Whisper + Claude → PickEditor
-- `supabase/functions/capture-event/index.ts` (v23) — edge function with two modes:
+- `supabase/functions/capture-event/index.ts` (v24) — edge function with two modes:
   - **Extract mode**: Receives image or audio via multipart upload. Images go to Claude directly. Audio goes to Whisper for transcription, then Claude extracts event JSON from the transcript.
   - **Commit mode**: Receives edited event JSON, inserts into `events` table with `source='poster_capture'`, creates pick. For audio: appends transcript to description ("Transcribed audio from {username}:"), saves transcript in dedicated column, saves city from client.
 
@@ -469,7 +467,7 @@ Users photograph an event poster or speak/upload audio to capture events:
 
 ## App Architecture
 
-The app uses XMLUI's `Main.xmlui.xs` for cross-component state and functions:
+The app uses XMLUI's code-behind convention (`Main.xmlui.xs`) for shared state and functions:
 
 ```
 Main.xmlui.xs                            # Shared vars (pickEvent, picksData, enrichmentsData, refreshCounter)
@@ -679,10 +677,9 @@ community-calendar/
 │   ├── santarosa/
 │   ├── bloomington/
 │   └── davis/
-├── scripts/                # Build scripts
+├── scripts/                # Build and utility scripts
 │   ├── combine_ics.py      # Combines ICS files into combined.ics
 │   ├── ics_to_json.py      # Converts ICS to JSON for Supabase
-│   ├── library_intercept.py # Sonoma County Library scraper
 │   └── report.py           # Feed health report
 ├── scrapers/               # Event scrapers (Eventbrite, CitySpark, RSS, etc.)
 ├── supabase/
