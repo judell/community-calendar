@@ -60,39 +60,9 @@ Our EventCards have **variable actual heights** (wrapping titles, conditional lo
 
 At limit=50, measurement shows **no performance difference** between true and false. We could switch to `false` for accurate scrollbar positioning with no cost. We keep `true` as the default since it doesn't hurt.
 
-## Measuring Search Performance
+## Measuring and Optimizing Search Performance
 
-The [trace-tools](https://github.com/xmlui-org/trace-tools) project provides `xsTrace`, a generic timing utility that pushes app-level measurements into the XMLUI inspector timeline. In `helpers.js`:
-
-```js
-var _filterEvents = filterEvents;
-window.filterEvents = function(events, term) {
-  return window.xsTrace
-    ? window.xsTrace("filterEvents", function() { return _filterEvents(events, term); })
-    : _filterEvents(events, term);
-};
-```
-
-This confirms that `filterEvents` takes 2-3ms — the bottleneck is engine-internal reactive overhead and React reconciliation, not app-level code. See the [xsTrace case study in trace-tools](https://github.com/xmlui-org/trace-tools#xstrace-case-study-community-calendar-search) for the full engine analysis.
-
-## What We Tried That Didn't Help
-
-| Strategy | Result | Why |
-|----------|--------|-----|
-| Pre-compute deduped+enriched array | Dead end (0-6%) | Bottleneck is engine-internal, not expression complexity |
-| Fixed card height (CSS `height="90px"`) | No effect | `fixedItemSize` already controls virtualizer; CSS height is irrelevant |
-| Server-side full-text search | Not needed | `filterEvents` is already 2-3ms |
-
-## What Does Help
-
-| Lever | Measured effect |
-|-------|----------------|
-| **limit 100→50** | **38% improvement** |
-| **XMLUI 0.12.1** (with log suppression) | **12% improvement** |
-| **LeafComponentAdapter** (engine optimization) | **6% improvement** |
-| **Combined** | **49% improvement (859→439ms)** |
-
-The first lever is the only app-level one. The other two are engine changes documented in [trace-tools](https://github.com/xmlui-org/trace-tools).
+App-level measurement using [trace-tools](https://github.com/xmlui-org/trace-tools) confirms that `filterEvents` takes 2-3ms — the bottleneck is engine-internal reactive overhead and React reconciliation, not app-level code. The only effective app-level lever is `limit` (lowering from 100 to 50 gave a 38% improvement). See the [xsTrace case study](https://github.com/xmlui-org/trace-tools#xstrace-case-study-community-calendar-search) for the full investigation, measurement methodology, and engine analysis.
 
 ## XMLUI List Documentation
 
