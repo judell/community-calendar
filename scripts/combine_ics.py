@@ -305,10 +305,15 @@ def extract_events(ics_content, source_name=None, fallback_url=None):
     return events
 
 
-def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar"):
-    """Combine all ICS files in a directory into one."""
+def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar", exclude_sources=None):
+    """Combine all ICS files in a directory into one.
+    
+    Args:
+        exclude_sources: Set of source filenames (without .ics) to skip
+    """
     all_events = []
     geo_filtered_count = 0
+    exclude_sources = exclude_sources or set()
     # Use 24 hours ago to avoid filtering out same-day events due to timezone differences
     from datetime import timedelta
     now = datetime.now(timezone.utc) - timedelta(hours=24)
@@ -324,6 +329,11 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar")
     for ics_file in sorted(ics_dir.glob('*.ics')):
         # Skip the output file if it exists
         if ics_file.name == Path(output_file).name:
+            continue
+        
+        # Skip excluded sources
+        if ics_file.stem in exclude_sources:
+            print(f"  SKIP {ics_file.name} (excluded)")
             continue
             
         try:
@@ -412,8 +422,12 @@ if __name__ == '__main__':
     parser.add_argument('--input-dir', '-i', required=True, help='Directory containing ICS files')
     parser.add_argument('--output', '-o', required=True, help='Output ICS file')
     parser.add_argument('--name', '-n', default='Community Calendar', help='Calendar name')
+    parser.add_argument('--exclude', '-x', default='', help='Comma-separated source filenames to exclude (without .ics)')
     
     args = parser.parse_args()
+    exclude_sources = set(s.strip() for s in args.exclude.split(',') if s.strip())
     
     print(f"Combining ICS files from {args.input_dir}...")
-    combine_ics_files(args.input_dir, args.output, args.name)
+    if exclude_sources:
+        print(f"  Excluding sources: {', '.join(sorted(exclude_sources))}")
+    combine_ics_files(args.input_dir, args.output, args.name, exclude_sources)

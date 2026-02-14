@@ -19,6 +19,10 @@ on:
         description: 'Number of months ahead to scrape (default: 6)'
         required: false
         default: '6'
+      exclude_sources:
+        description: 'Sources to exclude (comma-separated filenames without .ics, e.g., bohemian,pressdemocrat)'
+        required: false
+        default: ''
   schedule:
     - cron: '0 0 * * *'
 
@@ -128,7 +132,7 @@ jobs:
         cd ../..
         # Eventbrite scrape
         python scrapers/eventbrite_scraper.py --location ca--santa-rosa --months ${SCRAPE_MONTHS:-2} > cities/santarosa/eventbrite.ics || true
-        python scripts/combine_ics.py --input-dir cities/santarosa --output cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
+        python scripts/combine_ics.py --input-dir cities/santarosa --output cities/santarosa/combined.ics --name "Santa Rosa Community Calendar" --exclude "${{ github.event.inputs.exclude_sources }}"
 
     # ==========================================
     # Bloomington
@@ -157,7 +161,7 @@ jobs:
         curl -sL "https://calendar.google.com/calendar/ical/2gd73d7gc46mstrdnr6k7v7b2o@group.calendar.google.com/public/basic.ics" -o bsquare_critical_mass.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/c_02o6fd3erhdmhe4oc5so149ir0@group.calendar.google.com/public/basic.ics" -o bsquare_bptc.ics || true
         cd ../..
-        python scripts/combine_ics.py --input-dir cities/bloomington --output cities/bloomington/combined.ics --name "Bloomington Community Calendar"
+        python scripts/combine_ics.py --input-dir cities/bloomington --output cities/bloomington/combined.ics --name "Bloomington Community Calendar" --exclude "${{ github.event.inputs.exclude_sources }}"
 
     # ==========================================
     # Davis
@@ -196,7 +200,7 @@ jobs:
     - name: Combine Davis ICS
       if: contains(steps.locations.outputs.list, 'davis')
       run: |
-        python scripts/combine_ics.py --input-dir cities/davis --output cities/davis/combined.ics --name "Davis Community Calendar"
+        python scripts/combine_ics.py --input-dir cities/davis --output cities/davis/combined.ics --name "Davis Community Calendar" --exclude "${{ github.event.inputs.exclude_sources }}"
 
     # ==========================================
     # Petaluma
@@ -276,7 +280,7 @@ jobs:
         cd ../..
         # Eventbrite scrape
         python scrapers/eventbrite_scraper.py --location ca--petaluma --months ${SCRAPE_MONTHS:-2} > cities/petaluma/eventbrite.ics || true
-        python scripts/combine_ics.py --input-dir cities/petaluma --output cities/petaluma/combined.ics --name "Petaluma Community Calendar"
+        python scripts/combine_ics.py --input-dir cities/petaluma --output cities/petaluma/combined.ics --name "Petaluma Community Calendar" --exclude "${{ github.event.inputs.exclude_sources }}"
 
     # ==========================================
     # Post-processing (all cities)
