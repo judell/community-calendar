@@ -174,13 +174,26 @@ function dedupeEvents(events) {
       if (!groups[key].rrule && e.rrule) groups[key].rrule = e.rrule;
     }
   });
-  // Convert sources Set to comma-separated string
+  // Convert sources Set to comma-separated string, with authoritative source first
+  // (a source whose name appears in the event location is considered authoritative)
   // Filter mergedIds to only include numeric IDs (exclude synthetic enrichment IDs)
-  let result = Object.values(groups).map(e => ({
-    ...e,
-    source: Array.from(e.sources).sort().join(', '),
-    mergedIds: e.mergedIds.filter(id => typeof id === 'number' || /^\d+$/.test(id))
-  })).sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+  let result = Object.values(groups).map(e => {
+    const sourcesArr = Array.from(e.sources).sort();
+    const loc = (e.location || '').toLowerCase();
+    if (loc) {
+      // Move any source whose name is found in the location to the front
+      const authIdx = sourcesArr.findIndex(s => loc.includes(s.toLowerCase()));
+      if (authIdx > 0) {
+        const [auth] = sourcesArr.splice(authIdx, 1);
+        sourcesArr.unshift(auth);
+      }
+    }
+    return {
+      ...e,
+      source: sourcesArr.join(', '),
+      mergedIds: e.mergedIds.filter(id => typeof id === 'number' || /^\d+$/.test(id))
+    };
+  }).sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
 
   // Collapse long-running events (exhibitions, recurring services)
   result = collapseLongRunningEvents(result);
