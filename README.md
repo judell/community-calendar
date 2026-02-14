@@ -398,7 +398,7 @@ Users authenticate and save personal event picks:
 - Picking: checkbox opens PickEditor modal for confirmation + optional recurrence enrichment
 - Unpicking: one-click checkbox remove (no modal), deletes pick + any associated enrichment
 - "all" / "my picks" radio group toggles between full feed and personal picks view
-- DataSource refresh via `refreshCounter` in Globals.xs + ChangeListener in Main.xmlui
+- DataSource refresh via `refreshCounter` in Main.xmlui.xs + ChangeListener in Main.xmlui
 
 **Edge function:**
 - `my-picks` - validates token, returns user's picks as ICS (default) or JSON (`?format=json`)
@@ -469,10 +469,10 @@ Users photograph an event poster or speak/upload audio to capture events:
 
 ## App Architecture
 
-The app uses XMLUI's `Globals.xs` for cross-component state and functions:
+The app uses XMLUI's `Main.xmlui.xs` for cross-component state and functions:
 
 ```
-Globals.xs                            # Shared vars (pickEvent, picksData, enrichmentsData, refreshCounter)
+Main.xmlui.xs                            # Shared vars (pickEvent, picksData, enrichmentsData, refreshCounter)
                                       # and functions (togglePick, removePick)
 Main.xmlui                            # App shell with DataSources + ChangeListeners for reactive sync
 helpers.js                            # Pure functions (filter, dedupe, format, detectRecurrence, expandEnrichments, buildGoogleCalendarUrl)
@@ -487,9 +487,9 @@ components/
 └── SourcesDialog.xmlui               # Sources modal (uses method.open pattern)
 ```
 
-**Globals.xs pattern:**
+**Main.xmlui.xs pattern:**
 ```javascript
-// Globals.xs — vars and functions accessible from all components
+// Main.xmlui.xs — vars and functions accessible from all components
 var pickEvent = null;       // set to event object to open PickEditor
 var picksData = null;       // synced from picks DataSource via ChangeListener
 var enrichmentsData = null; // synced from enrichments DataSource via ChangeListener
@@ -499,11 +499,11 @@ function togglePick(event) { ... }
 function removePick(pickId) { ... }
 ```
 
-**DataSource refresh pattern:** Globals.xs functions can't reference DataSource IDs directly (they're XMLUI context variables, not JS scope). Instead, incrementing `refreshCounter` triggers a `ChangeListener` in Main.xmlui that calls `refetch()` in XMLUI context where DataSource IDs are valid.
+**DataSource refresh pattern:** Main.xmlui.xs functions can't reference DataSource IDs directly (they're XMLUI context variables, not JS scope). Instead, incrementing `refreshCounter` triggers a `ChangeListener` in Main.xmlui that calls `refetch()` in XMLUI context where DataSource IDs are valid.
 
 **Key patterns:**
-- `Globals.xs` for shared state and functions — no prop drilling needed
-- ChangeListeners sync DataSource values to Globals.xs vars (`picksData`, `enrichmentsData`)
+- `Main.xmlui.xs` for shared state and functions — no prop drilling needed
+- ChangeListeners sync DataSource values to Main.xmlui.xs vars (`picksData`, `enrichmentsData`)
 - ChangeListener on `refreshCounter` triggers `picks.refetch(); events.refetch(); enrichments.refetch()`
 - `method.open` on Component exposes internal dialog's open method
 - Inline `tooltip` prop on Icon instead of Tooltip wrapper
@@ -635,7 +635,7 @@ Recurring picks stay pinned in the "my picks" view regardless of whether the ori
 
 - **Picking**: Click checkbox → PickEditor modal opens → confirm with optional recurrence → pick + enrichment created
 - **Unpicking**: Click checkbox on already-picked event → one-click remove (no modal), deletes both the pick and any associated enrichment
-- **DataSource refresh**: Both paths increment a `refreshCounter` var in `Globals.xs`, which triggers a `ChangeListener` in `Main.xmlui` to call `refetch()` on the events, picks, and enrichments DataSources
+- **DataSource refresh**: Both paths increment a `refreshCounter` var in `Main.xmlui.xs`, which triggers a `ChangeListener` in `Main.xmlui` to call `refetch()` on the events, picks, and enrichments DataSources
 
 ### Three capture paths, one editor
 
@@ -660,7 +660,7 @@ The `AddToCalendar` component generates a downloadable `.ics` file for any event
 ```
 community-calendar/
 ├── Main.xmlui              # XMLUI app shell (DataSources, ChangeListeners, layout)
-├── Globals.xs              # Shared vars + functions (togglePick, removePick, refreshCounter)
+├── Main.xmlui.xs              # Shared vars + functions (togglePick, removePick, refreshCounter)
 ├── helpers.js              # Pure helper functions (filter, dedupe, format, detectRecurrence, etc.)
 ├── components/
 │   ├── EventCard.xmlui     # Event display card with pick checkbox
