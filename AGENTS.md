@@ -10,7 +10,7 @@
 
 3. **Churches and community centers** - Weekly services may not be interesting, but special events (concerts, fundraisers, community dinners) are.
 
-4. **Youth sports leagues** - Little League, youth soccer, swim teams often have public calendars.
+4. **Youth sports leagues** - Worth checking but rarely viable; most use member-only platforms (see [discovery lessons](docs/discovery-lessons.md)).
 
 5. **If in doubt, add it** - We can always filter later. Missing events is worse than having too many.
 
@@ -160,6 +160,8 @@ Complex - cross-origin iframes from `geteventviewer.com`. Often easier to check 
 - Testing discovered feeds
 - DuckDuckGo search templates
 - Meetup discovery process
+
+**See [docs/discovery-lessons.md](docs/discovery-lessons.md) for real-world lessons** (e.g., WordPress iCal endpoints, Wix→Eventbrite indirection, youth sports dead ends).
 
 ### Strategy 1: Ticketing Platform Indirection
 
