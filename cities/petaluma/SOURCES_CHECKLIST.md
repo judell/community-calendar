@@ -23,8 +23,13 @@
 | SRJC Petaluma Campus | LiveWhale Scraper | 17 | ✅ Ready |
 | HenHouse Brewing Petaluma | Scraper | 2-3 | ✅ Ready |
 | Phoenix Theater | Eventbrite Scraper | 13 | ✅ Ready |
+| Meetup: Sonoma County Outdoors | ICS | ~10 | ✅ Ready |
+| Meetup: North Bay Contra Dance | ICS | ~10 | ✅ Ready |
+| Meetup: Sonoma County Boomers | ICS | ~7 | ✅ Ready |
+| Meetup: Sonoma County Go Wild Hikers | ICS | ~3 | ✅ Ready |
+| Meetup: Meditate with a Monk | ICS | ~10 | ✅ Ready |
 
-**Total: ~320+ unique events (deduplicated)**
+**Total: ~360+ unique events (deduplicated)**
 
 ---
 
@@ -107,7 +112,7 @@ Topical search found more regional groups with Petaluma events:
 | sonoma-county-go-wild-hikers | `meetup.com/sonoma-county-go-wild-hikers/events/ical/` | ~3 | Hiking |
 | meditate-with-a-monk-in-sonoma-county | `meetup.com/meditate-with-a-monk-in-sonoma-county/events/ical/` | ~10 | Penngrove area |
 
-**Status:** Ready to add - all have working ICS feeds
+**Status:** ✅ Added to feeds.txt (2026-02-14)
 
 ---
 
@@ -223,9 +228,35 @@ Topical search found more regional groups with Petaluma events:
 - **Status:** Has school tour dates but no general event calendar found
 
 ### TODO
-- [ ] Build MaxPreps scraper for both high schools
-- [ ] Check SRJC Petaluma campus events
-- [ ] Youth sports leagues (Little League, AYSO, etc.)
+- [x] Build MaxPreps scraper for both high schools ✅ Done
+- [x] Check SRJC Petaluma campus events ✅ Done (17 events)
+- [x] Youth sports leagues - **Not viable** (see below)
+
+### Youth Sports Research (2026-02-14)
+
+**Extensively Investigated:**
+
+| Organization | URL | Platform | Status |
+|-------------|-----|----------|--------|
+| Petaluma National Little League | petalumanational.org | BlueSombrero/sSchedule | No public ICS |
+| Petaluma American Little League | petalumaamerican.com | BlueSombrero/sSchedule | No public ICS |
+| Petaluma Leghorns (Baseball) | petalumaleghorns.com | Custom site | Schedule page exists, no ICS |
+| AYSO Region 26 | ayso26.org | Google Sites | Palo Alto, not Petaluma |
+| Petaluma Youth Soccer | petalumasoccerclub.com | Not found | Domain doesn't resolve |
+| Petaluma Girls Softball | petalumagirlssoftball.com | Error page | Site down |
+| Petaluma Swim Team | petalumaswim.org | SeedProd (coming soon) | Not active |
+| City of Petaluma Parks & Rec | cityofpetaluma.org | Cloudflare | Blocked |
+| Petaluma RecDesk | petaluma.recdesk.com | RecDesk | Organization not found |
+
+**Platforms checked:** GameChanger, TeamSnap, SportsEngine, LeagueApps, GotSport, TourneyMachine, ActiveNet, RecDesk
+
+**Finding:** Youth sports organizations in Petaluma either:
+1. Use member-only platforms without public calendar exports (Little League)
+2. Have no functioning websites (soccer, softball, swim)
+3. Are blocked by Cloudflare (city recreation)
+4. Don't serve Petaluma specifically (AYSO)
+
+**Conclusion:** Youth sports leagues are **not viable** for public calendar aggregation. The high school athletics via MaxPreps (Petaluma High + Casa Grande) already capture the public-facing school sports events that would be of general community interest.
 
 ---
 
