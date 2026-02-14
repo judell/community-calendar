@@ -30,8 +30,15 @@
 | Meetup: Meditate with a Monk | ICS | ~10 | ✅ In CI |
 | Mercury Theater | Squarespace JSON Scraper | 12 | ✅ In CI |
 | Adobe Road Winery | JSON-LD Scraper | 8 | ✅ In CI |
+| Meetup: North Bay Adventure Club | ICS | ~10 | ✅ In CI |
+| Meetup: North Bay Tails and Trails | ICS | ~5 | ✅ In CI |
+| Meetup: North Bay 50+ Nature and Outdoors | ICS | ~10 | ✅ In CI |
+| Meetup: Senior Walkabouters (SWAG) | ICS | ~5 | ✅ In CI |
+| Meetup: Sonoma County Wanderers | ICS | ~10 | ✅ In CI |
+| Meetup: Mindfull Hikes | ICS | ~5 | ✅ In CI |
+| Meetup: Four Corners Hiking & Beer | ICS | ~5 | ✅ In CI |
 
-**Total: ~435+ events (before deduplication)**
+**Total: ~485+ events (before deduplication)**
 
 ---
 
@@ -115,6 +122,59 @@ Topical search found more regional groups with Petaluma events:
 | meditate-with-a-monk-in-sonoma-county | `meetup.com/meditate-with-a-monk-in-sonoma-county/events/ical/` | ~10 | Penngrove area |
 
 **Status:** ✅ All added to CI (2026-02-14)
+
+### Hiking & Outdoors Meetup Groups Discovered (2026-02-14)
+
+Topical search for hiking, outdoors, dogs, seniors + Petaluma found more groups:
+
+| Group | ICS URL | Events | Notes |
+|-------|---------|--------|-------|
+| northbayhiking | `meetup.com/northbayhiking/events/ical/` | ~10 | Hiking, backpacking, kayaking |
+| north-bay-tails-and-trails | `meetup.com/north-bay-tails-and-trails/events/ical/` | ~5 | Dog-friendly hikes, Sonoma County |
+| meetup-group-qXYJpXNx | `meetup.com/meetup-group-qXYJpXNx/events/ical/` | ~10 | 50+ nature walks, 1,081 members |
+| senior-walkabouters | `meetup.com/senior-walkabouters/events/ical/` | ~5 | Walking/hiking, Sonoma County parks |
+| sonoma-county-wanderers | `meetup.com/sonoma-county-wanderers/events/ical/` | ~10 | Ages 45-70, 5-14 mile hikes |
+| meetup-group-ohazunav | `meetup.com/meetup-group-ohazunav/events/ical/` | ~5 | Mindful/silent hiking, 690 members |
+| Four-Corners-Hiking-Beer | `meetup.com/Four-Corners-Hiking-Beer/events/ical/` | ~5 | Hike then beer, rotates North Bay |
+
+**Status:** ✅ All added to CI (2026-02-14)
+
+### Topical Discovery: Venues & Orgs to Investigate (2026-02-14)
+
+Comprehensive topical searches (music, hiking, cycling, birding, gardening, art/theater, food/wine, community/church/seniors) found many additional sources. Organized by scraping approach:
+
+**Squarespace sites (can reuse Mercury Theater `?format=json` pattern):**
+- Cinnabar Theater (cinnabartheater.org/shows/) - Full theater season
+- WonderStump! (wonderstump.art/events) - Immersive art venue
+- Polly Klaas Community Theater (pollyklaastheater.org/events/) - StorySlam, jazz
+- Petaluma Arts Center (petalumaartscenter.org/events) - Monthly art exchange
+- Brewsters Beer Garden (brewstersbeergarden.com/calendar1) - Live music, trivia
+- Cool Petaluma (coolpetaluma.org/events) - Climate/sustainability events
+- 350 Petaluma (350petaluma.org/events) - Monthly bike rides
+- Brooks Note Winery (brooksnotewinery.com/event-calendar/) - Friday music
+- Petaluma People Services (petalumapeople.org/events) - Senior programs
+- Healthy Petaluma (healthypetaluma.org/calendar-of-events) - Health events
+
+**Live music venues (need investigation):**
+- The Big Easy (bigeasypetaluma.com) - Live music 5 nights/week
+- McNear's Saloon (mcnears.com/our-events/) - Comedy + live events
+- Montagne Russe Winery (russewines.com/Events) - Weekly Saturday music
+- Griffo Distillery (griffodistillery.com/pages/calendar) - Weekly Thursday jam
+
+**WordPress/iCal sites (try `?ical=1` endpoint):**
+- Petaluma Elks Lodge (elks901.org/calendar-of-events/) - Craft faires, dinners
+- Petaluma Wetlands Alliance (petalumawetlands.org/calendar/) - Bird walks
+- Petaluma Garden Club (petalumagardenclub.org/calendar/) - Monthly meetings
+- Petaluma Bounty (petalumabounty.org/events-calendar/) - Farm volunteer hours
+
+**Other platforms:**
+- Rotary Club of Petaluma (ClubRunner - try portal.clubrunner.ca/10088/events/ical)
+- Village Network of Petaluma (ClubExpress - check for iCal)
+- Blue Zones Project Petaluma (Eventbrite - may already be captured)
+- Sonoma County Regional Parks (parks.sonomacounty.ca.gov/play/calendar/hiking)
+- Petaluma Cycling Club (Wild Apricot - no native ICS)
+- Empire Runners Club (Wild Apricot - no native ICS)
+- Petaluma River Park (petalumariverpark.org/calendar - weekly Tuesday walks)
 
 ---
 
