@@ -4,7 +4,7 @@
 **Last Updated:** 2026-02-14  
 **Status:** ✅ DEPLOYED
 
-## Current Status: ~415+ events from 25 sources
+## Current Status: ~435+ events from 27 sources
 
 ### Implemented Sources (all in CI)
 
@@ -20,6 +20,8 @@
 | Mystic Theatre | 12 | Scraper (`mystic_theatre.py`) | ✅ |
 | Petaluma High Athletics | 9 | Scraper (`maxpreps.py`) | ✅ |
 | Casa Grande High Athletics | 8 | Scraper (`maxpreps.py`) | ✅ |
+| Mercury Theater | 12 | Scraper (`mercury_theater.py`) | ✅ |
+| Adobe Road Winery | 8 | Scraper (`adobe_road.py`) | ✅ |
 | HenHouse Brewing | 2-3 | Scraper (`henhouse.py`) | ✅ |
 | Meetup: Mindful Petaluma | 10 | ICS Feed | ✅ |
 | Meetup: Candlelight Yoga | 10 | ICS Feed | ✅ |
@@ -39,11 +41,8 @@
 
 | Source | Events | Platform | Notes |
 |--------|--------|----------|-------|
-| Lagunitas Taproom | Recurring | Unknown | Trivia Wed, Music Bingo Thu |
-| Mercury Theater | ~5 | Unknown | New theater at old Cinnabar venue |
-| Adobe Road Winery | ~5-10 | Unknown | Wine events, live music |
+| Lagunitas Taproom | Recurring | WordPress + Eventbrite | Trivia Wed, Music Bingo Thu; may overlap with Eventbrite scrape |
 | Village Network | ~30+ | Unknown | Senior activities |
-| Youth Sports | ? | Various | Little League, AYSO, etc. |
 
 ---
 

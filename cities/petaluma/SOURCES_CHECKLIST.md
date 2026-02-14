@@ -28,8 +28,10 @@
 | Meetup: Sonoma County Boomers | ICS | ~7 | ✅ In CI |
 | Meetup: Go Wild Hikers | ICS | ~3 | ✅ In CI |
 | Meetup: Meditate with a Monk | ICS | ~10 | ✅ In CI |
+| Mercury Theater | Squarespace JSON Scraper | 12 | ✅ In CI |
+| Adobe Road Winery | JSON-LD Scraper | 8 | ✅ In CI |
 
-**Total: ~415+ events (before deduplication)**
+**Total: ~435+ events (before deduplication)**
 
 ---
 
