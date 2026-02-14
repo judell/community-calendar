@@ -224,7 +224,17 @@ Sacramento
 West Sacramento
 Dixon
 Winters
+
+# Excluded cities (prefix with !)
+# These are filtered even without address indicators
+!Fairfield
+!Vacaville
 ```
+
+**Syntax:**
+- Plain city names are **allowed** (events there will appear)
+- `!CityName` means **excluded** (events there are filtered out)
+- Excluded cities catch venues like "Fairfield Library" that lack state/ZIP
 
 You don't need to look up coordinates — the script does that automatically.
 
