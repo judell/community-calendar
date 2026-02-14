@@ -12,7 +12,6 @@ A community event aggregator that scrapes events from multiple sources, combines
 - [Recent Updates](#recent-updates-feb-2026)
 - [XMLUI Resources](#xmlui-resources)
 - [Testing](#testing)
-- [Legacy HTML Generation](#legacy-html-generation)
 - [Adding a New City](#adding-a-new-city)
 - [Recurrence and Enrichment](#recurrence-and-enrichment)
 - [Planned Improvements](#planned-improvements)
@@ -532,18 +531,6 @@ After mock tests, `test.html` fetches 500 live events from Supabase and validate
 - Helpers don't crash on real data edge cases
 - Deduplication finds actual duplicates (~9% reduction)
 - Long descriptions, null fields, and special characters handled correctly
-
-## Legacy HTML Generation
-
-The original HTML calendar generation lives in `legacy/`:
-
-```bash
-python legacy/cal.py --generate --location santarosa --year 2026 --month 2
-```
-
-See the legacy calendars at `/cities/bloomington/2026-02.html` etc.
-
----
 
 ## Adding a New City
 
