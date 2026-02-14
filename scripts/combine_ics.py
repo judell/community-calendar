@@ -82,6 +82,7 @@ SOURCE_NAMES = {
     'meetup_book_brew': 'Meetup: Petaluma Book & Brew Club',
     'meetup_active_20_30': 'Meetup: Petaluma Active 20-30',
     'srjc_petaluma': 'SRJC Petaluma Campus',
+    'bigeasy': 'The Big Easy',
     # Santa Rosa - local arts/community
     'santa_rosa_arts_center': 'Santa Rosa Arts Center',
     'movingwriting': 'MovingWriting',
@@ -111,6 +112,7 @@ SOURCE_URLS = {
     'bsquare_bptc': 'https://bloomingtontransit.com/',
     'santa_rosa_arts_center': 'https://santarosaartscenter.org/events/',
     'movingwriting': 'https://www.movingwriting.com/workshops',
+    'bigeasy': 'https://bigeasypetaluma.com/events/',
 }
 
 

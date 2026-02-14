@@ -30,6 +30,7 @@
 | Meetup: Meditate with a Monk | ICS | ~10 | ✅ In CI |
 | Mercury Theater | Squarespace JSON Scraper | 12 | ✅ In CI |
 | Adobe Road Winery | JSON-LD Scraper | 8 | ✅ In CI |
+| The Big Easy | WordPress iCal | ~30 | ✅ In CI |
 | Meetup: North Bay Adventure Club | ICS | ~10 | ✅ In CI |
 | Meetup: North Bay Tails and Trails | ICS | ~5 | ✅ In CI |
 | Meetup: North Bay 50+ Nature and Outdoors | ICS | ~10 | ✅ In CI |
@@ -38,7 +39,7 @@
 | Meetup: Mindfull Hikes | ICS | ~5 | ✅ In CI |
 | Meetup: Four Corners Hiking & Beer | ICS | ~5 | ✅ In CI |
 
-**Total: ~485+ events (before deduplication)**
+**Total: ~515+ events (before deduplication)**
 
 ---
 
@@ -156,7 +157,7 @@ Comprehensive topical searches (music, hiking, cycling, birding, gardening, art/
 - Healthy Petaluma (healthypetaluma.org/calendar-of-events) - Health events
 
 **Live music venues (need investigation):**
-- The Big Easy (bigeasypetaluma.com) - Live music 5 nights/week
+- ~~The Big Easy (bigeasypetaluma.com)~~ - **DONE** - WordPress iCal feed, ~30 events
 - McNear's Saloon (mcnears.com/our-events/) - Comedy + live events
 - Montagne Russe Winery (russewines.com/Events) - Weekly Saturday music
 - Griffo Distillery (griffodistillery.com/pages/calendar) - Weekly Thursday jam
