@@ -138,20 +138,28 @@ SOURCE_URLS = {
 
 
 def load_allowed_cities(input_dir):
-    """Load allowed cities from city directory if file exists."""
+    """Load allowed and excluded cities from city directory if file exists.
+    
+    Returns (allowed_cities, excluded_cities) tuple.
+    Lines starting with '!' are excluded cities (filtered even without address indicators).
+    """
     cities_file = Path(input_dir) / 'allowed_cities.txt'
     if not cities_file.exists():
-        return None
+        return None, None
     
-    cities = set()
+    allowed = set()
+    excluded = set()
     for line in cities_file.read_text().splitlines():
         line = line.strip()
         if line and not line.startswith('#'):
             # Strip trailing comment (e.g., "Petaluma  # 38.23, -122.63 (0.0 mi)")
-            city = line.split('#')[0].strip().lower()
-            if city:
-                cities.add(city)
-    return cities
+            city = line.split('#')[0].strip()
+            if city.startswith('!'):
+                # Excluded city
+                excluded.add(city[1:].strip().lower())
+            elif city:
+                allowed.add(city.lower())
+    return allowed if allowed else None, excluded if excluded else None
 
 
 # Locations that should always be allowed (virtual events, etc.)
@@ -179,10 +187,11 @@ ADDRESS_INDICATORS = re.compile(
 )
 
 
-def location_matches_allowed_cities(location, allowed_cities):
+def location_matches_allowed_cities(location, allowed_cities, excluded_cities=None):
     """Check if a location string contains any allowed city name.
     
-    Only applies geo-filter to locations that look like real addresses.
+    Only applies geo-filter to locations that look like real addresses,
+    UNLESS the location contains an explicitly excluded city name.
     Venue-only names ("Theater", "BiblioBus") are allowed through.
     """
     if not allowed_cities:
@@ -196,6 +205,12 @@ def location_matches_allowed_cities(location, allowed_cities):
     for pattern in VIRTUAL_LOCATION_PATTERNS:
         if pattern in location_lower:
             return True
+    
+    # Check for explicitly excluded cities (even without address indicators)
+    if excluded_cities:
+        for city in excluded_cities:
+            if city in location_lower:
+                return False
     
     # Check if location looks like an address
     # If not, allow it through (venue name only, no geo info to filter on)
@@ -299,9 +314,11 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar")
     now = datetime.now(timezone.utc) - timedelta(hours=24)
     
     # Load allowed cities for geo filtering
-    allowed_cities = load_allowed_cities(input_dir)
+    allowed_cities, excluded_cities = load_allowed_cities(input_dir)
     if allowed_cities:
         print(f"  Geo filter active: {len(allowed_cities)} allowed cities")
+    if excluded_cities:
+        print(f"  Excluded cities: {len(excluded_cities)}")
     
     ics_dir = Path(input_dir)
     for ics_file in sorted(ics_dir.glob('*.ics')):
@@ -330,7 +347,7 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar")
                         location = re.sub(r'\n[ \t]', '', location_match.group(1))
                     else:
                         location = ''
-                    if location_matches_allowed_cities(location, allowed_cities):
+                    if location_matches_allowed_cities(location, allowed_cities, excluded_cities):
                         filtered_events.append(e)
                     else:
                         geo_filtered_count += 1
