@@ -88,6 +88,11 @@ SOURCE_NAMES = {
     'petaluma_arts_center': 'Petaluma Arts Center',
     'brewsters': 'Brewsters Beer Garden',
     'cool_petaluma': 'Cool Petaluma',
+    'mcnears': "McNear's Saloon",
+    'griffo': 'Griffo Distillery',
+    'elks_lodge': 'Petaluma Elks Lodge',
+    'garden_club': 'Petaluma Garden Club',
+    'petaluma_bounty': 'Petaluma Bounty',
     # Santa Rosa - local arts/community
     'santa_rosa_arts_center': 'Santa Rosa Arts Center',
     'movingwriting': 'MovingWriting',
@@ -123,6 +128,11 @@ SOURCE_URLS = {
     'petaluma_arts_center': 'https://petalumaartscenter.org/events-exhibitions',
     'brewsters': 'https://brewstersbeergarden.com/calendar1',
     'cool_petaluma': 'https://coolpetaluma.org/events',
+    'mcnears': 'https://www.mcnears.com/event/',
+    'griffo': 'https://griffodistillery.com/pages/calendar',
+    'elks_lodge': 'https://elks901.org/calendar-of-events/',
+    'garden_club': 'https://petalumagardenclub.org/calendar/',
+    'petaluma_bounty': 'https://petalumabounty.org/events-calendar/',
 }
 
 

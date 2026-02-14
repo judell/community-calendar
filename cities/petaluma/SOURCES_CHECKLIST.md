@@ -23,6 +23,11 @@
 | Petaluma Arts Center | Squarespace Scraper | ~10 | ✅ In CI |
 | Brewsters Beer Garden | Squarespace Scraper | ~18 | ✅ In CI |
 | Cool Petaluma | Squarespace Scraper | ~6 | ✅ In CI |
+| McNear's Saloon | WordPress iCal | ~2 | ✅ In CI |
+| Griffo Distillery | Tockify ICS | ~20 | ✅ In CI |
+| Petaluma Elks Lodge | Google Calendar ICS | ~568 | ✅ In CI |
+| Petaluma Garden Club | Google Calendar ICS | ~131 | ✅ In CI |
+| Petaluma Bounty | WordPress iCal | ~19 | ✅ In CI |
 | Meetup: Mindful Petaluma | ICS | 10 | ✅ In CI |
 | Meetup: Candlelight Yoga | ICS | 10 | ✅ In CI |
 | Meetup: Rebel Craft Collective | ICS | 6 | ✅ In CI |
@@ -44,29 +49,17 @@
 | Meetup: Mindfull Hikes | ICS | ~5 | ✅ In CI |
 | Meetup: Four Corners Hiking & Beer | ICS | ~5 | ✅ In CI |
 
-**Total: ~699+ events (before deduplication)**
+**Total: ~1440+ events (before deduplication)**
 
 ---
 
 ## To Investigate
 
-### Remaining Squarespace candidates
-- Healthy Petaluma (healthypetaluma.org/calendar-of-events) - 10 upcoming but board meetings only, marginal
-- Cinnabar Theater (cinnabartheater.org/shows/) - NOT Squarespace, WordPress + Beaver Builder, HTML-only, needs custom scraper
+### Needs custom scraper
+- Montagne Russe Winery (russewines.com/Events) - WineDirect platform, HTML scraping needed, ~6 events
+- Cinnabar Theater (cinnabartheater.org/shows/) - WordPress + Beaver Builder, HTML-only, 5 shows
 
-### Live music venues
-- McNear's Saloon (mcnears.com/our-events/) - Comedy + live events
-- Montagne Russe Winery (russewines.com/Events) - Weekly Saturday music
-- Griffo Distillery (griffodistillery.com/pages/calendar) - Weekly Thursday jam
-
-### WordPress/iCal sites (try `?ical=1` endpoint)
-- Petaluma Elks Lodge (elks901.org/calendar-of-events/) - Craft faires, dinners
-- Petaluma Wetlands Alliance (petalumawetlands.org/calendar/) - Bird walks
-- Petaluma Garden Club (petalumagardenclub.org/calendar/) - Monthly meetings
-- Petaluma Bounty (petalumabounty.org/events-calendar/) - Farm volunteer hours
-
-### Other platforms
-- Rotary Club of Petaluma (ClubRunner - try portal.clubrunner.ca/10088/events/ical)
+### Not yet investigated
 - Village Network of Petaluma (ClubExpress - check for iCal)
 - Blue Zones Project Petaluma (Eventbrite - may already be captured)
 - Sonoma County Regional Parks (parks.sonomacounty.ca.gov/play/calendar/hiking)
@@ -75,6 +68,8 @@
 - Petaluma River Park (petalumariverpark.org/calendar - weekly Tuesday walks)
 - Petaluma Historical Library & Museum (petalumamuseum.com/events/) - concerts, speakers
 - Sonoma-Marin Fairgrounds (sonoma-marinfair.org/calendar) - check closer to summer fair season
+- Healthy Petaluma (healthypetaluma.org/calendar-of-events) - Squarespace, 10 upcoming but board meetings only
+- Petaluma Wetlands Alliance (petalumawetlands.org/calendar/) - not yet checked
 
 ---
 
@@ -90,6 +85,7 @@
 | WonderStump! | Squarespace but no events collection; Ticket Tailor behind Cloudflare |
 | 350 Petaluma | Squarespace events but dead since Oct 2023 |
 | Petaluma People Services | Squarespace but hand-curated page, not events collection |
+| Rotary Club of Petaluma | ClubRunner site deactivated |
 
 ### Youth Sports Research (2026-02-14)
 
