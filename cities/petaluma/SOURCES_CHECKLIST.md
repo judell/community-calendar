@@ -18,6 +18,8 @@
 | Mercury Theater | Squarespace JSON Scraper | 12 | ✅ In CI |
 | Adobe Road Winery | JSON-LD Scraper | 8 | ✅ In CI |
 | The Big Easy | WordPress iCal | ~30 | ✅ In CI |
+| Polly Klaas Community Theater | WordPress iCal | ~8 | ✅ In CI |
+| Brooks Note Winery | Google Calendar ICS | ~142 | ✅ In CI |
 | Meetup: Mindful Petaluma | ICS | 10 | ✅ In CI |
 | Meetup: Candlelight Yoga | ICS | 10 | ✅ In CI |
 | Meetup: Rebel Craft Collective | ICS | 6 | ✅ In CI |
@@ -39,23 +41,18 @@
 | Meetup: Mindfull Hikes | ICS | ~5 | ✅ In CI |
 | Meetup: Four Corners Hiking & Beer | ICS | ~5 | ✅ In CI |
 
-**Total: ~515+ events (before deduplication)**
+**Total: ~665+ events (before deduplication)**
 
 ---
 
 ## To Investigate
 
-### Squarespace sites (can reuse Mercury Theater `?format=json` pattern)
-- Cinnabar Theater (cinnabartheater.org/shows/) - Full theater season
-- WonderStump! (wonderstump.art/events) - Immersive art venue
-- Polly Klaas Community Theater (pollyklaastheater.org/events/) - StorySlam, jazz
-- Petaluma Arts Center (petalumaartscenter.org/events) - Monthly art exchange
-- Brewsters Beer Garden (brewstersbeergarden.com/calendar1) - Live music, trivia
-- Cool Petaluma (coolpetaluma.org/events) - Climate/sustainability events
-- 350 Petaluma (350petaluma.org/events) - Monthly bike rides
-- Brooks Note Winery (brooksnotewinery.com/event-calendar/) - Friday music
-- Petaluma People Services (petalumapeople.org/events) - Senior programs
-- Healthy Petaluma (healthypetaluma.org/calendar-of-events) - Health events
+### Squarespace sites (reuse Mercury Theater `?format=json` pattern)
+- Petaluma Arts Center (petalumaartscenter.org/events-exhibitions) - 12 upcoming, Squarespace confirmed
+- Brewsters Beer Garden (brewstersbeergarden.com/calendar1) - 18 upcoming, Squarespace confirmed
+- Cool Petaluma (coolpetaluma.org/events) - 6 upcoming, Squarespace confirmed
+- Healthy Petaluma (healthypetaluma.org/calendar-of-events) - 10 upcoming but board meetings only, marginal
+- Cinnabar Theater (cinnabartheater.org/shows/) - NOT Squarespace, WordPress + Beaver Builder, HTML-only, needs custom scraper
 
 ### Live music venues
 - McNear's Saloon (mcnears.com/our-events/) - Comedy + live events
@@ -90,6 +87,9 @@
 | Mindful-Monday Meetup | Virtual conference calls, not local |
 | Petaluma Wildlife Museum | School tours/private events, not public |
 | Youth sports leagues | Member-only platforms, no public calendar exports (see below) |
+| WonderStump! | Squarespace but no events collection; Ticket Tailor behind Cloudflare |
+| 350 Petaluma | Squarespace events but dead since Oct 2023 |
+| Petaluma People Services | Squarespace but hand-curated page, not events collection |
 
 ### Youth Sports Research (2026-02-14)
 

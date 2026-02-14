@@ -83,6 +83,8 @@ SOURCE_NAMES = {
     'meetup_active_20_30': 'Meetup: Petaluma Active 20-30',
     'srjc_petaluma': 'SRJC Petaluma Campus',
     'bigeasy': 'The Big Easy',
+    'polly_klaas': 'Polly Klaas Community Theater',
+    'brooksnote': 'Brooks Note Winery',
     # Santa Rosa - local arts/community
     'santa_rosa_arts_center': 'Santa Rosa Arts Center',
     'movingwriting': 'MovingWriting',
@@ -113,6 +115,8 @@ SOURCE_URLS = {
     'santa_rosa_arts_center': 'https://santarosaartscenter.org/events/',
     'movingwriting': 'https://www.movingwriting.com/workshops',
     'bigeasy': 'https://bigeasypetaluma.com/events/',
+    'polly_klaas': 'https://pollyklaastheater.org/events/',
+    'brooksnote': 'https://brooksnotewinery.com/event-calendar/',
 }
 
 

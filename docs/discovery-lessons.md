@@ -2,15 +2,34 @@
 
 Real-world lessons from source discovery across cities. These complement the strategies in [AGENTS.md](../AGENTS.md).
 
-## WordPress + The Events Calendar = Free ICS
+## "Curl-and-Done" Sources: No Scraper Needed
 
+Many sources provide ICS feeds that can be added with just a curl command in the workflow — no scraper required. Always check for these before writing a scraper:
+
+### WordPress + The Events Calendar = Free ICS
 Sites running WordPress with "The Events Calendar" plugin (by StellarWP/Modern Tribe) have a built-in iCal endpoint:
 ```
 https://example.com/events/?ical=1
 ```
-Look for `PRODID:-//...ECPv6...` in the response to confirm. No scraper needed — just curl it in the workflow.
+Look for `PRODID:-//...ECPv6...` in the response to confirm.
 
-**Example:** The Big Easy Petaluma — 30 events from a single curl command.
+**Examples:** The Big Easy Petaluma (30 events), Polly Klaas Community Theater (8 events).
+
+### Public Google Calendar = Free ICS
+Some sites embed a public Google Calendar via iframe. Extract the calendar ID from the iframe `src` URL and construct the ICS feed:
+```
+https://calendar.google.com/calendar/ical/{CALENDAR_ID}/public/basic.ics
+```
+The calendar ID is URL-encoded in the iframe src (look for `src=` parameter). Decode it to get the `...@group.calendar.google.com` ID.
+
+**Example:** Brooks Note Winery — 142 events from a Google Calendar ICS feed.
+
+### Integration checklist for curl-and-done sources
+1. Add curl command to the workflow (`.github/workflows/generate-calendar.yml`)
+2. Add SOURCE_NAMES entry in `scripts/combine_ics.py`
+3. Add SOURCE_URLS fallback entry in `scripts/combine_ics.py`
+4. Add note to `cities/{city}/feeds.txt`
+5. Update `cities/{city}/SOURCES_CHECKLIST.md`
 
 ## Squarespace = `?format=json`
 
