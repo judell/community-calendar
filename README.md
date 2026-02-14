@@ -2,6 +2,22 @@
 
 A community event aggregator that scrapes events from multiple sources, combines them into ICS feeds, and displays them via an XMLUI web app backed by Supabase.
 
+## Table of Contents
+
+- [Live App](#live-app)
+- [Architecture](#architecture)
+- [Components](#components)
+- [Deployment Workflow](#deployment-workflow)
+- [Supabase Setup Notes](#supabase-setup-notes)
+- [Recent Updates](#recent-updates-feb-2026)
+- [XMLUI Resources](#xmlui-resources)
+- [Testing](#testing)
+- [Legacy HTML Generation](#legacy-html-generation)
+- [Adding a New City](#adding-a-new-city)
+- [Recurrence and Enrichment](#recurrence-and-enrichment)
+- [Planned Improvements](#planned-improvements)
+- [File Structure](#file-structure)
+
 ## Live App
 
 **XMLUI App**: https://judell.github.io/community-calendar/ (city picker)
@@ -284,15 +300,58 @@ The app now includes client-side search that filters events as you type:
 - **Searches** title, location, source, and description fields
 - **Description snippets**: When a match is found in description (not displayed), shows a context window with the search term **highlighted**
 
-### Performance Optimizations
+### List Virtualization and Search Performance
 
-Rendering 900+ events required optimization:
+The List uses three key props:
+```xmlui
+<List data="{window.filterEvents(window.dedupeEvents([...]), filterTerm)}"
+      fixedItemSize="true" limit="50">
+```
 
-- **`fixedItemSize="true"`** - List skips per-item height measurement
-- **`limit="100"`** - Caps rendered items for faster updates
-- **Deduplication caching** - Avoids recomputing on every render
+#### How the search chain works
 
-Result: Specific searches like "cotati" now take ~80ms (down from 750ms).
+Data flows through several stages on every keystroke:
+
+1. **DataSource fetch** — up to 5000 events from Supabase (one-time)
+2. **`dedupeEvents()`** — O(n) grouping pass with a simple cache (`helpers.js:141`)
+3. **`filterEvents()`** — O(n) scan across title, location, source, and description (`helpers.js:46`). Runs on **every keystroke** because `filterTerm` is a reactive var
+4. **`limit="50"`** — XMLUI truncates the filtered result to 50 items before handing them to the virtualizer
+5. **Virtualization** — only the ~10-15 items visible in the viewport get DOM nodes; the other 35-40 are "virtual" (no DOM cost)
+6. **`fixedItemSize="true"`** — lets the virtualizer measure one card and assume all are that height
+
+Search gets snappier as you type because the filter output shrinks, so the List receives fewer items and React diffs less. The `limit` is **not** about DOM nodes — virtualization handles that. It's about **React's virtual DOM diffing**: each item, even if not rendered to the DOM, is a React element that must be created, diffed, and reconciled on every keystroke.
+
+#### Why limit=50
+
+Measured data shows limit=50 delivers a 38% improvement on the first keystroke vs limit=100 (859ms → 531ms). The tradeoff — users can only scroll 50 events before searching — is barely a tradeoff in practice. Search is one click (the magnifying glass) and one keystroke away.
+
+| Limit | Pros | Cons |
+|-------|------|------|
+| **50** (current) | 38% faster search; best responsiveness | Users scroll 50 events before needing to search |
+| **100** | More scrollable | ~100 virtual elements tracked; first keystroke ~859ms |
+| **200+** | More browsable | Heavier reconciliation on each keystroke; noticeable lag |
+
+#### fixedItemSize tradeoffs
+
+EventCards have **variable actual heights** (wrapping titles, conditional location/description). `fixedItemSize="true"` tells the virtualizer to measure the first card and assume all match.
+
+| | `fixedItemSize="true"` (current) | `fixedItemSize="false"` |
+|---|---|---|
+| **Scroll perf** | Best — no per-item measurement | Slightly worse |
+| **Scrollbar accuracy** | May drift with variable heights | Accurate (progressively) |
+| **Visual correctness** | Cards may clip or show extra whitespace | Each card gets its true height |
+
+At limit=50, measurement shows **no performance difference** between true and false. We could switch to `false` for accurate scrollbar positioning with no cost.
+
+#### Fetch size vs. virtualization
+
+These are independent concerns. Whether Supabase returns 200 or 5000 events, the virtualizer always sees at most 50. The fetch size affects the JS filter scan cost (2-3ms — negligible), not the rendering cost.
+
+#### Measurement and optimization
+
+App-level measurement using [trace-tools](https://github.com/xmlui-org/trace-tools) confirms that `filterEvents` takes 2-3ms — the bottleneck is engine-internal reactive overhead and React reconciliation, not app-level code. The only effective app-level lever is `limit` (lowering from 100 to 50 gave a 38% improvement). See the [xsTrace case study](https://github.com/xmlui-org/trace-tools#xstrace-case-study-community-calendar-search) for the full investigation, measurement methodology, and engine analysis.
+
+XMLUI List docs: [List](https://docs.xmlui.org/components/List) | [Items](https://docs.xmlui.org/components/Items) (non-virtualized alternative)
 
 ### XMLUI Inspector
 
