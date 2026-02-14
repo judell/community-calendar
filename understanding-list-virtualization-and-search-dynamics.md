@@ -302,6 +302,121 @@ Two surprises:
 
 The combined effect is a 38% improvement on the worst-case keystroke. Subsequent keystrokes benefit proportionally — by "jazz" (fewer than 50 matches), the limit no longer clips the result and the improvement comes purely from the reactive re-eval savings.
 
+## Engine Internals: Why the Reactive Gap Exists
+
+Reading the XMLUI source (`StateContainer.tsx`, `Container.tsx`, `ListNative.tsx`, `container-helpers.tsx`) reveals exactly where the ~298ms reactive re-eval and ~118ms reconciliation come from. The engine is **not** a signals/observables system — it's built entirely on React state with a custom expression evaluation layer.
+
+### The 6-Layer State Pipeline
+
+Every component with variables gets wrapped in a `StateContainer` that assembles state through six layers:
+
+1. Parent state (scoped by `uses`)
+2. Component reducer state (`useReducer`)
+3. Component APIs (`useState`)
+4. Context variables (`$item`, `$itemIndex`, etc.)
+5. Local variable resolution (**two passes** — once for forward references, once final)
+6. Routing parameters
+
+Each layer creates intermediate objects wrapped in `useShallowCompareMemoize`. Six layers times shallow comparison on potentially large state objects adds up.
+
+### Two-Pass Variable Resolution
+
+The most expensive part of the pipeline: `useVars` runs twice per render per `StateContainer`. Each pass iterates over every variable definition, collects dependency names, picks those values from state via `pickFromObject`, shallow-compares them against the last render, and only re-evaluates the expression if dependencies changed. This is per-variable, per-render, done twice, for every StateContainer in the tree.
+
+### Why Reconciliation Scales with Item Count: renderChild Instability
+
+The `stableRenderChild` callback in `Container.tsx` has `componentState` in its `useCallback` dependency array:
+
+```typescript
+const stableRenderChild = useCallback(
+  (childNode, ...) => { /* uses componentState */ },
+  [componentState, dispatch, appContext, ...]
+);
+```
+
+When `filterTerm` changes, `componentState` changes, which recreates `stableRenderChild`, which changes the `renderChild` prop on every `MemoizedItem` in the List. This defeats `React.memo` — **all 50 items fully re-render on every keystroke**, even though only the parent's `filterTerm` changed, not any item's `$item` data.
+
+Each re-rendered item goes through the full 6-layer `StateContainer` pipeline. With 50 items, that's 50 × 2-pass variable resolution = 100 variable resolution passes per keystroke.
+
+### Why This Is Intentional
+
+The initial reaction is "use a ref to stabilize `renderChild`." But the callback instability **is the change notification mechanism**. XMLUI doesn't use React Context per state value — it uses callback identity as a proxy for "something changed above you, re-evaluate." If `renderChild` were stable, children would never see updated parent state:
+
+- `filterTerm` changes → description snippets wouldn't update
+- `picksData` changes → pick checkboxes wouldn't reflect current state
+- Any global variable change would be invisible to list items
+
+The design chooses **correctness over performance**: every keystroke re-renders all items because the engine can't know which items depend on `filterTerm` vs which don't.
+
+### What a Real Fix Would Require
+
+| Strategy | Complexity | Effect |
+|----------|-----------|--------|
+| **Fine-grained dependency tracking** — track which items depend on which state keys; only re-render items whose dependencies changed | High (engine rewrite) | Would eliminate unnecessary item re-renders |
+| **React Context for hot state** — put frequently-changing values like `filterTerm` in a Context so only consumers re-render | Medium (engine change) | Would decouple item re-renders from unrelated state changes |
+| **Split renderChild** — separate structural (stable) from state-dependent (unstable) callback | Medium (engine change) | Would let `React.memo` work for items that only need structure |
+
+This explains the earlier surprise that reactive re-eval dropped when limit went from 100 to 50: fewer items means fewer `StateContainer` pipelines running the 6-layer + 2-pass resolution. The limit controls not just React reconciliation but also how many times the engine's internal state assembly runs.
+
+## Component Depth Experiment: The Real Cost
+
+To isolate how much of the per-keystroke cost comes from the engine's base per-item overhead vs the component tree inside each item, we replaced EventCard (which has ~12 child components) with a bare `<Text value="{$item.title}" />`.
+
+| Phase | EventCard (~12 children) | Text only (1 child) | Savings |
+|-------|--------------------------|----------------------|---------|
+| State processing | ~104ms | ~17ms | ~87ms (83%) |
+| Reactive re-eval | ~298ms | ~51ms | ~247ms (83%) |
+| filterEvents | ~2ms | ~2ms | 0ms |
+| Reconciliation | ~118ms | ~25ms | ~93ms (78%) |
+| **Total** | **531ms** | **102ms** | **429ms (81%)** |
+
+Three data points confirm linear scaling:
+
+| Template | ~Components/item | Total | Per item |
+|----------|-----------------|-------|----------|
+| Bare Text | 1 | 102ms | 2.0ms |
+| Stripped Card (Card → VStack → Text ×4) | 6 | 240ms | 4.8ms |
+| Full EventCard (+ Link, Markdown, HStack, AddToCalendar, Checkbox) | 12+ | 531ms | 10.6ms |
+
+Phase breakdown across all three:
+
+| Phase | Text (1) | Stripped (6) | Full (12+) |
+|-------|----------|-------------|------------|
+| State processing | ~17ms | ~56ms | ~104ms |
+| Reactive re-eval | ~51ms | ~112ms | ~298ms |
+| filterEvents | ~2ms | ~2ms | ~2ms |
+| Reconciliation | ~25ms | ~63ms | ~118ms |
+| **Total** | **102ms** | **240ms** | **531ms** |
+
+Every phase scales with component count — not just reconciliation. The 6-layer StateContainer pipeline runs for every component in the tree, including simple Text elements that have no state of their own. Simple Text components cost ~0.55ms each per item; heavier components (Link, Markdown, AddToCalendar) cost ~0.97ms each.
+
+### Why This Matters for XMLUI
+
+The tempting app-level response is "simplify your cards — fewer components, better performance." But this is exactly the wrong takeaway. XMLUI's value proposition is composability: developers should write clean, readable component trees without worrying about depth. An EventCard *should* have a Card wrapping a VStack with Text, Link, and Checkbox children — that's the natural way to express the UI.
+
+The problem is that the engine charges ~0.7ms per component per list item per keystroke. At this rate:
+
+- 50 items × 5 components = 250 evaluations → ~175ms overhead
+- 50 items × 12 components = 600 evaluations → ~420ms overhead
+- 50 items × 20 components = 1000 evaluations → ~700ms overhead
+
+A richer card template (with images, badges, action menus) would push into multi-second keystroke latency. Developers shouldn't have to choose between expressiveness and performance.
+
+### What This Tells the Engine Team
+
+The 6-layer StateContainer pipeline runs for every component in the tree, including leaf components like Text and SpaceFiller that have no variables, no loaders, and no state of their own. The overhead is structural — the pipeline runs because the component *exists*, not because it *needs* state resolution.
+
+Potential engine-level improvements:
+
+| Strategy | What it would do |
+|----------|-----------------|
+| **Fast-path for stateless components** | Skip the 6-layer pipeline for components with no variables, no `when`, no expressions referencing dynamic state. A Text with `value="{$props.event.title}"` where `$props` hasn't changed needs zero work. |
+| **Shallow re-render boundary at List items** | When `filterTerm` changes but `$item` hasn't, the item subtree doesn't need to re-render. Only components that actually reference `filterTerm` (like the Markdown snippet) need updating. |
+| **Batch the two-pass resolution** | The two-pass `useVars` loop could be eliminated for components whose variables have no forward references (the common case for leaf components). |
+| **Lightweight container for leaf components** | Text, SpaceFiller, Icon — these don't need the full ContainerWrapper → StateContainer → Container pipeline. A direct adapter path would skip 90% of the overhead. |
+
+The goal: make composition cost O(changed components), not O(total components). A keystroke that changes `filterTerm` should re-evaluate the ~3 components per card that reference it (the Markdown snippet and its parent conditionals), not all ~12.
+
 ## XMLUI List Documentation
 
 - [List component docs (limit, fixedItemSize, virtualization)](https://docs.xmlui.org/components/List)
