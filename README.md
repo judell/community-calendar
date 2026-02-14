@@ -361,7 +361,7 @@ These are independent concerns. Whether Supabase returns 200 or 5000 events, the
 
 #### Measurement and optimization
 
-App-level measurement using [trace-tools](https://github.com/xmlui-org/trace-tools) confirms that `filterEvents` takes 2-3ms — the bottleneck is engine-internal reactive overhead and React reconciliation, not app-level code. The only effective app-level lever is `limit` (lowering from 100 to 50 gave a 38% improvement). See the [xsTrace case study](https://github.com/xmlui-org/trace-tools#how-it-enables-analysis-community-calendar-example) for the full investigation, measurement methodology, and engine analysis.
+App-level measurement using [trace-tools](https://github.com/xmlui-org/trace-tools) confirms that `filterEvents` takes 2-3ms — the bottleneck is engine-internal reactive overhead and React reconciliation, not app-level code. The only effective app-level lever is `limit` (lowering from 100 to 50 cut the latency roughly in half). See the [xsTrace case study](https://github.com/xmlui-org/trace-tools#opt-in-app-level-timing-with-xstrace) for the full investigation, measurement methodology, and engine analysis.
 
 XMLUI List docs: [List](https://docs.xmlui.org/components/List) | [Items](https://docs.xmlui.org/components/Items) (non-virtualized alternative)
 
