@@ -1,9 +1,16 @@
 # Community Calendar
 
-A community event aggregator that scrapes events from multiple sources, combines them into ICS feeds, and displays them via an XMLUI web app backed by Supabase.
+Public events are trapped in information silos. The library posts to their website, the YMCA uses Google Calendar, the theater uses Eventbrite, Meetup groups have their own pages. Anyone wanting to know "what's happening this weekend?" must check a dozen different sites.
+
+Existing local aggregators typically expect event producers to "submit" events via a web form. This means producers must submit to several aggregators to reach their audience — tedious and error-prone. Worse, if event details change, producers must update each aggregator separately.
+
+This project takes a different approach: **event producers are the authoritative sources for their own events**. They publish once to their own calendar, and individuals and aggregators pull from those sources. When details change, the change propagates automatically. This is how RSS transformed blogging, and iCalendar can do the same for events.
+
+The gold standard is **iCalendar (ICS) feeds** — a format that machines can read, merge, and republish. If you're an event producer and your platform can publish an ICS feed, that's great. But ICS isn't the only way. The real requirement is to **embrace the open web**. A clean HTML page with well-structured event data works. What doesn't work: events locked in Facebook or behind login walls.
 
 ## Table of Contents
 
+- [The Curator Role](#the-curator-role)
 - [Live App](#live-app)
 - [Architecture](#architecture)
 - [Components](#components)
@@ -16,6 +23,17 @@ A community event aggregator that scrapes events from multiple sources, combines
 - [Recurrence and Enrichment](#recurrence-and-enrichment)
 - [Planned Improvements](#planned-improvements)
 - [File Structure](#file-structure)
+
+## The Curator Role
+
+A **curator** builds and maintains the calendar for their community. You don't create events — you discover and connect existing event sources:
+
+- Find organizations publishing calendars
+- Test that feeds work and contain relevant events
+- Add working feeds to the aggregator
+- Filter out noise (events too far away, duplicates, off-topic)
+
+The goal is a comprehensive, low-maintenance calendar that updates automatically as source organizations post their events. See [docs/curator-guide.md](docs/curator-guide.md) for the full playbook: platform searches, feed testing, geo-filtering setup, and step-by-step instructions for launching a new city.
 
 ## Live App
 
