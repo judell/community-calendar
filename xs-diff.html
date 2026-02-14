@@ -736,6 +736,7 @@
         <option value="">Export...</option>
         <option value="html">Download HTML</option>
         <option value="md">Download Markdown</option>
+        <option value="json">Download JSON (for Playwright)</option>
       </select>
     </div>
     <div id="diff"></div>
@@ -777,11 +778,18 @@
 
       function saveEntriesToStorage(entries) {
         try {
-          // Keep only the most recent entries to avoid localStorage limits
-          const toStore = entries.slice(-MAX_STORED_ENTRIES);
-          localStorage.setItem(STORAGE_KEY, safeStringify(toStore));
+          // Keep only the most recent entries and strip large fields for localStorage.
+          // Preserve all fields on interaction and API events — they're critical for
+          // Playwright test generation and semantic trace comparison.
+          const criticalKinds = new Set(["interaction", "navigate", "api:start", "api:complete", "api:error"]);
+          const toStore = entries.slice(-500).map(e => {
+            if (criticalKinds.has(e.kind)) return e;
+            const { text, diffPretty, diffJson, eventArgs, ...rest } = e;
+            return rest;
+          });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
         } catch (e) {
-          console.warn("Failed to save inspector history to localStorage:", e);
+          // Silently fail - localStorage is optional, export to JSON still works
         }
       }
 
@@ -965,13 +973,13 @@
       }
 
       // Safe JSON stringify that handles circular references and DOM objects
-      function safeStringify(obj, indent = null, maxLength = 10000) {
+      function safeStringify(obj, indent = null, maxLength = 10000, maxArrayLength = 100) {
         try {
           const seen = new WeakSet();
           let length = 0;
           const result = JSON.stringify(obj, (key, value) => {
             // Bail out if getting too large
-            if (length > maxLength) return "[truncated]";
+            if (maxLength !== Infinity && length > maxLength) return "[truncated]";
             length += key.length + 10;
             // Skip DOM nodes and Window
             if (value instanceof Node || value instanceof Window) {
@@ -981,22 +989,22 @@
             if (typeof value === "object" && value !== null) {
               if (seen.has(value)) return "[circular]";
               seen.add(value);
-              // Limit array length
-              if (Array.isArray(value) && value.length > 100) {
-                return [...value.slice(0, 100), `[...${value.length - 100} more items]`];
+              // Limit array length (skip if maxArrayLength is Infinity)
+              if (maxArrayLength !== Infinity && Array.isArray(value) && value.length > maxArrayLength) {
+                return [...value.slice(0, maxArrayLength), `[...${value.length - maxArrayLength} more items]`];
               }
             }
             // Handle functions
             if (typeof value === "function") {
               return `[function ${value.name || "anonymous"}]`;
             }
-            // Truncate long strings
-            if (typeof value === "string" && value.length > 500) {
+            // Truncate long strings (skip if maxLength is very large)
+            if (maxLength < 100000 && typeof value === "string" && value.length > 500) {
               return value.substring(0, 500) + "...";
             }
             return value;
           }, indent);
-          return result && result.length > maxLength ? result.substring(0, maxLength) + "..." : result;
+          return maxLength !== Infinity && result && result.length > maxLength ? result.substring(0, maxLength) + "..." : result;
         } catch (err) {
           return `[stringify error: ${err.message}]`;
         }
@@ -2211,6 +2219,9 @@
             const urlPath = e.url ? new URL(e.url, "http://x").pathname : "";
             expensiveParts.push({ name: `${method} ${urlPath}`, duration: e.duration, kind: "api" });
           }
+          if (e.kind === "app:timing" && typeof e.duration === "number" && e.duration > 0) {
+            expensiveParts.push({ name: `app:${e.label || "timing"}`, duration: e.duration, kind: "app" });
+          }
         });
         // Sort by duration descending, take top 3
         expensiveParts.sort((a, b) => b.duration - a.duration);
@@ -2293,6 +2304,9 @@
                 const urlPath = e.url ? new URL(e.url, "http://x").pathname.split("/").pop() : "";
                 timelineBreakdown.push({ phase: `api:${method} ${urlPath}`, duration, perfTs: e.perfTs, order: timelineOrder++ });
               }
+            }
+            if (e.kind === "app:timing" && typeof e.duration === "number" && e.duration > 0) {
+              timelineBreakdown.push({ phase: `app:${e.label || "timing"}`, duration: e.duration, perfTs: e.perfTs, order: timelineOrder++ });
             }
           });
 
@@ -3694,6 +3708,10 @@
               bodyHtml += `</details>`;
               bodyHtml += `</div>`;
             }
+          } else if (e.kind === "app:timing") {
+            // App-level timing events from xsTrace()
+            const durationStr = typeof e.duration === "number" ? ` (${e.duration.toFixed(1)}ms)` : "";
+            bodyHtml += `<div class="trace-event-header">[app:timing] <strong>${e.label || "timing"}</strong>${durationStr}${metaInline}</div>`;
           } else if (e.kind === "interaction") {
             // Interaction events - show the interaction type (click, contextmenu, etc.)
             const interactionType = e.interaction || "unknown";
@@ -4055,6 +4073,11 @@
               const truncatedResult = resultStr.length > 200 ? resultStr.substring(0, 200) + "..." : resultStr;
               lines.push(`      response: ${truncatedResult}`);
             }
+            return;
+          }
+          if (e.kind === "app:timing") {
+            const durationStr = typeof e.duration === "number" ? ` (${e.duration.toFixed(1)}ms)` : "";
+            lines.push(`    [app:timing]${durationStr} ${e.label || "timing"}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
             return;
           }
           if (e.kind === "error:boundary") {
@@ -7047,6 +7070,43 @@
           downloadFile(`xs-diff-${timestamp}.md`, generateMarkdownExport(processed), "text/markdown");
         } else if (format === "html") {
           downloadFile(`xs-diff-${timestamp}.html`, generateHtmlExport(processed), "text/html");
+        } else if (format === "json") {
+          // Export live _xsLogs only (not localStorage) for Playwright test generation.
+          // The engine's splicePreservingInteractions() already preserves interaction and
+          // API events from buffer eviction, so localStorage merge is unnecessary and
+          // would contaminate exports with stale events from previous sessions.
+          const rawLogs = ((window.parent && window.parent._xsLogs) || []).slice().sort((a, b) => (a.perfTs || a.ts || 0) - (b.perfTs || b.ts || 0));
+          console.log(`Exporting ${rawLogs.length} entries as JSON for Playwright`);
+          console.log(`Interaction entries: ${rawLogs.filter(e=>e.kind === 'interaction').length}`);
+          if (rawLogs.length === 0) {
+            alert("No logs found. Try running this in the app console:\ncopy(JSON.stringify(window._xsLogs, (k,v) => v instanceof Node || v instanceof Window || typeof v === 'function' ? undefined : v))");
+            return;
+          }
+          // Stringify each entry separately to avoid cross-entry circular tracking
+          const skipKeys = new Set(['_targetInst', '_debugOwner', '_debugSource', 'stateNode', 'nativeEvent', 'view', 'target', 'currentTarget', 'relatedTarget', '__reactFiber$', '__reactProps$']);
+          const jsonEntries = rawLogs.map(entry => {
+            const seen = new WeakSet();
+            return JSON.stringify(entry, (key, value) => {
+              if (value instanceof Node || value instanceof Window) return undefined;
+              if (typeof value === 'function') return undefined;
+              // Skip React internals and DOM-heavy fields that bloat the output
+              if (skipKeys.has(key)) return undefined;
+              if (key.startsWith('__react')) return undefined;
+              if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) return '[circular]';
+                seen.add(value);
+              }
+              return value;
+            });
+          });
+          const jsonContent = '[\n  ' + jsonEntries.join(',\n  ') + '\n]';
+          console.log(`JSON size: ${jsonContent.length} bytes`);
+          const defaultName = `xs-trace-${timestamp}`;
+          const filename = prompt("Save trace as:", defaultName);
+          if (filename) {
+            const finalName = filename.endsWith('.json') ? filename : `${filename}.json`;
+            downloadFile(finalName, jsonContent, "application/json");
+          }
         }
       });
 

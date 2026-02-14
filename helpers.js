@@ -704,7 +704,10 @@ function getNextOccurrence(enrichments, eventId, originalStartTime) {
 // Export for browser (attach to window)
 if (typeof window !== 'undefined') {
   window.toggleDay = toggleDay;
-  window.filterEvents = filterEvents;
+  var _filterEvents = filterEvents;
+  window.filterEvents = function(events, term) {
+    return window.xsTrace ? window.xsTrace("filterEvents", function() { return _filterEvents(events, term); }) : _filterEvents(events, term);
+  };
   window.getDescriptionSnippet = getDescriptionSnippet;
   window.formatDayOfWeek = formatDayOfWeek;
   window.formatMonthDay = formatMonthDay;
@@ -712,7 +715,10 @@ if (typeof window !== 'undefined') {
   window.formatTime = formatTime;
   window.truncate = truncate;
   window.getSourceCounts = getSourceCounts;
-  window.dedupeEvents = dedupeEvents;
+  var _dedupeEvents = dedupeEvents;
+  window.dedupeEvents = function(events) {
+    return window.xsTrace ? window.xsTrace("dedupeEvents", function() { return _dedupeEvents(events); }) : _dedupeEvents(events);
+  };
   window.collapseLongRunningEvents = collapseLongRunningEvents;
   window.clearDedupeCache = clearDedupeCache;
   window.isEventPicked = isEventPicked;

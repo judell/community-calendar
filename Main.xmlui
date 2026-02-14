@@ -1,7 +1,5 @@
 <App name="Community Calendar" codeBehind="Main.xmlui.xs" var.showSearch="{false}" var.filterTerm="" var.viewMode="{'all'}">
 
-  <!-- Sync picks data to Globals.xs var for child components -->
-
   <!-- DataSources -->
   <DataSource
     id="events"
@@ -70,7 +68,7 @@
 
   <!-- City picker (shown when no city selected) -->
   <VStack when="{!window.cityFilter}" horizontalAlignment="center" width="100%" padding="$space-8">
-    <H1>Community Calendar</H1>
+    <H1>Community Calendar {version}</H1>
     <Text marginBottom="$space-4">Choose your city:</Text>
     <VStack gap="$space-2" maxWidth="300px" width="100%">
       <Button variant="outlined" width="100%" onClick="window.location.search = '?city=santarosa'">Santa Rosa</Button>
@@ -133,7 +131,7 @@
       </HStack>
     </RadioGroup>
     <Spinner when="{!events.loaded && viewMode === 'all'}" />
-    <List when="{events.value && viewMode === 'all'}" data="{window.filterEvents(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), filterTerm)}" fixedItemSize="true" limit="100">
+    <List when="{events.loaded && viewMode === 'all'}" data="{window.filterEvents(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), filterTerm)}" fixedItemSize="true" limit="50">
       <EventCard event="{$item}" filterTerm="{filterTerm}" />
     </List>
     <VStack when="{viewMode === 'picks'}" gap="$space-2">
