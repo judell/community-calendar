@@ -16,7 +16,10 @@ The gold standard is **iCalendar (ICS) feeds** — a format that machines can re
 - [Pipeline](#pipeline)
 - [Deployment Workflow](#deployment-workflow)
 - [Supabase Setup Notes](#supabase-setup-notes)
-- [Recent Updates](#recent-updates-feb-2026)
+- [Search and Performance](#search-and-performance)
+- [Personal Picks](#personal-picks)
+- [Event Capture](#event-capture)
+- [App Architecture](#app-architecture)
 - [XMLUI Resources](#xmlui-resources)
 - [Testing](#testing)
 - [Adding a New City](#adding-a-new-city)
@@ -307,17 +310,11 @@ Required for upsert operations:
 ALTER TABLE events ADD CONSTRAINT events_source_uid_unique UNIQUE (source_uid);
 ```
 
-## Recent Updates (Feb 2026)
+## Search and Performance
 
-### Search Functionality
+Client-side search filters events as you type. The search icon in the header toggles a search box with auto-focus. Searches match against title, location, source, and description. When a match is in the description (not normally displayed), a context snippet appears with the search term highlighted.
 
-The app now includes client-side search that filters events as you type:
-
-- **Search icon** in header toggles search box with auto-focus
-- **Searches** title, location, source, and description fields
-- **Description snippets**: When a match is found in description (not displayed), shows a context window with the search term **highlighted**
-
-### List Virtualization and Search Performance
+### List virtualization
 
 The List uses three key props:
 ```xmlui
@@ -370,16 +367,11 @@ App-level measurement using [trace-tools](https://github.com/xmlui-org/trace-too
 
 XMLUI List docs: [List](https://docs.xmlui.org/components/List) | [Items](https://docs.xmlui.org/components/Items) (non-virtualized alternative)
 
-### XMLUI Inspector
+The XMLUI inspector (cog icon → `xs-diff.html`) shows event traces, state changes, and API calls. Requires `xsVerbose: true` in `config.json`.
 
-Added debugging tool accessible via cog icon:
-- Opens `xs-diff.html` in modal (relative path for GitHub Pages compatibility)
-- Shows event traces, state changes, API calls
-- Requires `xsVerbose: true` in config.json
+## Personal Picks
 
-### Personal Picks (Implemented)
-
-Users can now authenticate and save personal event picks:
+Users authenticate and save personal event picks:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -423,9 +415,9 @@ Users can now authenticate and save personal event picks:
 - Modal dialog uses `minWidth="70vw"` for mobile compatibility
 - Text uses `overflowMode="flow"` for proper wrapping
 
-### Event Capture (Image + Audio)
+## Event Capture
 
-Users can photograph an event poster or speak/upload audio to capture events:
+Users photograph an event poster or speak/upload audio to capture events:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -475,7 +467,7 @@ Users can photograph an event poster or speak/upload audio to capture events:
 - iOS Safari debugging tip: when client shows a server error, check Supabase Dashboard → Edge Functions → Logs first
 - Browser MediaRecorder produces WebM (Chrome) or MP4 (Safari), both handled by Whisper
 
-### Component Architecture
+## App Architecture
 
 The app uses XMLUI's `Globals.xs` for cross-component state and functions:
 
