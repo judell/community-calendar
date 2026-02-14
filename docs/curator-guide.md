@@ -384,3 +384,36 @@ https://calendar.google.com/calendar/ical/{CALENDAR_ID}/public/basic.ics
 
 - [docs/discovery-lessons.md](discovery-lessons.md) — Real-world lessons and gotchas from source discovery
 - [AGENTS.md](../AGENTS.md) — Technical reference for scrapers and automation
+
+---
+
+## Testing Without Aggregators
+
+To evaluate your direct source coverage versus reliance on aggregators like North Bay Bohemian or Press Democrat, you can run the workflow with sources excluded.
+
+### Using the exclude_sources Workflow Input
+
+1. Go to **Actions** → **Generate Calendar** → **Run workflow**
+2. Set **regenerate_only** to `true` (skip scraping, faster)
+3. Enter source IDs in **exclude_sources** (comma-separated)
+
+Example: `bohemian,pressdemocrat`
+
+### Finding Source IDs
+
+Open the **Sources** dialog in the calendar app. Each source shows its ID in parentheses:
+
+```
+2047  North Bay Bohemian (bohemian)
+2077  Press Democrat (pressdemocrat)
+  38  Arlene Francis Center (arlene_francis_theater)
+   1  City of Santa Rosa Legistar (legistar)
+```
+
+Use the ID (e.g., `bohemian`) not the display name.
+
+### What This Reveals
+
+Running without aggregators shows gaps in direct source coverage. For example, if "City Council Meeting" events disappear when you exclude `bohemian`, you need to add a direct source (like Legistar) for government meetings.
+
+**Goal:** Gradually add high-quality direct sources until excluding aggregators causes minimal loss.
