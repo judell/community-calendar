@@ -85,6 +85,9 @@ SOURCE_NAMES = {
     'bigeasy': 'The Big Easy',
     'polly_klaas': 'Polly Klaas Community Theater',
     'brooksnote': 'Brooks Note Winery',
+    'petaluma_arts_center': 'Petaluma Arts Center',
+    'brewsters': 'Brewsters Beer Garden',
+    'cool_petaluma': 'Cool Petaluma',
     # Santa Rosa - local arts/community
     'santa_rosa_arts_center': 'Santa Rosa Arts Center',
     'movingwriting': 'MovingWriting',
@@ -117,6 +120,9 @@ SOURCE_URLS = {
     'bigeasy': 'https://bigeasypetaluma.com/events/',
     'polly_klaas': 'https://pollyklaastheater.org/events/',
     'brooksnote': 'https://brooksnotewinery.com/event-calendar/',
+    'petaluma_arts_center': 'https://petalumaartscenter.org/events-exhibitions',
+    'brewsters': 'https://brewstersbeergarden.com/calendar1',
+    'cool_petaluma': 'https://coolpetaluma.org/events',
 }
 
 

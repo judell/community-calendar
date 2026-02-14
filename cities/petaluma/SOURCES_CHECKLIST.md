@@ -20,6 +20,9 @@
 | The Big Easy | WordPress iCal | ~30 | ✅ In CI |
 | Polly Klaas Community Theater | WordPress iCal | ~8 | ✅ In CI |
 | Brooks Note Winery | Google Calendar ICS | ~142 | ✅ In CI |
+| Petaluma Arts Center | Squarespace Scraper | ~10 | ✅ In CI |
+| Brewsters Beer Garden | Squarespace Scraper | ~18 | ✅ In CI |
+| Cool Petaluma | Squarespace Scraper | ~6 | ✅ In CI |
 | Meetup: Mindful Petaluma | ICS | 10 | ✅ In CI |
 | Meetup: Candlelight Yoga | ICS | 10 | ✅ In CI |
 | Meetup: Rebel Craft Collective | ICS | 6 | ✅ In CI |
@@ -41,16 +44,13 @@
 | Meetup: Mindfull Hikes | ICS | ~5 | ✅ In CI |
 | Meetup: Four Corners Hiking & Beer | ICS | ~5 | ✅ In CI |
 
-**Total: ~665+ events (before deduplication)**
+**Total: ~699+ events (before deduplication)**
 
 ---
 
 ## To Investigate
 
-### Squarespace sites (reuse Mercury Theater `?format=json` pattern)
-- Petaluma Arts Center (petalumaartscenter.org/events-exhibitions) - 12 upcoming, Squarespace confirmed
-- Brewsters Beer Garden (brewstersbeergarden.com/calendar1) - 18 upcoming, Squarespace confirmed
-- Cool Petaluma (coolpetaluma.org/events) - 6 upcoming, Squarespace confirmed
+### Remaining Squarespace candidates
 - Healthy Petaluma (healthypetaluma.org/calendar-of-events) - 10 upcoming but board meetings only, marginal
 - Cinnabar Theater (cinnabartheater.org/shows/) - NOT Squarespace, WordPress + Beaver Builder, HTML-only, needs custom scraper
 

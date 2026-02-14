@@ -35,9 +35,13 @@ The calendar ID is URL-encoded in the iframe src (look for `src=` parameter). De
 
 Squarespace sites expose event data at `?format=json` on any collection page. The JSON includes structured event objects with title, dates, location, excerpt, and URL.
 
-**Example:** Mercury Theater — `mercurytheater.org/events?format=json` returns clean JSON with all events. See `scrapers/mercury_theater.py` and `scrapers/lib/jsonld.py` for the reusable pattern.
+Use `scrapers/lib/squarespace.py` (`SquarespaceScraper` base class) — each scraper is just ~10 lines of config. Note: the collection slug varies per site (e.g., `/events`, `/events-exhibitions`, `/calendar1`).
 
-**How to confirm Squarespace:** View page source, look for `squarespace.com` in script/link URLs, or check for `<meta property="og:site_name">` patterns.
+**Examples:** Mercury Theater, Petaluma Arts Center, Brewsters Beer Garden, Cool Petaluma.
+
+**How to confirm Squarespace:** View page source, look for `<!-- This is Squarespace. -->` or `squarespace.com` in script/link URLs.
+
+**Gotcha:** Some Squarespace sites have an `/events` page that is a regular page (type 10), not an events collection (type 11). The `?format=json` endpoint only returns event data on actual collection pages. If `/events?format=json` returns `"itemCount": 0`, look for the real collection slug in the site navigation.
 
 ## Wix Sites: Don't Scrape, Find the Ticketing Platform
 
