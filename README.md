@@ -13,7 +13,7 @@ The gold standard is **iCalendar (ICS) feeds** — a format that machines can re
 - [The Curator Role](#the-curator-role)
 - [Live App](#live-app)
 - [Architecture](#architecture)
-- [Components](#components)
+- [Pipeline](#pipeline)
 - [Deployment Workflow](#deployment-workflow)
 - [Supabase Setup Notes](#supabase-setup-notes)
 - [Recent Updates](#recent-updates-feb-2026)
@@ -62,7 +62,7 @@ The goal is a comprehensive, low-maintenance calendar that updates automatically
 └─────────────────┘     └─────────────────┘     └─────────────────┘
 ```
 
-## Components
+## Pipeline
 
 ### 1. Event Sources
 
