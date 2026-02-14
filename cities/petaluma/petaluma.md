@@ -2,35 +2,47 @@
 
 **Started:** 2025-02-12  
 **Last Updated:** 2026-02-14  
-**Status:** ✅ READY TO DEPLOY
+**Status:** ✅ DEPLOYED
 
-## Current Status: ~360+ events from 12 sources
+## Current Status: ~415+ events from 25 sources
 
-### Implemented Sources
+### Implemented Sources (all in CI)
 
 | Source | Events | Type | Status |
 |--------|--------|------|--------|
 | Petaluma Regional Library | 155 | Scraper (`library_intercept.py`) | ✅ |
 | Aqus Community | 87 | ICS Feed (MembershipWorks) | ✅ |
+| Petaluma Chamber of Commerce | 80 | Scraper (`growthzone.py`) | ✅ |
 | Petaluma Downtown Association | 46 | Tockify ICS | ✅ |
-| Eventbrite Petaluma | 14 | Scraper | ✅ |
+| SRJC Petaluma Campus | 17 | Scraper (`srjc_petaluma.py`) | ✅ |
+| Eventbrite Petaluma | 14 | Scraper (`eventbrite_scraper.py`) | ✅ |
+| Phoenix Theater | 13 | Scraper (`phoenix_theater.py`) | ✅ |
 | Mystic Theatre | 12 | Scraper (`mystic_theatre.py`) | ✅ |
 | Petaluma High Athletics | 9 | Scraper (`maxpreps.py`) | ✅ |
 | Casa Grande High Athletics | 8 | Scraper (`maxpreps.py`) | ✅ |
-| 5 Meetup groups | 29 | ICS Feeds | ✅ |
-
-### Pending Sources (Scrapers Written)
-
-| Source | Events | Type | Status |
-|--------|--------|------|--------|
-| Chamber of Commerce | 262 | GrowthZone API (`growthzone.py`) | 🔧 Needs testing |
+| HenHouse Brewing | 2-3 | Scraper (`henhouse.py`) | ✅ |
+| Meetup: Mindful Petaluma | 10 | ICS Feed | ✅ |
+| Meetup: Candlelight Yoga | 10 | ICS Feed | ✅ |
+| Meetup: Sonoma County Outdoors | ~10 | ICS Feed | ✅ |
+| Meetup: North Bay Contra Dance | ~10 | ICS Feed | ✅ |
+| Meetup: Meditate with a Monk | ~10 | ICS Feed | ✅ |
+| Meetup: Sonoma County Boomers | ~7 | ICS Feed | ✅ |
+| Meetup: Rebel Craft Collective | 6 | ICS Feed | ✅ |
+| Meetup: Go Wild Hikers | ~3 | ICS Feed | ✅ |
+| Meetup: Sonoma-Marin Brat Pack | 2 | ICS Feed | ✅ |
+| Meetup: Petaluma Active 20-30 | 2 | ICS Feed | ✅ |
+| Meetup: Petaluma Figure Drawing | 1 | ICS Feed | ✅ |
+| Meetup: Petaluma Salon | 1 | ICS Feed | ✅ |
+| Meetup: Petaluma Book & Brew | 1 | ICS Feed | ✅ |
 
 ### Future Sources (No Scraper Yet)
 
 | Source | Events | Platform | Notes |
 |--------|--------|----------|-------|
-| Phoenix Theater | ~8 | Wix iframe | Complex - cross-origin |
-| SRJC Petaluma | ? | Unknown | Not yet investigated |
+| Lagunitas Taproom | Recurring | Unknown | Trivia Wed, Music Bingo Thu |
+| Mercury Theater | ~5 | Unknown | New theater at old Cinnabar venue |
+| Adobe Road Winery | ~5-10 | Unknown | Wine events, live music |
+| Village Network | ~30+ | Unknown | Senior activities |
 | Youth Sports | ? | Various | Little League, AYSO, etc. |
 
 ---

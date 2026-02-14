@@ -212,6 +212,9 @@ jobs:
         # Petaluma Chamber of Commerce (GrowthZone)
         python scrapers/growthzone.py --site petalumachamber --output cities/petaluma/petaluma_chamber.ics || true
         python scrapers/srjc_petaluma.py --output cities/petaluma/srjc_petaluma.ics || true
+        # HenHouse Brewing and Phoenix Theater
+        python scrapers/henhouse.py > cities/petaluma/henhouse.ics || true
+        python scrapers/phoenix_theater.py > cities/petaluma/phoenix_theater.ics || true
       continue-on-error: true
 
     - name: Download Petaluma live feeds and combine ICS
@@ -232,6 +235,12 @@ jobs:
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-salon/events/ical/" -o meetup_petaluma_salon.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-book-and-brew-club/events/ical/" -o meetup_book_brew.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-active-20-30/events/ical/" -o meetup_active_20_30.ics || true
+        # Regional Meetup groups with Petaluma events
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-outdoors/events/ical/" -o meetup_sonoma_outdoors.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/north-bay-contra-dance/events/ical/" -o meetup_contra_dance.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-boomers/events/ical/" -o meetup_sonoma_boomers.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-go-wild-hikers/events/ical/" -o meetup_go_wild_hikers.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/meditate-with-a-monk-in-sonoma-county/events/ical/" -o meetup_meditate_monk.ics || true
         cd ../..
         # Eventbrite scrape
         python scrapers/eventbrite_scraper.py --location ca--petaluma --months ${SCRAPE_MONTHS:-2} > cities/petaluma/eventbrite.ics || true

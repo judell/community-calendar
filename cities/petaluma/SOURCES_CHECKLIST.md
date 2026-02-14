@@ -1,35 +1,35 @@
 # Petaluma Calendar Source Checklist
 
-## Currently Implemented
+## Currently Implemented (all in CI)
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
-| Petaluma Downtown Association | Tockify ICS | 71 | ✅ Ready |
-| Aqus Community | MembershipWorks ICS | 87 | ✅ Ready |
-| Petaluma Regional Library | Scraper | 155 | ✅ Ready |
-| Petaluma Chamber of Commerce | GrowthZone Scraper | 80 | ✅ Ready |
-| Mystic Theatre | Scraper | 12 | ✅ Ready |
-| Eventbrite Petaluma | Scraper | 14 | ✅ Ready |
-| Petaluma High School Athletics | MaxPreps Scraper | 9 | ✅ Ready |
-| Casa Grande High School Athletics | MaxPreps Scraper | 8 | ✅ Ready |
-| Meetup: Mindful Petaluma | ICS | 10 | ✅ Ready |
-| Meetup: Candlelight Yoga | ICS | 10 | ✅ Ready |
-| Meetup: Rebel Craft Collective | ICS | 6 | ✅ Ready |
-| Meetup: Sonoma-Marin Brat Pack | ICS | 2 | ✅ Ready |
-| Meetup: Figure Drawing | ICS | 1 | ✅ Ready |
-| Meetup: Petaluma Salon | ICS | 1 | ✅ Ready |
-| Meetup: Book & Brew Club | ICS | 1 | ✅ Ready |
-| Meetup: Active 20-30 | ICS | 2 | ✅ Ready |
-| SRJC Petaluma Campus | LiveWhale Scraper | 17 | ✅ Ready |
-| HenHouse Brewing Petaluma | Scraper | 2-3 | ✅ Ready |
-| Phoenix Theater | Eventbrite Scraper | 13 | ✅ Ready |
-| Meetup: Sonoma County Outdoors | ICS | ~10 | ✅ Ready |
-| Meetup: North Bay Contra Dance | ICS | ~10 | ✅ Ready |
-| Meetup: Sonoma County Boomers | ICS | ~7 | ✅ Ready |
-| Meetup: Sonoma County Go Wild Hikers | ICS | ~3 | ✅ Ready |
-| Meetup: Meditate with a Monk | ICS | ~10 | ✅ Ready |
+| Petaluma Downtown Association | Tockify ICS | 71 | ✅ In CI |
+| Aqus Community | MembershipWorks ICS | 87 | ✅ In CI |
+| Petaluma Regional Library | Scraper | 155 | ✅ In CI |
+| Petaluma Chamber of Commerce | GrowthZone Scraper | 80 | ✅ In CI |
+| Mystic Theatre | Scraper | 12 | ✅ In CI |
+| Eventbrite Petaluma | Scraper | 14 | ✅ In CI |
+| Petaluma High School Athletics | MaxPreps Scraper | 9 | ✅ In CI |
+| Casa Grande High School Athletics | MaxPreps Scraper | 8 | ✅ In CI |
+| SRJC Petaluma Campus | LiveWhale Scraper | 17 | ✅ In CI |
+| HenHouse Brewing Petaluma | Scraper | 2-3 | ✅ In CI |
+| Phoenix Theater | Eventbrite Scraper | 13 | ✅ In CI |
+| Meetup: Mindful Petaluma | ICS | 10 | ✅ In CI |
+| Meetup: Candlelight Yoga | ICS | 10 | ✅ In CI |
+| Meetup: Rebel Craft Collective | ICS | 6 | ✅ In CI |
+| Meetup: Sonoma-Marin Brat Pack | ICS | 2 | ✅ In CI |
+| Meetup: Figure Drawing | ICS | 1 | ✅ In CI |
+| Meetup: Petaluma Salon | ICS | 1 | ✅ In CI |
+| Meetup: Book & Brew Club | ICS | 1 | ✅ In CI |
+| Meetup: Active 20-30 | ICS | 2 | ✅ In CI |
+| Meetup: Sonoma County Outdoors | ICS | ~10 | ✅ In CI |
+| Meetup: North Bay Contra Dance | ICS | ~10 | ✅ In CI |
+| Meetup: Sonoma County Boomers | ICS | ~7 | ✅ In CI |
+| Meetup: Go Wild Hikers | ICS | ~3 | ✅ In CI |
+| Meetup: Meditate with a Monk | ICS | ~10 | ✅ In CI |
 
-**Total: ~360+ unique events (deduplicated)**
+**Total: ~415+ events (before deduplication)**
 
 ---
 
@@ -112,7 +112,7 @@ Topical search found more regional groups with Petaluma events:
 | sonoma-county-go-wild-hikers | `meetup.com/sonoma-county-go-wild-hikers/events/ical/` | ~3 | Hiking |
 | meditate-with-a-monk-in-sonoma-county | `meetup.com/meditate-with-a-monk-in-sonoma-county/events/ical/` | ~10 | Penngrove area |
 
-**Status:** ✅ Added to feeds.txt (2026-02-14)
+**Status:** ✅ All added to CI (2026-02-14)
 
 ---
 
