@@ -124,12 +124,19 @@ function truncate(text, maxLen) {
 function getSourceCounts(events) {
   if (!events || !events.length) return [];
   const counts = {};
+  const ids = {};
   events.forEach(e => {
     const src = e.source || 'Unknown';
     counts[src] = (counts[src] || 0) + 1;
+    if (e.source_id && !ids[src]) {
+      ids[src] = e.source_id;
+    }
   });
   return Object.entries(counts)
-    .map(([source, count]) => ({ source, count }))
+    .map(([source, count]) => ({ 
+      source: ids[source] ? `${source} (${ids[source]})` : source, 
+      count 
+    }))
     .sort((a, b) => b.count - a.count);
 }
 

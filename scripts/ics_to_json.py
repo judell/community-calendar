@@ -54,8 +54,9 @@ def unfold_ics_lines(content):
 def extract_field(event_content, field_name):
     """Extract a field value from VEVENT content."""
     # Match field with optional parameters: FIELD;PARAM=VALUE:content or FIELD:content
-    pattern = rf'{field_name}[^:]*:([^\r\n]*)'
-    match = re.search(pattern, event_content, re.IGNORECASE)
+    # Use word boundary or end-of-field-name to avoid X-SOURCE matching X-SOURCE-ID
+    pattern = rf'^{field_name}(?:;[^:]*)?:([^\r\n]*)'
+    match = re.search(pattern, event_content, re.IGNORECASE | re.MULTILINE)
     if match:
         value = match.group(1)
         # Unescape ICS escapes
@@ -89,6 +90,7 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
         description = extract_field(event_content, 'DESCRIPTION')
         url = extract_field(event_content, 'URL')
         source = extract_field(event_content, 'X-SOURCE')
+        source_id = extract_field(event_content, 'X-SOURCE-ID')
         uid = extract_field(event_content, 'UID')
 
         # Skip if no title or start time
@@ -116,6 +118,7 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
             'url': url or '',
             'city': city or '',
             'source': source or '',
+            'source_id': source_id or '',
             'source_uid': uid or ''
         }
         events.append(event)

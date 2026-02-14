@@ -258,7 +258,7 @@ def parse_ics_datetime(dt_str):
         return None
 
 
-def extract_events(ics_content, source_name=None, fallback_url=None):
+def extract_events(ics_content, source_name=None, source_id=None, fallback_url=None):
     """Extract VEVENT blocks from ICS content."""
     events = []
 
@@ -293,9 +293,11 @@ def extract_events(ics_content, source_name=None, fallback_url=None):
                         # Add DESCRIPTION with source
                         event_content = f'DESCRIPTION:{source_line}\r\n{event_content}'
                     
-                    # Also add X-SOURCE header
+                    # Also add X-SOURCE and X-SOURCE-ID headers
                     if 'X-SOURCE' not in event_content:
                         event_content = f'X-SOURCE:{source_name}\r\n{event_content}'
+                    if source_id and 'X-SOURCE-ID' not in event_content:
+                        event_content = f'X-SOURCE-ID:{source_id}\r\n{event_content}'
                 
                 events.append({
                     'dtstart': dt,
@@ -339,8 +341,9 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar",
         try:
             content = ics_file.read_text(encoding='utf-8', errors='ignore')
             source_name = get_source_name(ics_file.name)
+            source_id = ics_file.stem  # filename without .ics
             fallback_url = get_fallback_url(ics_file.name)
-            events = extract_events(content, source_name, fallback_url)
+            events = extract_events(content, source_name, source_id, fallback_url)
             
             # Filter to future events only
             future_events = [e for e in events if e['dtstart'].replace(tzinfo=timezone.utc) >= now]
