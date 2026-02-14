@@ -288,6 +288,9 @@ python scripts/geocode_cities.py --city {cityname} --validate-only
 | **MembershipWorks** | `https://api.membershipworks.com/v2/events?_op=ics&org={ID}` |
 | **WordPress Tribe** | `https://example.com/events/?ical=1` |
 | **Google Calendar** | Extract calendar ID from embed code |
+| **Legistar** | `scrapers/legistar.py --client {client}` (WebAPI) |
+| **Squarespace** | `https://example.com/events?format=json` |
+| **GrowthZone** | `scrapers/growthzone.py --site {chamber}` |
 
 ---
 
@@ -309,3 +312,65 @@ The calendar automatically collapses these long-running events to **show once pe
 - The event remains visible throughout its run, just not every day
 
 This reduces event count significantly (typically 10-15% fewer displayed events) while maintaining weekly visibility of ongoing attractions. Curators don't need to do anything — this happens automatically in the display layer.
+
+---
+
+## Government & Civic Sources
+
+### Legistar (City Council, Boards, Commissions)
+Many cities use Legistar (Granicus) for agenda management. Check if your city has one:
+```bash
+# Try: {city}.legistar.com or {city-name}.legistar.com
+curl -s "https://webapi.legistar.com/v1/{client}/events" | head -50
+```
+
+If the API returns JSON, use the Legistar scraper:
+```bash
+python scrapers/legistar.py --client santa-rosa -o legistar.ics
+```
+
+**Client name:** Extract from URL (e.g., `santa-rosa.legistar.com` → `santa-rosa`)
+
+### City Website Calendars (CivicPlus, etc.)
+Many city websites have ICS export. Look for "Subscribe" or calendar icons. Common patterns:
+```
+https://www.{city}.org/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID={N}
+```
+**Warning:** These feeds are often stale or incomplete. Legistar is usually more authoritative for government meetings.
+
+---
+
+## Additional Platform Techniques
+
+### Squarespace Sites
+Squarespace sites expose event data via `?format=json`:
+```bash
+curl -sL "https://example.com/events?format=json" | head -100
+```
+Look for `<!-- This is Squarespace. -->` in page source to confirm. Use `scrapers/lib/squarespace.py` base class.
+
+### Wix Sites — Don't Scrape Directly
+Wix sites are heavy JS nightmares. Instead, find what ticketing platform the venue uses:
+- Search Eventbrite for the venue name
+- Check for SeeTickets widgets
+- Look for Dice.fm or AXS links
+
+### GrowthZone (Chambers of Commerce)
+Chamber sites on GrowthZone have public APIs:
+```bash
+curl -sL "https://business.{chamber}.com/api/events" | head -50
+```
+Use `scrapers/growthzone.py --site {chamber}`.
+
+### Google Calendar Embeds
+If a site embeds Google Calendar, extract the calendar ID from the iframe `src` URL:
+```
+https://calendar.google.com/calendar/ical/{CALENDAR_ID}/public/basic.ics
+```
+
+---
+
+## See Also
+
+- [docs/discovery-lessons.md](discovery-lessons.md) — Real-world lessons and gotchas from source discovery
+- [AGENTS.md](../AGENTS.md) — Technical reference for scrapers and automation
