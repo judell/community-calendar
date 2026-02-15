@@ -107,22 +107,6 @@
           <Text>{window.cityName} Events</Text>
           <SpaceFiller />
           <HStack gap="$space-1">
-            <Icon
-              when="{window.authUser}"
-              name="photo"
-              tooltip="Capture Event from Poster"
-              width="20px"
-              height="20px"
-              onClick="captureDialog.open()"
-            />
-            <Icon
-              when="{window.authUser && (adminGithubAccess.value || []).length > 0}"
-              name="play"
-              tooltip="Capture Event from Audio"
-              width="20px"
-              height="20px"
-              onClick="audioCaptureDialog.open()"
-            />
             <Icon name="list" tooltip="Sources" width="20px" height="20px" onClick="sourcesDialog.open()" />
             <Icon
               name="user"
@@ -132,6 +116,26 @@
               color="{window.authUser ? '$color-primary-500' : 'inherit'}"
               backgroundColor="{window.authUser ? '$color-primary-100' : 'transparent'}"
               onClick="{window.authUser ? window.signOut() : window.signIn()}"
+            />
+            <Icon
+              when="{window.authUser}"
+              name="photo"
+              tooltip="Capture Event from Poster"
+              width="20px"
+              height="20px"
+              color="$color-primary-500"
+              backgroundColor="$color-primary-100"
+              onClick="captureDialog.open()"
+            />
+            <Icon
+              when="{window.authUser && (adminGithubAccess.value || []).length > 0}"
+              name="play"
+              tooltip="Capture Event from Audio"
+              width="20px"
+              height="20px"
+              color="$color-primary-500"
+              backgroundColor="$color-primary-100"
+              onClick="audioCaptureDialog.open()"
             />
             <Icon name="cog" tooltip="Inspector" width="20px" height="20px" onClick="inspectorDialog.open()" />
           </HStack>
