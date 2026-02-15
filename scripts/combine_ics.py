@@ -409,8 +409,10 @@ def extract_events(ics_content, source_name=None, source_id=None, fallback_url=N
                     
                     if desc_match:
                         old_desc = desc_match.group(1)
+                        # Unfold before checking so fold boundaries don't break the match
+                        unfolded_desc = re.sub(r'\r?\n[ \t]', '', old_desc)
                         # Don't add if source already mentioned
-                        if 'Source:' not in old_desc:
+                        if 'Source:' not in unfolded_desc:
                             new_desc = old_desc.rstrip() + '\\n\\n' + source_line
                             event_content = event_content.replace(
                                 f'DESCRIPTION:{old_desc}',
