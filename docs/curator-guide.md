@@ -154,7 +154,8 @@ curl -sL "https://DOMAIN/api/2/events" | head -50
 curl -sL "https://example.com/events/" -A "Mozilla/5.0" | grep -o "wp-content/plugins/[^/]*" | sort -u
 
 # Try common feed endpoints
-curl -sL "https://example.com/events/?ical=1" | head -20
+curl -sL "https://example.com/events/?ical=1" | head -20              # Tribe Events Calendar
+curl -sL "https://example.com/events/?mec-ical-feed=1" | head -20     # Modern Events Calendar (MEC)
 curl -sL "https://example.com/events/feed/" | head -20
 ```
 
@@ -308,6 +309,7 @@ python scripts/geocode_cities.py --city {cityname} --validate-only
 | **LiveWhale** | `https://{domain}/live/ical/events` |
 | **MembershipWorks** | `https://api.membershipworks.com/v2/events?_op=ics&org={ID}` |
 | **WordPress Tribe** | `https://example.com/events/?ical=1` |
+| **WordPress MEC** | `https://example.com/events/?mec-ical-feed=1` |
 | **Google Calendar** | Extract calendar ID from embed code |
 | **Legistar** | `scrapers/legistar.py --client {client}` (WebAPI) |
 | **Squarespace** | `https://example.com/events?format=json` |

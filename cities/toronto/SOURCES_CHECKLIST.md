@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (31 feeds)
+## Currently Implemented (33 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -20,6 +20,12 @@
 | Buddies in Bad Times Theatre | WordPress Tribe ICS | 4 | LGBTQ+ theatre |
 | Factory Theatre | WordPress Tribe ICS | 9 | Canadian theatre |
 | High Park Nature Centre | WordPress Tribe ICS | 10 | Outdoor/nature programs |
+
+### Universities
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| University of Toronto | HTML scraper | 138 | Aggregate events from all faculties |
+| York University | WordPress MEC ICS | 6,558 | Huge feed, pipeline filters by date |
 
 ### Music Venues
 | Source | Type | Events | Notes |
@@ -137,7 +143,7 @@ These were verified with active ICS feeds — can be added later to broaden cove
 | Music Gallery | No feed |
 | Small World Music | No feed |
 | Scarborough Arts | No feed |
-| UofT / York / TMU / OCAD | No LiveWhale or Tribe ICS feeds |
+| TMU / OCAD | No ICS feeds (TMU custom CMS, OCAD Drupal) |
 | Toronto Public Library | No ICS feed (only JSON API via BiblioCommons) |
 
 ---

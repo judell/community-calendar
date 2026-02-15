@@ -15,6 +15,15 @@ Look for `PRODID:-//...ECPv6...` in the response to confirm.
 
 **Examples:** The Big Easy Petaluma (30 events), Polly Klaas Community Theater (8 events).
 
+### WordPress + Modern Events Calendar (MEC) = Free ICS
+A different WordPress calendar plugin from The Events Calendar. Look for `wp-content/plugins/modern-events-calendar` in page source. The ICS endpoint is:
+```
+https://example.com/events/?mec-ical-feed=1
+```
+Look for `PRODID:-//WordPress - MEC` in the response to confirm. MEC feeds can be very large (thousands of events including past ones) — the pipeline filters by date automatically.
+
+**Example:** York University Events Calendar (6,558 events via MEC).
+
 ### Public Google Calendar = Free ICS
 Some sites embed a public Google Calendar via iframe. Extract the calendar ID from the iframe `src` URL and construct the ICS feed:
 ```

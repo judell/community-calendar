@@ -141,6 +141,7 @@ For cities using Legistar (Granicus) for agenda management. Client name is from 
 | **LiveWhale** | `https://{domain}/live/ical/events` |
 | **Localist** | `https://{domain}/api/2/events` |
 | **WordPress Tribe** | `https://example.com/events/?ical=1` |
+| **WordPress MEC** | `https://example.com/events/?mec-ical-feed=1` |
 
 ### SeeTickets Widgets
 HTML classes: `.title a`, `.date`, `.see-showtime`, `.see-doortime`, `.genre`, `.ages`, `.price`

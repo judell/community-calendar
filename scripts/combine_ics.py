@@ -113,6 +113,9 @@ SOURCE_NAMES = {
     'buddies_theatre': 'Buddies in Bad Times Theatre',
     'factory_theatre': 'Factory Theatre',
     'high_park_nature': 'High Park Nature Centre',
+    # Toronto - Universities
+    'york_university': 'York University',
+    'uoft_events': 'University of Toronto',
     # Toronto - Community Organizations
     'culturelink': 'CultureLink Settlement Services',
     'scadding_court': 'Scadding Court Community Centre',
@@ -184,6 +187,8 @@ SOURCE_URLS = {
     'buddies_theatre': 'https://www.buddiesinbadtimes.com/events/',
     'factory_theatre': 'https://www.factorytheatre.ca/events/',
     'high_park_nature': 'https://highparknaturecentre.com/events/',
+    'york_university': 'https://events.yorku.ca/',
+    'uoft_events': 'https://www.utoronto.ca/events',
     'culturelink': 'https://www.culturelink.ca/events/',
     'scadding_court': 'https://scaddingcourt.org/events/',
     'st_lawrence_na': 'https://tockify.com/st.lawrence.na/',
