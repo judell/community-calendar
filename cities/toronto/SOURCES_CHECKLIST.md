@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (27 feeds)
+## Currently Implemented (29 feeds)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -18,6 +18,12 @@
 | Textile Museum of Canada | WordPress Tribe ICS | 9 | |
 | Bata Shoe Museum | WordPress Tribe ICS | 5 | |
 | Buddies in Bad Times Theatre | WordPress Tribe ICS | 4 | LGBTQ+ theatre |
+
+### Music Venues
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Jazz Bistro | WordPress Tribe ICS | 24 | Live jazz performances |
+| Grossman's Tavern | WordPress Tribe ICS | 30 | Live music |
 
 ### Community Organizations
 | Source | Type | Events | Notes |
@@ -107,6 +113,14 @@ These were verified with active ICS feeds — can be added later to broaden cove
 | Canadian Opera Company | 526 error |
 | do416.to | No feed |
 | To Do Canada | 403 Forbidden |
+| Songkick Toronto | No public feeds |
+| Dice.fm | No Toronto page |
+| Resident Advisor | 403 |
+| The Rex | Squarespace but not events collection type |
+| Horseshoe Tavern | Webflow, no feed |
+| Lee's Palace | Custom app, no feed |
+| Danforth Music Hall | Custom Chakra UI app, no feed |
+| TSO | No feed found |
 
 ---
 
