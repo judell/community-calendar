@@ -23,7 +23,7 @@ supabase/
 └── functions/                     # Edge Functions (Deno/TypeScript)
     ├── load-events/               # Fetches events.json and upserts to database
     ├── my-picks/                  # Returns user's picks as ICS or JSON feed
-    └── capture-event/             # Extracts event from poster image via Claude API
+    └── capture-event/             # Extracts event from poster image or audio via Claude API
 ```
 
 **Note:** DDL files document the live database state. They are not migration scripts — keep them in sync with what actually exists in Supabase.
@@ -90,11 +90,15 @@ The callback URL is the critical piece — it points to *Supabase*, not your app
 ### Step 3: Configure redirect URLs
 
 1. Go to Supabase Dashboard > Authentication > URL Configuration
-2. Under **Redirect URLs**, add your app's URL(s):
-   - `https://judell.github.io/community-calendar/`
-   - `http://localhost:1313/` (for local XMLUI dev server)
+2. Set **Site URL** to `https://judell.github.io/community-calendar/` — this is the default redirect target after OAuth
+3. Under **Redirect URLs**, add your app's URL(s):
+   - `https://judell.github.io/community-calendar/**`
+   - `http://localhost:3000/**` (for local dev via `npx serve`)
+   - `http://localhost:8080/**` (for local XMLUI dev server)
 
-These are the URLs Supabase is allowed to redirect *back to* after authentication completes.
+These are the URLs Supabase is allowed to redirect *back to* after authentication completes. The `redirect_to` parameter in the auth URL must match one of these patterns, otherwise Supabase falls back to the Site URL.
+
+**Important:** The Site URL must not have leading/trailing whitespace — Supabase will fail to parse it with a cryptic "first path segment cannot contain colon" error.
 
 ### How the OAuth flow works
 
@@ -130,9 +134,9 @@ App's onAuthStateChange handler fires, stores session in localStorage
 The app initiates this in `index.html`:
 ```js
 window.signIn = () => {
+  const returnTo = window.location.origin + window.location.pathname + window.location.search;
   window.location.href = SUPABASE_URL +
-    '/auth/v1/authorize?provider=github&redirect_to=' +
-    window.location.origin + window.location.pathname;
+    '/auth/v1/authorize?provider=github&redirect_to=' + encodeURIComponent(returnTo);
 };
 ```
 
@@ -205,9 +209,9 @@ supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 
 ## Edge Functions
 
-### load-events (v14)
+### load-events (v16)
 
-Fetches `cities/*/events.json` from GitHub Pages and upserts into the events table. Processes all 6 cities.
+Fetches `cities/*/events.json` from GitHub Pages and upserts into the events table. Processes all 5 cities (santarosa, bloomington, davis, petaluma, toronto).
 
 ```bash
 curl -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
@@ -225,10 +229,10 @@ GET https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/my-picks?token=<feed_t
 
 Merges event data with curator enrichments (rrule, categories, notes, etc.) from the `event_enrichments` table.
 
-### capture-event (v13)
+### capture-event (v24)
 
-Extracts event details from a poster image using Claude API. Two modes:
-- **Extract**: Upload image, get back structured event JSON
-- **Commit**: Save extracted event to database and create a pick
+Extracts event details from a poster image or audio recording using Claude API. Two modes:
+- **Extract**: Upload image or audio, get back structured event JSON. Audio is first transcribed via Whisper, then Claude extracts event details from the transcript.
+- **Commit**: Save extracted event to database and create a pick. For audio: appends transcript to description, saves transcript in dedicated column.
 
-Requires `ANTHROPIC_API_KEY` secret configured in Supabase dashboard.
+Requires `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` secrets configured in Supabase dashboard.
