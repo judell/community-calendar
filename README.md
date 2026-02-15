@@ -670,7 +670,7 @@ The `AddToCalendar` component generates a downloadable `.ics` file for any event
 ```
 community-calendar/
 ├── Main.xmlui              # XMLUI app shell (DataSources, ChangeListeners, layout)
-├── Main.xmlui.xs              # Shared vars + functions (togglePick, removePick, refreshCounter)
+├── Main.xmlui.xs           # Shared vars + functions (togglePick, removePick, refreshCounter)
 ├── helpers.js              # Pure helper functions (filter, dedupe, format, detectRecurrence, etc.)
 ├── components/
 │   ├── EventCard.xmlui     # Event display card with pick checkbox
@@ -682,6 +682,8 @@ community-calendar/
 │   ├── EnrichmentDialog.xmlui # Enrichment management dialog
 │   ├── MyPicksDialog.xmlui # My Picks view dialog
 │   └── SourcesDialog.xmlui # Sources modal dialog
+├── AGENTS.md               # Curator/developer operating guide and discovery playbook
+├── docs/                   # Supporting docs (curator guide, discovery lessons, audits)
 ├── config.json             # Supabase credentials + xsVerbose for inspector
 ├── index.html              # XMLUI loader + auth setup + ?city= param routing
 ├── test.html               # Browser-based test runner
@@ -694,14 +696,23 @@ community-calendar/
 │   ├── bloomington/
 │   ├── davis/
 │   ├── petaluma/
-│   └── toronto/
+│   ├── toronto/
+│   └── raleighdurham/
+├── .geocode_cache.json     # Geocoding cache used by scripts/geocode_cities.py
 ├── scripts/                # Build and utility scripts
+│   ├── add_feed.py         # Adds direct ICS feeds to workflow + feeds.txt
+│   ├── add_scraper.py      # Wires new scraper into workflow + combine_ics.py
 │   ├── combine_ics.py      # Combines ICS files into combined.ics
+│   ├── geocode_cities.py   # Geocodes city/location names for geo-filter setup
 │   ├── ics_to_json.py      # Converts ICS to JSON for Supabase
-│   └── report.py           # Feed health report
+│   ├── report.py           # Feed health report
+│   └── validate_pipeline.py# Pipeline output validation checks
 ├── scrapers/               # Event scrapers (Eventbrite, CitySpark, RSS, etc.)
+│   └── lib/                # Reusable scraper bases (ckan, bibliocommons, jsonld, etc.)
 ├── supabase/
 │   ├── ddl/                # Database schema documentation (01-09)
 │   └── functions/          # Edge Functions (load-events, my-picks, capture-event)
+├── .github/
+│   └── workflows/          # Automation (generate-calendar.yml)
 └── legacy/                 # Legacy HTML calendar generator (cal.py, templates)
 ```
