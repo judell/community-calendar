@@ -75,6 +75,28 @@ The `scrapers/growthzone.py` scraper handles this generically.
 
 Extensively investigated for Petaluma: Little League (BlueSombrero — member-only), AYSO, youth soccer, girls softball, swim teams. Results: member-only platforms, dead domains, or Cloudflare-blocked city rec sites. High school athletics via MaxPreps is the practical ceiling for public school sports data.
 
+## Probe WordPress Sites Directly with `?ical=1`
+
+Don't just rely on search engines to find WordPress Tribe Events sites. If you know venue or organization names in a city, **try appending `?ical=1` to their `/events/` page** directly. Many sites running The Events Calendar plugin don't show up in `inurl:/tribe_events/` searches but still serve ICS at that endpoint.
+
+**Toronto example:** Probing known museums, theatres, community centres, and BIAs turned up 8 working feeds (Gardiner Museum, Bata Shoe Museum, Textile Museum, Toronto Botanical Garden, Buddies in Bad Times Theatre, Scadding Court, CultureLink, Bloor West Village BIA) — none of which appeared in search results.
+
+## Neighbourhood Associations and Business Districts Are Worth Checking
+
+Business Improvement Districts (called BIDs in the US, BIAs in Canada) often maintain WordPress event calendars for their neighbourhood. Same goes for neighbourhood associations and community councils.
+
+**Toronto examples:** Bloor West Village Business Improvement Area (6 events), St. Lawrence Neighbourhood Association (82 events via Tockify), Councillor Jamaal Myers community calendar (27 events via Tockify).
+
+## Settlement and Newcomer Services Are Event Goldmines
+
+Immigrant settlement organizations and newcomer service agencies run huge numbers of community programs and events. They're often overlooked but can be the single highest-volume community source in a city.
+
+**Toronto example:** CultureLink Settlement Services had 494 events via WordPress Events Manager ICS — the second-largest source after the main aggregator.
+
+## Don't Over-Research Before Running the Playbook
+
+It's tempting to spend time cataloging aggregators, building venue lists, and writing scrapers before trying the standard discovery playbook. Resist this. The platform searches (Tockify, WordPress `?ical=1`, Meetup ICS) reliably turn up dozens of ready-to-use feeds in a single pass. Run those first, then assess gaps.
+
 ## Meetup Feeds Need User-Agent
 
 Meetup ICS feeds sometimes return errors without a User-Agent header:

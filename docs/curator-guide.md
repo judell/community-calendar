@@ -72,6 +72,9 @@ Use DuckDuckGo (Google may block automated queries). Replace `{city}` and `{stat
 | `{city} {state} events site:eventbrite.com` | Eventbrite events (requires scraper) |
 | `{city} {state} "community calendar"` | Local event aggregators |
 | `{city} {state} inurl:/tribe_events/` | WordPress Tribe Events Calendar |
+| `{city} "business improvement" events` | Neighbourhood business district calendars |
+| `{city} "settlement services" OR "newcomer" events` | Immigrant service orgs (often high volume) |
+| `{city} "community centre" OR "community center" events` | Community centres with event calendars |
 
 ### Ready-to-Use DuckDuckGo URLs
 
