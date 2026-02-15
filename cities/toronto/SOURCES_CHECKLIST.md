@@ -223,35 +223,27 @@
 - `scrapers/toronto_festivals.py` — City of Toronto festivals via CKAN JSON
 - `scrapers/uoft_events.py` — UofT aggregate page + 32 department deep-links
 - `scrapers/toronto_public_library.py` — TPL kids/family scraper on Bibliocommons base
+- `scrapers/toronto_public_library.py` — TPL kids/family scraper on Bibliocommons base
 
-**Topical searches completed:** outdoor activities, government/public affairs, crafts/makers
+---
 
-### 2026-02-15: Topical pass 1 — volunteering / mutual aid
+## Topical Searches
 
-**Added this session**
-- **Show Up Toronto** — iCal feed at `https://showuptoronto.ca/static/showupto.ics` (site also exposes RSS). Added to `feeds.txt`, workflow fetch, and `combine_ics.py` source mappings.
-- **Meetup: SAI Dham Canada Toronto Volunteer Group** — iCal feed at `https://www.meetup.com/sai-dham-canada-toronto-volunteer-group/events/ical/`. Added to `feeds.txt`, workflow fetch, and `combine_ics.py` source mappings.
-- **Volunteer Toronto scraper** — added `scrapers/volunteer_toronto.py` and wired workflow output `volunteer_toronto.ics` plus `combine_ics.py` source mappings. Needs runtime validation for event volume.
+Track progress on topical searches to find long-tail community sources.
 
-**Screened out for now (not Toronto-specific enough)**
-- **Volunteer MBC** (`https://www.volunteermbc.org/events/?ical=1`) — valid ICS, but appears regional beyond Toronto.
-- **VolunteerConnector** (`https://www.volunteerconnector.org/events?ical=1`) — valid ICS, but Ontario-wide feed likely too broad without city filtering.
+### Completed
 
-### 2026-02-15: Topical pass 2 — kids / family
+| Topic | Date | Sources Added | Notes |
+|-------|------|---------------|-------|
+| Outdoor activities | 2025-02-14 | (included in initial Meetup sweep) | Hiking, cycling, water sports |
+| Government/public affairs | 2025-02-14 | toronto_meetings.py, toronto_festivals.py | CKAN open data |
+| Crafts/makers | 2025-02-14 | Repair Cafe, Knitters Guild, Site 3, 3D printing | |
+| Volunteering/mutual aid | 2025-02-15 | Show Up Toronto, SAI Dham Volunteer, Volunteer Toronto scraper | |
+| Kids/family | 2025-02-15 | Toronto Dads, Little Sunbeams, Mini+Me Meetups, TPL scraper | Bibliocommons base |
+| History/heritage | 2025-02-15 | Ontario Historical Society, Toronto History Walks, Medieval SCA | 25 events |
 
-**Added this session**
-- **Meetup: Toronto Dads Group** — `https://www.meetup.com/torontodadsgroup/events/ical/`. Added to `feeds.txt`, workflow fetch (`meetup_toronto_dads.ics`), and `combine_ics.py` source mappings.
-- **Meetup: Little Sunbeams (Parents + Tots Meetup Group)** — `https://www.meetup.com/little-sunbeams-parents-tots-meetup/events/ical/`. Added to `feeds.txt`, workflow fetch (`meetup_little_sunbeams.ics`), and `combine_ics.py` source mappings.
-- **Meetup: Mini + Me Meetups** — `https://www.meetup.com/mini-me-meetups/events/ical/`. Added to `feeds.txt`, workflow fetch (`meetup_mini_me.ics`), and `combine_ics.py` source mappings.
-- **Toronto Public Library scraper** — added `scrapers/toronto_public_library.py` on reusable `scrapers/lib/bibliocommons.py` base and wired workflow output `tpl_events.ics` plus `combine_ics.py` source mappings. Targets TPL kids/family audiences.
+### Not Yet Done
 
-**Promising but needs custom handling**
-- **Jane/Finch Centre programming calendar** — includes downloadable iCal links per event; likely scrapeable but not a clean single ICS feed endpoint yet.
-
-**Screened out for now**
-- **Kids Out and About Toronto** — broad promotional listing site; not a clean direct source feed for producer-authoritative ingestion.
-
-**Topical searches not yet done:**
 - Food & drink (cooking classes, tastings, farmers markets)
 - Faith / spiritual
 - Seniors
@@ -264,69 +256,87 @@
 
 ---
 
-## Topical Search: History / Heritage (2025-02-15)
+## Topical Search: Volunteering / Mutual Aid (2025-02-15)
 
-**Objective**: Find long-tail events in history/heritage category
+### Added
 
-### Working ICS Feeds (Added to feeds.txt)
+| Source | Type | Notes |
+|--------|------|-------|
+| Show Up Toronto | ICS feed | `showuptoronto.ca/static/showupto.ics` |
+| SAI Dham Canada Toronto Volunteer | Meetup ICS | Volunteer group |
+| Volunteer Toronto | Scraper | `scrapers/volunteer_toronto.py` |
 
-| Source | ICS URL | Events | Notes |
-|--------|---------|--------|-------|
-| Ontario Historical Society | `ontariohistoricalsociety.ca/events/?ical=1` | 5 | WordPress Tribe; province-wide but includes Toronto events like Toronto Postcard Club (Feb 22), Canada Black Music Archives (Feb 18) |
-| Toronto History Walks | `meetup.com/the-history-of-parkdale/events/ical/` | 10 | Walking tours: U of T & Yorkville, Mt Pleasant Cemetery, St James Cemetery, Distillery District, Lakeshore Psychiatric Hospital, PATH System, Little India |
-| Medieval Renaissance Toronto SCA | `meetup.com/Medieval-Renaissance-Toronto-Royal-Citie-of-Eoforwic-SCA/events/ical/` | 10 | Society for Creative Anachronism - medieval arts, science, dancing, games |
-
-### Meetup Groups Discovered (History/Heritage)
-
-| Group | Members | ICS Events | Status |
-|-------|---------|------------|--------|
-| Toronto History Walks (the-history-of-parkdale) | 8,781 | 10 | ✅ Added - excellent walking tours |
-| Medieval Renaissance Toronto SCA | 172 | 10 | ✅ Added - medieval reenactment |
-| Eglinton History Salon | 266 | 0 | No current events |
-| History Discussion Group | 3,586 | 0 | No current events |
-| The Long Conversation | 16 | 0 | Philosophy/history discussion |
-| Toronto African Diaspora History Walking Tours | 63 | 0 | No current events |
-| Hidden History Toronto! Walking Tours | 9,597 | 0 | No current events |
-
-### Key Organizations Assessed
-
-| Organization | URL | Feed Status | Notes |
-|--------------|-----|-------------|-------|
-| Ontario Historical Society | ontariohistoricalsociety.ca | ✅ ICS works | Province-wide heritage org |
-| Heritage Toronto | heritagetoronto.org | No feed | Tours seasonal (June-Nov), next season late spring 2026 |
-| ACO Toronto | acotoronto.ca | No feed | Annual symposiums, static page |
-| Toronto Historical Association | torontohistory.net | Inactive | Last events from 2016 |
-| City of Toronto History Museums | toronto.ca | No feed | 61 events but WordPress, no ICS |
-| Toronto Family History (OGS) | torontofamilyhistory.org | Blocked | Cloudflare protected |
-
-### Historic Sites / Museums
-
-| Venue | URL | Feed Status | Notes |
-|-------|-----|-------------|-------|
-| Casa Loma | casaloma.ca | No feed | RSS from 2018, empty; static events page |
-| Fort York | fortyork.streamintickets.com | 404 | Ticketing system down |
-| City of Toronto Archives | toronto.ca/archives | No feed | Static events page |
-| Doors Open Toronto | toronto.ca/doors-open | Scheduled | May 23-24, 2026 - 150+ sites |
-
-### Sample Events from Toronto History Walks
-
-- University of Toronto and Historic Yorkville!
-- Mount Pleasant Cemetery (WEEKDAY)
-- St. James Cemetery and Castle Frank
-- Alcohol Wars: The Distillery and the Brewery District (EVENING)
-- With Strength: Toronto Women on the Edge of History!
-- The Mystery of Alfreda Mae Hillier: Interactive Game and Tour
-- Historic Little India: Gerrard India Bazaar
-- The Massey Murder: Interactive Game and Tour
-- The PATH System: Specialist Course and Guide
-- The Lakeshore Psychiatric Hospital and Camp M
-
-### Non-Starters (History/Heritage)
+### Screened Out
 
 | Source | Reason |
 |--------|--------|
-| Toronto Historical Association | Site inactive since 2016 |
-| Toronto Family History | Cloudflare protected |
+| Volunteer MBC | Regional beyond Toronto |
+| VolunteerConnector | Ontario-wide, too broad |
+
+---
+
+## Topical Search: Kids / Family (2025-02-15)
+
+### Added
+
+| Source | Type | Notes |
+|--------|------|-------|
+| Toronto Dads Group | Meetup ICS | `meetup.com/torontodadsgroup/events/ical/` |
+| Little Sunbeams | Meetup ICS | Parents + Tots meetup |
+| Mini + Me Meetups | Meetup ICS | `meetup.com/mini-me-meetups/events/ical/` |
+| Toronto Public Library | Scraper | `scrapers/toronto_public_library.py` on Bibliocommons base |
+
+### Promising (Needs Work)
+
+| Source | Notes |
+|--------|-------|
+| Jane/Finch Centre | Has per-event iCal links, not clean single feed |
+
+### Screened Out
+
+| Source | Reason |
+|--------|--------|
+| Kids Out and About Toronto | Promotional listing site, not producer-authoritative |
+
+---
+
+## Topical Search: History / Heritage (2025-02-15)
+
+### Added
+
+| Source | ICS URL | Events | Notes |
+|--------|---------|--------|-------|
+| Ontario Historical Society | `ontariohistoricalsociety.ca/events/?ical=1` | 5 | WordPress Tribe; province-wide, includes Toronto Postcard Club, Canada Black Music Archives |
+| Toronto History Walks | `meetup.com/the-history-of-parkdale/events/ical/` | 10 | Walking tours: cemeteries, neighborhoods, interactive games |
+| Medieval Renaissance Toronto SCA | `meetup.com/Medieval-Renaissance-Toronto-Royal-Citie-of-Eoforwic-SCA/events/ical/` | 10 | Medieval arts, science, dancing |
+
+### Meetup Groups Assessed
+
+| Group | Members | Events | Status |
+|-------|---------|--------|--------|
+| Toronto History Walks | 8,781 | 10 | ✅ Added |
+| Medieval Renaissance Toronto SCA | 172 | 10 | ✅ Added |
+| Hidden History Toronto! Walking Tours | 9,597 | 0 | Monitor for future events |
+| History Discussion Group | 3,586 | 0 | No current events |
+| Eglinton History Salon | 266 | 0 | No current events |
+| Toronto African Diaspora History Walking Tours | 63 | 0 | No current events |
+| The Long Conversation | 16 | 0 | Philosophy/history |
+
+### Organizations Assessed
+
+| Organization | Feed Status | Notes |
+|--------------|-------------|-------|
+| Ontario Historical Society | ✅ ICS works | Province-wide heritage org |
+| Heritage Toronto | No feed | Tours seasonal (June-Nov) |
+| ACO Toronto | No feed | Annual symposiums |
+| City of Toronto History Museums | No feed | 61 events on website |
+| Toronto Historical Association | Inactive | Last events 2016 |
+
+### Non-Starters
+
+| Source | Reason |
+|--------|--------|
+| Toronto Family History (OGS) | Cloudflare protected |
 | Casa Loma | Static site, RSS empty since 2018 |
-| Fort York tickets | 404 error on events page |
+| Fort York tickets | 404 error |
 | Heritage Toronto tours | Seasonal only (June-Nov) |
