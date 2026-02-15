@@ -6,29 +6,26 @@ Usage: python scripts/legistar_to_ics.py --client santa-rosa -o output.ics
 
 import argparse
 import json
+import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
-import urllib.request
 import urllib.parse
 import hashlib
 
 def fetch_events(client, months_ahead=12):
     """Fetch future events from Legistar WebAPI."""
     today = datetime.now().strftime('%Y-%m-%d')
-    future = (datetime.now() + timedelta(days=months_ahead * 30)).strftime('%Y-%m-%d')
-    
-    # OData filter for future events
-    filter_param = f"EventDate ge datetime'{today}'"
-    params = {
-        '$filter': filter_param,
-        '$orderby': 'EventDate asc',
-    }
-    
-    url = f"https://webapi.legistar.com/v1/{client}/events?{urllib.parse.urlencode(params)}"
-    
-    req = urllib.request.Request(url, headers={'Accept': 'application/json'})
-    with urllib.request.urlopen(req) as response:
-        return json.loads(response.read().decode())
+
+    # OData filter for future events - use literal $ (some Legistar instances reject %24)
+    filter_val = urllib.parse.quote(f"EventDate ge datetime'{today}'", safe="'")
+    url = f"https://webapi.legistar.com/v1/{client}/events?$filter={filter_val}&$orderby=EventDate%20asc"
+
+    # Use subprocess+curl to avoid Python urllib re-encoding the $
+    result = subprocess.run(
+        ['curl', '-s', '-H', 'Accept: application/json', url],
+        capture_output=True, text=True, timeout=30
+    )
+    return json.loads(result.stdout)
 
 def escape_ics(text):
     """Escape text for ICS format."""
@@ -120,8 +117,13 @@ def main():
     source_name = args.source or f"City of {args.client.replace('-', ' ').title()} Legistar"
     
     events = fetch_events(args.client, args.months)
+
+    if not isinstance(events, list):
+        print(f"Error: API returned non-list response: {events}", file=sys.stderr)
+        events = []
+
     print(f"Fetched {len(events)} events from Legistar", file=sys.stderr)
-    
+
     ics = events_to_ics(events, source_name)
     
     if args.output:

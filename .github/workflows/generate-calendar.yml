@@ -394,6 +394,14 @@ jobs:
     # ==========================================
     # Raleigh-Durham
     # ==========================================
+    - name: Scrape Raleigh-Durham sources
+      if: contains(steps.locations.outputs.list, 'raleighdurham') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        python scrapers/legistar.py --client wake --source "Wake County" -o cities/raleighdurham/wake_county_legistar.ics || true
+        python scrapers/legistar.py --client chapelhill --source "Town of Chapel Hill" -o cities/raleighdurham/chapelhill_legistar.ics || true
+        python scrapers/legistar.py --client durhamcounty --source "Durham County" -o cities/raleighdurham/durhamcounty_legistar.ics || true
+      continue-on-error: true
+
     - name: Download Raleigh-Durham live feeds and combine ICS
       if: contains(steps.locations.outputs.list, 'raleighdurham')
       run: |
