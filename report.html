@@ -22,43 +22,7 @@
             margin-bottom: 20px;
         }
 
-        .summary {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 4px;
-        }
-
-        .summary-city {
-            text-align: center;
-            flex: 1;
-            min-width: 120px;
-        }
-
-        .summary-city .count {
-            font-size: 1.8em;
-            font-weight: bold;
-        }
-
-        .summary-city .label {
-            text-transform: capitalize;
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        details { margin-bottom: 8px; }
-
-        details > summary {
-            cursor: pointer;
-            padding: 8px 0;
-        }
-
-        .anomalies {
-            margin-bottom: 20px;
-        }
+        .anomalies { margin-bottom: 20px; }
 
         .anomaly {
             padding: 8px 12px;
@@ -69,49 +33,19 @@
 
         .anomaly.high { border-color: #d32f2f; }
         .anomaly.medium { border-color: #f57c00; }
+        .anomaly .meta { font-size: 0.85em; color: #666; }
 
-        .anomaly .meta {
-            font-size: 0.85em;
-            color: #666;
-        }
+        details { margin-bottom: 4px; }
+        details > summary { cursor: pointer; padding: 4px 0; }
+        details > summary > span { display: inline; }
 
-        .city-summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-
-        .city-name {
-            font-weight: 600;
-            text-transform: capitalize;
-        }
-
-        .city-total {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .feed-summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
+        .city-name { font-weight: 600; text-transform: capitalize; }
+        .city-stats { color: #666; }
 
         .feed-name { font-weight: 500; }
-
-        .feed-type {
-            font-size: 0.75em;
-            padding: 1px 6px;
-            border-radius: 3px;
-            background: #e8e8e8;
-            margin-left: 8px;
-        }
-
-        .feed-count { font-weight: 600; }
+        .feed-count { color: #666; }
         .feed-count.zero { color: #d32f2f; }
-        .feed-count.error { color: #d32f2f; }
+        .feed-count.error { color: #d32f2f; font-size: 0.85em; }
 
         .sparkline {
             height: 30px;
@@ -132,11 +66,7 @@
         .sparkline .bar.error { background: #d32f2f; }
         .sparkline .bar.zero { background: #f57c00; min-height: 2px; }
 
-        .history-label {
-            font-size: 0.75em;
-            color: #999;
-        }
-
+        .history-label { font-size: 0.75em; color: #999; }
         .feed-detail { padding-left: 20px; }
         .city-content { padding-left: 10px; }
     </style>
@@ -144,8 +74,6 @@
 <body>
     <h1>Calendar Feed Health Report</h1>
     <div class="generated" id="generated">Loading...</div>
-
-    <div class="summary" id="summary"></div>
 
     <details class="anomalies" id="anomalies">
         <summary>Anomalies (<span id="anomaly-count">0</span>)</summary>
@@ -165,11 +93,14 @@
             }
         }
 
+        function capitalize(s) {
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
         function renderReport(data) {
             document.getElementById('generated').textContent =
                 'Last updated: ' + new Date(data.generated).toLocaleString();
 
-            const summaryEl = document.getElementById('summary');
             const cityTotals = {};
             for (const [city, cityData] of Object.entries(data.cities || {})) {
                 cityTotals[city] = Object.values(cityData.feeds || {}).reduce((sum, feed) => {
@@ -177,12 +108,6 @@
                     return sum + (latest && !latest.error ? latest.count : 0);
                 }, 0);
             }
-            summaryEl.innerHTML = Object.entries(cityTotals).map(([city, total]) =>
-                `<div class="summary-city">
-                    <div class="count">${total.toLocaleString()}</div>
-                    <div class="label">${city}</div>
-                </div>`
-            ).join('');
 
             const recentAnomalies = (data.anomalies || [])
                 .sort((a, b) => b.date.localeCompare(a.date))
@@ -216,12 +141,7 @@
 
                 const cityEl = document.createElement('details');
                 cityEl.innerHTML = `
-                    <summary>
-                        <span class="city-summary">
-                            <span class="city-name">${cityName}</span>
-                            <span class="city-total"><strong>${total.toLocaleString()}</strong> events from ${feeds.length} feeds</span>
-                        </span>
-                    </summary>
+                    <summary><span class="city-name">${capitalize(cityName)}</span> <span class="city-stats">${total.toLocaleString()} events from ${feeds.length} feeds</span></summary>
                     <div class="city-content">
                         ${feeds.map(([name, feed]) => renderFeed(name, feed)).join('')}
                     </div>
@@ -240,7 +160,7 @@
 
             if (latest.error) {
                 countClass = 'error';
-                countText = `Error: ${latest.error}`;
+                countText = `error: ${latest.error}`;
             } else if (latest.count === 0) {
                 countClass = 'zero';
                 countText = '0 events';
@@ -259,13 +179,8 @@
                 : (history[0]?.date || 'No data');
 
             return `
-                <details class="feed">
-                    <summary>
-                        <span class="feed-summary">
-                            <span><span class="feed-name">${name}</span><span class="feed-type">${feed.type}</span></span>
-                            <span class="feed-count ${countClass}">${countText}</span>
-                        </span>
-                    </summary>
+                <details>
+                    <summary><span class="feed-name">${name}</span> <span class="feed-count ${countClass}">${countText}</span></summary>
                     <div class="feed-detail">
                         <div class="sparkline">${sparkline}</div>
                         <div class="history-label">${range} (${history.length} days)</div>
