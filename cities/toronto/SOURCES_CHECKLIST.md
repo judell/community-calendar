@@ -27,108 +27,13 @@ Toronto is a major city (~3M metro). Strategy: identify major aggregators first,
    - JSON embedded in each event page (clean structure)
    - Would need to scrape listing page for URLs, then extract JSON from each
 
----
+### Still to Investigate
 
-## Venue List (Built from Aggregators)
-
-### Music Venues
-| Venue | Source Found | Direct Feed? | Notes |
-|-------|--------------|--------------|-------|
-| Massey Hall | BlogTO | PENDING | Major concert hall |
-| Roy Thomson Hall | BlogTO | PENDING | TSO home |
-| Danforth Music Hall | BlogTO | PENDING | |
-| Phoenix Concert Theatre | BlogTO | PENDING | |
-| Horseshoe Tavern | BlogTO | PENDING | |
-| Cameron House | BlogTO | PENDING | |
-| Lee's Palace | BlogTO | PENDING | |
-| Velvet Underground | BlogTO | PENDING | |
-| Queen Elizabeth Theatre | BlogTO | PENDING | |
-| Coca-Cola Coliseum | BlogTO | PENDING | Concerts + sports |
-| Palais Royale Ballroom | BlogTO | PENDING | Historic venue |
-| Free Times Cafe | BlogTO | PENDING | |
-
-### Theaters & Performing Arts
-| Venue | Source Found | Direct Feed? | Notes |
-|-------|--------------|--------------|-------|
-| Ed Mirvish Theatre | BlogTO | PENDING | Mirvish Productions |
-| Royal Alexandra Theatre | PENDING | PENDING | Mirvish |
-| Princess of Wales Theatre | PENDING | PENDING | Mirvish |
-| Four Seasons Centre | PENDING | PENDING | COC + National Ballet |
-| Harbourfront Centre | BlogTO | PENDING | Multiple venues |
-| Crow's Theatre | BlogTO | PENDING | |
-| Buddies in Bad Times | BlogTO | PENDING | LGBTQ+ theatre |
-| Berkeley Street Theatre | BlogTO | PENDING | |
-| Tarragon Theatre | PENDING | PENDING | |
-| Factory Theatre | PENDING | PENDING | |
-| Soulpepper Theatre | PENDING | PENDING | Distillery District |
-| VideoCabaret | BlogTO | PENDING | |
-| Second City Toronto | PENDING | PENDING | Comedy |
-| Comedy Bar | PENDING | PENDING | |
-| Backroom Comedy Club | NOW | PENDING | |
-| The Comedy Lab | NOW | PENDING | |
-
-### Museums & Galleries
-| Venue | Source Found | Direct Feed? | Notes |
-|-------|--------------|--------------|-------|
-| Art Gallery of Ontario (AGO) | BlogTO | PENDING | Major museum |
-| Royal Ontario Museum (ROM) | NOW, BlogTO | PENDING | Major museum |
-| Aga Khan Museum | NOW, BlogTO | PENDING | Islamic arts |
-| Bata Shoe Museum | NOW | PENDING | |
-| Gardiner Museum | BlogTO | PENDING | Ceramics |
-| Textile Museum of Canada | BlogTO | PENDING | |
-| Toronto Railway Museum | BlogTO | PENDING | |
-| TIFF Lightbox | BlogTO | PENDING | Film |
-| Hot Docs Ted Rogers Cinema | BlogTO | PENDING | Documentary |
-| OCAD University | BlogTO | PENDING | Art shows |
-| Power Plant | PENDING | PENDING | Contemporary art |
-| McMichael Canadian Art | NOW | PENDING | In Kleinburg |
-
-### Major Attractions & Event Spaces
-| Venue | Source Found | Direct Feed? | Notes |
-|-------|--------------|--------------|-------|
-| Casa Loma | BlogTO, NOW | PENDING | Historic castle |
-| Evergreen Brick Works | BlogTO | PENDING | Markets, events |
-| Nathan Phillips Square | BlogTO | PENDING | City Hall events |
-| STACKT Market | BlogTO | PENDING | Container market |
-| Distillery District | PENDING | PENDING | Multiple venues |
-| St. Lawrence Market | PENDING | PENDING | |
-| The Bentway | BlogTO | PENDING | Under Gardiner |
-| Toronto Zoo | BlogTO | PENDING | |
-| Little Canada | BlogTO | PENDING | |
-| CN Tower | PENDING | PENDING | |
-| Ripley's Aquarium | PENDING | PENDING | |
-| Ontario Science Centre | PENDING | PENDING | Closed? |
-
-### Sports & Arenas
-| Venue | Source Found | Direct Feed? | Notes |
-|-------|--------------|--------------|-------|
-| Scotiabank Arena | BlogTO | PENDING | Leafs, Raptors, concerts |
-| Rogers Centre | PENDING | PENDING | Blue Jays |
-| BMO Field | PENDING | PENDING | TFC, Argos |
-| Coca-Cola Coliseum | BlogTO | PENDING | Marlies, concerts |
-
-### Libraries
-| Venue | Source Found | Direct Feed? | Notes |
-|-------|--------------|--------------|-------|
-| Toronto Reference Library | BlogTO | BiblioCommons | 100 branches, many programs |
-| Toronto Public Library | TPL site | BiblioCommons | No public iCal found |
-
-### Community & Cultural Centers
-| Venue | Source Found | Direct Feed? | Notes |
-|-------|--------------|--------------|-------|
-| Harbourfront Centre | BlogTO | PENDING | Major arts center |
-| Japanese Canadian Cultural Centre | PENDING | PENDING | |
-| Native Canadian Centre | PENDING | PENDING | |
-| Miles Chicken Cultural Centre | PENDING | PENDING | |
-| Various community centres | City of TO | PENDING | 100+ city-run |
-
-### Universities
-| Venue | Source Found | Direct Feed? | Notes |
-|-------|--------------|--------------|-------|
-| University of Toronto | PENDING | Likely Localist | events.utoronto.ca (slow/timeout) |
-| Ryerson/TMU | PENDING | PENDING | |
-| York University | PENDING | PENDING | |
-| OCAD University | BlogTO | PENDING | |
+- Toronto Public Library (BiblioCommons — no public iCal found yet)
+- City of Toronto events page (WordPress, no obvious feed)
+- Eventbrite Toronto (need to adapt scraper for Canada)
+- Meetup Toronto groups
+- University calendars (UofT uses Localist — events.utoronto.ca was slow/timeout)
 
 ---
 
@@ -178,25 +83,5 @@ Toronto is a major city (~3M metro). Strategy: identify major aggregators first,
 **Next Steps**:
 1. ✅ Add NOW Magazine ICS feed (done - in feeds.txt)
 2. Build BlogTO scraper (high value)
-3. Investigate major venue websites directly
-4. Check Meetup for Toronto groups
-5. Test Eventbrite scraper with Canada location
-
-### Additional Venue Research (2025-02-14)
-
-**Cloudflare Protected (non-starter):**
-- AGO (ago.ca) - Cloudflare challenge page
-
-**No obvious feeds:**
-- TIFF (tiff.net) - Custom site, no feed found
-- Massey Hall / Roy Thomson Hall (mhrth.com) - No feed found
-- ROM (rom.on.ca) - 404 on whats-on page
-- Mirvish (mirvish.com) - Has calendar page but no iCal
-- Aga Khan Museum - No feed found
-- Second City Toronto - Next.js app, no feed
-- Harbourfront Centre - RSS feed exists but empty (0 items)
-
-**Platform Notes:**
-- Toronto Public Library uses BiblioCommons - no public iCal
-- Many venues use custom ticketing systems without public feeds
-- Most major venues likely appear in BlogTO already
+3. Investigate TPL BiblioCommons, City of Toronto, Meetup, Eventbrite Canada
+4. Check university calendars (UofT Localist)
