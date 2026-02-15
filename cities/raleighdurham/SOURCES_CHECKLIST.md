@@ -1,6 +1,6 @@
 # Raleigh-Durham (Research Triangle) Calendar Source Checklist
 
-## Currently Implemented (28 sources)
+## Currently Implemented (31 sources)
 
 ### Universities
 | Source | Type | Events | Notes |
@@ -32,6 +32,9 @@
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | City of Durham | CivicPlus ICS | ~0 | Community calendar; currently empty, may populate seasonally |
+| Wake County | Legistar scraper | 1 | Board of Commissioners, Planning Board, etc. |
+| Town of Chapel Hill | Legistar scraper | 0 | Town Council, boards — meetings posted as scheduled |
+| Durham County | Legistar scraper | 0 | Board of County Commissioners — meetings posted as scheduled |
 
 ### Meetup Groups — Tech (11 groups)
 | Group | Events | Category |
@@ -87,6 +90,7 @@
 | Source | Reason |
 |--------|--------|
 | City of Raleigh (raleighnc.gov/events) | Drupal, no ICS feeds |
+| Raleigh Legistar API | raleigh.legistar.com web UI exists but API returns "LegistarConnectionString not set up" — uses Granicus backend |
 | PNC Arena | Custom + Ticketmaster, no public feeds |
 | Red Hat Amphitheater | Custom, no feeds |
 | NC Museum of Natural Sciences ICS | Returns valid ICS structure but 0 events |
@@ -117,6 +121,13 @@
 
 **Total: 28 sources, ~3,900+ events**
 
+### 2026-02-15: Legistar government sources
+- Tested Legistar WebAPI for Triangle governments
+- **Working**: `wake` (Wake County), `chapelhill` (Town of Chapel Hill), `durhamcounty` (Durham County)
+- **Broken**: `raleigh` — web UI exists at raleigh.legistar.com but API returns "LegistarConnectionString setting is not set up in InSite for client: raleigh" (uses Granicus, not Legistar API)
+- Fixed legistar.py scraper to use curl subprocess (avoids Python urllib encoding `$` as `%24`)
+- **Total: 31 sources**
+
 ---
 
 ## Topical Searches
@@ -135,6 +146,6 @@ Track progress on topical searches to find long-tail community sources.
 - Kids / family (libraries, museums, parks)
 - Science / research (Duke, UNC, NIEHS, RTI, EPA)
 - Outdoor recreation (Eno River, Falls Lake, Umstead State Park, American Tobacco Trail)
-- Government / public affairs (Town of Chapel Hill, Wake County, Durham County)
+- Government / public affairs — Legistar done (wake, chapelhill, durhamcounty); Raleigh API broken
 - Volunteering / mutual aid
 - Sports / fitness (running clubs, cycling groups)
