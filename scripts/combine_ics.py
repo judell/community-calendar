@@ -111,6 +111,8 @@ SOURCE_NAMES = {
     'textile_museum': 'Textile Museum of Canada',
     'bata_shoe_museum': 'Bata Shoe Museum',
     'buddies_theatre': 'Buddies in Bad Times Theatre',
+    'factory_theatre': 'Factory Theatre',
+    'high_park_nature': 'High Park Nature Centre',
     # Toronto - Community Organizations
     'culturelink': 'CultureLink Settlement Services',
     'scadding_court': 'Scadding Court Community Centre',
@@ -180,6 +182,8 @@ SOURCE_URLS = {
     'textile_museum': 'https://www.textilemuseum.ca/events/',
     'bata_shoe_museum': 'https://batashoemuseum.ca/events/',
     'buddies_theatre': 'https://www.buddiesinbadtimes.com/events/',
+    'factory_theatre': 'https://www.factorytheatre.ca/events/',
+    'high_park_nature': 'https://highparknaturecentre.com/events/',
     'culturelink': 'https://www.culturelink.ca/events/',
     'scadding_court': 'https://scaddingcourt.org/events/',
     'st_lawrence_na': 'https://tockify.com/st.lawrence.na/',

@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (29 feeds)
+## Currently Implemented (31 feeds)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -18,6 +18,8 @@
 | Textile Museum of Canada | WordPress Tribe ICS | 9 | |
 | Bata Shoe Museum | WordPress Tribe ICS | 5 | |
 | Buddies in Bad Times Theatre | WordPress Tribe ICS | 4 | LGBTQ+ theatre |
+| Factory Theatre | WordPress Tribe ICS | 9 | Canadian theatre |
+| High Park Nature Centre | WordPress Tribe ICS | 10 | Outdoor/nature programs |
 
 ### Music Venues
 | Source | Type | Events | Notes |
@@ -121,6 +123,22 @@ These were verified with active ICS feeds — can be added later to broaden cove
 | Lee's Palace | Custom app, no feed |
 | Danforth Music Hall | Custom Chakra UI app, no feed |
 | TSO | No feed found |
+| Canadian Stage | No WordPress Tribe ICS |
+| Tarragon Theatre | No WordPress Tribe ICS |
+| Hot Docs | No WordPress Tribe ICS |
+| Aga Khan Museum | No WordPress Tribe ICS |
+| Power Plant Gallery | No WordPress Tribe ICS |
+| MOCA Toronto | No WordPress Tribe ICS |
+| The 519 | WordPress but no Tribe Events plugin |
+| Lula Lounge | No feed |
+| Tranzac | No feed |
+| 918 Bathurst | No feed |
+| Luminato Festival | No feed |
+| Music Gallery | No feed |
+| Small World Music | No feed |
+| Scarborough Arts | No feed |
+| UofT / York / TMU / OCAD | No LiveWhale or Tribe ICS feeds |
+| Toronto Public Library | No ICS feed (only JSON API via BiblioCommons) |
 
 ---
 
