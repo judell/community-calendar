@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS events (
   url text,
   city text,                -- e.g., 'santarosa', 'sebastopol', 'cotati'
   source text,              -- e.g., 'bohemian', 'pressdemocrat' (no date suffix)
+  source_id text,           -- filename-derived source identifier for curator reference
   source_uid text UNIQUE,   -- unique ID from source for deduplication
   transcript text,          -- Whisper transcript for audio-captured events
   created_at timestamptz DEFAULT now()
