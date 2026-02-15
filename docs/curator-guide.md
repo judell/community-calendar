@@ -55,6 +55,7 @@ Only after exhausting phases 1 and 2, build scrapers for important sources that 
 - **Document** findings in `cities/{city}/SOURCES_CHECKLIST.md` (Step 3)
 - **Add** working feed URLs to `cities/{city}/feeds.txt` (Step 4)
 - **Configure geo-filtering** if feeds include events outside your area (Step 5)
+- **Register the city** in the app's home page (Step 6)
 
 You can do these things by hand, or with any kind and amount of LLM assistance that you are comfortable with.
 
@@ -304,6 +305,26 @@ To check existing config without making API calls:
 ```bash
 python scripts/geocode_cities.py --city {cityname} --validate-only
 ```
+
+---
+
+## Step 6: Register the City in the App
+
+Once feeds are flowing, add the city to the app's home page so users can find it.
+
+**`index.html`** — Add an entry to the `cityNames` map:
+```javascript
+const cityNames = {
+  santarosa: 'Santa Rosa', davis: 'Davis', ..., yourcity: 'Your City'
+};
+```
+
+**`Main.xmlui`** — Add a button in the city picker VStack (search for the existing city buttons):
+```xml
+<Button variant="outlined" width="100%" onClick="window.location.search = '?city=yourcity'">Your City</Button>
+```
+
+The city key must match the directory name under `cities/` and the `?city=` URL parameter.
 
 ---
 
