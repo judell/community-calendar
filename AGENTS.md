@@ -186,7 +186,8 @@ For discovering sources in a new city, search **DuckDuckGo** (Google often block
 
 ```
 music, hiking, dance, dogs, yoga, art, running, cycling, wine, 
-beer, trivia, book club, garden, comedy, theater, kids, seniors, church
+beer, trivia, book club, garden, comedy, theater, kids, seniors, church,
+history, heritage, architecture, genealogy
 ```
 
 City names like "Petaluma" or "Bloomington" are discriminatory enough to filter results effectively. Move quickly - assess what's worth pursuing, don't get bogged down.

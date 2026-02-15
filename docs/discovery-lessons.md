@@ -223,3 +223,36 @@ curl -sL "https://example.com/events/" | grep -o "wp-content/plugins/[^/]*" | so
 | Anything else | No standard ICS feed |
 
 This is faster than trial-and-error with `?ical=1` on every site.
+
+## Topical Searches: History/Heritage Pattern (Toronto)
+
+When searching for history/heritage sources, look for:
+
+### High-value Meetup groups
+- **Walking tour groups** ("Toronto History Walks", "Hidden History") — often 5,000-10,000 members with regular events
+- **Reenactment groups** (Society for Creative Anachronism chapters) — weekly events
+- **History discussion groups** — may be inactive but worth checking
+
+### Provincial/state historical societies
+- Look for `{province/state} historical society` — often have WordPress Tribe Events with ICS feeds
+- Events may be province-wide but include local events (Toronto Postcard Club, Canada Black Music Archives)
+- Filter by location in pipeline if needed
+
+### Heritage organizations (often seasonal)
+- **Heritage Toronto**, **Heritage Ottawa**, etc. — walking tours typically June-November only
+- **Doors Open** events — annual city-wide heritage events (150+ sites in Toronto)
+- **Architectural Conservancy** chapters — annual symposiums, static pages
+
+### Non-starters to skip
+- **Genealogy societies** — often Cloudflare protected or members-only
+- **Historic sites with ticketing** — Casa Loma, Fort York often have static sites or broken ticketing feeds
+- **Historical associations** — many are inactive (check when last events were posted)
+
+### Search terms that work
+```
+{city} historical society events
+{city} history heritage site:meetup.com
+{city} walking tours history
+{city} architecture preservation events
+{city} genealogy events calendar
+```
