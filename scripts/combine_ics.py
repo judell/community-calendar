@@ -97,6 +97,40 @@ SOURCE_NAMES = {
     # Santa Rosa - local arts/community
     'santa_rosa_arts_center': 'Santa Rosa Arts Center',
     'movingwriting': 'MovingWriting',
+    # Toronto - Aggregators
+    'now_toronto': 'NOW Toronto',
+    'torevent': 'Toronto Events (Tockify)',
+    # Toronto - Music Venues
+    'jazz_bistro': 'Jazz Bistro',
+    'grossmans_tavern': "Grossman's Tavern",
+    # Toronto - Venues & Institutions
+    'union_station': 'Union Station Toronto',
+    'distillery_events': 'Distillery District',
+    'gardiner_museum': 'Gardiner Museum',
+    'toronto_botanical': 'Toronto Botanical Garden',
+    'textile_museum': 'Textile Museum of Canada',
+    'bata_shoe_museum': 'Bata Shoe Museum',
+    'buddies_theatre': 'Buddies in Bad Times Theatre',
+    # Toronto - Community Organizations
+    'culturelink': 'CultureLink Settlement Services',
+    'scadding_court': 'Scadding Court Community Centre',
+    'st_lawrence_na': 'St. Lawrence Neighbourhood Association',
+    'bloor_west_village': 'Bloor West Village BIA',
+    'jamaalmyers': 'Councillor Jamaal Myers',
+    # Toronto - Meetup groups
+    'meetup_torontobabel': 'Meetup: TorontoBabel Language Exchange',
+    'meetup_try_new_things': 'Meetup: Try New Things in Toronto',
+    'meetup_arts_culture': 'Meetup: Toronto Arts & Culture',
+    'meetup_hiking_boots': 'Meetup: These Boots Are Made for Hiking',
+    'meetup_bike_toronto': 'Meetup: Toronto Bike Meetup',
+    'meetup_board_games_to': 'Meetup: Board Games and Social',
+    'meetup_salsa_gta': 'Meetup: Salsa/Bachata/Kizomba GTA',
+    'meetup_photography_to': 'Meetup: Toronto Photography Group',
+    'meetup_book_club_abcd': 'Meetup: A Book Club Downtown',
+    'meetup_improv_to': 'Meetup: Improv, Acting & Karaoke',
+    'meetup_techto': 'Meetup: TechTO',
+    'meetup_torontojs': 'Meetup: Toronto JavaScript',
+    'meetup_python_to': 'Meetup: Python Toronto',
 }
 
 # Fallback URLs for sources that don't provide event URLs
@@ -134,6 +168,23 @@ SOURCE_URLS = {
     'elks_lodge': 'https://elks901.org/calendar-of-events/',
     'garden_club': 'https://petalumagardenclub.org/calendar/',
     'petaluma_bounty': 'https://petalumabounty.org/events-calendar/',
+    # Toronto
+    'now_toronto': 'https://nowtoronto.com/events/',
+    'torevent': 'https://tockify.com/torevent/',
+    'jazz_bistro': 'https://jazzbistro.ca/events/',
+    'grossmans_tavern': 'https://grossmanstavern.com/events/',
+    'union_station': 'https://torontounion.ca/toronto-union-events/',
+    'distillery_events': 'https://tockify.com/distilleryevents/',
+    'gardiner_museum': 'https://www.gardinermuseum.on.ca/events/',
+    'toronto_botanical': 'https://www.torontobotanicalgarden.ca/events/',
+    'textile_museum': 'https://www.textilemuseum.ca/events/',
+    'bata_shoe_museum': 'https://batashoemuseum.ca/events/',
+    'buddies_theatre': 'https://www.buddiesinbadtimes.com/events/',
+    'culturelink': 'https://www.culturelink.ca/events/',
+    'scadding_court': 'https://scaddingcourt.org/events/',
+    'st_lawrence_na': 'https://tockify.com/st.lawrence.na/',
+    'bloor_west_village': 'https://www.bloorwestvillagebia.com/events/',
+    'jamaalmyers': 'https://tockify.com/jamaalmyers/',
 }
 
 

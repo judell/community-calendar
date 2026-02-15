@@ -62,7 +62,7 @@ jobs:
       run: |
         INPUT="${{ github.event.inputs.locations }}"
         if [ -z "$INPUT" ] || [ "$INPUT" = "all" ]; then
-          echo "list=santarosa,bloomington,davis,petaluma" >> $GITHUB_OUTPUT
+          echo "list=santarosa,bloomington,davis,petaluma,toronto" >> $GITHUB_OUTPUT
         else
           echo "list=$INPUT" >> $GITHUB_OUTPUT
         fi
@@ -279,6 +279,50 @@ jobs:
         python scripts/combine_ics.py --input-dir cities/petaluma --output cities/petaluma/combined.ics --name "Petaluma Community Calendar"
 
     # ==========================================
+    # Toronto
+    # ==========================================
+    - name: Download Toronto live feeds and combine ICS
+      if: contains(steps.locations.outputs.list, 'toronto')
+      run: |
+        cd cities/toronto
+        # Aggregators
+        curl -sL "https://nowtoronto.com/events/?ical=1" -o now_toronto.ics || true
+        curl -sL "https://tockify.com/api/feeds/ics/torevent" -o torevent.ics || true
+        # Music Venues
+        curl -sL "https://jazzbistro.ca/events/?ical=1" -o jazz_bistro.ics || true
+        curl -sL "https://grossmanstavern.com/events/?ical=1" -o grossmans_tavern.ics || true
+        # Venues & Institutions
+        curl -sL "https://torontounion.ca/toronto-union-events/?ical=1" -o union_station.ics || true
+        curl -sL "https://tockify.com/api/feeds/ics/distilleryevents" -o distillery_events.ics || true
+        curl -sL "https://www.gardinermuseum.on.ca/events/?ical=1" -o gardiner_museum.ics || true
+        curl -sL "https://www.torontobotanicalgarden.ca/events/?ical=1" -o toronto_botanical.ics || true
+        curl -sL "https://www.textilemuseum.ca/events/?ical=1" -o textile_museum.ics || true
+        curl -sL "https://batashoemuseum.ca/events/?ical=1" -o bata_shoe_museum.ics || true
+        curl -sL "https://www.buddiesinbadtimes.com/events/?ical=1" -o buddies_theatre.ics || true
+        # Community Organizations
+        curl -sL "https://www.culturelink.ca/events/?ical=1" -o culturelink.ics || true
+        curl -sL "https://scaddingcourt.org/events/?ical=1" -o scadding_court.ics || true
+        curl -sL "https://tockify.com/api/feeds/ics/st.lawrence.na" -o st_lawrence_na.ics || true
+        curl -sL "https://www.bloorwestvillagebia.com/events/?ical=1" -o bloor_west_village.ics || true
+        curl -sL "https://tockify.com/api/feeds/ics/jamaalmyers" -o jamaalmyers.ics || true
+        # Meetup groups
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/torontobabel/events/ical/" -o meetup_torontobabel.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/torontotnt/events/ical/" -o meetup_try_new_things.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-arts-and-culture/events/ical/" -o meetup_arts_culture.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/these-boots-are-made-for-hiking/events/ical/" -o meetup_hiking_boots.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/torontobikemeetup/events/ical/" -o meetup_bike_toronto.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/boardgamestoronto/events/ical/" -o meetup_board_games_to.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/salsa-bachata-kizomba-gta/events/ical/" -o meetup_salsa_gta.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-photography-group/events/ical/" -o meetup_photography_to.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/a-book-club-downtown-abcd/events/ical/" -o meetup_book_club_abcd.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/comedy-improv-and-acting/events/ical/" -o meetup_improv_to.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/techto/events/ical/" -o meetup_techto.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/torontojs/events/ical/" -o meetup_torontojs.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/python-toronto/events/ical/" -o meetup_python_to.ics || true
+        cd ../..
+        python scripts/combine_ics.py --input-dir cities/toronto --output cities/toronto/combined.ics --name "Toronto Community Calendar"
+
+    # ==========================================
     # Post-processing (all cities)
     # ==========================================
     - name: Convert ICS to JSON for Supabase
@@ -315,7 +359,7 @@ jobs:
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         
         # Save generated files before any git operations
-        for city in santarosa bloomington davis; do
+        for city in santarosa bloomington davis petaluma toronto; do
           if [ -f "cities/$city/events.json" ]; then
             cp "cities/$city/events.json" "/tmp/${city}_events.json"
           fi
@@ -330,7 +374,7 @@ jobs:
             fi
             echo "Push failed, restoring generated files and retrying..."
             # Restore generated files that may have been clobbered by rebase
-            for city in santarosa bloomington davis; do
+            for city in santarosa bloomington davis petaluma toronto; do
               if [ -f "/tmp/${city}_events.json" ]; then
                 cp "/tmp/${city}_events.json" "cities/$city/events.json"
               fi
