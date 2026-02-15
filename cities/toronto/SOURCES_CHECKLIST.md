@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (33 sources)
+## Currently Implemented (36 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -24,7 +24,10 @@
 ### Universities
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
-| University of Toronto | HTML scraper | 138 | Aggregate events from all faculties |
+| University of Toronto | HTML scraper | 176 | Aggregate page + 32 department deep-links |
+| UofT Engineering | WordPress Tribe ICS | 17 | |
+| UofT Philosophy | WordPress Tribe ICS | 7 | |
+| UofT Social Work | WordPress Tribe ICS | 4 | |
 | York University | WordPress MEC ICS | 6,558 | Huge feed, pipeline filters by date |
 
 ### Music Venues

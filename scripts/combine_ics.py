@@ -116,6 +116,9 @@ SOURCE_NAMES = {
     # Toronto - Universities
     'york_university': 'York University',
     'uoft_events': 'University of Toronto',
+    'uoft_engineering': 'UofT Engineering',
+    'uoft_philosophy': 'UofT Philosophy',
+    'uoft_socialwork': 'UofT Social Work',
     # Toronto - Community Organizations
     'culturelink': 'CultureLink Settlement Services',
     'scadding_court': 'Scadding Court Community Centre',
@@ -189,6 +192,9 @@ SOURCE_URLS = {
     'high_park_nature': 'https://highparknaturecentre.com/events/',
     'york_university': 'https://events.yorku.ca/',
     'uoft_events': 'https://www.utoronto.ca/events',
+    'uoft_engineering': 'https://www.engineering.utoronto.ca/engineering-events/',
+    'uoft_philosophy': 'https://philosophy.utoronto.ca/events/',
+    'uoft_socialwork': 'https://socialwork.utoronto.ca/events/',
     'culturelink': 'https://www.culturelink.ca/events/',
     'scadding_court': 'https://scaddingcourt.org/events/',
     'st_lawrence_na': 'https://tockify.com/st.lawrence.na/',
