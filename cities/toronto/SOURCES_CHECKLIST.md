@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (36 sources)
+## Currently Implemented (44 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -45,7 +45,12 @@
 | Bloor West Village BIA | WordPress Tribe ICS | 6 | |
 | Councillor Jamaal Myers | Tockify ICS | 27 | Scarborough community, city council |
 
-### Meetup Groups (13 groups)
+### Outdoor & Nature
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Ontario Nature | WordPress Tribe ICS | 11 | Birding trips, nature talks, conservation |
+
+### Meetup Groups (20 groups)
 | Group | Events | Category |
 |-------|--------|----------|
 | TorontoBabel | 10 | Language exchange |
@@ -61,6 +66,13 @@
 | TechTO | 2 | Tech |
 | Toronto JavaScript | 1 | Tech |
 | Python Toronto | 1 | Tech |
+| Founders Running Club Toronto | 10 | Running |
+| High Park Yoga | 10 | Outdoor yoga |
+| Mindful Movement Toronto | 10 | Outdoor yoga/wellness |
+| Toronto Wellness | 10 | Yoga, meditation, wellness |
+| Toronto SUP, Kayak & Canoe | seasonal | Water sports |
+| Toronto Paddlers | seasonal | Waterfront kayaking |
+| Toronto Canoe Trippers | seasonal | Canoe expeditions |
 
 ## Additional Meetup Groups (discovered, not yet added)
 
@@ -75,8 +87,6 @@ These were verified with active ICS feeds — can be added later to broaden cove
 | GTA Hiking & Stuff | `gta-hiking-meetup` | 1 | Hiking |
 | Toronto Bruce Trail Club | `Toronto-Bruce-Trail-Club` | 1 | Hiking |
 | Wilderness Union | `wildernessunion` | 2 | Outdoors |
-| Mindful Movement Toronto | `mindful-movement-toronto` | 10 | Yoga/wellness |
-| Toronto Wellness | `toronto-wellness-yoga-art-therapy-meditation-chakra` | 10 | Wellness |
 | Toronto Heavy Boardgamers | `toronto-heavy-boardgamers` | 10 | Board games |
 | Toronto Movies & Social | `toronto-movies-and-social-group` | 10 | Film |
 | Sci Fi Book Club | `thescifibookclub` | 6 | Book club |
@@ -148,6 +158,17 @@ These were verified with active ICS feeds — can be added later to broaden cove
 | Scarborough Arts | No feed |
 | TMU / OCAD | No ICS feeds (TMU custom CMS, OCAD Drupal) |
 | Toronto Public Library | No ICS feed (only JSON API via BiblioCommons) |
+| TRCA | Events on Eventbrite only; no ICS/RSS for events |
+| Tommy Thompson Park | Links to TRCA calendar; no own event feed |
+| Rouge National Urban Park | No calendar; page says "check back soon" |
+| Ontario Place | WordPress Tribe installed but ICS returns empty |
+| Evergreen Brick Works | WordPress but no Tribe/MEC; no feeds |
+| Toronto Outdoor Club | Custom ASP.NET, no feeds |
+| Bruce Trail Conservancy (Toronto) | ECWD calendar plugin, no ICS endpoint |
+| Toronto Field Naturalists | Members-only content, no public feed |
+| Dragon Boat Canada | MEC installed but ICS returns HTML |
+| Cycle Toronto | NationBuilder, no feeds |
+| Downsview Park | Drupal, no feeds (30+ events but would need scraper) |
 
 ---
 

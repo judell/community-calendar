@@ -154,9 +154,26 @@ curl "https://webapi.legistar.com/v1/santa-rosa/events?\$filter=EventBodyName%20
 
 **Example:** Santa Rosa — 3,995 total records, WebAPI returns future scheduled meetings.
 
-## Universities Are Decentralized — Scrape the Aggregate Page
+## University Event Systems Vary Widely
 
-Large universities typically have a central events page that aggregates feeds from dozens of departments, but each department runs its own CMS. Don't try to add 30 individual department feeds — instead:
+Universities range from fully centralized (one platform, one feed) to fully decentralized (every department runs its own CMS). Check in this order:
+
+### 1. Centralized platforms (curl-and-done)
+Many universities use a single events platform with standard endpoints:
+
+| Platform | How to detect | Feed endpoint |
+|----------|--------------|---------------|
+| **Localist** | URL contains `/localist/` or uses `events.{university}.edu` | `/api/2/events`, `/events.rss`, or ICS export |
+| **LiveWhale** | URL contains `/live/` | `{domain}/live/ical/events` |
+| **WordPress Tribe** | `wp-content/plugins/the-events-calendar` in source | `?ical=1` |
+| **WordPress MEC** | `wp-content/plugins/modern-events-calendar` in source | `?mec-ical-feed=1` |
+
+These are the best case — one curl command gets the whole university.
+
+**Examples:** UC Davis Library (Localist, 118 events), York University (MEC, 6,558 events), SRJC (LiveWhale, 130+ events).
+
+### 2. Decentralized — scrape the aggregate page
+Some universities (especially large ones with legacy infrastructure) have a central events page that aggregates feeds from dozens of departments, each running its own CMS. Don't try to add 30 individual department feeds — instead:
 
 1. **Check the central events page** for an ICS feed (rare) or scrapeable HTML (common)
 2. **Follow "More" links** from the aggregate page to get deeper per-department coverage

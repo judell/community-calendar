@@ -139,6 +139,15 @@ SOURCE_NAMES = {
     'meetup_techto': 'Meetup: TechTO',
     'meetup_torontojs': 'Meetup: Toronto JavaScript',
     'meetup_python_to': 'Meetup: Python Toronto',
+    # Toronto - Outdoor & Nature
+    'ontario_nature': 'Ontario Nature',
+    'meetup_founders_running': 'Meetup: Founders Running Club Toronto',
+    'meetup_high_park_yoga': 'Meetup: High Park Yoga',
+    'meetup_mindful_movement': 'Meetup: Mindful Movement Toronto',
+    'meetup_toronto_wellness': 'Meetup: Toronto Wellness',
+    'meetup_sup_kayak': 'Meetup: Toronto SUP, Kayak & Canoe',
+    'meetup_toronto_paddlers': 'Meetup: Toronto Paddlers',
+    'meetup_canoe_trippers': 'Meetup: Toronto Canoe Trippers',
 }
 
 # Fallback URLs for sources that don't provide event URLs
@@ -200,6 +209,7 @@ SOURCE_URLS = {
     'st_lawrence_na': 'https://tockify.com/st.lawrence.na/',
     'bloor_west_village': 'https://www.bloorwestvillagebia.com/events/',
     'jamaalmyers': 'https://tockify.com/jamaalmyers/',
+    'ontario_nature': 'https://ontarionature.org/events-calendar/',
 }
 
 
