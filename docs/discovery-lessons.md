@@ -224,35 +224,49 @@ curl -sL "https://example.com/events/" | grep -o "wp-content/plugins/[^/]*" | so
 
 This is faster than trial-and-error with `?ical=1` on every site.
 
-## Topical Searches: History/Heritage Pattern (Toronto)
+## Topical Searches Yield Long-Tail Sources
 
-When searching for history/heritage sources, look for:
+Beyond platform searches (Meetup, Tockify, WordPress `?ical=1`), topical searches find niche community groups that don't show up otherwise. The pattern: search `{topic} {city} site:meetup.com` and `{topic} {city} events calendar`, then probe each result for ICS feeds.
 
-### High-value Meetup groups
+### Example: History/Heritage
+
+Searching for history/heritage sources in Toronto found 25 events from 3 new ICS feeds:
+
+**High-value Meetup groups:**
 - **Walking tour groups** ("Toronto History Walks", "Hidden History") — often 5,000-10,000 members with regular events
-- **Reenactment groups** (Society for Creative Anachronism chapters) — weekly events
+- **Reenactment groups** (Society for Creative Anachronism chapters) — weekly medieval arts events
 - **History discussion groups** — may be inactive but worth checking
 
-### Provincial/state historical societies
-- Look for `{province/state} historical society` — often have WordPress Tribe Events with ICS feeds
-- Events may be province-wide but include local events (Toronto Postcard Club, Canada Black Music Archives)
-- Filter by location in pipeline if needed
+**Provincial/state historical societies:**
+- Search `{province/state} historical society` — often have WordPress Tribe Events with ICS feeds
+- Events may be province-wide but include local events worth capturing
+- Example: Ontario Historical Society had Toronto Postcard Club, Canada Black Music Archives
 
-### Heritage organizations (often seasonal)
-- **Heritage Toronto**, **Heritage Ottawa**, etc. — walking tours typically June-November only
-- **Doors Open** events — annual city-wide heritage events (150+ sites in Toronto)
-- **Architectural Conservancy** chapters — annual symposiums, static pages
+**Heritage organizations (often seasonal):**
+- Heritage {City} organizations — walking tours typically summer only (June-November)
+- **Doors Open** events — annual city-wide heritage events
+- Architectural Conservancy chapters — annual symposiums, often static pages
 
-### Non-starters to skip
+**Non-starters to skip:**
 - **Genealogy societies** — often Cloudflare protected or members-only
-- **Historic sites with ticketing** — Casa Loma, Fort York often have static sites or broken ticketing feeds
+- **Historic sites with ticketing** — often have static sites or broken ticketing feeds
 - **Historical associations** — many are inactive (check when last events were posted)
 
-### Search terms that work
+**Search terms that work:**
 ```
 {city} historical society events
 {city} history heritage site:meetup.com
 {city} walking tours history
 {city} architecture preservation events
-{city} genealogy events calendar
 ```
+
+### Other Topical Searches to Try
+
+The same pattern applies to other topics. See AGENTS.md for the full list:
+```
+music, hiking, dance, dogs, yoga, art, running, cycling, wine,
+beer, trivia, book club, garden, comedy, theater, kids, seniors,
+church, history, heritage, architecture, genealogy
+```
+
+Document findings in `cities/{city}/SOURCES_CHECKLIST.md` under a "Topical Search" section, noting which searches have been done and what was found.
