@@ -5,269 +5,140 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar Feed Health Report</title>
     <style>
-        :root {
-            --bg: #1a1a2e;
-            --card-bg: #16213e;
-            --text: #eee;
-            --text-muted: #888;
-            --accent: #4ecca3;
-            --warning: #ffc107;
-            --danger: #e74c3c;
-            --success: #27ae60;
-        }
-
-        * { box-sizing: border-box; }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
+            max-width: 900px;
+            margin: 0 auto;
             padding: 20px;
             line-height: 1.5;
+            color: #333;
         }
 
-        h1 {
-            color: var(--accent);
-            margin-bottom: 5px;
-        }
+        h1 { margin-bottom: 5px; }
 
         .generated {
-            color: var(--text-muted);
+            color: #666;
             font-size: 0.9em;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .summary {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 4px;
         }
 
         .summary-city {
-            flex: 1;
-            min-width: 150px;
             text-align: center;
+            flex: 1;
+            min-width: 120px;
         }
 
         .summary-city .count {
-            font-size: 2em;
+            font-size: 1.8em;
             font-weight: bold;
-            color: var(--accent);
         }
 
         .summary-city .label {
             text-transform: capitalize;
-            color: var(--text-muted);
+            color: #666;
             font-size: 0.9em;
         }
 
-        .anomalies {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
+        details { margin-bottom: 8px; }
 
-        .anomalies > summary {
+        details > summary {
             cursor: pointer;
-            list-style: none;
-            padding: 0;
+            padding: 8px 0;
         }
 
-        .anomalies > summary::-webkit-details-marker { display: none; }
-
-        .anomalies h2 {
-            margin-top: 0;
-            color: var(--danger);
+        .anomalies {
+            margin-bottom: 20px;
         }
 
         .anomaly {
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 4px;
-            border-left: 4px solid;
+            padding: 8px 12px;
+            margin: 6px 0;
+            border-left: 3px solid;
+            background: #fafafa;
         }
 
-        .anomaly.high {
-            background: rgba(231, 76, 60, 0.1);
-            border-color: var(--danger);
-        }
-
-        .anomaly.medium {
-            background: rgba(255, 193, 7, 0.1);
-            border-color: var(--warning);
-        }
+        .anomaly.high { border-color: #d32f2f; }
+        .anomaly.medium { border-color: #f57c00; }
 
         .anomaly .meta {
             font-size: 0.85em;
-            color: var(--text-muted);
+            color: #666;
         }
 
-        .no-anomalies {
-            color: var(--success);
-        }
-
-        details.city {
-            background: var(--card-bg);
-            border-radius: 8px;
-            margin-bottom: 12px;
-        }
-
-        details.city > summary {
-            padding: 16px 20px;
-            cursor: pointer;
-            list-style: none;
+        .city-summary {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 8px;
-        }
-
-        details.city > summary::-webkit-details-marker { display: none; }
-
-        details.city > summary::before {
-            content: '\25b6';
-            margin-right: 10px;
-            font-size: 0.7em;
-            transition: transform 0.2s;
-        }
-
-        details.city[open] > summary::before {
-            transform: rotate(90deg);
+            width: 100%;
         }
 
         .city-name {
-            font-size: 1.2em;
             font-weight: 600;
-            color: var(--accent);
             text-transform: capitalize;
         }
 
         .city-total {
-            color: var(--text-muted);
+            color: #666;
             font-size: 0.9em;
         }
 
-        .city-total strong {
-            color: var(--accent);
-            font-size: 1.1em;
-        }
-
-        .city-content {
-            padding: 0 20px 16px;
-        }
-
-        details.feed {
-            background: rgba(255,255,255,0.03);
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-
-        details.feed > summary {
-            padding: 12px 15px;
-            cursor: pointer;
-            list-style: none;
+        .feed-summary {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
         }
 
-        details.feed > summary::-webkit-details-marker { display: none; }
-
-        details.feed > summary::before {
-            content: '\25b6';
-            margin-right: 8px;
-            font-size: 0.6em;
-            color: var(--text-muted);
-            transition: transform 0.2s;
-        }
-
-        details.feed[open] > summary::before {
-            transform: rotate(90deg);
-        }
-
-        .feed-summary-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .feed-name {
-            font-weight: 600;
-            color: var(--text);
-        }
+        .feed-name { font-weight: 500; }
 
         .feed-type {
             font-size: 0.75em;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: rgba(78, 204, 163, 0.2);
-            color: var(--accent);
+            padding: 1px 6px;
+            border-radius: 3px;
+            background: #e8e8e8;
+            margin-left: 8px;
         }
 
-        .feed-count {
-            font-weight: 600;
-            min-width: 80px;
-            text-align: right;
-        }
-
-        .feed-count.zero { color: var(--danger); }
-        .feed-count.healthy { color: var(--success); }
-        .feed-count.error { color: var(--danger); }
-
-        .feed-detail {
-            padding: 0 15px 15px;
-        }
+        .feed-count { font-weight: 600; }
+        .feed-count.zero { color: #d32f2f; }
+        .feed-count.error { color: #d32f2f; }
 
         .sparkline {
-            height: 40px;
+            height: 30px;
             display: flex;
             align-items: flex-end;
-            gap: 2px;
+            gap: 1px;
+            margin: 8px 0 4px;
         }
 
         .sparkline .bar {
             flex: 1;
             min-width: 3px;
-            max-width: 12px;
-            background: var(--accent);
-            border-radius: 2px 2px 0 0;
-            transition: background 0.2s;
+            max-width: 10px;
+            background: #666;
+            border-radius: 1px 1px 0 0;
         }
 
-        .sparkline .bar:hover {
-            background: var(--text);
-        }
-
-        .sparkline .bar.error {
-            background: var(--danger);
-        }
-
-        .sparkline .bar.zero {
-            background: var(--warning);
-            min-height: 2px;
-        }
+        .sparkline .bar.error { background: #d32f2f; }
+        .sparkline .bar.zero { background: #f57c00; min-height: 2px; }
 
         .history-label {
             font-size: 0.75em;
-            color: var(--text-muted);
-            margin-top: 5px;
+            color: #999;
         }
 
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: var(--text-muted);
-        }
-
-        @media (max-width: 600px) {
-            body { padding: 10px; }
-        }
+        .feed-detail { padding-left: 20px; }
+        .city-content { padding-left: 10px; }
     </style>
 </head>
 <body>
@@ -277,33 +148,27 @@
     <div class="summary" id="summary"></div>
 
     <details class="anomalies" id="anomalies">
-        <summary><h2 style="display:inline;margin:0">Anomalies (<span id="anomaly-count">0</span>)</h2></summary>
-        <div id="anomaly-list" class="loading">Loading...</div>
+        <summary>Anomalies (<span id="anomaly-count">0</span>)</summary>
+        <div id="anomaly-list">Loading...</div>
     </details>
 
     <div id="cities"></div>
 
     <script>
-        const REPORT_URL = 'report.json';
-        const MAX_HISTORY_DISPLAY = 30;
-
         async function loadReport() {
             try {
-                const response = await fetch(REPORT_URL);
+                const response = await fetch('report.json');
                 if (!response.ok) throw new Error('Failed to load report');
-                const data = await response.json();
-                renderReport(data);
+                renderReport(await response.json());
             } catch (e) {
-                document.getElementById('generated').textContent = 'Error loading report: ' + e.message;
+                document.getElementById('generated').textContent = 'Error: ' + e.message;
             }
         }
 
         function renderReport(data) {
-            const genDate = new Date(data.generated);
             document.getElementById('generated').textContent =
-                `Last updated: ${genDate.toLocaleString()}`;
+                'Last updated: ' + new Date(data.generated).toLocaleString();
 
-            // Summary totals per city
             const summaryEl = document.getElementById('summary');
             const cityTotals = {};
             for (const [city, cityData] of Object.entries(data.cities || {})) {
@@ -319,7 +184,6 @@
                 </div>`
             ).join('');
 
-            // Anomalies
             const recentAnomalies = (data.anomalies || [])
                 .sort((a, b) => b.date.localeCompare(a.date))
                 .slice(0, 20);
@@ -327,7 +191,7 @@
             document.getElementById('anomaly-count').textContent = recentAnomalies.length;
             const anomalyList = document.getElementById('anomaly-list');
             if (recentAnomalies.length === 0) {
-                anomalyList.innerHTML = '<div class="no-anomalies">No anomalies detected</div>';
+                anomalyList.innerHTML = '<div>No anomalies detected</div>';
             } else {
                 anomalyList.innerHTML = recentAnomalies.map(a => `
                     <div class="anomaly ${a.severity}">
@@ -337,7 +201,6 @@
                 `).join('');
             }
 
-            // Cities as collapsible sections
             const citiesContainer = document.getElementById('cities');
             citiesContainer.innerHTML = '';
 
@@ -349,31 +212,30 @@
                         return bCount - aCount;
                     });
 
-                const feedCount = feeds.length;
                 const total = cityTotals[cityName] || 0;
 
                 const cityEl = document.createElement('details');
-                cityEl.className = 'city';
                 cityEl.innerHTML = `
                     <summary>
-                        <span class="city-name">${cityName}</span>
-                        <span class="city-total"><strong>${total.toLocaleString()}</strong> events from ${feedCount} feeds</span>
+                        <span class="city-summary">
+                            <span class="city-name">${cityName}</span>
+                            <span class="city-total"><strong>${total.toLocaleString()}</strong> events from ${feeds.length} feeds</span>
+                        </span>
                     </summary>
                     <div class="city-content">
                         ${feeds.map(([name, feed]) => renderFeed(name, feed)).join('')}
                     </div>
                 `;
-
                 citiesContainer.appendChild(cityEl);
             }
         }
 
         function renderFeed(name, feed) {
-            const history = (feed.history || []).slice(-MAX_HISTORY_DISPLAY);
+            const history = (feed.history || []).slice(-30);
             const latest = history[history.length - 1] || {};
             const maxCount = Math.max(...history.map(h => h.count || 0), 1);
 
-            let countClass = 'healthy';
+            let countClass = '';
             let countText = `${latest.count || 0} events`;
 
             if (latest.error) {
@@ -389,28 +251,24 @@
                 let barClass = '';
                 if (h.error) barClass = 'error';
                 else if (h.count === 0) barClass = 'zero';
-
-                return `<div class="bar ${barClass}"
-                    style="height: ${height}%"
-                    title="${h.date}: ${h.error || h.count + ' events'}"></div>`;
+                return `<div class="bar ${barClass}" style="height:${height}%" title="${h.date}: ${h.error || h.count + ' events'}"></div>`;
             }).join('');
 
-            const historyRange = history.length > 1
+            const range = history.length > 1
                 ? `${history[0].date} to ${history[history.length-1].date}`
                 : (history[0]?.date || 'No data');
 
             return `
                 <details class="feed">
                     <summary>
-                        <span class="feed-summary-left">
-                            <span class="feed-name">${name}</span>
-                            <span class="feed-type">${feed.type}</span>
+                        <span class="feed-summary">
+                            <span><span class="feed-name">${name}</span><span class="feed-type">${feed.type}</span></span>
+                            <span class="feed-count ${countClass}">${countText}</span>
                         </span>
-                        <span class="feed-count ${countClass}">${countText}</span>
                     </summary>
                     <div class="feed-detail">
                         <div class="sparkline">${sparkline}</div>
-                        <div class="history-label">${historyRange} (${history.length} days)</div>
+                        <div class="history-label">${range} (${history.length} days)</div>
                     </div>
                 </details>
             `;

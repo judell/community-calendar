@@ -12,7 +12,7 @@ import argparse
 import json
 import os
 import re
-from datetime import datetime, date
+from datetime import datetime, date, timezone, timedelta
 from pathlib import Path
 from typing import Optional
 import urllib.request
@@ -23,12 +23,36 @@ DROP_THRESHOLD = 0.5  # 50% drop from previous
 MIN_EVENTS_FOR_DROP = 5  # Only flag drops if previous had at least this many
 
 
+def count_future_events_in_ics_content(content: str) -> int:
+    """Count VEVENT entries with future DTSTART in ICS content."""
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+    count = 0
+    for match in re.finditer(r'BEGIN:VEVENT\r?\n(.*?)\r?\nEND:VEVENT', content, re.DOTALL):
+        event = match.group(1)
+        dt_match = re.search(r'DTSTART[^:]*:(\d{8}(?:T\d{6}Z?)?)', event)
+        if not dt_match:
+            continue
+        dt_str = dt_match.group(1)
+        try:
+            if dt_str.endswith('Z'):
+                dt = datetime.strptime(dt_str, '%Y%m%dT%H%M%SZ').replace(tzinfo=timezone.utc)
+            elif 'T' in dt_str:
+                dt = datetime.strptime(dt_str, '%Y%m%dT%H%M%S').replace(tzinfo=timezone.utc)
+            else:
+                dt = datetime.strptime(dt_str, '%Y%m%d').replace(tzinfo=timezone.utc)
+            if dt >= cutoff:
+                count += 1
+        except ValueError:
+            count += 1  # count if unparseable, to be safe
+    return count
+
+
 def count_events_in_ics(filepath: str) -> tuple[int, Optional[str]]:
-    """Count VEVENT entries in an ICS file. Returns (count, error)."""
+    """Count future VEVENT entries in an ICS file. Returns (count, error)."""
     try:
         with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
             content = f.read()
-        count = content.count('BEGIN:VEVENT')
+        count = count_future_events_in_ics_content(content)
         return count, None
     except FileNotFoundError:
         return 0, 'file_not_found'
@@ -37,14 +61,14 @@ def count_events_in_ics(filepath: str) -> tuple[int, Optional[str]]:
 
 
 def fetch_and_count_url(url: str, timeout: int = 30) -> tuple[int, Optional[str]]:
-    """Fetch ICS from URL and count events. Returns (count, error)."""
+    """Fetch ICS from URL and count future events. Returns (count, error)."""
     try:
         req = urllib.request.Request(url, headers={
             'User-Agent': 'Mozilla/5.0 (compatible; CalendarBot/1.0)'
         })
         with urllib.request.urlopen(req, timeout=timeout) as response:
             content = response.read().decode('utf-8', errors='ignore')
-        count = content.count('BEGIN:VEVENT')
+        count = count_future_events_in_ics_content(content)
         return count, None
     except urllib.error.HTTPError as e:
         return 0, f'http_{e.code}'
@@ -95,15 +119,26 @@ def extract_feed_name_from_url(url: str) -> str:
         match = re.search(r'/ical/([^/]+)/', url)
         if match:
             return match.group(1).split('@')[0].replace('%40', '@')
-    
+
+    # Meetup - use group slug
+    if 'meetup.com/' in url:
+        match = re.search(r'meetup\.com/([^/]+)', url)
+        if match:
+            return 'meetup/' + match.group(1)
+
+    # Tockify - use calendar slug
+    if 'tockify.com/' in url:
+        match = re.search(r'tockify\.com/api/feeds/ics/([^/?]+)', url)
+        if match:
+            return 'tockify/' + match.group(1)
+
     # Domain-based name
     match = re.search(r'https?://(?:www\.)?([^/]+)', url)
     if match:
         domain = match.group(1)
-        # Clean up
         domain = domain.replace('.org', '').replace('.com', '').replace('.gov', '')
         return domain
-    
+
     return url[:50]
 
 
