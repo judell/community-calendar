@@ -195,7 +195,7 @@
 - Direct WordPress `?ical=1` probing on Toronto venue/org sites
 - Meetup group discovery across 13+ categories
 - Aggregator assessment (BlogTO, NOW, City of Toronto, etc.)
-- Topical searches: outdoor activities, government/public affairs
+- Topical searches: outdoor activities, government/public affairs, crafts/makers
 - City of Toronto open data portal (CKAN API)
 
 **Key finds:**
@@ -204,7 +204,30 @@
 - **York University**: 6,558 events via WordPress MEC
 - **University of Toronto**: 176 events via custom scraper + 3 department ICS feeds
 - **Ontario Nature**: 11 events via WordPress Tribe
-- **42 Meetup groups** with active ICS feeds across social, arts, hiking, cycling, dance, games, books, comedy, tech, language, yoga, water sports, running, film, improv, business
-- **City of Toronto CKAN**: meeting schedule (229 meetings/2026) + festivals/events (~2,211 future) — needs JSON-to-ICS converters
+- **City of Toronto CKAN**: meeting schedule (162 future meetings) + festivals/events (2,101 future) via new CKAN base scraper
+- **Repair Cafe Toronto**: 82 community repair workshops
+- **44 Meetup groups** with active ICS feeds across social, arts, hiking, cycling, dance, games, books, comedy, tech, language, yoga, water sports, running, film, improv, business, makers, crafts
 
-**Total events across all feeds:** ~4,500+
+**Total: 73 sources, ~6,800+ events**
+
+**Infrastructure built:**
+- `scrapers/lib/ckan.py` — reusable CKAN datastore API base scraper (pagination, filters)
+- `scrapers/toronto_meetings.py` — City of Toronto meetings via CKAN
+- `scrapers/toronto_festivals.py` — City of Toronto festivals via CKAN JSON
+- `scrapers/uoft_events.py` — UofT aggregate page + 32 department deep-links
+
+**Topical searches completed:** outdoor activities, government/public affairs, crafts/makers
+
+**Topical searches not yet done:**
+- Volunteering / mutual aid
+- Food & drink (cooking classes, tastings, farmers markets)
+- Faith / spiritual
+- Kids / family
+- Seniors
+- Literary (readings, poetry, writing workshops)
+- Science / education (lectures, astronomy clubs)
+- LGBTQ+ community
+- Comedy (standup, open mics)
+- Music participation (choirs, jam sessions, open mics)
+- Gardening / urban farming
+- History / heritage
