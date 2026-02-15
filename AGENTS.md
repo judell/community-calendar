@@ -17,29 +17,20 @@
 ## Quick Reference: Adding a New City
 
 1. **Create city directory** under `cities/` with `feeds.txt` and `SOURCES_CHECKLIST.md`
-2. **Set up geo-filtering** - create `allowed_cities.txt` with center, radius, and allowed cities:
-   ```
-   # center: 38.5449, -121.7405
-   # radius: 30
-   # state: CA
-   Davis
-   Woodland
-   Sacramento
-   ```
-   Then run: `python scripts/geocode_cities.py --city {cityname}`
-3. **Run Meetup discovery** - see [docs/curator-guide.md](docs/curator-guide.md)
-4. **Run Eventbrite scraper** - `python scrapers/eventbrite_scraper.py --location {state}--{city} --months 2`
-5. **Update the GitHub Actions workflow** (`.github/workflows/generate-calendar.yml`):
-   - Add curl commands for Meetup ICS feeds
-   - Add Eventbrite scraper command
-   - Add combine_ics.py step
-6. **Update `combine_ics.py`** - add SOURCE_NAMES entries for new Meetup groups
-7. **Add city to UI** - TWO places must be updated:
-   - `index.html`: add entry to `cityNames` map (e.g., `petaluma: 'Petaluma'`)
+2. **Run source discovery** — platform searches (Tockify, WordPress `?ical=1`, Meetup ICS), topical searches. See [docs/curator-guide.md](docs/curator-guide.md). Run the playbook first, assess gaps second.
+3. **Optionally run Eventbrite scraper** — `python scrapers/eventbrite_scraper.py --location {state}--{city} --months 2` (not available in all regions)
+4. **Update the GitHub Actions workflow** (`.github/workflows/generate-calendar.yml`):
+   - Add city to the locations list (line with `echo "list=..."`)
+   - Add a city section with curl commands for all feeds + `combine_ics.py` call
+   - Add city to the backup/restore lists in the commit step (`for city in ...`)
+5. **Update `combine_ics.py`** — add `SOURCE_NAMES` entries (filename → display name) and `SOURCE_URLS` entries (filename → fallback URL) for all new sources
+6. **Add city to UI** — TWO places must be updated:
+   - `index.html`: add entry to `cityNames` map (e.g., `toronto: 'Toronto'`)
    - `Main.xmlui`: add a Button in the city picker VStack (search for "Choose your city")
-8. **Add city to load-events function** - add URL entry to `EVENTS_URLS` in `supabase/functions/load-events/index.ts`, then redeploy the edge function
-9. **Update SOURCES_CHECKLIST.md** - document findings, track pending sources
-10. **Commit and push** - workflow runs daily or trigger manually
+7. **Add city to load-events function** — add URL entry to `EVENTS_URLS` in `supabase/functions/load-events/index.ts`, then redeploy the edge function
+8. **Optionally set up geo-filtering** — create `allowed_cities.txt` if feeds include events outside your area. This is optional; if the file doesn't exist, all events pass through. See [docs/curator-guide.md](docs/curator-guide.md#step-5-geo-filtering-setup).
+9. **Update SOURCES_CHECKLIST.md** — document findings, track pending sources
+10. **Commit and push** — workflow runs daily or trigger manually
 
 ## App Architecture
 
