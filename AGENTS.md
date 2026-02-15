@@ -98,6 +98,25 @@ python scripts/add_scraper.py myscraper santarosa "My Source Name" --dry-run   #
 
 ---
 
+## Quick Reference: Adding a New ICS Feed
+
+For ICS feeds that don't need a scraper (direct curl), use `add_feed.py`:
+
+```bash
+python scripts/add_feed.py "https://example.com/events/?ical=1" toronto "Example Events"
+python scripts/add_feed.py URL city "Source Name" --test      # test first
+python scripts/add_feed.py URL city "Source Name" --dry-run   # preview
+```
+
+This will:
+1. Test the feed URL returns valid ICS
+2. Add curl command to `.github/workflows/generate-calendar.yml`
+3. Add entry to `cities/{city}/feeds.txt`
+
+You still need to manually update `SOURCES_CHECKLIST.md`.
+
+---
+
 ## Reusable Scrapers
 
 ### MaxPreps (`scrapers/maxpreps.py`) - High School Athletics
