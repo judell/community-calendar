@@ -78,6 +78,23 @@ python sportsbasement.py --location "Santa Rosa" -o sportsbasement.ics
 python sportsbasement.py --location "Santa Rosa" --type "Run Events"
 ```
 
+### legistar.py
+City/county government meetings via Legistar WebAPI
+- Events: City council, planning boards, commissions
+- Method: Legistar WebAPI (OData) → ICS conversion
+- Uses subprocess+curl to avoid Python urllib encoding `$` as `%24`
+
+```bash
+# Discover: does the city have a working Legistar API?
+curl -s "https://webapi.legistar.com/v1/{client}/events" | head -50
+
+# Scrape
+python scrapers/legistar.py --client santa-rosa --source "City of Santa Rosa" -o legistar.ics
+python scrapers/legistar.py --client wake --source "Wake County" -o wake_legistar.ics
+```
+
+**Note:** Not all `{city}.legistar.com` web UIs have working APIs. Test first. See [AGENTS.md](../AGENTS.md) for the Granicus vs Legistar distinction.
+
 ## Usage
 
 Each scraper accepts `--year` and `--month` arguments and outputs an ICS file:

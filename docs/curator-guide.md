@@ -341,18 +341,30 @@ This reduces event count significantly (typically 10-15% fewer displayed events)
 ## Government & Civic Sources
 
 ### Legistar (City Council, Boards, Commissions)
-Many cities use Legistar (Granicus) for agenda management. Check if your city has one:
+Many cities use Legistar for agenda management. Check if your city has one:
 ```bash
-# Try: {city}.legistar.com or {city-name}.legistar.com
+# Try common client slugs: city name, county name, hyphenated
 curl -s "https://webapi.legistar.com/v1/{client}/events" | head -50
+# Examples: santa-rosa, wake, chapelhill, durhamcounty
 ```
 
-If the API returns JSON, use the Legistar scraper:
+If the API returns a JSON array of events, use the Legistar scraper:
 ```bash
-python scrapers/legistar.py --client santa-rosa -o legistar.ics
+python scrapers/legistar.py --client santa-rosa --source "City of Santa Rosa" -o legistar.ics
 ```
 
-**Client name:** Extract from URL (e.g., `santa-rosa.legistar.com` → `santa-rosa`)
+**Client name:** Extract from URL (e.g., `santa-rosa.legistar.com` → `santa-rosa`). Also try county/town names without the domain — some clients (like `wake`, `chapelhill`) don't have obvious `.legistar.com` web UIs but the API works.
+
+**Gotcha — broken Legistar APIs:** Some cities have a `{city}.legistar.com` web UI but the API returns errors like "LegistarConnectionString not set up." This means the city uses a different backend (often BoardDocs or Granicus directly). Always test the API before adding to the workflow.
+
+### Granicus vs Legistar (both Granicus-owned, different purposes)
+- **Legistar WebAPI** → forward-looking meeting calendar with dates, committees, agendas. **This is what we scrape.**
+- **Granicus video** (`{city}.granicus.com`) → backward-looking archive of meeting recordings. RSS feeds contain past meetings only. **Not useful for upcoming events.**
+
+Don't confuse the two. A city may have Granicus video streaming but no working Legistar API (e.g., Raleigh).
+
+### BoardDocs
+Some cities use BoardDocs for agenda publishing (e.g., `go.boarddocs.com/nc/raleigh/`). No public calendar API — only a document viewer. Not currently scrapable for event feeds.
 
 ### City Website Calendars (CivicPlus, etc.)
 Many city websites have ICS export. Look for "Subscribe" or calendar icons. Common patterns:

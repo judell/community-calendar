@@ -149,7 +149,11 @@ For sites using Elfsight Event Calendar widget. See `scrapers/sportsbasement.py`
 python scrapers/legistar.py --client santa-rosa -o events.ics
 python scrapers/legistar.py --client santa-rosa --source "City of Santa Rosa" -o events.ics
 ```
-For cities using Legistar (Granicus) for agenda management. Client name is from the Legistar URL (e.g., `santa-rosa.legistar.com` → `santa-rosa`).
+For cities using Legistar for agenda management. Client name is from the Legistar URL (e.g., `santa-rosa.legistar.com` → `santa-rosa`). Uses the Legistar WebAPI with OData queries for future events.
+
+**Discovery:** Try `curl -s "https://webapi.legistar.com/v1/{client}/events" | head -50`. If it returns JSON, the client works. Common client names: city slug (`santa-rosa`), county slug (`wake`, `durhamcounty`), or town name (`chapelhill`).
+
+**Gotcha:** Some cities have a `{city}.legistar.com` web UI but a broken API (e.g., Raleigh returns "LegistarConnectionString not set up"). These cities use Granicus for video but not Legistar for legislative data. Always test the API before adding to the workflow.
 
 ### Bibliocommons (`scrapers/lib/bibliocommons.py`) - Library Event Platforms
 Reusable base for public-library systems on Bibliocommons gateway APIs.
@@ -175,6 +179,8 @@ To create a new city/library scraper, subclass `BibliocommonsEventsScraper` and 
 | **Localist** | `https://{domain}/api/2/events` |
 | **WordPress Tribe** | `https://example.com/events/?ical=1` |
 | **WordPress MEC** | `https://example.com/events/?mec-ical-feed=1` |
+| **Legistar** | `https://webapi.legistar.com/v1/{client}/events` (WebAPI, use scraper) |
+| **CivicPlus** | `https://www.{city}.org/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID={N}` |
 
 ### SeeTickets Widgets
 HTML classes: `.title a`, `.date`, `.see-showtime`, `.see-doortime`, `.genre`, `.ages`, `.price`
@@ -252,6 +258,7 @@ Many event platforms have predictable feed URLs:
 | **GrowthZone** | Chamber sites: `business.{chamber}.us/api/events` |
 | **LiveWhale** | University sites: `{domain}/live/ical/events` |
 | **WordPress Tribe** | `{domain}/events/?ical=1` |
+| **Legistar** | `curl -s "https://webapi.legistar.com/v1/{client}/events"` — try city/county slugs |
 
 ---
 
@@ -281,3 +288,5 @@ python scripts/validate_pipeline.py --cities santarosa --strict
 | **Simpleview CMS** | Tourism sites; no public events API |
 | **Cloudflare-protected sites** | Challenge pages block scrapers |
 | **Facebook Events** | No public API since 2018 |
+| **Granicus video** | RSS feeds at `{instance}.granicus.com/ViewPublisherRSS.php?view_id={N}` are **backward-looking only** (archived meeting videos). Not useful for upcoming events. Don't confuse with Legistar (also Granicus-owned), which has a forward-looking WebAPI. |
+| **BoardDocs** | Used by some cities for agenda publishing (e.g., `go.boarddocs.com/nc/raleigh/`). No public calendar API; LlamaIndex has a reader but it's for document extraction, not event feeds. |
