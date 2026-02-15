@@ -176,8 +176,27 @@ Toronto is a major city (~3M metro). Strategy: identify major aggregators first,
 - Need to investigate further
 
 **Next Steps**:
-1. Add NOW Magazine ICS feed (immediate win)
+1. ✅ Add NOW Magazine ICS feed (done - in feeds.txt)
 2. Build BlogTO scraper (high value)
 3. Investigate major venue websites directly
 4. Check Meetup for Toronto groups
 5. Test Eventbrite scraper with Canada location
+
+### Additional Venue Research (2025-02-14)
+
+**Cloudflare Protected (non-starter):**
+- AGO (ago.ca) - Cloudflare challenge page
+
+**No obvious feeds:**
+- TIFF (tiff.net) - Custom site, no feed found
+- Massey Hall / Roy Thomson Hall (mhrth.com) - No feed found
+- ROM (rom.on.ca) - 404 on whats-on page
+- Mirvish (mirvish.com) - Has calendar page but no iCal
+- Aga Khan Museum - No feed found
+- Second City Toronto - Next.js app, no feed
+- Harbourfront Centre - RSS feed exists but empty (0 items)
+
+**Platform Notes:**
+- Toronto Public Library uses BiblioCommons - no public iCal
+- Many venues use custom ticketing systems without public feeds
+- Most major venues likely appear in BlogTO already
