@@ -153,3 +153,43 @@ curl "https://webapi.legistar.com/v1/santa-rosa/events?\$filter=EventBodyName%20
 **Note:** Not all Legistar instances have the WebAPI enabled. Test with a simple events request first. If you get a "Key or Token is required" error, the API may require authentication.
 
 **Example:** Santa Rosa — 3,995 total records, WebAPI returns future scheduled meetings.
+
+## Universities Are Decentralized — Scrape the Aggregate Page
+
+Large universities typically have a central events page that aggregates feeds from dozens of departments, but each department runs its own CMS. Don't try to add 30 individual department feeds — instead:
+
+1. **Check the central events page** for an ICS feed (rare) or scrapeable HTML (common)
+2. **Follow "More" links** from the aggregate page to get deeper per-department coverage
+3. **Detect WordPress plugins** on department sites by checking `wp-content/plugins/` in page source — some departments will have Tribe Events (`?ical=1`) or MEC (`?mec-ical-feed=1`)
+
+The aggregate page may cap events per department (UofT shows 5 each). Following "More" links with theme-specific parsers gets deeper coverage without writing 30 separate scrapers.
+
+**Example:** UofT has 32 department calendars across 4+ Drupal themes and WordPress. One scraper with 5 parser patterns handles them all: 176 events from one scraper + 3 direct ICS feeds from departments that have Tribe Events.
+
+## Drupal Sites Don't Have Standardized Feed Patterns
+
+Unlike WordPress (where Tribe = `?ical=1` and MEC = `?mec-ical-feed=1`), Drupal sites vary wildly. Every Drupal installation has its own theme, views configuration, and CSS class names. Don't expect to build a reusable "Drupal scraper" — each site needs its own parser.
+
+**What to look for in Drupal event pages:**
+- `node-events-*` classes (common in university Drupal themes)
+- `views-row` with event links (generic Drupal Views)
+- `listing-item--events` (BEM-style custom themes)
+- `field-event` or `field--name-title` (Drupal field formatters)
+
+**What to try first:** Always check `?_format=json` on Drupal URLs — some sites have REST exports enabled (returns JSON). If you get `"A route that returns a rendered array..."`, REST is not configured for that view.
+
+## Classify WordPress Sites at Scale with Plugin Detection
+
+When probing many sites for feeds, check `wp-content/plugins/` in page source to quickly classify:
+```bash
+curl -sL "https://example.com/events/" | grep -o "wp-content/plugins/[^/]*" | sort -u
+```
+
+| Plugin | Feed URL |
+|--------|----------|
+| `the-events-calendar` | `?ical=1` |
+| `modern-events-calendar` | `?mec-ical-feed=1` |
+| `events-calendar-pro` | `?ical=1` (same as Tribe, pro adds filters) |
+| Anything else | No standard ICS feed |
+
+This is faster than trial-and-error with `?ical=1` on every site.
