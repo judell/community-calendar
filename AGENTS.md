@@ -69,8 +69,9 @@ When creating a new scraper for an existing city, **all steps are required**:
 2. **Run the scraper** to generate initial ICS file in `cities/{city}/`
 3. **Add ICS to feeds.txt** (`cities/{city}/feeds.txt`)
 4. **Add scraper to workflow** (`.github/workflows/generate-calendar.yml`)
-5. **Update SOURCES_CHECKLIST.md** - document what was added
-6. **Commit and push** - include the ICS file
+5. **Update `combine_ics.py`** — add `SOURCE_NAMES` entry (filename → display name) and `SOURCE_URLS` entry (filename → fallback URL)
+6. **Update SOURCES_CHECKLIST.md** - document what was added
+7. **Commit and push** - include the ICS file
 
 ### Verification Checklist
 
@@ -82,6 +83,7 @@ Before considering a scraper "done", verify:
 | ICS has events | `grep -c 'BEGIN:VEVENT' cities/{city}/myscraper.ics` |
 | In feeds.txt | `grep myscraper cities/{city}/feeds.txt` |
 | In workflow | `grep myscraper .github/workflows/generate-calendar.yml` |
+| In combine_ics.py | `grep myscraper scripts/combine_ics.py` |
 | Committed | `git status` shows no uncommitted scraper files |
 
 ### Recommended: Use the add_scraper script
