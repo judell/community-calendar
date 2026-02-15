@@ -165,13 +165,13 @@
       <Text fontSize="$fontSize-sm" value="{(picks.value || []).length + ' events'}" />
       <Text fontSize="$fontSize-xs" color="$color-text-secondary">Calendar feed for your picks:</Text>
       <Text fontSize="$fontSize-xs" overflowMode="flow" value="{feedToken.value && feedToken.value[0] ? appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + feedToken.value[0].token : ''}" />
-      <HStack verticalAlignment="center" gap="$space-1">
+      <HStack verticalAlignment="center" gap="$space-1" wrapContent="true" width="100%">
         <Button
           size="xs"
           icon="copy"
           onClick="navigator.clipboard.writeText(appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + feedToken.value[0].token); toast('Copied', { duration: 1500 })"
         />
-        <Text fontSize="$fontSize-xs" color="$color-text-secondary">Click to copy link, paste into your calendar app to subscribe.</Text>
+        <Text fontSize="$fontSize-xs" color="$color-text-secondary" overflowMode="flow">Click to copy link, paste into your calendar app to subscribe.</Text>
       </HStack>
       <List data="{picks.value || []}" fixedItemSize="true" limit="100">
         <PickItem pick="{$item}" />
