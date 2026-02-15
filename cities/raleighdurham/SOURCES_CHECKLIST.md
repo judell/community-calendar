@@ -1,6 +1,6 @@
 # Raleigh-Durham (Research Triangle) Calendar Source Checklist
 
-## Currently Implemented (31 sources)
+## Currently Implemented (34 sources)
 
 ### Universities
 | Source | Type | Events | Notes |
@@ -36,6 +36,17 @@
 | Town of Chapel Hill | Legistar scraper | 0 | Town Council, boards — meetings posted as scheduled |
 | Durham County | Legistar scraper | 0 | Board of County Commissioners — meetings posted as scheduled |
 
+### Cycling & Active Transportation
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Bike Durham Events | Google Calendar ICS | ~101 | Advocacy meetings, community rides |
+| Triangle Cycling | Google Calendar ICS | ~1,925 | Cycling events across the Triangle |
+
+### Breweries & Taprooms
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Gizmo Brew Works Durham | Google Calendar ICS | ~128 | Live music, trivia, beer releases |
+
 ### Meetup Groups — Tech (11 groups)
 | Group | Events | Category |
 |-------|--------|----------|
@@ -67,6 +78,9 @@
 
 | Source | URL | Platform | Notes |
 |--------|-----|----------|-------|
+| Durham Chamber of Commerce | members.durhamchamber.org/api/events | GrowthZone Hub XML API | ~8 events; needs growthzone.py scraper |
+| Wake Forest Chamber | chambermaster.wakeforestchamber.org/api/events | GrowthZone Hub XML API | ~102 events; needs growthzone.py scraper |
+| Apex Chamber | business.apexchamber.com/api/events | GrowthZone Hub XML API | ~132 events; needs growthzone.py scraper |
 | DPAC | dpacnc.com/events/all | Custom/Ticketmaster | Major performing arts center |
 | Carolina Theatre (Durham) | carolinatheatre.org/events/ | WordPress + Agile Ticketing | Film, music, comedy |
 | Cat's Cradle / Motorco / Lincoln Theatre | catscradle.com/events/ | WordPress + ETIX | Major indie music venues |
@@ -96,6 +110,14 @@
 | NC Museum of Natural Sciences ICS | Returns valid ICS structure but 0 events |
 | Quail Ridge Books | Custom bookstore platform, no feeds |
 | Eno River Association | WordPress Simple Calendar plugin, no ICS export |
+| Raleigh Chamber | Atlas SPA (web.raleighchamber.org), no server-side API |
+| Cary Chamber | Atlas SPA (web.carychamber.com), no server-side API |
+| Chapel Hill-Carrboro Chamber | GrowthZone MicroNet CMS, no XML API endpoint |
+| Triangle on the Cheap ICS | `?ical=1` returns HTML, not ICS — Tribe Events export disabled |
+| Downtown Cary | Mod_Security blocks automated requests |
+| Durham Convention Center | Mod_Security blocks automated requests |
+| LiveWhale feeds | No LiveWhale instances found in NC |
+| MembershipWorks | No MembershipWorks orgs found in RDU area |
 
 ---
 
@@ -128,6 +150,14 @@
 - Fixed legistar.py scraper to use curl subprocess (avoids Python urllib encoding `$` as `%24`)
 - **Total: 31 sources**
 
+### 2026-02-15: Phase 1 platform searches (continued)
+- **Google Calendar embeds**: Checked 20+ Triangle-area organizations for embedded Google Calendars. Found 3 usable community feeds: Bike Durham Events (101 events), Triangle Cycling (1,925 events), Gizmo Brew Works Durham (128 events). Also found UNC CS and Raleigh Charter HS calendars — skipped as too niche.
+- **GrowthZone/Chamber of Commerce**: Surveyed 6 area chambers. Three have usable XML APIs at `/api/events` (Durham, Wake Forest, Apex) returning `ArrayOfEventDisplay` XML. Three are dead ends: Raleigh and Cary use Atlas SPA, Chapel Hill uses MicroNet CMS. None offer bulk ICS feeds — all need a growthzone.py scraper.
+- **LiveWhale**: Zero hits in NC. Platform not used in this region.
+- **MembershipWorks**: Zero hits in RDU area.
+- **Community calendars/BIDs**: Triangle on the Cheap has Tribe Events but `?ical=1` returns HTML. Downtown Durham uses Tribe Events via Elementor (no ICS). Downtown Cary and Durham Convention Center blocked by Mod_Security.
+- **Total: 34 sources** (+3 Google Calendar feeds)
+
 ---
 
 ## Topical Searches
@@ -136,7 +166,7 @@ Track progress on topical searches to find long-tail community sources.
 
 ### Not Yet Done
 
-- Food & drink (breweries, farmers markets, food trucks)
+- Food & drink (breweries, farmers markets, food trucks) — **partial**: Gizmo Brew Works added; others TBD
 - Music venues (Cat's Cradle, Motorco, Lincoln Theatre, Pour House — all need scrapers)
 - Performing arts (DPAC, Carolina Performing Arts, PlayMakers)
 - Faith / spiritual
@@ -148,4 +178,4 @@ Track progress on topical searches to find long-tail community sources.
 - Outdoor recreation (Eno River, Falls Lake, Umstead State Park, American Tobacco Trail)
 - Government / public affairs — Legistar done (wake, chapelhill, durhamcounty); Raleigh API broken
 - Volunteering / mutual aid
-- Sports / fitness (running clubs, cycling groups)
+- Sports / fitness (running clubs, cycling groups) — **partial**: Bike Durham + Triangle Cycling added
