@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (73 sources)
+## Currently Implemented (76 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -44,6 +44,8 @@
 | St. Lawrence Neighbourhood Assoc. | Tockify ICS | 82 | Community meetings, markets, kids |
 | Bloor West Village BIA | WordPress Tribe ICS | 6 | |
 | Councillor Jamaal Myers | Tockify ICS | 27 | Scarborough community, city council |
+| Show Up Toronto | iCal feed | TBD | Volunteering, mutual aid, civic organizing |
+| Volunteer Toronto | HTML scraper | TBD | Volunteering opportunities and events |
 
 ### Crafts & Makers
 | Source | Type | Events | Notes |
@@ -63,9 +65,10 @@
 |--------|------|--------|-------|
 | Ontario Nature | WordPress Tribe ICS | 11 | Birding trips, nature talks, conservation |
 
-### Meetup Groups (44 groups)
+### Meetup Groups (46 groups)
 | Group | Events | Category |
 |-------|--------|----------|
+| SAI Dham Canada Toronto Volunteer Group | 10 | Volunteering / mutual aid |
 | TorontoBabel | 10 | Language exchange |
 | Try New Things in Toronto | 10 | Social/activities |
 | Toronto Arts & Culture | 10 | Arts outings |
@@ -208,7 +211,7 @@
 - **Repair Cafe Toronto**: 82 community repair workshops
 - **44 Meetup groups** with active ICS feeds across social, arts, hiking, cycling, dance, games, books, comedy, tech, language, yoga, water sports, running, film, improv, business, makers, crafts
 
-**Total: 73 sources, ~6,800+ events**
+**Total: 76 sources, ~6,800+ events**
 
 **Infrastructure built:**
 - `scrapers/lib/ckan.py` — reusable CKAN datastore API base scraper (pagination, filters)
@@ -218,8 +221,18 @@
 
 **Topical searches completed:** outdoor activities, government/public affairs, crafts/makers
 
+### 2026-02-15: Topical pass 1 — volunteering / mutual aid
+
+**Added this session**
+- **Show Up Toronto** — iCal feed at `https://showuptoronto.ca/static/showupto.ics` (site also exposes RSS). Added to `feeds.txt`, workflow fetch, and `combine_ics.py` source mappings.
+- **Meetup: SAI Dham Canada Toronto Volunteer Group** — iCal feed at `https://www.meetup.com/sai-dham-canada-toronto-volunteer-group/events/ical/`. Added to `feeds.txt`, workflow fetch, and `combine_ics.py` source mappings.
+- **Volunteer Toronto scraper** — added `scrapers/volunteer_toronto.py` and wired workflow output `volunteer_toronto.ics` plus `combine_ics.py` source mappings. Needs runtime validation for event volume.
+
+**Screened out for now (not Toronto-specific enough)**
+- **Volunteer MBC** (`https://www.volunteermbc.org/events/?ical=1`) — valid ICS, but appears regional beyond Toronto.
+- **VolunteerConnector** (`https://www.volunteerconnector.org/events?ical=1`) — valid ICS, but Ontario-wide feed likely too broad without city filtering.
+
 **Topical searches not yet done:**
-- Volunteering / mutual aid
 - Food & drink (cooking classes, tastings, farmers markets)
 - Faith / spiritual
 - Kids / family

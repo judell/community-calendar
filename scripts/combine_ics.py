@@ -125,7 +125,9 @@ SOURCE_NAMES = {
     'st_lawrence_na': 'St. Lawrence Neighbourhood Association',
     'bloor_west_village': 'Bloor West Village BIA',
     'jamaalmyers': 'Councillor Jamaal Myers',
+    'showup_toronto': 'Show Up Toronto',
     # Toronto - Meetup groups
+    'meetup_sai_dham_volunteer': 'Meetup: SAI Dham Canada Toronto Volunteer Group',
     'meetup_torontobabel': 'Meetup: TorontoBabel Language Exchange',
     'meetup_try_new_things': 'Meetup: Try New Things in Toronto',
     'meetup_arts_culture': 'Meetup: Toronto Arts & Culture',
@@ -148,6 +150,7 @@ SOURCE_NAMES = {
     # Toronto - Government & Public Affairs
     'toronto_meetings': 'City of Toronto Meetings',
     'toronto_festivals': 'City of Toronto Festivals & Events',
+    'volunteer_toronto': 'Volunteer Toronto',
     # Toronto - Outdoor & Nature
     'ontario_nature': 'Ontario Nature',
     'meetup_founders_running': 'Meetup: Founders Running Club Toronto',
@@ -241,12 +244,15 @@ SOURCE_URLS = {
     'st_lawrence_na': 'https://tockify.com/st.lawrence.na/',
     'bloor_west_village': 'https://www.bloorwestvillagebia.com/events/',
     'jamaalmyers': 'https://tockify.com/jamaalmyers/',
+    'showup_toronto': 'https://showuptoronto.ca/',
+    'meetup_sai_dham_volunteer': 'https://www.meetup.com/sai-dham-canada-toronto-volunteer-group/',
     'ontario_nature': 'https://ontarionature.org/events-calendar/',
     'repair_cafe_toronto': 'https://repaircafetoronto.ca/get-our-events-feed/',
     'knitters_guild': 'https://torontoknittersguild.ca/events/',
     'site3': 'https://www.site3.ca/events/',
     'toronto_meetings': 'https://www.toronto.ca/city-government/council/',
     'toronto_festivals': 'https://open.toronto.ca/dataset/festivals-events/',
+    'volunteer_toronto': 'https://www.volunteertoronto.ca/networking/events/calendar.asp',
 }
 
 
