@@ -316,7 +316,7 @@ Track progress on topical searches to find long-tail community sources.
 |-------|---------|--------|--------|
 | Toronto History Walks | 8,781 | 10 | ✅ Added |
 | Medieval Renaissance Toronto SCA | 172 | 10 | ✅ Added |
-| Hidden History Toronto! Walking Tours | 9,597 | 0 | Monitor for future events |
+| Hidden History Toronto! Walking Tours | 9,597 | n/a | Feed/group slug now returns 404 `Group not found` (checked 2026-02-15) |
 | History Discussion Group | 3,586 | 0 | No current events |
 | Eglinton History Salon | 266 | 0 | No current events |
 | Toronto African Diaspora History Walking Tours | 63 | 0 | No current events |
