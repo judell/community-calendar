@@ -392,6 +392,44 @@ jobs:
         python scripts/combine_ics.py --input-dir cities/toronto --output cities/toronto/combined.ics --name "Toronto Community Calendar"
 
     # ==========================================
+    # Raleigh-Durham
+    # ==========================================
+    - name: Download Raleigh-Durham live feeds and combine ICS
+      if: contains(steps.locations.outputs.list, 'raleighdurham')
+      run: |
+        cd cities/raleighdurham
+        curl -sL "https://calendar.unc.edu/calendar/1.ics" -o unc_chapel_hill.ics || true
+        curl -sL "https://calendar.ncsu.edu/calendar/1.ics" -o ncsu.ics || true
+        curl -sL "https://calendar.duke.edu/events/index.ics" -o duke.ics || true
+        curl -sL "https://events.dncr.nc.gov/calendar/1.ics" -o nc_cultural_resources.ics || true
+        curl -sL "https://events.ackland.org/events/?ical=1" -o ackland_art.ics || true
+        curl -sL "https://ncbg.unc.edu/calendar/?ical=1" -o nc_botanical_garden.ics || true
+        curl -sL "https://nasher.duke.edu/events/?ical=1" -o nasher_museum.ics || true
+        curl -sL "https://triangleland.org/events/list/?ical=1" -o triangle_land.ics || true
+        curl -sL "https://durhamcentralpark.org/events/list/?ical=1" -o durham_central_park.ics || true
+        curl -sL "https://durhamcountylibrary.libcal.com/ical_subscribe.php?src=p&cid=14288" -o durham_library.ics || true
+        curl -sL "https://www.durhamnc.gov/common/modules/iCalendar/iCalendar.aspx?catID=30&feed=calendar" -o durham_gov.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/tripython/events/ical/" -o meetup_tripython.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/PyData-Triangle/events/ical/" -o meetup_pydata_triangle.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/Research-Triangle-Analysts/events/ical/" -o meetup_research_triangle_analysts.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/triangleai/events/ical/" -o meetup_triangleai.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/triangle-devs/events/ical/" -o meetup_triangle_devs.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/all-things-open-rtp-meetup/events/ical/" -o meetup_all_things_open_rtp_meetup.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/triangle-techbreakfast/events/ical/" -o meetup_triangle_techbreakfast.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/futureofdata-triangle/events/ical/" -o meetup_futureofdata_triangle.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/Blacks-In-Tech-BIT-RDU-Durham-Raleigh-Meetup/events/ical/" -o meetup_blacks_in_tech_bit_rdu_durham_raleigh_meetup.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/downtown-techies-durham/events/ical/" -o meetup_downtown_techies_durham.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/raleigh-wordpress-meetup-group/events/ical/" -o meetup_raleigh_wordpress_meetup_group.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/adventures/events/ical/" -o meetup_adventures.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/durham-geeks/events/ical/" -o meetup_durham_geeks.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/durham-board-games-meetup-group/events/ical/" -o meetup_durham_board_games_meetup_group.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/CHAD2015/events/ical/" -o meetup_chad2015.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/discover-durham-together/events/ical/" -o meetup_discover_durham_together.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/ChickTech-RDU/events/ical/" -o meetup_chicktech_rdu.ics || true
+        cd ../..
+        python scripts/combine_ics.py --input-dir cities/raleighdurham --output cities/raleighdurham/combined.ics --name "Raleigh-Durham Community Calendar"
+
+    # ==========================================
     # Post-processing (all cities)
     # ==========================================
     - name: Convert ICS to JSON for Supabase
@@ -428,7 +466,7 @@ jobs:
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         
         # Save generated files before any git operations
-        for city in santarosa bloomington davis petaluma toronto; do
+        for city in santarosa bloomington davis petaluma toronto raleighdurham; do
           if [ -f "cities/$city/events.json" ]; then
             cp "cities/$city/events.json" "/tmp/${city}_events.json"
           fi
@@ -443,7 +481,7 @@ jobs:
             fi
             echo "Push failed, restoring generated files and retrying..."
             # Restore generated files that may have been clobbered by rebase
-            for city in santarosa bloomington davis petaluma toronto; do
+            for city in santarosa bloomington davis petaluma toronto raleighdurham; do
               if [ -f "/tmp/${city}_events.json" ]; then
                 cp "/tmp/${city}_events.json" "cities/$city/events.json"
               fi
