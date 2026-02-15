@@ -243,4 +243,72 @@
 - Comedy (standup, open mics)
 - Music participation (choirs, jam sessions, open mics)
 - Gardening / urban farming
-- History / heritage
+
+---
+
+## Topical Search: History / Heritage (2025-02-15)
+
+**Objective**: Find long-tail events in history/heritage category
+
+### Working ICS Feeds (Added to feeds.txt)
+
+| Source | ICS URL | Events | Notes |
+|--------|---------|--------|-------|
+| Ontario Historical Society | `ontariohistoricalsociety.ca/events/?ical=1` | 5 | WordPress Tribe; province-wide but includes Toronto events like Toronto Postcard Club (Feb 22), Canada Black Music Archives (Feb 18) |
+| Toronto History Walks | `meetup.com/the-history-of-parkdale/events/ical/` | 10 | Walking tours: U of T & Yorkville, Mt Pleasant Cemetery, St James Cemetery, Distillery District, Lakeshore Psychiatric Hospital, PATH System, Little India |
+| Medieval Renaissance Toronto SCA | `meetup.com/Medieval-Renaissance-Toronto-Royal-Citie-of-Eoforwic-SCA/events/ical/` | 10 | Society for Creative Anachronism - medieval arts, science, dancing, games |
+
+### Meetup Groups Discovered (History/Heritage)
+
+| Group | Members | ICS Events | Status |
+|-------|---------|------------|--------|
+| Toronto History Walks (the-history-of-parkdale) | 8,781 | 10 | ✅ Added - excellent walking tours |
+| Medieval Renaissance Toronto SCA | 172 | 10 | ✅ Added - medieval reenactment |
+| Eglinton History Salon | 266 | 0 | No current events |
+| History Discussion Group | 3,586 | 0 | No current events |
+| The Long Conversation | 16 | 0 | Philosophy/history discussion |
+| Toronto African Diaspora History Walking Tours | 63 | 0 | No current events |
+| Hidden History Toronto! Walking Tours | 9,597 | 0 | No current events |
+
+### Key Organizations Assessed
+
+| Organization | URL | Feed Status | Notes |
+|--------------|-----|-------------|-------|
+| Ontario Historical Society | ontariohistoricalsociety.ca | ✅ ICS works | Province-wide heritage org |
+| Heritage Toronto | heritagetoronto.org | No feed | Tours seasonal (June-Nov), next season late spring 2026 |
+| ACO Toronto | acotoronto.ca | No feed | Annual symposiums, static page |
+| Toronto Historical Association | torontohistory.net | Inactive | Last events from 2016 |
+| City of Toronto History Museums | toronto.ca | No feed | 61 events but WordPress, no ICS |
+| Toronto Family History (OGS) | torontofamilyhistory.org | Blocked | Cloudflare protected |
+
+### Historic Sites / Museums
+
+| Venue | URL | Feed Status | Notes |
+|-------|-----|-------------|-------|
+| Casa Loma | casaloma.ca | No feed | RSS from 2018, empty; static events page |
+| Fort York | fortyork.streamintickets.com | 404 | Ticketing system down |
+| City of Toronto Archives | toronto.ca/archives | No feed | Static events page |
+| Doors Open Toronto | toronto.ca/doors-open | Scheduled | May 23-24, 2026 - 150+ sites |
+
+### Sample Events from Toronto History Walks
+
+- University of Toronto and Historic Yorkville!
+- Mount Pleasant Cemetery (WEEKDAY)
+- St. James Cemetery and Castle Frank
+- Alcohol Wars: The Distillery and the Brewery District (EVENING)
+- With Strength: Toronto Women on the Edge of History!
+- The Mystery of Alfreda Mae Hillier: Interactive Game and Tour
+- Historic Little India: Gerrard India Bazaar
+- The Massey Murder: Interactive Game and Tour
+- The PATH System: Specialist Course and Guide
+- The Lakeshore Psychiatric Hospital and Camp M
+
+### Non-Starters (History/Heritage)
+
+| Source | Reason |
+|--------|--------|
+| Toronto Historical Association | Site inactive since 2016 |
+| Toronto Family History | Cloudflare protected |
+| Casa Loma | Static site, RSS empty since 2018 |
+| Fort York tickets | 404 error on events page |
+| Heritage Toronto tours | Seasonal only (June-Nov) |
