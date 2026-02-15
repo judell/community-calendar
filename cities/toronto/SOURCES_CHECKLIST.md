@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (44 sources)
+## Currently Implemented (66 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -50,7 +50,7 @@
 |--------|------|--------|-------|
 | Ontario Nature | WordPress Tribe ICS | 11 | Birding trips, nature talks, conservation |
 
-### Meetup Groups (20 groups)
+### Meetup Groups (42 groups)
 | Group | Events | Category |
 |-------|--------|----------|
 | TorontoBabel | 10 | Language exchange |
@@ -73,43 +73,38 @@
 | Toronto SUP, Kayak & Canoe | seasonal | Water sports |
 | Toronto Paddlers | seasonal | Waterfront kayaking |
 | Toronto Canoe Trippers | seasonal | Canoe expeditions |
-
-## Additional Meetup Groups (discovered, not yet added)
-
-These were verified with active ICS feeds — can be added later to broaden coverage:
-
-| Group | Slug | Events | Category |
-|-------|------|--------|----------|
-| 20s 30s Toronto Social | `20s-30s-toronto-social-activities` | 10 | Social |
-| Soul City Social Club | `soulcity` | 10 | Social |
-| Experience Toronto | `experiencetoronto` | 7 | Arts/culture |
-| Hiking Network | `hiking-network` | 3 | Hiking |
-| GTA Hiking & Stuff | `gta-hiking-meetup` | 1 | Hiking |
-| Toronto Bruce Trail Club | `Toronto-Bruce-Trail-Club` | 1 | Hiking |
-| Wilderness Union | `wildernessunion` | 2 | Outdoors |
-| Toronto Heavy Boardgamers | `toronto-heavy-boardgamers` | 10 | Board games |
-| Toronto Movies & Social | `toronto-movies-and-social-group` | 10 | Film |
-| Sci Fi Book Club | `thescifibookclub` | 6 | Book club |
-| Post-Apocalyptic Book Club | `post-apocalyptic-book-club-toronto-chapter` | 2 | Book club |
-| Silent Book Club | `toronto-silent-book-club-meetup-group` | 1 | Book club |
-| Toronto Japanese English Exchange | `tjex-ca` | 10 | Language |
-| Language Exchange Toronto | `toronto` | 10 | Language |
-| TILE Language Party | `biggest-language-party-event-social-in-toronto` | 5 | Language |
-| Improv For New Friends | `meetup-group-fqsmjvcq` | 2 | Improv |
-| Toronto AI & ML | `toronto-ai-machine-learning-data-science` | 10 | Tech |
-| Microsoft Reactor Toronto | `microsoft-reactor-toronto` | 10 | Tech |
-| Toronto Tech Stack Exchange | `toronto-tech-stack-exchange` | 10 | Tech |
-| Toronto Enterprise DevOps | `toronto-enterprise-devops-user-group` | 3 | Tech |
-| Toronto Postgres | `toronto-postgres` | 2 | Tech |
-| Toronto Women in Business | `downtown-toronto-women-in-business-meetup` | 2 | Business |
-| Toronto 20s-50s Singles Social | `toronto-20s-to-50s-singles-social` | 2 | Social |
+| 20s 30s Toronto Social | 10 | Social |
+| Soul City Social Club | 10 | Social |
+| Experience Toronto | 7 | Arts/culture |
+| Hiking Network | 3 | Hiking |
+| GTA Hiking & Stuff | 1 | Hiking |
+| Toronto Bruce Trail Club | 1 | Hiking |
+| Wilderness Union | 2 | Outdoors |
+| Toronto Heavy Boardgamers | 10 | Board games |
+| Toronto Movies & Social | 10 | Film |
+| Sci Fi Book Club | 6 | Book club |
+| Post-Apocalyptic Book Club | 2 | Book club |
+| Silent Book Club | 1 | Book club |
+| Toronto Japanese English Exchange | 10 | Language |
+| Language Exchange Toronto | 10 | Language |
+| TILE Language Party | 5 | Language |
+| Improv For New Friends | 2 | Improv |
+| Toronto AI & ML | 10 | Tech |
+| Microsoft Reactor Toronto | 10 | Tech |
+| Toronto Tech Stack Exchange | 10 | Tech |
+| Toronto Enterprise DevOps | 3 | Tech |
+| Toronto Postgres | 2 | Tech |
+| Toronto Women in Business | 2 | Business |
+| Toronto 20s-50s Singles Social | 2 | Social |
 
 ## Needs Further Assessment
 
+- **City of Toronto Meeting Schedule** — CKAN open data API at `ckan0.cf.opendata.inter.prod-toronto.ca`. 229 meetings in 2026 across 56 committees (council, community councils, Board of Health, budget, all standing committees). Needs JSON-to-ICS conversion scraper.
+- **City of Toronto Festivals & Events** — CKAN open data API. ~2,211 future events across 37 categories. Official city festival/event listings. Needs JSON-to-ICS conversion scraper. May overlap with torevent Tockify.
 - **Toronto Public Library** — JSON API at `gateway.bibliocommons.com/v2/libraries/tpl/events` returns ~8,000 items, but these are library programs (book clubs, yoga, tech help). Needs JSON-to-ICS conversion and scoping decision.
-- **U of T Events** — Localist platform at events.utoronto.ca. Site timed out during testing. Standard endpoints should work: `/api/2/events`, `/events.rss`. [Localist API docs](https://developer.localist.com/doc/api)
 - **BlogTO** — Highest volume Toronto source (215+ events) but needs custom scraper. JSON embedded in event pages (`var event = {...}`).
 - **Explore Kids Ontario Adventures** — Tockify feed (`ekoad`) has 822 events but covers broader GTA/Ontario, not just Toronto. May need geo-filtering.
+- **Toronto Bicycling Network** — Wild Apricot RSS at `tbn.ca/events/RSS` has 55 events (hiking, cycling, walks, skating, skiing). Richest outdoor recreation club. Needs RSS-to-ICS conversion.
 
 ---
 
@@ -121,7 +116,6 @@ These were verified with active ICS feeds — can be added later to broaden cove
 | Bandsintown | 403 errors, no public feed |
 | Destination Toronto | Uses Cruncho widget, no feeds |
 | Toronto.com RSS | Rate limited (429) |
-| City of Toronto | WordPress RSS exists but empty; events page is static editorial |
 | Eventbrite | No public feeds; API requires OAuth key |
 | Exclaim! | Events section returns 404 |
 | AllEvents.in | No feeds, web-only |
@@ -169,6 +163,13 @@ These were verified with active ICS feeds — can be added later to broaden cove
 | Dragon Boat Canada | MEC installed but ICS returns HTML |
 | Cycle Toronto | NationBuilder, no feeds |
 | Downsview Park | Drupal, no feeds (30+ events but would need scraper) |
+| City of Toronto (toronto.ca) | No Legistar; TMMIS behind Akamai WAF (403). Meeting data available via CKAN instead |
+| Ontario Legislature | 403 on calendar page; no ICS/RSS |
+| Toronto Police Services Board | Joomla, no feeds (~9 meetings/year) |
+| TTC Board | Moved to TMMIS; meetings included in CKAN dataset |
+| Metrolinx Board | Static HTML listing (~6 meetings/year) |
+| TDSB / TCDSB | eScribe platform, no API or feeds; email subscription only |
+| Waterfront Toronto | Drupal/FullCalendar, no feeds (~15 meetings/year) |
 
 ---
 
@@ -181,13 +182,16 @@ These were verified with active ICS feeds — can be added later to broaden cove
 - Direct WordPress `?ical=1` probing on Toronto venue/org sites
 - Meetup group discovery across 13+ categories
 - Aggregator assessment (BlogTO, NOW, City of Toronto, etc.)
+- Topical searches: outdoor activities, government/public affairs
+- City of Toronto open data portal (CKAN API)
 
 **Key finds:**
 - **torevent** Tockify calendar: ~2,900 Toronto events — single biggest source
 - **CultureLink**: 494 community/newcomer events via WordPress Events Manager
-- **St. Lawrence NA**: 82 events via Tockify
-- **13 Meetup groups** with active ICS feeds across social, arts, hiking, cycling, dance, games, books, comedy, tech
-- **6 WordPress Tribe venue sites** with working `?ical=1` feeds (museums, theatre, botanical garden)
-- **25 additional Meetup groups** verified but held back for later
+- **York University**: 6,558 events via WordPress MEC
+- **University of Toronto**: 176 events via custom scraper + 3 department ICS feeds
+- **Ontario Nature**: 11 events via WordPress Tribe
+- **42 Meetup groups** with active ICS feeds across social, arts, hiking, cycling, dance, games, books, comedy, tech, language, yoga, water sports, running, film, improv, business
+- **City of Toronto CKAN**: meeting schedule (229 meetings/2026) + festivals/events (~2,211 future) — needs JSON-to-ICS converters
 
-**Total events across all feeds:** ~3,800+
+**Total events across all feeds:** ~4,500+
