@@ -13,7 +13,9 @@ supabase/
 │   ├── 04_feed_tokens.sql         # Feed tokens with RLS
 │   ├── 05_cron_jobs.sql           # Scheduled event loading
 │   ├── 06_event_enrichments.sql   # Curator overrides per event
-│   └── 07_source_suggestions.sql  # Anonymous source suggestions
+│   ├── 07_source_suggestions.sql  # Anonymous source suggestions
+│   ├── 08_admin_users.sql         # Server-side admin allowlist (UUID-based)
+│   └── 09_admin_github_users.sql  # Server-side admin allowlist (preapproval by GitHub username)
 │
 ├── migrations/                    # One-off migrations (already applied)
 │   └── 001_add_city_column.sql
@@ -39,6 +41,8 @@ The publishable key identifies the *application* (not the user) and provides onl
 | `feed_tokens` | None | SELECT/INSERT own row only |
 | `event_enrichments` | SELECT (read all) | SELECT all, INSERT/UPDATE/DELETE own rows only |
 | `source_suggestions` | SELECT/INSERT (anyone can suggest) | SELECT/INSERT (anyone can suggest) |
+| `admin_users` | None | SELECT own row only (admin marker) |
+| `admin_github_users` | None | SELECT own GitHub username row only |
 
 So anyone with the publishable key can read events (which is the whole point — it's a public calendar). But only authenticated users can manage their own picks, and RLS ensures they can't see or modify other users' data.
 
@@ -148,6 +152,26 @@ psql $DATABASE_URL -f ddl/03_picks.sql
 psql $DATABASE_URL -f ddl/04_feed_tokens.sql
 psql $DATABASE_URL -f ddl/05_cron_jobs.sql
 psql $DATABASE_URL -f ddl/06_event_enrichments.sql
+psql $DATABASE_URL -f ddl/08_admin_users.sql
+psql $DATABASE_URL -f ddl/09_admin_github_users.sql
+
+### Admin access management
+
+Privileged UI features (for example audio capture) are gated by server-side tables, not by hardcoded GitHub usernames in frontend code.
+
+For preapproval before first sign-in, use `admin_github_users`.
+
+Preapprove by GitHub username:
+```sql
+insert into admin_github_users (github_user)
+values ('judell'), ('gvwilson')
+on conflict (github_user) do nothing;
+```
+
+Revoke admin:
+```sql
+delete from admin_github_users where github_user = 'judell';
+```
 ```
 
 ### 2. Deploy Edge Functions

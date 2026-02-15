@@ -57,6 +57,16 @@
   />
 
   <DataSource
+    id="adminGithubAccess"
+    when="{window.authSession && window.authUser?.user_metadata?.user_name}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/admin_github_users?select=github_user&github_user=eq.' + window.authUser?.user_metadata?.user_name + '&limit=1'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + window.authSession?.access_token
+    }}"
+  />
+
+  <DataSource
     id="enrichments"
     url="{appGlobals.supabaseUrl + '/rest/v1/event_enrichments?select=*&rrule=not.is.null' + (window.cityFilter ? '&city=eq.' + window.cityFilter : '')}"
     headers="{{
@@ -107,7 +117,7 @@
               onClick="captureDialog.open()"
             />
             <Icon
-              when="{(window.LOCAL_ADMIN_USERS || []).includes(window.authUser?.user_metadata?.user_name)}"
+              when="{window.authUser && (adminGithubAccess.value || []).length > 0}"
               name="play"
               tooltip="Capture Event from Audio"
               width="20px"
@@ -117,7 +127,7 @@
             <Icon name="list" tooltip="Sources" width="20px" height="20px" onClick="sourcesDialog.open()" />
             <Icon
               name="user"
-              tooltip="{window.authUser ? 'Sign Out' : 'Sign In'}"
+              tooltip="{window.authUser ? 'Sign Out (' + (window.authUser?.user_metadata?.user_name || window.authUser?.email || 'user') + ')' : 'Sign In'}"
               width="20px"
               height="20px"
               color="{window.authUser ? '$color-primary-500' : 'inherit'}"
