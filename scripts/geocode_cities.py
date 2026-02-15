@@ -40,12 +40,12 @@ def save_cache(cache):
     CACHE_FILE.write_text(json.dumps(cache, indent=2))
 
 
-def geocode(city_name, state='CA', cache=None):
+def geocode(city_name, state='CA', calendar=None, cache=None):
     """Geocode a city name to lat/lng using Nominatim."""
     if cache is None:
         cache = {}
-    
-    cache_key = f"{city_name}, {state}"
+
+    cache_key = f"{city_name}, {state}, {calendar}" if calendar else f"{city_name}, {state}"
     if cache_key in cache:
         return cache[cache_key]
     
@@ -74,7 +74,7 @@ def geocode(city_name, state='CA', cache=None):
             return cache[cache_key]
     except Exception as e:
         print(f"  Warning: Failed to geocode '{city_name}': {e}")
-    
+
     return None
 
 
@@ -149,7 +149,7 @@ def main():
     parser.add_argument('--city', required=True, help='City directory name (e.g., petaluma)')
     parser.add_argument('--center', help='Center coordinates as "lat,lng"')
     parser.add_argument('--radius', type=float, help='Radius in miles')
-    parser.add_argument('--state', default='CA', help='State abbreviation (default: CA)')
+    parser.add_argument('--state', default=None, help='State abbreviation (overrides file; file default: CA)')
     parser.add_argument('--validate-only', action='store_true', help='Just validate, no geocoding')
     
     args = parser.parse_args()
@@ -171,7 +171,7 @@ def main():
         config['center'] = (float(parts[0].strip()), float(parts[1].strip()))
     if args.radius:
         config['radius'] = args.radius
-    if args.state:
+    if args.state is not None:
         config['state'] = args.state
     
     # Load geocoding cache
@@ -180,7 +180,7 @@ def main():
     if not config['center']:
         # Auto-geocode the city name to get center coordinates
         print(f"  No center defined, geocoding '{args.city}'...", end=' ', flush=True)
-        coords = geocode(args.city, config['state'], cache)
+        coords = geocode(args.city, config['state'], args.city, cache)
         if coords:
             config['center'] = (coords['lat'], coords['lng'])
             print(f"OK ({coords['lat']:.4f}, {coords['lng']:.4f})")
@@ -202,7 +202,7 @@ def main():
     
     # Geocode cities
     for city in config['cities']:
-        cache_key = f"{city}, {config['state']}"
+        cache_key = f"{city}, {config['state']}, {args.city}"
         if cache_key in cache:
             city_coords[city] = cache[cache_key]
             status = "cached"
@@ -210,7 +210,7 @@ def main():
             status = "skipped (validate-only)"
         else:
             print(f"  Geocoding {city}...", end=' ', flush=True)
-            coords = geocode(city, config['state'], cache)
+            coords = geocode(city, config['state'], args.city, cache)
             if coords:
                 city_coords[city] = coords
                 status = f"OK ({coords['lat']:.4f}, {coords['lng']:.4f})"
