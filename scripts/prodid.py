@@ -2,6 +2,9 @@
 """
 Scan ICS files across all cities and report distinct PRODID values (ICS platforms).
 Updates docs/prodid.md with a table of platforms, descriptions, and which cities use them.
+
+Unrecognized PRODIDs are listed in an "Unclassified" section so new platforms
+don't silently disappear. To fix: add a pattern to PLATFORM_MAP or OUR_SCRAPERS.
 """
 
 import re
@@ -29,23 +32,40 @@ PLATFORM_MAP = [
     (r'bibliocommons\.com', 'BiblioCommons', 'Library discovery platform with event listings.'),
 ]
 
+# Patterns that identify our own scrapers (skip entirely).
+# Our scrapers set PRODIDs like -//Org Name//domain.com// or -//Community Calendar//...
+OUR_SCRAPERS = [
+    r'Community Calendar//',
+    r'//combined//',
+    r'//\w[\w\s&;\'.\-]+//[\w.\-]+\.\w{2,}//',  # -//Name//domain.tld//
+    r'//\w[\w\s&;\'.\-]+//Events//EN',            # -//Name//Events//EN
+    r'//\w[\w\s&;\'.\-]+//events//EN',             # -//Name//events//EN
+    r'Your Organization//NONSGML',                  # default scraper template
+]
 
-def classify_prodid(prodid: str) -> tuple[str, str] | None:
-    """Return (platform_name, description) for a PRODID string, or None to skip."""
-    # Skip our own scrapers and combined feeds
-    if 'Community Calendar//' in prodid:
-        return None
+
+def classify_prodid(prodid: str) -> str | tuple[str, str]:
+    """Return (platform_name, description), 'skip' for our scrapers, or 'unknown'."""
+    # Check known platforms first (takes priority over scraper patterns)
     for pattern, name, desc in PLATFORM_MAP:
         if re.search(pattern, prodid):
             return name, desc
-    # Skip unrecognized PRODIDs (likely our own scrapers with custom PRODIDs)
-    return None
+    # Then check if it's one of our scrapers
+    for pattern in OUR_SCRAPERS:
+        if re.search(pattern, prodid):
+            return 'skip'
+    return 'unknown'
 
 
-def scan_cities(repo_root: Path) -> dict:
-    """Scan all cities and return {platform: {description, cities: {city: [files]}}}."""
+def scan_cities(repo_root: Path) -> tuple[dict, dict]:
+    """Scan all cities. Return (platforms, unclassified).
+
+    platforms: {name: {desc, cities: {city: [files]}}}
+    unclassified: {prodid: {city: [files]}}
+    """
     cities_dir = repo_root / 'cities'
-    platforms = {}  # name -> {desc, cities: {city: [files]}}
+    platforms = {}
+    unclassified = defaultdict(lambda: defaultdict(list))
 
     for city_dir in sorted(cities_dir.iterdir()):
         if not city_dir.is_dir():
@@ -55,7 +75,6 @@ def scan_cities(repo_root: Path) -> dict:
             if ics_file.name == 'combined.ics':
                 continue
             try:
-                # Read just the header (first 50 lines) for efficiency
                 with open(ics_file, 'r', errors='replace') as f:
                     header = ''
                     for i, line in enumerate(f):
@@ -70,18 +89,21 @@ def scan_cities(repo_root: Path) -> dict:
                 continue
             prodid = match.group(1).strip()
             result = classify_prodid(prodid)
-            if result is None:
+
+            if result == 'skip':
                 continue
-            name, desc = result
+            elif result == 'unknown':
+                unclassified[prodid][city].append(ics_file.stem)
+            else:
+                name, desc = result
+                if name not in platforms:
+                    platforms[name] = {'desc': desc, 'cities': defaultdict(list)}
+                platforms[name]['cities'][city].append(ics_file.stem)
 
-            if name not in platforms:
-                platforms[name] = {'desc': desc, 'cities': defaultdict(list)}
-            platforms[name]['cities'][city].append(ics_file.stem)
-
-    return platforms
+    return platforms, dict(unclassified)
 
 
-def generate_markdown(platforms: dict) -> str:
+def generate_markdown(platforms: dict, unclassified: dict) -> str:
     """Generate the docs/prodid.md content."""
     lines = [
         '# ICS Platforms (PRODID Report)',
@@ -97,7 +119,6 @@ def generate_markdown(platforms: dict) -> str:
     lines.append('| Platform | Description | Cities | Feeds |')
     lines.append('|----------|-------------|--------|------:|')
 
-    # Sort by total feed count descending
     sorted_platforms = sorted(
         platforms.items(),
         key=lambda x: sum(len(files) for files in x[1]['cities'].values()),
@@ -126,24 +147,44 @@ def generate_markdown(platforms: dict) -> str:
             lines.append(f'**{city}** ({len(files)}): {", ".join(sorted(files))}')
             lines.append('')
 
+    # Unclassified section
+    if unclassified:
+        lines.append('## Unclassified')
+        lines.append('')
+        lines.append('PRODIDs not yet mapped to a platform. If these are third-party platforms,')
+        lines.append('add a pattern to `PLATFORM_MAP` in `scripts/prodid.py`. If they are our')
+        lines.append('own scrapers, add a pattern to `OUR_SCRAPERS`.')
+        lines.append('')
+        lines.append('| PRODID | City | Feeds |')
+        lines.append('|--------|------|-------|')
+        for prodid in sorted(unclassified.keys()):
+            city_files = unclassified[prodid]
+            for city in sorted(city_files.keys()):
+                files = city_files[city]
+                lines.append(f'| `{prodid}` | {city} | {", ".join(sorted(files))} |')
+        lines.append('')
+
     return '\n'.join(lines)
 
 
 def main():
     repo_root = Path(__file__).parent.parent
-    platforms = scan_cities(repo_root)
-    md = generate_markdown(platforms)
+    platforms, unclassified = scan_cities(repo_root)
+    md = generate_markdown(platforms, unclassified)
 
     out_path = repo_root / 'docs' / 'prodid.md'
     out_path.write_text(md)
     print(f'Wrote {out_path}')
 
-    # Also print summary to stdout
     total_feeds = sum(
         sum(len(f) for f in p['cities'].values())
         for p in platforms.values()
     )
     print(f'{len(platforms)} platforms, {total_feeds} feeds across {len(set(c for p in platforms.values() for c in p["cities"]))} cities')
+
+    if unclassified:
+        total_unknown = sum(len(f) for files in unclassified.values() for f in files.values())
+        print(f'{len(unclassified)} unclassified PRODIDs ({total_unknown} feeds) — see docs/prodid.md')
 
 
 if __name__ == '__main__':
