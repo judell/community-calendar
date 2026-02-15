@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (76 sources)
+## Currently Implemented (80 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -46,6 +46,7 @@
 | Councillor Jamaal Myers | Tockify ICS | 27 | Scarborough community, city council |
 | Show Up Toronto | iCal feed | TBD | Volunteering, mutual aid, civic organizing |
 | Volunteer Toronto | HTML scraper | TBD | Volunteering opportunities and events |
+| Toronto Public Library | Bibliocommons scraper | 2,438 | Kids/family scoped (school-age + teens), reusable base |
 
 ### Crafts & Makers
 | Source | Type | Events | Notes |
@@ -65,10 +66,13 @@
 |--------|------|--------|-------|
 | Ontario Nature | WordPress Tribe ICS | 11 | Birding trips, nature talks, conservation |
 
-### Meetup Groups (46 groups)
+### Meetup Groups (49 groups)
 | Group | Events | Category |
 |-------|--------|----------|
 | SAI Dham Canada Toronto Volunteer Group | 10 | Volunteering / mutual aid |
+| Toronto Dads Group | 10 | Kids / family |
+| Little Sunbeams (Parents + Tots) | 10 | Kids / family |
+| Mini + Me Meetups | 10 | Kids / family |
 | TorontoBabel | 10 | Language exchange |
 | Try New Things in Toronto | 10 | Social/activities |
 | Toronto Arts & Culture | 10 | Arts outings |
@@ -117,7 +121,7 @@
 
 ## Needs Further Assessment
 
-- **Toronto Public Library** — kids/family scraper added (`scrapers/toronto_public_library.py`) on reusable Bibliocommons base (`scrapers/lib/bibliocommons.py`) and wired as `tpl_events.ics`; needs tuning for volume/signal.
+- **Toronto Public Library** — now implemented as kids/family-scoped scraper (`scrapers/toronto_public_library.py`) on reusable Bibliocommons base (`scrapers/lib/bibliocommons.py`). Monitor ongoing signal/noise and adjust filters if needed.
 - **BlogTO** — Highest volume Toronto source (215+ events) but needs custom scraper. JSON embedded in event pages (`var event = {...}`).
 - **Explore Kids Ontario Adventures** — Tockify feed (`ekoad`) has 822 events but covers broader GTA/Ontario, not just Toronto. May need geo-filtering.
 - **Toronto Bicycling Network** — Wild Apricot RSS at `tbn.ca/events/RSS` has 55 events (hiking, cycling, walks, skating, skiing). Richest outdoor recreation club. Needs RSS-to-ICS conversion.
@@ -208,15 +212,17 @@
 - **Ontario Nature**: 11 events via WordPress Tribe
 - **City of Toronto CKAN**: meeting schedule (162 future meetings) + festivals/events (2,101 future) via new CKAN base scraper
 - **Repair Cafe Toronto**: 82 community repair workshops
-- **44 Meetup groups** with active ICS feeds across social, arts, hiking, cycling, dance, games, books, comedy, tech, language, yoga, water sports, running, film, improv, business, makers, crafts
+- **49 Meetup groups** with active ICS feeds across social, arts, hiking, cycling, dance, games, books, comedy, tech, language, yoga, water sports, running, film, improv, business, makers, crafts, and kids/family
 
-**Total: 76 sources, ~6,800+ events**
+**Total: 80 sources, ~9,200+ events**
 
 **Infrastructure built:**
 - `scrapers/lib/ckan.py` — reusable CKAN datastore API base scraper (pagination, filters)
+- `scrapers/lib/bibliocommons.py` — reusable Bibliocommons events API base scraper (entity mapping + filter hooks)
 - `scrapers/toronto_meetings.py` — City of Toronto meetings via CKAN
 - `scrapers/toronto_festivals.py` — City of Toronto festivals via CKAN JSON
 - `scrapers/uoft_events.py` — UofT aggregate page + 32 department deep-links
+- `scrapers/toronto_public_library.py` — TPL kids/family scraper on Bibliocommons base
 
 **Topical searches completed:** outdoor activities, government/public affairs, crafts/makers
 
