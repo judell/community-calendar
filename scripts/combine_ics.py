@@ -267,6 +267,13 @@ SOURCE_URLS = {
     'cita_local_events': 'https://www.cita.utoronto.ca/events/event-calendar/',
     'cita_seminars': 'https://www.cita.utoronto.ca/events/event-calendar/',
     'cita_special_events': 'https://www.cita.utoronto.ca/events/event-calendar/',
+    # Raleigh-Durham
+    'duke': 'https://calendar.duke.edu/events/',
+    'unc_chapel_hill': 'https://calendar.unc.edu/',
+    'ncsu': 'https://calendar.ncsu.edu/',
+    'nc_cultural_resources': 'https://events.dncr.nc.gov/',
+    'durham_library': 'https://durhamcountylibrary.libcal.com/calendar',
+    'durham_gov': 'https://www.durhamnc.gov/calendar.aspx',
 }
 
 
