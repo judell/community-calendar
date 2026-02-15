@@ -4,36 +4,36 @@
 
 Toronto is a major city (~3M metro). Strategy: identify major aggregators first, assess data access, then build venue list from their coverage.
 
-### Aggregators Assessed (2025-02-14)
+### Aggregators Assessed
 
-| Aggregator | URL | Feed? | Scrapable? | Volume | Notes |
-|------------|-----|-------|------------|--------|-------|
-| BlogTO | blogto.com/events | RSS (15 only) | YES - JSON in pages | 215+ events | Best source - clean JSON in event pages |
-| NOW Magazine | nowtoronto.com/events | **ICS** ✅ | YES | 30 events | WordPress Tribe, direct iCal feed works |
-| Toronto.com | toronto.com/events | RSS (rate limited) | Blocked | ? | Got 429 on RSS feed |
-| Destination Toronto | destinationtoronto.com | No | No | - | Simpleview CMS, no public API |
-| Eventbrite Toronto | eventbrite.ca/d/canada--toronto | No | YES | varies | Need to adapt scraper for Canada |
-| Facebook Events | - | No | No | - | Dead end (since 2018) |
-| Bandsintown | - | No | No | - | 403 errors |
+| Aggregator | URL | Feed? | Volume | Notes |
+|------------|-----|-------|--------|-------|
+| NOW Magazine | nowtoronto.com/events | **ICS** ✅ | ~30 events | WordPress Tribe, direct iCal feed works |
+| BlogTO | blogto.com/events | RSS (15 only) | 215+ on site | Needs custom scraper — JSON embedded in event pages |
+| Toronto Public Library | tpl.bibliocommons.com/events | **JSON API** | ~8,000 programs | Unauthenticated API, but library programs not general events |
+| U of T Events | events.utoronto.ca | Localist (ICS/JSON/RSS) | Unknown | Site timed out; standard Localist endpoints should work |
+| Meetup | meetup.com/find/?location=ca--toronto | ICS per group | 1-5/group | Pattern: `meetup.com/{GROUP}/events/ical/` — need to curate group list |
 
 ### Ready to Implement
 
-1. **NOW Magazine iCal** - `https://nowtoronto.com/events/?ical=1`
-   - 30 events, WordPress Tribe Events
-   - Venues include: Aga Khan Museum, Bata Shoe Museum, Casa Loma, ROM, Comedy Lab, etc.
+1. **NOW Magazine iCal** — `https://nowtoronto.com/events/?ical=1`
+   - ~30 events, WordPress Tribe Events
+   - Already in feeds.txt
 
-2. **BlogTO** - needs custom scraper
-   - RSS only has 15 events but page loads 215+
-   - JSON embedded in each event page (clean structure)
-   - Would need to scrape listing page for URLs, then extract JSON from each
+2. **BlogTO** — needs custom scraper
+   - RSS at `blogto.com/rss/events.xml` only has ~15 items
+   - Main page loads 215+ events; JSON embedded in each event page (`var event = {...}`)
+   - High value, highest volume Toronto source
 
-### Still to Investigate
+3. **U of T Events** — standard Localist feeds (when site is accessible)
+   - `https://events.utoronto.ca/api/2/events?pp=50&days=30` (JSON)
+   - `https://events.utoronto.ca/events.rss` (RSS)
+   - [Localist API docs](https://developer.localist.com/doc/api)
 
-- Toronto Public Library (BiblioCommons — no public iCal found yet)
-- City of Toronto events page (WordPress, no obvious feed)
-- Eventbrite Toronto (need to adapt scraper for Canada)
-- Meetup Toronto groups
-- University calendars (UofT uses Localist — events.utoronto.ca was slow/timeout)
+### Needs Further Assessment
+
+- **Toronto Public Library** — JSON API at `gateway.bibliocommons.com/v2/libraries/tpl/events` returns ~8,000 items, but these are library programs (book clubs, yoga, tech help). Need to decide if this is in scope.
+- **Meetup** — per-group ICS works (`meetup.com/{GROUP}/events/ical/`) but requires curating a list of relevant Toronto groups.
 
 ---
 
@@ -43,14 +43,18 @@ Toronto is a major city (~3M metro). Strategy: identify major aggregators first,
 |--------|--------|
 | Facebook Events | No public API since 2018 |
 | Bandsintown | 403 errors, no public feed |
-| Destination Toronto | Simpleview CMS, no public API |
+| Destination Toronto | Uses Cruncho widget, no feeds |
 | Toronto.com RSS | Rate limited (429) |
+| City of Toronto | WordPress RSS exists but empty (0 items); events page is static editorial |
+| Eventbrite | No public feeds; API requires OAuth key |
+| Exclaim! | Events section returns 404 |
+| AllEvents.in | No feeds, web-only |
 
 ---
 
 ## Research Log
 
-### 2025-02-14: Initial Aggregator Research
+### 2026-02-14: Initial Aggregator Research
 
 **BlogTO** (blogto.com/events)
 - Best aggregator found
@@ -58,30 +62,33 @@ Toronto is a major city (~3M metro). Strategy: identify major aggregators first,
 - Main page loads 215+ events with venue data
 - Event pages have clean JSON embedded: `var event = {...}`
 - JSON includes: title, venue_name, address, city, website, description
-- Venues extracted: 110+ unique including major ones
 - **Recommendation**: Custom scraper to fetch listing URLs, then extract JSON from each page
 
 **NOW Magazine** (nowtoronto.com/events)
 - WordPress Tribe Events Calendar (Events Calendar Pro)
 - **Working iCal feed**: `https://nowtoronto.com/events/?ical=1`
-- 30 events in feed
-- Powered by Destination Toronto
+- ~30 events in feed
 - Venues: Aga Khan Museum, Bata Shoe Museum, Casa Loma, ROM, Comedy Lab, etc.
-- **Ready to add as ICS feed**
+- **Ready to add as ICS feed** ✅ Added to feeds.txt
 
 **Toronto Public Library**
 - Uses BiblioCommons for events
-- URL: `https://tpl.bibliocommons.com/events`
-- No public iCal/RSS feed found
-- Would need scraper if we want TPL events
+- JSON API: `https://gateway.bibliocommons.com/v2/libraries/tpl/events`
+- ~8,000 events, unauthenticated, paginated
+- Content is library programs (crafts, book clubs, yoga, tech help), not general community events
 
 **City of Toronto**
-- Has WordPress site with events page
-- No obvious calendar feed found yet
-- Need to investigate further
+- WordPress RSS at `toronto.ca/feed/` exists but has 0 items
+- Events section is static editorial (annual festivals list), not a dynamic calendar
 
-**Next Steps**:
-1. ✅ Add NOW Magazine ICS feed (done - in feeds.txt)
-2. Build BlogTO scraper (high value)
-3. Investigate TPL BiblioCommons, City of Toronto, Meetup, Eventbrite Canada
-4. Check university calendars (UofT Localist)
+**U of T Events**
+- Uses Localist platform (events.utoronto.ca)
+- Site timed out during testing
+- Standard Localist endpoints should work: `/api/2/events`, `/events.ics`, `/events.rss`
+
+**Meetup**
+- No city-wide feed
+- Per-group ICS works: `meetup.com/{GROUP}/events/ical/`
+- Verified with TorontoJS
+
+**Other aggregators checked**: Exclaim! (404), AllEvents.in (no feeds), Destination Toronto (Cruncho widget, no feeds)
