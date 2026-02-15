@@ -139,6 +139,12 @@ SOURCE_NAMES = {
     'meetup_techto': 'Meetup: TechTO',
     'meetup_torontojs': 'Meetup: Toronto JavaScript',
     'meetup_python_to': 'Meetup: Python Toronto',
+    # Toronto - Crafts & Makers
+    'repair_cafe_toronto': 'Repair Cafe Toronto',
+    'knitters_guild': 'Toronto Knitters Guild',
+    'site3': 'Site 3 CoLaboratory',
+    'meetup_3d_printing': 'Meetup: Toronto 3D Printing',
+    'meetup_arts_crafts': 'Meetup: Midtown Arts & Crafts',
     # Toronto - Government & Public Affairs
     'toronto_meetings': 'City of Toronto Meetings',
     'toronto_festivals': 'City of Toronto Festivals & Events',
@@ -236,6 +242,9 @@ SOURCE_URLS = {
     'bloor_west_village': 'https://www.bloorwestvillagebia.com/events/',
     'jamaalmyers': 'https://tockify.com/jamaalmyers/',
     'ontario_nature': 'https://ontarionature.org/events-calendar/',
+    'repair_cafe_toronto': 'https://repaircafetoronto.ca/get-our-events-feed/',
+    'knitters_guild': 'https://torontoknittersguild.ca/events/',
+    'site3': 'https://www.site3.ca/events/',
     'toronto_meetings': 'https://www.toronto.ca/city-government/council/',
     'toronto_festivals': 'https://open.toronto.ca/dataset/festivals-events/',
 }

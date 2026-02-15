@@ -307,6 +307,10 @@ jobs:
         curl -sL "https://www.engineering.utoronto.ca/engineering-events/?ical=1" -o uoft_engineering.ics || true
         curl -sL "https://philosophy.utoronto.ca/events/?ical=1" -o uoft_philosophy.ics || true
         curl -sL "https://socialwork.utoronto.ca/events/?ical=1" -o uoft_socialwork.ics || true
+        # Crafts & Makers
+        curl -sL "https://repaircafetoronto.ca/feed/events/" -o repair_cafe_toronto.ics || true
+        curl -sL "https://torontoknittersguild.ca/events/?ical=1" -o knitters_guild.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.site3.ca/events/?ical=1" -o site3.ics || true
         # Government & Public Affairs
         python ../../scrapers/toronto_meetings.py -o toronto_meetings.ics || true
         python ../../scrapers/toronto_festivals.py -o toronto_festivals.ics || true
@@ -362,6 +366,8 @@ jobs:
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-postgres/events/ical/" -o meetup_postgres_to.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/downtown-toronto-women-in-business-meetup/events/ical/" -o meetup_women_biz.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-20s-to-50s-singles-social/events/ical/" -o meetup_singles_social.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-3d-printing/events/ical/" -o meetup_3d_printing.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/midtown-arts-and-crafts-group/events/ical/" -o meetup_arts_crafts.ics || true
         cd ../..
         python scripts/combine_ics.py --input-dir cities/toronto --output cities/toronto/combined.ics --name "Toronto Community Calendar"
 

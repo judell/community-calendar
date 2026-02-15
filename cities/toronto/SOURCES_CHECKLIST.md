@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (68 sources)
+## Currently Implemented (73 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -45,6 +45,13 @@
 | Bloor West Village BIA | WordPress Tribe ICS | 6 | |
 | Councillor Jamaal Myers | Tockify ICS | 27 | Scarborough community, city council |
 
+### Crafts & Makers
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Repair Cafe Toronto | WordPress ICS | 82 | Community repair workshops across GTA |
+| Toronto Knitters Guild | WordPress Tribe ICS | 9 | Guild meetings, knit nights, workshops |
+| Site 3 CoLaboratory | WordPress Tribe ICS | 1 | Art/tech makerspace workshops |
+
 ### Government & Public Affairs
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
@@ -56,7 +63,7 @@
 |--------|------|--------|-------|
 | Ontario Nature | WordPress Tribe ICS | 11 | Birding trips, nature talks, conservation |
 
-### Meetup Groups (42 groups)
+### Meetup Groups (44 groups)
 | Group | Events | Category |
 |-------|--------|----------|
 | TorontoBabel | 10 | Language exchange |
@@ -102,6 +109,8 @@
 | Toronto Postgres | 2 | Tech |
 | Toronto Women in Business | 2 | Business |
 | Toronto 20s-50s Singles Social | 2 | Social |
+| Toronto 3D Printing | 10 | Makers/3D printing |
+| Midtown Arts & Crafts | 1 | General crafts |
 
 ## Needs Further Assessment
 
