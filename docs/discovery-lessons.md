@@ -75,6 +75,22 @@ Use `scrapers/lib/ckan.py` (`CKANScraper` base class) — subclasses just provid
 
 **Example:** Toronto has two CKAN datasets — meeting schedules (162 future meetings across 56 committees) and festivals/events (2,101 future events across 37 categories).
 
+## Bibliocommons Library Platforms Have a Reusable API Pattern
+
+Public-library systems on Bibliocommons expose structured event data via:
+```
+https://gateway.bibliocommons.com/v2/libraries/{library_slug}/events
+```
+
+The response includes event entities and embedded definitions (title, description, start/end, audience IDs, location IDs), so this is better than scraping rendered HTML pages.
+
+Use `scrapers/lib/bibliocommons.py` (`BibliocommonsEventsScraper`) as the reusable base:
+- handles pagination
+- maps entities to ICS-ready event objects
+- supports filter hooks (`audience_ids`, `type_ids`, `program_ids`, `language_ids`)
+
+**Example:** `scrapers/toronto_public_library.py` configures `library_slug = "tpl"` and kids/family audience filters.
+
 ## MembershipWorks ICS is Hidden but Standard
 
 Community organizations using MembershipWorks have ICS feeds at:

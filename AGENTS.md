@@ -151,6 +151,18 @@ python scrapers/legistar.py --client santa-rosa --source "City of Santa Rosa" -o
 ```
 For cities using Legistar (Granicus) for agenda management. Client name is from the Legistar URL (e.g., `santa-rosa.legistar.com` → `santa-rosa`).
 
+### Bibliocommons (`scrapers/lib/bibliocommons.py`) - Library Event Platforms
+Reusable base for public-library systems on Bibliocommons gateway APIs.
+
+Example (Toronto Public Library):
+```bash
+python scrapers/toronto_public_library.py -o events.ics
+```
+To create a new city/library scraper, subclass `BibliocommonsEventsScraper` and set:
+- `library_slug` (e.g., `tpl`)
+- `timezone`
+- optional filters like `audience_ids`, `type_ids`, `program_ids`, `language_ids`
+
 ---
 
 ## Platform-Specific Techniques
