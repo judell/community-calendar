@@ -62,6 +62,19 @@ Wix sites are heavy JS with cross-origin iframes — scraping them directly is a
 
 Eventbrite event pages embed `schema.org/Event` JSON-LD in the HTML. This is more reliable than their search API (which is undocumented and changes). The `scrapers/lib/jsonld.py` base class handles extraction.
 
+## CKAN Open Data Portals Have Government Meeting & Event Data
+
+Many cities publish structured event data through CKAN (Comprehensive Knowledge Archive Network), an open-source data portal. The datastore API is standardized across all CKAN instances:
+```
+https://{ckan-host}/api/3/action/datastore_search?resource_id={id}&limit=500
+```
+
+Use `scrapers/lib/ckan.py` (`CKANScraper` base class) — subclasses just provide a resource ID and a `map_record()` method to map fields to event properties. The base class handles pagination automatically.
+
+**How to find CKAN datasets:** Search for `{city} open data portal` or check `open.{city}.ca` / `data.{city}.gov`. Look for datasets with "meeting schedule", "events", or "calendar" in the name.
+
+**Example:** Toronto has two CKAN datasets — meeting schedules (162 future meetings across 56 committees) and festivals/events (2,101 future events across 37 categories).
+
 ## MembershipWorks ICS is Hidden but Standard
 
 Community organizations using MembershipWorks have ICS feeds at:

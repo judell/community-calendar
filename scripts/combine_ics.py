@@ -139,6 +139,9 @@ SOURCE_NAMES = {
     'meetup_techto': 'Meetup: TechTO',
     'meetup_torontojs': 'Meetup: Toronto JavaScript',
     'meetup_python_to': 'Meetup: Python Toronto',
+    # Toronto - Government & Public Affairs
+    'toronto_meetings': 'City of Toronto Meetings',
+    'toronto_festivals': 'City of Toronto Festivals & Events',
     # Toronto - Outdoor & Nature
     'ontario_nature': 'Ontario Nature',
     'meetup_founders_running': 'Meetup: Founders Running Club Toronto',
@@ -233,6 +236,8 @@ SOURCE_URLS = {
     'bloor_west_village': 'https://www.bloorwestvillagebia.com/events/',
     'jamaalmyers': 'https://tockify.com/jamaalmyers/',
     'ontario_nature': 'https://ontarionature.org/events-calendar/',
+    'toronto_meetings': 'https://www.toronto.ca/city-government/council/',
+    'toronto_festivals': 'https://open.toronto.ca/dataset/festivals-events/',
 }
 
 

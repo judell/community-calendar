@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (66 sources)
+## Currently Implemented (68 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -44,6 +44,12 @@
 | St. Lawrence Neighbourhood Assoc. | Tockify ICS | 82 | Community meetings, markets, kids |
 | Bloor West Village BIA | WordPress Tribe ICS | 6 | |
 | Councillor Jamaal Myers | Tockify ICS | 27 | Scarborough community, city council |
+
+### Government & Public Affairs
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| City of Toronto Meetings | CKAN JSON scraper | 162 | Council, community councils, 56 committees |
+| City of Toronto Festivals & Events | CKAN JSON scraper | 2,101 | Official city festival/event data, 37 categories |
 
 ### Outdoor & Nature
 | Source | Type | Events | Notes |
@@ -99,8 +105,6 @@
 
 ## Needs Further Assessment
 
-- **City of Toronto Meeting Schedule** — CKAN open data API at `ckan0.cf.opendata.inter.prod-toronto.ca`. 229 meetings in 2026 across 56 committees (council, community councils, Board of Health, budget, all standing committees). Needs JSON-to-ICS conversion scraper.
-- **City of Toronto Festivals & Events** — CKAN open data API. ~2,211 future events across 37 categories. Official city festival/event listings. Needs JSON-to-ICS conversion scraper. May overlap with torevent Tockify.
 - **Toronto Public Library** — JSON API at `gateway.bibliocommons.com/v2/libraries/tpl/events` returns ~8,000 items, but these are library programs (book clubs, yoga, tech help). Needs JSON-to-ICS conversion and scoping decision.
 - **BlogTO** — Highest volume Toronto source (215+ events) but needs custom scraper. JSON embedded in event pages (`var event = {...}`).
 - **Explore Kids Ontario Adventures** — Tockify feed (`ekoad`) has 822 events but covers broader GTA/Ontario, not just Toronto. May need geo-filtering.
