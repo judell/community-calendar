@@ -248,6 +248,10 @@ Winters
 - `!CityName` means **excluded** (events there are filtered out)
 - Excluded cities catch venues like "Fairfield Library" that lack state/ZIP
 
+**Important:**
+- The `# state:` line is critical — it disambiguates city names during geocoding (Durham NC vs Durham CA). Always set it to the correct state abbreviation.
+- For multi-city calendars (e.g., `raleighdurham`), the directory name isn't a real place, so auto-geocoding will fail. Use `--center lat,lng` to specify the center point manually.
+
 You don't need to look up coordinates — the script does that automatically.
 
 ### Geocode and Validate
@@ -256,6 +260,9 @@ Run the geocoding script to add coordinates and validate distances:
 
 ```bash
 python scripts/geocode_cities.py --city {cityname}
+
+# For multi-city calendars where the directory name isn't a real place:
+python scripts/geocode_cities.py --city raleighdurham --center 35.8701,-78.7937
 ```
 
 This will:
