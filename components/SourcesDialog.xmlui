@@ -34,7 +34,11 @@
     <VStack gap="$space-3">
       <Text
         value="{$props.events ? window.dedupeEvents($props.events).length + ' events for the next ' + window.getQueryMonths() + ' months' : 'Loading...'}" />
-      <Items data="{window.getSourceCounts($props.events)}">
+      <Text
+        fontSize="$fontSize-xs"
+        color="$color-text-secondary"
+        value="Per-source counts reflect overlap between sources" />
+      <Items data="{window.getSourceCounts(window.dedupeEvents($props.events))}">
         <HStack gap="$space-2" paddingVertical="$space-1">
           <Text
             width="40px"

@@ -172,8 +172,10 @@ function getSourceCounts(events) {
   if (!events || !events.length) return [];
   const counts = {};
   events.forEach(e => {
-    const src = e.source || 'Unknown';
-    counts[src] = (counts[src] || 0) + 1;
+    const sources = (e.source || 'Unknown').split(', ');
+    sources.forEach(src => {
+      counts[src] = (counts[src] || 0) + 1;
+    });
   });
   return Object.entries(counts)
     .map(([source, count]) => ({ source, count }))
