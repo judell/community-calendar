@@ -61,11 +61,14 @@ function getPagedEvents(events, term, startIndex, pageSize) {
   const filtered = filterEvents(events, term) || [];
   const size = pageSize || 50;
   const index = Number.isFinite(startIndex) ? Math.max(0, startIndex) : 0;
+  const step = Math.max(1, size - 1);
 
   if (!filtered.length) {
     if (typeof window !== 'undefined') {
       window._moreHasMore = false;
       window._moreNextIndex = null;
+      window._moreHasPrev = false;
+      window._morePrevIndex = null;
     }
     return [];
   }
@@ -77,17 +80,23 @@ function getPagedEvents(events, term, startIndex, pageSize) {
     if (typeof window !== 'undefined') {
       window._moreHasMore = false;
       window._moreNextIndex = null;
+      window._moreHasPrev = false;
+      window._morePrevIndex = null;
     }
     return page;
   }
 
   const page = filtered.slice(index, index + size);
   const hasMore = (index + size) < filtered.length;
-  const nextIndex = hasMore ? (index + size - 1) : null;
+  const nextIndex = hasMore ? (index + step) : null;
+  const hasPrev = index > 0;
+  const prevIndex = hasPrev ? Math.max(0, index - step) : null;
 
   if (typeof window !== 'undefined') {
     window._moreHasMore = hasMore;
     window._moreNextIndex = nextIndex;
+    window._moreHasPrev = hasPrev;
+    window._morePrevIndex = prevIndex;
   }
 
   return page;

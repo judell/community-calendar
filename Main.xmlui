@@ -143,12 +143,20 @@
       </HStack>
     </RadioGroup>
     <Spinner when="{!events.loaded && viewMode === 'all'}" />
+    <Button
+      when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasPrev}"
+      label="Earlier"
+      variant="outlined"
+      width="100%"
+      marginBottom="$space-2"
+      onClick="const prevIndex = window._morePrevIndex ?? 0; displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
+    />
     <List id="eventsList" when="{events.loaded && viewMode === 'all'}" data="{window.getPagedEvents(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), filterTerm, displayStartIndex, 50)}" fixedItemSize="true" limit="50">
       <EventCard event="{$item}" filterTerm="{filterTerm}" />
     </List>
     <Button
       when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasMore}"
-      label="More events..."
+      label="Later"
       variant="outlined"
       width="100%"
       marginTop="$space-2"
