@@ -117,7 +117,7 @@
 
 ## Needs Further Assessment
 
-- **Toronto Public Library** — JSON API at `gateway.bibliocommons.com/v2/libraries/tpl/events` returns ~8,000 items, but these are library programs (book clubs, yoga, tech help). Needs JSON-to-ICS conversion and scoping decision.
+- **Toronto Public Library** — kids/family scraper added (`scrapers/toronto_public_library.py`) on reusable Bibliocommons base (`scrapers/lib/bibliocommons.py`) and wired as `tpl_events.ics`; needs tuning for volume/signal.
 - **BlogTO** — Highest volume Toronto source (215+ events) but needs custom scraper. JSON embedded in event pages (`var event = {...}`).
 - **Explore Kids Ontario Adventures** — Tockify feed (`ekoad`) has 822 events but covers broader GTA/Ontario, not just Toronto. May need geo-filtering.
 - **Toronto Bicycling Network** — Wild Apricot RSS at `tbn.ca/events/RSS` has 55 events (hiking, cycling, walks, skating, skiing). Richest outdoor recreation club. Needs RSS-to-ICS conversion.
@@ -167,7 +167,6 @@
 | Small World Music | No feed |
 | Scarborough Arts | No feed |
 | TMU / OCAD | No ICS feeds (TMU custom CMS, OCAD Drupal) |
-| Toronto Public Library | No ICS feed (only JSON API via BiblioCommons) |
 | TRCA | Events on Eventbrite only; no ICS/RSS for events |
 | Tommy Thompson Park | Links to TRCA calendar; no own event feed |
 | Rouge National Urban Park | No calendar; page says "check back soon" |
@@ -232,10 +231,23 @@
 - **Volunteer MBC** (`https://www.volunteermbc.org/events/?ical=1`) — valid ICS, but appears regional beyond Toronto.
 - **VolunteerConnector** (`https://www.volunteerconnector.org/events?ical=1`) — valid ICS, but Ontario-wide feed likely too broad without city filtering.
 
+### 2026-02-15: Topical pass 2 — kids / family
+
+**Added this session**
+- **Meetup: Toronto Dads Group** — `https://www.meetup.com/torontodadsgroup/events/ical/`. Added to `feeds.txt`, workflow fetch (`meetup_toronto_dads.ics`), and `combine_ics.py` source mappings.
+- **Meetup: Little Sunbeams (Parents + Tots Meetup Group)** — `https://www.meetup.com/little-sunbeams-parents-tots-meetup/events/ical/`. Added to `feeds.txt`, workflow fetch (`meetup_little_sunbeams.ics`), and `combine_ics.py` source mappings.
+- **Meetup: Mini + Me Meetups** — `https://www.meetup.com/mini-me-meetups/events/ical/`. Added to `feeds.txt`, workflow fetch (`meetup_mini_me.ics`), and `combine_ics.py` source mappings.
+- **Toronto Public Library scraper** — added `scrapers/toronto_public_library.py` on reusable `scrapers/lib/bibliocommons.py` base and wired workflow output `tpl_events.ics` plus `combine_ics.py` source mappings. Targets TPL kids/family audiences.
+
+**Promising but needs custom handling**
+- **Jane/Finch Centre programming calendar** — includes downloadable iCal links per event; likely scrapeable but not a clean single ICS feed endpoint yet.
+
+**Screened out for now**
+- **Kids Out and About Toronto** — broad promotional listing site; not a clean direct source feed for producer-authoritative ingestion.
+
 **Topical searches not yet done:**
 - Food & drink (cooking classes, tastings, farmers markets)
 - Faith / spiritual
-- Kids / family
 - Seniors
 - Literary (readings, poetry, writing workshops)
 - Science / education (lectures, astronomy clubs)

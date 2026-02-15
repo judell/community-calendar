@@ -128,6 +128,9 @@ SOURCE_NAMES = {
     'showup_toronto': 'Show Up Toronto',
     # Toronto - Meetup groups
     'meetup_sai_dham_volunteer': 'Meetup: SAI Dham Canada Toronto Volunteer Group',
+    'meetup_toronto_dads': 'Meetup: Toronto Dads Group',
+    'meetup_little_sunbeams': 'Meetup: Little Sunbeams (Parents + Tots)',
+    'meetup_mini_me': 'Meetup: Mini + Me Meetups',
     'meetup_torontobabel': 'Meetup: TorontoBabel Language Exchange',
     'meetup_try_new_things': 'Meetup: Try New Things in Toronto',
     'meetup_arts_culture': 'Meetup: Toronto Arts & Culture',
@@ -151,6 +154,7 @@ SOURCE_NAMES = {
     'toronto_meetings': 'City of Toronto Meetings',
     'toronto_festivals': 'City of Toronto Festivals & Events',
     'volunteer_toronto': 'Volunteer Toronto',
+    'tpl_events': 'Toronto Public Library',
     # Toronto - Outdoor & Nature
     'ontario_nature': 'Ontario Nature',
     'meetup_founders_running': 'Meetup: Founders Running Club Toronto',
@@ -246,6 +250,9 @@ SOURCE_URLS = {
     'jamaalmyers': 'https://tockify.com/jamaalmyers/',
     'showup_toronto': 'https://showuptoronto.ca/',
     'meetup_sai_dham_volunteer': 'https://www.meetup.com/sai-dham-canada-toronto-volunteer-group/',
+    'meetup_toronto_dads': 'https://www.meetup.com/torontodadsgroup/',
+    'meetup_little_sunbeams': 'https://www.meetup.com/little-sunbeams-parents-tots-meetup/',
+    'meetup_mini_me': 'https://www.meetup.com/mini-me-meetups/',
     'ontario_nature': 'https://ontarionature.org/events-calendar/',
     'repair_cafe_toronto': 'https://repaircafetoronto.ca/get-our-events-feed/',
     'knitters_guild': 'https://torontoknittersguild.ca/events/',
@@ -253,6 +260,7 @@ SOURCE_URLS = {
     'toronto_meetings': 'https://www.toronto.ca/city-government/council/',
     'toronto_festivals': 'https://open.toronto.ca/dataset/festivals-events/',
     'volunteer_toronto': 'https://www.volunteertoronto.ca/networking/events/calendar.asp',
+    'tpl_events': 'https://tpl.bibliocommons.com/v2/events',
 }
 
 
