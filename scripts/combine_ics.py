@@ -155,6 +155,9 @@ SOURCE_NAMES = {
     'toronto_festivals': 'City of Toronto Festivals & Events',
     'volunteer_toronto': 'Volunteer Toronto',
     'tpl_events': 'Toronto Public Library',
+    'cita_local_events': 'CITA Local Events',
+    'cita_seminars': 'CITA Seminars',
+    'cita_special_events': 'CITA Special Events',
     # Toronto - Outdoor & Nature
     'ontario_nature': 'Ontario Nature',
     'meetup_founders_running': 'Meetup: Founders Running Club Toronto',
@@ -261,6 +264,9 @@ SOURCE_URLS = {
     'toronto_festivals': 'https://open.toronto.ca/dataset/festivals-events/',
     'volunteer_toronto': 'https://www.volunteertoronto.ca/networking/events/calendar.asp',
     'tpl_events': 'https://tpl.bibliocommons.com/v2/events',
+    'cita_local_events': 'https://www.cita.utoronto.ca/events/event-calendar/',
+    'cita_seminars': 'https://www.cita.utoronto.ca/events/event-calendar/',
+    'cita_special_events': 'https://www.cita.utoronto.ca/events/event-calendar/',
 }
 
 

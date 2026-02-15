@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (80 sources)
+## Currently Implemented (83 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -60,6 +60,13 @@
 |--------|------|--------|-------|
 | City of Toronto Meetings | CKAN JSON scraper | 162 | Council, community councils, 56 committees |
 | City of Toronto Festivals & Events | CKAN JSON scraper | 2,101 | Official city festival/event data, 37 categories |
+
+### Science & Education
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| CITA Local Events | Public Google ICS | 339 | CITA/UofT science talks and local events |
+| CITA Seminars | Public Google ICS | 1,089 | CITA seminar series (pipeline date filters apply) |
+| CITA Special Events | Public Google ICS | 175 | CITA special event calendar |
 
 ### Outdoor & Nature
 | Source | Type | Events | Notes |
@@ -241,6 +248,7 @@ Track progress on topical searches to find long-tail community sources.
 | Volunteering/mutual aid | 2025-02-15 | Show Up Toronto, SAI Dham Volunteer, Volunteer Toronto scraper | |
 | Kids/family | 2025-02-15 | Toronto Dads, Little Sunbeams, Mini+Me Meetups, TPL scraper | Bibliocommons base |
 | History/heritage | 2025-02-15 | Ontario Historical Society, Toronto History Walks, Medieval SCA | 25 events |
+| Science/education | 2026-02-15 | CITA Local Events, CITA Seminars, CITA Special Events | 3 public Google ICS feeds from CITA calendar page |
 
 ### Not Yet Done
 
@@ -248,7 +256,6 @@ Track progress on topical searches to find long-tail community sources.
 - Faith / spiritual
 - Seniors
 - Literary (readings, poetry, writing workshops)
-- Science / education (lectures, astronomy clubs)
 - LGBTQ+ community
 - Comedy (standup, open mics)
 - Music participation (choirs, jam sessions, open mics)
@@ -340,3 +347,32 @@ Track progress on topical searches to find long-tail community sources.
 | Casa Loma | Static site, RSS empty since 2018 |
 | Fort York tickets | 404 error |
 | Heritage Toronto tours | Seasonal only (June-Nov) |
+
+---
+
+## Topical Search: Science / Education (2026-02-15)
+
+### Added
+
+| Source | Type | Notes |
+|--------|------|-------|
+| CITA Local Events | Public Google ICS | `calendar.google.com/.../qfg129sn6k25ah00ioakus0gds.../public/basic.ics` |
+| CITA Seminars | Public Google ICS | `calendar.google.com/.../4h7dspldpuviiv4o1slj9o5p5c.../public/basic.ics` |
+| CITA Special Events | Public Google ICS | `calendar.google.com/.../d7muv9fjli72io6q1a7hkdpf04.../public/basic.ics` |
+
+### Organizations Assessed
+
+| Organization | Feed Status | Notes |
+|--------------|-------------|-------|
+| Canadian Institute for Theoretical Astrophysics (CITA) | ✅ 3 ICS feeds | Feed links available on event calendar page |
+| RASC Toronto Centre | No feed found | Site does not expose ICS endpoint |
+| Ontario Science Centre | No feed found | Event pages, no ICS/RSS endpoint identified |
+| UofT Physics | No feed found | No working `?ical=1` endpoint |
+
+### Meetup Groups Assessed
+
+| Group | Events | Status |
+|-------|--------|--------|
+| Cognitive Toronto | 0 | Valid ICS, no upcoming events |
+| Toronto Data Workshop | n/a | 404 `Group not found` |
+| RASC Toronto Centre (Meetup slug) | n/a | 404 `Group not found` |
