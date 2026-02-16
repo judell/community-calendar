@@ -383,6 +383,9 @@ jobs:
         python scrapers/legistar.py --client wake --source "Wake County" -o cities/raleighdurham/wake_county_legistar.ics || true
         python scrapers/legistar.py --client chapelhill --source "Town of Chapel Hill" -o cities/raleighdurham/chapelhill_legistar.ics || true
         python scrapers/legistar.py --client durhamcounty --source "Durham County" -o cities/raleighdurham/durhamcounty_legistar.ics || true
+        python scrapers/growthzone.py --site durhamchamber --output cities/raleighdurham/durham_chamber.ics || true
+        python scrapers/growthzone.py --site wakeforestchamber --output cities/raleighdurham/wakeforest_chamber.ics || true
+        python scrapers/growthzone.py --site apexchamber --output cities/raleighdurham/apex_chamber.ics || true
       continue-on-error: true
 
     - name: Download Raleigh-Durham live feeds and combine ICS
@@ -398,6 +401,8 @@ jobs:
         curl -sL "https://nasher.duke.edu/events/?ical=1" -o nasher_museum.ics || true
         curl -sL "https://triangleland.org/events/list/?ical=1" -o triangle_land.ics || true
         curl -sL "https://durhamcentralpark.org/events/list/?ical=1" -o durham_central_park.ics || true
+        curl -sL "https://gardens.duke.edu/calendar/?ical=1" -o duke_gardens.ics || true
+        curl -sL "https://naturalsciences.org/calendar/events/?ical=1" -o nc_natural_sciences.ics || true
         curl -sL "https://durhamcountylibrary.libcal.com/ical_subscribe.php?src=p&cid=14288" -o durham_library.ics || true
         curl -sL "https://www.durhamnc.gov/common/modules/iCalendar/iCalendar.aspx?catID=30&feed=calendar" -o durham_gov.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/tripython/events/ical/" -o meetup_tripython.ics || true

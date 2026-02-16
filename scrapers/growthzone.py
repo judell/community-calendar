@@ -36,6 +36,27 @@ KNOWN_SITES = {
         'timezone': 'America/Los_Angeles',
         'location': 'Petaluma, CA',
     },
+    'durhamchamber': {
+        'name': 'Durham Chamber of Commerce',
+        'api_url': 'https://members.durhamchamber.org/api/events',
+        'base_url': 'https://members.durhamchamber.org',
+        'timezone': 'America/New_York',
+        'location': 'Durham, NC',
+    },
+    'wakeforestchamber': {
+        'name': 'Wake Forest Chamber of Commerce',
+        'api_url': 'https://chambermaster.wakeforestchamber.org/api/events',
+        'base_url': 'https://chambermaster.wakeforestchamber.org',
+        'timezone': 'America/New_York',
+        'location': 'Wake Forest, NC',
+    },
+    'apexchamber': {
+        'name': 'Apex Chamber of Commerce',
+        'api_url': 'https://business.apexchamber.com/api/events',
+        'base_url': 'https://business.apexchamber.com',
+        'timezone': 'America/New_York',
+        'location': 'Apex, NC',
+    },
     # Add more chambers as discovered
 }
 

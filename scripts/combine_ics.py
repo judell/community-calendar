@@ -9,7 +9,10 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Map filenames to friendly source names
+# Map filenames to friendly source names.
+# Only needed when the filename doesn't convert cleanly via stem.replace('_', ' ').title().
+# For example, 'arlene_francis_theater' -> 'Arlene Francis Theater' misses 'Center',
+# so we override it here. Most sources don't need an entry.
 SOURCE_NAMES = {
     'arlene_francis_theater': 'Arlene Francis Center',
     'luther_burbank_center': 'Luther Burbank Center',
@@ -189,9 +192,47 @@ SOURCE_NAMES = {
     'meetup_postgres_to': 'Meetup: Toronto Postgres',
     'meetup_women_biz': 'Meetup: Toronto Women in Business',
     'meetup_singles_social': 'Meetup: Toronto 20s-50s Singles Social',
+    # Raleigh-Durham
+    'unc_chapel_hill': 'UNC Chapel Hill',
+    'ncsu': 'NC State University',
+    'duke': 'Duke University',
+    'nc_cultural_resources': 'NC Cultural Resources',
+    'ackland_art': 'Ackland Art Museum',
+    'nc_botanical_garden': 'NC Botanical Garden',
+    'nasher_museum': 'Nasher Museum of Art',
+    'triangle_land': 'Triangle Land Conservancy',
+    'durham_central_park': 'Durham Central Park',
+    'durham_library': 'Durham County Library',
+    'durham_gov': 'City of Durham',
+    'duke_gardens': 'Sarah P. Duke Gardens',
+    'nc_natural_sciences': 'NC Museum of Natural Sciences',
+    'durham_chamber': 'Durham Chamber of Commerce',
+    'wakeforest_chamber': 'Wake Forest Chamber of Commerce',
+    'apex_chamber': 'Apex Chamber of Commerce',
+    'wake_county_legistar': 'Wake County Government',
+    'chapelhill_legistar': 'Town of Chapel Hill',
+    'durhamcounty_legistar': 'Durham County Government',
+    'meetup_tripython': 'Meetup: Triangle Python Users',
+    'meetup_pydata_triangle': 'Meetup: PyData Triangle',
+    'meetup_research_triangle_analysts': 'Meetup: Research Triangle Analysts',
+    'meetup_triangleai': 'Meetup: Triangle AI',
+    'meetup_triangle_devs': 'Meetup: Triangle Developers',
+    'meetup_all_things_open_rtp_meetup': 'Meetup: All Things Open RTP',
+    'meetup_triangle_techbreakfast': 'Meetup: Triangle TechBreakfast',
+    'meetup_futureofdata_triangle': 'Meetup: Future of Data Triangle',
+    'meetup_blacks_in_tech_bit_rdu_durham_raleigh_meetup': 'Meetup: Blacks in Tech RDU',
+    'meetup_downtown_techies_durham': 'Meetup: Downtown Techies Durham',
+    'meetup_raleigh_wordpress_meetup_group': 'Meetup: Raleigh WordPress',
+    'meetup_adventures': 'Meetup: Triangle Hiking & Outdoors',
+    'meetup_durham_geeks': 'Meetup: Durham Geeks',
+    'meetup_durham_board_games_meetup_group': 'Meetup: Durham Board Games',
+    'meetup_chad2015': 'Meetup: CHAD (Chapel Hill & Durham Fun)',
+    'meetup_discover_durham_together': 'Meetup: Discover Durham Together',
+    'meetup_chicktech_rdu': 'Meetup: ChickTech RDU',
 }
 
-# Fallback URLs for sources that don't provide event URLs
+# Fallback URLs for sources whose ICS events lack a URL property.
+# Only needed for scraped sources where per-event URLs aren't available.
 SOURCE_URLS = {
     'arlene_francis_theater': 'https://arlenefranciscenter.org/calendar/',
     'luther_burbank_center': 'https://lutherburbankcenter.org/events/',
@@ -267,6 +308,10 @@ SOURCE_URLS = {
     'cita_seminars': 'https://www.cita.utoronto.ca/events/event-calendar/',
     'cita_special_events': 'https://www.cita.utoronto.ca/events/event-calendar/',
     # Raleigh-Durham
+    'duke_gardens': 'https://gardens.duke.edu/calendar/',
+    'durham_chamber': 'https://members.durhamchamber.org/events',
+    'wakeforest_chamber': 'https://chambermaster.wakeforestchamber.org/events',
+    'apex_chamber': 'https://business.apexchamber.com/events',
     'duke': 'https://calendar.duke.edu/events/',
     'unc_chapel_hill': 'https://calendar.unc.edu/',
     'ncsu': 'https://calendar.ncsu.edu/',
