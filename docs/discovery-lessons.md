@@ -2,6 +2,38 @@
 
 Real-world lessons from source discovery across cities. These complement the strategies in [AGENTS.md](../AGENTS.md).
 
+## Table of Contents
+
+- ["Curl-and-Done" Sources: No Scraper Needed](#curl-and-done-sources-no-scraper-needed)
+  - [WordPress + The Events Calendar = Free ICS](#wordpress--the-events-calendar--free-ics)
+  - [WordPress + Modern Events Calendar (MEC) = Free ICS](#wordpress--modern-events-calendar-mec--free-ics)
+  - [Public Google Calendar = Free ICS](#public-google-calendar--free-ics)
+  - [Integration checklist for curl-and-done sources](#integration-checklist-for-curl-and-done-sources)
+- [Squarespace = ?format=json](#squarespace--formatjson)
+- [Wix Sites: Don't Scrape, Find the Ticketing Platform](#wix-sites-dont-scrape-find-the-ticketing-platform)
+- [Eventbrite JSON-LD is Reliable](#eventbrite-json-ld-is-reliable)
+- [CKAN Open Data Portals Have Government Meeting & Event Data](#ckan-open-data-portals-have-government-meeting--event-data)
+- [Bibliocommons Library Platforms Have a Reusable API Pattern](#bibliocommons-library-platforms-have-a-reusable-api-pattern)
+- [MembershipWorks ICS is Hidden but Standard](#membershipworks-ics-is-hidden-but-standard)
+- [GrowthZone Chambers Have XML APIs](#growthzone-chambers-have-xml-apis)
+- [Youth Sports Leagues Are Almost Never Viable](#youth-sports-leagues-are-almost-never-viable)
+- [Probe WordPress Sites Directly with ?ical=1](#probe-wordpress-sites-directly-with-ical1)
+- [Neighbourhood Associations and Business Districts Are Worth Checking](#neighbourhood-associations-and-business-districts-are-worth-checking)
+- [Settlement and Newcomer Services Are Event Goldmines](#settlement-and-newcomer-services-are-event-goldmines)
+- [Don't Over-Research Before Running the Playbook](#dont-over-research-before-running-the-playbook)
+- [Meetup Feeds Need User-Agent](#meetup-feeds-need-user-agent)
+- [Regional Groups Need Geo-Filtering](#regional-groups-need-geo-filtering)
+- [LiveWhale University Calendars](#livewhale-university-calendars)
+- [Legistar WebAPI for Government Meetings](#legistar-webapi-for-government-meetings)
+- [University Event Systems Vary Widely](#university-event-systems-vary-widely)
+  - [1. Centralized platforms (curl-and-done)](#1-centralized-platforms-curl-and-done)
+  - [2. Decentralized — scrape the aggregate page](#2-decentralized--scrape-the-aggregate-page)
+- [Drupal Sites Don't Have Standardized Feed Patterns](#drupal-sites-dont-have-standardized-feed-patterns)
+- [Classify WordPress Sites at Scale with Plugin Detection](#classify-wordpress-sites-at-scale-with-plugin-detection)
+- [Topical Searches Yield Long-Tail Sources](#topical-searches-yield-long-tail-sources)
+  - [Example: History/Heritage](#example-historyheritage)
+  - [Other Topical Searches to Try](#other-topical-searches-to-try)
+
 ## "Curl-and-Done" Sources: No Scraper Needed
 
 Many sources provide ICS feeds that can be added with just a curl command in the workflow — no scraper required. Always check for these before writing a scraper:
