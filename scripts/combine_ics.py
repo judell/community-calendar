@@ -25,7 +25,6 @@ SOURCE_NAMES = {
     'cal_theatre': 'Cal Theatre',
     'copperfields': "Copperfield's Books",
     'bohemian': 'North Bay Bohemian',
-    'eventbrite': 'Eventbrite',
     'pressdemocrat': 'Press Democrat',
     # Meetup groups - Santa Rosa
     'meetup_go_wild_hikers': 'Meetup: Go Wild Hikers',

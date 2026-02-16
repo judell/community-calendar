@@ -9,12 +9,12 @@
 | Petaluma Regional Library | Scraper | 155 | ✅ In CI |
 | Petaluma Chamber of Commerce | GrowthZone Scraper | 80 | ✅ In CI |
 | Mystic Theatre | Scraper | 12 | ✅ In CI |
-| Eventbrite Petaluma | Scraper | 14 | ✅ In CI |
+| ~~Eventbrite Petaluma~~ | ~~Scraper~~ | — | Retired 2026-02-15: scraper broken |
 | Petaluma High School Athletics | MaxPreps Scraper | 9 | ✅ In CI |
 | Casa Grande High School Athletics | MaxPreps Scraper | 8 | ✅ In CI |
 | SRJC Petaluma Campus | LiveWhale Scraper | 17 | ✅ In CI |
 | HenHouse Brewing Petaluma | Scraper | 2-3 | ✅ In CI |
-| Phoenix Theater | Eventbrite Scraper | 13 | ✅ In CI |
+| ~~Phoenix Theater~~ | ~~Eventbrite Scraper~~ | — | Retired 2026-02-15: Eventbrite-dependent |
 | Mercury Theater | Squarespace JSON Scraper | 12 | ✅ In CI |
 | Adobe Road Winery | JSON-LD Scraper | 8 | ✅ In CI |
 | The Big Easy | WordPress iCal | ~30 | ✅ In CI |
@@ -61,7 +61,7 @@
 
 ### Not yet investigated
 - Village Network of Petaluma (ClubExpress - check for iCal)
-- Blue Zones Project Petaluma (Eventbrite - may already be captured)
+- Blue Zones Project Petaluma (Eventbrite-based, likely no public feed)
 - Sonoma County Regional Parks (parks.sonomacounty.ca.gov/play/calendar/hiking)
 - Petaluma Cycling Club (Wild Apricot - no native ICS)
 - Empire Runners Club (Wild Apricot - no native ICS)

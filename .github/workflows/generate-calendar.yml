@@ -116,8 +116,6 @@ jobs:
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/santa-rosa-womens-creativity-collective/events/ical/" -o meetup_creativity.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-boomers/events/ical/" -o meetup_boomers.ics || true
         cd ../..
-        # Eventbrite scrape
-        python scrapers/eventbrite_scraper.py --location ca--santa-rosa --months ${SCRAPE_MONTHS:-2} > cities/santarosa/eventbrite.ics || true
         python scripts/combine_ics.py --input-dir cities/santarosa --output cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
 
     # ==========================================
@@ -167,7 +165,7 @@ jobs:
         python scrapers/ucdavis_athletics.py --output cities/davis/ucdavis_athletics.ics || true
       continue-on-error: true
 
-    - name: Download Davis Meetup feeds and Eventbrite
+    - name: Download Davis Meetup feeds
       if: contains(steps.locations.outputs.list, 'davis')
       run: |
         cd cities/davis
@@ -180,8 +178,6 @@ jobs:
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mindful-embodied-spirituality/events/ical/" -o meetup_mindful.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/winters-shut-up-and-write-meetup-group/events/ical/" -o meetup_winters_write.ics || true
         cd ../..
-        # Eventbrite scrape
-        python scrapers/eventbrite_scraper.py --location ca--davis --months ${SCRAPE_MONTHS:-2} --cities davis woodland dixon winters "west sacramento" > cities/davis/eventbrite.ics || true
 
     - name: Combine Davis ICS
       if: contains(steps.locations.outputs.list, 'davis')
@@ -205,7 +201,6 @@ jobs:
         python scrapers/srjc_petaluma.py --output cities/petaluma/srjc_petaluma.ics || true
         # HenHouse Brewing and Phoenix Theater
         python scrapers/henhouse.py > cities/petaluma/henhouse.ics || true
-        python scrapers/phoenix_theater.py --output cities/petaluma/phoenix_theater.ics || true
         # Mercury Theater and Adobe Road Winery
         python scrapers/mercury_theater.py --output cities/petaluma/mercury_theater.ics || true
         python scrapers/adobe_road.py --output cities/petaluma/adobe_road.ics || true
@@ -264,8 +259,6 @@ jobs:
         # Petaluma Bounty (WordPress Events Manager iCal feed)
         curl -sL "https://petalumabounty.org/events-calendar/?ical=1" -o petaluma_bounty.ics || true
         cd ../..
-        # Eventbrite scrape
-        python scrapers/eventbrite_scraper.py --location ca--petaluma --months ${SCRAPE_MONTHS:-2} > cities/petaluma/eventbrite.ics || true
         python scripts/combine_ics.py --input-dir cities/petaluma --output cities/petaluma/combined.ics --name "Petaluma Community Calendar"
 
     # ==========================================

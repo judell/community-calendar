@@ -14,7 +14,7 @@
 | Yolo County Library | Scraper | — | Library events |
 | UU Davis | Scraper | — | Unitarian Universalist |
 | Davis Chamber | Scraper | — | Chamber of commerce |
-| Eventbrite | Scraper | — | Ticketed events |
+| ~~Eventbrite~~ | ~~Scraper~~ | — | Retired 2026-02-15: scraper broken, no public feeds |
 
 ### Meetup Groups (Discovered 2025-02-08)
 | Group | Events | Notes |
