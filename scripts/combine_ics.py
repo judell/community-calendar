@@ -229,6 +229,12 @@ SOURCE_NAMES = {
     'meetup_chad2015': 'Meetup: CHAD (Chapel Hill & Durham Fun)',
     'meetup_discover_durham_together': 'Meetup: Discover Durham Together',
     'meetup_chicktech_rdu': 'Meetup: ChickTech RDU',
+    'meetup_raleigh_triangle_activities': 'Meetup: Raleigh & Triangle Activities',
+    'meetup_code_for_america': 'Meetup: Code with the Carolinas',
+    'transitions_lifecare': 'Transitions LifeCare',
+    'nc_wildlife_federation': 'NC Wildlife Federation',
+    'resilient_durham': 'Resilient Durham NC',
+    'sw_durham_rotary': 'SW Durham Rotary Club',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.

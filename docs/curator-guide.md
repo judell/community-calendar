@@ -70,15 +70,12 @@ Only after exhausting phases 1 and 2, build scrapers for important sources that 
 
 ### Throughout all phases:
 
-Each time you find a potential source, apply these procedures:
+Your job as curator is to **discover, test, and document**:
 1. **Search** for feeds (see Procedures below)
 2. **Test** each discovered feed to verify it works and has events
 3. **Document** findings in `cities/{city}/SOURCES_CHECKLIST.md`
-4. **Add** working feed URLs to `cities/{city}/feeds.txt`
 
-And once per city setup:
-5. **Configure geo-filtering** if feeds include events outside your area
-6. **Register the city** in the app's home page
+That's the curator's deliverable — a well-maintained checklist of what works, what doesn't, and what's worth pursuing. Adding feeds to the pipeline (workflow, scripts, deployment) is a separate step handled by a maintainer or automation tooling.
 
 You can do these things by hand, or with any kind and amount of LLM assistance that you are comfortable with.
 
