@@ -45,7 +45,7 @@ When you find a source that needs a scraper, document it in the city's `SOURCES_
 ## Playbook for Launching a New Citywide Calendar
 
 ### Phase 1: Platform searches (grab the easy wins)
-Search for feeds by platform — Tockify, Meetup ICS, WordPress `?ical=1`, Localist, Google Calendar embeds. These reliably turn up dozens of ready-to-use ICS feeds in a single pass.
+Search for feeds by platform — Tockify, Meetup ICS, WordPress `?ical=1` (a URL suffix you can append to WordPress event pages to get an ICS feed), Localist, Google Calendar embeds. These reliably turn up dozens of ready-to-use ICS feeds in a single pass.
 
 ### Phase 2: Topical searches (find venues by category)
 Search by topic to find venues and organizations, then probe their websites for feeds (try `?ical=1`, check for Squarespace `?format=json`, look for Google Calendar embeds). This is where you find the Jazz Bistros and Grossman's Taverns that don't show up in platform searches.
