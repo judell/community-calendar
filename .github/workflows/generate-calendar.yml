@@ -76,6 +76,8 @@ jobs:
         python scrapers/barrel_proof.py --output cities/santarosa/barrel_proof.ics || true
         python scrapers/sportsbasement.py --location "Santa Rosa" --output cities/santarosa/sportsbasement.ics || true
         python scrapers/sebarts.py --output cities/santarosa/sebarts.ics || true
+        python scrapers/santa_rosa_arts_center.py --output cities/santarosa/santa_rosa_arts_center.ics || true
+        python scrapers/movingwriting.py --output cities/santarosa/movingwriting.ics || true
         python scrapers/legistar.py --client santa-rosa --source "City of Santa Rosa Legistar" -o cities/santarosa/legistar.ics || true
         
         echo "\n=== Santa Rosa Scraper Results ==="
@@ -115,6 +117,12 @@ jobs:
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/nataraja-school-of-traditional-yoga/events/ical/" -o meetup_yoga.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/santa-rosa-womens-creativity-collective/events/ical/" -o meetup_creativity.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-boomers/events/ical/" -o meetup_boomers.ics || true
+        curl -sL "https://tockify.com/api/feeds/ics/rileystreet.art.com" -o rileystreet_art.ics || true
+        # LiveWhale
+        curl -sL "https://calendar.santarosa.edu/live/ical/events" -o srjc.ics || true
+        # Additional Meetup groups
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/amorc-santa-rosa-pronaos/events/ical/" -o meetup_amorc.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sarogn/events/ical/" -o meetup_sarogn.ics || true
         cd ../..
         python scripts/combine_ics.py --input-dir cities/santarosa --output cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
 
