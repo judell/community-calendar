@@ -651,7 +651,8 @@ function _detectRecurrenceInText(text) {
   if (!text) return null;
   const lower = text.toLowerCase();
   // Match "every Monday", "on Mondays", "every Wednesday", "on Wednesdays", etc.
-  const everyDay = lower.match(/(?:every|on)\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)s?/);
+  // Exclude "on Monday February 16" or "on Monday, Jan 5" (specific dates, not recurrence)
+  const everyDay = lower.match(/(?:every|on)\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)s?(?![,\s]+(?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b)/);
   if (everyDay) {
     const dayMap = { sunday: 'SU', monday: 'MO', tuesday: 'TU', wednesday: 'WE', thursday: 'TH', friday: 'FR', saturday: 'SA' };
     return { frequency: 'WEEKLY', days: [dayMap[everyDay[1]]] };
