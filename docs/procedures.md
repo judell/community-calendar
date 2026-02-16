@@ -2,6 +2,40 @@
 
 These are the step-by-step procedures referenced by the [Curator Guide](curator-guide.md) and [AGENTS.md](../AGENTS.md).
 
+## Table of Contents
+
+- [1. Search for Feeds](#1-search-for-feeds)
+  - [Google ICS Discovery](#google-ics-discovery-find-sites-serving-actual-ics-files)
+  - [High-Value Searches](#high-value-searches-do-these-first)
+  - [Discovery Searches](#discovery-searches-find-potential-sources)
+  - [Ready-to-Use DuckDuckGo URLs](#ready-to-use-duckduckgo-urls)
+  - [Meetup Deep Dive](#meetup-deep-dive)
+- [2. Test Discovered Feeds](#2-test-discovered-feeds)
+  - [Tockify Calendar](#tockify-calendar)
+  - [Meetup Group](#meetup-group)
+  - [LiveWhale/Localist (Universities)](#livewhalelocalist-universities)
+  - [WordPress Site](#wordpress-site)
+  - [MembershipWorks](#membershipworks)
+- [3. Document Findings](#3-document-findings)
+- [4. Add Working Feeds](#4-add-working-feeds)
+- [5. Geo-Filtering Setup](#5-geo-filtering-setup)
+  - [Create allowed_cities.txt](#create-allowed_citiestxt)
+  - [Geocode and Validate](#geocode-and-validate)
+  - [How Geo-Filtering Works](#how-geo-filtering-works)
+  - [Validate-Only Mode](#validate-only-mode)
+- [6. Register the City in the App](#6-register-the-city-in-the-app)
+- [Platform Reference](#platform-reference)
+- [Government & Civic Sources](#government--civic-sources)
+  - [Legistar (City Council, Boards, Commissions)](#legistar-city-council-boards-commissions)
+  - [Granicus vs Legistar](#granicus-vs-legistar-both-granicus-owned-different-purposes)
+  - [BoardDocs](#boarddocs)
+  - [City Website Calendars (CivicPlus, etc.)](#city-website-calendars-civicplus-etc)
+- [Additional Platform Techniques](#additional-platform-techniques)
+  - [Squarespace Sites](#squarespace-sites)
+  - [Wix Sites](#wix-sites--dont-scrape-directly)
+  - [GrowthZone (Chambers of Commerce)](#growthzone-chambers-of-commerce)
+  - [Google Calendar Embeds](#google-calendar-embeds)
+
 ---
 
 ## 1. Search for Feeds
