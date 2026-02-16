@@ -1,5 +1,24 @@
 # Community Calendar Curator Guide
 
+## Table of Contents
+
+- [Overview](#overview)
+- [The Curator Role](#the-curator-role)
+  - [How you work is up to you](#how-you-work-is-up-to-you)
+- [What Makes a Good Source](#what-makes-a-good-source)
+- [Playbook for Launching a New Citywide Calendar](#playbook-for-launching-a-new-citywide-calendar)
+  - [Phase 1: Platform searches (grab the easy wins)](#phase-1-platform-searches-grab-the-easy-wins)
+  - [Phase 2: Topical searches (find venues by category)](#phase-2-topical-searches-find-venues-by-category)
+  - [Phase 3: Custom scrapers (last resort for high-value sources)](#phase-3-custom-scrapers-last-resort-for-high-value-sources)
+  - [Throughout all phases](#throughout-all-phases)
+- [Duplicates](#duplicates)
+- [Long-Running Events](#long-running-events)
+- [Working with an AI Agent](#working-with-an-ai-agent)
+  - [Getting started with a cloud workspace](#getting-started-with-a-cloud-workspace)
+  - [What about Git and the command line?](#what-about-git-and-the-command-line)
+  - [What if something goes wrong?](#what-if-something-goes-wrong)
+- [See Also](#see-also)
+
 ## Overview
 
 Public events are trapped in information silos. The library posts to their website, the YMCA uses Google Calendar, the theater uses Eventbrite, Meetup groups have their own pages. Anyone wanting to know "what's happening this weekend?" must check a dozen different sites.
