@@ -47,12 +47,23 @@ Search for feeds by platform — Tockify, Meetup ICS, WordPress `?ical=1`, Local
 ### Phase 2: Topical searches (find venues by category)
 Search by topic to find venues and organizations, then probe their websites for feeds (try `?ical=1`, check for Squarespace `?format=json`, look for Google Calendar embeds). This is where you find the Jazz Bistros and Grossman's Taverns that don't show up in platform searches.
 
+This is a conversation with your agent. The topics below are a starting point — add, remove, or adjust based on what makes your city distinctive. A beach town needs "surfing, sailing, tide pools." A college town needs "alumni, Greek life." You know your community best.
+
 **Topics to search:**
-```
-music, hiking, dance, dogs, yoga, art, running, cycling, wine,
-beer, trivia, book club, garden, comedy, theater, kids, seniors, church,
-history, heritage, architecture, genealogy
-```
+
+| Category | Topics |
+|----------|--------|
+| Arts & Culture | music, theater, comedy, dance, film, art, crafts, literature |
+| Ideas & Learning | poetry, book clubs, writing, history, genealogy, philosophy, talks |
+| Outdoors & Nature | hiking, walking, running, cycling, gardening, birding, conservation |
+| Health & Well-Being | yoga, fitness, mindfulness, mental health, wellness |
+| Food & Drink | beer, wine, food, cooking, farmers markets |
+| Play & Games | trivia, board games, puzzles, casual gaming |
+| Animals & Environment | pets, wildlife, animal care, sustainability |
+| Community & Life Stages | kids, families, seniors, caregivers, newcomers |
+| Identity & Belonging | faith, LGBTQ+, cultural heritage |
+| Civic & Social Good | volunteering, mutual aid, civic engagement |
+| Technology & Work | tech, digital skills, careers |
 
 ### Phase 3: Custom scrapers (last resort for high-value sources)
 Only after exhausting phases 1 and 2, build scrapers for important sources that have no feeds. Prioritize by event volume and community relevance.
