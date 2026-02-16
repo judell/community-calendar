@@ -314,3 +314,29 @@ Track progress on topical searches to find long-tail community sources.
 ### Not Yet Done
 
 All topical categories have been searched. Remaining gaps are scraper candidates only (no ICS feeds available).
+
+### 2026-02-15: Phase 2 Topical Search (continued)
+
+**LGBTQ+ Community:**
+- **LGBTQ Center of Durham** Google Calendar: **1,763 events** — ADDED!
+
+**Gardens & Nature:**
+- **Sarah P. Duke Gardens** WordPress Tribe ICS: **30 events** — ADDED!
+- NC State Parks — uses DNCR Localist (already have)
+- Eno River Association — WordPress Simple Calendar, no ICS export
+
+**Performing Arts:**
+- PlayMakers Repertory Company — Tribe Events visible, `?ical=1` returns 404
+- Carolina Performing Arts — no ICS found
+
+**Food & Drink:**
+- Durham Farmers Market — Squarespace, no events calendar
+
+**Literary/Bookstores:**
+- Flyleaf Books — Drupal IndieCommerce, no ICS
+- Regulator Bookshop — Drupal IndieCommerce, no ICS
+
+**Volunteering:**
+- Habitat for Humanity Durham — no ICS found
+
+**Total: 36 sources** (+2: LGBTQ Center, Duke Gardens)
