@@ -12,14 +12,17 @@ The gold standard is **iCalendar (ICS) feeds**—a format that machines can read
 
 ## The Curator Role
 
-A **curator** builds and maintains the calendar for their community. You don't create events—you discover and connect existing event sources:
+A **curator** builds and maintains the calendar for their community. You don't create events — you discover and connect existing event sources. The goal is a comprehensive, low-maintenance calendar that updates automatically as source organizations post their events.
 
-- Find organizations publishing calendars
-- Test that feeds work and contain relevant events
-- Add working feeds to the aggregator
-- Filter out noise (events too far away, duplicates, off-topic)
+### How you work is up to you
 
-The goal is a comprehensive, low-maintenance calendar that updates automatically as source organizations post their events.
+**Hands-on curator.** You enjoy the detective work — searching, testing feeds, wiring up the pipeline. Everything you need is in this guide, from discovery techniques to pipeline setup.
+
+**Agent-assisted curator.** You work with an AI agent that handles the searching, testing, and wiring while you steer. The topical searches especially benefit from this — an agent can fan out across dozens of topics in parallel. Point your agent at [AGENTS.md](../AGENTS.md) and this guide.
+
+**Delegating curator.** You know your community but prefer to hand off the technical work. You describe what matters — "we need more outdoor recreation sources" or "the Durham food scene is underrepresented" — and a hands-on or agent-assisted collaborator executes.
+
+All three approaches produce the same thing: a well-maintained `SOURCES_CHECKLIST.md` and a pipeline that pulls from discovered feeds.
 
 ## What Makes a Good Source
 
@@ -70,14 +73,14 @@ Only after exhausting phases 1 and 2, build scrapers for important sources that 
 
 ### Throughout all phases:
 
-Your job as curator is to **discover, test, and document**:
 1. **Search** for feeds (see Procedures below)
 2. **Test** each discovered feed to verify it works and has events
 3. **Document** findings in `cities/{city}/SOURCES_CHECKLIST.md`
+4. **Add** working feeds to the pipeline
+5. **Configure geo-filtering** if feeds include events outside your area
+6. **Register the city** in the app
 
-That's the curator's deliverable — a well-maintained checklist of what works, what doesn't, and what's worth pursuing. Adding feeds to the pipeline (workflow, scripts, deployment) is a separate step handled by a maintainer or automation tooling.
-
-You can do these things by hand, or with any kind and amount of LLM assistance that you are comfortable with.
+Steps 1-3 are the core discovery loop. Steps 4-6 are pipeline setup — detailed below under Procedures.
 
 ---
 
