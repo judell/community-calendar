@@ -42,7 +42,7 @@ When you find a source that needs a scraper, document it in the city's `SOURCES_
 ## Playbook for Launching a New Citywide Calendar
 
 ### Phase 1: Platform searches (grab the easy wins)
-Search for feeds by platform — Tockify, Meetup ICS, WordPress `?ical=1`, Localist, Google Calendar embeds. These reliably turn up dozens of ready-to-use ICS feeds in a single pass. See Step 1 below.
+Search for feeds by platform — Tockify, Meetup ICS, WordPress `?ical=1`, Localist, Google Calendar embeds. These reliably turn up dozens of ready-to-use ICS feeds in a single pass.
 
 ### Phase 2: Topical searches (find venues by category)
 Search by topic to find venues and organizations, then probe their websites for feeds (try `?ical=1`, check for Squarespace `?format=json`, look for Google Calendar embeds). This is where you find the Jazz Bistros and Grossman's Taverns that don't show up in platform searches.
@@ -69,17 +69,24 @@ This is a conversation with your agent. The topics below are a starting point �
 Only after exhausting phases 1 and 2, build scrapers for important sources that have no feeds. Prioritize by event volume and community relevance.
 
 ### Throughout all phases:
-- **Test** each discovered feed to verify it works and has events (Step 2)
-- **Document** findings in `cities/{city}/SOURCES_CHECKLIST.md` (Step 3)
-- **Add** working feed URLs to `cities/{city}/feeds.txt` (Step 4)
-- **Configure geo-filtering** if feeds include events outside your area (Step 5)
-- **Register the city** in the app's home page (Step 6)
+
+Each time you find a potential source, apply these procedures:
+1. **Search** for feeds (see Procedures below)
+2. **Test** each discovered feed to verify it works and has events
+3. **Document** findings in `cities/{city}/SOURCES_CHECKLIST.md`
+4. **Add** working feed URLs to `cities/{city}/feeds.txt`
+
+And once per city setup:
+5. **Configure geo-filtering** if feeds include events outside your area
+6. **Register the city** in the app's home page
 
 You can do these things by hand, or with any kind and amount of LLM assistance that you are comfortable with.
 
 ---
 
-## Step 1: Platform Searches
+## Procedures
+
+### 1. Search for Feeds
 
 Use DuckDuckGo (Google may block automated queries). Replace `{city}` and `{state}` with your target location.
 
@@ -158,7 +165,7 @@ https://duckduckgo.com/?q=CITY+STATE+%22community+calendar%22
 
 ---
 
-## Step 2: Test Discovered Feeds
+### 2. Test Discovered Feeds
 
 ### Tockify Calendar
 ```bash
@@ -198,7 +205,7 @@ https://api.membershipworks.com/v2/events?_op=ics&org={ORG_ID}
 
 ---
 
-## Step 3: Document Findings
+### 3. Document Findings
 
 Create/update `cities/{cityname}/SOURCES_CHECKLIST.md`:
 
@@ -232,7 +239,7 @@ Create/update `cities/{cityname}/SOURCES_CHECKLIST.md`:
 
 ---
 
-## Step 4: Add Working Feeds
+### 4. Add Working Feeds
 
 Add working feed URLs to `cities/{city}/feeds.txt`, one per line. Comments starting with `#` are supported for organization:
 
@@ -249,7 +256,7 @@ The automated pipeline reads this file and fetches each URL during the daily bui
 
 ---
 
-## Step 5: Geo-Filtering Setup
+### 5. Geo-Filtering Setup
 
 Geo-filtering prevents events from distant locations (e.g., away games, regional feeds) from appearing.
 
@@ -338,7 +345,7 @@ python scripts/geocode_cities.py --city {cityname} --validate-only
 
 ---
 
-## Step 6: Register the City in the App
+### 6. Register the City in the App
 
 Once feeds are flowing, add the city to the app's home page so users can find it.
 
