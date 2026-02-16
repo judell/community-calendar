@@ -69,8 +69,8 @@ The calendar ID is URL-encoded in the iframe src (look for `src=` parameter). De
 1. Add curl command to the workflow (`.github/workflows/generate-calendar.yml`)
 2. Add SOURCE_NAMES entry in `scripts/combine_ics.py`
 3. Add SOURCE_URLS fallback entry in `scripts/combine_ics.py`
-4. Add note to `cities/{city}/feeds.txt`
-5. Update `cities/{city}/SOURCES_CHECKLIST.md`
+4. Update `cities/{city}/SOURCES_CHECKLIST.md`
+5. Run `python scripts/sync_feeds_txt.py` to regenerate `feeds.txt`
 
 ## Squarespace = `?format=json`
 

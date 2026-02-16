@@ -193,7 +193,7 @@ Create/update `cities/{cityname}/SOURCES_CHECKLIST.md`:
 
 ## 4. Add Working Feeds
 
-Use `scripts/add_feed.py` to add a new ICS feed. It tests the feed, adds the curl command to the GitHub Actions workflow, and updates `cities/{city}/feeds.txt` in one step:
+Use `scripts/add_feed.py` to add a new ICS feed. It tests the feed and adds the curl command to the GitHub Actions workflow:
 
 ```
 python scripts/add_feed.py "https://example.com/events/?ical=1" toronto "Example Events"
@@ -201,7 +201,7 @@ python scripts/add_feed.py URL city "Source Name" --dry-run  # preview without c
 python scripts/add_feed.py URL city "Source Name" --test     # test only, don't add
 ```
 
-The automated pipeline reads `feeds.txt` and fetches each URL during the daily build.
+The workflow YAML is the source of truth. `feeds.txt` is auto-generated documentation — run `python scripts/sync_feeds_txt.py` to regenerate it.
 
 ---
 

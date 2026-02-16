@@ -46,7 +46,7 @@
 
 ## Quick Reference: Adding a New City
 
-1. **Create city directory** under `cities/` with `feeds.txt` and `SOURCES_CHECKLIST.md`
+1. **Create city directory** under `cities/` with `SOURCES_CHECKLIST.md`
 2. **Run source discovery** — platform searches (Tockify, WordPress `?ical=1`, Meetup ICS), topical searches. See [docs/curator-guide.md](docs/curator-guide.md). Run the playbook first, assess gaps second.
 3. **Update the GitHub Actions workflow** (`.github/workflows/generate-calendar.yml`):
    - Add city to the locations list (line with `echo "list=..."`)
@@ -94,11 +94,12 @@ When creating a new scraper for an existing city, **all steps are required**:
 
 1. **Create the scraper** in `scrapers/` directory
 2. **Run the scraper** to generate initial ICS file in `cities/{city}/`
-3. **Add ICS to feeds.txt** (`cities/{city}/feeds.txt`)
-4. **Add scraper to workflow** (`.github/workflows/generate-calendar.yml`)
-5. **Update `combine_ics.py`** — add `SOURCE_NAMES` entry (filename → display name) and `SOURCE_URLS` entry (filename → fallback URL)
-6. **Update SOURCES_CHECKLIST.md** - document what was added
-7. **Commit and push** - include the ICS file
+3. **Add scraper to workflow** (`.github/workflows/generate-calendar.yml`)
+4. **Update `combine_ics.py`** — add `SOURCE_NAMES` entry (filename → display name) and `SOURCE_URLS` entry (filename → fallback URL)
+5. **Update SOURCES_CHECKLIST.md** - document what was added
+6. **Commit and push** - include the ICS file
+
+**You do NOT need to edit `feeds.txt`.** It is auto-generated from the workflow by `scripts/sync_feeds_txt.py` (see below).
 
 ### Verification Checklist
 
@@ -108,12 +109,19 @@ Before considering a scraper "done", verify:
 |------|---------------|
 | Scraper runs | `python scrapers/myscraper.py -o cities/{city}/myscraper.ics` |
 | ICS has events | `grep -c 'BEGIN:VEVENT' cities/{city}/myscraper.ics` |
-| In feeds.txt | `grep myscraper cities/{city}/feeds.txt` |
 | In workflow | `grep myscraper .github/workflows/generate-calendar.yml` |
 | In combine_ics.py | `grep myscraper scripts/combine_ics.py` |
 | Committed | `git status` shows no uncommitted scraper files |
 
 ### Recommended: Use the add_scraper script
+
+After creating the scraper in `scrapers/`, use `add_scraper.py` to wire it into the pipeline. The script automates two of the manual steps above:
+
+1. **Finds the scraper** in `scrapers/` (including subdirectories)
+2. **Adds it to the workflow** — inserts a `python scrapers/<name>.py --output cities/<city>/<name>.ics || true` line into the city's "Scrape" section in `.github/workflows/generate-calendar.yml`
+3. **Adds the source name** — adds an entry to `SOURCE_NAMES` in `scripts/combine_ics.py`
+
+With `--test`, it also runs the scraper first and checks that it produces a valid .ics file with events.
 
 ```bash
 python scripts/add_scraper.py myscraper santarosa "My Source Name"
@@ -121,7 +129,21 @@ python scripts/add_scraper.py myscraper santarosa "My Source Name" --test      #
 python scripts/add_scraper.py myscraper santarosa "My Source Name" --dry-run   # preview
 ```
 
+You still need to manually update `SOURCES_CHECKLIST.md` and commit/push.
+
 **If you skip any step, events won't appear in the calendar!**
+
+### feeds.txt is auto-generated
+
+`feeds.txt` files are **not manually edited**. They are a human-readable inventory generated from the workflow YAML:
+
+```bash
+python scripts/sync_feeds_txt.py                  # regenerate all cities
+python scripts/sync_feeds_txt.py --city santarosa  # one city
+python scripts/sync_feeds_txt.py --dry-run         # preview without writing
+```
+
+The workflow YAML is the source of truth. `feeds.txt` is documentation only — `combine_ics.py` globs `*.ics` and ignores `feeds.txt`.
 
 ---
 
@@ -138,9 +160,8 @@ python scripts/add_feed.py URL city "Source Name" --dry-run   # preview
 This will:
 1. Test the feed URL returns valid ICS
 2. Add curl command to `.github/workflows/generate-calendar.yml`
-3. Add entry to `cities/{city}/feeds.txt`
 
-You still need to manually update `SOURCES_CHECKLIST.md`.
+You still need to manually update `SOURCES_CHECKLIST.md`. You do **not** need to edit `feeds.txt` — it is auto-generated (see above).
 
 ---
 
