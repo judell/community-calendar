@@ -235,6 +235,38 @@ SOURCE_NAMES = {
     'nc_wildlife_federation': 'NC Wildlife Federation',
     'resilient_durham': 'Resilient Durham NC',
     'sw_durham_rotary': 'SW Durham Rotary Club',
+    # Raleigh-Durham - Birding & Nature (Google Calendar)
+    'wake_audubon': 'Wake Audubon',
+    'new_hope_bird_alliance': 'New Hope Bird Alliance',
+    'eno_river': 'Eno River Association',
+    # Raleigh-Durham - Downtown Durham
+    'downtown_durham': 'Downtown Durham Inc',
+    # Raleigh-Durham - Health & Well-Being
+    'meetup_yoga_in_nature': 'Meetup: Yoga In Nature NC',
+    'meetup_outdoor_flow_yogis': 'Meetup: Outdoor Flow Yogis',
+    'meetup_plum_village_meditation': 'Meetup: Durham Plum Village Meditation',
+    # Raleigh-Durham - Animals & Rescue
+    'independent_animal_rescue': 'Independent Animal Rescue',
+    'hope_animal_rescue': 'Hope Animal Rescue',
+    'aps_durham': 'Animal Protection Society of Durham',
+    'second_chance_pets': 'Second Chance Pet Adoptions',
+    # Raleigh-Durham - Play & Games
+    'meetup_triangle_board_games': 'Meetup: Triangle Board Games & Bars',
+    'gathering_place_games': 'The Gathering Place Games',
+    # Raleigh-Durham - Ideas & Learning
+    'morehead_planetarium': 'Morehead Planetarium & Science Center',
+    'nc_humanities': 'NC Humanities Council',
+    'meetup_durham_writers': 'Meetup: Durham Writers Group',
+    'american_tobacco_campus': 'American Tobacco Campus',
+    # Raleigh-Durham - Technology & Work (additional Meetups)
+    'meetup_raleigh_ai_ml_cv': 'Meetup: Raleigh AI, ML & Computer Vision',
+    'meetup_all_things_ai': 'Meetup: All Things AI',
+    'meetup_data_science_raleigh': 'Meetup: Data Science Raleigh',
+    'meetup_modern_web_triangle': 'Meetup: Modern Web Triangle',
+    'meetup_triangle_devops': 'Meetup: Triangle DevOps',
+    'meetup_splatspace': 'Meetup: Splat Space (Durham Hackerspace)',
+    'meetup_csa_triangle': 'Meetup: Cloud Security Alliance Triangle',
+    'meetup_triangle_transitional': 'Meetup: Triangle Transitional Networking',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.

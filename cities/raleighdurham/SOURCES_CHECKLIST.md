@@ -1,6 +1,6 @@
 # Raleigh-Durham (Research Triangle) Calendar Source Checklist
 
-## Currently Implemented (44 sources)
+## Currently Implemented (71 sources)
 
 ### Universities
 | Source | Type | Events | Notes |
@@ -56,6 +56,47 @@
 | Wake Forest Chamber | GrowthZone scraper | ~47 | Business events, networking |
 | Apex Chamber | GrowthZone scraper | ~49 | Business events, mixers |
 
+### Birding & Nature (Google Calendar)
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Wake Audubon | Google Calendar ICS | ~567 | Bird outings, talks, cleanups |
+| New Hope Bird Alliance | Google Calendar ICS | ~1,574 | Bird walks, monthly meetings; includes history |
+| Eno River Association | Google Calendar ICS | ~3,278 | Hikes, canoe trips, nature events; includes history |
+
+### Downtown & Venues
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Downtown Durham Inc | WordPress Tribe ICS | ~30 | Walking club, oysters, community events |
+| American Tobacco Campus | WordPress Tribe ICS | ~50 | Night markets, pop-ups, Durham Bulls |
+
+### Health & Well-Being
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Yoga In Nature NC | Meetup ICS | ~4 | Outdoor yoga + hikes at NCMA, parks |
+| Outdoor Flow Yogis | Meetup ICS | ~10 | Sunday yoga at Trophy Brewing |
+| Durham Plum Village Meditation | Meetup ICS | ~3 | Wednesday meditation circle |
+
+### Animals & Rescue
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Independent Animal Rescue | WordPress Tribe ICS | ~2 | Cat adoption events, Durham |
+| Hope Animal Rescue | WordPress Tribe ICS | ~3 | Pints & Pups, Yappy Hour |
+| Animal Protection Society of Durham | WordPress Tribe ICS | ~4 | Crafts & Dogs, Out & About |
+| Second Chance Pet Adoptions | WordPress Tribe ICS | ~6 | Pups & Pucks, adoption at museums |
+
+### Play & Games
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Triangle Board Games & Bars | Meetup ICS | ~10 | Board games at Geekery, Gamers Geekery |
+| The Gathering Place Games | WordPress ICS | ~50 | D&D, Commander, Pokémon, board games; Chapel Hill |
+
+### Ideas & Learning
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Morehead Planetarium | WordPress Tribe ICS | ~25 | Shows, science summits, yoga under stars; Chapel Hill |
+| NC Humanities Council | WordPress Tribe ICS | ~30 | Community conversations, exhibits; mostly Triangle |
+| Durham Writers Group | Meetup ICS | ~10 | SF/F group, virtual + in-person |
+
 ### Community & Civic
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
@@ -66,7 +107,7 @@
 | Resilient Durham NC | WordPress Tribe ICS | ~4 | Community resilience, wellness |
 | SW Durham Rotary Club | Google Calendar ICS | ~628 | Speaker series, volunteer events, socials |
 
-### Meetup Groups — Tech (11 groups)
+### Meetup Groups — Tech (19 groups)
 | Group | Events | Category |
 |-------|--------|----------|
 | Triangle Python Users (TriPython) | 0 | Python |
@@ -80,6 +121,14 @@
 | Blacks in Tech RDU | 0 | Diversity in tech |
 | Downtown Techies Durham | 0 | Tech social |
 | Raleigh WordPress Meetup | 0 | WordPress |
+| Raleigh AI, ML & Computer Vision | 10 | AI/ML/CV |
+| All Things AI (Live) | 7 | AI |
+| Data Science Raleigh | 10 | Data science |
+| Modern Web Triangle | 3 | Web dev |
+| Triangle DevOps | 1 | DevOps |
+| Splat Space (Durham Hackerspace) | 10 | Hackerspace |
+| Cloud Security Alliance Triangle | 1 | Cloud security |
+| Triangle Transitional Networking | 1 | IT careers |
 
 ### Meetup Groups — Social/Outdoors (6 groups)
 | Group | Events | Category |
@@ -111,7 +160,7 @@
 | NC Museum of History | ncmuseumofhistory.org/events | Drupal | No ICS feed |
 | Raleigh Little Theatre | raleighlittletheatre.org/shows-and-events/ | WordPress + Salesforce | Community theatre |
 | Durham Arts Council | durhamarts.org/dac-art-events/ | WordPress (custom) | Arts events and grants |
-| American Tobacco Campus | americantobacco.co/events/ | WordPress (Events Manager) | No ICS exposed |
+| ~~American Tobacco Campus~~ | ~~americantobaccocampus.com~~ | ~~WordPress Tribe~~ | ICS works — moved to Implemented |
 | INDY Week Calendar | calendar.indyweek.com | Custom | Alt-weekly community calendar |
 | Triangle on the Cheap | triangleonthecheap.com/events/ | WordPress (custom) | Free/cheap event aggregator |
 | Ponysaurus Brewing | ponysaurusbrewing.com/events | Squarespace | ~15-20 events/mo; `?format=json` scrapable |
@@ -143,7 +192,7 @@
 | Red Hat Amphitheater | Custom, no feeds |
 | ~~NC Museum of Natural Sciences~~ | Now returns 30 events — moved to Implemented |
 | Quail Ridge Books | Custom bookstore platform, no feeds |
-| Eno River Association | WordPress Simple Calendar plugin embeds Google Calendar; underlying gcal ID unknown |
+| ~~Eno River Association~~ | Google Calendar ID extracted — moved to Implemented |
 | Raleigh Chamber | Atlas SPA (web.raleighchamber.org), no server-side API |
 | Cary Chamber | Atlas SPA (web.carychamber.com), no server-side API |
 | Chapel Hill-Carrboro Chamber | GrowthZone MicroNet CMS, no XML API endpoint |
@@ -159,8 +208,8 @@
 | Activate Good / Triangle Do-Gooders | WordPress, Meetup ICS returns 403 |
 | NC Native Plant Society | WordPress MEC, `?mec-ical-feed=1` returns HTML |
 | Newcomers clubs (Raleigh/Cary/Chapel Hill) | Member-gated, no public calendars |
-| Wake Audubon | WordPress + Google Calendar embed; gcal ID not yet extracted |
-| New Hope Bird Alliance | WordPress + Google Calendar embed; gcal ID not yet extracted |
+| ~~Wake Audubon~~ | Google Calendar ID extracted — moved to Implemented |
+| ~~New Hope Bird Alliance~~ | Google Calendar ID extracted — moved to Implemented |
 
 ---
 
@@ -219,6 +268,17 @@
 - **Google Calendar embeds found** at Wake Audubon, New Hope Bird Alliance, Eno River Assn — calendar IDs not yet extracted.
 - **Total: 44 sources, ~4,700+ events**
 
+### 2026-02-15: Phase 2 completion — remaining topical searches
+- **Google Calendar extraction**: Decoded base64 event IDs from WordPress Simple Calendar plugin to extract calendar IDs for Wake Audubon (567 events), New Hope Bird Alliance (1,574), Eno River Association (3,278).
+- **Health & Well-Being**: Yoga In Nature NC (4), Outdoor Flow Yogis (10), Durham Plum Village Meditation (3). Yoga studios and wellness centers mostly on Squarespace.
+- **Food & Drink**: No new ICS feeds. Wine shops on Shopify, cooking schools on plain WordPress.
+- **Animals & Rescue**: Independent Animal Rescue (2), Hope Animal Rescue (3), APS Durham (4), Second Chance Pet Adoptions (6). All WordPress Tribe.
+- **Play & Games**: Triangle Board Games & Bars Meetup (10), The Gathering Place Games (50, Chapel Hill game store).
+- **Ideas & Learning**: Morehead Planetarium (25), NC Humanities Council (30), Durham Writers Group (10), American Tobacco Campus (50). NC Writers' Network skipped (statewide). CED skipped (national conferences).
+- **Technology & Work**: 8 new Meetup groups across AI, data science, web dev, DevOps, hackerspace, security, careers.
+- **Downtown Durham Inc**: 30 events covering walking club, food events, community gatherings.
+- **Total: 71 sources, ~10,000+ events**
+
 ---
 
 ## Topical Searches
@@ -243,13 +303,14 @@ Track progress on topical searches to find long-tail community sources.
 - Community / newcomers — Raleigh Triangle Activities Meetup: 10 events. Newcomers clubs (Raleigh/Cary/Chapel Hill): all member-gated.
 - Sports / fitness — Bike Durham + Triangle Cycling (implemented). NC Roadrunners Meetup: valid ICS but currently 0 events.
 - Government / public affairs — Legistar done (wake, chapelhill, durhamcounty); Raleigh API broken.
+- Google Calendar extraction — Wake Audubon (567 events), New Hope Bird Alliance (1,574), Eno River Association (3,278). All extracted by decoding base64 event IDs from Simple Calendar plugin.
+- Health & Well-Being — Yoga In Nature NC (4 events), Outdoor Flow Yogis (10), Durham Plum Village Meditation (3). Many yoga studios on Squarespace with no ICS.
+- Food & Drink (wine/cooking) — No new ICS feeds found. Wine shops (Raleigh Wine Shop, Taylor's, LouElla, Wine Feed) all Shopify. Cooking schools (Wyntons World, Travelling Cafe, Farmbelly, Flour Power) no events plugins.
+- Animals & Environment — Independent Animal Rescue (2), Hope Animal Rescue (3), APS Durham (4), Second Chance Pet Adoptions (6). SPCA Wake, Saving Grace, Freedom Ride all no ICS. Several Squarespace conservation orgs (Circular Triangle, NC Sustainable Business Council) no ICS.
+- Play & Games — Triangle Board Games & Bars Meetup (10), The Gathering Place Games (50). Kitchen Table board game cafe (Squarespace, no ICS). Trivia companies (Hammered, Not Rocket Science) have venue listings, not event calendars.
+- Ideas & Learning — Morehead Planetarium (25), NC Humanities Council (30), Durham Writers Group (10), American Tobacco Campus (50). Bookstores (Quail Ridge, Regulator, Flyleaf, Letters) all no ICS. NC Writers' Network skipped (statewide, most events outside Triangle). Wake/Chapel Hill libraries on LibCal but subscriptions not responding.
+- Technology & Work — 8 new Meetup groups: Raleigh AI/ML/CV (10), All Things AI (7), Data Science Raleigh (10), Modern Web Triangle (3), Triangle DevOps (1), Splat Space (10), Cloud Security Alliance (1), Triangle Transitional Networking (1). CED skipped (national conferences). Coworking spaces (Frontier, Loading Dock) have no ICS. Many additional tech Meetups (TRINUG, Triangle JS, Rust, PHP, security groups) returned 0 events.
 
 ### Not Yet Done
 
-- Google Calendar ID extraction — Wake Audubon, New Hope Bird Alliance, Eno River Assn all embed Google Calendars. Extracting the calendar IDs from page source would yield free ICS feeds.
-- Health & Well-Being — yoga, fitness, mindfulness, wellness: not yet searched
-- Food & Drink — wine, cooking classes: not yet searched
-- Animals & Environment — pets, wildlife, animal care, sustainability: not yet searched
-- Play & Games — gaming cafes, puzzle groups: not yet searched
-- Ideas & Learning — writing groups, genealogy, philosophy: not yet searched
-- Technology & Work — digital skills, careers, coworking: not yet searched
+All topical categories have been searched. Remaining gaps are scraper candidates only (no ICS feeds available).
