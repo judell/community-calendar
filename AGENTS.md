@@ -18,19 +18,18 @@
 
 1. **Create city directory** under `cities/` with `feeds.txt` and `SOURCES_CHECKLIST.md`
 2. **Run source discovery** — platform searches (Tockify, WordPress `?ical=1`, Meetup ICS), topical searches. See [docs/curator-guide.md](docs/curator-guide.md). Run the playbook first, assess gaps second.
-3. **Optionally run Eventbrite scraper** — `python scrapers/eventbrite_scraper.py --location {state}--{city} --months 2` (not available in all regions)
-4. **Update the GitHub Actions workflow** (`.github/workflows/generate-calendar.yml`):
+3. **Update the GitHub Actions workflow** (`.github/workflows/generate-calendar.yml`):
    - Add city to the locations list (line with `echo "list=..."`)
    - Add a city section with curl commands for all feeds + `combine_ics.py` call
    - Add city to the backup/restore lists in the commit step (`for city in ...`)
-5. **Update `combine_ics.py`** — add `SOURCE_NAMES` entries (filename → display name) and `SOURCE_URLS` entries (filename → fallback URL) for all new sources
-6. **Add city to UI** — TWO places must be updated:
+4. **Update `combine_ics.py`** — add `SOURCE_NAMES` entries (filename → display name) and `SOURCE_URLS` entries (filename → fallback URL) for all new sources
+5. **Add city to UI** — TWO places must be updated:
    - `index.html`: add entry to `cityNames` map (e.g., `toronto: 'Toronto'`)
    - `Main.xmlui`: add a Button in the city picker VStack (search for "Choose your city")
-7. **Add city to load-events function** — add URL entry to `EVENTS_URLS` in `supabase/functions/load-events/index.ts`, then redeploy the edge function
-8. **Optionally set up geo-filtering** — create `allowed_cities.txt` if feeds include events outside your area. This is optional; if the file doesn't exist, all events pass through. See [docs/curator-guide.md](docs/curator-guide.md#step-5-geo-filtering-setup).
-9. **Update SOURCES_CHECKLIST.md** — document findings, track pending sources
-10. **Commit and push** — workflow runs daily or trigger manually
+6. **Add city to load-events function** — add URL entry to `EVENTS_URLS` in `supabase/functions/load-events/index.ts`, then redeploy the edge function
+7. **Optionally set up geo-filtering** — create `allowed_cities.txt` if feeds include events outside your area. This is optional; if the file doesn't exist, all events pass through. See [docs/curator-guide.md](docs/curator-guide.md#step-5-geo-filtering-setup).
+8. **Update SOURCES_CHECKLIST.md** — document findings, track pending sources
+9. **Commit and push** — workflow runs daily or trigger manually
 
 ## App Architecture
 
@@ -55,7 +54,7 @@ The XMLUI app lives at the repo root and serves all cities from a single set of 
 Each city should have a `SOURCES_CHECKLIST.md` to track ongoing discovery:
 - **Currently Implemented** - sources already in the workflow
 - **Meetup Groups** - results of Meetup discovery with dates
-- **Eventbrite** - scraper results and key venues found
+- **Scraper Sources** - results of scraper-based discovery
 - **Potential Additional Sources** - venues/orgs to investigate
 - **Non-Starters** - sources that were checked but don't work (and why)
 
@@ -131,11 +130,6 @@ python scrapers/maxpreps.py --url "https://www.maxpreps.com/ca/davis/davis-blue-
 python scrapers/growthzone.py --site petalumachamber -o events.ics
 ```
 
-### Eventbrite (`scrapers/eventbrite_scraper.py`)
-```bash
-python scrapers/eventbrite_scraper.py --location ca--petaluma --months 2 > events.ics
-```
-
 ### Library Intercept (`scripts/library_intercept.py`)
 ```bash
 python scripts/library_intercept.py --location petaluma -o library.ics
@@ -208,7 +202,7 @@ When a venue's website is hard to scrape (Wix, heavy JS, Squarespace, etc.), **c
 - Search APIs
 - Much cleaner HTML
 
-**Example:** Phoenix Theater Petaluma uses a Wix site (heavy JS, no static content). But their events are ticketed via **Eventbrite**. Searching `eventbrite.com/d/ca--petaluma/phoenix-theater/` returns all events with clean structured data.
+**Example:** A venue with a Wix or Squarespace site (heavy JS, no static content) may ticket via **SeeTickets** or **Eventbrite**, where events have structured data and cleaner HTML.
 
 **Common ticketing platforms to check:**
 - Eventbrite (search by venue name + city)
@@ -219,13 +213,7 @@ When a venue's website is hard to scrape (Wix, heavy JS, Squarespace, etc.), **c
 
 ### Strategy 2: Topical Search for New Cities
 
-For discovering sources in a new city, search **DuckDuckGo** (Google often blocks) for `[topic] + [city name]` across many topics:
-
-```
-music, hiking, dance, dogs, yoga, art, running, cycling, wine, 
-beer, trivia, book club, garden, comedy, theater, kids, seniors, church,
-history, heritage, architecture, genealogy
-```
+For discovering sources in a new city, search **DuckDuckGo** (Google often blocks) for `[topic] + [city name]` across the topic list in the [curator guide](docs/curator-guide.md#phase-2-topical-searches-find-venues-by-category).
 
 City names like "Petaluma" or "Bloomington" are discriminatory enough to filter results effectively. Move quickly - assess what's worth pursuing, don't get bogged down.
 

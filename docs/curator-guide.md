@@ -45,7 +45,14 @@ When you find a source that needs a scraper, document it in the city's `SOURCES_
 Search for feeds by platform — Tockify, Meetup ICS, WordPress `?ical=1`, Localist, Google Calendar embeds. These reliably turn up dozens of ready-to-use ICS feeds in a single pass. See Step 1 below.
 
 ### Phase 2: Topical searches (find venues by category)
-Search by topic — music, theatre, comedy, dance, food, kids, outdoors, etc. For each topic, identify venues and organizations, then probe their websites for feeds (try `?ical=1`, check for Squarespace `?format=json`, look for Google Calendar embeds). This is where you find the Jazz Bistros and Grossman's Taverns that don't show up in platform searches.
+Search by topic to find venues and organizations, then probe their websites for feeds (try `?ical=1`, check for Squarespace `?format=json`, look for Google Calendar embeds). This is where you find the Jazz Bistros and Grossman's Taverns that don't show up in platform searches.
+
+**Topics to search:**
+```
+music, hiking, dance, dogs, yoga, art, running, cycling, wine,
+beer, trivia, book club, garden, comedy, theater, kids, seniors, church,
+history, heritage, architecture, genealogy
+```
 
 ### Phase 3: Custom scrapers (last resort for high-value sources)
 Only after exhausting phases 1 and 2, build scrapers for important sources that have no feeds. Prioritize by event volume and community relevance.
