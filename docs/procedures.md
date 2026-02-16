@@ -193,18 +193,15 @@ Create/update `cities/{cityname}/SOURCES_CHECKLIST.md`:
 
 ## 4. Add Working Feeds
 
-Add working feed URLs to `cities/{city}/feeds.txt`, one per line. Comments starting with `#` are supported for organization:
+Use `scripts/add_feed.py` to add a new ICS feed. It tests the feed, adds the curl command to the GitHub Actions workflow, and updates `cities/{city}/feeds.txt` in one step:
 
 ```
-# Meetup groups
-https://www.meetup.com/go-wild-hikers/events/ical/
-https://www.meetup.com/local-book-club/events/ical/
-
-# Tockify calendars
-https://tockify.com/api/feeds/ics/downtown_events
+python scripts/add_feed.py "https://example.com/events/?ical=1" toronto "Example Events"
+python scripts/add_feed.py URL city "Source Name" --dry-run  # preview without changes
+python scripts/add_feed.py URL city "Source Name" --test     # test only, don't add
 ```
 
-The automated pipeline reads this file and fetches each URL during the daily build.
+The automated pipeline reads `feeds.txt` and fetches each URL during the daily build.
 
 ---
 
