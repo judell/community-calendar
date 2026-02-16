@@ -1,5 +1,35 @@
 # Agent Strategies for Calendar Source Discovery
 
+## Table of Contents
+
+- [Discovery Philosophy](#discovery-philosophy)
+- [Quick Reference: Adding a New City](#quick-reference-adding-a-new-city)
+- [App Architecture](#app-architecture)
+  - [SOURCES_CHECKLIST.md](#sources_checklistmd)
+- [Quick Reference: Adding a New Scraper](#quick-reference-adding-a-new-scraper)
+  - [Verification Checklist](#verification-checklist)
+  - [Recommended: Use the add_scraper script](#recommended-use-the-add_scraper-script)
+- [Quick Reference: Adding a New ICS Feed](#quick-reference-adding-a-new-ics-feed)
+- [Reusable Scrapers](#reusable-scrapers)
+  - [MaxPreps](#maxpreps-scrapersmaxprepspy---high-school-athletics)
+  - [GrowthZone](#growthzone-scrapersgrowthzonepy---chamber-of-commerce)
+  - [Library Intercept](#library-intercept-scriptslibrary_interceptpy)
+  - [Elfsight Calendar](#elfsight-calendar-scraperslibelfsigtpy)
+  - [Legistar](#legistar-scraperslegistarpy---city-government-meetings)
+  - [Bibliocommons](#bibliocommons-scraperslibbibliocommunspy---library-event-platforms)
+- [Platform-Specific Techniques](#platform-specific-techniques)
+  - [SeeTickets Widgets](#seetickets-widgets)
+  - [Wix Events](#wix-events)
+- [Source Discovery](#source-discovery)
+  - [Strategy 1: Ticketing Platform Indirection](#strategy-1-ticketing-platform-indirection)
+  - [Strategy 2: Topical Search for New Cities](#strategy-2-topical-search-for-new-cities)
+  - [Strategy 3: Meetup ICS Pattern](#strategy-3-meetup-ics-pattern)
+  - [Strategy 4: Platform-Specific Discovery](#strategy-4-platform-specific-discovery)
+- [Pipeline Validation](#pipeline-validation)
+  - [Validation Script](#validation-script)
+  - [Common Silent Failure Causes](#common-silent-failure-causes)
+- [Known Platform Limitations](#known-platform-limitations)
+
 ## Discovery Philosophy
 
 **We want COMPLETE coverage, not curated coverage.** This means:
