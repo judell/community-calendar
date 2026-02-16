@@ -88,6 +88,25 @@ Each city should have a `SOURCES_CHECKLIST.md` to track ongoing discovery:
 
 ---
 
+## Editing the Workflow YAML
+
+The workflow file (`.github/workflows/generate-calendar.yml`) looks intimidating but every source is just one of two patterns. Each city has two steps that group these, but a given source uses one or the other:
+
+**Pattern 1: Live feed** — the site provides an ICS URL, just curl it:
+```yaml
+        curl -sL "https://example.com/events/?ical=1" -o example.ics || true
+```
+(For Meetup feeds, add `-A "Mozilla/5.0"` after `curl -sL`.)
+
+**Pattern 2: Scraper** — no ICS feed, so a Python script extracts events:
+```yaml
+        python scrapers/myscraper.py --output cities/{city}/myscraper.ics || true
+```
+
+That's it. Everything else in the workflow (setup, combine, commit, deploy) is boilerplate you don't touch. Just append your line to the right city section.
+
+---
+
 ## Quick Reference: Adding a New Scraper
 
 When creating a new scraper for an existing city, **all steps are required**:
