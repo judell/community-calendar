@@ -65,6 +65,18 @@ You can do these things by hand, or with any kind and amount of LLM assistance t
 
 Use DuckDuckGo (Google may block automated queries). Replace `{city}` and `{state}` with your target location.
 
+### Google ICS Discovery (find sites serving actual .ics files)
+
+Google indexes the raw content of ICS files. Searching for the ICS header string plus a city name surfaces sites that serve ICS feeds directly:
+
+```
+"BEGIN:VCALENDAR" "toronto"
+"BEGIN:VCALENDAR" "santa rosa"
+"BEGIN:VCALENDAR" "bloomington" "indiana"
+```
+
+Scan the results for sites that look like local organizations — ignore documentation pages, Stack Overflow, and timezone false positives (many ICS files reference `America/Toronto` as a timezone even if they're not Toronto events).
+
 ### High-Value Searches (do these first)
 
 | Search | What You'll Find |
