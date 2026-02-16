@@ -23,7 +23,7 @@ The goal is a comprehensive, low-maintenance calendar that updates automatically
 
 ## What Makes a Good Source
 
-**Best**: Native ICS feeds (Meetup groups, Tockify calendars, Google Calendar public links). These "just work" and stay current automatically. Unfortunately, native ICS is rarer than it used to be.
+**Best**: Native ICS feeds (Meetup groups, Tockify calendars, Google Calendar public links). These "just work" and stay current automatically. 
 
 **Fallback 1 — Platform APIs**: Some platforms (Eventbrite, LibCal) offer APIs or structured data that scrapers can convert to ICS. The project includes scrapers for common platforms.
 
