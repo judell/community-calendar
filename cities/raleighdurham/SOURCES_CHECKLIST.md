@@ -1,6 +1,6 @@
 # Raleigh-Durham (Research Triangle) Calendar Source Checklist
 
-## Currently Implemented (71 sources)
+## Currently Implemented (75 sources)
 
 ### Universities
 | Source | Type | Events | Notes |
@@ -163,9 +163,9 @@
 | ~~American Tobacco Campus~~ | ~~americantobaccocampus.com~~ | ~~WordPress Tribe~~ | ICS works — moved to Implemented |
 | INDY Week Calendar | calendar.indyweek.com | Custom | Alt-weekly community calendar |
 | Triangle on the Cheap | triangleonthecheap.com/events/ | WordPress (custom) | Free/cheap event aggregator |
-| Ponysaurus Brewing | ponysaurusbrewing.com/events | Squarespace | ~15-20 events/mo; `?format=json` scrapable |
+| ~~Ponysaurus Brewing~~ | ~~Squarespace~~ | ~~Implemented~~ | Moved to Implemented |
 | Fullsteam Brewery | fullsteam.ag/tavern/events | Craft CMS | Trivia, live music; no ICS |
-| The Scrap Exchange | scrapexchange.org/tsecalendar | Squarespace | ~10 events/mo; `?format=json` scrapable |
+| ~~The Scrap Exchange~~ | ~~Squarespace~~ | ~~Implemented~~ | Moved to Implemented |
 | Museum of Life and Science | lifeandscience.org/explore/events/ | WordPress (Formidable Forms) | No Tribe ICS |
 | NC Museum of Natural Sciences exhibits | naturalsciences.org/calendar/ | WordPress | Per-event iCal export only; main ICS already captured |
 | Carolina Theatre (Durham) | carolinatheatre.org/events/ | WordPress (no Tribe) | Film, live performances; no ICS |
@@ -176,8 +176,8 @@
 | Durham Resistance Hub | durhamresistance.com/calendar | Squarespace | Aggregated activism calendar; `?format=json` possible |
 | Durham People's Alliance | durhampa.org/calendar | NationBuilder | Progressive politics; NationBuilder API available |
 | Ellerbee Creek Watershed | ellerbecreek.org | Squarespace | Conservation volunteer events |
-| Keep Durham Beautiful | keepdurhambeautiful.org/events | Squarespace | Cleanups, volunteer workdays |
-| Haw River Assembly | hawriver.org/events | Squarespace | Western Triangle conservation |
+| ~~Keep Durham Beautiful~~ | ~~Squarespace~~ | ~~Implemented~~ | Moved to Implemented |
+| ~~Haw River Assembly~~ | ~~Squarespace~~ | ~~Implemented~~ | Moved to Implemented |
 | ~~Sarah P. Duke Gardens~~ | ~~WordPress Tribe~~ | ~~Implemented~~ | Moved to Implemented |
 
 ---

@@ -267,6 +267,11 @@ SOURCE_NAMES = {
     'meetup_splatspace': 'Meetup: Splat Space (Durham Hackerspace)',
     'meetup_csa_triangle': 'Meetup: Cloud Security Alliance Triangle',
     'meetup_triangle_transitional': 'Meetup: Triangle Transitional Networking',
+    # Raleigh-Durham - Squarespace scrapers
+    'ponysaurus': 'Ponysaurus Brewing',
+    'scrap_exchange': 'The Scrap Exchange',
+    'keep_durham_beautiful': 'Keep Durham Beautiful',
+    'haw_river_assembly': 'Haw River Assembly',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -356,6 +361,11 @@ SOURCE_URLS = {
     'nc_cultural_resources': 'https://events.dncr.nc.gov/',
     'durham_library': 'https://durhamcountylibrary.libcal.com/calendar',
     'durham_gov': 'https://www.durhamnc.gov/calendar.aspx',
+    # Raleigh-Durham - Squarespace scrapers
+    'ponysaurus': 'https://ponysaurusbrewing.com/events',
+    'scrap_exchange': 'https://scrapexchange.org/tsecalendar',
+    'keep_durham_beautiful': 'https://keepdurhambeautiful.org/events',
+    'haw_river_assembly': 'https://hawriver.org/events',
 }
 
 
