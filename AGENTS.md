@@ -33,17 +33,15 @@
 
 ## App Architecture
 
-The XMLUI app lives at the repo root and serves all cities from a single set of files:
+The XMLUI app lives at the repo root and serves all cities from https://judell.github.io/community-calendar/.
 
 - **`index.html`** — Entry point. Reads `?city=` URL param to set `window.cityFilter` and `window.cityName`. No param shows the city picker.
 - **`Main.xmlui`** — App layout. Shows city picker when `!window.cityFilter`, calendar UI when a city is selected. Queries Supabase filtered by `window.cityFilter`.
+- **`Main.xmlui.xs`** — Shared state (pickEvent, picksData, enrichmentsData, refreshCounter) and functions (togglePick, removePick)
 - **`components/`** — Shared XMLUI components (EventCard, PickItem, etc.)
-- **`Globals.xs`** — Shared state (pickEvent, picksData, enrichmentsData, refreshCounter) and functions (togglePick, removePick)
 - **`helpers.js`**, **`config.json`** — Pure helper functions and app configuration
 
 **URLs:** `index.html?city=santarosa`, `index.html?city=davis`, `index.html?city=bloomington`, etc.
-
-**Do not duplicate app files into city directories.** City directories (`cities/<name>/`) hold only data (ICS files, events.json) and city-specific docs.
 
 **Edge function gotcha:** Redeploying any edge function via the Supabase MCP tool resets "Require JWT" to ON. The workflow calls `load-events` with the anon key, so after redeploying you must manually turn off "Require JWT" in the Supabase dashboard.
 
