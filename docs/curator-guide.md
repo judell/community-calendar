@@ -105,6 +105,53 @@ This reduces event count significantly (typically 10-15% fewer displayed events)
 
 ---
 
+## Working with an AI Agent
+
+If you're comfortable in a terminal and already have a GitHub workflow, you know the drill — clone the repo, point your agent at [AGENTS.md](../AGENTS.md), and go.
+
+If that sentence meant nothing to you, don't worry. Here's the short version: an AI agent is a conversational partner that can also edit files, run commands, and push changes to this project. You tell it what you want ("find yoga and meditation event sources in Durham") and it does the searching, testing, and wiring. You steer; it drives.
+
+### Getting started with a cloud workspace
+
+You don't need to install anything on your computer. Several services give you a cloud workspace with an AI agent connected to this project:
+
+- **[exe.dev](https://exe.dev)** — A cloud VM with a conversational agent. Connect it to this repository and start talking.
+- **[GitHub Copilot coding agent](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent)** — Works directly on github.com. You file an issue describing what you want, assign it to Copilot, and it opens a pull request with the changes. Requires a paid [GitHub Copilot](https://github.com/features/copilot) plan.
+- **[Firebase Studio](https://firebase.studio/)** — Google's browser-based workspace with Gemini AI. Import from GitHub. Free tier available (currently in preview).
+- **[OpenAI Codex](https://chatgpt.com/codex)** — Cloud sandbox preloaded with your repo, conversational interface, produces pull requests. Requires a ChatGPT Pro or Team plan.
+
+The steps below use exe.dev as an example, but the pattern is the same across all of these: connect to the project, describe what you want in plain language, review the agent's work, approve or adjust.
+
+1. **Get a GitHub account.** If you don't already have one, create one at [github.com](https://github.com). It's free. You can even make a fresh account just for this project — no prior history needed.
+
+2. **Open the project in your cloud workspace.** Connect to this repository. This gives you an AI agent that already understands the project structure.
+
+3. **Start talking.** Tell the agent what you want to do in plain language:
+   - *"Find event sources for yoga and meditation in Durham, NC"*
+   - *"Check if the Durham Public Library has an ICS feed"*
+   - *"Add this Meetup group to the calendar: [URL]"*
+
+   The agent searches, tests feeds, edits configuration files, and proposes changes. You review what it did and say yes or no.
+
+4. **Your changes get saved.** When the agent makes changes you approve, they're committed to the project through Git — the version control system that tracks every change anyone makes. If something goes wrong, everything can be rolled back. Nothing is permanent until you're happy with it.
+
+### What about Git and the command line?
+
+You'll see the agent running commands in a terminal. You don't need to understand them. But if you're curious:
+
+- **Git** is how this project tracks changes. Think of it like Google Docs revision history, but for code and configuration files.
+- A **commit** is a saved snapshot — "added 5 new yoga sources for Durham."
+- A **pull request** is a proposal — "here are my changes, please review them before they go live."
+- The **command line** (or terminal) is where the agent types commands. You're watching over its shoulder, not typing yourself.
+
+If you want to learn more about any of this as you go, just ask the agent. It can explain what it's doing and why. Some curators never look at the terminal; others get curious and start learning Git along the way. Both are fine.
+
+### What if something goes wrong?
+
+Nothing you or the agent does is irreversible. Git keeps a complete history of every change. If a feed turns out to be broken, or a scraper doesn't work, the change can be undone cleanly. The worst case is wasted time, never wasted data.
+
+---
+
 ## See Also
 
 - [Procedures](procedures.md) — Step-by-step how-tos for searching, testing, adding feeds, geo-filtering, and city registration
