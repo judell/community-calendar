@@ -340,3 +340,25 @@ All topical categories have been searched. Remaining gaps are scraper candidates
 - Habitat for Humanity Durham — no ICS found
 
 **Total: 36 sources** (+2: LGBTQ Center, Duke Gardens)
+
+**Kids/Family:**
+- Kidzu Children's Museum — site timed out
+- Marbles Kids Museum — no ICS found
+- No viable Meetup groups found with events
+
+**Science/Research:**
+- NC Museum of Natural Sciences — already have (30 events via Tribe ICS)
+- NIEHS — no ICS feed available
+
+**Sports/Fitness:**
+- Bull City Track Club — uses Google Sites, no ICS
+- Running clubs — not viable
+
+**Faith/Spiritual:**
+- Watts Street Baptist — Tribe visible but ICS endpoint returns 0 events
+
+**Remaining Gaps (need scrapers or not viable):**
+- Music venues (Cat's Cradle, Motorco, Lincoln Theatre, etc.) — need scrapers
+- DPAC — Ticketmaster integration, no ICS
+- Bookstores (Flyleaf, Regulator) — Drupal IndieCommerce, need scraper
+- PlayMakers Rep — Tribe ICS broken
