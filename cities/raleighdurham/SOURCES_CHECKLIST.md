@@ -402,3 +402,32 @@ All topical categories have been searched. Remaining gaps are scraper candidates
 - DPAC — Ticketmaster integration, no ICS
 - Bookstores (Flyleaf, Regulator) — Drupal IndieCommerce, need scraper
 - PlayMakers Rep — Tribe ICS broken
+
+---
+
+## Coverage Assessment (2026-02-16)
+
+With ~65 active sources and ~2,800+ future events, this is likely the most comprehensive open calendar aggregation for the Triangle region. Alternatives (Indy Week listings, N&O events, Eventbrite, Facebook Events) are curated subsets or platform-locked.
+
+### Strengths
+- Strong university coverage (Duke, UNC, NC State)
+- ~20 Meetup groups across tech, outdoors, social
+- Music venues via custom scrapers (Cat's Cradle, Motorco, Carolina Theatre)
+- Performing arts (Carolina Performing Arts, Raleigh Little Theatre, Duke Arts)
+- Nature/outdoors (Eno River, Wake Audubon, New Hope Bird Alliance, Triangle Land, NC Botanical)
+- Museums (Nasher, Ackland, NC Natural Sciences, Morehead Planetarium)
+- Government (3 Legistar instances, Durham gov, NC Cultural Resources)
+- Community orgs (Durham Resistance, LGBTQ Center, animal rescues)
+- Breweries (Ponysaurus, Gizmo Brew Works)
+
+### Known Gaps
+
+**Raleigh underrepresented** — most sources skew Durham/Chapel Hill. Missing: Raleigh Parks & Rec, Raleigh Convention Center, CAM Raleigh, Raleigh City Farm, Visual Art Exchange.
+
+**Major venues (platform-gated)** — DPAC (Ticketmaster), PNC Arena, Durham Bulls (MiLB), Red Hat Amphitheater.
+
+**Libraries** — Only Durham County Library. Wake County (wakegov.libcal.com) and Chapel Hill Public Library not yet added.
+
+**Parks & Rec** — Durham, Raleigh, Cary, Chapel Hill all run programs we're not capturing.
+
+**Untapped categories** — Farmers markets, food events, art galleries, comedy venues, faith-based community events (concerts, fundraisers, community meals).
