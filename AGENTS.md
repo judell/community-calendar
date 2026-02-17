@@ -79,6 +79,23 @@ The XMLUI app lives at the repo root and serves all cities from https://judell.g
 
 **DDL files (`supabase/ddl/`)** document the live database state — they are not migration scripts.
 
+### Source Attribution
+
+Source attribution flows through a single structured field, **not** through event descriptions:
+
+```
+Scraper/Feed ICS  →  combine_ics.py  →  ics_to_json.py  →  Supabase DB  →  EventCard.xmlui
+   X-SOURCE           X-SOURCE           source column       source column    italic "Source: X"
+   DESCRIPTION         (untouched)        description col     description col  (search snippets only)
+```
+
+- **`X-SOURCE`** ICS header carries the source name. `combine_ics.py` adds it if missing.
+- **`source`** DB column is populated from `X-SOURCE` by `ics_to_json.py`.
+- **`EventCard.xmlui`** line 26 renders `$props.event.source` as an italic line.
+- **DESCRIPTION** is for actual event content only. Do NOT put "Source:" text in descriptions — it causes duplicate display since the app renders both.
+- **`BaseScraper.create_event()`** adds `x-source` automatically. Scrapers should not call `append_source()`.
+- **`SOURCE_NAMES`** dict in `combine_ics.py` maps ICS filenames to friendly display names (e.g., `'catscradle': "Cat's Cradle"`).
+
 ### SOURCES_CHECKLIST.md
 
 Each city should have a `SOURCES_CHECKLIST.md` to track ongoing discovery:
