@@ -331,3 +331,36 @@ These groups have working ICS feeds but no upcoming events as of 2026-02-17:
 | Civic | City of Bloomington, B-Square Government |
 | LGBTQ+ | Covered by IU All Events |
 | Atheist/Skeptic | Bloomington Atheists Meetup |
+
+---
+
+## Phase 3: Custom Scrapers — NOT STARTED
+
+**Status as of 2026-02-17:** Phases 1 and 2 complete. Ready for Phase 3.
+
+### High-Priority Scraper Candidates
+
+| Source | URL | Reason Blocked | Priority |
+|--------|-----|----------------|----------|
+| Buskirk-Chumley Theater | `buskirkchumley.org/events/` | 403 blocks scrapers | HIGH - major venue |
+| WonderLab Museum | `wonderlab.org/events/` | Cloudflare challenge | HIGH - family events |
+| WFHB Community Calendar | `wfhb.org/calendar/` | mod_security blocks | MEDIUM - community radio |
+
+### Lower-Priority / May Not Need Scrapers
+
+| Source | Notes |
+|--------|-------|
+| Visit Bloomington | Simpleview CMS - would need complex scraper; likely derivative |
+| Herald-Times Events | Derivative aggregator |
+| Neighborhood Associations | Sites appear inactive/minimal events |
+
+### Current Coverage Summary
+
+**21 sources implemented** covering:
+- University events (IU LiveWhale × 3)
+- City/civic (Parks & Rec, Farmers Market, B-Square × 4, City Gov)
+- Arts/entertainment (Bloomington Arts, Comedy Attic, Bishop, Bluebird)
+- Community (BloomingtonOnline × 3, Library, Boys & Girls Club)
+- Interest groups (2 Meetup groups)
+
+**Estimated unique future events:** ~1,700+
