@@ -297,6 +297,8 @@ SOURCE_NAMES = {
     'durham_gov': 'City of Durham',
     'durham_gov_community': 'City of Durham',
     'buskirk_chumley': 'Buskirk-Chumley Theater',
+    'comedy_attic': 'The Comedy Attic',
+    'the_bishop': 'The Bishop',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
