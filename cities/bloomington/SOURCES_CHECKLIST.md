@@ -334,29 +334,39 @@ These groups have working ICS feeds but no upcoming events as of 2026-02-17:
 
 ---
 
-## Phase 3: Custom Scrapers — NOT STARTED
+## Phase 3: Custom Scrapers — IN PROGRESS
 
-**Status as of 2026-02-17:** Phases 1 and 2 complete. Ready for Phase 3.
+**Status as of 2026-02-17:** Phase 3 started.
 
-### High-Priority Scraper Candidates
+### Scrapers Completed
 
-| Source | URL | Status | Priority |
-|--------|-----|--------|----------|
-| Buskirk-Chumley Theater | `buskirkchumley.org/events/` | ✅ DONE | HIGH - major venue |
-| WonderLab Museum | `wonderlab.org/events/` | Cloudflare challenge | HIGH - family events |
-| WFHB Community Calendar | `wfhb.org/calendar/` | mod_security blocks | MEDIUM - community radio |
+| Source | URL | Events | Notes |
+|--------|-----|--------|-------|
+| Buskirk-Chumley Theater | `buskirkchumley.org/events/` | ~38 | `buskirk_chumley.py` - uses curl UA to bypass WAF |
+| The Comedy Attic | `comedyattic.com/events` | ~30 | `comedy_attic.py` |
+| The Bishop | `thebishopbar.com/events` | ~4 | `the_bishop.py` |
+| People's Market | `peoplesmarketbtown.org/gatherings` | ~10 | Squarespace scraper |
+| Lotus Festival | `lotusfest.org/events/?ical=1` | ~7 | ICS feed (discovered has ical) |
+
+### Blocked / Cannot Scrape
+
+| Source | URL | Reason |
+|--------|-----|--------|
+| WonderLab Museum | `wonderlab.org/events/` | Cloudflare challenge |
+| WFHB Community Calendar | `wfhb.org/calendar/` | mod_security blocks |
+| Visit Bloomington | `visitbloomington.com/events/` | Simpleview CMS, no API |
+| Winter Farmers' Market | `bloomingtonwinterfarmersmarket.com/` | Wix site, no scraping |
 
 ### Lower-Priority / May Not Need Scrapers
 
 | Source | Notes |
 |--------|-------|
-| Visit Bloomington | Simpleview CMS - would need complex scraper; likely derivative |
 | Herald-Times Events | Derivative aggregator |
 | Neighborhood Associations | Sites appear inactive/minimal events |
 
 ### Current Coverage Summary
 
-**21 sources implemented** covering:
+**26 sources implemented** covering:
 - University events (IU LiveWhale × 3)
 - City/civic (Parks & Rec, Farmers Market, B-Square × 4, City Gov)
 - Arts/entertainment (Bloomington Arts, Comedy Attic, Bishop, Bluebird)
