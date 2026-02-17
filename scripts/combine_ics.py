@@ -294,6 +294,8 @@ SOURCE_NAMES = {
     'new_hope_bird_alliance': 'New Hope Bird Alliance',
     'wake_audubon': 'Wake Audubon',
     'sw_durham_rotary': 'SW Durham Rotary',
+    'durham_gov': 'City of Durham',
+    'durham_gov_community': 'City of Durham',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
