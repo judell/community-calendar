@@ -20,6 +20,13 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | B-Square: BPTC Public Meetings | ICS | ~15 | Google Calendar (transit board meetings) |
 | The Comedy Attic | Scraper | ~32 | `comedy_attic.py` |
 | The Bishop | Scraper | ~4 | `the_bishop.py` |
+| BloomingtonOnline: Events | ICS | ~224 | Google Calendar - community events |
+| BloomingtonOnline: Food & Drink | ICS | ~133 | Google Calendar - restaurant/brewery specials |
+| BloomingtonOnline: Shopping | ICS | ~18 | Google Calendar - markets, deals |
+| Parks and Recreation | ICS | ~1615 | Google Calendar via city website |
+| Knobstone Hiking Trail Meetup | ICS | ~10 | Meetup group - regional hiking |
+| Bloomington Atheists Meetup | ICS | ~10 | Meetup group - local social/discussion |
+| Bloomington Farmers Market | ICS | ~307 | Google Calendar via city website |
 
 ---
 
@@ -156,15 +163,15 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 
 ### New Google Calendar Feeds (via BloomingtonOnline.com)
 
-bloomingtononline.com embeds a master Google Calendar with 8 source calendars. Several are new and unique:
+bloomingtononline.com embeds a master Google Calendar with multiple source calendars:
 
 | Source | Events | Status | Notes |
 |--------|--------|--------|-------|
-| **Events** | ~217 | ✅ ADDED | Community events, film screenings, workshops |
-| **Shopping & Deals** | ~18 | ✅ ADDED | Farmers' market, vintage market, store demos |
-| **Food & Drink Specials** | ~133 | ✅ ADDED | Restaurant/brewery specials |
-| **Cool Family Events** | ~6 | ✅ ADDED | Regional festivals |
-| **Music** | ~461 | SKIP | Heavy overlap with IU Jacobs LiveWhale feed |
+| **Events** | ~224 | ✅ IMPLEMENTED | Community events, film screenings, workshops |
+| **Shopping & Deals** | ~18 | ✅ IMPLEMENTED | Farmers' market, vintage market, store demos |
+| **Food & Drink Specials** | ~133 | ✅ IMPLEMENTED | Restaurant/brewery specials |
+| **Cool Family Events** | ~6 | NOT FOUND | Calendar no longer on site |
+| **Music** | ~467 | SKIP | Heavy overlap with IU Jacobs LiveWhale feed |
 | **IU Events (import)** | ~457 | SKIP | Duplicate of IU LiveWhale |
 | **Ivy Tech** | ~1169 | SKIP | Statewide academic calendar, not community events |
 
@@ -172,7 +179,7 @@ bloomingtononline.com embeds a master Google Calendar with 8 source calendars. S
 
 | Source | Events | Status | Notes |
 |--------|--------|--------|-------|
-| **Parks and Recreation** | ~1612 | ✅ ADDED | Concerts, fitness, nature, family events. Different from existing USB calendar |
+| **Parks and Recreation** | ~1615 | ✅ IMPLEMENTED | Concerts, fitness, nature, family events. Different from existing USB calendar |
 
 **Note:** The existing `bloomington.in.gov_1b95au4d2ueudldosb024fimp0` is actually "Utilities Service Board" (board meetings). The Parks & Rec calendar is the community-relevant one.
 
@@ -180,13 +187,14 @@ bloomingtononline.com embeds a master Google Calendar with 8 source calendars. S
 
 | Source | Events | Status | Notes |
 |--------|--------|--------|-------|
-| **IU All Events** | ~923 | ✅ ADDED | Subsumes Jacobs/Auditorium/Eskenazi + ~330 more IU events |
+| **IU All Events** | ~614 | NOT IMPLEMENTED | Would subsume individual IU feeds; kept individual feeds for attribution |
 
 ### Meetup Groups (New)
 
 | Group | Events | Status | Notes |
 |-------|--------|--------|-------|
-| Knobstone Hiking Trail Assoc | 10 | ✅ ADDED | Southern Indiana hiking |
+| Knobstone Hiking Trail Assoc | 10 | ✅ IMPLEMENTED | Southern Indiana hiking |
+| Bloomington Atheists | 10 | ✅ IMPLEMENTED | Local social/discussion group |
 | Bloomington Board Games | 0 | BLOCKED | Meetup disabled ICS for this group |
 | GDG Bloomington | 0 | INACTIVE | Feed works but no events |
 | Fun 50+ Active Singles | 0 | INACTIVE | Feed works but no events |
