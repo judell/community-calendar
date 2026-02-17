@@ -274,3 +274,52 @@ curl -sL "https://events.iu.edu/{group}/" | grep -o '"group_id":"[0-9]*"'
 
 ### Timezone
 Bloomington, IN uses `America/Indiana/Indianapolis` (Eastern, no DST changes since 2006).
+
+---
+
+## Phase 2 Topical Search Results: 2026-02-17
+
+### Sources Found and Added
+
+| Source | Events | Status | Notes |
+|--------|--------|--------|-------|
+| **Bloomington Farmers Market** | ~307 | ✅ ADDED | Google Calendar via city website |
+
+### Sources Evaluated - Not Added
+
+| Source | Reason |
+|--------|--------|
+| Limestone Post Magazine | CitySpark-powered (derivative aggregator) |
+| Bloomington Brewing Co | Squarespace site, no ICS export |
+| Indiana Brewers Guild | Statewide feed, only 3 events |
+| Bloomington Volunteer Network | Custom platform, no ICS export |
+| LGBTQ+ Culture Center IU | Covered by IU All Events feed |
+| I Run, You Run Meetup | Actually in Arlington, VA (not Bloomington) |
+| Bloomington RUN Meetup | ICS export disabled |
+
+### Meetup Groups - ICS Works but 0 Events
+
+These groups have working ICS feeds but no upcoming events as of 2026-02-17:
+
+- Bloomington Bitcoin Meetup
+- Bloomington Pickleball Warehouse
+- Bloomington Chess Study Group
+- Bloomington Dance Meetup Group
+- Creative Hearts Club (Artists)
+- AWS Cloud Club at IU
+- Fun 50+ Active Singles
+- Bloomington Listening Meetup
+
+### Categories Covered by Existing Sources
+
+| Category | Coverage |
+|----------|----------|
+| Music | IU Jacobs, Bluebird, Bishop, BloomingtonOnline Music |
+| Theater/Comedy | IU Auditorium, Comedy Attic |
+| Arts | Bloomington Arts (Tockify), Eskenazi Museum |
+| Outdoors | Knobstone Hiking Meetup, Parks & Rec |
+| Community Events | BloomingtonOnline Events, B-Square calendars |
+| Food & Drink | BloomingtonOnline Food & Drink, Farmers Market |
+| Civic | City of Bloomington, B-Square Government |
+| LGBTQ+ | Covered by IU All Events |
+| Atheist/Skeptic | Bloomington Atheists Meetup |
