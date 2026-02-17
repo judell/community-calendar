@@ -276,7 +276,7 @@ SOURCE_NAMES = {
     'scrap_exchange': 'The Scrap Exchange',
     'keep_durham_beautiful': 'Keep Durham Beautiful',
     'haw_river_assembly': 'Haw River Assembly',
-    'catscradle': 'Cat's Cradle',
+    'catscradle': "Cat's Cradle",
     'motorco': 'Motorco Music Hall',
     'carolina_theatre': 'Carolina Theatre',
     'carolina_performing_arts': 'Carolina Performing Arts',
