@@ -9,7 +9,7 @@ from typing import Any, Optional
 
 from icalendar import Calendar, Event
 
-from .utils import append_source, generate_uid
+from .utils import generate_uid
 
 
 class BaseScraper(ABC):
@@ -101,8 +101,7 @@ class BaseScraper(ABC):
         if data.get('location'):
             event.add('location', data['location'])
         
-        description = append_source(data.get('description', ''), self.name)
-        event.add('description', description)
+        event.add('description', data.get('description', ''))
         
         uid = data.get('uid') or generate_uid(title, dtstart, self.domain)
         event.add('uid', uid)

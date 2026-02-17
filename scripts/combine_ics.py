@@ -520,28 +520,9 @@ def extract_events(ics_content, source_name=None, source_id=None, fallback_url=N
                 if fallback_url and 'URL:' not in event_content:
                     event_content = f'URL:{fallback_url}\r\n{event_content}'
 
-                # Add or update source in description
+                # Add X-SOURCE and X-SOURCE-ID headers (source attribution
+                # is rendered by the app from X-SOURCE; no need to duplicate in DESCRIPTION)
                 if source_name:
-                    # Check if DESCRIPTION exists
-                    desc_match = re.search(r'DESCRIPTION:([^\r\n]*(?:\r?\n [^\r\n]*)*)', event_content)
-                    source_line = f'Source: {source_name}'
-                    
-                    if desc_match:
-                        old_desc = desc_match.group(1)
-                        # Unfold before checking so fold boundaries don't break the match
-                        unfolded_desc = re.sub(r'\r?\n[ \t]', '', old_desc)
-                        # Don't add if source already mentioned
-                        if 'Source:' not in unfolded_desc:
-                            new_desc = old_desc.rstrip() + '\\n\\n' + source_line
-                            event_content = event_content.replace(
-                                f'DESCRIPTION:{old_desc}',
-                                f'DESCRIPTION:{new_desc}'
-                            )
-                    else:
-                        # Add DESCRIPTION with source
-                        event_content = f'DESCRIPTION:{source_line}\r\n{event_content}'
-                    
-                    # Also add X-SOURCE and X-SOURCE-ID headers
                     if 'X-SOURCE' not in event_content:
                         event_content = f'X-SOURCE:{source_name}\r\n{event_content}'
                     if source_id and 'X-SOURCE-ID' not in event_content:
