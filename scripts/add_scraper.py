@@ -109,11 +109,21 @@ def add_to_workflow(scraper_name: str, city: str, scraper_path: Path) -> bool:
     city_title = city.title()  # santarosa -> Santarosa
     
     # Try different capitalization patterns
+    # Build a regex to find "Scrape ... sources" where the city name appears
+    # This handles cases like "Raleigh-Durham" for city "raleighdurham"
     patterns = [
         f"Scrape {city_title} sources",
         f"Scrape {city} sources",
         f"Scrape Santa Rosa sources" if city == "santarosa" else None,
+        f"Scrape Raleigh-Durham sources" if city == "raleighdurham" else None,
     ]
+
+    # Also try a fuzzy match: find any "Scrape ... sources" line containing the city name
+    import re as _re
+    scrape_lines = _re.findall(r'Scrape [^\n]+ sources', workflow_content)
+    for line in scrape_lines:
+        if city.lower().replace('-', '') in line.lower().replace('-', '').replace(' ', ''):
+            patterns.append(line)
     
     scrape_section_start = -1
     for pattern in patterns:

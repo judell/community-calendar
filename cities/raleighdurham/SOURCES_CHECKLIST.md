@@ -69,6 +69,21 @@
 | Downtown Durham Inc | WordPress Tribe ICS | ~30 | Walking club, oysters, community events |
 | American Tobacco Campus | WordPress Tribe ICS | ~50 | Night markets, pop-ups, Durham Bulls |
 
+### Performing Arts & Music Venues (Phase 3 scrapers)
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Cat's Cradle (8 venues) | Custom scraper (RSS + JSON-LD) | ~560 | Covers Cat's Cradle, Back Room, Motorco, Lincoln Theatre, Haw River Ballroom, Local 506, etc. |
+| Motorco Music Hall | Custom scraper (FullCalendar) | ~48 | Inline FullCalendar parsing |
+| Carolina Theatre (Durham) | Custom scraper (AJAX) | ~132 | WordPress AJAX endpoint, film + live performances |
+| Carolina Performing Arts | Custom scraper (JSON API) | ~18 | UNC Memorial Hall, REST API |
+| Duke Arts | Custom scraper (FacetWP HTML) | ~85 | Duke campus events, concerts, dance, film, workshops |
+| Raleigh Little Theatre | Custom scraper (show pages) | ~77 | Performance schedule parsing from date ranges + show times |
+
+### Activism & Community (Phase 3 feeds)
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Durham Resistance Hub (4 calendars) | Google Calendar ICS | ~1,132 | 4 embedded Google Calendars aggregating activism events |
+
 ### Health & Well-Being
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
@@ -149,33 +164,34 @@
 | ~~Durham Chamber~~ | ~~GrowthZone~~ | ~~Implemented~~ | Moved to Implemented |
 | ~~Wake Forest Chamber~~ | ~~GrowthZone~~ | ~~Implemented~~ | Moved to Implemented |
 | ~~Apex Chamber~~ | ~~GrowthZone~~ | ~~Implemented~~ | Moved to Implemented |
-| DPAC | dpacnc.com/events/all | Custom/Ticketmaster | Major performing arts center |
-| Carolina Theatre (Durham) | carolinatheatre.org/events/ | WordPress + Agile Ticketing | Film, music, comedy |
-| Cat's Cradle / Motorco / Lincoln Theatre | catscradle.com/events/ | WordPress + ETIX | Major indie music venues |
-| The Pour House (Raleigh) | pourhouseraleigh.com | Squarespace-like | Music venue |
-| Haw River Ballroom | hawriverballroom.com/calendar | Squarespace | Music venue — candidate for squarespace.py scraper |
-| Carolina Performing Arts (UNC) | carolinaperformingarts.org/calendar/ | WordPress + Ticketmaster | Memorial Hall performances |
-| Duke Performances | arts.duke.edu/events/ | WordPress (FacetWP) | Duke arts events |
-| NC Museum of Art | ncartmuseum.org/events-and-exhibitions/ | WordPress (MEC) | No public ICS from MEC |
-| NC Museum of History | ncmuseumofhistory.org/events | Drupal | No ICS feed |
-| Raleigh Little Theatre | raleighlittletheatre.org/shows-and-events/ | WordPress + Salesforce | Community theatre |
-| Durham Arts Council | durhamarts.org/dac-art-events/ | WordPress (custom) | Arts events and grants |
+| ~~Durham Chamber~~ | ~~GrowthZone~~ | ~~Implemented~~ | Moved to Implemented |
+| ~~Wake Forest Chamber~~ | ~~GrowthZone~~ | ~~Implemented~~ | Moved to Implemented |
+| ~~Apex Chamber~~ | ~~GrowthZone~~ | ~~Implemented~~ | Moved to Implemented |
+| ~~Carolina Theatre (Durham)~~ | ~~carolinatheatre.org/events/~~ | ~~WordPress + AJAX~~ | **Implemented** — carolina_theatre.py scraper, ~132 events |
+| ~~Cat's Cradle / Motorco / Lincoln Theatre~~ | ~~catscradle.com/events/~~ | ~~WordPress + RSS~~ | **Implemented** — catscradle.py scraper, ~560 events across 8 venues (Cat's Cradle, Back Room, Motorco, Lincoln Theatre, Haw River Ballroom, Local 506, etc.) |
+| ~~Motorco Music Hall~~ | ~~motorcomusic.com/calendar/~~ | ~~WordPress~~ | **Implemented** — motorco.py scraper (FullCalendar inline), ~48 events. Also covered by catscradle.py RSS |
+| ~~Carolina Performing Arts (UNC)~~ | ~~carolinaperformingarts.org/calendar/~~ | ~~WordPress REST API~~ | **Implemented** — carolina_performing_arts.py scraper, ~18 events via JSON API |
+| ~~Duke Performances~~ | ~~arts.duke.edu/events/~~ | ~~WordPress (FacetWP)~~ | **Implemented** — duke_arts.py scraper, ~85 events from HTML |
+| ~~Raleigh Little Theatre~~ | ~~raleighlittletheatre.org/shows-and-events/~~ | ~~WordPress~~ | **Implemented** — raleigh_little_theatre.py scraper, ~77 performances from show pages |
+| ~~Durham Resistance Hub~~ | ~~durhamresistance.com/calendar~~ | ~~Squarespace + Google Cal~~ | **Implemented** — 4 embedded Google Calendar ICS feeds, ~1,132 events |
+| ~~Haw River Ballroom~~ | ~~hawriverballroom.com/calendar~~ | ~~Squarespace~~ | Covered by catscradle.py RSS (shared venue network) |
+| DPAC | dpacnc.com/events/all | Custom/Ticketmaster | **Dead end** — blocks non-browser requests (JS SPA, 0 bytes from curl) |
+| The Pour House (Raleigh) | pourhouseraleigh.com | Webflow | **Dead end** — minimal event data, Webflow platform |
+| NC Museum of Art | ncartmuseum.org/events-and-exhibitions/ | WordPress (MEC) | No public ICS from MEC; covered by DNCR Localist feed |
+| NC Museum of History | ncmuseumofhistory.org/events | Drupal | No ICS feed; covered by DNCR Localist feed |
+| Durham Arts Council | durhamarts.org/dac-art-events/ | WordPress (custom) | **Dead end** — no event links in HTML, minimal content |
 | ~~American Tobacco Campus~~ | ~~americantobaccocampus.com~~ | ~~WordPress Tribe~~ | ICS works — moved to Implemented |
-| INDY Week Calendar | calendar.indyweek.com | Custom | Alt-weekly community calendar |
-| Triangle on the Cheap | triangleonthecheap.com/events/ | WordPress (custom) | Free/cheap event aggregator |
+| INDY Week Calendar | calendar.indyweek.com | Custom | Deferred — custom platform, would need investigation |
+| Triangle on the Cheap | triangleonthecheap.com/events/ | WordPress (custom) | Deferred — Tribe Events `?ical=1` returns HTML |
 | ~~Ponysaurus Brewing~~ | ~~Squarespace~~ | ~~Implemented~~ | Moved to Implemented |
-| Fullsteam Brewery | fullsteam.ag/tavern/events | Craft CMS | Trivia, live music; no ICS |
+| Fullsteam Brewery | fullsteam.ag/tavern/events | Craft CMS | **Dead end** — Craft CMS day pages return 404, low volume |
 | ~~The Scrap Exchange~~ | ~~Squarespace~~ | ~~Implemented~~ | Moved to Implemented |
-| Museum of Life and Science | lifeandscience.org/explore/events/ | WordPress (Formidable Forms) | No Tribe ICS |
+| Museum of Life and Science | lifeandscience.org/explore/events/ | WordPress (Formidable Forms) | **Dead end** — RSS feed 404, only shows daily schedule (not events) |
 | NC Museum of Natural Sciences exhibits | naturalsciences.org/calendar/ | WordPress | Per-event iCal export only; main ICS already captured |
-| Carolina Theatre (Durham) | carolinatheatre.org/events/ | WordPress (no Tribe) | Film, live performances; no ICS |
-| Motorco Music Hall | motorcomusic.com/calendar/ | WordPress (Astra) | ~15-20 events/mo; no Tribe ICS |
-| Cat's Cradle (Carrboro) | catscradle.com/events/ | WordPress | ~20-30 events/mo; no ICS |
 | Boxyard RTP | boxyard.rtp.org/calendar/ | Custom | Per-event iCal export only |
-| Durham Parks & Recreation | dprplaymore.org/Calendar.aspx | CivicEngage | May have iCal subscription |
-| Durham Resistance Hub | durhamresistance.com/calendar | Squarespace | Aggregated activism calendar; `?format=json` possible |
-| Durham People's Alliance | durhampa.org/calendar | NationBuilder | Progressive politics; NationBuilder API available |
-| Ellerbee Creek Watershed | ellerbecreek.org | Squarespace | Conservation volunteer events |
+| Durham Parks & Recreation | dprplaymore.org/Calendar.aspx | CivicEngage | Deferred — may have iCal subscription |
+| Durham People's Alliance | durhampa.org/calendar | NationBuilder | Deferred — NationBuilder API available |
+| Ellerbee Creek Watershed | ellerbecreek.org | Squarespace | **Dead end** — no events page at all |
 | ~~Keep Durham Beautiful~~ | ~~Squarespace~~ | ~~Implemented~~ | Moved to Implemented |
 | ~~Haw River Assembly~~ | ~~Squarespace~~ | ~~Implemented~~ | Moved to Implemented |
 | ~~Sarah P. Duke Gardens~~ | ~~WordPress Tribe~~ | ~~Implemented~~ | Moved to Implemented |
@@ -278,6 +294,30 @@
 - **Technology & Work**: 8 new Meetup groups across AI, data science, web dev, DevOps, hackerspace, security, careers.
 - **Downtown Durham Inc**: 30 events covering walking club, food events, community gatherings.
 - **Total: 71 sources, ~10,000+ events**
+
+### 2026-02-16: Phase 3 — Custom scrapers for high-value sources
+
+**Built 6 scrapers + extracted 4 Google Calendar feeds:**
+- **catscradle.py**: RSS feed at catscradle.com/events/feed/ covers 8 venues (Cat's Cradle, Back Room, Motorco, Lincoln Theatre, Haw River Ballroom, Local 506, etc.). Fetches RSS then visits detail pages for JSON-LD Event schema. ~560 events.
+- **motorco.py**: Parses FullCalendar inline JavaScript events from motorcomusic.com. ~48 events. (Also covered by catscradle.py RSS)
+- **carolina_theatre.py**: WordPress AJAX endpoint (admin-ajax.php?action=event_filter). Uses subprocess curl to bypass TLS fingerprinting. ~132 events.
+- **carolina_performing_arts.py**: Clean JSON REST API at /wp-json/cpa/v1/performances/. ~18 events at Memorial Hall.
+- **duke_arts.py**: Parses FacetWP HTML template from arts.duke.edu/events/. 85 of 129 events on first page. Date formats: "Day, Mon DD at H:MMam/pm" and "Mon DD – Mon DD".
+- **raleigh_little_theatre.py**: Visits each show page, parses date ranges and day-of-week show time rules, generates individual performance events. ~77 performances across 6 shows.
+- **Durham Resistance Hub**: 4 embedded Google Calendar ICS feeds extracted from Squarespace page. ~1,132 activism events.
+
+**Dead ends investigated:**
+- DPAC: JS SPA blocks non-browser requests (0 bytes from curl with all headers)
+- Museum of Life and Science: RSS feed 404, only daily schedule (not events)
+- Durham Arts Council: No event links in HTML
+- Ellerbee Creek: No events page at all
+- Fullsteam Brewery: Craft CMS day pages 404, low volume
+- Pour House Raleigh: Webflow, minimal event data
+
+**Deferred:**
+- INDY Week Calendar, Triangle on the Cheap, Durham Parks & Rec, Durham People's Alliance
+
+**Total: 82 sources, ~12,000+ events**
 
 ---
 

@@ -399,6 +399,12 @@ jobs:
         python scrapers/squarespace.py --url "https://scrapexchange.org/tsecalendar" --name "The Scrap Exchange" -o cities/raleighdurham/scrap_exchange.ics || true
         python scrapers/squarespace.py --url "https://keepdurhambeautiful.org/events" --name "Keep Durham Beautiful" -o cities/raleighdurham/keep_durham_beautiful.ics || true
         python scrapers/squarespace.py --url "https://hawriver.org/events" --name "Haw River Assembly" -o cities/raleighdurham/haw_river_assembly.ics || true
+        python scrapers/catscradle.py --output cities/raleighdurham/catscradle.ics || true
+        python scrapers/motorco.py --output cities/raleighdurham/motorco.ics || true
+        python scrapers/carolina_theatre.py --output cities/raleighdurham/carolina_theatre.ics || true
+        python scrapers/carolina_performing_arts.py --output cities/raleighdurham/carolina_performing_arts.ics || true
+        python scrapers/duke_arts.py --output cities/raleighdurham/duke_arts.ics || true
+        python scrapers/raleigh_little_theatre.py --output cities/raleighdurham/raleigh_little_theatre.ics || true
       continue-on-error: true
 
     - name: Download Raleigh-Durham live feeds and combine ICS
@@ -478,6 +484,10 @@ jobs:
         curl -sL "https://calendar.google.com/calendar/ical/c_j40ldpocctr71k99n0n2lr9c14%40group.calendar.google.com/public/basic.ics" -o calendar_c_j40ldpocctr71k99n0n2lr9c14_40group_cale.ics || true
         curl -sL "https://gardens.duke.edu/events/?ical=1" -o gardens.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/lgbtqcenterofdurham.org_qb71v8n48d0a304sq7dtm89f84%40group.calendar.google.com/public/basic.ics" -o calendar_lgbtqcenterofdurham_org_qb71v8n48d0a304sq.ics || true
+        curl -sL "https://calendar.google.com/calendar/ical/e299fb559498ba8fef0f629f438f848f53d0b4bb946a74989b44f271146a12e5%40group.calendar.google.com/public/basic.ics" -o durham_resistance_1.ics || true
+        curl -sL "https://calendar.google.com/calendar/ical/41d85e1478a55e3b4adbf2e4951c5be9f6e49241ac55a65427c71d252849bf1c%40group.calendar.google.com/public/basic.ics" -o durham_resistance_2.ics || true
+        curl -sL "https://calendar.google.com/calendar/ical/f511c08827b961733168ea93761e472cd12de35e813c3a73af3e44c56b7fe53d%40group.calendar.google.com/public/basic.ics" -o durham_resistance_3.ics || true
+        curl -sL "https://calendar.google.com/calendar/ical/b32e7018b18e1a8650f0d178e5d8314fd6664c368233eead570b44e368f882c9%40group.calendar.google.com/public/basic.ics" -o durham_resistance_4.ics || true
         cd ../..
         python scripts/combine_ics.py --input-dir cities/raleighdurham --output cities/raleighdurham/combined.ics --name "Raleigh-Durham Community Calendar"
 

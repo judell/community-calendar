@@ -276,6 +276,16 @@ SOURCE_NAMES = {
     'scrap_exchange': 'The Scrap Exchange',
     'keep_durham_beautiful': 'Keep Durham Beautiful',
     'haw_river_assembly': 'Haw River Assembly',
+    'catscradle': 'Cat's Cradle',
+    'motorco': 'Motorco Music Hall',
+    'carolina_theatre': 'Carolina Theatre',
+    'carolina_performing_arts': 'Carolina Performing Arts',
+    'duke_arts': 'Duke Arts',
+    'raleigh_little_theatre': 'Raleigh Little Theatre',
+    'durham_resistance_1': 'Durham Resistance Hub',
+    'durham_resistance_2': 'Durham Resistance Hub',
+    'durham_resistance_3': 'Durham Resistance Hub',
+    'durham_resistance_4': 'Durham Resistance Hub',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
