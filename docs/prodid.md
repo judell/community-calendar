@@ -7,11 +7,11 @@ used across all city feeds, identified by their PRODID header.
 
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
-| **Meetup** | ICS export from meetup.com groups. | davis, petaluma, raleighdurham, santarosa, toronto | 112 |
-| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, petaluma, raleighdurham, santarosa, toronto | 45 |
+| **Meetup** | ICS export from meetup.com groups. | davis, petaluma, raleighdurham, santarosa, toronto | 114 |
+| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, petaluma, raleighdurham, santarosa, toronto | 46 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | raleighdurham, santarosa | 33 |
 | **Google Calendar** | Public Google Calendar ICS export. | bloomington, petaluma, raleighdurham, santarosa, toronto | 20 |
-| **Tockify** | Embeddable calendar widget with public ICS feeds. | bloomington, petaluma, toronto | 7 |
+| **Tockify** | Embeddable calendar widget with public ICS feeds. | bloomington, petaluma, santarosa, toronto | 8 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 6 |
 | **Modern Events Calendar (WordPress)** | WordPress plugin by Webnus. PRODID references wp-events-plugin.com. | petaluma, raleighdurham, toronto | 4 |
 | **GrowthZone** | Chamber of commerce / association management platform. | petaluma, raleighdurham | 4 |
@@ -24,7 +24,7 @@ used across all city feeds, identified by their PRODID header.
 
 ## Detail
 
-### Meetup (112 feeds)
+### Meetup (114 feeds)
 
 ICS export from meetup.com groups.
 
@@ -34,17 +34,17 @@ ICS export from meetup.com groups.
 
 **raleighdurham** (31): meetup_adventures, meetup_all_things_ai, meetup_all_things_open_rtp_meetup, meetup_blacks_in_tech_bit_rdu_durham_raleigh_meetup, meetup_chad2015, meetup_chicktech_rdu, meetup_code_for_america, meetup_csa_triangle, meetup_data_science_raleigh, meetup_discover_durham_together, meetup_downtown_techies_durham, meetup_durham_geeks, meetup_durham_writers, meetup_futureofdata_triangle, meetup_modern_web_triangle, meetup_outdoor_flow_yogis, meetup_plum_village_meditation, meetup_pydata_triangle, meetup_raleigh_ai_ml_cv, meetup_raleigh_triangle_activities, meetup_raleigh_wordpress_meetup_group, meetup_research_triangle_analysts, meetup_splatspace, meetup_triangle_board_games, meetup_triangle_devops, meetup_triangle_devs, meetup_triangle_techbreakfast, meetup_triangle_transitional, meetup_triangleai, meetup_tripython, meetup_yoga_in_nature
 
-**santarosa** (8): meetup_boomers, meetup_creativity, meetup_go_wild_hikers, meetup_scottish_dancing, meetup_shutupandwrite, meetup_toastmasters, meetup_womens_wine_club, meetup_yoga
+**santarosa** (10): meetup_amorc, meetup_boomers, meetup_creativity, meetup_go_wild_hikers, meetup_sarogn, meetup_scottish_dancing, meetup_shutupandwrite, meetup_toastmasters, meetup_womens_wine_club, meetup_yoga
 
 **toronto** (51): meetup_20s30s_social, meetup_3d_printing, meetup_ai_ml, meetup_arts_crafts, meetup_arts_culture, meetup_bike_toronto, meetup_board_games_to, meetup_book_club_abcd, meetup_bruce_trail, meetup_canoe_trippers, meetup_devops, meetup_experience_to, meetup_founders_running, meetup_gta_hiking, meetup_heavy_boardgames, meetup_high_park_yoga, meetup_hiking_boots, meetup_hiking_network, meetup_improv_friends, meetup_improv_to, meetup_jpn_eng_exchange, meetup_lang_exchange_to, meetup_little_sunbeams, meetup_medieval_sca, meetup_mindful_movement, meetup_mini_me, meetup_movies_social, meetup_ms_reactor, meetup_photography_to, meetup_postapoc_books, meetup_postgres_to, meetup_python_to, meetup_sai_dham_volunteer, meetup_salsa_gta, meetup_scifi_books, meetup_silent_books, meetup_singles_social, meetup_soul_city, meetup_sup_kayak, meetup_tech_stack, meetup_techto, meetup_tile_language, meetup_toronto_dads, meetup_toronto_history_walks, meetup_toronto_paddlers, meetup_toronto_wellness, meetup_torontobabel, meetup_torontojs, meetup_try_new_things, meetup_wilderness_union, meetup_women_biz
 
-### The Events Calendar (WordPress) (45 feeds)
+### The Events Calendar (WordPress) (46 feeds)
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **bloomington** (1): bgc_bloomington
 
-**petaluma** (2): mcnears, polly_klaas
+**petaluma** (3): bigeasy, mcnears, polly_klaas
 
 **raleighdurham** (16): ackland_art, aps_durham, downtown_durham, duke_gardens, durham_central_park, hope_animal_rescue, morehead_planetarium, nasher_museum, nc_botanical_garden, nc_humanities, nc_natural_sciences, nc_wildlife_federation, resilient_durham, second_chance_pets, transitions_lifecare, triangle_land
 
@@ -74,13 +74,15 @@ Public Google Calendar ICS export.
 
 **toronto** (3): cita_local_events, cita_seminars, cita_special_events
 
-### Tockify (7 feeds)
+### Tockify (8 feeds)
 
 Embeddable calendar widget with public ICS feeds.
 
 **bloomington** (1): bloomington_arts
 
 **petaluma** (2): griffo, petaluma_downtown
+
+**santarosa** (1): rileystreet_art
 
 **toronto** (4): distillery_events, jamaalmyers, st_lawrence_na, torevent
 
@@ -145,3 +147,13 @@ Events generated by Go ical library.
 Library discovery platform with event listings.
 
 **toronto** (1): tpl_events
+
+## Unclassified
+
+PRODIDs not yet mapped to a platform. If these are third-party platforms,
+add a pattern to `PLATFORM_MAP` in `scripts/prodid.py`. If they are our
+own scrapers, add a pattern to `OUR_SCRAPERS`.
+
+| PRODID | City | Feeds |
+|--------|------|-------|
+| `-//Santa Rosa Junior College//NONSGML v1.0//EN` | santarosa | srjc |
