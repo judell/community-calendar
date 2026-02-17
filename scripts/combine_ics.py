@@ -286,6 +286,14 @@ SOURCE_NAMES = {
     'durham_resistance_2': 'Durham Resistance',
     'durham_resistance_3': 'Durham Resistance',
     'durham_resistance_4': 'Durham Resistance',
+    'bike_durham': 'Bike Durham',
+    'triangle_cycling': 'Triangle Cycling',
+    'gizmo_brew_works': 'Gizmo Brew Works',
+    'lgbtq_center_durham': 'LGBTQ Center of Durham',
+    'eno_river': 'Eno River Association',
+    'new_hope_bird_alliance': 'New Hope Bird Alliance',
+    'wake_audubon': 'Wake Audubon',
+    'sw_durham_rotary': 'SW Durham Rotary',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -384,6 +392,14 @@ SOURCE_URLS = {
     'durham_resistance_2': 'https://durhamresistance.com/calendar',
     'durham_resistance_3': 'https://durhamresistance.com/calendar',
     'durham_resistance_4': 'https://durhamresistance.com/calendar',
+    'bike_durham': 'https://bikedurham.org/events',
+    'triangle_cycling': 'https://www.trianglecycling.org/',
+    'gizmo_brew_works': 'https://gizmobrewworks.com/durham-taproom/',
+    'lgbtq_center_durham': 'https://www.lgbtqcenterofdurham.org/',
+    'eno_river': 'https://www.enoriver.org/events/',
+    'new_hope_bird_alliance': 'https://newhopeaudubon.org/events/',
+    'wake_audubon': 'https://www.wakeaudubon.org/events',
+    'sw_durham_rotary': 'https://portal.clubrunner.ca/3674',
 }
 
 
