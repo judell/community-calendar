@@ -282,10 +282,10 @@ SOURCE_NAMES = {
     'carolina_performing_arts': 'Carolina Performing Arts',
     'duke_arts': 'Duke Arts',
     'raleigh_little_theatre': 'Raleigh Little Theatre',
-    'durham_resistance_1': 'Durham Resistance Hub',
-    'durham_resistance_2': 'Durham Resistance Hub',
-    'durham_resistance_3': 'Durham Resistance Hub',
-    'durham_resistance_4': 'Durham Resistance Hub',
+    'durham_resistance_1': 'Durham Resistance',
+    'durham_resistance_2': 'Durham Resistance',
+    'durham_resistance_3': 'Durham Resistance',
+    'durham_resistance_4': 'Durham Resistance',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -380,6 +380,10 @@ SOURCE_URLS = {
     'scrap_exchange': 'https://scrapexchange.org/tsecalendar',
     'keep_durham_beautiful': 'https://keepdurhambeautiful.org/events',
     'haw_river_assembly': 'https://hawriver.org/events',
+    'durham_resistance_1': 'https://durhamresistance.com/calendar',
+    'durham_resistance_2': 'https://durhamresistance.com/calendar',
+    'durham_resistance_3': 'https://durhamresistance.com/calendar',
+    'durham_resistance_4': 'https://durhamresistance.com/calendar',
 }
 
 
