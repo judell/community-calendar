@@ -26,6 +26,7 @@ import json
 import logging
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from typing import Any, Optional
 
@@ -47,8 +48,8 @@ class CatsCradleScraper(BaseScraper):
     timezone = "America/New_York"
 
     RSS_URL = "https://catscradle.com/events/feed/"
-    # RSS feed has paginated pages: /events/feed/?paged=2, etc.
-    MAX_PAGES = 5
+    # Pagination is broken (all pages return the same 115 entries), so fetch only page 1.
+    MAX_PAGES = 1
 
     VENUE_ADDRESSES = {
         "cats-cradle": "Cat's Cradle, 300 E Main St, Carrboro, NC 27510",
@@ -65,33 +66,51 @@ class CatsCradleScraper(BaseScraper):
         super().__init__()
 
     def fetch_events(self) -> list[dict[str, Any]]:
-        """Fetch events from RSS feed. Uses RSS data directly (title, date,
-        link, venue from URL slug) rather than visiting each detail page for
-        JSON-LD, which took 6+ minutes for ~560 pages."""
-        all_entries = []
-        for page in range(1, self.MAX_PAGES + 1):
-            url = self.RSS_URL if page == 1 else f"{self.RSS_URL}?paged={page}"
-            self.logger.info(f"Fetching RSS page {page}: {url}")
-            feed = feedparser.parse(url)
-            if not feed.entries:
-                break
-            all_entries.extend(feed.entries)
-            self.logger.info(f"  Got {len(feed.entries)} entries (total: {len(all_entries)})")
+        """Fetch events from RSS feed, then visit each detail page for JSON-LD
+        to get actual event dates (RSS published dates are post dates, not
+        event dates). With pagination broken (all pages = same 115 entries),
+        this fetches ~115 detail pages in ~35 seconds."""
+        self.logger.info(f"Fetching RSS: {self.RSS_URL}")
+        feed = feedparser.parse(self.RSS_URL)
+        self.logger.info(f"RSS entries: {len(feed.entries)}")
 
-        self.logger.info(f"Total RSS entries: {len(all_entries)}")
+        # Deduplicate by URL (pagination bug returns duplicates)
+        seen_urls = set()
+        unique_entries = []
+        for entry in feed.entries:
+            link = entry.get('link', '')
+            if link not in seen_urls:
+                seen_urls.add(link)
+                unique_entries.append(entry)
+        self.logger.info(f"Unique entries: {len(unique_entries)}")
 
-        events = []
-        for entry in all_entries:
+        # Filter by venue before fetching detail pages
+        filtered = []
+        for entry in unique_entries:
             link = entry.get('link', '')
             venue_slug = self._extract_venue_slug(link)
-
             if self.venue_filter and venue_slug != self.venue_filter:
                 continue
+            filtered.append((entry, link, venue_slug))
 
-            event = self._parse_rss_entry(entry, venue_slug)
-            if event:
-                events.append(event)
+        self.logger.info(f"Fetching {len(filtered)} detail pages (parallel)...")
+        events = []
 
+        def fetch_one(item):
+            entry, link, venue_slug = item
+            event = self._fetch_event_jsonld(link, venue_slug)
+            if not event:
+                event = self._parse_rss_entry(entry, venue_slug)
+            return event
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = {executor.submit(fetch_one, item): item for item in filtered}
+            for future in as_completed(futures):
+                event = future.result()
+                if event:
+                    events.append(event)
+
+        self.logger.info(f"Fetched {len(events)} events from detail pages")
         return events
 
     def _extract_venue_slug(self, url: str) -> str:
