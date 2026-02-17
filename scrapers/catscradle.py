@@ -65,8 +65,9 @@ class CatsCradleScraper(BaseScraper):
         super().__init__()
 
     def fetch_events(self) -> list[dict[str, Any]]:
-        """Fetch events from RSS feed, then get dates from JSON-LD on detail pages."""
-        # Collect all RSS entries across pages
+        """Fetch events from RSS feed. Uses RSS data directly (title, date,
+        link, venue from URL slug) rather than visiting each detail page for
+        JSON-LD, which took 6+ minutes for ~560 pages."""
         all_entries = []
         for page in range(1, self.MAX_PAGES + 1):
             url = self.RSS_URL if page == 1 else f"{self.RSS_URL}?paged={page}"
@@ -82,23 +83,14 @@ class CatsCradleScraper(BaseScraper):
         events = []
         for entry in all_entries:
             link = entry.get('link', '')
-
-            # Extract venue slug from URL path
-            # URL format: /event/{slug}/{venue-slug}/{city-state}/
             venue_slug = self._extract_venue_slug(link)
 
-            # Apply venue filter if specified
             if self.venue_filter and venue_slug != self.venue_filter:
                 continue
 
-            # Fetch JSON-LD from the event detail page
-            event = self._fetch_event_jsonld(link, venue_slug)
-            if not event:
-                # Fall back to RSS entry data if JSON-LD missing/unparseable
-                event = self._parse_rss_entry(entry, venue_slug)
+            event = self._parse_rss_entry(entry, venue_slug)
             if event:
                 events.append(event)
-            time.sleep(0.3)
 
         return events
 
