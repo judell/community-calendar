@@ -68,7 +68,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
-| **Buskirk-Chumley Theater** | `buskirkchumley.org/events/` | BLOCKED | Site blocks scrapers (403); RSS feed limited to 3 items |
+| **Buskirk-Chumley Theater** | `buskirkchumley.org/events/` | DONE | `buskirk_chumley.py` scraper (~38 events) |
 | **The Bishop** | `thebishopbar.com/events` | DONE | `the_bishop.py` scraper |
 | **IU Auditorium (public site)** | `iuauditorium.com/events` | SKIP | Covered by LiveWhale feed |
 
@@ -340,9 +340,9 @@ These groups have working ICS feeds but no upcoming events as of 2026-02-17:
 
 ### High-Priority Scraper Candidates
 
-| Source | URL | Reason Blocked | Priority |
-|--------|-----|----------------|----------|
-| Buskirk-Chumley Theater | `buskirkchumley.org/events/` | 403 blocks scrapers | HIGH - major venue |
+| Source | URL | Status | Priority |
+|--------|-----|--------|----------|
+| Buskirk-Chumley Theater | `buskirkchumley.org/events/` | ✅ DONE | HIGH - major venue |
 | WonderLab Museum | `wonderlab.org/events/` | Cloudflare challenge | HIGH - family events |
 | WFHB Community Calendar | `wfhb.org/calendar/` | mod_security blocks | MEDIUM - community radio |
 

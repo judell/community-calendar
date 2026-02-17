@@ -296,6 +296,7 @@ SOURCE_NAMES = {
     'sw_durham_rotary': 'SW Durham Rotary',
     'durham_gov': 'City of Durham',
     'durham_gov_community': 'City of Durham',
+    'buskirk_chumley': 'Buskirk-Chumley Theater',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
