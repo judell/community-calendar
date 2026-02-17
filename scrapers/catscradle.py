@@ -93,6 +93,9 @@ class CatsCradleScraper(BaseScraper):
 
             # Fetch JSON-LD from the event detail page
             event = self._fetch_event_jsonld(link, venue_slug)
+            if not event:
+                # Fall back to RSS entry data if JSON-LD missing/unparseable
+                event = self._parse_rss_entry(entry, venue_slug)
             if event:
                 events.append(event)
             time.sleep(0.3)
@@ -144,6 +147,36 @@ class CatsCradleScraper(BaseScraper):
         self.logger.warning(f"No JSON-LD Event found at {url}")
         return None
 
+    def _parse_rss_entry(self, entry, venue_slug: str) -> Optional[dict[str, Any]]:
+        """Fall back to RSS entry data when JSON-LD is missing."""
+        title = entry.get('title', '')
+        if not title:
+            return None
+        published = entry.get('published_parsed')
+        if not published:
+            return None
+        dtstart = datetime(*published[:6])
+        return {
+            'title': title,
+            'dtstart': dtstart,
+            'dtend': dtstart + timedelta(hours=3),
+            'url': entry.get('link', ''),
+            'location': self.VENUE_ADDRESSES.get(venue_slug, venue_slug),
+            'description': '',
+        }
+
+    @staticmethod
+    def _parse_iso_date(date_str: str) -> Optional[datetime]:
+        """Parse ISO date string, handling offset formats like -0400 that
+        Python < 3.11 fromisoformat() doesn't support."""
+        # Insert colon in timezone offset if missing (e.g., -0400 -> -04:00)
+        date_str = re.sub(r'([+-]\d{2})(\d{2})$', r'\1:\2', date_str)
+        try:
+            dt = datetime.fromisoformat(date_str)
+            return dt.replace(tzinfo=None)
+        except ValueError:
+            return None
+
     def _parse_jsonld_event(self, data: dict, url: str, venue_slug: str) -> Optional[dict[str, Any]]:
         """Parse a JSON-LD Event object into our event dict format."""
         event_type = data.get('@type', '')
@@ -162,11 +195,8 @@ class CatsCradleScraper(BaseScraper):
         if not start_str:
             return None
 
-        try:
-            dtstart = datetime.fromisoformat(start_str)
-            # Strip timezone info for naive datetime (BaseScraper handles timezone)
-            dtstart = dtstart.replace(tzinfo=None)
-        except ValueError:
+        dtstart = self._parse_iso_date(start_str)
+        if not dtstart:
             self.logger.warning(f"Could not parse startDate: {start_str}")
             return None
 
@@ -174,10 +204,7 @@ class CatsCradleScraper(BaseScraper):
         dtend = None
         end_str = data.get('endDate', '')
         if end_str:
-            try:
-                dtend = datetime.fromisoformat(end_str).replace(tzinfo=None)
-            except ValueError:
-                pass
+            dtend = self._parse_iso_date(end_str)
         if not dtend:
             dtend = dtstart + timedelta(hours=3)
 
