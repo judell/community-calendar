@@ -299,6 +299,8 @@ SOURCE_NAMES = {
     'buskirk_chumley': 'Buskirk-Chumley Theater',
     'comedy_attic': 'The Comedy Attic',
     'the_bishop': 'The Bishop',
+    'peoples_market': "People's Market",
+    'lotusfest': 'Lotus Festival',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.

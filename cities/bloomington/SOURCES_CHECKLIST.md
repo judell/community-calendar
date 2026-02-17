@@ -119,13 +119,13 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 |--------|-----|--------|-------|
 | **Winter Farmers' Market** | `bloomingtonwinterfarmersmarket.com/` | PENDING | Seasonal |
 | **Community Farmers' Market** | `bloomington.in.gov/farmers-market` | PENDING | City site |
-| **People's Market** | `peoplesmarketbtown.org/gatherings` | PENDING | Has per-event ICS |
+| **People's Market** | `peoplesmarketbtown.org/gatherings` | DONE | Squarespace scraper (~10 events) |
 
 ### Festivals
 
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
-| **Lotus Festival** | `lotusfest.org/schedule/` | PENDING | Seasonal (fall) |
+| **Lotus Festival** | `lotusfest.org/events/?ical=1` | DONE | ICS feed (~7 events) |
 
 ### Newspapers / Journalism
 
