@@ -116,7 +116,7 @@ Current cities and their known aggregators:
 - **Santa Rosa:** North Bay Bohemian, Press Democrat
 - **Toronto:** NOW Toronto, Toronto Events (Tockify)
 
-To add your city or flag an aggregator, [open an issue](https://github.com/judell/community-calendar/issues/new?template=add-city-or-aggregator.yml). Just name your city and any aggregators you know about — we'll help you figure out the rest.
+To add your city or flag an aggregator, [open an issue](https://github.com/judell/community-calendar/issues/new?template=add-city-or-aggregator.md). Just name your city and any aggregators you know about — we'll help you figure out the rest.
 
 For technical details on how deduplication and ordering work, see [Deduplication and Event Ordering](deduplication.md).
 
