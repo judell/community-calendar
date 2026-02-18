@@ -69,6 +69,24 @@
         .history-label { font-size: 0.75em; color: #999; }
         .feed-detail { padding-left: 20px; }
         .city-content { padding-left: 10px; }
+
+        .url-section { margin-top: 30px; }
+        .url-section h2 { margin-bottom: 10px; }
+        .url-table { width: 100%; border-collapse: collapse; font-size: 0.9em; margin: 8px 0; }
+        .url-table th { text-align: left; padding: 4px 8px; border-bottom: 2px solid #ddd; }
+        .url-table td { padding: 4px 8px; border-bottom: 1px solid #eee; }
+        .url-table td.num { text-align: right; }
+        .url-table tr.warn td { color: #d32f2f; }
+        .url-table tr.caution td { color: #f57c00; }
+        .url-table a { color: #1976d2; text-decoration: none; word-break: break-all; }
+        .url-table a:hover { text-decoration: underline; }
+        .url-summary { display: flex; gap: 20px; flex-wrap: wrap; margin: 8px 0; }
+        .url-stat { background: #f5f5f5; padding: 8px 14px; border-radius: 6px; }
+        .url-stat .label { font-size: 0.8em; color: #666; }
+        .url-stat .value { font-size: 1.3em; font-weight: 600; }
+        .pct-bar { display: inline-block; height: 8px; border-radius: 4px; vertical-align: middle; }
+        .pct-bar.good { background: #4caf50; }
+        .pct-bar.bad { background: #d32f2f; }
     </style>
 </head>
 <body>
@@ -81,6 +99,151 @@
     </details>
 
     <div id="cities"></div>
+
+    <div class="url-section">
+        <h2>URL Quality</h2>
+        <div id="url-report">Loading...</div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://dzpdualvwspgqghrysyz.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5';
+
+        async function supabaseQuery(query) {
+            const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/exec_sql', {
+                method: 'POST',
+                headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            });
+            if (!res.ok) throw new Error('Query failed: ' + res.status);
+            return res.json();
+        }
+
+        async function loadUrlReport() {
+            const container = document.getElementById('url-report');
+            try {
+                // Use PostgREST directly for each query
+                const headers = { 'apikey': SUPABASE_KEY };
+
+                // Get all events with URLs
+                const eventsRes = await fetch(
+                    SUPABASE_URL + '/rest/v1/events?select=city,url,source&url=not.is.null&url=neq.',
+                    { headers }
+                );
+                if (!eventsRes.ok) throw new Error('Failed to fetch events');
+                const events = await eventsRes.json();
+
+                // Group by city
+                const cities = {};
+                for (const e of events) {
+                    const city = e.city || '(none)';
+                    if (!cities[city]) cities[city] = [];
+                    cities[city].push(e);
+                }
+
+                let html = '';
+                for (const [city, cityEvents] of Object.entries(cities).sort((a, b) => a[0].localeCompare(b[0]))) {
+                    html += renderCityUrls(city, cityEvents);
+                }
+                container.innerHTML = html;
+            } catch (e) {
+                container.textContent = 'Error loading URL report: ' + e.message;
+            }
+        }
+
+        function getDomain(url) {
+            try { return new URL(url).hostname; } catch { return url; }
+        }
+
+        function renderCityUrls(city, events) {
+            const total = events.length;
+            const uniqueUrls = new Set(events.map(e => e.url)).size;
+
+            // Find generic URLs: domains where all events share one URL
+            const byDomain = {};
+            for (const e of events) {
+                const d = getDomain(e.url);
+                if (!byDomain[d]) byDomain[d] = { urls: new Set(), count: 0 };
+                byDomain[d].urls.add(e.url);
+                byDomain[d].count++;
+            }
+
+            const genericDomains = [];
+            let genericCount = 0;
+            for (const [domain, info] of Object.entries(byDomain)) {
+                if (info.urls.size === 1 && info.count > 5) {
+                    genericDomains.push({ domain, events: info.count, url: [...info.urls][0] });
+                    genericCount += info.count;
+                }
+            }
+            genericDomains.sort((a, b) => b.events - a.events);
+
+            // HTTP domains
+            const httpDomains = new Set();
+            let httpCount = 0;
+            for (const e of events) {
+                if (e.url.startsWith('http://')) {
+                    httpDomains.add(getDomain(e.url));
+                    httpCount++;
+                }
+            }
+
+            // Source specificity
+            const bySrc = {};
+            for (const e of events) {
+                const s = e.source || '(none)';
+                if (!bySrc[s]) bySrc[s] = { count: 0, urls: new Set() };
+                bySrc[s].count++;
+                bySrc[s].urls.add(e.url);
+            }
+            const srcRows = Object.entries(bySrc)
+                .map(([src, info]) => ({ source: src, events: info.count, unique: info.urls.size, pct: Math.round(info.urls.size / info.count * 100) }))
+                .sort((a, b) => b.events - a.events)
+                .slice(0, 15);
+
+            const specificPct = Math.round((total - genericCount) / total * 100);
+
+            return `
+                <details>
+                    <summary><span class="city-name">${capitalize(city)}</span>
+                        <span class="city-stats">${total.toLocaleString()} events, ${uniqueUrls.toLocaleString()} unique URLs, ${specificPct}% event-specific</span>
+                    </summary>
+                    <div class="city-content">
+                        <div class="url-summary">
+                            <div class="url-stat"><div class="label">Events</div><div class="value">${total.toLocaleString()}</div></div>
+                            <div class="url-stat"><div class="label">Unique URLs</div><div class="value">${uniqueUrls.toLocaleString()}</div></div>
+                            <div class="url-stat"><div class="label">Generic URL events</div><div class="value" style="color:${genericCount > 0 ? '#d32f2f' : '#4caf50'}">${genericCount} (${100 - specificPct}%)</div></div>
+                            <div class="url-stat"><div class="label">HTTP (not HTTPS)</div><div class="value" style="color:${httpCount > 0 ? '#f57c00' : '#4caf50'}">${httpCount} (${httpDomains.size} domains)</div></div>
+                        </div>
+
+                        ${genericDomains.length ? `
+                        <details>
+                            <summary>Generic URLs (${genericDomains.length} domains, ${genericCount} events)</summary>
+                            <table class="url-table">
+                                <tr><th>Domain</th><th>Events</th><th>URL</th></tr>
+                                ${genericDomains.map(g => `
+                                    <tr class="warn"><td>${g.domain}</td><td class="num">${g.events}</td><td><a href="${g.url}" target="_blank">${g.url.length > 60 ? g.url.substring(0, 60) + '...' : g.url}</a></td></tr>
+                                `).join('')}
+                            </table>
+                        </details>` : ''}
+
+                        <details>
+                            <summary>URL specificity by source</summary>
+                            <table class="url-table">
+                                <tr><th>Source</th><th>Events</th><th>Unique URLs</th><th>Specificity</th></tr>
+                                ${srcRows.map(r => `
+                                    <tr class="${r.pct < 20 ? 'warn' : r.pct < 50 ? 'caution' : ''}">
+                                        <td>${r.source}</td><td class="num">${r.events}</td><td class="num">${r.unique}</td>
+                                        <td class="num"><span class="pct-bar ${r.pct >= 80 ? 'good' : 'bad'}" style="width:${Math.max(4, r.pct * 0.6)}px"></span> ${r.pct}%</td>
+                                    </tr>
+                                `).join('')}
+                            </table>
+                        </details>
+                    </div>
+                </details>
+            `;
+        }
+    </script>
 
     <script>
         async function loadReport() {
@@ -193,6 +356,7 @@
         }
 
         loadReport();
+        loadUrlReport();
     </script>
 </body>
 </html>
