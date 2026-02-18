@@ -1,9 +1,24 @@
-# Deduplication Mechanics in Community Calendar
+# Deduplication and Event Ordering
 
-This document describes the existing deduplication mechanisms at each stage of the pipeline, identifies gaps where cross-source duplicates are not being handled, and proposes a city-level policy system.
+## For Curators: What You Need to Know
+
+**Everything is automatic.** The system handles deduplication and event ordering without configuration.
+
+**Deduplication:** A global policy favors authoritative sources (venues, libraries) over aggregators (newspapers, event platforms). When the same event appears in multiple sources, the primary source version is kept and all contributing sources are preserved in the attribution. This removes ~20% of duplicate events automatically.
+
+**Event ordering:** Within each timeslot, events with similar titles are grouped together. "Family Storytime", "Bilingual Family Storytime", and "Yoga Storytime Series" will appear adjacent rather than scattered randomly. This uses title-similarity clustering, not just alphabetical sort.
+
+**When adding a new source:**
+- If it's a primary source (venue, library, etc.), its events will be kept over aggregator versions
+- If it's an aggregator, add it to the `AGGREGATORS` set in `scripts/combine_ics.py`
+
+**How to identify an aggregator:** pulls events from many other sources (like a newspaper events section), high event count with significant overlap, events often appear elsewhere with better metadata.
+
+---
 
 ## Table of Contents
 
+- [For Curators: What You Need to Know](#for-curators-what-you-need-to-know)
 - [Pipeline Overview](#pipeline-overview)
 - [Stage 1: Individual Scrapers](#stage-1-individual-scrapers)
 - [Stage 2: combine_ics.py](#stage-2-combine_icspy)
@@ -14,12 +29,10 @@ This document describes the existing deduplication mechanisms at each stage of t
 - [Summary: Where Duplicates Are Handled](#summary-where-duplicates-are-handled)
 - [The Root Problem](#the-root-problem)
 - [Current Santa Rosa Duplicate Statistics](#current-santa-rosa-duplicate-statistics)
-- [Key Architectural Problem: Scattered Deduplication Policies](#key-architectural-problem-scattered-deduplication-policies)
 - [Current Solution: Global Aggregator List](#current-solution-global-aggregator-list)
-- [For Curators: What You Need to Know](#for-curators-what-you-need-to-know)
-- [Remaining Work](#remaining-work)
-- [Fuzzy LLM Dedup: Experiment Results](#fuzzy-llm-dedup-experiment-results-2026-02-17)
 - [Event Ordering by Title Similarity](#event-ordering-by-title-similarity)
+- [Fuzzy LLM Dedup: Experiment Results](#fuzzy-llm-dedup-experiment-results-2026-02-17)
+- [Remaining Work](#remaining-work)
 - [Appendix: Future Architecture - Policy Flow](#appendix-future-architecture---policy-flow)
 
 ## Pipeline Overview
@@ -29,7 +42,7 @@ Sources (ICS/Scrapers)
         ↓
     combine_ics.py      ← Dedup by UID (same source only)
         ↓
-    ics_to_json.py      ← No dedup (passthrough)
+    ics_to_json.py      ← Title-similarity ordering
         ↓
     events.json
         ↓
@@ -102,9 +115,9 @@ The `dedupe_cross_source()` function:
 
 **Location:** `scripts/ics_to_json.py`
 
-**Mechanism:** None. Pure conversion from ICS to JSON format.
+**Mechanism:** Converts ICS to JSON. No dedup, but clusters events within each timeslot by title similarity (token-set algorithm, threshold 0.6) so related events appear adjacent in the calendar. See [Event Ordering by Title Similarity](#event-ordering-by-title-similarity).
 
-**Scope:** Passthrough only.
+**Scope:** Ordering only, not dedup.
 
 ---
 
@@ -207,14 +220,14 @@ function dedupeEvents(events) {
 
 ## Summary: Where Duplicates Are Handled
 
-| Stage | Handles Same-Source Dups | Handles Cross-Source Dups |
-|-------|-------------------------|---------------------------|
-| Scrapers | ✅ (within scraper) | ❌ |
-| **combine_ics.py** | ✅ (by UID) | **✅ (by title+date)** |
-| ics_to_json.py | ❌ (passthrough) | ❌ |
-| load-events | ✅ (by source_uid) | ❌ |
-| PostgreSQL | ✅ (UNIQUE constraint) | ❌ |
-| Client (helpers.js) | ✅ | ✅ (safety net) |
+| Stage | Same-Source Dups | Cross-Source Dups | Ordering |
+|-------|-----------------|-------------------|----------|
+| Scrapers | ✅ (within scraper) | ❌ | ❌ |
+| **combine_ics.py** | ✅ (by UID) | **✅ (by title+date)** | ❌ |
+| **ics_to_json.py** | ❌ | ❌ | **✅ (title similarity)** |
+| load-events | ✅ (by source_uid) | ❌ | — |
+| PostgreSQL | ✅ (UNIQUE constraint) | ❌ | — |
+| Client (helpers.js) | ✅ | ✅ (safety net) | ✅ (by start_time) |
 
 ---
 
@@ -249,24 +262,6 @@ Cross-source duplicates occur because:
 | North Bay Bohemian ↔ Press Democrat | 509 |
 | North Bay Bohemian ↔ Sonoma County Library | 310 |
 | Press Democrat ↔ Sonoma County Library | 72 |
-
----
-
-## Key Architectural Problem: Scattered Deduplication Policies
-
-The current system has deduplication logic scattered across multiple locations:
-
-- Individual scrapers implement their own internal deduplication
-- `combine_ics.py` has its own UID-based dedup
-- The edge function has its own source_uid dedup
-- The client has the most sophisticated title+time dedup
-
-**This is wrong.** Each component implementing its own policy means:
-
-1. **Inconsistent behavior** - Different scrapers handle duplicates differently
-2. **No city-level control** - A city can't say "prefer library events over aggregators"
-3. **Policy changes require touching multiple files** - Want to change dedup logic? Edit scrapers, combine_ics.py, helpers.js...
-4. **Testing is difficult** - Hard to verify deduplication works correctly end-to-end
 
 ---
 
@@ -315,25 +310,6 @@ A simple global aggregator list accomplishes the same thing with zero configurat
 |------|--------|-------|--------|
 | Santa Rosa | 6,054 | 4,837 | 1,217 (20%) |
 | Toronto | 5,097 | 4,558 | 539 (11%) |
-
----
-
-## For Curators: What You Need to Know
-
-**Deduplication is automatic.** You don't need to configure anything.
-
-When you add a new source:
-- If it's a primary source (venue, library, etc.), its events will be kept over aggregator versions
-- If it's an aggregator, add it to the `AGGREGATORS` set in `combine_ics.py`
-
-**How to identify an aggregator:**
-- Pulls events from many other sources (like a newspaper events section)
-- High event count with significant overlap with other sources  
-- Events often appear elsewhere with better metadata
-
-**When adding a new aggregator:**
-1. Add the source name to `AGGREGATORS` in `scripts/combine_ics.py`
-2. That's it - duplicates will be handled automatically
 
 ---
 
