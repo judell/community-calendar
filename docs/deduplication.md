@@ -321,6 +321,99 @@ When you add a new source:
 
 1. **Monitoring** - Add logging to track dedup effectiveness over time
 2. **Report enhancement** - Show duplicate counts in the feed health report
+3. **Fuzzy matching for variant titles** - See next section
+
+---
+
+## Fuzzy Title Matching with LLM
+
+### The Problem
+
+Current dedup uses exact matching on `(date, normalized_title[:40])`. This misses duplicates where the same event has different titles across sources:
+
+| Date | Sports Basement (primary) | Bohemian (aggregator) |
+|------|---------------------------|----------------------|
+| 2026-02-22 | `SANTA ROSA RIDE GROUP` | `Group Rides with Sports Basement` |
+| 2026-02-24 | `SANTA ROSA RUN CLUB` | `Tuesday Night Run Club at Sports Basement` |
+| 2026-03-10 | `BROOKS DEMO RUN AT SB SANTA ROSA` | `Brooks Demo Run at Sports Basement Santa Rosa` |
+
+These are clearly the same events but title normalization doesn't catch them.
+
+### Proposed Solution: LLM-Assisted Fuzzy Matching
+
+Use OpenAI or Anthropic API to identify likely duplicates that exact matching misses.
+
+#### Approach 1: Candidate Generation + LLM Verification
+
+```python
+def find_fuzzy_duplicates(events):
+    # Group by date first (cheap filter)
+    by_date = group_by_date(events)
+    
+    candidates = []
+    for date, day_events in by_date.items():
+        if len(day_events) < 2:
+            continue
+        
+        # Find pairs with same location or overlapping keywords
+        for i, e1 in enumerate(day_events):
+            for e2 in day_events[i+1:]:
+                if likely_same_event(e1, e2):  # cheap heuristics
+                    candidates.append((e1, e2))
+    
+    # Ask LLM to verify candidates
+    verified = []
+    for e1, e2 in candidates:
+        if llm_says_same_event(e1, e2):
+            verified.append((e1, e2))
+    
+    return verified
+```
+
+#### Approach 2: Batch LLM Clustering
+
+For each date with multiple events, ask the LLM to cluster them:
+
+```
+Prompt: "Here are events on 2026-02-22. Group any that are the same event:
+
+1. SANTA ROSA RIDE GROUP (Sports Basement, 9am)
+2. Group Rides with Sports Basement (North Bay Bohemian, 9am)
+3. Farmers Market at Plaza (GoLocal, 8am)
+
+Respond with groups like: [[1,2], [3]]"
+```
+
+#### Cost Considerations
+
+- Only run on events sharing the same date AND location (or no location)
+- Cache results (same event pairs don't need re-verification)
+- Run as batch job, not real-time
+- Estimate: ~$0.01-0.05 per city per day with GPT-4o-mini
+
+#### Implementation Location
+
+Add to `combine_ics.py` after exact-match dedup:
+
+```python
+# Phase 1: Exact match dedup (current)
+unique_events = dedupe_cross_source(uid_deduped, input_dir)
+
+# Phase 2: Fuzzy match dedup (new)
+if os.environ.get('ENABLE_FUZZY_DEDUP'):
+    unique_events = dedupe_fuzzy(unique_events)
+```
+
+Gate behind environment variable for gradual rollout.
+
+#### Matching Signals
+
+Beyond title similarity, the LLM can consider:
+- Same date and time
+- Same or similar location
+- Overlapping keywords ("run", "club", "sports basement")
+- One title is substring/expansion of another
+- Same venue mentioned in description
 
 ---
 
