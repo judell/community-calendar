@@ -28,14 +28,7 @@ Primary sources (venues, libraries, etc.) need no special configuration.
 ## Table of Contents
 
 - [For Curators: What You Need to Know](#for-curators-what-you-need-to-know)
-- [Pipeline Overview](#pipeline-overview)
-- [Stage 1: Individual Scrapers](#stage-1-individual-scrapers)
-- [Stage 2: combine_ics.py](#stage-2-combine_icspy)
-- [Stage 3: ics_to_json.py](#stage-3-ics_to_jsonpy)
-- [Stage 4: load-events Edge Function](#stage-4-load-events-edge-function)
-- [Stage 5: PostgreSQL Database](#stage-5-postgresql-database)
-- [Stage 6: JavaScript Client (helpers.js)](#stage-6-javascript-client-helpersjs)
-- [Summary: Where Duplicates Are Handled](#summary-where-duplicates-are-handled)
+- [Pipeline Stages](#pipeline-stages)
 - [The Root Problem](#the-root-problem)
 - [Current Santa Rosa Duplicate Statistics](#current-santa-rosa-duplicate-statistics)
 - [Current Solution: Global Aggregator List](#current-solution-global-aggregator-list)
@@ -44,7 +37,7 @@ Primary sources (venues, libraries, etc.) need no special configuration.
 - [Remaining Work](#remaining-work)
 - [Appendix: Future Architecture - Policy Flow](#appendix-future-architecture---policy-flow)
 
-## Pipeline Overview
+## Pipeline Stages
 
 ```
 Sources (ICS/Scrapers)
@@ -64,7 +57,7 @@ Sources (ICS/Scrapers)
 
 ---
 
-## Stage 1: Individual Scrapers
+### Stage 1: Individual Scrapers
 
 **Location:** `scrapers/*.py`, `scrapers/lib/*.py`
 
@@ -81,7 +74,7 @@ Examples:
 
 ---
 
-## Stage 2: combine_ics.py
+### Stage 2: combine_ics.py
 
 **Location:** `scripts/combine_ics.py`
 
@@ -120,7 +113,7 @@ The `dedupe_cross_source()` function:
 
 ---
 
-## Stage 3: ics_to_json.py
+### Stage 3: ics_to_json.py
 
 **Location:** `scripts/ics_to_json.py`
 
@@ -130,7 +123,7 @@ The `dedupe_cross_source()` function:
 
 ---
 
-## Stage 4: load-events Edge Function
+### Stage 4: load-events Edge Function
 
 **Location:** `supabase/functions/load-events/index.ts`, lines 53-59
 
@@ -162,7 +155,7 @@ const { error } = await supabase
 
 ---
 
-## Stage 5: PostgreSQL Database
+### Stage 5: PostgreSQL Database
 
 **Location:** `supabase/ddl/events.sql`
 
@@ -182,7 +175,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS events_source_source_uid_key
 
 ---
 
-## Stage 6: JavaScript Client (helpers.js)
+### Stage 6: JavaScript Client (helpers.js)
 
 **Location:** `helpers.js`, lines 185-247 (`dedupeEvents` function)
 
@@ -227,7 +220,7 @@ function dedupeEvents(events) {
 
 ---
 
-## Summary: Where Duplicates Are Handled
+### Summary
 
 | Stage | Same-Source Dups | Cross-Source Dups | Ordering |
 |-------|-----------------|-------------------|----------|
