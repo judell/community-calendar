@@ -559,58 +559,37 @@ def get_dedup_key(event):
     return (date_str, normalize_title(title))
 
 
-def load_source_priority(input_dir):
-    """Load source priority from dedup_policy.json if it exists."""
-    policy_file = Path(input_dir) / 'dedup_policy.json'
-    if policy_file.exists():
-        import json
-        try:
-            policy = json.loads(policy_file.read_text())
-            return policy.get('source_priority', [])
-        except Exception as e:
-            print(f"  Warning: Could not load dedup_policy.json: {e}")
-    return []
+# Known aggregators - these get lowest priority in deduplication.
+# When the same event appears in an aggregator AND a primary source,
+# we keep the primary source version.
+AGGREGATORS = {
+    'North Bay Bohemian',
+    'Press Democrat', 
+    'NOW Toronto',
+    'Toronto Events (Tockify)',
+}
 
 
-def get_source_priority_rank(source_name, priority_list):
-    """Get priority rank for a source (lower is higher priority).
-    
-    Sources not in the list get a high rank (low priority).
-    Supports wildcards like 'Meetup:*' to match 'Meetup: Scottish Dancing'.
-    """
-    for i, pattern in enumerate(priority_list):
-        if pattern.endswith('*'):
-            prefix = pattern[:-1]
-            if source_name.startswith(prefix):
-                return i
-        elif source_name == pattern:
-            return i
-    return len(priority_list) + 1000  # Not in list = low priority
+def is_aggregator(source_name):
+    """Check if a source is a known aggregator (low priority for dedup)."""
+    return source_name in AGGREGATORS
 
 
 def dedupe_cross_source(events, input_dir):
     """Deduplicate events across sources using title+date matching.
     
-    When duplicates are found, keeps the event from the highest-priority source
-    (as defined in dedup_policy.json), or the first one encountered if no policy.
+    When duplicates are found, prefers primary sources over aggregators.
+    Among primary sources or among aggregators, keeps the first encountered.
     """
-    priority_list = load_source_priority(input_dir)
-    
     # Group events by dedup key
     groups = {}
     for event in events:
         key = get_dedup_key(event)
-        if not key[1]:  # Skip events with no title
-            if key not in groups:
-                groups[key] = []
-            groups[key].append(event)
-            continue
-            
         if key not in groups:
             groups[key] = []
         groups[key].append(event)
     
-    # For each group, keep the highest-priority event
+    # For each group, keep primary source over aggregator
     unique_events = []
     cross_source_deduped = 0
     
@@ -618,14 +597,10 @@ def dedupe_cross_source(events, input_dir):
         if len(group) == 1:
             unique_events.append(group[0])
         else:
-            # Multiple events with same title+date - pick highest priority
-            if priority_list:
-                # Sort by priority (lower rank = higher priority)
-                group.sort(key=lambda e: get_source_priority_rank(
-                    extract_field(e['content'], 'X-SOURCE') or '', 
-                    priority_list
-                ))
-            # Keep the first (highest priority) event
+            # Multiple events with same title+date
+            # Sort: primary sources first, aggregators last
+            group.sort(key=lambda e: (1 if is_aggregator(extract_field(e['content'], 'X-SOURCE') or '') else 0))
+            # Keep the first (primary source if available)
             unique_events.append(group[0])
             cross_source_deduped += len(group) - 1
     
