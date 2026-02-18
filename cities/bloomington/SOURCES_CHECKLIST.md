@@ -27,6 +27,7 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | Knobstone Hiking Trail Meetup | ICS | ~10 | Meetup group - regional hiking |
 | Bloomington Atheists Meetup | ICS | ~10 | Meetup group - local social/discussion |
 | Bloomington Farmers Market | ICS | ~307 | Google Calendar via city website |
+| Bloomington Bicycle Club | ICS | ~5023 | Google Calendar - cycling rides, weekly events |
 
 ---
 
@@ -364,9 +365,39 @@ These groups have working ICS feeds but no upcoming events as of 2026-02-17:
 | Herald-Times Events | Derivative aggregator |
 | Neighborhood Associations | Sites appear inactive/minimal events |
 
+---
+
+## Discovery Run: 2026-02-18
+
+### New Sources Found
+
+| Source | Events | Status | Notes |
+|--------|--------|--------|-------|
+| **Bloomington Bicycle Club** | ~5023 | ✅ ADDED | Google Calendar - cycling rides, weekly events |
+
+### Sources Evaluated - Not Added
+
+| Source | Reason |
+|--------|--------|
+| BARA (Bloomington Area Runners) | Wix site, no ICS feed |
+| Bloomington Yoga Collective | Squarespace, no ICS export |
+| Bloomington Brewing Co | Squarespace, no ICS export |
+| MaxPreps Bloomington North | Only 4 events (low volume) |
+| MaxPreps Bloomington South | Only 2 events (low volume) |
+
+### Meetup Groups Re-Verified
+
+| Group | Events | Status |
+|-------|--------|--------|
+| Bloomington Atheists | 10 | ✅ Already implemented |
+| Knobstone Hiking Trail | 10 | ✅ Already implemented |
+| All other Bloomington Meetups | 0 | Inactive or ICS disabled |
+
+---
+
 ### Current Coverage Summary
 
-**26 sources implemented** covering:
+**27 sources implemented** covering:
 - University events (IU LiveWhale × 3)
 - City/civic (Parks & Rec, Farmers Market, B-Square × 4, City Gov)
 - Arts/entertainment (Bloomington Arts, Comedy Attic, Bishop, Bluebird)

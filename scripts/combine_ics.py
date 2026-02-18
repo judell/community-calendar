@@ -65,6 +65,7 @@ SOURCE_NAMES = {
     'bgc_bloomington': 'Boys & Girls Club Bloomington',
     'bloomington_gov': 'City of Bloomington',
     'bloomington_arts': 'Bloomington Arts',
+    'calendar_cuc66guoam1hhcqq2rnaniinl8_40group_calend': 'Bloomington Bicycle Club',
     'bluebird': 'The Bluebird',
     'iu_jacobs_music': 'IU Jacobs School of Music',
     'iu_auditorium': 'IU Auditorium',
