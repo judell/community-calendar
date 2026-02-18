@@ -531,6 +531,113 @@ def parse_ics_datetime(dt_str):
         return None
 
 
+def normalize_title(title):
+    """Normalize title for dedup matching: lowercase, alphanumeric only, first 40 chars."""
+    if not title:
+        return ''
+    return ''.join(c.lower() for c in title if c.isalnum())[:40]
+
+
+def extract_field(event_content, field_name):
+    """Extract a field value from VEVENT content, handling line folding."""
+    # Match field, handling continuation lines (start with space/tab)
+    pattern = rf'^{field_name}[^:]*:([^\r\n]+(?:[\r\n]+[ \t][^\r\n]+)*)'
+    match = re.search(pattern, event_content, re.MULTILINE | re.IGNORECASE)
+    if match:
+        # Unfold: remove newline+space/tab
+        value = re.sub(r'[\r\n]+[ \t]', '', match.group(1))
+        # Unescape ICS escapes
+        value = value.replace('\\n', ' ').replace('\\,', ',').replace('\\;', ';').replace('\\\\', '\\')
+        return value.strip()
+    return None
+
+
+def get_dedup_key(event):
+    """Generate dedup key from event: (date, normalized_title)."""
+    date_str = event['dtstart'].strftime('%Y-%m-%d')
+    title = extract_field(event['content'], 'SUMMARY') or ''
+    return (date_str, normalize_title(title))
+
+
+def load_source_priority(input_dir):
+    """Load source priority from dedup_policy.json if it exists."""
+    policy_file = Path(input_dir) / 'dedup_policy.json'
+    if policy_file.exists():
+        import json
+        try:
+            policy = json.loads(policy_file.read_text())
+            return policy.get('source_priority', [])
+        except Exception as e:
+            print(f"  Warning: Could not load dedup_policy.json: {e}")
+    return []
+
+
+def get_source_priority_rank(source_name, priority_list):
+    """Get priority rank for a source (lower is higher priority).
+    
+    Sources not in the list get a high rank (low priority).
+    Supports wildcards like 'Meetup:*' to match 'Meetup: Scottish Dancing'.
+    """
+    for i, pattern in enumerate(priority_list):
+        if pattern.endswith('*'):
+            prefix = pattern[:-1]
+            if source_name.startswith(prefix):
+                return i
+        elif source_name == pattern:
+            return i
+    return len(priority_list) + 1000  # Not in list = low priority
+
+
+def dedupe_cross_source(events, input_dir):
+    """Deduplicate events across sources using title+date matching.
+    
+    When duplicates are found, keeps the event from the highest-priority source
+    (as defined in dedup_policy.json), or the first one encountered if no policy.
+    """
+    priority_list = load_source_priority(input_dir)
+    
+    # Group events by dedup key
+    groups = {}
+    for event in events:
+        key = get_dedup_key(event)
+        if not key[1]:  # Skip events with no title
+            if key not in groups:
+                groups[key] = []
+            groups[key].append(event)
+            continue
+            
+        if key not in groups:
+            groups[key] = []
+        groups[key].append(event)
+    
+    # For each group, keep the highest-priority event
+    unique_events = []
+    cross_source_deduped = 0
+    
+    for key, group in groups.items():
+        if len(group) == 1:
+            unique_events.append(group[0])
+        else:
+            # Multiple events with same title+date - pick highest priority
+            if priority_list:
+                # Sort by priority (lower rank = higher priority)
+                group.sort(key=lambda e: get_source_priority_rank(
+                    extract_field(e['content'], 'X-SOURCE') or '', 
+                    priority_list
+                ))
+            # Keep the first (highest priority) event
+            unique_events.append(group[0])
+            cross_source_deduped += len(group) - 1
+    
+    if cross_source_deduped > 0:
+        print(f"  Cross-source dedup: removed {cross_source_deduped} duplicate events")
+    
+    # Re-sort by start time
+    unique_events.sort(key=lambda x: x['dtstart'].replace(tzinfo=timezone.utc) if x['dtstart'].tzinfo is None else x['dtstart'])
+    
+    return unique_events
+
+
 def extract_events(ics_content, source_name=None, source_id=None, fallback_url=None):
     """Extract VEVENT blocks from ICS content."""
     events = []
@@ -636,18 +743,22 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar",
         return dt
     all_events.sort(key=lambda x: normalize_dt(x['dtstart']))
     
-    # Remove duplicates based on UID
+    # Remove duplicates based on UID (same-source duplicates)
     seen_uids = set()
-    unique_events = []
+    uid_deduped = []
     for event in all_events:
         uid_match = re.search(r'UID:([^\r\n]+)', event['content'])
         if uid_match:
             uid = uid_match.group(1)
             if uid not in seen_uids:
                 seen_uids.add(uid)
-                unique_events.append(event)
+                uid_deduped.append(event)
         else:
-            unique_events.append(event)
+            uid_deduped.append(event)
+    
+    # Cross-source deduplication: group by (date, normalized_title)
+    # Keep the event from the highest-priority source (primary sources over aggregators)
+    unique_events = dedupe_cross_source(uid_deduped, input_dir)
     
     # Build combined ICS
     output = [

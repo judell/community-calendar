@@ -41,33 +41,40 @@ Examples:
 
 ## Stage 2: combine_ics.py
 
-**Location:** `scripts/combine_ics.py`, lines 639-650
+**Location:** `scripts/combine_ics.py`
 
-**Mechanism:** After combining all ICS files for a city, removes duplicates based on UID:
+**Mechanism:** Two-phase deduplication:
 
+### Phase 1: UID-based dedup (same-source duplicates)
 ```python
 # Remove duplicates based on UID
 seen_uids = set()
-unique_events = []
+uid_deduped = []
 for event in all_events:
     uid_match = re.search(r'UID:([^\r\n]+)', event['content'])
     if uid_match:
         uid = uid_match.group(1)
         if uid not in seen_uids:
             seen_uids.add(uid)
-            unique_events.append(event)
+            uid_deduped.append(event)
     else:
-        unique_events.append(event)
+        uid_deduped.append(event)
 ```
 
-**Scope:** Deduplicates events with identical UIDs. 
+### Phase 2: Cross-source dedup (title+date matching)
+```python
+unique_events = dedupe_cross_source(uid_deduped, input_dir)
+```
 
-**Gap:** Cross-source duplicates have DIFFERENT UIDs. For example:
-- Bohemian event UID: `260217UHmG-QHZsEmxyEc-inQ_6w`
-- Press Democrat event UID: `260217_different_hash`
-- Both represent the same "Petaluma Farmers Market" on 2026-02-17
+The `dedupe_cross_source()` function:
+1. Groups events by `(date, normalized_title[:40])`
+2. Loads source priority from `dedup_policy.json` if present
+3. For each group with multiple events, keeps only the highest-priority source
+4. Logs how many duplicates were removed
 
-**This is where ~1,200 duplicates slip through.**
+**Scope:** Now handles BOTH same-source and cross-source duplicates.
+
+**Result:** Santa Rosa went from 6,054 to 4,837 events (~20% reduction).
 
 ---
 
@@ -183,11 +190,11 @@ function dedupeEvents(events) {
 | Stage | Handles Same-Source Dups | Handles Cross-Source Dups |
 |-------|-------------------------|---------------------------|
 | Scrapers | ✅ (within scraper) | ❌ |
-| combine_ics.py | ✅ (by UID) | ❌ |
+| **combine_ics.py** | ✅ (by UID) | **✅ (by title+date)** |
 | ics_to_json.py | ❌ (passthrough) | ❌ |
 | load-events | ✅ (by source_uid) | ❌ |
 | PostgreSQL | ✅ (UNIQUE constraint) | ❌ |
-| **Client (helpers.js)** | ✅ | **✅** |
+| Client (helpers.js) | ✅ | ✅ (safety net) |
 
 ---
 
@@ -315,31 +322,32 @@ The current system has deduplication logic scattered across multiple locations:
 
 ---
 
-## Immediate Actions
+## Implementation Status
 
-### Quick Win: Remove Press Democrat Feed
+### ✅ DONE: Cross-Source Deduplication in combine_ics.py
 
-Eliminates 509 Bohemian↔Press Democrat duplicates immediately:
-
-- Press Democrat has 875 events, but 69% (602) are duplicates
-- Net loss: ~273 unique events
-- Simple workflow change, no code modifications
-
-### Medium-term: Implement City-Level Policy
-
-Add source-priority deduplication in `combine_ics.py`:
+Implemented source-priority deduplication:
 
 1. **Groups events by `(date, normalized_title[:40])`** - same logic as client
-
 2. **Loads city policy** - reads `dedup_policy.json` if present
-
-3. **Applies source priority** - when duplicates found, keep the highest-priority source
-
+3. **Applies source priority** - when duplicates found, keeps highest-priority source
 4. **Removes lower-priority duplicates** before writing combined.ics
 
-This would:
-- Reduce event count by ~20% (1,218 events for Santa Rosa)
-- Eliminate redundant database storage
-- Simplify client-side deduplication
-- Improve page load performance
-- Provide a foundation for consistent, city-controlled deduplication
+**Results for Santa Rosa:**
+- Before: 6,054 events
+- After: 4,837 events
+- Removed: 1,217 duplicates (~20% reduction)
+
+### ✅ DONE: Santa Rosa dedup_policy.json
+
+Created `cities/santarosa/dedup_policy.json` with source priority:
+- Primary venues first (Copperfield's, Barrel Proof, Luther Burbank, etc.)
+- Institutions next (Library, SRJC, Government)
+- Meetup groups
+- Aggregators last (Bohemian, then Press Democrat)
+
+### Remaining Work
+
+1. **Add policies for other cities** - Create `dedup_policy.json` for Petaluma, Toronto, etc.
+2. **Client dedup simplification** - The client `dedupeEvents()` can now be simplified since most duplicates are removed upstream (still needed as safety net)
+3. **Monitoring** - Add logging/metrics to track dedup effectiveness over time
