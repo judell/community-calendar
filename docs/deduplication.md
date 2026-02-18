@@ -446,6 +446,69 @@ This tells us events 1&2 are the same, 4&5 are the same, and 3 is unique.
 - Single call per date is easier to reason about
 - Can fall back to Approach 1 if costs are too high
 
+---
+
+## Implementation Status (2026-02-17)
+
+### What's Been Built
+
+1. **Fuzzy dedup in `combine_ics.py`** using Claude 3.5 Haiku
+   - Batch clustering approach (Approach 2)
+   - Gated by `ENABLE_FUZZY_DEDUP` env var
+   - Requires `ANTHROPIC_API_KEY` in GitHub secrets
+
+2. **Provenance preservation** - both exact and fuzzy dedup now merge sources
+   - `X-SOURCE:Sports Basement, North Bay Bohemian` instead of discarding
+
+3. **Logging to `cities/{city}/fuzzy_dedup.log`**
+   - Each date checked with event count
+   - Each match found
+   - Merged sources
+   - API usage (calls, input/output tokens)
+   - Errors with raw LLM response for debugging
+
+### First Run Results
+
+The fuzzy dedup found matches like:
+```
+Fuzzy match: [2026-02-22] 'Group Rides with Sports Basement' (North Bay Bohemian) -> 'SANTA ROSA RIDE GROUP' (Sports Basement)
+```
+
+These are correct - same event, different titles.
+
+### Issues Found
+
+**False positives** - the LLM is being too aggressive:
+```
+Fuzzy match: [2026-03-20] 'VHS Station (2) - Playback Memory Lab' (library_intercept) -> 'One-on-One Genealogy Research Help' (library_intercept)
+Fuzzy match: [2026-03-27] 'Scanning Station - Playback Memory Lab' (library_intercept) -> 'One-on-One Genealogy Research Help' (library_intercept)
+Fuzzy match: [2026-03-31] 'No classes, District closed' (srjc) -> 'Holiday Closure: Cesar Chavez Day 2026' (sonoma_county_gov)
+```
+
+These are NOT the same events - they just happen on the same day at the same location.
+
+**Occasional JSON parse errors** - LLM sometimes returns malformed JSON:
+```
+Fuzzy dedup error for 2026-03-28: Extra data: line 3 column 1 (char 116)
+```
+
+### Next Steps
+
+1. **Tighten the prompt** - be more explicit about what constitutes "same event":
+   - Same actual gathering, not just same day/location
+   - Different library programs at the same branch are NOT duplicates
+   - School closures and government holidays are NOT the same event
+   - When in doubt, keep them separate
+
+2. **Consider Approach 1** (candidate generation) - pre-filter to only check events that:
+   - Have overlapping significant words in title
+   - Are from different sources (same-source events are already deduped)
+   - This would reduce false positives and API costs
+
+3. **Add confidence threshold** - have LLM return confidence scores, only merge high-confidence matches
+
+4. **Review logs** - analyze `fuzzy_dedup.log` files to tune the prompt based on real-world false positives
+
 #### Cost Considerations
 
 - Only run on events sharing the same date AND location (or no location)
