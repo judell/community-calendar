@@ -2,6 +2,26 @@
 
 This document describes the existing deduplication mechanisms at each stage of the pipeline, identifies gaps where cross-source duplicates are not being handled, and proposes a city-level policy system.
 
+## Table of Contents
+
+- [Pipeline Overview](#pipeline-overview)
+- [Stage 1: Individual Scrapers](#stage-1-individual-scrapers)
+- [Stage 2: combine_ics.py](#stage-2-combine_icspy)
+- [Stage 3: ics_to_json.py](#stage-3-ics_to_jsonpy)
+- [Stage 4: load-events Edge Function](#stage-4-load-events-edge-function)
+- [Stage 5: PostgreSQL Database](#stage-5-postgresql-database)
+- [Stage 6: JavaScript Client (helpers.js)](#stage-6-javascript-client-helpersjs)
+- [Summary: Where Duplicates Are Handled](#summary-where-duplicates-are-handled)
+- [The Root Problem](#the-root-problem)
+- [Current Santa Rosa Duplicate Statistics](#current-santa-rosa-duplicate-statistics)
+- [Key Architectural Problem: Scattered Deduplication Policies](#key-architectural-problem-scattered-deduplication-policies)
+- [Current Solution: Global Aggregator List](#current-solution-global-aggregator-list)
+- [For Curators: What You Need to Know](#for-curators-what-you-need-to-know)
+- [Remaining Work](#remaining-work)
+- [Fuzzy LLM Dedup: Experiment Results](#fuzzy-llm-dedup-experiment-results-2026-02-17)
+- [Event Ordering by Title Similarity](#event-ordering-by-title-similarity)
+- [Appendix: Future Architecture - Policy Flow](#appendix-future-architecture---policy-flow)
+
 ## Pipeline Overview
 
 ```
