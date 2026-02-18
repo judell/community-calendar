@@ -22,8 +22,9 @@
       <Text
         when="{window.getSnippet($props.event.description)}"
         fontSize="$fontSize-xs"
-        color="$color-text-secondary"
-        tooltip="{$props.event.description}"
+        color="$color-primary"
+        cursor="pointer"
+        onClick="detailDialog.open($props.event)"
         value="{window.getSnippet($props.event.description)}"
       />
       <HStack verticalAlignment="center" gap="$space-2">
@@ -40,4 +41,20 @@
       </HStack>
     </VStack>
   </Card>
+
+  <ModalDialog id="detailDialog" title="{$param.title}">
+    <VStack gap="$space-2">
+      <Text
+        fontSize="$fontSize-xs"
+        color="$color-text-secondary"
+        value="{window.formatDayOfWeek($param.start_time) + ' ' + window.formatMonthDay($param.start_time) + (window.formatTime($param.start_time) ? ', ' + window.formatTime($param.start_time) : '')}"
+      />
+      <Text when="{$param.location}" fontSize="$fontSize-sm" value="{$param.location}" />
+      <Text when="{$param.source}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-tertiary" value="{'Source: ' + $param.source}" />
+      <Markdown when="{$param.description}" content="{$param.description}" />
+      <Link when="{$param.url}" to="{$param.url}" target="_blank">
+        <Text fontSize="$fontSize-sm" value="Event link" />
+      </Link>
+    </VStack>
+  </ModalDialog>
 </Component>
