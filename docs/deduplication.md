@@ -250,106 +250,77 @@ The current system has deduplication logic scattered across multiple locations:
 
 ---
 
-## Goal: City-Level Deduplication Policy
+## Current Solution: Global Aggregator List
 
-**Deduplication policy should flow down from the city level and affect all calendars the same way, reliably.**
+Rather than per-city policy files, we use a simple global rule: **primary sources beat aggregators**.
 
-### Design Principles
+### How It Works
 
-1. **Single policy definition per city** - One file (e.g., `cities/{city}/dedup_policy.json`) defines that city's deduplication rules
+`combine_ics.py` has a global `AGGREGATORS` set:
 
-2. **Policy applied in one place** - `combine_ics.py` is the natural location since it already processes all sources for a city
-
-3. **Scrapers should NOT deduplicate cross-source** - Scrapers may still dedupe internal pagination issues, but should not make policy decisions about which sources win
-
-4. **Client dedup becomes a safety net** - The client-side `dedupeEvents()` remains as a fallback for edge cases, but should rarely need to merge events if upstream dedup works correctly
-
-### Proposed Policy Structure
-
-```json
-// cities/santarosa/dedup_policy.json
-{
-  "match_key": "date+normalized_title_40",
-  "source_priority": [
-    // Highest priority first - when duplicates found, keep the highest priority source
-    "Copperfield's Books",
-    "Barrel Proof Lounge",
-    "Luther Burbank Center",
-    "Charles M. Schulz Museum",
-    "Sonoma County Library",
-    "Santa Rosa Junior College",
-    "Sonoma County Government",
-    "City of Santa Rosa Legistar",
-    "GoLocal Cooperative",
-    "Meetup:*",
-    "North Bay Bohemian",
-    "Press Democrat"
-  ],
-  "always_keep": [
-    // Sources that are never deduplicated away, even if lower priority
-    // (useful for sources with unique metadata)
-  ]
+```python
+AGGREGATORS = {
+    'North Bay Bohemian',
+    'Press Democrat', 
+    'NOW Toronto',
+    'Toronto Events (Tockify)',
 }
 ```
 
-### Implementation Plan
+When duplicates are found (same title + date), the code keeps the non-aggregator version:
 
-1. **Phase 1: Define policy format**
-   - Create JSON schema for dedup policies
-   - Add sample policy for Santa Rosa
+```python
+def is_aggregator(source_name):
+    return source_name in AGGREGATORS
 
-2. **Phase 2: Implement in combine_ics.py**
-   - Load city's dedup_policy.json if present
-   - After combining all ICS files, group by match_key
-   - For each group, keep only the highest-priority source
-   - Log what was deduplicated for debugging
+# Sort: primary sources first, aggregators last
+group.sort(key=lambda e: (1 if is_aggregator(source) else 0))
+# Keep the first (primary source if available)
+unique_events.append(group[0])
+```
 
-3. **Phase 3: Remove scattered dedup logic**
-   - Audit scrapers for cross-source dedup logic (keep internal dedup only)
-   - Simplify client-side dedupeEvents() since most work happens upstream
+### Why Not Per-City Policies?
 
-4. **Phase 4: Per-city rollout**
-   - Start with Santa Rosa (most duplicates)
-   - Validate results, tune policy
-   - Roll out to other cities
+We initially planned per-city `dedup_policy.json` files with source priority lists. But we realized:
 
-### Benefits
+1. The only rule that matters is "aggregators go last"
+2. Everything else (venue vs library vs meetup) doesn't matter - those sources rarely overlap
+3. Per-city files would just list every source in arbitrary order
 
-- **Predictable behavior** - Same policy applies everywhere
-- **Easy to tune** - Edit one JSON file to change priority
-- **Testable** - Can write tests that verify policy is applied correctly
-- **City-specific** - Different cities can have different policies (e.g., Toronto might prioritize NOW Toronto over other aggregators)
+A simple global aggregator list accomplishes the same thing with zero configuration.
+
+### Results
+
+| City | Before | After | Removed |
+|------|--------|-------|--------|
+| Santa Rosa | 6,054 | 4,837 | 1,217 (20%) |
+| Toronto | 5,097 | 4,558 | 539 (11%) |
 
 ---
 
-## Implementation Status
+## For Curators: What You Need to Know
 
-### ✅ DONE: Cross-Source Deduplication in combine_ics.py
+**Deduplication is automatic.** You don't need to configure anything.
 
-Implemented source-priority deduplication:
+When you add a new source:
+- If it's a primary source (venue, library, etc.), its events will be kept over aggregator versions
+- If it's an aggregator, add it to the `AGGREGATORS` set in `combine_ics.py`
 
-1. **Groups events by `(date, normalized_title[:40])`** - same logic as client
-2. **Loads city policy** - reads `dedup_policy.json` if present
-3. **Applies source priority** - when duplicates found, keeps highest-priority source
-4. **Removes lower-priority duplicates** before writing combined.ics
+**How to identify an aggregator:**
+- Pulls events from many other sources (like a newspaper events section)
+- High event count with significant overlap with other sources  
+- Events often appear elsewhere with better metadata
 
-**Results for Santa Rosa:**
-- Before: 6,054 events
-- After: 4,837 events
-- Removed: 1,217 duplicates (~20% reduction)
+**When adding a new aggregator:**
+1. Add the source name to `AGGREGATORS` in `scripts/combine_ics.py`
+2. That's it - duplicates will be handled automatically
 
-### ✅ DONE: Santa Rosa dedup_policy.json
+---
 
-Created `cities/santarosa/dedup_policy.json` with source priority:
-- Primary venues first (Copperfield's, Barrel Proof, Luther Burbank, etc.)
-- Institutions next (Library, SRJC, Government)
-- Meetup groups
-- Aggregators last (Bohemian, then Press Democrat)
+## Remaining Work
 
-### Remaining Work
-
-1. **Add policies for other cities** - Create `dedup_policy.json` for Petaluma, Toronto, etc.
-2. **Monitoring** - Add logging/metrics to track dedup effectiveness over time
+1. **Monitoring** - Add logging to track dedup effectiveness over time
+2. **Report enhancement** - Show duplicate counts in the feed health report
 
 ### Client Dedup Retained as Safety Net
 
