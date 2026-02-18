@@ -4,15 +4,24 @@
 
 **Everything is automatic.** The system handles deduplication and event ordering without configuration.
 
-**Deduplication:** A global policy favors authoritative sources (venues, libraries) over aggregators (newspapers, event platforms). When the same event appears in multiple sources, the primary source version is kept and all contributing sources are preserved in the attribution. This removes ~20% of duplicate events automatically.
+**Deduplication:** A global policy favors authoritative sources (venues, libraries) over aggregators (newspapers, event platforms). When the same event appears in multiple sources, the primary source version is kept and all contributing sources are preserved in the attribution.
 
 **Event ordering:** Within each timeslot, events with similar titles are grouped together. "Family Storytime", "Bilingual Family Storytime", and "Yoga Storytime Series" will appear adjacent rather than scattered randomly. This uses title-similarity clustering, not just alphabetical sort.
 
-**When adding a new source:**
-- If it's a primary source (venue, library, etc.), its events will be kept over aggregator versions
-- If it's an aggregator, add it to the `AGGREGATORS` set in `scripts/combine_ics.py`
+**The one thing you need to configure:** when you add an aggregator source to your city, add its name to the `AGGREGATORS` set in `scripts/combine_ics.py`. This tells the system to prefer primary source versions when duplicates are found.
 
-**How to identify an aggregator:** pulls events from many other sources (like a newspaper events section), high event count with significant overlap, events often appear elsewhere with better metadata.
+An aggregator is a source that pulls events from many other sources — typically a newspaper events section or a regional event platform. You'll recognize one by its high event count and significant overlap with your other sources. Current aggregators:
+
+```python
+AGGREGATORS = {
+    'North Bay Bohemian',
+    'Press Democrat',
+    'NOW Toronto',
+    'Toronto Events (Tockify)',
+}
+```
+
+Primary sources (venues, libraries, etc.) need no special configuration.
 
 ---
 
