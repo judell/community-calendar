@@ -167,6 +167,37 @@ function formatTime(isoString) {
   return `${h}:${m} ${ampm}`;
 }
 
+// Extract a short readable snippet from an event description (for always-visible preview)
+// Junk line patterns are hardcoded here; see docs/admin-interface.md for plan to make configurable
+function getSnippet(description) {
+  if (!description) return null;
+
+  // Strip URLs
+  var text = description.replace(/https?:\/\/\S+/g, '');
+  // Collapse tabs, carriage returns, and runs of whitespace
+  text = text.replace(/[\t\r]+/g, ' ').replace(/ {2,}/g, ' ');
+
+  // Split into lines, find first meaningful one
+  var lines = text.split('\n').map(function(l) { return l.trim(); }).filter(Boolean);
+
+  // Skip junk lines (hardcoded; future: curator-configurable via DB table)
+  var junkPattern = /^(department:|committee:|doors\b|tickets:|link to join:|how to join:|print copies|contact:|free$|-free$)/i;
+  var line = null;
+  for (var i = 0; i < lines.length; i++) {
+    if (!junkPattern.test(lines[i]) && lines[i].length > 15) {
+      line = lines[i];
+      break;
+    }
+  }
+  if (!line) return null;
+
+  // Truncate to ~100 chars at a word boundary
+  if (line.length <= 100) return line;
+  var cut = line.lastIndexOf(' ', 100);
+  if (cut < 40) cut = 100;
+  return line.substring(0, cut) + '...';
+}
+
 // Truncate text with ellipsis
 function truncate(text, maxLen) {
   if (!text) return '';
@@ -798,6 +829,7 @@ if (typeof window !== 'undefined') {
   window.formatMonthDay = formatMonthDay;
   window.formatDate = formatDate;
   window.formatTime = formatTime;
+  window.getSnippet = getSnippet;
   window.truncate = truncate;
   window.getSourceCounts = getSourceCounts;
   var _dedupeEvents = dedupeEvents;

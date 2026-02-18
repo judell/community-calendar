@@ -21,3 +21,22 @@ CREATE TABLE city_config (
 The edge function queries `SELECT city, events_url FROM city_config WHERE enabled = true` instead of using a hardcoded map. Adding or disabling a city becomes a row insert/update, not a deploy.
 
 The UI city picker (`index.html`) could also read from this table, eliminating the need to update frontend code when adding cities.
+
+## 2. Description snippet junk-line patterns
+
+The `getSnippet()` function in `helpers.js` strips junk lines from event descriptions before extracting a readable snippet. The patterns (e.g. lines starting with "Department:", "Tickets:", "Doors") are currently hardcoded as a regex.
+
+**Current**: `junkPattern` regex in `getSnippet()` in `helpers.js`
+
+**Proposed**: A `snippet_junk_patterns` table:
+
+```sql
+CREATE TABLE snippet_junk_patterns (
+  id serial PRIMARY KEY,
+  pattern text NOT NULL,
+  description text,
+  enabled boolean DEFAULT true
+);
+```
+
+The client fetches enabled patterns at load time and builds the regex dynamically. Curators can add/remove patterns as new calendar sources introduce new boilerplate.
