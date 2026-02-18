@@ -613,13 +613,16 @@ def dedupe_cross_source(events, input_dir):
     return unique_events
 
 
-def dedupe_fuzzy(events):
+def dedupe_fuzzy(events, input_dir):
     """Use LLM to find duplicates with different titles.
     
     Groups events by date, asks Claude to cluster same-events,
     then keeps highest-priority source from each cluster.
+    Logs matches to {input_dir}/fuzzy_dedup.log for analysis.
     """
     import os
+    from datetime import datetime
+    
     api_key = os.environ.get('ANTHROPIC_API_KEY')
     if not api_key:
         print("  Fuzzy dedup: ANTHROPIC_API_KEY not set, skipping")
@@ -632,6 +635,12 @@ def dedupe_fuzzy(events):
         return events
     
     client = anthropic.Anthropic(api_key=api_key)
+    
+    # Open log file
+    log_path = Path(input_dir) / 'fuzzy_dedup.log'
+    log_file = open(log_path, 'w')  
+    log_file.write(f"Fuzzy dedup run: {datetime.now().isoformat()}\n")
+    log_file.write(f"Total events: {len(events)}\n\n")
     
     # Group by date
     by_date = {}
@@ -709,7 +718,9 @@ JSON:"""
                 for idx, removed_event in cluster_events[1:]:
                     removed_title = extract_field(removed_event['content'], 'SUMMARY') or '(no title)'
                     removed_source = extract_field(removed_event['content'], 'X-SOURCE') or 'Unknown'
-                    print(f"    Fuzzy match: '{removed_title}' ({removed_source}) -> '{kept_title}' ({kept_source})")
+                    match_line = f"[{date_str}] '{removed_title}' ({removed_source}) -> '{kept_title}' ({kept_source})"
+                    print(f"    Fuzzy match: {match_line}")
+                    log_file.write(f"MATCH: {match_line}\n")
                     
                     # Find this event in the original list
                     orig_idx = events.index(day_events[idx])
@@ -720,8 +731,14 @@ JSON:"""
             print(f"  Fuzzy dedup error for {date_str}: {e}")
             continue
     
+    # Close log file
+    log_file.write(f"\nTotal fuzzy matches: {fuzzy_deduped}\n")
+    log_file.close()
+    
     if fuzzy_deduped > 0:
-        print(f"  Fuzzy dedup: removed {fuzzy_deduped} duplicate events")
+        print(f"  Fuzzy dedup: removed {fuzzy_deduped} duplicate events (see fuzzy_dedup.log)")
+    else:
+        print(f"  Fuzzy dedup: no additional duplicates found")
     
     # Return events with duplicates removed
     return [e for i, e in enumerate(events) if i not in events_to_remove]
@@ -852,7 +869,7 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar",
     # Fuzzy deduplication: use LLM to find duplicates with different titles
     import os
     if os.environ.get('ENABLE_FUZZY_DEDUP'):
-        unique_events = dedupe_fuzzy(unique_events)
+        unique_events = dedupe_fuzzy(unique_events, input_dir)
     
     # Build combined ICS
     output = [
