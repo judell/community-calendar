@@ -702,7 +702,15 @@ JSON:"""
                 cluster_events.sort(key=lambda x: (1 if is_aggregator(extract_field(x[1]['content'], 'X-SOURCE') or '') else 0))
                 
                 # Keep first, mark rest for removal
-                for idx, _ in cluster_events[1:]:
+                kept_idx, kept_event = cluster_events[0]
+                kept_title = extract_field(kept_event['content'], 'SUMMARY') or '(no title)'
+                kept_source = extract_field(kept_event['content'], 'X-SOURCE') or 'Unknown'
+                
+                for idx, removed_event in cluster_events[1:]:
+                    removed_title = extract_field(removed_event['content'], 'SUMMARY') or '(no title)'
+                    removed_source = extract_field(removed_event['content'], 'X-SOURCE') or 'Unknown'
+                    print(f"    Fuzzy match: '{removed_title}' ({removed_source}) -> '{kept_title}' ({kept_source})")
+                    
                     # Find this event in the original list
                     orig_idx = events.index(day_events[idx])
                     events_to_remove.add(orig_idx)
