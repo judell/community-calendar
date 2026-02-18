@@ -265,7 +265,16 @@
                     </details>
                 `;
             }
-            container.innerHTML = html || '<div>No URL quality data available (next build will generate it)</div>';
+            if (!html) {
+                container.innerHTML = '<div>No URL quality data available (next build will generate it)</div>';
+                return;
+            }
+            container.innerHTML = html;
+            container.querySelectorAll(':scope > details').forEach(cityEl => {
+                cityEl.addEventListener('toggle', () => {
+                    cityEl.querySelectorAll('.city-content > details').forEach(d => d.open = cityEl.open);
+                });
+            });
         }
 
         loadReport();
