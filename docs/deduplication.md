@@ -345,6 +345,21 @@ Use OpenAI or Anthropic API to identify likely duplicates that exact matching mi
 
 #### Approach 1: Candidate Generation + LLM Verification
 
+**How it works:**
+1. Use cheap heuristics to find *candidate* duplicate pairs (same date + same location, or same date + overlapping keywords)
+2. Only send candidates to the LLM for verification
+3. LLM returns yes/no for each pair
+
+**Pros:**
+- Minimal LLM calls (only candidates, not all events)
+- Easy to tune heuristics to reduce false candidates
+- Can cache pair results
+
+**Cons:**
+- May miss duplicates if heuristics are too strict
+- Multiple LLM calls (one per candidate pair)
+- Heuristics add complexity
+
 ```python
 def find_fuzzy_duplicates(events):
     # Group by date first (cheap filter)
@@ -368,11 +383,44 @@ def find_fuzzy_duplicates(events):
             verified.append((e1, e2))
     
     return verified
+
+def likely_same_event(e1, e2):
+    """Cheap heuristics to find candidate duplicates."""
+    # Same location?
+    loc1, loc2 = e1.get('location', '').lower(), e2.get('location', '').lower()
+    if loc1 and loc2 and (loc1 in loc2 or loc2 in loc1):
+        return True
+    
+    # Overlapping significant words in title?
+    words1 = set(w for w in e1.get('title', '').lower().split() if len(w) > 3)
+    words2 = set(w for w in e2.get('title', '').lower().split() if len(w) > 3)
+    if len(words1 & words2) >= 2:
+        return True
+    
+    # Same time and one source is aggregator?
+    if e1.get('start_time') == e2.get('start_time'):
+        if is_aggregator(e1.get('source')) or is_aggregator(e2.get('source')):
+            return True
+    
+    return False
 ```
 
 #### Approach 2: Batch LLM Clustering
 
-For each date with multiple events, ask the LLM to cluster them:
+**How it works:**
+1. For each date, send ALL events to the LLM in one prompt
+2. Ask it to return clusters of same-event groups
+3. Keep one event per cluster (highest priority source)
+
+**Pros:**
+- Single LLM call per date (simpler, potentially cheaper)
+- LLM sees full context, can catch non-obvious matches
+- No heuristics to tune
+
+**Cons:**
+- Larger prompts (more tokens)
+- May hit context limits on busy days
+- Less control over matching logic
 
 ```
 Prompt: "Here are events on 2026-02-22. Group any that are the same event:
@@ -380,9 +428,23 @@ Prompt: "Here are events on 2026-02-22. Group any that are the same event:
 1. SANTA ROSA RIDE GROUP (Sports Basement, 9am)
 2. Group Rides with Sports Basement (North Bay Bohemian, 9am)
 3. Farmers Market at Plaza (GoLocal, 8am)
+4. Tuesday Run Club (Sports Basement, 6pm)
+5. Evening Run at Sports Basement (Bohemian, 6pm)
 
-Respond with groups like: [[1,2], [3]]"
+Respond ONLY with JSON grouping indices: [[1,2], [4,5], [3]]"
 ```
+
+**Response:** `[[1,2], [4,5], [3]]`
+
+This tells us events 1&2 are the same, 4&5 are the same, and 3 is unique.
+
+#### Recommendation
+
+**Start with Approach 2** (batch clustering) because:
+- Simpler to implement
+- No heuristics to tune and maintain
+- Single call per date is easier to reason about
+- Can fall back to Approach 1 if costs are too high
 
 #### Cost Considerations
 
