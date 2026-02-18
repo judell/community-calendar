@@ -197,11 +197,12 @@ function getSnippet(description) {
   }
   if (!line) return null;
 
-  // Truncate to ~100 chars at a word boundary
+  // Truncate to ~100 chars at a word boundary, trim trailing orphan punctuation
   if (line.length <= 100) return line;
   var cut = line.lastIndexOf(' ', 100);
   if (cut < 40) cut = 100;
-  return line.substring(0, cut) + '...';
+  var snippet = line.substring(0, cut).replace(/[\s(,\-;:]+$/, '');
+  return snippet + '...';
 }
 
 // Truncate text with ellipsis
