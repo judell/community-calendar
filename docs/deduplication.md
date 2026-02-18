@@ -98,7 +98,7 @@ The `dedupe_cross_source()` function:
 
 **Location:** `scripts/ics_to_json.py`
 
-**Mechanism:** Converts ICS to JSON. No dedup, but clusters events within each timeslot by title similarity (token-set algorithm, threshold 0.6) so related events appear adjacent in the calendar. See [Event Ordering by Title Similarity](#event-ordering-by-title-similarity).
+**Mechanism:** Converts ICS to JSON. No dedup, but clusters events within each timeslot by title similarity (token-set algorithm, threshold 0.85) and location awareness so related events appear adjacent in the calendar. Events at different locations are never clustered. See [Event Ordering by Title Similarity](#event-ordering-by-title-similarity).
 
 **Scope:** Ordering only, not dedup.
 
@@ -549,3 +549,24 @@ The client-side `dedupeEvents()` function in `helpers.js` remains in place. It d
 - **No code churn** - Removing it would require testing all the `mergedIds` logic for picks
 
 The upstream dedup in `combine_ics.py` does the heavy lifting (~1,200 duplicates removed). The client dedup now rarely finds anything to merge, but keeping it costs nothing and provides defense in depth.
+
+---
+
+## Location String Variance
+
+Title clustering (ics_to_json.py) uses exact string match on locations to avoid clustering events with similar titles at different venues. This works well for clearly different locations but fails when the same venue has different names across sources:
+
+- "Sports Basement" vs "SB Santa Rosa"
+- "Guerneville Library" vs "Guerneville Regional Library"
+- "Vallejo JFK Library" vs "Vallejo John F. Kennedy Library"
+- "Solano County Fairgrounds" vs "McCormack Hall" (building within the fairgrounds)
+- "Dry Creek Vineyard" vs "3770 Lambert Bridge Road, Healdsburg, CA"
+
+These pairs are the same venue but won't cluster because the strings don't match.
+
+**Possible approaches if this becomes worth solving:**
+
+- **Token overlap**: share enough words → same location. Fragile with abbreviations.
+- **Normalize abbreviations**: expand "SB" → "Sports Basement", "JFK" → "John F. Kennedy". Requires a mapping table per city.
+- **Geocoding**: resolve addresses to coordinates, compare distance. Most robust but adds API dependency and cost.
+- **Venue alias table**: manually curated mappings of known equivalent location strings. Low-tech, reliable, but requires maintenance.
