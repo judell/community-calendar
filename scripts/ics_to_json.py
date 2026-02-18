@@ -90,7 +90,7 @@ def token_set_similarity(a, b):
     return max(ratios)
 
 
-def cluster_by_title_similarity(events, threshold=0.6):
+def cluster_by_title_similarity(events, threshold=0.85):
     """Cluster events within same timeslot by title similarity.
     Uses union-find to group similar titles, sorts clusters alphabetically."""
     from collections import defaultdict
