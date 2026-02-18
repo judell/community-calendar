@@ -214,6 +214,7 @@ function dedupeEvents(events) {
       if (!groups[key].location && e.location) groups[key].location = e.location;
       if (!groups[key].description && e.description) groups[key].description = e.description;
       if (!groups[key].rrule && e.rrule) groups[key].rrule = e.rrule;
+      if (!groups[key].cluster_id && e.cluster_id) groups[key].cluster_id = e.cluster_id;
     }
   });
   // Convert sources Set to comma-separated string, with authoritative source first
