@@ -1,27 +1,14 @@
 # Deduplication and Event Ordering
 
-## For Curators: What You Need to Know
+## For Curators
 
-**Everything is automatic.** The system handles deduplication and event ordering without configuration.
-
-**Deduplication:** A global policy favors authoritative sources (venues, libraries) over aggregators (newspapers, event platforms). When the same event appears in multiple sources, the primary source version is kept and all contributing sources are preserved in the attribution.
-
-**Event ordering:** Within each timeslot, events with similar titles are grouped together. "Family Storytime", "Bilingual Family Storytime", and "Yoga Storytime Series" will appear adjacent rather than scattered randomly. This uses title-similarity clustering, not just alphabetical sort.
-
-**Adding your city:** To get your city on the calendar, [open an issue](https://github.com/judell/community-calendar/issues/new?template=add-city-or-aggregator.yml). Just name your city and any aggregators — newspapers or regional event platforms that republish events from many local sources. If you're not sure what counts as an aggregator, no worries, we'll help you figure it out.
-
-Current cities and their known aggregators:
-
-- **Santa Rosa:** North Bay Bohemian, Press Democrat
-- **Toronto:** NOW Toronto, Toronto Events (Tockify)
-
-Primary sources (venues, libraries, etc.) need no special configuration.
+See the [Curator Guide](curator-guide.md#duplicates-and-event-ordering) for what you need to know about deduplication, event ordering, and adding your city. The rest of this document covers the technical implementation.
 
 ---
 
 ## Table of Contents
 
-- [For Curators: What You Need to Know](#for-curators-what-you-need-to-know)
+- [For Curators](#for-curators)
 - [Pipeline Stages](#pipeline-stages)
 - [The Root Problem](#the-root-problem)
 - [Current Santa Rosa Duplicate Statistics](#current-santa-rosa-duplicate-statistics)

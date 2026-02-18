@@ -11,7 +11,7 @@
   - [Phase 2: Topical searches (find venues by category)](#phase-2-topical-searches-find-venues-by-category)
   - [Phase 3: Custom scrapers (last resort for high-value sources)](#phase-3-custom-scrapers-last-resort-for-high-value-sources)
   - [Throughout all phases](#throughout-all-phases)
-- [Duplicates](#duplicates)
+- [Duplicates and Event Ordering](#duplicates-and-event-ordering)
 - [Long-Running Events](#long-running-events)
 - [Working with an AI Agent](#working-with-an-ai-agent)
   - [Getting started with a cloud workspace](#getting-started-with-a-cloud-workspace)
@@ -103,9 +103,22 @@ Steps 1-3 are the core discovery loop. Steps 4-6 are pipeline setup. All the det
 
 ---
 
-## Duplicates
+## Duplicates and Event Ordering
 
-Don't worry about the same event appearing in multiple sources. The calendar deduplicates events that are identical, but when the same event comes from different sources it preserves the event and lists all the sources. For example, a concert might show sources: `Bohemian, GoLocal, Eventbrite`. This is a feature, not a bug — it reveals provenance and syndication patterns, showing how events flow through the local information ecosystem.
+**Deduplication is automatic.** When the same event appears in multiple sources, the system keeps the version from the most authoritative source (the venue or library itself) over aggregators (newspapers, regional event platforms). All contributing sources are still listed in the attribution — a concert might show `Bohemian, GoLocal, Eventbrite` — so you can see how events flow through the local information ecosystem.
+
+**Event ordering is automatic.** Within each timeslot, events with similar titles are grouped together. "Baby Storytime", "Family Storytime", and "Preschool Storytime" at different library branches appear adjacent rather than scattered randomly.
+
+**Aggregators** are the key configuration. Each city lists its aggregators — newspapers or platforms that republish events from many local sources. Primary sources (venues, libraries, etc.) need no special configuration.
+
+Current cities and their known aggregators:
+
+- **Santa Rosa:** North Bay Bohemian, Press Democrat
+- **Toronto:** NOW Toronto, Toronto Events (Tockify)
+
+To add your city or flag an aggregator, [open an issue](https://github.com/judell/community-calendar/issues/new?template=add-city-or-aggregator.yml). Just name your city and any aggregators you know about — we'll help you figure out the rest.
+
+For technical details on how deduplication and ordering work, see [Deduplication and Event Ordering](deduplication.md).
 
 ---
 
@@ -175,4 +188,5 @@ Nothing you or the agent does is irreversible. Git keeps a complete history of e
 
 - [Procedures](procedures.md) — Step-by-step how-tos for searching, testing, adding feeds, geo-filtering, and city registration
 - [Discovery Lessons](discovery-lessons.md) — Real-world lessons and gotchas from source discovery
+- [Deduplication and Event Ordering](deduplication.md) — Technical details on how duplicates are handled and events are ordered
 - [AGENTS.md](../AGENTS.md) — Technical reference for scrapers and automation
