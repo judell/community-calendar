@@ -138,11 +138,12 @@ def cluster_by_title_similarity(events, threshold=0.6):
         sorted_clusters = sorted(clusters.values(),
             key=lambda c: (c[0].get('title', '') or '').lower())
 
+        cluster_idx = 0
         for cluster in sorted_clusters:
             if len(cluster) > 1:
-                cluster_id = cluster[0].get('title', '').lower()[:30] + '|' + key
                 for e in cluster:
-                    e['cluster_id'] = cluster_id
+                    e['cluster_id'] = cluster_idx
+                cluster_idx += 1
             result.extend(cluster)
 
     return result

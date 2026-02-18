@@ -1,6 +1,13 @@
 // Community Calendar Helper Functions
 // Pure functions for filtering, formatting, and deduplication
 
+// --- Cluster Colors ---
+const CLUSTER_COLORS = ['#6b9bd2', '#7bc47f', '#d4a04a'];
+window.clusterBorder = function(clusterId) {
+  if (clusterId == null) return 'none';
+  return '3px solid ' + CLUSTER_COLORS[clusterId % CLUSTER_COLORS.length];
+};
+
 // --- Audio Recording ---
 window.audioRecorder = null;
 window.audioChunks = [];
@@ -236,7 +243,20 @@ function dedupeEvents(events) {
       source: sourcesArr.join(', '),
       mergedIds: e.mergedIds.filter(id => typeof id === 'number' || /^\d+$/.test(id))
     };
-  }).sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+  }).sort((a, b) => {
+    const timeCmp = (a.start_time || '').localeCompare(b.start_time || '');
+    if (timeCmp !== 0) return timeCmp;
+    // Within same timeslot, group clustered events together by cluster_id, then title
+    const ca = a.cluster_id != null ? a.cluster_id : null;
+    const cb = b.cluster_id != null ? b.cluster_id : null;
+    if (ca != null && cb != null) {
+      if (ca !== cb) return ca - cb;
+      return (a.title || '').localeCompare(b.title || '');
+    }
+    if (ca != null) return -1;
+    if (cb != null) return 1;
+    return (a.title || '').localeCompare(b.title || '');
+  });
 
   // Collapse long-running events (exhibitions, recurring services)
   result = collapseLongRunningEvents(result);
