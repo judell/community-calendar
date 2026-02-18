@@ -335,7 +335,11 @@ ALTER TABLE events ADD CONSTRAINT events_source_uid_unique UNIQUE (source_uid);
 
 ## Search and Performance
 
-Client-side search filters events as you type. The search icon in the header toggles a search box with auto-focus. Searches match against title, location, source, and description. When a match is in the description (not normally displayed), a context snippet appears with the search term highlighted.
+Client-side search filters events as you type. The search icon in the header toggles a search box with auto-focus. Searches match against title, location, source, and description.
+
+### Description snippets
+
+Each event card shows a short snippet extracted from the description (when available). The `getSnippet()` helper strips URLs, collapses whitespace, skips junk lines (metadata like "Department:", "Tickets:", etc.), and truncates to ~100 characters at a word boundary. Clicking the snippet opens a modal dialog with the full event details. Junk-line patterns are hardcoded for now; see `docs/admin-interface.md` for the plan to make them curator-configurable.
 
 ### List virtualization
 
@@ -370,7 +374,7 @@ Measured data shows limit=50 delivers a 38% improvement on the first keystroke v
 
 #### fixedItemSize tradeoffs
 
-EventCards have **variable actual heights** (wrapping titles, conditional location/description). `fixedItemSize="true"` tells the virtualizer to measure the first card and assume all match.
+EventCards have **variable actual heights** (wrapping titles, conditional location/description/snippet). `fixedItemSize="true"` tells the virtualizer to measure the first card and assume all match.
 
 | | `fixedItemSize="true"` (current) | `fixedItemSize="false"` |
 |---|---|---|
@@ -503,7 +507,7 @@ Main.xmlui                            # App shell with DataSources + ChangeListe
 helpers.js                            # Pure functions (filter, dedupe, format, detectRecurrence, expandEnrichments, buildGoogleCalendarUrl)
 
 components/
-├── EventCard.xmlui                   # Event display card with pick checkbox
+├── EventCard.xmlui                   # Event display card with snippet + detail modal
 ├── PickItem.xmlui                    # Pick item in My Picks view
 ├── PickEditor.xmlui                  # Modal for confirming picks + optional recurrence enrichment
 ├── AddToCalendar.xmlui               # ICS download button (includes RRULE when available)
@@ -690,7 +694,7 @@ community-calendar/
 ├── Main.xmlui.xs           # Shared vars + functions (togglePick, removePick, refreshCounter)
 ├── helpers.js              # Pure helper functions (filter, dedupe, format, detectRecurrence, etc.)
 ├── components/
-│   ├── EventCard.xmlui     # Event display card with pick checkbox
+│   ├── EventCard.xmlui     # Event display card with snippet + detail modal
 │   ├── PickItem.xmlui      # Pick item in My Picks view
 │   ├── PickEditor.xmlui    # Pick confirmation modal with recurrence enrichment
 │   ├── AddToCalendar.xmlui # ICS download button (includes RRULE when available)
