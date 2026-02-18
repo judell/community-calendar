@@ -3,12 +3,9 @@
 
 // --- Cluster Colors ---
 const CLUSTER_COLORS = ['#6b9bd2', '#7bc47f', '#d4a04a'];
-const CLUSTER_COLORS_FADED = ['#b5d0e8', '#b8deba', '#e8d4a8'];
 window.clusterBorder = function(clusterId, filtered) {
-  if (clusterId == null) return 'none';
-  var colors = filtered ? CLUSTER_COLORS_FADED : CLUSTER_COLORS;
-  var width = filtered ? '2px' : '3px';
-  return width + ' solid ' + colors[clusterId % colors.length];
+  if (clusterId == null || filtered) return 'none';
+  return '3px solid ' + CLUSTER_COLORS[clusterId % CLUSTER_COLORS.length];
 };
 
 // --- Audio Recording ---
