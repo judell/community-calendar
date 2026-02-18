@@ -8,18 +8,12 @@
 
 **Event ordering:** Within each timeslot, events with similar titles are grouped together. "Family Storytime", "Bilingual Family Storytime", and "Yoga Storytime Series" will appear adjacent rather than scattered randomly. This uses title-similarity clustering, not just alphabetical sort.
 
-**The one thing you need to configure:** when you add an aggregator source to your city, add its name to the `AGGREGATORS` set in `scripts/combine_ics.py`. This tells the system to prefer primary source versions when duplicates are found.
+**Adding your city:** To get your city on the calendar, [open an issue](https://github.com/judell/community-calendar/issues/new?template=add-city-or-aggregator.yml). Just name your city and any aggregators — newspapers or regional event platforms that republish events from many local sources. If you're not sure what counts as an aggregator, no worries, we'll help you figure it out.
 
-An aggregator is a source that pulls events from many other sources — typically a newspaper events section or a regional event platform. You'll recognize one by its high event count and significant overlap with your other sources. Current aggregators:
+Current cities and their known aggregators:
 
-```python
-AGGREGATORS = {
-    'North Bay Bohemian',
-    'Press Democrat',
-    'NOW Toronto',
-    'Toronto Events (Tockify)',
-}
-```
+- **Santa Rosa:** North Bay Bohemian, Press Democrat
+- **Toronto:** NOW Toronto, Toronto Events (Tockify)
 
 Primary sources (venues, libraries, etc.) need no special configuration.
 
