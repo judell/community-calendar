@@ -172,8 +172,14 @@ function formatTime(isoString) {
 function getSnippet(description) {
   if (!description) return null;
 
+  // Strip HTML tags using the browser's DOMParser
+  var text = description;
+  if (/<[a-z][\s\S]*>/i.test(text)) {
+    var doc = new DOMParser().parseFromString(text, 'text/html');
+    text = doc.body.textContent || '';
+  }
   // Strip URLs
-  var text = description.replace(/https?:\/\/\S+/g, '');
+  text = text.replace(/https?:\/\/\S+/g, '');
   // Collapse tabs, carriage returns, and runs of whitespace
   text = text.replace(/[\t\r]+/g, ' ').replace(/ {2,}/g, ' ');
 
