@@ -210,12 +210,12 @@ function dedupeEvents(events) {
     const normalizedTime = e.start_time ? new Date(e.start_time).toISOString() : '';
     const key = (e.title || '').trim().toLowerCase() + '|' + normalizedTime;
     if (!groups[key]) {
-      groups[key] = { ...e, sources: new Set([e.source]), mergedIds: [e.id] };
+      groups[key] = { ...e, sources: new Set((e.source || '').split(',').map(s => s.trim()).filter(Boolean)), mergedIds: [e.id] };
     } else {
       // Track all merged event IDs (for picks to work across sources)
       groups[key].mergedIds.push(e.id);
-      // Add source (Set handles deduplication automatically)
-      groups[key].sources.add(e.source);
+      // Add individual sources (split comma-separated values before deduping)
+      (e.source || '').split(',').map(s => s.trim()).filter(Boolean).forEach(s => groups[key].sources.add(s));
       // Prefer non-empty values for other fields
       if (!groups[key].url && e.url) groups[key].url = e.url;
       if (!groups[key].location && e.location) groups[key].location = e.location;
