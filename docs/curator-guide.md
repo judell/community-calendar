@@ -5,6 +5,7 @@
 - [Overview](#overview)
 - [The Curator Role](#the-curator-role)
   - [How you work is up to you](#how-you-work-is-up-to-you)
+  - [Monitor the dashboard, act on what matters to you](#monitor-the-dashboard-act-on-what-matters-to-you)
 - [What Makes a Good Source](#what-makes-a-good-source)
 - [Playbook for Launching a New Citywide Calendar](#playbook-for-launching-a-new-citywide-calendar)
   - [Phase 1: Platform searches (grab the easy wins)](#phase-1-platform-searches-grab-the-easy-wins)
