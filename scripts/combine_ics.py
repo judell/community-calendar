@@ -600,8 +600,26 @@ def dedupe_cross_source(events, input_dir):
             # Multiple events with same title+date
             # Sort: primary sources first, aggregators last
             group.sort(key=lambda e: (1 if is_aggregator(extract_field(e['content'], 'X-SOURCE') or '') else 0))
-            # Keep the first (primary source if available)
-            unique_events.append(group[0])
+            
+            # Merge sources from all duplicates into the kept event
+            kept = group[0]
+            all_sources = []
+            for e in group:
+                src = extract_field(e['content'], 'X-SOURCE')
+                if src and src not in all_sources:
+                    all_sources.append(src)
+            
+            # Update X-SOURCE to combined value
+            if len(all_sources) > 1:
+                merged_source = ', '.join(all_sources)
+                kept['content'] = re.sub(
+                    r'^X-SOURCE:[^\r\n]+',
+                    f'X-SOURCE:{merged_source}',
+                    kept['content'],
+                    flags=re.MULTILINE
+                )
+            
+            unique_events.append(kept)
             cross_source_deduped += len(group) - 1
     
     if cross_source_deduped > 0:
@@ -721,14 +739,21 @@ JSON:"""
                 # Sort by priority (non-aggregators first)
                 cluster_events.sort(key=lambda x: (1 if is_aggregator(extract_field(x[1]['content'], 'X-SOURCE') or '') else 0))
                 
-                # Keep first, mark rest for removal
+                # Keep first, merge sources from rest, then mark rest for removal
                 kept_idx, kept_event = cluster_events[0]
                 kept_title = extract_field(kept_event['content'], 'SUMMARY') or '(no title)'
                 kept_source = extract_field(kept_event['content'], 'X-SOURCE') or 'Unknown'
                 
+                # Collect all sources for merging
+                all_sources = [kept_source] if kept_source != 'Unknown' else []
+                
                 for idx, removed_event in cluster_events[1:]:
                     removed_title = extract_field(removed_event['content'], 'SUMMARY') or '(no title)'
                     removed_source = extract_field(removed_event['content'], 'X-SOURCE') or 'Unknown'
+                    
+                    if removed_source != 'Unknown' and removed_source not in all_sources:
+                        all_sources.append(removed_source)
+                    
                     match_line = f"[{date_str}] '{removed_title}' ({removed_source}) -> '{kept_title}' ({kept_source})"
                     print(f"    Fuzzy match: {match_line}")
                     log_file.write(f"MATCH: {match_line}\n")
@@ -737,6 +762,17 @@ JSON:"""
                     orig_idx = events.index(day_events[idx])
                     events_to_remove.add(orig_idx)
                     fuzzy_deduped += 1
+                
+                # Merge sources into kept event
+                if len(all_sources) > 1:
+                    merged_source = ', '.join(all_sources)
+                    kept_event['content'] = re.sub(
+                        r'^X-SOURCE:[^\r\n]+',
+                        f'X-SOURCE:{merged_source}',
+                        kept_event['content'],
+                        flags=re.MULTILINE
+                    )
+                    log_file.write(f"  -> Merged sources: {merged_source}\n")
                     
         except Exception as e:
             print(f"  Fuzzy dedup error for {date_str}: {e}")
