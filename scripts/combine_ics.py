@@ -653,10 +653,17 @@ def dedupe_fuzzy(events, input_dir):
     # Track which events to remove (by index in original list)
     events_to_remove = set()
     fuzzy_deduped = 0
+    api_calls = 0
+    total_input_tokens = 0
+    total_output_tokens = 0
+    dates_with_multiple = 0
+    dates_skipped_too_many = 0
     
     for date_str, day_events in by_date.items():
         if len(day_events) < 2:
             continue
+        
+        dates_with_multiple += 1
         
         # Build prompt with event summaries
         event_lines = []
@@ -670,7 +677,11 @@ def dedupe_fuzzy(events, input_dir):
         
         # Skip if too many events (cost control)
         if len(event_lines) > 50:
+            dates_skipped_too_many += 1
+            log_file.write(f"SKIPPED: {date_str} ({len(event_lines)} events, too many)\n")
             continue
+        
+        log_file.write(f"CHECKING: {date_str} ({len(event_lines)} events)\n")
         
         prompt = f"""Events on {date_str}. Group any that are the SAME event (same actual gathering, possibly with different titles).
 
@@ -688,6 +699,12 @@ JSON:"""
                 max_tokens=1024,
                 messages=[{"role": "user", "content": prompt}]
             )
+            
+            # Track API usage
+            api_calls += 1
+            if hasattr(response, 'usage'):
+                total_input_tokens += response.usage.input_tokens
+                total_output_tokens += response.usage.output_tokens
             
             # Parse response
             import json
@@ -731,9 +748,17 @@ JSON:"""
             print(f"  Fuzzy dedup error for {date_str}: {e}")
             continue
     
-    # Close log file
-    log_file.write(f"\nTotal fuzzy matches: {fuzzy_deduped}\n")
+    # Write summary and close log file
+    log_file.write(f"\n--- Summary ---\n")
+    log_file.write(f"Dates with 2+ events: {dates_with_multiple}\n")
+    log_file.write(f"Dates skipped (>50 events): {dates_skipped_too_many}\n")
+    log_file.write(f"API calls made: {api_calls}\n")
+    log_file.write(f"Total input tokens: {total_input_tokens}\n")
+    log_file.write(f"Total output tokens: {total_output_tokens}\n")
+    log_file.write(f"Fuzzy matches found: {fuzzy_deduped}\n")
     log_file.close()
+    
+    print(f"  Fuzzy dedup: {api_calls} API calls, {total_input_tokens}+{total_output_tokens} tokens")
     
     if fuzzy_deduped > 0:
         print(f"  Fuzzy dedup: removed {fuzzy_deduped} duplicate events (see fuzzy_dedup.log)")
