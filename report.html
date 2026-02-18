@@ -86,6 +86,7 @@
         .url-stat .value { font-size: 1.3em; font-weight: 600; }
         .pct-bar { display: inline-block; height: 8px; border-radius: 4px; vertical-align: middle; }
         .pct-bar.good { background: #4caf50; }
+        .pct-bar.mid { background: #f57c00; }
         .pct-bar.bad { background: #d32f2f; }
     </style>
 </head>
@@ -256,7 +257,7 @@
                                     ${(uq.source_specificity || []).map(r => `
                                         <tr class="${r.specificity_pct < 20 ? 'warn' : r.specificity_pct < 50 ? 'caution' : ''}">
                                             <td>${r.source}</td><td class="num">${r.events}</td><td class="num">${r.unique_urls}</td>
-                                            <td><span class="pct-bar ${r.specificity_pct >= 80 ? 'good' : 'bad'}" style="width:${Math.max(4, r.specificity_pct * 0.6)}px"></span> ${r.specificity_pct}%</td>
+                                            <td><span class="pct-bar ${r.specificity_pct >= 80 ? 'good' : r.specificity_pct >= 40 ? 'mid' : 'bad'}" style="width:${Math.max(4, r.specificity_pct * 0.6)}px"></span> ${r.specificity_pct}%</td>
                                         </tr>
                                     `).join('')}
                                 </table>
