@@ -65,6 +65,85 @@ def extract_field(event_content, field_name):
     return None
 
 
+def token_set_similarity(a, b):
+    """Compare word sets, ignore order. Returns 0-1.
+    'Family Storytime' vs 'Bilingual Family Storytime' scores high because
+    the shared words dominate. Uses overlap/min-size ratio."""
+    from difflib import SequenceMatcher as SM
+    words_a = set(a.lower().split())
+    words_b = set(b.lower().split())
+    if not words_a and not words_b:
+        return 1.0
+    if not words_a or not words_b:
+        return 0.0
+    intersection = words_a & words_b
+    sorted_inter = ' '.join(sorted(intersection))
+    remaining_a = ' '.join(sorted(words_a - intersection))
+    remaining_b = ' '.join(sorted(words_b - intersection))
+    combined_a = (sorted_inter + ' ' + remaining_a).strip()
+    combined_b = (sorted_inter + ' ' + remaining_b).strip()
+    ratios = [
+        SM(None, sorted_inter, combined_a).ratio() if combined_a else 1.0,
+        SM(None, sorted_inter, combined_b).ratio() if combined_b else 1.0,
+        SM(None, combined_a, combined_b).ratio(),
+    ]
+    return max(ratios)
+
+
+def cluster_by_title_similarity(events, threshold=0.6):
+    """Cluster events within same timeslot by title similarity.
+    Uses union-find to group similar titles, sorts clusters alphabetically."""
+    from collections import defaultdict
+
+    # Group by timeslot
+    slots = defaultdict(list)
+    slot_order = []
+    for e in events:
+        key = e.get('start_time', '') or ''
+        if key not in slots:
+            slot_order.append(key)
+        slots[key].append(e)
+
+    result = []
+    for key in slot_order:
+        group = slots[key]
+        if len(group) <= 1:
+            result.extend(group)
+            continue
+
+        # Union-find
+        parent = list(range(len(group)))
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+        def union(a, b):
+            parent[find(a)] = find(b)
+
+        for i in range(len(group)):
+            for j in range(i + 1, len(group)):
+                ta = group[i].get('title', '')
+                tb = group[j].get('title', '')
+                if ta and tb and token_set_similarity(ta, tb) >= threshold:
+                    union(i, j)
+
+        clusters = defaultdict(list)
+        for i in range(len(group)):
+            clusters[find(i)].append(group[i])
+
+        for c in clusters.values():
+            c.sort(key=lambda e: (e.get('title', '') or '').lower())
+
+        sorted_clusters = sorted(clusters.values(),
+            key=lambda c: (c[0].get('title', '') or '').lower())
+
+        for cluster in sorted_clusters:
+            result.extend(cluster)
+
+    return result
+
+
 def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
     """Convert an ICS file to JSON format for Supabase."""
     content = Path(ics_file).read_text(encoding='utf-8', errors='ignore')
@@ -123,8 +202,9 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
         }
         events.append(event)
 
-    # Sort by start time
+    # Sort by start time, then cluster similar titles within each timeslot
     events.sort(key=lambda x: x['start_time'] or '')
+    events = cluster_by_title_similarity(events)
 
     # Output
     json_output = json.dumps(events, indent=2, ensure_ascii=False)

@@ -321,224 +321,106 @@ When you add a new source:
 
 1. **Monitoring** - Add logging to track dedup effectiveness over time
 2. **Report enhancement** - Show duplicate counts in the feed health report
-3. **Fuzzy matching for variant titles** - See next section
+3. ~~**Event ordering**~~ — Done. See "Event Ordering by Title Similarity" section below
 
 ---
 
-## Fuzzy Title Matching with LLM
+## Fuzzy LLM Dedup: Experiment Results (2026-02-17)
+
+### What Was Built
+
+Fuzzy dedup in `combine_ics.py` using Claude 3.5 Haiku (batch clustering approach). Gated by `ENABLE_FUZZY_DEDUP` env var + `ANTHROPIC_API_KEY`. Code remains in `combine_ics.py` but is dormant — neither env var is set.
+
+### Results: Not Worth Pursuing
+
+Out of **282 "fuzzy matches"** found, roughly **~250 were false positives** (~10% precision). The LLM aggressively merged events that merely shared a date:
+
+**Examples of wrong merges:**
+- 'Tuesday Night Comedy Showcase' → 'Live Music Happy Hour' (different shows, same venue)
+- 'Santa Rosa Symphony - Mahler's Third' → 'Disney's Descendants: The Musical'
+- 'Beginning Watercolor Class' → 'Figure Drawing DROP-IN Session' (wrong every week for months)
+- 'Vineyard Garden Wine Tasting' → 'Markham Vineyards Private Tasting' (different wineries)
+- Different BiblioBus stops merged, different kids' camps merged, etc.
+
+**Genuine catches (~20-30):** title variants like 'Boeing Boeing - The Play' → 'Boeing Boeing', 'Vallejo Gem & Mineral Show' → 'Vallejo Gem and Mineral Show'.
+
+### Why It Was Abandoned
+
+| Factor | Assessment |
+|--------|-----------|
+| Exact dedup already handles | ~1,200 events (20%) |
+| Genuine fuzzy dupes remaining | ~20-30 (<1% of events) |
+| Cost per run | 178 API calls, 140K input tokens |
+| False positive rate | ~90% — would destroy the calendar |
+| Marginal value | Not worth the complexity, cost, or risk |
+
+The batch clustering approach (sending all events for a date to the LLM) is fundamentally ill-suited — the LLM lacks the domain knowledge to distinguish "same event, different title" from "different events, same day." Tightening the prompt might help precision but would likely hurt the already-small recall.
+
+### If Revisited
+
+If the ~20-30 edge cases ever matter enough, a **manual synonym table** (static mapping of known title variants) would be simpler, free, and 100% precise. No LLM needed.
+
+---
+
+## Event Ordering by Title Similarity
 
 ### The Problem
 
-Current dedup uses exact matching on `(date, normalized_title[:40])`. This misses duplicates where the same event has different titles across sources:
+Events at the same day/time appeared in random order. Instances of the same recurring event — "Baby Storytime", "Family Storytime", "Preschool Storytime" at different library branches — should be grouped together, with alphabetical ordering as tiebreaker.
 
-| Date | Sports Basement (primary) | Bohemian (aggregator) |
-|------|---------------------------|----------------------|
-| 2026-02-22 | `SANTA ROSA RIDE GROUP` | `Group Rides with Sports Basement` |
-| 2026-02-24 | `SANTA ROSA RUN CLUB` | `Tuesday Night Run Club at Sports Basement` |
-| 2026-03-10 | `BROOKS DEMO RUN AT SB SANTA ROSA` | `Brooks Demo Run at Sports Basement Santa Rosa` |
+Simple alphabetical sort doesn't work because the *differentiating* word often comes first ("Baby", "Family", "Preschool"), scattering related events apart.
 
-These are clearly the same events but title normalization doesn't catch them.
+### Solution: Token-Set Similarity Clustering in `ics_to_json.py`
 
-### Proposed Solution: LLM-Assisted Fuzzy Matching
-
-Use OpenAI or Anthropic API to identify likely duplicates that exact matching misses.
-
-#### Approach 1: Candidate Generation + LLM Verification
+Events are clustered by title similarity within each timeslot during JSON generation, using a token-set similarity algorithm built on stdlib `difflib.SequenceMatcher` (no external dependencies).
 
 **How it works:**
-1. Use cheap heuristics to find *candidate* duplicate pairs (same date + same location, or same date + overlapping keywords)
-2. Only send candidates to the LLM for verification
-3. LLM returns yes/no for each pair
+1. Events are sorted by `start_time`
+2. Within each timeslot, pairwise token-set similarity is computed
+3. Events with similarity >= 0.6 are grouped using union-find
+4. Clusters are sorted alphabetically by first title; events within clusters sort alphabetically
 
-**Pros:**
-- Minimal LLM calls (only candidates, not all events)
-- Easy to tune heuristics to reduce false candidates
-- Can cache pair results
+**Token-set similarity** compares word *sets*, ignoring order. "Family Storytime" vs "Bilingual Family Storytime" scores high because the shared words dominate. This handles the core cases:
+- "One-On-One Tech Help" / "Tech Help" → adjacent
+- "Pine Ridge Après-Ski Cave Experience" / "Pine Ridge Après-Ski Cave Experience | Napa" → adjacent
+- "Family Storytime" / "Yoga Storytime Series @ JFK" → adjacent
+- "Themed Paint Along - Easter" / "Themed Paint Along - Valentine's Day" → adjacent
 
-**Cons:**
-- May miss duplicates if heuristics are too strict
-- Multiple LLM calls (one per candidate pair)
-- Heuristics add complexity
+**Why not a library?** We evaluated `rapidfuzz` but the stdlib implementation performs well on our data sizes (~150 events/day max, small timeslots) and avoids adding a dependency to the build pipeline.
 
-```python
-def find_fuzzy_duplicates(events):
-    # Group by date first (cheap filter)
-    by_date = group_by_date(events)
-    
-    candidates = []
-    for date, day_events in by_date.items():
-        if len(day_events) < 2:
-            continue
-        
-        # Find pairs with same location or overlapping keywords
-        for i, e1 in enumerate(day_events):
-            for e2 in day_events[i+1:]:
-                if likely_same_event(e1, e2):  # cheap heuristics
-                    candidates.append((e1, e2))
-    
-    # Ask LLM to verify candidates
-    verified = []
-    for e1, e2 in candidates:
-        if llm_says_same_event(e1, e2):
-            verified.append((e1, e2))
-    
-    return verified
+### Test Harness
 
-def likely_same_event(e1, e2):
-    """Cheap heuristics to find candidate duplicates."""
-    # Same location?
-    loc1, loc2 = e1.get('location', '').lower(), e2.get('location', '').lower()
-    if loc1 and loc2 and (loc1 in loc2 or loc2 in loc1):
-        return True
-    
-    # Overlapping significant words in title?
-    words1 = set(w for w in e1.get('title', '').lower().split() if len(w) > 3)
-    words2 = set(w for w in e2.get('title', '').lower().split() if len(w) > 3)
-    if len(words1 & words2) >= 2:
-        return True
-    
-    # Same time and one source is aggregator?
-    if e1.get('start_time') == e2.get('start_time'):
-        if is_aggregator(e1.get('source')) or is_aggregator(e2.get('source')):
-            return True
-    
-    return False
+The implementation was chosen using `scripts/similarity_test.py`, a standalone test harness that reads a city's `events.json` and previews how different similarity algorithms would order the calendar — without affecting it.
+
+**Algorithms evaluated:**
+
+| Algorithm | Pairs >= 0.6 (same timeslot) | Character |
+|-----------|------------------------------|-----------|
+| `sequencematcher` | 108 | Middle ground |
+| `levenshtein` | 58 | Most conservative, position-sensitive |
+| `token_set` | 149 | Best for this use case — catches word-order variants |
+
+`token_set` was chosen because it handles the core case (shared words in different positions) that the others miss.
+
+**Usage:**
+```bash
+# Preview calendar order for a specific date
+python scripts/similarity_test.py --city santarosa --date 2026-02-19 --algorithm token_set
+
+# Show only timeslots where clustering changes the order vs alphabetical
+python scripts/similarity_test.py --city santarosa --changes-only --algorithm token_set
+
+# Compare all algorithms side by side
+python scripts/similarity_test.py --city santarosa --date 2026-02-20
+
+# Pair analysis with score distribution
+python scripts/similarity_test.py --city santarosa --pairs --algorithm token_set
+
+# Adjust threshold
+python scripts/similarity_test.py --city santarosa --changes-only --threshold 0.5
 ```
 
-#### Approach 2: Batch LLM Clustering
-
-**How it works:**
-1. For each date, send ALL events to the LLM in one prompt
-2. Ask it to return clusters of same-event groups
-3. Keep one event per cluster (highest priority source)
-
-**Pros:**
-- Single LLM call per date (simpler, potentially cheaper)
-- LLM sees full context, can catch non-obvious matches
-- No heuristics to tune
-
-**Cons:**
-- Larger prompts (more tokens)
-- May hit context limits on busy days
-- Less control over matching logic
-
-```
-Prompt: "Here are events on 2026-02-22. Group any that are the same event:
-
-1. SANTA ROSA RIDE GROUP (Sports Basement, 9am)
-2. Group Rides with Sports Basement (North Bay Bohemian, 9am)
-3. Farmers Market at Plaza (GoLocal, 8am)
-4. Tuesday Run Club (Sports Basement, 6pm)
-5. Evening Run at Sports Basement (Bohemian, 6pm)
-
-Respond ONLY with JSON grouping indices: [[1,2], [4,5], [3]]"
-```
-
-**Response:** `[[1,2], [4,5], [3]]`
-
-This tells us events 1&2 are the same, 4&5 are the same, and 3 is unique.
-
-#### Recommendation
-
-**Start with Approach 2** (batch clustering) because:
-- Simpler to implement
-- No heuristics to tune and maintain
-- Single call per date is easier to reason about
-- Can fall back to Approach 1 if costs are too high
-
----
-
-## Implementation Status (2026-02-17)
-
-### What's Been Built
-
-1. **Fuzzy dedup in `combine_ics.py`** using Claude 3.5 Haiku
-   - Batch clustering approach (Approach 2)
-   - Gated by `ENABLE_FUZZY_DEDUP` env var
-   - Requires `ANTHROPIC_API_KEY` in GitHub secrets
-
-2. **Provenance preservation** - both exact and fuzzy dedup now merge sources
-   - `X-SOURCE:Sports Basement, North Bay Bohemian` instead of discarding
-
-3. **Logging to `cities/{city}/fuzzy_dedup.log`**
-   - Each date checked with event count
-   - Each match found
-   - Merged sources
-   - API usage (calls, input/output tokens)
-   - Errors with raw LLM response for debugging
-
-### First Run Results
-
-The fuzzy dedup found matches like:
-```
-Fuzzy match: [2026-02-22] 'Group Rides with Sports Basement' (North Bay Bohemian) -> 'SANTA ROSA RIDE GROUP' (Sports Basement)
-```
-
-These are correct - same event, different titles.
-
-### Issues Found
-
-**False positives** - the LLM is being too aggressive:
-```
-Fuzzy match: [2026-03-20] 'VHS Station (2) - Playback Memory Lab' (library_intercept) -> 'One-on-One Genealogy Research Help' (library_intercept)
-Fuzzy match: [2026-03-27] 'Scanning Station - Playback Memory Lab' (library_intercept) -> 'One-on-One Genealogy Research Help' (library_intercept)
-Fuzzy match: [2026-03-31] 'No classes, District closed' (srjc) -> 'Holiday Closure: Cesar Chavez Day 2026' (sonoma_county_gov)
-```
-
-These are NOT the same events - they just happen on the same day at the same location.
-
-**Occasional JSON parse errors** - LLM sometimes returns malformed JSON:
-```
-Fuzzy dedup error for 2026-03-28: Extra data: line 3 column 1 (char 116)
-```
-
-### Next Steps
-
-1. **Tighten the prompt** - be more explicit about what constitutes "same event":
-   - Same actual gathering, not just same day/location
-   - Different library programs at the same branch are NOT duplicates
-   - School closures and government holidays are NOT the same event
-   - When in doubt, keep them separate
-
-2. **Consider Approach 1** (candidate generation) - pre-filter to only check events that:
-   - Have overlapping significant words in title
-   - Are from different sources (same-source events are already deduped)
-   - This would reduce false positives and API costs
-
-3. **Add confidence threshold** - have LLM return confidence scores, only merge high-confidence matches
-
-4. **Review logs** - analyze `fuzzy_dedup.log` files to tune the prompt based on real-world false positives
-
-#### Cost Considerations
-
-- Only run on events sharing the same date AND location (or no location)
-- Cache results (same event pairs don't need re-verification)
-- Run as batch job, not real-time
-- Estimate: ~$0.01-0.05 per city per day with GPT-4o-mini
-
-#### Implementation Location
-
-Add to `combine_ics.py` after exact-match dedup:
-
-```python
-# Phase 1: Exact match dedup (current)
-unique_events = dedupe_cross_source(uid_deduped, input_dir)
-
-# Phase 2: Fuzzy match dedup (new)
-if os.environ.get('ENABLE_FUZZY_DEDUP'):
-    unique_events = dedupe_fuzzy(unique_events)
-```
-
-Gate behind environment variable for gradual rollout.
-
-#### Matching Signals
-
-Beyond title similarity, the LLM can consider:
-- Same date and time
-- Same or similar location
-- Overlapping keywords ("run", "club", "sports basement")
-- One title is substring/expansion of another
-- Same venue mentioned in description
+The test harness remains available for evolving the approach — trying new algorithms, adjusting thresholds, or evaluating on new cities. Any change to the similarity logic in `ics_to_json.py` can be previewed first in the test harness.
 
 ---
 
