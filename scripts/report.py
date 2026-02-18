@@ -186,6 +186,85 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
         if key not in existing_today:
             report['anomalies'].append(a)
 
+    # URL quality analysis from events.json
+    for city in cities:
+        events_json = f'cities/{city}/events.json'
+        try:
+            with open(events_json, 'r') as f:
+                events = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
+
+        urls_with_url = [e for e in events if e.get('url')]
+        total = len(urls_with_url)
+        unique_urls = len(set(e['url'] for e in urls_with_url))
+
+        # Group by domain
+        from urllib.parse import urlparse
+        by_domain = {}
+        for e in urls_with_url:
+            try:
+                domain = urlparse(e['url']).hostname or e['url']
+            except Exception:
+                domain = e['url']
+            if domain not in by_domain:
+                by_domain[domain] = {'urls': set(), 'count': 0}
+            by_domain[domain]['urls'].add(e['url'])
+            by_domain[domain]['count'] += 1
+
+        # Generic URLs: domains where all events share one URL, with >5 events
+        generic_domains = []
+        generic_count = 0
+        for domain, info in by_domain.items():
+            if len(info['urls']) == 1 and info['count'] > 5:
+                generic_domains.append({
+                    'domain': domain,
+                    'events': info['count'],
+                    'url': list(info['urls'])[0]
+                })
+                generic_count += info['count']
+        generic_domains.sort(key=lambda g: -g['events'])
+
+        # HTTP domains
+        http_domains = set()
+        http_count = 0
+        for e in urls_with_url:
+            if e['url'].startswith('http://'):
+                try:
+                    http_domains.add(urlparse(e['url']).hostname)
+                except Exception:
+                    pass
+                http_count += 1
+
+        # Source specificity
+        by_source = {}
+        for e in urls_with_url:
+            src = e.get('source') or '(none)'
+            if src not in by_source:
+                by_source[src] = {'count': 0, 'urls': set()}
+            by_source[src]['count'] += 1
+            by_source[src]['urls'].add(e['url'])
+        source_specificity = sorted([
+            {
+                'source': src,
+                'events': info['count'],
+                'unique_urls': len(info['urls']),
+                'specificity_pct': round(len(info['urls']) / info['count'] * 100)
+            }
+            for src, info in by_source.items()
+        ], key=lambda x: -x['events'])[:15]
+
+        report['cities'][city]['url_quality'] = {
+            'total_with_url': total,
+            'total_events': len(events),
+            'unique_urls': unique_urls,
+            'generic_count': generic_count,
+            'generic_domains': generic_domains,
+            'http_count': http_count,
+            'http_domains': len(http_domains),
+            'source_specificity': source_specificity
+        }
+
     report['generated'] = now
 
     save_report(report, report_path)
