@@ -349,5 +349,14 @@ Created `cities/santarosa/dedup_policy.json` with source priority:
 ### Remaining Work
 
 1. **Add policies for other cities** - Create `dedup_policy.json` for Petaluma, Toronto, etc.
-2. **Client dedup simplification** - The client `dedupeEvents()` can now be simplified since most duplicates are removed upstream (still needed as safety net)
-3. **Monitoring** - Add logging/metrics to track dedup effectiveness over time
+2. **Monitoring** - Add logging/metrics to track dedup effectiveness over time
+
+### Client Dedup Retained as Safety Net
+
+The client-side `dedupeEvents()` function in `helpers.js` remains in place. It duplicates the logic in `combine_ics.py` but this is intentional:
+
+- **Harmless overhead** - The function is fast and cached
+- **Safety net** - Catches any duplicates that slip through upstream (edge cases, timing issues)
+- **No code churn** - Removing it would require testing all the `mergedIds` logic for picks
+
+The upstream dedup in `combine_ics.py` does the heavy lifting (~1,200 duplicates removed). The client dedup now rarely finds anything to merge, but keeping it costs nothing and provides defense in depth.
