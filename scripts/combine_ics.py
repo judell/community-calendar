@@ -541,7 +541,9 @@ def normalize_title(title):
 def extract_field(event_content, field_name):
     """Extract a field value from VEVENT content, handling line folding."""
     # Match field, handling continuation lines (start with space/tab)
-    pattern = rf'^{field_name}[^:]*:([^\r\n]+(?:[\r\n]+[ \t][^\r\n]+)*)'
+    # Use (?:;[^:]*)?  to allow ICS parameters (e.g. DTSTART;TZID=...:value)
+    # but prevent matching longer field names (e.g. X-SOURCE-ID when searching for X-SOURCE)
+    pattern = rf'^{field_name}(?:;[^:]*)?:([^\r\n]+(?:[\r\n]+[ \t][^\r\n]+)*)'
     match = re.search(pattern, event_content, re.MULTILINE | re.IGNORECASE)
     if match:
         # Unfold: remove newline+space/tab
@@ -611,7 +613,7 @@ def dedupe_cross_source(events, input_dir):
             
             # Update X-SOURCE to combined value
             if len(all_sources) > 1:
-                merged_source = ', '.join(all_sources)
+                merged_source = ', '.join(sorted(all_sources))
                 kept['content'] = re.sub(
                     r'^X-SOURCE:[^\r\n]+',
                     f'X-SOURCE:{merged_source}',
@@ -765,7 +767,7 @@ JSON:"""
                 
                 # Merge sources into kept event
                 if len(all_sources) > 1:
-                    merged_source = ', '.join(all_sources)
+                    merged_source = ', '.join(sorted(all_sources))
                     kept_event['content'] = re.sub(
                         r'^X-SOURCE:[^\r\n]+',
                         f'X-SOURCE:{merged_source}',
