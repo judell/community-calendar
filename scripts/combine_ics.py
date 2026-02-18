@@ -775,7 +775,12 @@ JSON:"""
                     log_file.write(f"  -> Merged sources: {merged_source}\n")
                     
         except Exception as e:
-            print(f"  Fuzzy dedup error for {date_str}: {e}")
+            error_msg = f"ERROR [{date_str}]: {e}"
+            print(f"  Fuzzy dedup: {error_msg}")
+            log_file.write(f"{error_msg}\n")
+            # Log the raw response if available for debugging
+            if 'text' in dir():
+                log_file.write(f"  Raw response: {text[:500]}\n")
             continue
     
     # Write summary and close log file
