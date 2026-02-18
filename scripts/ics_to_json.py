@@ -143,8 +143,14 @@ def cluster_by_title_similarity(events, threshold=0.85):
             for j in range(i + 1, len(group)):
                 ta = group[i].get('title', '')
                 tb = group[j].get('title', '')
-                if ta and tb and token_set_similarity(ta, tb) >= threshold:
-                    union(i, j)
+                if not ta or not tb or token_set_similarity(ta, tb) < threshold:
+                    continue
+                # Don't cluster events at different locations
+                la = group[i].get('location', '') or ''
+                lb = group[j].get('location', '') or ''
+                if la and lb and la != lb:
+                    continue
+                union(i, j)
 
         clusters = defaultdict(list)
         for i in range(len(group)):

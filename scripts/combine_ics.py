@@ -608,8 +608,11 @@ def dedupe_cross_source(events, input_dir):
             all_sources = []
             for e in group:
                 src = extract_field(e['content'], 'X-SOURCE')
-                if src and src not in all_sources:
-                    all_sources.append(src)
+                if src:
+                    for s in src.split(','):
+                        s = s.strip()
+                        if s and s not in all_sources:
+                            all_sources.append(s)
             
             # Update X-SOURCE to combined value
             if len(all_sources) > 1:
@@ -746,15 +749,20 @@ JSON:"""
                 kept_title = extract_field(kept_event['content'], 'SUMMARY') or '(no title)'
                 kept_source = extract_field(kept_event['content'], 'X-SOURCE') or 'Unknown'
                 
-                # Collect all sources for merging
-                all_sources = [kept_source] if kept_source != 'Unknown' else []
-                
+                # Collect all sources for merging (split already-merged comma-separated sources)
+                all_sources = []
+                if kept_source != 'Unknown':
+                    all_sources.extend(s.strip() for s in kept_source.split(','))
+
                 for idx, removed_event in cluster_events[1:]:
                     removed_title = extract_field(removed_event['content'], 'SUMMARY') or '(no title)'
                     removed_source = extract_field(removed_event['content'], 'X-SOURCE') or 'Unknown'
-                    
-                    if removed_source != 'Unknown' and removed_source not in all_sources:
-                        all_sources.append(removed_source)
+
+                    if removed_source != 'Unknown':
+                        for s in removed_source.split(','):
+                            s = s.strip()
+                            if s and s not in all_sources:
+                                all_sources.append(s)
                     
                     match_line = f"[{date_str}] '{removed_title}' ({removed_source}) -> '{kept_title}' ({kept_source})"
                     print(f"    Fuzzy match: {match_line}")
