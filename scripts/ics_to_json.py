@@ -227,7 +227,8 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
             'city': city or '',
             'source': source or '',
             'source_id': source_id or '',
-            'source_uid': uid or ''
+            'source_uid': uid or '',
+            'cluster_id': None
         }
         events.append(event)
 
