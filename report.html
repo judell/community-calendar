@@ -84,6 +84,28 @@
         .url-stat { background: #f5f5f5; padding: 8px 14px; border-radius: 6px; }
         .url-stat .label { font-size: 0.8em; color: #666; }
         .url-stat .value { font-size: 1.3em; font-weight: 600; }
+        .help-btn {
+            display: inline-block; width: 16px; height: 16px; line-height: 16px;
+            text-align: center; border-radius: 50%; background: #e0e0e0; color: #666;
+            font-size: 11px; font-weight: 600; cursor: pointer; vertical-align: middle;
+            margin-left: 4px; user-select: none;
+        }
+        .help-btn:hover { background: #bbb; color: #333; }
+        .help-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .help-overlay.open { display: flex; }
+        .help-dialog {
+            background: white; border-radius: 8px; padding: 24px; max-width: 500px;
+            margin: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative;
+        }
+        .help-dialog h3 { margin-top: 0; }
+        .help-close {
+            position: absolute; top: 8px; right: 12px; cursor: pointer;
+            font-size: 20px; color: #999; background: none; border: none;
+        }
+        .help-close:hover { color: #333; }
         .pct-bar { display: inline-block; height: 8px; border-radius: 4px; vertical-align: middle; }
         .pct-bar.good { background: #4caf50; }
         .pct-bar.mid { background: #f57c00; }
@@ -104,6 +126,14 @@
     <div class="url-section">
         <h2>URL Quality</h2>
         <div id="url-report">Loading...</div>
+    </div>
+
+    <div class="help-overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()">
+        <div class="help-dialog">
+            <button class="help-close" onclick="closeHelp()">&times;</button>
+            <h3 id="helpTitle"></h3>
+            <div id="helpBody"></div>
+        </div>
     </div>
 
     <script>
@@ -237,7 +267,7 @@
                             <div class="url-summary">
                                 <div class="url-stat"><div class="label">Events with URL</div><div class="value">${uq.total_with_url.toLocaleString()} / ${uq.total_events.toLocaleString()}</div></div>
                                 <div class="url-stat"><div class="label">Unique URLs</div><div class="value">${uq.unique_urls.toLocaleString()}</div></div>
-                                <div class="url-stat"><div class="label">Generic URL events</div><div class="value" style="color:${uq.generic_count > 0 ? '#d32f2f' : '#4caf50'}">${uq.generic_count} (${100 - specificPct}%)</div></div>
+                                <div class="url-stat"><div class="label">Generic URL events <span class="help-btn" onclick="showHelp('generic')">?</span></div><div class="value" style="color:${uq.generic_count > 0 ? '#d32f2f' : '#4caf50'}">${uq.generic_count} (${100 - specificPct}%)</div></div>
                                 <div class="url-stat"><div class="label">HTTP (not HTTPS)</div><div class="value" style="color:${uq.http_count > 0 ? '#f57c00' : '#4caf50'}">${uq.http_count} (${uq.http_domains} domains)</div></div>
                             </div>
                             ${uq.generic_domains.length ? `
@@ -253,7 +283,7 @@
                             <details>
                                 <summary>URL specificity by source</summary>
                                 <table class="url-table">
-                                    <tr><th>Source</th><th>Events</th><th>Unique URLs</th><th>Specificity</th></tr>
+                                    <tr><th>Source</th><th>Events</th><th>Unique URLs</th><th>Specificity <span class="help-btn" onclick="showHelp('specificity')">?</span></th></tr>
                                     ${(uq.source_specificity || []).map(r => `
                                         <tr class="${r.specificity_pct < 20 ? 'warn' : r.specificity_pct < 50 ? 'caution' : ''}">
                                             <td>${r.source}</td><td class="num">${r.events}</td><td class="num">${r.unique_urls}</td>
@@ -276,6 +306,29 @@
                     cityEl.querySelectorAll('.city-content > details').forEach(d => d.open = cityEl.open);
                 });
             });
+        }
+
+        const helpDefs = {
+            generic: {
+                title: 'Generic URL Events',
+                body: 'Events whose URL points to a generic page (homepage, calendar listing) rather than a page about that specific event. Every event from the domain shares the same URL. Clicking takes the user to a page with no direct connection to the event they were looking at.<br><br>Common causes: the source calendar doesn\'t provide per-event links, or the scraper can only extract the venue\'s top-level URL.'
+            },
+            specificity: {
+                title: 'URL Specificity',
+                body: 'The percentage of a source\'s events that have a unique URL. 100% means every event links to its own page. Low specificity means many events share the same URL.<br><br><b>Green (80%+)</b>: most events have their own page.<br><b>Orange (40\u201379%)</b>: mixed \u2014 some events link to specific pages, others to generic ones.<br><b>Red (&lt;40%)</b>: most events link to the same generic page.'
+            }
+        };
+
+        function showHelp(key) {
+            const def = helpDefs[key];
+            if (!def) return;
+            document.getElementById('helpTitle').textContent = def.title;
+            document.getElementById('helpBody').innerHTML = def.body;
+            document.getElementById('helpOverlay').classList.add('open');
+        }
+
+        function closeHelp() {
+            document.getElementById('helpOverlay').classList.remove('open');
         }
 
         loadReport();
