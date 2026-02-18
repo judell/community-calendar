@@ -12,6 +12,7 @@ const EVENTS_URLS: Record<string, string> = {
   bloomington: "https://judell.github.io/community-calendar/cities/bloomington/events.json",
   davis: "https://judell.github.io/community-calendar/cities/davis/events.json",
   toronto: "https://judell.github.io/community-calendar/cities/toronto/events.json",
+  raleighdurham: "https://judell.github.io/community-calendar/cities/raleighdurham/events.json",
 };
 
 Deno.serve(async (req) => {
@@ -26,8 +27,9 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch events from all cities
+    // Fetch events from all cities, delete stale records, then upsert
     const allEvents: any[] = [];
+    let deleted = 0;
     for (const [city, url] of Object.entries(EVENTS_URLS)) {
       console.log(`Fetching events from ${city}:`, url);
       try {
@@ -40,6 +42,17 @@ Deno.serve(async (req) => {
         // Ensure city is set on each event
         for (const event of events) {
           event.city = event.city || city;
+        }
+        // Delete existing events for this city to remove stale records
+        const { count, error: delError } = await supabase
+          .from("events")
+          .delete({ count: "exact" })
+          .eq("city", city);
+        if (delError) {
+          console.error(`Delete ${city} error:`, delError);
+        } else {
+          deleted += count || 0;
+          console.log(`Deleted ${count} existing events for ${city}`);
         }
         allEvents.push(...events);
         console.log(`Fetched ${events.length} events from ${city}`);
@@ -58,7 +71,7 @@ Deno.serve(async (req) => {
     }
     console.log(`Unique events: ${uniqueEvents.size}`);
 
-    // Upsert events in batches
+    // Insert events in batches
     const batchSize = 500;
     const eventsArray = Array.from(uniqueEvents.values());
     let inserted = 0;
@@ -83,9 +96,10 @@ Deno.serve(async (req) => {
     }
 
     const result = {
-      success: true,
+      success: errors === 0,
       fetched: allEvents.length,
       unique: uniqueEvents.size,
+      deleted,
       inserted,
       errors,
     };
