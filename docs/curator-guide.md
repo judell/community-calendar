@@ -43,6 +43,12 @@ A **curator** builds and maintains the calendar for their community. You don't c
 
 All three approaches produce the same thing: a well-maintained `SOURCES_CHECKLIST.md` and a pipeline that pulls from discovered feeds.
 
+### Monitor the dashboard, act on what matters to you
+
+The [health report](../report.html) is a curator's primary ongoing tool. It shows which feeds are working, which have gone to zero, and how URL quality is trending across sources. When you see a gap — a feed dropping to 0 events, a category you care about underrepresented — that's your cue to investigate.
+
+**Example:** The health report showed `volunteer_toronto` at 0 events. A curator who cares about volunteerism noticed the gap, asked an agent to investigate, and discovered that Volunteer Toronto's events had migrated to Toronto Public Library's BiblioCommons platform. Ten lines of code replaced a broken 436-line scraper and restored 82 events. The dashboard surfaced the problem; the curator's judgment about what matters drove the fix. See [When a Source Goes Dark](discovery-lessons.md#when-a-source-goes-dark-follow-the-events) for the full story.
+
 ## What Makes a Good Source
 
 **Best**: Native ICS feeds (Meetup groups, Tockify calendars, Google Calendar public links). These "just work" and stay current automatically. 

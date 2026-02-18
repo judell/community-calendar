@@ -33,6 +33,7 @@ Real-world lessons from source discovery across cities. These complement the str
 - [Topical Searches Yield Long-Tail Sources](#topical-searches-yield-long-tail-sources)
   - [Example: History/Heritage](#example-historyheritage)
   - [Other Topical Searches to Try](#other-topical-searches-to-try)
+- [When a Source Goes Dark, Follow the Events](#when-a-source-goes-dark-follow-the-events)
 
 ## "Curl-and-Done" Sources: No Scraper Needed
 
@@ -318,3 +319,29 @@ church, history, heritage, architecture, genealogy
 ```
 
 Document findings in `cities/{city}/SOURCES_CHECKLIST.md` under a "Topical Search" section, noting which searches have been done and what was found.
+
+## When a Source Goes Dark, Follow the Events
+
+Sources break. A site adds Cloudflare bot protection, a platform redesigns its API, a domain expires. The health report dashboard shows the symptom: a feed drops to 0 events. What happens next depends on whether a curator cares about that category.
+
+**Case study: Volunteer Toronto**
+
+The health report showed `volunteer_toronto` at 0 events. The scraper had targeted `volunteertoronto.ca` directly — RSS, ICS, and HTML endpoints — but the entire site was now behind Cloudflare, returning 403 on every request.
+
+A curator who cares about volunteerism in Toronto won't stop there. The investigation path:
+
+1. **Web search for the same events elsewhere.** Searching for "volunteer toronto" events turned up listings on Toronto Public Library's BiblioCommons, Eventbrite, Meetup, and City of Toronto pages.
+
+2. **Check Eventbrite.** Volunteer Toronto has an [Eventbrite organizer page](https://www.eventbrite.ca/o/volunteer-toronto-9797196651) — but it showed 0 future events (last activity was 2023). Dead end.
+
+3. **Check BiblioCommons.** TPL's events API at `gateway.bibliocommons.com` showed Volunteer Toronto events tagged with `programId: 68b050fad7b6cc3d009b8dcf`. These are the same "How to Become a Volunteer" workshops, newcomer settlement services, English conversation circles, and career programs — 182 events, all with per-event URLs, locations, and descriptions.
+
+4. **Reuse existing infrastructure.** We already had a `BibliocommonsEventsScraper` base class for TPL kids events. The new scraper is 10 lines — just a subclass with `program_ids = ["68b050fad7b6cc3d009b8dcf"]`. It replaced 436 lines of Cloudflare-blocked code and immediately produced 82 events.
+
+**The general pattern:** Events often exist in multiple places. When the original source becomes inaccessible, search for who else hosts, aggregates, or republishes the same events. Check:
+- The organization's presence on Eventbrite, Meetup, Facebook
+- Library systems that host their programs (BiblioCommons, LibCal)
+- Municipal event calendars that list partner organizations
+- Aggregator sites that may have picked up the events
+
+Don't give up on a category just because one source is inaccessible. The events are still happening — they're just published somewhere else.
