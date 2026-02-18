@@ -613,6 +613,112 @@ def dedupe_cross_source(events, input_dir):
     return unique_events
 
 
+def dedupe_fuzzy(events):
+    """Use LLM to find duplicates with different titles.
+    
+    Groups events by date, asks Claude to cluster same-events,
+    then keeps highest-priority source from each cluster.
+    """
+    import os
+    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    if not api_key:
+        print("  Fuzzy dedup: ANTHROPIC_API_KEY not set, skipping")
+        return events
+    
+    try:
+        import anthropic
+    except ImportError:
+        print("  Fuzzy dedup: anthropic package not installed, skipping")
+        return events
+    
+    client = anthropic.Anthropic(api_key=api_key)
+    
+    # Group by date
+    by_date = {}
+    for event in events:
+        date_str = event['dtstart'].strftime('%Y-%m-%d')
+        if date_str not in by_date:
+            by_date[date_str] = []
+        by_date[date_str].append(event)
+    
+    # Track which events to remove (by index in original list)
+    events_to_remove = set()
+    fuzzy_deduped = 0
+    
+    for date_str, day_events in by_date.items():
+        if len(day_events) < 2:
+            continue
+        
+        # Build prompt with event summaries
+        event_lines = []
+        for i, e in enumerate(day_events):
+            title = extract_field(e['content'], 'SUMMARY') or '(no title)'
+            source = extract_field(e['content'], 'X-SOURCE') or 'Unknown'
+            location = extract_field(e['content'], 'LOCATION') or ''
+            time_str = e['dtstart'].strftime('%H:%M')
+            loc_part = f", {location}" if location else ""
+            event_lines.append(f"{i+1}. {title} ({source}, {time_str}{loc_part})")
+        
+        # Skip if too many events (cost control)
+        if len(event_lines) > 50:
+            continue
+        
+        prompt = f"""Events on {date_str}. Group any that are the SAME event (same actual gathering, possibly with different titles).
+
+{chr(10).join(event_lines)}
+
+Respond with ONLY a JSON array of arrays grouping indices of same events.
+Example: [[1,2], [3], [4,5,6]] means 1&2 are same event, 3 is unique, 4&5&6 are same event.
+If all events are unique, respond: [[1], [2], [3], ...]
+
+JSON:"""
+        
+        try:
+            response = client.messages.create(
+                model="claude-3-5-haiku-20241022",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            # Parse response
+            import json
+            text = response.content[0].text.strip()
+            # Handle markdown code blocks
+            if text.startswith('```'):
+                text = text.split('\n', 1)[1].rsplit('\n', 1)[0]
+            clusters = json.loads(text)
+            
+            # Process clusters - keep highest priority from each
+            for cluster in clusters:
+                if len(cluster) <= 1:
+                    continue
+                
+                # Get events in this cluster (convert 1-indexed to 0-indexed)
+                cluster_events = [(idx-1, day_events[idx-1]) for idx in cluster if 0 < idx <= len(day_events)]
+                if len(cluster_events) <= 1:
+                    continue
+                
+                # Sort by priority (non-aggregators first)
+                cluster_events.sort(key=lambda x: (1 if is_aggregator(extract_field(x[1]['content'], 'X-SOURCE') or '') else 0))
+                
+                # Keep first, mark rest for removal
+                for idx, _ in cluster_events[1:]:
+                    # Find this event in the original list
+                    orig_idx = events.index(day_events[idx])
+                    events_to_remove.add(orig_idx)
+                    fuzzy_deduped += 1
+                    
+        except Exception as e:
+            print(f"  Fuzzy dedup error for {date_str}: {e}")
+            continue
+    
+    if fuzzy_deduped > 0:
+        print(f"  Fuzzy dedup: removed {fuzzy_deduped} duplicate events")
+    
+    # Return events with duplicates removed
+    return [e for i, e in enumerate(events) if i not in events_to_remove]
+
+
 def extract_events(ics_content, source_name=None, source_id=None, fallback_url=None):
     """Extract VEVENT blocks from ICS content."""
     events = []
@@ -734,6 +840,11 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar",
     # Cross-source deduplication: group by (date, normalized_title)
     # Keep the event from the highest-priority source (primary sources over aggregators)
     unique_events = dedupe_cross_source(uid_deduped, input_dir)
+    
+    # Fuzzy deduplication: use LLM to find duplicates with different titles
+    import os
+    if os.environ.get('ENABLE_FUZZY_DEDUP'):
+        unique_events = dedupe_fuzzy(unique_events)
     
     # Build combined ICS
     output = [
