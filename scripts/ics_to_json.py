@@ -92,7 +92,25 @@ def token_set_similarity(a, b):
 
 def cluster_by_title_similarity(events, threshold=0.85):
     """Cluster events within same timeslot by title similarity.
-    Uses union-find to group similar titles, sorts clusters alphabetically."""
+    Uses union-find to group similar titles, sorts clusters alphabetically.
+
+    Tuning
+    ------
+    Threshold controls how similar titles must be to cluster together.
+    Genuine duplicates (same event from different sources) score 0.98-1.0:
+      "One-On-One Tech Help" vs "Tech Help"                          → 1.000
+      "Vineyard Garden Wine Tasting" vs "Picnic Lunch and ..."       → 1.000
+      "Bilingual Family Storytime" vs "Family Storytime"             → 1.000
+
+    False matches (different events sharing common words) score 0.56-0.78:
+      "Community Coffee Tasting" vs "Community Yoga"                 → 0.783
+      "BiblioBus at ... Farmers Market" vs "VALLEJO FARMERS MARKET"  → 0.778
+      "Mushroom Hike" vs "Mushroom Identification"                   → 0.762
+      "Karaoke Sundays" vs "Sabroso Sundays"                        → 0.733
+      "Honky Tonk Open Mic" vs "Open Mic Night"                     → 0.727
+
+    Threshold of 0.85 cleanly separates the two groups.
+    """
     from collections import defaultdict
 
     # Group by timeslot
