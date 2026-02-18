@@ -121,6 +121,16 @@ Scrapers are in `scrapers/` and per-city data lives in `cities/<name>/`.
 python scripts/combine_ics.py -i cities/santarosa -o cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
 ```
 
+### Deduplication and Source Attribution
+
+**`scripts/combine_ics.py`** performs two rounds of deduplication:
+
+1. **Cross-source dedup** — Events with identical title + date from different sources are merged. The non-aggregator version is kept (better URL/description), and `X-SOURCE` headers are merged alphabetically (e.g., "North Bay Bohemian, Press Democrat").
+
+2. **Fuzzy dedup** — An LLM (Claude Haiku) groups events with different titles that are the same actual gathering (e.g., "Boeing Boeing" vs "Boeing Boeing - The Play"). Runs per-date, keeps highest-priority source from each cluster.
+
+Source attribution flows through the pipeline as `X-SOURCE` ICS headers, which become the `source` column in the database. Display names are mapped from filenames via `SOURCE_NAMES` in `combine_ics.py`.
+
 ### 3. ICS to JSON Conversion
 
 **`scripts/ics_to_json.py`** - Converts ICS to JSON format for Supabase ingestion:
@@ -128,6 +138,13 @@ python scripts/combine_ics.py -i cities/santarosa -o cities/santarosa/combined.i
 ```bash
 python scripts/ics_to_json.py cities/santarosa/combined.ics -o cities/santarosa/events.json
 ```
+
+#### Title Clustering
+
+Events within the same timeslot are clustered by title similarity so the UI can visually group them with colored borders. Uses token-set similarity (word overlap) with a threshold of 0.85, plus location awareness — events at different locations are never clustered even if titles match.
+
+Good clusters (score 0.98-1.0): "Tech Help" / "One-On-One Tech Help" at the same library.
+Rejected (score < 0.85): "Community Yoga" / "Community Coffee Tasting" — different events sharing a common word. See the `cluster_by_title_similarity` docstring for tuning details.
 
 Output format:
 ```json
@@ -139,7 +156,8 @@ Output format:
   "description": "Event description",
   "url": "https://...",
   "source": "Source Name",
-  "source_uid": "unique-id@source.com"
+  "source_uid": "unique-id@source.com",
+  "cluster_id": 0
 }
 ```
 
