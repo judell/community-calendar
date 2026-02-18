@@ -657,7 +657,7 @@ def dedupe_fuzzy(events, input_dir):
     total_input_tokens = 0
     total_output_tokens = 0
     dates_with_multiple = 0
-    dates_skipped_too_many = 0
+
     
     for date_str, day_events in by_date.items():
         if len(day_events) < 2:
@@ -674,12 +674,6 @@ def dedupe_fuzzy(events, input_dir):
             time_str = e['dtstart'].strftime('%H:%M')
             loc_part = f", {location}" if location else ""
             event_lines.append(f"{i+1}. {title} ({source}, {time_str}{loc_part})")
-        
-        # Skip if too many events (cost control)
-        if len(event_lines) > 50:
-            dates_skipped_too_many += 1
-            log_file.write(f"SKIPPED: {date_str} ({len(event_lines)} events, too many)\n")
-            continue
         
         log_file.write(f"CHECKING: {date_str} ({len(event_lines)} events)\n")
         
@@ -751,7 +745,7 @@ JSON:"""
     # Write summary and close log file
     log_file.write(f"\n--- Summary ---\n")
     log_file.write(f"Dates with 2+ events: {dates_with_multiple}\n")
-    log_file.write(f"Dates skipped (>50 events): {dates_skipped_too_many}\n")
+
     log_file.write(f"API calls made: {api_calls}\n")
     log_file.write(f"Total input tokens: {total_input_tokens}\n")
     log_file.write(f"Total output tokens: {total_output_tokens}\n")
