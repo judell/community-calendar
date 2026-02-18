@@ -81,3 +81,27 @@ A scheduled check could HEAD-request a sample of URLs per domain to detect:
 - Sites that have gone offline
 
 This could feed into the anomaly system already in report.html.
+
+## 4. Feed quality score
+
+The health report currently shows feed-level metrics (event counts, errors) and URL quality separately. A composite per-feed quality score would give a single number summarizing how well a feed is performing.
+
+### Available fields today (from events.json)
+
+| Field | What it measures | Range across cities |
+|---|---|---|
+| has-description | Event has a description | 68–99% |
+| has-location | Event has a location string | 52–93% |
+| has-url | Event has any URL | 87–100% |
+| url-specificity | Unique URLs / events (per source) | 59–96% |
+
+### Future dimensions to add
+
+- **has-geo**: Location includes lat/lon coordinates (not yet in the data)
+- **url-reachable**: URL returns 2xx on HEAD request
+- **has-end-time**: Event specifies an end time (not just start)
+- **description-quality**: Description is more than boilerplate (length, uniqueness)
+
+### Possible approach
+
+Score each feed/source 0–100 as a weighted average of available dimensions. Display as a single percentage on the city summary line in the health report, analogous to URL Quality's "78% event-specific." Weights and thresholds TBD — the right formula depends on what dimensions matter most to users clicking through to events.

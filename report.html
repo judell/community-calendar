@@ -22,7 +22,7 @@
             margin-bottom: 20px;
         }
 
-        .anomalies { margin-bottom: 20px; }
+        .anomalies { margin-top: 30px; margin-bottom: 20px; }
 
         .anomaly {
             padding: 8px 12px;
@@ -66,12 +66,30 @@
         .sparkline .bar.error { background: #d32f2f; }
         .sparkline .bar.zero { background: #f57c00; min-height: 2px; }
 
+        .sparkline-mini {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 1px;
+            height: 12px;
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+        .sparkline-mini .bar {
+            width: 3px;
+            background: #999;
+            border-radius: 1px 1px 0 0;
+        }
+        .sparkline-mini .bar.error { background: #d32f2f; }
+        .sparkline-mini .bar.zero { background: #f57c00; min-height: 1px; }
         .history-label { font-size: 0.75em; color: #999; }
         .feed-detail { padding-left: 20px; }
         .city-content { padding-left: 10px; }
 
+        .feed-section { margin-top: 20px; }
+        .feed-section h2 { margin-bottom: 4px; }
+        .section-desc { font-size: 0.85em; color: #666; margin-bottom: 12px; }
         .url-section { margin-top: 30px; }
-        .url-section h2 { margin-bottom: 10px; }
+        .url-section h2 { margin-bottom: 4px; }
         .url-table { width: 100%; border-collapse: collapse; font-size: 0.9em; margin: 8px 0; }
         .url-table th { text-align: left; padding: 4px 8px; border-bottom: 2px solid #ddd; }
         .url-table td { padding: 4px 8px; border-bottom: 1px solid #eee; }
@@ -116,17 +134,22 @@
     <h1>Calendar Feed Health Report</h1>
     <div class="generated" id="generated">Loading...</div>
 
-    <details class="anomalies" id="anomalies">
-        <summary>Anomalies (<span id="anomaly-count">0</span>)</summary>
-        <div id="anomaly-list">Loading...</div>
-    </details>
-
-    <div id="cities"></div>
+    <div class="feed-section">
+        <h2>Ingestion by Day</h2>
+        <div class="section-desc">Future events per feed, summed across feeds (duplicates possible when sources overlap)</div>
+        <div id="cities"></div>
+    </div>
 
     <div class="url-section">
         <h2>URL Quality</h2>
+        <div class="section-desc">Deduplicated events from the combined calendar</div>
         <div id="url-report">Loading...</div>
     </div>
+
+    <details class="anomalies" id="anomalies">
+        <summary><strong>Anomalies</strong> (<span id="anomaly-count">0</span>)</summary>
+        <div id="anomaly-list">Loading...</div>
+    </details>
 
     <div class="help-overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()">
         <div class="help-dialog">
@@ -225,6 +248,14 @@
                 countText = '0 events';
             }
 
+            const miniSparkline = history.slice(-14).map(h => {
+                const height = h.count ? Math.max(10, (h.count / maxCount) * 100) : 0;
+                let barClass = '';
+                if (h.error) barClass = 'error';
+                else if (h.count === 0) barClass = 'zero';
+                return `<div class="bar ${barClass}" style="height:${height}%" title="${h.date}: ${h.error || h.count + ' events'}"></div>`;
+            }).join('');
+
             const sparkline = history.map(h => {
                 const height = h.count ? Math.max(10, (h.count / maxCount) * 100) : 0;
                 let barClass = '';
@@ -239,7 +270,7 @@
 
             return `
                 <details>
-                    <summary><span class="feed-name">${name}</span> <span class="feed-count ${countClass}">${countText}</span></summary>
+                    <summary><span class="feed-name">${name}</span> <span class="feed-count ${countClass}">${countText}</span> <span class="sparkline-mini">${miniSparkline}</span></summary>
                     <div class="feed-detail">
                         <div class="sparkline">${sparkline}</div>
                         <div class="history-label">${range} (${history.length} days)</div>
