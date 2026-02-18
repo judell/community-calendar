@@ -322,6 +322,145 @@ When you add a new source:
 1. **Monitoring** - Add logging to track dedup effectiveness over time
 2. **Report enhancement** - Show duplicate counts in the feed health report
 
+---
+
+## Appendix: Future Architecture - Policy Flow
+
+The current solution (global AGGREGATORS list) handles the immediate problem. But there will likely be a need for richer per-city policies that flow down through the entire pipeline, including scrapers.
+
+### Why Policy Flow Matters
+
+Currently, scrapers are city-agnostic. They output ICS files and don't know:
+- What city context they're running in
+- Whether their output will be deduplicated against other sources
+- What quality standards apply
+- What geographic boundaries matter
+
+This means:
+- Scrapers can't make intelligent decisions about what to include
+- Duplicate work happens (scraping events that will be filtered later)
+- No way for a city to customize scraper behavior
+
+### Proposed Architecture
+
+#### 1. City Policy File
+
+Each city would have a `policy.json` (or expand the existing config):
+
+```json
+// cities/santarosa/policy.json
+{
+  "dedup": {
+    "aggregators": ["North Bay Bohemian", "Press Democrat"],
+    "match_key": "date+normalized_title_40"
+  },
+  "geo": {
+    "allowed_cities": ["Santa Rosa", "Sebastopol", ...],
+    "excluded_cities": ["San Francisco", ...]
+  },
+  "quality": {
+    "require_location": false,
+    "require_description": false,
+    "min_title_length": 3
+  },
+  "sources": {
+    "bohemian": {
+      "enabled": true,
+      "priority": "low",
+      "notes": "Aggregator - deprioritize in dedup"
+    },
+    "library_intercept": {
+      "enabled": true,
+      "priority": "high",
+      "geo_filter": true
+    }
+  }
+}
+```
+
+#### 2. Scraper Context
+
+Scrapers would receive city context, either via:
+
+**Option A: Command-line flag**
+```bash
+python scrapers/bohemian.py --city santarosa --output cities/santarosa/bohemian.ics
+```
+
+**Option B: Environment variable**
+```bash
+CALENDAR_CITY=santarosa python scrapers/bohemian.py --output cities/santarosa/bohemian.ics
+```
+
+**Option C: Infer from output path**
+```python
+# Scraper detects city from output path
+city = Path(args.output).parent.name  # "santarosa"
+```
+
+#### 3. BaseScraper Policy Integration
+
+The `BaseScraper` class would gain policy awareness:
+
+```python
+class BaseScraper:
+    def __init__(self, city=None):
+        self.city = city
+        self.policy = self.load_policy(city) if city else {}
+    
+    def load_policy(self, city):
+        policy_file = Path(f'cities/{city}/policy.json')
+        if policy_file.exists():
+            return json.loads(policy_file.read_text())
+        return {}
+    
+    def should_include_event(self, event):
+        """Apply policy filters before yielding event."""
+        # Geo filter
+        if self.policy.get('geo', {}).get('allowed_cities'):
+            if not self.location_matches_policy(event.get('location')):
+                return False
+        
+        # Quality filter
+        quality = self.policy.get('quality', {})
+        if quality.get('require_location') and not event.get('location'):
+            return False
+        
+        return True
+```
+
+#### 4. Policy-Aware Workflow
+
+The GitHub Actions workflow would pass city context:
+
+```yaml
+- name: Scrape Santa Rosa sources
+  run: |
+    export CALENDAR_CITY=santarosa
+    python scrapers/bohemian.py --output cities/santarosa/bohemian.ics
+    python scrapers/library_intercept.py --output cities/santarosa/library.ics
+```
+
+### Benefits of Policy Flow
+
+1. **Early filtering** - Scrapers skip irrelevant events at source, reducing downstream work
+
+2. **City customization** - Different cities can have different quality thresholds, geo boundaries, source priorities
+
+3. **Single source of truth** - Policy defined once, applied everywhere
+
+4. **Scraper intelligence** - Scrapers can make informed decisions (e.g., "I'm an aggregator for this city, maybe I should yield fewer events")
+
+5. **Easier testing** - Can validate scraper output against policy without running full pipeline
+
+### Migration Path
+
+1. **Phase 1** (current): Global AGGREGATORS list in combine_ics.py
+2. **Phase 2**: Move AGGREGATORS to per-city policy files
+3. **Phase 3**: Add city context to scraper invocations
+4. **Phase 4**: BaseScraper reads and applies policy
+5. **Phase 5**: Scrapers can declare their own characteristics ("I am an aggregator")
+
 ### Client Dedup Retained as Safety Net
 
 The client-side `dedupeEvents()` function in `helpers.js` remains in place. It duplicates the logic in `combine_ics.py` but this is intentional:
