@@ -405,3 +405,32 @@ These groups have working ICS feeds but no upcoming events as of 2026-02-17:
 - Interest groups (2 Meetup groups)
 
 **Estimated unique future events:** ~1,700+
+
+### Phase 2 Topical Search Results: 2026-02-18
+
+Searched across all curator-guide topics: music, theater, comedy, dance, film, art, crafts, literature, poetry, book clubs, writing, history, genealogy, philosophy, talks, hiking, walking, running, cycling, gardening, birding, conservation, yoga, fitness, mindfulness, wellness, beer, wine, food, cooking, farmers markets, trivia, board games, pets, wildlife, sustainability, kids, families, seniors, caregivers, newcomers, faith, LGBTQ+, cultural heritage, volunteering, mutual aid, civic engagement, tech, digital skills, careers.
+
+#### Sources Evaluated - Not Added
+
+| Source | Platform | Reason |
+|--------|----------|--------|
+| Limestone Post Magazine | CitySpark | Derivative aggregator |
+| FAR Center for Arts | Craft CMS | No ICS export, would need scraper |
+| Juniper Art Gallery | Custom | No calendar feed |
+| Gallery Walk Bloomington | Wix | No ICS export |
+| Bloomington PRIDE | Squarespace | No ICS export |
+| Bloomington Volunteer Network | Custom | No ICS export |
+| BARA (runners) | Wix | No ICS export |
+| Bloomington Yoga Collective | Squarespace | No ICS export |
+| Bloomington Brewing Co | Squarespace | No ICS export |
+| Indiana Dance Company | Custom | Class schedules only |
+| MotionArts Dance Academy | Custom | Class schedules only |
+| Windfall Dancers | WordPress | No events feed |
+
+#### Notes
+
+- Most independent arts/culture venues in Bloomington use Squarespace or Wix (no ICS)
+- Many sources are derivative (aggregate from existing sources)
+- IU LiveWhale feeds already capture most university arts/culture events
+- BloomingtonOnline calendars capture most community events
+- Eskenazi Museum (IU) already covered via LiveWhale
