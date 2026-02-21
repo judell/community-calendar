@@ -34,6 +34,7 @@
         .anomaly.high { border-color: #d32f2f; }
         .anomaly.medium { border-color: #f57c00; }
         .anomaly .meta { font-size: 0.85em; color: #666; }
+        .anomaly code { font-size: 0.85em; word-break: break-all; }
 
         details { margin-bottom: 4px; }
         details > summary { cursor: pointer; padding: 4px 0; }
@@ -139,6 +140,11 @@
         <div id="cities"></div>
     </div>
 
+    <details class="anomalies" id="build-errors" style="display:none">
+        <summary><strong>Build Errors</strong> (<span id="error-count">0</span>)</summary>
+        <div id="error-list"></div>
+    </details>
+
     <div class="url-section">
         <h2>URL Quality</h2>
         <div class="section-desc">Deduplicated events from the combined calendar</div>
@@ -225,7 +231,23 @@
                 citiesContainer.appendChild(cityEl);
             }
 
+            renderBuildErrors(data);
             renderUrlReport(data);
+        }
+
+        function renderBuildErrors(data) {
+            const errors = data.errors || [];
+            const container = document.getElementById('build-errors');
+            const list = document.getElementById('error-list');
+            document.getElementById('error-count').textContent = errors.length;
+            if (errors.length === 0) return;
+            container.style.display = '';
+            list.innerHTML = errors.map(e => `
+                <div class="anomaly high">
+                    <strong>${e.source || 'unknown'}</strong>: <code>${e.line}</code>
+                    <div class="meta">${e.date}</div>
+                </div>
+            `).join('');
         }
 
         function renderFeed(name, feed) {
