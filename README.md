@@ -100,8 +100,6 @@ The goal is a comprehensive, low-maintenance calendar that updates automatically
 - And more...
 
 **Scraping is a fallback** for sources that don't provide ICS feeds:
-- Press Democrat (event listings)
-- Bohemian (event listings)
 - Sonoma County Library (via API interception)
 - Cal Theatre
 - Copperfield's Books
@@ -109,7 +107,6 @@ The goal is a comprehensive, low-maintenance calendar that updates automatically
 **Generic/reusable scrapers** work across multiple sites:
 - `maxpreps.py` - High school athletics (any school)
 - `growthzone.py` - Chamber of Commerce sites
-- `eventbrite_scraper.py` - Eventbrite events by location
 
 Scrapers are in `scrapers/` and per-city data lives in `cities/<name>/`.
 
