@@ -49,7 +49,8 @@ def test_scraper(scraper_path: Path) -> bool:
     output_file = Path("/tmp/scraper_test.ics")
     try:
         result = subprocess.run(
-            [sys.executable, str(scraper_path), "--output", str(output_file), "--months", "2"],
+            [sys.executable, str(scraper_path), "--output", str(output_file)],
+            env={**os.environ, 'SCRAPE_MONTHS': '2'},
             capture_output=True,
             text=True,
             timeout=120,
@@ -137,25 +138,32 @@ def add_to_workflow(scraper_name: str, city: str, scraper_path: Path) -> bool:
         print(f"   {WORKFLOW_PATH}")
         return False
     
-    # Find the "continue-on-error: true" that ends this section
-    section_end_marker = "continue-on-error: true"
-    section_end = workflow_content.find(section_end_marker, scrape_section_start)
-    
-    if section_end == -1:
-        print("❌ Could not find end of scrape section")
+    # Find the next workflow step ("- name:") to bound our search to this step only
+    next_step_match = re.search(r'\n    - name:', workflow_content[scrape_section_start + 1:])
+    if next_step_match:
+        section_end = scrape_section_start + 1 + next_step_match.start()
+    else:
+        section_end = len(workflow_content)
+    section_text = workflow_content[scrape_section_start:section_end]
+
+    # Find the last scraper command line in this section only
+    scraper_pattern = re.compile(r'^( +python (?:scrapers|scripts)/\S+ .+\|\| true)$', re.MULTILINE)
+    matches = list(scraper_pattern.finditer(section_text))
+
+    if not matches:
+        print("❌ Could not find any scraper commands in section")
         return False
-    
-    # Insert before continue-on-error
-    # Find the line before continue-on-error (last scraper command)
-    before_continue = workflow_content[:section_end].rstrip()
-    after_continue = workflow_content[section_end:]
-    
+
+    # Insert after the last scraper command
+    last_match = matches[-1]
+    insert_pos = scrape_section_start + last_match.end()
+
     # Check if already there
-    if scraper_line.strip() in before_continue:
+    if scraper_line.strip() in workflow_content:
         print(f"✅ Already in workflow")
         return True
-    
-    new_content = before_continue + "\n" + scraper_line + "\n      " + after_continue
+
+    new_content = workflow_content[:insert_pos] + "\n" + scraper_line + workflow_content[insert_pos:]
     
     WORKFLOW_PATH.write_text(new_content)
     print(f"✅ Added to workflow: {scraper_line.strip()}")
