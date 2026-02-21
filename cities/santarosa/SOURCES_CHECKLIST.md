@@ -151,6 +151,7 @@ The Bohemian, Press Democrat, and NorCal Public Media calendars all use **CitySp
 | Sonoma Valley Events (sonomavalleyevents.com) | GatherBoard | RSS page says "Coming Soon" |
 | Bandsintown | Proprietary | 403, no public feed |
 | Visit Santa Rosa (visitsantarosa.com) | Simpleview | Tourism site, no public feed |
+| Brew Coffee and Beer (brewcoffeeandbeer.com) | WordPress (All-in-One Event Calendar) | ICS feed exists but empty; site directs to Facebook for events |
 | Happy over 50 Meetup | Meetup | 0 events |
 | NorCal Public Media | CitySpark | Would mostly duplicate Bohemian + Press Democrat |
 
