@@ -12,6 +12,8 @@
 | GoLocal Coop | `golocal.coop` Tribe Events | Local business coop |
 | Sonoma County AA | `sonomacountyaa.org/events/?ical=1` | Recovery community |
 | DSA Sonoma County | Google Calendar | Political org |
+| Sonoma Community Center | `sonomacommunitycenter.org/events/?ical=1` | Tribe Events; tai chi, dancing, printmaking, bluegrass, sewing (30 events) |
+| Santa Rosa Symphony | `srsymphony.org/events/?ical=1` | Tribe Events; concerts and youth ensembles |
 
 ### Scraped Sources
 | Source | Scraper | Notes |
