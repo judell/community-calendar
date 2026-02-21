@@ -302,6 +302,11 @@ SOURCE_NAMES = {
     'the_bishop': 'The Bishop',
     'peoples_market': "People's Market",
     'lotusfest': 'Lotus Festival',
+    'spreckels': 'Spreckels Performing Arts Center',
+    'lagunitas': 'Lagunitas Brewing Company',
+    'creative_sonoma': 'Creative Sonoma',
+    'cinnabar': 'Cinnabar Theater',
+    'green_music_center': 'Green Music Center',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
