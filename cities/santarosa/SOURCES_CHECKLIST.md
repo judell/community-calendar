@@ -28,6 +28,11 @@
 | Cafe Frida | Scraper | Music venue |
 | SRCC | `srcc.py` | Santa Rosa Chamber? |
 | Museum of Sonoma County | ICS | Local museum |
+| Spreckels Performing Arts | `spreckels.py` | Tribe Events REST API; Rohnert Park theater |
+| Lagunitas Brewing Company | `lagunitas.py` | Petaluma taproom; live music, trivia, food trucks (37 events) |
+| Creative Sonoma | `creative_sonoma.py` | County arts agency aggregator (55 events) |
+| Cinnabar Theater | `cinnabar.py` | Petaluma community theater (5 shows/season) |
+| Green Music Center | `green_music_center.py` | Sonoma State performing arts venue (10 events) |
 
 ### City of Santa Rosa Calendars
 Multiple ICS feeds from `srcity.org`:
