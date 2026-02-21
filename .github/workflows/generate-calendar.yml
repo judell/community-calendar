@@ -49,6 +49,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Set up build logging
+      run: |
+        echo 'exec 2> >(tee -a $GITHUB_WORKSPACE/build.log >&2)' > /tmp/bash_env.sh
+        echo "BASH_ENV=/tmp/bash_env.sh" >> $GITHUB_ENV
+
     - name: Determine locations to process
       id: locations
       run: |
@@ -542,7 +547,7 @@ jobs:
 
     - name: Generate feed health report
       run: |
-        python scripts/report.py --cities ${{ steps.locations.outputs.list }}
+        python scripts/report.py --cities ${{ steps.locations.outputs.list }} --build-log build.log
 
     - name: Generate PRODID platform report
       run: python scripts/prodid.py

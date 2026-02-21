@@ -280,16 +280,123 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
             print(f"  [{a['severity']}] {a['city']}/{a['feed']}: {a['message']}")
 
 
+def parse_build_errors(log_path: str) -> list[dict]:
+    """Parse build.log for error patterns. Returns list of error dicts."""
+    try:
+        with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
+            lines = f.readlines()
+    except FileNotFoundError:
+        return []
+
+    errors = []
+    today = date.today().isoformat()
+
+    # Patterns that indicate errors
+    error_patterns = [
+        re.compile(r'error: the following arguments are required', re.IGNORECASE),
+        re.compile(r'HTTP Error \d+', re.IGNORECASE),
+        re.compile(r'ConnectionError', re.IGNORECASE),
+        re.compile(r'Timeout', re.IGNORECASE),
+        re.compile(r': error:', re.IGNORECASE),
+        re.compile(r'(?<!Timeout)Error:', re.IGNORECASE),
+    ]
+
+    # Pattern to extract Python script name from a line
+    py_file_pattern = re.compile(r'(\w[\w-]*\.py)')
+
+    i = 0
+    while i < len(lines):
+        line = lines[i].rstrip()
+
+        # Check for traceback blocks
+        if 'Traceback (most recent call last)' in line:
+            # Collect the full traceback through the final error line
+            tb_lines = [line]
+            j = i + 1
+            last_error_line = line
+            while j < len(lines):
+                tb_line = lines[j].rstrip()
+                tb_lines.append(tb_line)
+                if tb_line and not tb_line.startswith(' ') and j > i + 1:
+                    last_error_line = tb_line
+                    break
+                j += 1
+
+            # Extract source from traceback file references
+            source = None
+            for tb in tb_lines:
+                m = re.search(r'File ".*?/(\w[\w-]*\.py)"', tb)
+                if m:
+                    source = m.group(1).replace('.py', '')
+
+            errors.append({
+                'date': today,
+                'line': last_error_line,
+                'source': source
+            })
+            i = j + 1
+            continue
+
+        # Check single-line error patterns
+        for pattern in error_patterns:
+            if pattern.search(line):
+                # Extract source script name
+                source = None
+                m = py_file_pattern.search(line)
+                if m:
+                    source = m.group(1).replace('.py', '')
+                # Also check the preceding line for script name context
+                if not source and i > 0:
+                    m = py_file_pattern.search(lines[i - 1])
+                    if m:
+                        source = m.group(1).replace('.py', '')
+
+                errors.append({
+                    'date': today,
+                    'line': line.strip(),
+                    'source': source
+                })
+                break
+
+        i += 1
+
+    # Deduplicate by (line, source)
+    seen = set()
+    unique = []
+    for e in errors:
+        key = (e['line'], e['source'])
+        if key not in seen:
+            seen.add(key)
+            unique.append(e)
+
+    return unique
+
+
 def main():
     parser = argparse.ArgumentParser(description='Generate feed health report')
     parser.add_argument('--cities', type=str, default='santarosa,bloomington,davis',
                         help='Comma-separated list of cities')
     parser.add_argument('--output', type=str, default='report.json',
                         help='Output JSON file path')
+    parser.add_argument('--build-log', type=str, default=None,
+                        help='Path to build.log for error extraction')
     args = parser.parse_args()
-    
+
     cities = [c.strip() for c in args.cities.split(',')]
     update_report(cities, args.output)
+
+    # Parse build errors if log provided
+    if args.build_log:
+        report = load_report(args.output)
+        build_errors = parse_build_errors(args.build_log)
+        report['errors'] = build_errors
+        save_report(report, args.output)
+        if build_errors:
+            print(f"Build errors found: {len(build_errors)}")
+            for e in build_errors:
+                print(f"  [{e.get('source', '?')}] {e['line'][:120]}")
+        else:
+            print("No build errors found in log.")
 
 
 if __name__ == '__main__':
