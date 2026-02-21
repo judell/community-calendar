@@ -20,9 +20,33 @@ import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
+import shutil
+
 # Repository root
 ROOT = Path(__file__).parent.parent
 WORKFLOW_PATH = ROOT / ".github/workflows/generate-calendar.yml"
+
+
+def count_actionlint_errors(path: Path) -> int | None:
+    """Count actionlint errors on a workflow file. Returns None if actionlint not available."""
+    actionlint = shutil.which('actionlint')
+    if not actionlint:
+        return None
+    result = subprocess.run([actionlint, str(path)], capture_output=True, text=True)
+    return result.stdout.count('\n') if result.stdout else 0
+
+
+def validate_workflow(path: Path, prev_error_count: int | None) -> bool:
+    """Validate that editing the workflow didn't introduce new actionlint errors."""
+    if prev_error_count is None:
+        print("⚠️  actionlint not available, skipping validation")
+        return True
+    new_count = count_actionlint_errors(path)
+    if new_count > prev_error_count:
+        print(f"❌ actionlint: edit introduced new errors ({prev_error_count} → {new_count})")
+        return False
+    print(f"✅ actionlint: no new errors ({new_count} pre-existing)")
+    return True
 
 
 def slugify(url: str) -> str:
@@ -149,9 +173,15 @@ def add_to_workflow(url: str, city: str, slug: str) -> bool:
         return False
     
     # Insert the curl command before "cd ../.."
+    prev_errors = count_actionlint_errors(WORKFLOW_PATH)
     lines.insert(insert_idx, curl_cmd)
-    
     WORKFLOW_PATH.write_text('\n'.join(lines))
+
+    if not validate_workflow(WORKFLOW_PATH, prev_errors):
+        print("   Restoring original workflow")
+        WORKFLOW_PATH.write_text(workflow_content)
+        return False
+
     print(f"✅ Added to workflow: curl ... -o {slug}.ics")
     return True
 

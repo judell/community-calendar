@@ -18,11 +18,35 @@ import subprocess
 import sys
 from pathlib import Path
 
+import shutil
+
 # Repository root
 ROOT = Path(__file__).parent.parent
 WORKFLOW_PATH = ROOT / ".github/workflows/generate-calendar.yml"
 COMBINE_ICS_PATH = ROOT / "scripts/combine_ics.py"
 SCRAPERS_DIR = ROOT / "scrapers"
+
+
+def count_actionlint_errors(path: Path) -> int | None:
+    """Count actionlint errors on a workflow file. Returns None if actionlint not available."""
+    actionlint = shutil.which('actionlint')
+    if not actionlint:
+        return None
+    result = subprocess.run([actionlint, str(path)], capture_output=True, text=True)
+    return result.stdout.count('\n') if result.stdout else 0
+
+
+def validate_workflow(path: Path, prev_error_count: int | None) -> bool:
+    """Validate that editing the workflow didn't introduce new actionlint errors."""
+    if prev_error_count is None:
+        print("⚠️  actionlint not available, skipping validation")
+        return True
+    new_count = count_actionlint_errors(path)
+    if new_count > prev_error_count:
+        print(f"❌ actionlint: edit introduced new errors ({prev_error_count} → {new_count})")
+        return False
+    print(f"✅ actionlint: no new errors ({new_count} pre-existing)")
+    return True
 
 
 def find_scraper(name: str) -> Path | None:
@@ -120,8 +144,7 @@ def add_to_workflow(scraper_name: str, city: str, scraper_path: Path) -> bool:
     ]
 
     # Also try a fuzzy match: find any "Scrape ... sources" line containing the city name
-    import re as _re
-    scrape_lines = _re.findall(r'Scrape [^\n]+ sources', workflow_content)
+    scrape_lines = re.findall(r'Scrape [^\n]+ sources', workflow_content)
     for line in scrape_lines:
         if city.lower().replace('-', '') in line.lower().replace('-', '').replace(' ', ''):
             patterns.append(line)
@@ -164,8 +187,15 @@ def add_to_workflow(scraper_name: str, city: str, scraper_path: Path) -> bool:
         return True
 
     new_content = workflow_content[:insert_pos] + "\n" + scraper_line + workflow_content[insert_pos:]
-    
+
+    prev_errors = count_actionlint_errors(WORKFLOW_PATH)
     WORKFLOW_PATH.write_text(new_content)
+
+    if not validate_workflow(WORKFLOW_PATH, prev_errors):
+        print("   Restoring original workflow")
+        WORKFLOW_PATH.write_text(workflow_content)
+        return False
+
     print(f"✅ Added to workflow: {scraper_line.strip()}")
     return True
 
