@@ -265,15 +265,26 @@ def create_calendar(events: list[dict], year: int, month: int) -> Calendar:
 
 def main():
     parser = argparse.ArgumentParser(description='Scrape MovingWriting events')
-    parser.add_argument('--year', type=int, required=True, help='Target year')
-    parser.add_argument('--month', type=int, required=True, help='Target month (1-12)')
+    parser.add_argument('--year', type=int, help='Target year (default: current + next month)')
+    parser.add_argument('--month', type=int, help='Target month 1-12 (default: current + next month)')
     parser.add_argument('--output', '-o', help='Output file (default: stdout)')
     args = parser.parse_args()
-    
-    events = scrape_events(args.year, args.month)
-    logger.info(f"Found {len(events)} events for {args.year}/{args.month:02d}")
-    
-    cal = create_calendar(events, args.year, args.month)
+
+    if args.year and args.month:
+        months = [(args.year, args.month)]
+    else:
+        now = datetime.now()
+        months = [(now.year, now.month)]
+        nxt = (now.replace(day=28) + timedelta(days=4)).replace(day=1)
+        months.append((nxt.year, nxt.month))
+
+    all_events = []
+    for y, m in months:
+        events = scrape_events(y, m)
+        logger.info(f"Found {len(events)} events for {y}/{m:02d}")
+        all_events.extend(events)
+
+    cal = create_calendar(all_events, months[0][0], months[0][1])
     ical_data = cal.to_ical().decode('utf-8')
     
     if args.output:
