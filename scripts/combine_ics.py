@@ -85,6 +85,13 @@ SOURCE_NAMES = {
     'mystic_theatre': 'Mystic Theatre',
     'maxpreps_petaluma_high': 'Petaluma High School Athletics',
     'maxpreps_casa_grande': 'Casa Grande High School Athletics',
+    # Santa Rosa High Schools (MaxPreps)
+    'maxpreps_santa_rosa_high': 'Santa Rosa High School Athletics',
+    'maxpreps_montgomery_high': 'Montgomery High School Athletics',
+    'maxpreps_maria_carrillo': 'Maria Carrillo High School Athletics',
+    'maxpreps_piner_high': 'Piner High School Athletics',
+    'maxpreps_elsie_allen': 'Elsie Allen High School Athletics',
+    'maxpreps_cardinal_newman': 'Cardinal Newman High School Athletics',
     'petaluma_chamber': 'Petaluma Chamber of Commerce',
     'meetup_petaluma_salon': 'Meetup: Petaluma Salon',
     'meetup_book_brew': 'Meetup: Petaluma Book & Brew Club',

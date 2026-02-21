@@ -215,3 +215,34 @@ The film festival doesn't maintain its own events feed - it's more of a promotio
 **Coverage:** Future meetings only (events are added to Legistar as they're scheduled, typically a few weeks/months ahead). Historical meetings remain in Legistar but are filtered out.
 
 **Cancelled meetings:** The script automatically skips events with `EventAgendaStatusName: "Cancelled"`.
+
+---
+
+## High School Athletics (Added 2026-02-21)
+
+### MaxPreps Integration
+
+Added MaxPreps scraper for Santa Rosa area high schools. The scraper parses `__NEXT_DATA__` JSON from MaxPreps pages to extract upcoming sports events.
+
+| School | MaxPreps Key | Events | Notes |
+|--------|--------------|--------|-------|
+| Santa Rosa High | `santa-rosa-panthers` | ~2 | Varsity basketball, soccer |
+| Montgomery High | `montgomery-vikings` | ~2 | Varsity basketball, soccer |
+| Maria Carrillo High | `maria-carrillo-pumas` | ~2 | Various varsity sports |
+| Piner High | `piner-prospectors` | ~1 | Limited events |
+| Elsie Allen High | `elsie-allen-lobos` | 0 | No upcoming events currently |
+| Cardinal Newman High | `cardinal-newman-cardinals` | ~4 | Private school; baseball, lacrosse, soccer, basketball |
+
+**Note:** Event counts vary by season. Spring sports (baseball, softball, track, lacrosse) typically have more events than winter playoffs.
+
+### Not Added
+
+| School | Reason |
+|--------|--------|
+| Windsor High | 0 upcoming events |
+| Healdsburg High | 0 upcoming events |
+| Sonoma Valley High | Outside Santa Rosa city limits |
+
+### Middle Schools
+
+Middle school athletics are not tracked on MaxPreps. The district (SRCS) does not publish a public calendar for middle school sports.
