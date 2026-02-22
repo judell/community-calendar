@@ -50,7 +50,6 @@ function togglePick(event) {
 function toggleSourceVisibility(source) {
   if (!window.authSession) return;
   userSettingsData = window.toggleSourceAndSave(source, userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
-  refreshCounter = refreshCounter + 1;
 }
 
 function removePick(pickId) {
