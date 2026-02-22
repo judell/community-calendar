@@ -915,13 +915,18 @@ def extract_events(ics_content, source_name=None, source_id=None, fallback_url=N
                 if fallback_url and 'URL:' not in event_content:
                     event_content = f'URL:{fallback_url}\r\n{event_content}'
 
-                # Add X-SOURCE and X-SOURCE-ID headers (source attribution
-                # is rendered by the app from X-SOURCE; no need to duplicate in DESCRIPTION)
+                # Add X-SOURCE, X-SOURCE-ID, and X-SOURCE-URLS headers
+                # (source attribution is rendered by the app from X-SOURCE)
                 if source_name:
                     if 'X-SOURCE' not in event_content:
                         event_content = f'X-SOURCE:{source_name}\r\n{event_content}'
                     if source_id and 'X-SOURCE-ID' not in event_content:
                         event_content = f'X-SOURCE-ID:{source_id}\r\n{event_content}'
+                    # Build initial source_urls mapping so every event has one,
+                    # not just events that go through dedup merging
+                    evt_url = extract_field(event_content, 'URL')
+                    if evt_url and 'X-SOURCE-URLS' not in event_content:
+                        event_content = f'X-SOURCE-URLS:{json.dumps({source_name: evt_url})}\r\n{event_content}'
                 
                 events.append({
                     'dtstart': dt,
@@ -953,8 +958,8 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar",
     
     ics_dir = Path(input_dir)
     for ics_file in sorted(ics_dir.glob('*.ics')):
-        # Skip the output file if it exists
-        if ics_file.name == Path(output_file).name:
+        # Skip output files (combined.ics or the specified output)
+        if ics_file.name == Path(output_file).name or ics_file.stem == 'combined':
             continue
         
         # Skip excluded sources
