@@ -580,7 +580,9 @@ def get_dedup_key(event):
 # we keep the primary source version.
 AGGREGATORS = {
     'North Bay Bohemian',
-    'Press Democrat', 
+    'Press Democrat',
+    'Creative Sonoma',
+    'GoLocal Cooperative',
     'NOW Toronto',
     'Toronto Events (Tockify)',
 }
@@ -593,9 +595,11 @@ def is_aggregator(source_name):
 
 def dedupe_cross_source(events, input_dir):
     """Deduplicate events across sources using title+date matching.
-    
+
     When duplicates are found, prefers primary sources over aggregators.
     Among primary sources or among aggregators, keeps the first encountered.
+    Also merges groups where one title is a prefix of another on the same date
+    (handles aggregators that append "at Venue Name" to titles).
     """
     # Group events by dedup key
     groups = {}
@@ -604,11 +608,59 @@ def dedupe_cross_source(events, input_dir):
         if key not in groups:
             groups[key] = []
         groups[key].append(event)
-    
+
+    # Second pass: merge groups where one normalized title is a prefix of another
+    # on the same date. This handles "Hands on a Hardbody" vs
+    # "Hands on a Hardbody at Spreckels Performing Arts Center".
+    # Only merge if the shorter title is at least 12 chars (avoid false positives).
+    date_keys = {}
+    for key in groups:
+        date_str, norm_title = key
+        if date_str not in date_keys:
+            date_keys[date_str] = []
+        date_keys[date_str].append(key)
+
+    merged_into = {}  # key -> canonical key it was merged into
+    for date_str, keys in date_keys.items():
+        if len(keys) < 2:
+            continue
+        # Sort by title length so shorter titles come first
+        keys.sort(key=lambda k: len(k[1]))
+        for i in range(len(keys)):
+            if keys[i] in merged_into:
+                continue
+            short_title = keys[i][1]
+            if len(short_title) < 12:
+                continue
+            for j in range(i + 1, len(keys)):
+                if keys[j] in merged_into:
+                    continue
+                long_title = keys[j][1]
+                if long_title.startswith(short_title) and len(short_title) / len(long_title) <= 0.75:
+                    # Only merge if at least one group contains an aggregator event.
+                    # This avoids merging unrelated events that happen to share a prefix
+                    # (e.g. "After School Club" vs "After School Club Robotics" at different libraries).
+                    has_aggregator = False
+                    for e in groups[keys[i]] + groups[keys[j]]:
+                        src = extract_field(e['content'], 'X-SOURCE') or ''
+                        if any(is_aggregator(s.strip()) for s in src.split(',')):
+                            has_aggregator = True
+                            break
+                    if not has_aggregator:
+                        continue
+                    # Merge longer-title group into shorter-title group
+                    groups[keys[i]].extend(groups[keys[j]])
+                    merged_into[keys[j]] = keys[i]
+                    print(f"  Prefix dedup: merged '{keys[j][1][:50]}' into '{keys[i][1][:50]}' on {date_str}")
+
+    # Remove merged groups
+    for key in merged_into:
+        del groups[key]
+
     # For each group, keep primary source over aggregator
     unique_events = []
     cross_source_deduped = 0
-    
+
     for key, group in groups.items():
         if len(group) == 1:
             unique_events.append(group[0])
