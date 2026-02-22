@@ -112,6 +112,8 @@ function getPagedEvents(events, term, startIndex, pageSize) {
 // Get description snippet with context around search term (returns null if no match in description)
 function getDescriptionSnippet(description, term) {
   if (!description || !term) return null;
+  // Collapse newlines and extra whitespace into single spaces
+  description = description.replace(/[\r\n]+/g, ' ').replace(/ {2,}/g, ' ');
   const lower = description.toLowerCase();
   const termLower = term.toLowerCase();
   const idx = lower.indexOf(termLower);
@@ -184,39 +186,122 @@ function formatSourceLinks(source, sourceUrls, hiddenSources) {
   return 'Source: ' + parts.join(', ');
 }
 
-function getSnippet(description) {
+function getSnippet(description, title) {
   if (!description) return null;
 
-  // Strip HTML tags using the browser's DOMParser
-  var text = description;
+  var text = String(description);
+
+  // Preserve line breaks from HTML before stripping tags
   if (/<[a-z][\s\S]*>/i.test(text)) {
+    text = text.replace(/<\s*br\s*\/?>/gi, '\n');
+    text = text.replace(/<\s*\/p\s*>/gi, '\n');
+    text = text.replace(/<\s*li\s*>/gi, '\n');
+    text = text.replace(/<\s*\/li\s*>/gi, '\n');
+    // Replace all other closing tags with a space to prevent word smashing
+    text = text.replace(/<\/[^>]+>/g, ' ');
     var doc = new DOMParser().parseFromString(text, 'text/html');
     text = doc.body.textContent || '';
   }
-  // Strip URLs
+
+  // Strip URLs, markdown artifacts
   text = text.replace(/https?:\/\/\S+/g, '');
-  // Collapse tabs, carriage returns, and runs of whitespace
+  text = text.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1');
+  text = text.replace(/\\([*_\[\](){}+#>|`~])/g, '$1');
+
+  // Fix smashed words from bad HTML cleanup (e.g. "ZwiftJoin" → "Zwift Join")
+  text = text.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+  // Normalize whitespace
   text = text.replace(/[\t\r]+/g, ' ').replace(/ {2,}/g, ' ');
 
-  // Split into lines, find first meaningful one
   var lines = text.split('\n').map(function(l) { return l.trim(); }).filter(Boolean);
 
-  // Skip junk lines (hardcoded; future: curator-configurable via DB table)
-  var junkPattern = /^(department:|committee:|doors\b|tickets:|link to join:|how to join:|print copies|contact:|free$|-free$)/i;
-  var line = null;
+  // General patterns
+  var labelPrefix = /^\w+(\s+\w+){0,2}\s*:\s*/;
+  var ctaPrefix = /^(back to|buy|register|sign up|rsvp|tickets?|click|tap|view|see all|read more|get|call or text|call or email)\b/i;
+  var badAnywhere = /\b(zoom|meeting id|passcode|one tap|meeting url|webex|microsoft teams|google meet|agenda|packet|minutes|prohibited|not permitted|are not allowed|from almost anywhere in the world|from anywhere in the world)\b/i;
+  var moneyOrPrice = /(\$\s*\d|\bprice\b|\bfee\b|\badmission\b|\bfree but\b)/i;
+
+  // Normalize title for comparison
+  var normTitle = title ? title.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() : null;
+  function normText(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+
+  // Salvage text after a label prefix if the remainder is a real sentence
+  function salvageLabel(line) {
+    if (!labelPrefix.test(line)) return line;
+    var rest = line.replace(labelPrefix, '').trim();
+    // Remainder must be substantial and sentence-like (has function words)
+    if (rest.length < 30) return '';
+    if (!/\b(the|a|an|and|or|for|with|to|from|at|in|on|by|is|are|was|will|this|that)\b/i.test(rest)) return '';
+    // If remainder itself starts with a label, reject
+    if (labelPrefix.test(rest)) return '';
+    return rest;
+  }
+
+  function scoreLine(line) {
+    if (line.length < 15) return -999;
+
+    // Salvage from label prefix
+    line = salvageLabel(line);
+    if (!line) return -999;
+
+    // Hard rejects
+    if (ctaPrefix.test(line)) return -999;
+    if (badAnywhere.test(line)) return -999;
+
+    var score = 0;
+
+    // Sentence-like signals (articles, prepositions, common verbs)
+    if (/[.!?]/.test(line)) score += 3;
+    if (/\b(the|a|an|and|or|but|for|with|to|from|at|in|on|by)\b/i.test(line)) score += 2;
+    if (/\b(join|learn|discover|explore|enjoy|experience|celebrate|meet|hear|watch|featuring|presents)\b/i.test(line)) score += 2;
+
+    // Penalize admin/pricing/digit-heavy/boilerplate
+    if (moneyOrPrice.test(line)) score -= 3;
+    var digitCount = (line.match(/\d/g) || []).length;
+    if (digitCount >= 6) score -= 3;
+    // Penalize very short lines that aren't sentences
+    if (line.length < 25 && !/[.!?]/.test(line)) score -= 3;
+    // Penalize lines that are just an institution/venue name (no verb or article)
+    if (!/\b(the|a|an|is|are|was|will|has|have|can|do|and|but|for|with|from)\b/i.test(line) && line.length < 40) score -= 3;
+
+    // Penalize title repetition
+    if (normTitle) {
+      var nt = normText(line);
+      if (nt === normTitle) score -= 6;
+      else if (nt.indexOf(normTitle) >= 0 && nt.length - normTitle.length < 15) score -= 4;
+    }
+
+    // Prefer real length
+    if (line.length >= 40) score += 1;
+    if (line.length > 220) score -= 2;
+
+    return score;
+  }
+
+  // Score all candidates, including sentence splits within long lines
+  var best = null;
+  var bestScore = -999;
   for (var i = 0; i < lines.length; i++) {
-    if (!junkPattern.test(lines[i]) && lines[i].length > 15) {
-      line = lines[i];
-      break;
+    var parts = lines[i].split(/(?<=[.!?])\s+/);
+    for (var j = 0; j < parts.length; j++) {
+      var part = parts[j].trim();
+      if (!part) continue;
+      var s = scoreLine(part);
+      if (s > bestScore) {
+        bestScore = s;
+        best = part;
+      }
     }
   }
-  if (!line) return null;
 
-  // Truncate to ~100 chars at a word boundary, trim trailing orphan punctuation
-  if (line.length <= 100) return line;
-  var cut = line.lastIndexOf(' ', 100);
+  if (!best || bestScore < 0) return null;
+
+  // Truncate to ~100 chars at a word boundary
+  if (best.length <= 100) return best;
+  var cut = best.lastIndexOf(' ', 100);
   if (cut < 40) cut = 100;
-  var snippet = line.substring(0, cut).replace(/[\s(,\-;:]+$/, '');
+  var snippet = best.substring(0, cut).replace(/[\s(,\-;:]+$/, '');
   return snippet + '...';
 }
 

@@ -337,7 +337,35 @@ Client-side search filters events as you type. The search icon in the header tog
 
 ### Description snippets
 
-Each event card shows a short snippet extracted from the description (when available). The `getSnippet()` helper strips URLs, collapses whitespace, skips junk lines (metadata like "Department:", "Tickets:", etc.), and truncates to ~100 characters at a word boundary. Clicking the snippet opens a modal dialog with the full event details. Junk-line patterns are hardcoded for now; see `docs/admin-interface.md` for the plan to make them curator-configurable.
+Each event card shows a short snippet — ideally the single best sentence that describes the event. The `getSnippet(description, title)` function in `helpers.js` uses a scoring approach to find it:
+
+1. **Prepare text** — preserve HTML line breaks (`<br>`, `</p>`, `</li>`) as newlines before stripping tags; strip URLs and markdown artifacts; fix smashed words from bad HTML cleanup (`"ZwiftJoin"` → `"Zwift Join"`); replace closing tags with spaces to prevent word smashing
+2. **Score each candidate line** (and sentence fragments within long lines):
+   - **Reward** sentence-like signals: punctuation (`.!?`), function words (`the, a, and, for, with`), descriptive verbs (`join, learn, discover, explore, celebrate`)
+   - **Penalize** pricing/money (`$`, `fee`, `admission`), digit-heavy lines (6+ digits), very short non-sentences, lines that just repeat the event title, and lines without articles or verbs
+   - **Hard-reject** lines matching CTA prefixes (`buy`, `register`, `sign up`, `back to`), lines containing meeting logistics (`zoom`, `meeting id`, `passcode`, `webex`), policy text (`prohibited`, `not permitted`), and cross-event boilerplate
+3. **Salvage label-prefixed lines** — if a line starts with a `Label: value` pattern (1-3 words before a colon), strip the label and keep the remainder *if* it's at least 30 characters and contains function words (catches real descriptions hiding behind `Presenter:` or `About:` prefixes)
+4. **Pick the highest-scoring candidate**, truncate to ~100 characters at a word boundary
+
+When searching, a separate `getDescriptionSnippet(description, term)` shows where the search term matched in the description, with the match in **bold**.
+
+#### Snippet quality
+
+Snippet quality is an ongoing effort refined iteratively against real event data. The report generator (`scripts/snippet_report.py`) evaluates `getSnippet` across all cities and writes `docs/snippet-report.md` — a full listing of every event's title and snippet (or why it has none).
+
+To regenerate the report after changing snippet logic:
+
+```bash
+python3 scripts/snippet_report.py
+# Writes docs/snippet-report.md
+```
+
+The report helps identify:
+- **False positives** — snippets that aren't useful descriptions (metadata, boilerplate, policy text)
+- **False negatives** — events with real descriptions that got rejected
+- **Coverage** — percentage of events with snippets per city (currently 60-92% depending on city)
+
+The evaluation prompt (`docs/snippet-eval-prompt.md`) can be given to any LLM to review the report and recommend improvements. This is how the scoring approach was developed — iterating between report generation, LLM evaluation, and logic refinement.
 
 ### List virtualization
 

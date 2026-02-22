@@ -24,13 +24,21 @@
         margin="0"
         content="{window.formatSourceLinks($props.event.source, $props.event.source_urls, (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || [])}"
       />
+      <Markdown
+        when="{$props.filterTerm && window.getDescriptionSnippet($props.event.description, $props.filterTerm)}"
+        fontSize="$fontSize-xs"
+        color="$color-text-secondary"
+        padding="0"
+        margin="0"
+        content="{window.getDescriptionSnippet($props.event.description, $props.filterTerm)}"
+      />
       <Text
-        when="{window.getSnippet($props.event.description)}"
+        when="{window.getSnippet($props.event.description, $props.event.title)}"
         fontSize="$fontSize-xs"
         color="$color-primary"
         cursor="pointer"
         onClick="detailDialog.open($props.event)"
-        value="{window.getSnippet($props.event.description)}"
+        value="{window.getSnippet($props.event.description, $props.event.title)}"
       />
       <HStack verticalAlignment="center" gap="$space-2">
         <SpaceFiller />
