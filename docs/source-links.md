@@ -1,87 +1,56 @@
-# Feature: Link Source Names to Authoritative URLs
+# Source Attribution Links
 
-## Goal
-Update the calendar display so source names are clickable links to the source's events page.
+## How It Works
 
-## Implementation Plan
+Each event card displays a "Source:" line showing where the event came from. When an event appears in multiple sources (e.g., a venue's own calendar and an aggregator like the Bohemian), all contributing sources are listed. Each source name links to that source's page for the event when a URL is available.
 
-### 1. Infrastructure Changes
+### Data Flow
 
-**`scripts/combine_ics.py`**: Add `X-SOURCE-URL` header to events using `SOURCE_URLS` dict
+**`scripts/combine_ics.py`** — Two places where `X-SOURCE-URLS` gets populated:
+
+1. **At extraction time**: Every event gets an `X-SOURCE-URLS` JSON dict mapping its source name to its event URL:
 ```python
-# In extract_events(), after adding X-SOURCE-ID:
-if fallback_url and 'X-SOURCE-URL' not in event_content:
-    event_content = f'X-SOURCE-URL:{fallback_url}\r\n{event_content}'
+evt_url = extract_field(event_content, 'URL')
+if evt_url and 'X-SOURCE-URLS' not in event_content:
+    event_content = f'X-SOURCE-URLS:{json.dumps({source_name: evt_url})}\r\n{event_content}'
 ```
 
-**`scripts/ics_to_json.py`**: Extract `X-SOURCE-URL` as `source_url` field
+2. **During cross-source dedup**: When duplicates are merged, source URLs from all copies are combined into a single dict:
 ```python
-source_url = extract_field(event_content, 'X-SOURCE-URL')
-# Add to event dict:
-'source_url': source_url or '',
+source_urls = {}
+for e in group:
+    src = extract_field(e['content'], 'X-SOURCE')
+    evt_url = extract_field(e['content'], 'URL')
+    if src and evt_url:
+        source_urls[src.strip()] = evt_url
+# Stored as: X-SOURCE-URLS:{"Bohemian":"https://...","GoLocal":"https://..."}
 ```
 
-**`components/EventCard.xmlui`**: Wrap source name in Link when `source_url` exists
-```xml
-<HStack when="{$props.event.source_url}" gap="$space-0">
-  <Text fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-tertiary" value="Source: " />
-  <Link to="{$props.event.source_url}" target="_blank">
-    <Text fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-tertiary" value="{$props.event.source}" />
-  </Link>
-</HStack>
-<Text
-  when="{!$props.event.source_url}"
-  fontSize="$fontSize-xs"
-  fontStyle="italic"
-  color="$color-text-tertiary"
-  breakMode="word"
-  value="{'Source: ' + $props.event.source}"
-/>
+**`scripts/ics_to_json.py`** — Extracts `X-SOURCE-URLS` as a parsed JSON dict:
+```python
+source_urls_raw = extract_field(event_content, 'X-SOURCE-URLS')
+source_urls = json.loads(source_urls_raw) if source_urls_raw else {}
 ```
 
-**Database**: Add `source_url` column
+**Database** — Stored as `jsonb`:
 ```sql
-ALTER TABLE events ADD COLUMN IF NOT EXISTS source_url text;
+source_urls jsonb,  -- per-source URLs for aggregator attribution links
 ```
 
-### 2. Add Missing URLs to SOURCE_URLS
+**`helpers.js`** — `formatSourceLinks(source, sourceUrls, hiddenSources)` renders the attribution line:
+- Splits comma-separated source names
+- Filters out hidden sources (from user settings), but keeps all if all would be removed
+- Wraps each source name in a markdown link if `sourceUrls` has an entry for it
+- Returns `Source: [Bohemian](https://...), [GoLocal](https://...)`
 
-The `SOURCE_URLS` dict in `combine_ics.py` needs entries for all sources. Currently ~150 are missing.
+**`components/EventCard.xmlui`** — Renders the formatted source line using a Markdown component, passing `hiddenSources` from `userSettingsData`.
 
-**To see missing sources:**
-```bash
-python3 -c "
-from scripts.combine_ics import SOURCE_NAMES, SOURCE_URLS
-missing = set(SOURCE_NAMES.keys()) - set(SOURCE_URLS.keys())
-for s in sorted(missing):
-    print(f'{s}: {SOURCE_NAMES[s]}')
-"
-```
+### Aggregator Attribution Principle
 
-**Missing source categories:**
+When an event was discovered via an aggregator, we link the aggregator's name to the aggregator's page for that event — not just to the aggregator's homepage. A reader who clicks through to the Bohemian may discover related events, editorial coverage, or other context. See [curator-guide.md - About Aggregators](curator-guide.md#about-aggregators).
 
-1. **Aggregators** (high priority):
-   - `bohemian` → `https://bohemian.com/events-calendar/`
-   - `pressdemocrat` → `https://www.pressdemocrat.com/events/`
+### Graceful Degradation
 
-2. **Meetup groups** (~100 groups) - URL pattern: `https://www.meetup.com/{slug}/`
-   - Extract slugs: `grep -oE 'meetup\.com/[^/]+' .github/workflows/generate-calendar.yml`
-
-3. **Venues/Organizations** (~50 sources):
-   - Santa Rosa: barrel_proof, cafefrida, srcc, museumsc, mystic_theatre, sebarts, etc.
-   - Bloomington: bgc_bloomington, bluebird, buskirk_chumley, comedy_attic, etc.
-   - Raleigh-Durham: catscradle, motorco, carolina_theatre, etc.
-   - MaxPreps schools: pattern `https://www.maxpreps.com/ca/{city}/{school-mascot}/`
-
-### 3. Deployment Steps
-
-1. Run migration on Supabase
-2. Deploy code changes
-3. Regenerate calendar data (GitHub Actions workflow)
-4. Reload events to populate `source_url` in database
-
-## Notes
-
-- `SOURCE_URLS` currently serves as fallback URL for events without their own URL
-- Same dict works for source home page links
-- Sources without entries will show plain text (graceful degradation)
+- Events with `source_urls` entries: source names are clickable links
+- Events without `source_urls`: source names display as plain text
+- Single-source events always show their source, even if hidden by user settings

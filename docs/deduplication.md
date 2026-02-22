@@ -83,14 +83,18 @@ unique_events = dedupe_cross_source(uid_deduped, input_dir)
 ```
 
 The `dedupe_cross_source()` function:
-1. Groups events by `(date, normalized_title[:40])`
-2. Loads source priority from `dedup_policy.json` if present
-3. For each group with multiple events, keeps only the highest-priority source
-4. Logs how many duplicates were removed
+1. Groups events by `(date, normalized_title)` — full normalized title, not truncated
+2. **Prefix dedup pass**: merges groups where one title is a prefix of another on the same date (handles aggregators that append "at Venue Name" to titles, e.g. "Hands on a Hardbody" vs "Hands on a Hardbody at Spreckels Performing Arts Center"). Three guards prevent false positives:
+   - Minimum 12 characters on the shorter title
+   - Ratio cap: shorter title must be ≤ 75% of the longer title's length
+   - At least one event in the pair must come from an aggregator source
+3. For each group with multiple events, keeps the primary-source version over aggregators
+4. Merges all source names into comma-separated `X-SOURCE` and builds a `X-SOURCE-URLS` JSON dict mapping each source name to its event URL
+5. Logs how many duplicates were removed
 
-**Scope:** Now handles BOTH same-source and cross-source duplicates.
+**Scope:** Now handles BOTH same-source and cross-source duplicates, including title variants from aggregators.
 
-**Result:** Santa Rosa went from 6,054 to 4,837 events (~20% reduction).
+**Result:** Santa Rosa went from 6,054 to ~3,758 events.
 
 ---
 
@@ -203,14 +207,14 @@ function dedupeEvents(events) {
 
 ### Summary
 
-| Stage | Same-Source Dups | Cross-Source Dups | Ordering |
-|-------|-----------------|-------------------|----------|
-| Scrapers | ✅ (within scraper) | ❌ | ❌ |
-| **combine_ics.py** | ✅ (by UID) | **✅ (by title+date)** | ❌ |
-| **ics_to_json.py** | ❌ | ❌ | **✅ (title similarity)** |
-| load-events | ✅ (by source_uid) | ❌ | — |
-| PostgreSQL | ✅ (UNIQUE constraint) | ❌ | — |
-| Client (helpers.js) | ✅ | ✅ (safety net) | ✅ (by start_time) |
+| Stage | Same-Source Dups | Cross-Source Dups | Source Attribution | Ordering |
+|-------|-----------------|-------------------|--------------------|----------|
+| Scrapers | ✅ (within scraper) | ❌ | ❌ | ❌ |
+| **combine_ics.py** | ✅ (by UID) | **✅ (by title+date + prefix match)** | **✅ (merges X-SOURCE, X-SOURCE-URLS)** | ❌ |
+| **ics_to_json.py** | ❌ | ❌ | ✅ (passes through) | **✅ (title similarity)** |
+| load-events | ✅ (by source_uid) | ❌ | ✅ (passes through) | — |
+| PostgreSQL | ✅ (UNIQUE constraint) | ❌ | ✅ (source_urls jsonb) | — |
+| Client (helpers.js) | ✅ | ✅ (safety net) | ✅ (formatSourceLinks) | ✅ (by start_time) |
 
 ---
 
@@ -234,17 +238,21 @@ Cross-source duplicates occur because:
 
 | Metric | Value |
 |--------|-------|
-| Total events | 6,064 |
-| Unique (title+date) | 4,846 |
-| Duplicate entries | 1,218 (~20%) |
+| Total events (pre-dedup) | ~6,000 |
+| After dedup | ~3,758 |
+| Duplicate entries removed | ~2,300 (~38%) |
+
+The increase in dedup effectiveness (from ~20% to ~38%) reflects the addition of Creative Sonoma and GoLocal Cooperative as aggregators, plus the prefix-matching dedup pass that catches title variants.
 
 ### Top Overlapping Source Pairs
 
 | Source Pair | Duplicate Count |
 |-------------|----------------|
-| North Bay Bohemian ↔ Press Democrat | 509 |
-| North Bay Bohemian ↔ Sonoma County Library | 310 |
-| Press Democrat ↔ Sonoma County Library | 72 |
+| North Bay Bohemian ↔ Press Democrat | ~500 |
+| North Bay Bohemian ↔ Sonoma County Library | ~300 |
+| Creative Sonoma ↔ North Bay Bohemian | varies |
+| GoLocal Cooperative ↔ others | varies |
+| Press Democrat ↔ Sonoma County Library | ~70 |
 
 ---
 
@@ -259,23 +267,15 @@ Rather than per-city policy files, we use a simple global rule: **primary source
 ```python
 AGGREGATORS = {
     'North Bay Bohemian',
-    'Press Democrat', 
+    'Press Democrat',
+    'Creative Sonoma',
+    'GoLocal Cooperative',
     'NOW Toronto',
     'Toronto Events (Tockify)',
 }
 ```
 
-When duplicates are found (same title + date), the code keeps the non-aggregator version:
-
-```python
-def is_aggregator(source_name):
-    return source_name in AGGREGATORS
-
-# Sort: primary sources first, aggregators last
-group.sort(key=lambda e: (1 if is_aggregator(source) else 0))
-# Keep the first (primary source if available)
-unique_events.append(group[0])
-```
+When duplicates are found (same title + date), the `dedupe_cross_source()` function in `scripts/combine_ics.py` keeps the non-aggregator version and merges source attribution — combining all source names into `X-SOURCE` and building an `X-SOURCE-URLS` JSON dict that maps each source name to its event URL. See [source-links.md](source-links.md) for how this flows through the rest of the pipeline.
 
 ### Why Not Per-City Policies?
 
@@ -291,7 +291,7 @@ A simple global aggregator list accomplishes the same thing with zero configurat
 
 | City | Before | After | Removed |
 |------|--------|-------|--------|
-| Santa Rosa | 6,054 | 4,837 | 1,217 (20%) |
+| Santa Rosa | 6,054 | ~3,758 | ~2,296 (~38%) |
 | Toronto | 5,097 | 4,558 | 539 (11%) |
 
 ---

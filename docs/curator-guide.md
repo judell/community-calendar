@@ -135,7 +135,7 @@ Steps 1-3 are the core discovery loop. Steps 4-6 are pipeline setup. All the det
 
 Current cities and their known aggregators:
 
-- **Santa Rosa:** North Bay Bohemian, Press Democrat
+- **Santa Rosa:** North Bay Bohemian, Press Democrat, Creative Sonoma, GoLocal Cooperative
 - **Toronto:** NOW Toronto, Toronto Events (Tockify)
 
 To add your city or flag an aggregator, [open an issue](https://github.com/judell/community-calendar/issues/new?template=add-city-or-aggregator.md). Just name your city and any aggregators you know about — we'll help you figure out the rest.
