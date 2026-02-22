@@ -4,7 +4,6 @@
 var pickEvent = null;
 var picksData = null;
 var enrichmentsData = null;
-var userSettingsData = null;
 var refreshCounter = 0;
 
 function togglePick(event) {

@@ -1,4 +1,4 @@
-<App name="Community Calendar" codeBehind="Main.xmlui.xs" var.filterTerm="" var.viewMode="{'all'}" var.displayStartIndex="{0}" var.browseStartIndex="{0}" var.scrollRequest="{0}">
+<App name="Community Calendar" codeBehind="Main.xmlui.xs" var.filterTerm="" var.viewMode="{'all'}" var.displayStartIndex="{0}" var.browseStartIndex="{0}" var.scrollRequest="{0}" global.userSettingsData="{null}">
 
   <!-- DataSources -->
   <DataSource
@@ -44,7 +44,7 @@
 
   <ChangeListener
     listenTo="{userSettings.value}"
-    onDidChange="() => userSettingsData = userSettings.value"
+    onDidChange="() => { if (!userSettingsData) userSettingsData = userSettings.value }"
   />
 
   <ChangeListener

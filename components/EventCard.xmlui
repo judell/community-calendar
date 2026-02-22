@@ -22,7 +22,7 @@
         openLinkInNewTab="true"
         padding="0"
         margin="0"
-        content="{window.formatSourceLinks($props.event.source, $props.event.source_urls)}"
+        content="{window.formatSourceLinks($props.event.source, $props.event.source_urls, (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || [])}"
       />
       <Text
         when="{window.getSnippet($props.event.description)}"
@@ -63,7 +63,7 @@
         overflowMode="flow"
         breakMode="word"
         openLinkInNewTab="true"
-        content="{window.formatSourceLinks($param.source, $param.source_urls)}"
+        content="{window.formatSourceLinks($param.source, $param.source_urls, (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || [])}"
       />
       <Markdown when="{$param.description}" content="{$param.description}" />
       <Link when="{$param.url}" to="{$param.url}" target="_blank">

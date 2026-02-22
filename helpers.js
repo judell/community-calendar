@@ -169,9 +169,14 @@ function formatTime(isoString) {
 
 // Extract a short readable snippet from an event description (for always-visible preview)
 // Junk line patterns are hardcoded here; see docs/admin-interface.md for plan to make configurable
-function formatSourceLinks(source, sourceUrls) {
+function formatSourceLinks(source, sourceUrls, hiddenSources) {
   if (!source) return '';
   var sources = source.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+  // Filter out hidden sources, but keep all if all would be removed
+  if (hiddenSources && hiddenSources.length) {
+    var visible = sources.filter(function(s) { return hiddenSources.indexOf(s) < 0; });
+    if (visible.length > 0) sources = visible;
+  }
   var parts = sources.map(function(name) {
     var url = sourceUrls && sourceUrls[name];
     return url ? '[' + name + '](' + url + ')' : name;
