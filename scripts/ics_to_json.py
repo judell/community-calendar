@@ -199,6 +199,7 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
         url = extract_field(event_content, 'URL')
         source = extract_field(event_content, 'X-SOURCE')
         source_id = extract_field(event_content, 'X-SOURCE-ID')
+        source_urls_raw = extract_field(event_content, 'X-SOURCE-URLS')
         uid = extract_field(event_content, 'UID')
 
         # Skip if no title or start time
@@ -217,6 +218,13 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
                 pass
 
 
+        source_urls = {}
+        if source_urls_raw:
+            try:
+                source_urls = json.loads(source_urls_raw)
+            except json.JSONDecodeError:
+                pass
+
         event = {
             'title': title,
             'start_time': start_time,
@@ -228,6 +236,7 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
             'source': source or '',
             'source_id': source_id or '',
             'source_uid': uid or '',
+            'source_urls': source_urls if source_urls else None,
             'cluster_id': None
         }
         events.append(event)

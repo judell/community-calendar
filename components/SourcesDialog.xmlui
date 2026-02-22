@@ -39,13 +39,20 @@
         color="$color-text-secondary"
         value="Per-source counts reflect overlap between sources" />
       <Items data="{window.getSourceCounts(window.dedupeEvents($props.events))}">
-        <HStack gap="$space-2" paddingVertical="$space-1">
+        <HStack gap="$space-2" paddingVertical="$space-1" verticalAlignment="center">
+          <Checkbox
+            when="{window.authUser}"
+            width="fit-content"
+            readOnly="true"
+            initialValue="{!window.isSourceHidden($item.source, $props.hiddenSources)}"
+            onClick="toggleSourceVisibility($item.source)"
+          />
           <Text
             width="40px"
             textAlign="right"
             fontWeight="bold"
             value="{$item.count}" />
-          <Text value="{$item.source}" />
+          <Text value="{$item.source}" breakMode="word" />
         </HStack>
       </Items>
 

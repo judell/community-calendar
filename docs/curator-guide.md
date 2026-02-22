@@ -7,6 +7,7 @@
   - [How you work is up to you](#how-you-work-is-up-to-you)
   - [Monitor the dashboard, act on what matters to you](#monitor-the-dashboard-act-on-what-matters-to-you)
 - [What Makes a Good Source](#what-makes-a-good-source)
+- [About Aggregators](#about-aggregators)
 - [Playbook for Launching a New Citywide Calendar](#playbook-for-launching-a-new-citywide-calendar)
   - [Phase 1: Platform searches (grab the easy wins)](#phase-1-platform-searches-grab-the-easy-wins)
   - [Phase 2: Topical searches (find venues by category)](#phase-2-topical-searches-find-venues-by-category)
@@ -52,7 +53,7 @@ The [health report](https://judell.github.io/community-calendar/report.html) is 
 
 ## What Makes a Good Source
 
-**Best**: Native ICS feeds (Meetup groups, Tockify calendars, Google Calendar public links). These "just work" and stay current automatically. 
+**Best**: Native ICS feeds (Meetup groups, Tockify calendars, Google Calendar public links). These "just work" and stay current automatically.
 
 **Fallback 1 — Platform APIs**: Some platforms (Eventbrite, LibCal) offer APIs or structured data that scrapers can convert to ICS. The project includes scrapers for common platforms.
 
@@ -65,6 +66,20 @@ https://github.com/judell/community-calendar/raw/main/video/event-poster-capture
 **Skip**: Facebook events (API restrictions), Cloudflare-protected sites.
 
 When you find a source that needs a scraper, document it in the city's `SOURCES_CHECKLIST.md` with the URL and any notes about the page structure. A developer (or you, with LLM assistance) can then build the scraper.
+
+## About Aggregators
+
+While we source events from aggregators like the North Bay Bohemian and NOW Toronto, we don't aim to compete with them. Our goal is to expand their reach. Aggregators can value by providing context that a raw event listing doesn't.
+
+When an event card shows a source like "North Bay Bohemian," the title links to the venue's own page (the authoritative source), but the Bohemian attribution links to the Bohemian's page for that event. A reader who clicks through to the Bohemian may discover related events, editorial coverage, or other context that the venue's page alone doesn't provide.
+
+The principle: **we could disintermediate aggregators and only link directly to primary sources, but we choose not to**. If we got an event via an aggregator, we provide a link to their event page. This respects the work aggregators do and gives readers a richer experience.
+
+**For developers adding a new aggregator to a city:**
+
+1. Add the aggregator's friendly name to the `AGGREGATORS` set in `scripts/combine_ics.py` so deduplication correctly prefers primary sources over the aggregator's copies.
+
+2. Ensure the fetcher emits per-event URLs whenever possible. If the aggregator's platform supports deep links to individual events (as CitySpark does for Bohemian), construct those URLs in the fetcher if possible. A ink to `bohemian.com/events-calendar/#/details/thee-sinseers/17654647/2026-02-22T19` is far more valuable than a link to `bohemian.com/events-calendar/`. If unavailable, add the aggregator's calendar page to `SOURCE_URLS` in `combine_ics.py` as a fallback. Even a link to the right calendar page is better than no link.
 
 ---
 

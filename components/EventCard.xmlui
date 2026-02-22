@@ -12,12 +12,17 @@
       </Link>
       <Text when="{!$props.event.url}" fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
       <Text when="{$props.event.location}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{$props.event.location}" />
-      <Text
+      <Markdown
+        when="{$props.event.source}"
         fontSize="$fontSize-xs"
         fontStyle="italic"
         color="$color-text-tertiary"
+        overflowMode="flow"
         breakMode="word"
-        value="{'Source: ' + $props.event.source}"
+        openLinkInNewTab="true"
+        padding="0"
+        margin="0"
+        content="{window.formatSourceLinks($props.event.source, $props.event.source_urls)}"
       />
       <Text
         when="{window.getSnippet($props.event.description)}"
@@ -50,7 +55,16 @@
         value="{window.formatDayOfWeek($param.start_time) + ' ' + window.formatMonthDay($param.start_time) + (window.formatTime($param.start_time) ? ', ' + window.formatTime($param.start_time) : '')}"
       />
       <Text when="{$param.location}" fontSize="$fontSize-sm" value="{$param.location}" />
-      <Text when="{$param.source}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-tertiary" value="{'Source: ' + $param.source}" />
+      <Markdown
+        when="{$param.source}"
+        fontSize="$fontSize-xs"
+        fontStyle="italic"
+        color="$color-text-tertiary"
+        overflowMode="flow"
+        breakMode="word"
+        openLinkInNewTab="true"
+        content="{window.formatSourceLinks($param.source, $param.source_urls)}"
+      />
       <Markdown when="{$param.description}" content="{$param.description}" />
       <Link when="{$param.url}" to="{$param.url}" target="_blank">
         <Text fontSize="$fontSize-sm" value="Event link" />

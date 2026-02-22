@@ -21,6 +21,17 @@
     }}"
   />
 
+  <DataSource
+    id="userSettings"
+    when="{window.authSession}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/user_settings?select=*&city=eq.' + window.cityFilter + '&limit=1'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + window.authSession?.access_token,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    }}"
+  />
+
   <ChangeListener
     listenTo="{picks.value}"
     onDidChange="() => picksData = picks.value"
@@ -32,8 +43,13 @@
   />
 
   <ChangeListener
+    listenTo="{userSettings.value}"
+    onDidChange="() => userSettingsData = userSettings.value"
+  />
+
+  <ChangeListener
     listenTo="{refreshCounter}"
-    onDidChange="picks.refetch(); events.refetch(); enrichments.refetch()"
+    onDidChange="picks.refetch(); events.refetch(); enrichments.refetch(); userSettings.refetch()"
   />
 
   <ChangeListener
@@ -76,7 +92,7 @@
   />
 
   <!-- Dialogs -->
-  <SourcesDialog id="sourcesDialog" events="{events.value}" />
+  <SourcesDialog id="sourcesDialog" events="{events.value}" hiddenSources="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []}" />
   <CaptureDialog id="captureDialog" />
   <AudioCaptureDialog id="audioCaptureDialog" />
   <PickEditor when="{!!pickEvent}" event="{pickEvent}" onClose="pickEvent = null" onSaved="picks.refetch(); events.refetch(); enrichments.refetch();" />
@@ -164,7 +180,7 @@
       marginBottom="$space-2"
       onClick="const prevIndex = window._morePrevIndex ?? 0; displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
     />
-    <List id="eventsList" when="{events.loaded && viewMode === 'all'}" data="{window.getPagedEvents(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), filterTerm, displayStartIndex, 50)}" fixedItemSize="true" limit="50">
+    <List id="eventsList" when="{events.loaded && viewMode === 'all'}" data="{window.getPagedEvents(window.filterHiddenSources(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []), filterTerm, displayStartIndex, 50)}" fixedItemSize="true" limit="50">
       <EventCard event="{$item}" filterTerm="{filterTerm}" />
     </List>
     <Button

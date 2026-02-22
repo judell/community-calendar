@@ -5,6 +5,7 @@ Filters to only include events from today forward.
 """
 
 import argparse
+import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -619,14 +620,18 @@ def dedupe_cross_source(events, input_dir):
             # Merge sources from all duplicates into the kept event
             kept = group[0]
             all_sources = []
+            source_urls = {}
             for e in group:
                 src = extract_field(e['content'], 'X-SOURCE')
+                evt_url = extract_field(e['content'], 'URL')
                 if src:
                     for s in src.split(','):
                         s = s.strip()
                         if s and s not in all_sources:
                             all_sources.append(s)
-            
+                        if s and evt_url:
+                            source_urls[s] = evt_url
+
             # Update X-SOURCE to combined value
             if len(all_sources) > 1:
                 merged_source = ', '.join(sorted(all_sources))
@@ -636,7 +641,11 @@ def dedupe_cross_source(events, input_dir):
                     kept['content'],
                     flags=re.MULTILINE
                 )
-            
+
+            # Store per-source URLs for aggregator attribution
+            if source_urls:
+                kept['content'] = f'X-SOURCE-URLS:{json.dumps(source_urls)}\r\n{kept["content"]}'
+
             unique_events.append(kept)
             cross_source_deduped += len(group) - 1
     
@@ -762,30 +771,37 @@ JSON:"""
                 kept_title = extract_field(kept_event['content'], 'SUMMARY') or '(no title)'
                 kept_source = extract_field(kept_event['content'], 'X-SOURCE') or 'Unknown'
                 
-                # Collect all sources for merging (split already-merged comma-separated sources)
+                # Collect all sources and their URLs for merging
                 all_sources = []
+                source_urls = {}
                 if kept_source != 'Unknown':
                     all_sources.extend(s.strip() for s in kept_source.split(','))
+                kept_url = extract_field(kept_event['content'], 'URL')
+                if kept_source != 'Unknown' and kept_url:
+                    source_urls[kept_source] = kept_url
 
                 for idx, removed_event in cluster_events[1:]:
                     removed_title = extract_field(removed_event['content'], 'SUMMARY') or '(no title)'
                     removed_source = extract_field(removed_event['content'], 'X-SOURCE') or 'Unknown'
+                    removed_url = extract_field(removed_event['content'], 'URL')
 
                     if removed_source != 'Unknown':
                         for s in removed_source.split(','):
                             s = s.strip()
                             if s and s not in all_sources:
                                 all_sources.append(s)
-                    
+                            if s and removed_url:
+                                source_urls[s] = removed_url
+
                     match_line = f"[{date_str}] '{removed_title}' ({removed_source}) -> '{kept_title}' ({kept_source})"
                     print(f"    Fuzzy match: {match_line}")
                     log_file.write(f"MATCH: {match_line}\n")
-                    
+
                     # Find this event in the original list
                     orig_idx = events.index(day_events[idx])
                     events_to_remove.add(orig_idx)
                     fuzzy_deduped += 1
-                
+
                 # Merge sources into kept event
                 if len(all_sources) > 1:
                     merged_source = ', '.join(sorted(all_sources))
@@ -796,6 +812,10 @@ JSON:"""
                         flags=re.MULTILINE
                     )
                     log_file.write(f"  -> Merged sources: {merged_source}\n")
+
+                # Store per-source URLs for aggregator attribution
+                if source_urls:
+                    kept_event['content'] = f'X-SOURCE-URLS:{json.dumps(source_urls)}\r\n{kept_event["content"]}'
                     
         except Exception as e:
             error_msg = f"ERROR [{date_str}]: {e}"

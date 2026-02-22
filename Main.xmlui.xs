@@ -4,6 +4,7 @@
 var pickEvent = null;
 var picksData = null;
 var enrichmentsData = null;
+var userSettingsData = null;
 var refreshCounter = 0;
 
 function togglePick(event) {
@@ -44,6 +45,12 @@ function togglePick(event) {
     // Picking: set pickEvent to trigger PickEditor via when
     pickEvent = event;
   }
+}
+
+function toggleSourceVisibility(source) {
+  if (!window.authSession) return;
+  userSettingsData = window.toggleSourceAndSave(source, userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
+  refreshCounter = refreshCounter + 1;
 }
 
 function removePick(pickId) {

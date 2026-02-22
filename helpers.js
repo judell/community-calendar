@@ -169,6 +169,16 @@ function formatTime(isoString) {
 
 // Extract a short readable snippet from an event description (for always-visible preview)
 // Junk line patterns are hardcoded here; see docs/admin-interface.md for plan to make configurable
+function formatSourceLinks(source, sourceUrls) {
+  if (!source) return '';
+  var sources = source.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+  var parts = sources.map(function(name) {
+    var url = sourceUrls && sourceUrls[name];
+    return url ? '[' + name + '](' + url + ')' : name;
+  });
+  return 'Source: ' + parts.join(', ');
+}
+
 function getSnippet(description) {
   if (!description) return null;
 
@@ -210,6 +220,55 @@ function truncate(text, maxLen) {
   if (!text) return '';
   if (text.length <= maxLen) return text;
   return text.substring(0, maxLen).trim() + '...';
+}
+
+// Toggle a source's visibility and persist to Supabase. Returns updated userSettingsData.
+function toggleSourceAndSave(source, userSettingsData, supabaseUrl, supabaseKey) {
+  var current = (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || [];
+  var idx = current.indexOf(source);
+  var updated = idx >= 0
+    ? current.filter(function(s) { return s !== source; })
+    : current.concat([source]);
+
+  // Persist to Supabase (fire-and-forget)
+  fetch(supabaseUrl + '/rest/v1/user_settings', {
+    method: 'POST',
+    headers: {
+      apikey: supabaseKey,
+      Authorization: 'Bearer ' + window.authSession.access_token,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates'
+    },
+    body: JSON.stringify({
+      user_id: window.authUser.id,
+      city: window.cityFilter,
+      hidden_sources: updated,
+      updated_at: new Date().toISOString()
+    })
+  });
+
+  // Return optimistic update
+  if (userSettingsData && userSettingsData[0]) {
+    return [Object.assign({}, userSettingsData[0], { hidden_sources: updated })];
+  }
+  return [{ hidden_sources: updated }];
+}
+
+// Check if a source is in the hidden sources list
+function isSourceHidden(source, hiddenSources) {
+  if (!hiddenSources || !hiddenSources.length) return false;
+  return hiddenSources.indexOf(source) >= 0;
+}
+
+// Filter out events where ALL sources are hidden
+function filterHiddenSources(events, hiddenSources) {
+  if (!hiddenSources || !hiddenSources.length) return events;
+  if (!events) return [];
+  return events.filter(function(e) {
+    if (!e.source) return true;
+    var sources = e.source.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+    return !sources.every(function(s) { return hiddenSources.indexOf(s) >= 0; });
+  });
 }
 
 // Aggregate events by source, return sorted array of {source, count}
@@ -838,6 +897,10 @@ if (typeof window !== 'undefined') {
   window.formatTime = formatTime;
   window.getSnippet = getSnippet;
   window.truncate = truncate;
+  window.formatSourceLinks = formatSourceLinks;
+  window.toggleSourceAndSave = toggleSourceAndSave;
+  window.isSourceHidden = isSourceHidden;
+  window.filterHiddenSources = filterHiddenSources;
   window.getSourceCounts = getSourceCounts;
   var _dedupeEvents = dedupeEvents;
   window.dedupeEvents = function(events) {

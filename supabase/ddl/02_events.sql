@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS events (
   source_uid text UNIQUE,   -- unique ID from source for deduplication
   transcript text,          -- Whisper transcript for audio-captured events
   cluster_id text,          -- groups similar events within same timeslot for UI display
+  source_urls jsonb,        -- per-source URLs for aggregator attribution links
   created_at timestamptz DEFAULT now()
 );
 

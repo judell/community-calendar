@@ -3,6 +3,7 @@
 Used by Bohemian and Press Democrat event calendars.
 """
 
+import re
 from datetime import datetime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -115,9 +116,15 @@ class CitySparkScraper(BaseScraper):
         if links and isinstance(links, list) and len(links) > 0:
             url = links[0].get('url') or ''
 
-        # If no link URL, use publisher's calendar page as fallback
+        # If no link URL, construct per-event detail URL from CitySpark fields
         if not url and self.calendar_url:
-            url = self.calendar_url
+            slug = re.sub(r'[^a-z0-9]+', '-', event.get('Name', '').lower()).strip('-')
+            pid = event.get('PId')
+            date_start = (event.get('DateStart') or '')[:13]
+            if slug and pid and date_start:
+                url = f"{self.calendar_url}#/details/{slug}/{pid}/{date_start}"
+            else:
+                url = self.calendar_url
 
         return {
             'title': event.get('Name', 'Untitled Event'),
