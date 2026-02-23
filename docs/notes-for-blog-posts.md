@@ -153,6 +153,7 @@ Analyzing all six cities revealed four distinct patterns:
 - Aggregator: Toronto Events (Tockify)
 - Pattern: Venues submit to Tockify as their primary publishing platform
 - Phase 4 yield: Lower for venues using the platform as infrastructure
+- Note: Tockify itself appears across multiple cities, but with different roles (see below)
 
 **3. Government Aggregator (Raleigh-Durham)**
 - Aggregator: NC Cultural Resources (873 events)
@@ -163,6 +164,22 @@ Analyzing all six cities revealed four distinct patterns:
 - No major aggregator — calendar built from direct institutional feeds
 - Sources: Universities, libraries, arts councils
 - Phase 4 yield: N/A — already operating at upstream authority level
+
+### Tockify: Same Platform, Different Roles
+
+An interesting finding: Tockify appears across multiple cities, but plays different roles:
+
+| City | Tockify Feed | Events | Role |
+|------|--------------|--------|------|
+| Toronto | torevent | 1,457 | **Regional aggregator** - music venues submit here as primary platform |
+| Toronto | distilleryevents, st.lawrence.na, jamaalmyers | ~170 | Individual venue/org feeds |
+| Bloomington | bloomington.arts.calendar | 260 | Individual org feed (Bloomington Arts Council) |
+| Santa Rosa | rileystreet.art.com | 453 | Individual venue feed |
+| Petaluma | pdaevents, griffo | ~300 | Individual org/venue feeds |
+
+The same platform can be either an aggregator or an upstream source depending on how the local community uses it. `torevent` in Toronto is a regional aggregator that venues publish to. But `bloomington.arts.calendar` is just the Bloomington Arts Council's own calendar — it's a direct source, not an intermediary.
+
+This matters for Phase 4: when you see a Tockify feed, check whether it's aggregating multiple venues or just one organization's events. Only the aggregator pattern warrants upstream analysis.
 
 ### The Long Tail Opportunity
 
