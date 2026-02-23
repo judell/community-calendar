@@ -376,3 +376,78 @@ Track progress on topical searches to find long-tail community sources.
 | Cognitive Toronto | 0 | Valid ICS, no upcoming events |
 | Toronto Data Workshop | n/a | 404 `Group not found` |
 | RASC Toronto Centre (Meetup slug) | n/a | 404 `Group not found` |
+
+---
+
+## Topical Search: Broad Web Scan (2026-02-23)
+
+### New ICS Feeds Found
+
+| Source | ICS URL | Events | Notes |
+|--------|---------|--------|-------|
+| Sunshine Centres for Seniors | `sunshinecentres.com/events/?ical=1` | 15 | Senior programs across multiple Toronto locations |
+| GO Latin Dance | `golatindance.com/events/?ical=1` | 30 | Salsa, bachata, kizomba events (Dovercourt House) |
+| Boulderz Climbing | `boulderzclimbing.com/events/?ical=1` | 6 | Climbing gym events |
+| Toronto Dance | `torontodance.com/events/?ical=1` | ~68 (2025-26) | Dance community aggregator (large historical archive) |
+| Toronto Choir | `torontochoir.org/events/?ical=1` | 1 | Community choir (small feed) |
+
+### RSS Feeds (needs RSS-to-ICS conversion)
+
+| Source | RSS URL | Events | Notes |
+|--------|---------|--------|-------|
+| Toronto Bicycling Network | `tbn.ca/events/RSS` | 50+ | Wild Apricot RSS; hiking, cycling, walks, skating, skiing. Previously identified in Needs Further Assessment, now confirmed 50+ events. |
+
+### Promising Scraping Opportunities
+
+| Source | URL | Notes |
+|--------|-----|-------|
+| YOHOMO | `yohomo.ca/events` | LGBTQ+ events aggregator - calendar page, would need scraper |
+| Harbourfront Centre | `harbourfrontcentre.com/whats-on/` | Major venue, WP Engine site, likely has JSON API |
+| Toronto Zoo Events | `torontozoo.com/events/` | Custom site, would need scraper |
+| ROM Events | `rom.on.ca/whats-on/events` | Drupal site, may have JSON endpoint |
+| Toronto Arts Council | `torontoartscouncil.org/events/` | WordPress, grant deadlines and arts events |
+| Centre for Social Innovation | `socialinnovation.org/where-change-happens/events/` | Community/coworking/social enterprise events |
+| TRCA Events | `trca.ca/events-calendar/` | Conservation authority nature events |
+| The 519 | `the519.org/events/` | LGBTQ+ community centre (already in Non-Starters but worth re-checking) |
+
+### Assessed - Non-Starters
+
+| Source | Reason |
+|--------|--------|
+| Toronto Junction BIA | WordPress but not Tribe calendar plugin |
+| Chinatown BIA | 404 on ICS endpoint |
+| Toronto Dance Salsa | Cloudflare protected (403) |
+| Jazz Near You Toronto | 403 Forbidden |
+| 365 Etobicoke | WordPress but no ICS |
+| Toronto Shambhala Meditation | Cloudflare challenge |
+| Toronto Running Club | Custom site, 404 on events |
+| Amadeus Choir | WordPress but no ICS |
+| Annex Singers | 404 on ICS |
+| Echo Women's Choir | 404 on ICS |
+| Fire Mics (open mics) | Custom site, no ICS |
+| Archdiocese of Toronto | 404 on ICS |
+| Diocese of Toronto (Anglican) | HTML only |
+| MCC Toronto | HTML only |
+| Toronto Mass Choir | HTML only |
+| Toronto Urban Growers | 404 on ICS |
+| Museum of Toronto | HTML only |
+| TRSL (Rec Sports) | 404 on events |
+| XTSC | 404 on events |
+| Community Living Toronto | HTML only |
+| The Disability Collective | Wix site |
+
+### Categories Explored
+
+- Seniors (✅ Sunshine Centres)
+- LGBTQ+ (scraper opportunity: YOHOMO, The 519)
+- Dance (✅ GO Latin Dance, Toronto Dance)
+- Climbing/Outdoor (✅ Boulderz)
+- Cycling (RSS: TBN)
+- Faith/Spiritual (no good feeds found)
+- Music/Choir (small: Toronto Choir)
+- Food & Drink (no feeds found - mostly Eventbrite)
+- Comedy/Open Mic (no feeds found - mostly Facebook/Eventbrite)
+- Gardening/Urban Farming (no feeds found)
+- Literary/Poetry (no feeds found)
+- Startup/Tech (mostly Meetup already covered)
+- Museums (scraper opportunities: ROM, Toronto Zoo)
