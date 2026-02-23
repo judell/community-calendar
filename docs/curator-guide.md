@@ -124,13 +124,17 @@ Once your calendar has aggregator sources (newspapers, regional platforms), anal
 
 **Why this matters:** Aggregators may lag behind venues, miss events, or eventually go away. Direct feeds are more reliable and often have richer event details. This phase also reveals dead feeds in your pipeline — if a venue appears only via aggregators but is already in your feeds.txt, that feed may be broken.
 
-**Two patterns emerge:**
+**Four patterns emerge:**
 
-*Aggregator-as-intermediary* (Santa Rosa model): Newspapers and media sites scrape or receive submissions from venues that have their own calendar infrastructure. Phase 4 finds these upstream feeds — we found Uptown Theatre Napa with a working WordPress feed the aggregators were capturing.
+*Media aggregator* (Santa Rosa, Petaluma): Newspapers and media sites scrape or receive submissions from venues that have their own calendar infrastructure. Phase 4 finds these upstream feeds — we found Uptown Theatre Napa with a working WordPress feed the aggregators were capturing.
 
-*Aggregator-as-infrastructure* (Toronto model): Venues submit directly to a shared platform (like Tockify) as their primary publishing mechanism. They don't maintain their own calendars. Phase 4 is less productive here for high-volume music venues, but the long tail — community centers, churches, small arts organizations — may still have independent feeds the aggregator doesn't capture.
+*Platform infrastructure* (Toronto): Venues submit directly to a shared platform (like Tockify) as their primary publishing mechanism. They don't maintain their own calendars. Phase 4 is less productive here for venues using the platform, but the long tail — community centers, churches, small arts organizations — may still have independent feeds the aggregator doesn't capture.
 
-Check the aggregator's role before investing time: if venues use the aggregator as their calendar, you won't find upstream feeds. But always check the long tail — smaller organizations often maintain their own infrastructure even when big venues don't.
+*Government aggregator* (Raleigh-Durham): A state or regional agency aggregates events from government-run cultural sites (state parks, historic sites, museums). These venues typically report to the government system rather than maintaining their own feeds. Phase 4 yield is low — the aggregator IS the authoritative source for these sites.
+
+*Direct sources* (Bloomington, Davis): No major aggregator. The calendar is already built from direct institutional feeds (universities, libraries, arts councils). Phase 4 doesn't apply — you're already at upstream authority level.
+
+Check the aggregator's role before investing time. But always check the long tail regardless of pattern — smaller organizations often maintain their own infrastructure even when big venues don't.
 
 ### Throughout all phases:
 
