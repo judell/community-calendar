@@ -116,3 +116,44 @@ Results from a real run:
 4. **Location matters** — events at different locations should never merge, even with similar titles
 
 The token-set similarity algorithm (threshold 0.85) catches most fuzzy matches without API calls. LLM dedup is a refinement, not a replacement.
+
+---
+
+## Phase 4: When Aggregators Are Infrastructure vs. Intermediaries (2026-02-23)
+
+Phase 4 of source discovery analyzes which venues appear *only* via aggregators, then checks if they have their own feeds we could use directly. The results revealed two distinct patterns:
+
+### Santa Rosa: Aggregator as Intermediary
+
+The North Bay Bohemian and Press Democrat scrape or receive submissions from venues that maintain their own calendar infrastructure. Phase 4 found Uptown Theatre Napa with a perfectly good WordPress Tribe feed (30 events) that we were only getting through the newspaper aggregators. Adding it directly means fresher data and independence from the aggregator.
+
+We also discovered a dead feed — Sonoma Community Center was in our feeds.txt but returning Cloudflare 403s. The 106 events we saw via aggregators weren't coming from our "direct" feed at all.
+
+### Toronto: Aggregator as Infrastructure
+
+Toronto's music venue scene uses Tockify (torevent) differently. When I checked the top venues appearing only via the aggregator:
+
+- Comedy Bar (277 events): ASP.NET custom site, no calendar
+- Tranzac (146 events): Nuxt/Netlify static site  
+- Horseshoe Tavern (49 events): Cloudflare-protected, no ICS
+- The Garrison, Mod Club, Cameron House: Simple websites with ticket links
+
+These venues don't have their own calendar systems. They submit events directly to Tockify as their primary publishing platform. The aggregator isn't an intermediary we can bypass — it IS the infrastructure.
+
+### The Long Tail Opportunity
+
+But here's the thing: this analysis focused on high-volume venues. The project's philosophy is long-tail inclusive. Smaller organizations — community centers, churches, arts collectives, cultural associations — often maintain their own WordPress or Google Calendar infrastructure even when big venues outsource to aggregators.
+
+The Tockify aggregator is great at capturing the music scene, but it probably misses the Korean seniors' association, the neighborhood chess club, the community garden workdays. Phase 4 for Toronto should also probe the venues with 1-5 events appearing via aggregators. That's where independent feeds are more likely to exist.
+
+### Tactical Guidance
+
+Before running Phase 4 on a new city:
+
+1. **Identify the aggregator's role.** Is it a newspaper scraping venues (intermediary) or a platform venues publish to directly (infrastructure)?
+
+2. **High-volume venues:** In intermediary cities, check them first. In infrastructure cities, skip them.
+
+3. **Long-tail venues:** Always check these regardless of pattern. Small organizations maintain their own calendars.
+
+4. **Dead feed detection:** If a venue appears only via aggregators but is already in your feeds.txt, that feed is probably broken.

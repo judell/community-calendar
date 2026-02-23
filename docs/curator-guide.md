@@ -118,11 +118,19 @@ Once your calendar has aggregator sources (newspapers, regional platforms), anal
 
 **The process:**
 1. Query your `events.json` to find locations that appear only in aggregator-sourced events
-2. For each high-volume venue, check if they have their own ICS feed (`?ical=1`)
+2. For each venue, check if they have their own ICS feed (`?ical=1`)
 3. Add any working feeds — this improves data freshness and reduces aggregator dependency
 4. Document venues with no feeds as potential scraper candidates
 
 **Why this matters:** Aggregators may lag behind venues, miss events, or eventually go away. Direct feeds are more reliable and often have richer event details. This phase also reveals dead feeds in your pipeline — if a venue appears only via aggregators but is already in your feeds.txt, that feed may be broken.
+
+**Two patterns emerge:**
+
+*Aggregator-as-intermediary* (Santa Rosa model): Newspapers and media sites scrape or receive submissions from venues that have their own calendar infrastructure. Phase 4 finds these upstream feeds — we found Uptown Theatre Napa with a working WordPress feed the aggregators were capturing.
+
+*Aggregator-as-infrastructure* (Toronto model): Venues submit directly to a shared platform (like Tockify) as their primary publishing mechanism. They don't maintain their own calendars. Phase 4 is less productive here for high-volume music venues, but the long tail — community centers, churches, small arts organizations — may still have independent feeds the aggregator doesn't capture.
+
+Check the aggregator's role before investing time: if venues use the aggregator as their calendar, you won't find upstream feeds. But always check the long tail — smaller organizations often maintain their own infrastructure even when big venues don't.
 
 ### Throughout all phases:
 
