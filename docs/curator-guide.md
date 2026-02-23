@@ -12,6 +12,7 @@
   - [Phase 1: Platform searches (grab the easy wins)](#phase-1-platform-searches-grab-the-easy-wins)
   - [Phase 2: Topical searches (find venues by category)](#phase-2-topical-searches-find-venues-by-category)
   - [Phase 3: Custom scrapers (last resort for high-value sources)](#phase-3-custom-scrapers-last-resort-for-high-value-sources)
+  - [Phase 4: Upstream authority (find direct feeds for aggregated venues)](#phase-4-upstream-authority-find-direct-feeds-for-aggregated-venues)
   - [Throughout all phases](#throughout-all-phases)
 - [Duplicates and Event Ordering](#duplicates-and-event-ordering)
 - [Long-Running Events](#long-running-events)
@@ -111,6 +112,17 @@ This is a conversation with your agent. The topics below are a starting point �
 
 ### Phase 3: Custom scrapers (last resort for high-value sources)
 Only after exhausting phases 1 and 2, build scrapers for important sources that have no feeds. Prioritize by event volume and community relevance.
+
+### Phase 4: Upstream authority (find direct feeds for aggregated venues)
+Once your calendar has aggregator sources (newspapers, regional platforms), analyze which venues appear *only* via aggregators. These are candidates for direct sourcing — getting events straight from the venue rather than through an intermediary.
+
+**The process:**
+1. Query your `events.json` to find locations that appear only in aggregator-sourced events
+2. For each high-volume venue, check if they have their own ICS feed (`?ical=1`)
+3. Add any working feeds — this improves data freshness and reduces aggregator dependency
+4. Document venues with no feeds as potential scraper candidates
+
+**Why this matters:** Aggregators may lag behind venues, miss events, or eventually go away. Direct feeds are more reliable and often have richer event details. This phase also reveals dead feeds in your pipeline — if a venue appears only via aggregators but is already in your feeds.txt, that feed may be broken.
 
 ### Throughout all phases:
 
