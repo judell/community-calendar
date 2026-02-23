@@ -103,7 +103,7 @@ jobs:
         echo "\n=== Santa Rosa Scraper Results ==="
         for f in cities/santarosa/*.ics; do
           if [ -f "$f" ]; then
-            events=$(grep -c 'BEGIN:VEVENT' "$f" 2>/dev/null || echo 0)
+            events=$(grep -c 'BEGIN:VEVENT' "$f" 2>/dev/null) || events=0
             size=$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f" 2>/dev/null || echo 0)
             name=$(basename "$f")
             if [ "$events" -gt 0 ]; then
@@ -581,7 +581,7 @@ jobs:
         git diff --quiet && git diff --staged --quiet || (
           git commit -m "Auto-generate calendar"
           for i in 1 2 3; do
-            if git pull --rebase && git push; then
+            if git pull --rebase --autostash && git push; then
               break
             fi
             echo "Push failed, restoring generated files and retrying..."
