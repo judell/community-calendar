@@ -315,6 +315,7 @@ SOURCE_NAMES = {
     'creative_sonoma': 'Creative Sonoma',
     'cinnabar': 'Cinnabar Theater',
     'green_music_center': 'Green Music Center',
+    'jack_london_park': 'Jack London State Historic Park',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -421,6 +422,7 @@ SOURCE_URLS = {
     'new_hope_bird_alliance': 'https://newhopeaudubon.org/events/',
     'wake_audubon': 'https://www.wakeaudubon.org/events',
     'sw_durham_rotary': 'https://portal.clubrunner.ca/3674',
+    'jack_london_park': 'https://jacklondonpark.com/events/',
 }
 
 
