@@ -19,3 +19,7 @@
 Search for each missing platform in each gap city. Many will turn up hits.
 
 **2. Discover new platforms.** When a new city's feeds produce an unclassified PRODID (shown in the "Unclassified" section of `docs/prodid.md`), that's a platform we haven't seen before. Add it to `PLATFORM_MAP` in `prodid.py`, then search for it retroactively across all existing cities.
+
+## Cache-busting for XMLUI components
+
+Edge browser aggressively caches `.xmlui` component files, making it hard to see updates after deployment. Consider adding cache-control headers or version query params to component file loading.
