@@ -52,7 +52,7 @@ WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **santarosa** (7): golocal_coop, luther_burbank_center, schulz_museum, sonoma_com, sonoma_county_aa, srsymphony, uptowntheatrenapa
 
-**toronto** (24): bata_shoe_museum, bloor_west_village, boulderzclimbing, buddies_theatre, factory_theatre, gardiner_museum, golatindance, grossmans_tavern, high_park_nature, indigenous, jazz_bistro, knitters_guild, now_toronto, ontario_historical_society, ontario_nature, scadding_court, sunshinecentres, textile_museum, toronto_botanical, union_station, uoft_engineering, uoft_indigenous, uoft_philosophy, uoft_socialwork
+**toronto** (24): bata_shoe_museum, bloor_west_village, boulderzclimbing, buddies_theatre, factory_theatre, gardiner_museum, grossmans_tavern, high_park_nature, indigenous, jazz_bistro, knitters_guild, now_toronto, ontario_historical_society, ontario_nature, scadding_court, site3, sunshinecentres, textile_museum, toronto_botanical, union_station, uoft_engineering, uoft_indigenous, uoft_philosophy, uoft_socialwork
 
 ### CivicPlus (ical.net) (33 feeds)
 
