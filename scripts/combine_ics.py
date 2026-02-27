@@ -583,9 +583,16 @@ def parse_ics_datetime(dt_str):
 
 
 def normalize_title(title):
-    """Normalize title for dedup matching: lowercase, alphanumeric only, first 40 chars."""
+    """Normalize title for dedup matching: strip leading article, lowercase, alphanumeric only, first 40 chars."""
     if not title:
         return ''
+    # Strip leading articles ("The", "A", "An") to improve matching
+    # e.g. "The Sam Grisman Project" matches "Sam Grisman Project"
+    lower = title.lower()
+    for article in ('the ', 'a ', 'an '):
+        if lower.startswith(article):
+            title = title[len(article):]
+            break
     return ''.join(c.lower() for c in title if c.isalnum())[:40]
 
 
