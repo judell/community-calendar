@@ -337,6 +337,8 @@ SOURCE_NAMES = {
     'essex_county_parks': 'Essex County Parks',
     'montclair_film': 'Montclair Film',
     'songkick_wellmont': 'Wellmont Theater',
+    'eventbrite_watchung_booksellers': 'Watchung Booksellers',
+    'studio_montclair': 'Studio Montclair',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -492,6 +494,8 @@ SOURCE_URLS = {
     'essex_county_parks': 'https://parks.essexcountynj.org/',
     'eventbrite_montclair_brewery': 'https://www.eventbrite.com/o/montclair-brewery-17088451648',
     'eventbrite_montclair_book_center': 'https://www.eventbrite.com/o/montclair-book-center-76893048773',
+    'eventbrite_watchung_booksellers': 'https://www.eventbrite.com/o/watchung-booksellers-32491987875',
+    'studio_montclair': 'https://studiomontclair.org/event-calendar/',
     'maxpreps_montclair_high': 'https://www.maxpreps.com/nj/montclair/montclair-mounties/events/',
 }
 

@@ -1,6 +1,6 @@
 # Montclair NJ Sources Checklist
 
-## Currently Implemented (20 sources, ~1238 events)
+## Currently Implemented (22 sources, ~1240 events)
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
@@ -20,10 +20,12 @@
 | Wharton Arts | WordPress ICS | 4 | ✅ Ready |
 | Montclair High School Athletics | MaxPreps scraper | 2 | ✅ Ready |
 | Metrotrails Hiking | Meetup ICS | 2 | ✅ Ready |
+| Studio Montclair | WP REST API scraper | 1 | ✅ Ready |
 | Exploring Montclair | Meetup ICS | 1 | ✅ Ready |
 | Montclair GameNights | Meetup ICS | 1 | ✅ Ready |
 | NJ Code & Coffee | Meetup ICS | 1 | ✅ Ready |
 | PEAK Performances at MSU | WordPress ICS | 1 | ✅ Ready |
+| Watchung Booksellers | Eventbrite scraper | 0 | ✅ Ready (no upcoming events) |
 
 ## Key Aggregators (potential allies)
 | Aggregator | URL | Notes |
@@ -40,16 +42,6 @@
 | Montclair Entrepreneurs | montclair-entrepreneurs | 0 events (2026-03-01) |
 | Living Mindfully | Say-Yes-To-Your-Life-Montclair | 0 events (2026-03-01) |
 | WordPress Montclair | wordpress-montclair-meetup | Not tested |
-
-## Needs Scraper — High Priority
-| Source | URL | Platform | Notes |
-|--------|-----|----------|-------|
-| Watchung Booksellers | watchungbooksellers.com/events | Bookmanager platform | Author events; fully JS-rendered, no API discovered |
-
-## Needs Scraper — Worth Trying
-| Source | URL | Platform | Notes |
-|--------|-----|----------|-------|
-| Studio Montclair | studiomontclair.org/event-calendar/ | WordPress/Tribe Events | Mod_Security blocks ICS requests |
 
 ## Needs Scraper — Probably Expensive / Brittle
 | Source | URL | Platform | Notes |
