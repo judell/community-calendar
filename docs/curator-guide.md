@@ -113,6 +113,12 @@ This is a conversation with your agent. The topics below are a starting point �
 ### Phase 3: Custom scrapers (last resort for high-value sources)
 Only after exhausting phases 1 and 2, build scrapers for important sources that have no feeds. Prioritize by event volume and community relevance.
 
+**Before writing a scraper, try indirection.** When a venue's site is hard to scrape — bot protection, heavy JavaScript, ticketing platform lock-in — ask: *where else does this data live?*
+
+- **Ticketing platforms:** Check Eventbrite, SeeTickets, Dice.fm for the venue name. The ticketing site often has cleaner structured data than the venue's own site.
+- **Artist-sourced aggregators:** For music venues, check [Songkick](https://www.songkick.com) and [Bandsintown](https://www.bandsintown.com). Artists and their management push tour dates to these platforms, which aggregate them onto venue pages with clean JSON-LD. One page fetch, no bot games. **Example:** The Wellmont Theater in Montclair uses ShowDog bot protection and routes through Ticketmaster/AXS — but Songkick serves every upcoming show as structured `MusicEvent` data from a single URL.
+- **Listing page + JSON-LD:** Some sites have a simple listing page that links to individual event pages, each with JSON-LD structured data. Scrape the listing for URLs, then extract JSON-LD from each page. **Example:** Montclair Film's `/all-event/` page links to ~15 current films; each film page has a `subEvent` array with individual screening times. 16 fetches yield 128 showtimes.
+
 ### Phase 4: Upstream authority (find direct feeds for aggregated venues)
 Once your calendar has aggregator sources (newspapers, regional platforms), analyze which venues appear *only* via aggregators. These are candidates for direct sourcing — getting events straight from the venue rather than through an intermediary.
 

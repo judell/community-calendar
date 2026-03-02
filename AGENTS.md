@@ -236,6 +236,18 @@ For cities using Legistar for agenda management. Client name is from the Legista
 
 **Gotcha:** Some cities have a `{city}.legistar.com` web UI but a broken API (e.g., Raleigh returns "LegistarConnectionString not set up"). These cities use Granicus for video but not Legistar for legislative data. Always test the API before adding to the workflow.
 
+### Songkick (`scrapers/songkick.py`) - Music Venue Showtimes
+```bash
+python scrapers/songkick.py --url "https://www.songkick.com/venues/32209-wellmont-theater" --name "Wellmont Theater" -o events.ics
+```
+Extracts `MusicEvent` JSON-LD from any Songkick venue page. Artists push their own tour dates to Songkick, so this gives you artist-sourced data in a single HTTP request — no bot protection to deal with, no pagination needed. See [Strategy 4](#strategy-4-artist-sourced-data-songkick-bandsintown) for when and why to use this.
+
+### Montclair Film (`scrapers/montclair_film.py`) - Film Showtimes via JSON-LD subEvents
+```bash
+python scrapers/montclair_film.py -o cities/montclair/montclair_film.ics
+```
+Montclair Film uses WordPress with a groundplan-pro plugin. The listing page at `/all-event/` links to ~15 current films; each film page has JSON-LD with a `subEvent` array of individual screenings. This is a site-specific scraper but illustrates the **listing page + JSON-LD** pattern: discover URLs from a listing page, then extract structured data from each. 16 fetches yield 128 screenings.
+
 ### Bibliocommons (`scrapers/lib/bibliocommons.py`) - Library Event Platforms
 Reusable base for public-library systems on Bibliocommons gateway APIs.
 
@@ -262,6 +274,7 @@ To create a new city/library scraper, subclass `BibliocommonsEventsScraper` and 
 | **WordPress MEC** | `https://example.com/events/?mec-ical-feed=1` |
 | **Legistar** | `https://webapi.legistar.com/v1/{client}/events` (WebAPI, use scraper) |
 | **CivicPlus** | `https://www.{city}.org/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID={N}` |
+| **Songkick** | `https://www.songkick.com/venues/{ID}-{slug}` (JSON-LD MusicEvent, use `scrapers/songkick.py`) |
 
 ### SeeTickets Widgets
 HTML classes: `.title a`, `.date`, `.see-showtime`, `.see-doortime`, `.genre`, `.ages`, `.price`
@@ -324,7 +337,32 @@ No scraping needed - just discover groups and add their feeds. Test with:
 curl -s "https://www.meetup.com/{group-slug}/events/ical/" | head -30
 ```
 
-### Strategy 4: Platform-Specific Discovery
+### Strategy 4: Artist-Sourced Data (Songkick, Bandsintown)
+
+When a music venue's own site is hard to scrape (bot protection, heavy JS, ticketing widgets), **look for the venue on platforms where artists push their own tour dates**. Artists and their management maintain tour data on Songkick and Bandsintown, which aggregate it onto clean venue pages with structured JSON-LD.
+
+**Why this works:** The data flows artist → aggregator → venue page. You're getting artist-sourced tour data, not scraping the venue. A single page fetch returns `MusicEvent` JSON-LD for all upcoming shows.
+
+**Example:** The Wellmont Theater uses ShowDog bot protection and routes through Ticketmaster/AXS. Direct scraping is impractical. But `https://www.songkick.com/venues/32209-wellmont-theater` serves clean JSON-LD with every upcoming show — one fetch, structured data, no bot games.
+
+**How to check:**
+```bash
+# Search Songkick for the venue
+curl -sL "https://www.songkick.com/search?query=wellmont+theater&type=venues" | grep -o 'href="/venues/[^"]*"' | head -5
+
+# Fetch the venue page and check for JSON-LD
+curl -sL "https://www.songkick.com/venues/32209-wellmont-theater" | grep -c 'MusicEvent'
+```
+
+**Reusable scraper:** `scrapers/songkick.py` handles any Songkick venue page (see [Reusable Scrapers](#reusable-scrapers) below).
+
+**When to use this strategy:**
+- Venue site has bot protection (ShowDog, Cloudflare, etc.)
+- Venue tickets through a platform that's hard to scrape (Ticketmaster, AXS)
+- You want clean, structured data with minimal HTTP requests
+- The venue is a music venue (this pattern is music-specific)
+
+### Strategy 5: Platform-Specific Discovery
 
 Many event platforms have predictable feed URLs:
 
