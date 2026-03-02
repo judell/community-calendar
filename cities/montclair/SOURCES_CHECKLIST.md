@@ -1,11 +1,12 @@
 # Montclair NJ Sources Checklist
 
-## Currently Implemented (18 sources, ~1106 events)
+## Currently Implemented (20 sources, ~1238 events)
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
 | Montclair State University | CampusLabs ICS | 817 | ✅ Ready |
 | Montclair Public Library | LibCal ICS | 161 | ✅ Ready |
+| Montclair Film | JSON-LD scraper | 128 | ✅ Ready |
 | Essex County Parks | JSON API scraper | 90 | ✅ Ready |
 | Montclair Foundation / Van Vleck | WordPress ICS | 30 | ✅ Ready |
 | Lackawanna Station | Squarespace scraper | 27 | ✅ Ready |
@@ -15,6 +16,7 @@
 | West African Drumming NJ | Meetup ICS | 10 | ✅ Ready |
 | South Mountain Conservancy | Meetup ICS | 6 | ✅ Ready |
 | Montclair Book Center | Eventbrite scraper | 5 | ✅ Ready |
+| Wellmont Theater | Songkick JSON-LD scraper | 4 | ✅ Ready |
 | Wharton Arts | WordPress ICS | 4 | ✅ Ready |
 | Montclair High School Athletics | MaxPreps scraper | 2 | ✅ Ready |
 | Metrotrails Hiking | Meetup ICS | 2 | ✅ Ready |
@@ -42,9 +44,7 @@
 ## Needs Scraper — High Priority
 | Source | URL | Platform | Notes |
 |--------|-----|----------|-------|
-| Montclair Film | montclairfilm.org/all-event/ | WordPress/Elementor/JetEngine | Runs Clairidge & Bellevue theaters; WP REST API has mc_event type but dates in Salesforce |
-| Wellmont Theater | wellmonttheater.com/upcoming-shows/ | WordPress (ShowDog bot protection) | Major venue; also on Ticketmaster, Bandsintown, AXS |
-| Watchung Booksellers | watchungbooksellers.com/events | Bookmanager platform | Author events |
+| Watchung Booksellers | watchungbooksellers.com/events | Bookmanager platform | Author events; fully JS-rendered, no API discovered |
 
 ## Needs Scraper — Worth Trying
 | Source | URL | Platform | Notes |

@@ -335,6 +335,8 @@ SOURCE_NAMES = {
     'eventbrite_montclair_brewery': 'Montclair Brewery',
     'eventbrite_montclair_book_center': 'Montclair Book Center',
     'essex_county_parks': 'Essex County Parks',
+    'montclair_film': 'Montclair Film',
+    'songkick_wellmont': 'Wellmont Theater',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -485,6 +487,12 @@ SOURCE_URLS = {
     'bccls_ical_subscribe_php': 'https://bccls.libcal.com/calendar/montclair',
     'north_essex_chamber': 'https://business.northessexchamber.com/events',
     'lackawanna': 'https://www.lackawanna.com/events',
+    'songkick_wellmont': 'https://www.songkick.com/venues/32209-wellmont-theater',
+    'montclair_film': 'https://montclairfilm.org/all-event/',
+    'essex_county_parks': 'https://parks.essexcountynj.org/',
+    'eventbrite_montclair_brewery': 'https://www.eventbrite.com/o/montclair-brewery-17088451648',
+    'eventbrite_montclair_book_center': 'https://www.eventbrite.com/o/montclair-book-center-76893048773',
+    'maxpreps_montclair_high': 'https://www.maxpreps.com/nj/montclair/montclair-mounties/events/',
 }
 
 
