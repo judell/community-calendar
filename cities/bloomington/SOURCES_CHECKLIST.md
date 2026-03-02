@@ -7,13 +7,30 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Monroe County Public Library | Scraper | — | `library_intercept.py --location bloomington` |
-| The Bluebird | ICS (static) | — | `bluebird.ics` |
+| The Bluebird | Songkick | ~9 | `songkick.py` venue 78904 |
+| Blockhouse Bar | Songkick | ~2 | `songkick.py` venue 3607354 |
 | Boys & Girls Club | ICS | — | `bgcbloomington.org` WordPress Events Calendar |
 | City of Bloomington | ICS | ~374 | Google Calendar feed |
+| City Boards & Commissions | ICS | — | Google Calendar feed (added 2026-03) |
 | Bloomington Arts | ICS | — | Tockify API feed |
 | IU Jacobs School of Music | ICS | ~514 | LiveWhale `group_id/56` |
 | IU Auditorium | ICS | ~23 | LiveWhale `group_id/378` |
 | Eskenazi Museum of Art | ICS | ~74 | LiveWhale `group_id/234` |
+| IU Cinema | ICS | ~19 | LiveWhale `group_id/81` (added 2026-03) |
+| IU La Casa Latino Cultural Center | ICS | ~109 | LiveWhale `group_id/59` (added 2026-03) |
+| IU Maurer School of Law | ICS | ~80 | LiveWhale `group_id/64` (added 2026-03) |
+| IU Kelley School of Business | ICS | ~48 | LiveWhale `group_id/343` (added 2026-03) |
+| IU Arts & Humanities Institute | ICS | ~183 | LiveWhale `group_id/130` (added 2026-03) |
+| IU Bloomington Libraries | ICS | ~436 | LiveWhale `group_id/261` (added 2026-03) |
+| IU Theatre & Dance | ICS | ~20 | LiveWhale `group_id/218` (added 2026-03) |
+| IU Asian Culture Center | ICS | ~26 | LiveWhale `group_id/314` (added 2026-03) |
+| IU First Nations Center | ICS | ~14 | LiveWhale `group_id/275` (added 2026-03) |
+| IU LGBTQ+ Culture Center | ICS | ~4 | LiveWhale `group_id/237` (added 2026-03) |
+| IU Black Film Center & Archive | ICS | ~9 | LiveWhale `group_id/221` (added 2026-03) |
+| IU Neal-Marshall Black Culture Center | ICS | — | LiveWhale `group_id/235` (seasonal, added 2026-03) |
+| IU Moving Image Archive | ICS | ~151 | LibCal `cid=5914` (added 2026-03) |
+| IU Scholars' Commons | ICS | ~26 | LibCal `cid=1228` (added 2026-03) |
+| IU beINvolved Student Orgs | ICS | ~16900 | CampusLabs `iub.campuslabs.com` (added 2026-03) |
 | B-Square: Government | ICS | ~8887 | Google Calendar (mostly historical, future-filtered by combine_ics) |
 | B-Square: Misc Civic Events | ICS | ~252 | Google Calendar |
 | B-Square: Critical Mass | ICS | ~8 | Google Calendar (monthly group bike ride) |
@@ -26,8 +43,19 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | Parks and Recreation | ICS | ~1615 | Google Calendar via city website |
 | Knobstone Hiking Trail Meetup | ICS | ~10 | Meetup group - regional hiking |
 | Bloomington Atheists Meetup | ICS | ~10 | Meetup group - local social/discussion |
+| Bloomington Board Games Meetup | ICS | — | Meetup group (retested 2026-03) |
+| Bloomington Remote Workers Meetup | ICS | — | Meetup group (added 2026-03) |
 | Bloomington Farmers Market | ICS | ~307 | Google Calendar via city website |
 | Bloomington Bicycle Club | ICS | ~5023 | Google Calendar - cycling rides, weekly events |
+| WonderLab Museum | ICS | ~30+ | WordPress ICS `?ical=1` — Cloudflare blocks HTML but not ICS! (added 2026-03) |
+| First United Church | ICS | ~50+ | WordPress ICS — rich community hub (DSA, Al-Anon, scouts, etc.) (added 2026-03) |
+| Bloomington Community Band | ICS | ~20 | WordPress Events Calendar ICS (added 2026-03) |
+| Brown County Playhouse | ICS | ~12 | WordPress Events Calendar ICS (added 2026-03) |
+| Upland Brewing | ICS | — | WordPress Events Calendar ICS — dormant, populates seasonally (added 2026-03) |
+| Bloominglabs Makerspace | ICS | ~10+ | Google Calendar (added 2026-03) |
+| Cardinal Spirits | Scraper | ~5 | Squarespace scraper (added 2026-03) |
+| People's Market | Scraper | ~10 | Squarespace scraper |
+| Lotus Festival | ICS | ~7 | WordPress Events Calendar ICS |
 
 ---
 
@@ -43,6 +71,18 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | **Jacobs School of Music** | 56 | DONE | ~514 events |
 | **IU Auditorium** | 378 | DONE | ~23 events |
 | **Eskenazi Museum of Art** | 234 | DONE | ~74 events |
+| **IU Cinema** | 81 | DONE | ~19 events (added 2026-03) |
+| **La Casa Latino Cultural Center** | 59 | DONE | ~109 events (added 2026-03) |
+| **Maurer School of Law** | 64 | DONE | ~80 events (added 2026-03) |
+| **Kelley School of Business** | 343 | DONE | ~48 events (added 2026-03) |
+| **College Arts + Humanities Institute** | 130 | DONE | ~183 events (added 2026-03) |
+| **IU Bloomington Libraries** | 261 | DONE | ~436 events (added 2026-03) |
+| **IU Theatre & Dance** | 218 | DONE | ~20 events (added 2026-03) |
+| **Asian Culture Center** | 314 | DONE | ~26 events (added 2026-03) |
+| **First Nations Center** | 275 | DONE | ~14 events (added 2026-03) |
+| **LGBTQ+ Culture Center** | 237 | DONE | ~4 events (added 2026-03) |
+| **Black Film Center & Archive** | 221 | DONE | ~9 events (added 2026-03) |
+| **Neal-Marshall Black Culture Center** | 235 | DONE | Seasonal (added 2026-03) |
 
 ### Government / Civic ICS
 
@@ -90,7 +130,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
-| **WonderLab Museum** | `wonderlab.org/events/` | BLOCKED | Behind Cloudflare challenge |
+| **WonderLab Museum** | `wonderlab.org/events/?ical=1` | ✅ DONE | Cloudflare blocks HTML pages but ICS export works! |
 
 ### Libraries
 
@@ -397,14 +437,15 @@ These groups have working ICS feeds but no upcoming events as of 2026-02-17:
 
 ### Current Coverage Summary
 
-**27 sources implemented** covering:
-- University events (IU LiveWhale × 3)
-- City/civic (Parks & Rec, Farmers Market, B-Square × 4, City Gov)
-- Arts/entertainment (Bloomington Arts, Comedy Attic, Bishop, Bluebird)
-- Community (BloomingtonOnline × 3, Library, Boys & Girls Club)
-- Interest groups (2 Meetup groups)
+**51 sources implemented** (expanded from 27 on 2026-03-02) covering:
+- University events (IU LiveWhale × 15, LibCal × 2, CampusLabs × 1)
+- City/civic (Parks & Rec, Farmers Market, B-Square × 4, City Gov, Boards & Commissions)
+- Arts/entertainment (Bloomington Arts, Comedy Attic, Bishop, Bluebird, Blockhouse, Brown County Playhouse, Cardinal Spirits)
+- Community (BloomingtonOnline × 3, Library, Boys & Girls Club, First United Church, WonderLab, Community Band, Bloominglabs)
+- Interest groups (4 Meetup groups)
+- Beverages (Upland Brewing, Cardinal Spirits)
 
-**Estimated unique future events:** ~1,700+
+**Estimated unique future events:** ~5,000+
 
 ### Phase 2 Topical Search Results: 2026-02-18
 

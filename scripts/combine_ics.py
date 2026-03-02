@@ -75,6 +75,39 @@ SOURCE_NAMES = {
     'bsquare_misc_civic': 'Bloomington Civic Events',
     'bsquare_critical_mass': 'Critical Mass Bloomington',
     'bsquare_bptc': 'Bloomington Public Transit',
+    # Bloomington - IU LiveWhale
+    'iu_cinema': 'IU Cinema',
+    'iu_la_casa': 'IU La Casa Latino Cultural Center',
+    'iu_maurer_law': 'IU Maurer School of Law',
+    'iu_kelley_business': 'IU Kelley School of Business',
+    'iu_arts_humanities': 'IU Arts & Humanities Institute',
+    'iu_libraries': 'IU Bloomington Libraries',
+    'iu_theatre_dance': 'IU Theatre & Dance',
+    'iu_asian_culture': 'IU Asian Culture Center',
+    'iu_first_nations': 'IU First Nations Center',
+    'iu_lgbtq_culture': 'IU LGBTQ+ Culture Center',
+    'iu_black_film': 'IU Black Film Center & Archive',
+    'iu_neal_marshall': 'IU Neal-Marshall Black Culture Center',
+    # Bloomington - IU LibCal
+    'iu_libcal_screening_room': 'IU Moving Image Archive',
+    'iu_libcal_scholars_commons': 'IU Scholars\' Commons',
+    # Bloomington - IU CampusLabs
+    'iu_campuslabs': 'IU beINvolved Student Orgs',
+    # Bloomington - Community
+    'wonderlab': 'WonderLab Museum',
+    'first_united_church': 'First United Church',
+    'community_band': 'Bloomington Community Band',
+    'brown_county_playhouse': 'Brown County Playhouse',
+    'upland_brewing': 'Upland Brewing',
+    'city_boards_commissions': 'City Boards & Commissions',
+    'bloominglabs': 'Bloominglabs Makerspace',
+    'meetup_board_games': 'Meetup: Bloomington Board Games',
+    'meetup_remote_workers': 'Meetup: Bloomington Remote Workers',
+    # Bloomington - Songkick venues
+    'songkick_bluebird': 'The Bluebird',
+    'songkick_blockhouse': 'Blockhouse Bar',
+    # Bloomington - Squarespace
+    'cardinal_spirits': 'Cardinal Spirits',
     # Petaluma
     'petaluma_downtown': 'Petaluma Downtown Association',
     'meetup_mindful_petaluma': 'Meetup: Mindful Petaluma',

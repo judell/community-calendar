@@ -161,6 +161,9 @@ jobs:
         python scrapers/comedy_attic.py --output cities/bloomington/comedy_attic.ics || true
         python scrapers/the_bishop.py --output cities/bloomington/the_bishop.ics || true
         python scrapers/squarespace.py --url "https://www.peoplesmarketbtown.org/gatherings" --name "People's Market" -o cities/bloomington/peoples_market.ics || true
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/78904-bluebird" --name "The Bluebird" --output cities/bloomington/songkick_bluebird.ics || true
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/3607354-blockhouse-bar" --name "Blockhouse Bar" --output cities/bloomington/songkick_blockhouse.ics || true
+        python scrapers/squarespace.py --url "https://www.cardinalspirits.com/events" --name "Cardinal Spirits" -o cities/bloomington/cardinal_spirits.ics || true
       continue-on-error: true
 
     - name: Download Bloomington live feeds and combine ICS
@@ -174,6 +177,18 @@ jobs:
         curl -sL "https://events.iu.edu/live/ical/events/group_id/56" -o iu_jacobs_music.ics || true
         curl -sL "https://events.iu.edu/live/ical/events/group_id/378" -o iu_auditorium.ics || true
         curl -sL "https://events.iu.edu/live/ical/events/group_id/234" -o iu_eskenazi_museum.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/81" -o iu_cinema.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/59" -o iu_la_casa.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/64" -o iu_maurer_law.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/343" -o iu_kelley_business.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/130" -o iu_arts_humanities.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/261" -o iu_libraries.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/218" -o iu_theatre_dance.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/314" -o iu_asian_culture.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/275" -o iu_first_nations.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/237" -o iu_lgbtq_culture.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/221" -o iu_black_film.ics || true
+        curl -sL "https://events.iu.edu/live/ical/events/group_id/235" -o iu_neal_marshall.ics || true
         # B-Square Bulletin Google Calendars
         curl -sL "https://calendar.google.com/calendar/ical/bloomington.in.gov_35a6qiaiperdn7b1r6v2ksjlig@group.calendar.google.com/public/basic.ics" -o bsquare_government.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/4dj0guhji982ca5k90ljeliul0@group.calendar.google.com/public/basic.ics" -o bsquare_misc_civic.ics || true
@@ -188,6 +203,23 @@ jobs:
         curl -sL "https://calendar.google.com/calendar/ical/bloomington.in.gov_0l6e93fe54psagva4dhojra2q0@group.calendar.google.com/public/basic.ics" -o farmers_market.ics || true
         curl -sL "https://www.lotusfest.org/events/?ical=1" -o lotusfest.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/cuc66guoam1hhcqq2rnaniinl8%40group.calendar.google.com/public/basic.ics" -o calendar_cuc66guoam1hhcqq2rnaniinl8_40group_calend.ics || true
+        # IU LibCal feeds
+        curl -sL "https://iub.libcal.com/ical_subscribe.php?src=p&cid=5914" -o iu_libcal_screening_room.ics || true
+        curl -sL "https://iub.libcal.com/ical_subscribe.php?src=p&cid=1228" -o iu_libcal_scholars_commons.ics || true
+        # CampusLabs / beINvolved (student org events)
+        curl -sL "https://iub.campuslabs.com/engage/events.ics" -o iu_campuslabs.ics || true
+        # Community ICS feeds
+        curl -sL "https://wonderlab.org/events/?ical=1" -o wonderlab.ics || true
+        curl -sL "https://firstuc.org/events/?ical=1" -o first_united_church.ics || true
+        curl -sL "https://www.bloomingtoncommunityband.org/events/?ical=1" -o community_band.ics || true
+        curl -sL "https://browncountyplayhouse.org/events/?ical=1" -o brown_county_playhouse.ics || true
+        curl -sL "https://uplandbeer.com/events/?ical=1" -o upland_brewing.ics || true
+        # Google Calendar feeds
+        curl -sL "https://calendar.google.com/calendar/ical/bloomington.in.gov_r7b1mkrme1r8uhl3b5amhb50bc@group.calendar.google.com/public/basic.ics" -o city_boards_commissions.ics || true
+        curl -sL "https://calendar.google.com/calendar/ical/bloominglabs%40gmail.com/public/basic.ics" -o bloominglabs.ics || true
+        # Meetup feeds
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/Bloomington-Board-Games-Meetup/events/ical/" -o meetup_board_games.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/bloomington-remote-workers-meetup-group/events/ical/" -o meetup_remote_workers.ics || true
         cd ../..
         python scripts/combine_ics.py --input-dir cities/bloomington --output cities/bloomington/combined.ics --name "Bloomington Community Calendar"
 
