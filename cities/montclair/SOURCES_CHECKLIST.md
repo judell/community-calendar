@@ -6,6 +6,7 @@
 |--------|------|--------|--------|
 | Montclair State University | CampusLabs ICS | 817 | ✅ Ready |
 | Montclair Public Library | LibCal ICS | 161 | ✅ Ready |
+| Essex County Parks | JSON API scraper | 90 | ✅ Ready |
 | Montclair Foundation / Van Vleck | WordPress ICS | 30 | ✅ Ready |
 | Lackawanna Station | Squarespace scraper | 27 | ✅ Ready |
 | Montclair Local News | WordPress ICS | 24 | ✅ Ready |
@@ -20,7 +21,6 @@
 | Exploring Montclair | Meetup ICS | 1 | ✅ Ready |
 | Montclair GameNights | Meetup ICS | 1 | ✅ Ready |
 | NJ Code & Coffee | Meetup ICS | 1 | ✅ Ready |
-| Essex County Parks | JSON API scraper | 90 | ✅ Ready |
 | PEAK Performances at MSU | WordPress ICS | 1 | ✅ Ready |
 
 ## Key Aggregators (benchmark competitors)
@@ -39,16 +39,22 @@
 | Living Mindfully | Say-Yes-To-Your-Life-Montclair | 0 events (2026-03-01) |
 | WordPress Montclair | wordpress-montclair-meetup | Not tested |
 
-## Discovered - Needs Scraper
+## Needs Scraper — High Priority
 | Source | URL | Platform | Notes |
 |--------|-----|----------|-------|
+| Montclair Film | montclairfilm.org/all-event/ | WordPress/Elementor/JetEngine | Runs Clairidge & Bellevue theaters; WP REST API has mc_event type but dates in Salesforce |
 | Wellmont Theater | wellmonttheater.com/upcoming-shows/ | WordPress (ShowDog bot protection) | Major venue; also on Ticketmaster, Bandsintown, AXS |
-| Montclair Film | montclairfilm.org/all-event/ | WordPress/Elementor/JetEngine | Runs Clairidge & Bellevue theaters |
-| Montclair Art Museum | montclairartmuseum.org/events | Cloudflare protected | |
-| Studio Montclair | studiomontclair.org/event-calendar/ | WordPress/Tribe Events | Mod_Security blocks ICS requests |
-| ~~Montclair Brewery~~ | ~~montclairbrewery.com/events~~ | ~~Wix~~ | **Implemented** via Eventbrite organizer scraper (10 events) |
-| ~~Montclair Book Center~~ | ~~montclairbookcenter.com/events.php~~ | ~~Custom PHP~~ | **Implemented** via Eventbrite organizer scraper (5 events) |
 | Watchung Booksellers | watchungbooksellers.com/events | Bookmanager platform | Author events |
+
+## Needs Scraper — Worth Trying
+| Source | URL | Platform | Notes |
+|--------|-----|----------|-------|
+| Studio Montclair | studiomontclair.org/event-calendar/ | WordPress/Tribe Events | Mod_Security blocks ICS requests |
+
+## Needs Scraper — Probably Expensive / Brittle
+| Source | URL | Platform | Notes |
+|--------|-----|----------|-------|
+| Montclair Art Museum | montclairartmuseum.org/events | Cloudflare protected | |
 
 ## Non-Starters
 | Source | Reason |
@@ -62,17 +68,23 @@
 | Vibemap / Experience Montclair | Closed commercial SaaS, no public API |
 | Out Montclair | WordPress/Tribe Events, empty feed (0 events) |
 | Churches (Planning Center) | No public API; Redeemer Montclair & Montclair Community Church both use it |
+| Trumpets Jazz Club | Closed September 2021, building sold |
 
-## Potential Additional Sources
-- [ ] Montclair Brewery via Eventbrite API/scraper (13 events)
-- [ ] Montclair Book Center via Eventbrite (5 events)
-- [ ] Montclair Kimberley Academy (MaxPreps - private school athletics)
+## Potential Additional Sources — Community/Civic
 - [ ] Montclair YMCA (montclairymca.org - class schedules, special events)
-- [ ] Fred Astaire Dance (fredastaire.com/upper-montclair/calendar/ - has discrete events)
 - [ ] Montclair Farmers' Market (static recurring: Saturdays 8am-2pm, Walnut St)
-- [ ] Congregation Shomrei Emunah, Bnai Keshet, Temple Ner Tamid (check for calendar pages)
-- [ ] First Congregational Church (fccmontclair.org)
-- [ ] Unitarian Universalist of Montclair (uumontclair.org)
-- [ ] MSU College of the Arts (montclair.edu/arts/events-at-the-college/)
-- [ ] MSU Campus Recreation special events
 - [ ] Montclair Community Farms
+- [ ] Montclair Kimberley Academy (MaxPreps - private school athletics)
+
+## Potential Additional Sources — Faith
+- [ ] Congregation Shomrei Emunah, Bnai Keshet, Temple Ner Tamid (check for calendar pages)
+- [ ] First Congregational Church (fccmontclair.org) — also hosts Outpost in the Burbs concerts
+- [ ] Unitarian Universalist of Montclair (uumontclair.org)
+
+## Potential Additional Sources — Long-Tail Music Venues
+Most are Facebook/Instagram-only; listed here for future reference if platforms open up.
+- [ ] Outpost in the Burbs (Wix + Thundertix, no feed; ~monthly folk/singer-songwriter concerts)
+- [ ] DLV Lounge (Facebook-only; jazz Wed-Sat since 1972)
+- [ ] The Meatlocker (Instagram @meatlockershows; DIY punk/metal, shows most nights)
+- [ ] Just Jake's (Wix; live music Fri-Sat)
+- [ ] Tierney's Tavern (live music Fri-Sat; Bandsintown 403)
