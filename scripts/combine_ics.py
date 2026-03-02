@@ -356,6 +356,8 @@ SOURCE_NAMES = {
     'unioncong': 'Union Congregational Church',
     'nertamid': 'Temple Ner Tamid',
     'njaudubon': 'NJ Audubon',
+    'turtle_back_zoo': 'Turtle Back Zoo',
+    'raptor_trust': 'The Raptor Trust',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -524,6 +526,8 @@ SOURCE_URLS = {
     'unioncong': 'https://www.unioncong.org/events/',
     'nertamid': 'https://www.nertamid.org/events/',
     'njaudubon': 'https://njaudubon.org/calendar/',
+    'turtle_back_zoo': 'https://www.turtlebackzoo.com/events/',
+    'raptor_trust': 'https://www.theraptortrust.org/events',
     'maxpreps_montclair_high': 'https://www.maxpreps.com/nj/montclair/montclair-mounties/events/',
 }
 

@@ -1,6 +1,6 @@
 # Montclair NJ Sources Checklist
 
-## Currently Implemented (39 sources)
+## Currently Implemented (41 sources)
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
@@ -41,7 +41,9 @@
 | Montclair Kimberley Academy | MaxPreps scraper | * | ✅ Ready |
 | Watchung Booksellers | Eventbrite scraper | 0 | ✅ Ready (no upcoming events) |
 | League of Women Voters Montclair | Meetup ICS | 0 | ✅ Ready (events on ClubExpress) |
+| Turtle Back Zoo | WP REST API scraper | 42 | ✅ Ready |
 | NJ Audubon | WordPress ICS | 30 | ✅ Ready |
+| The Raptor Trust | Squarespace per-event ICS | 4 | ✅ Ready |
 | Bicycle Touring Club of NJ | Meetup ICS | 0 | ✅ Ready (seasonal) |
 
 \* Google Calendar feeds include historical events; pipeline filters to future only.
@@ -61,12 +63,6 @@
 | Montclair Entrepreneurs | montclair-entrepreneurs | 0 events (2026-03-01) |
 | Living Mindfully | Say-Yes-To-Your-Life-Montclair | 0 events (2026-03-01) |
 | WordPress Montclair | wordpress-montclair-meetup | Not tested |
-
-## Needs Scraper — Worth Trying
-| Source | URL | Platform | Notes |
-|--------|-----|----------|-------|
-| Turtle Back Zoo | turtlebackzoo.com/events/ | WordPress/MEC | WP REST API has events but MEC dates need parsing |
-| The Raptor Trust | theraptortrust.org/events | Squarespace | Per-event ICS works; needs scraper for listing page |
 
 ## Needs Scraper — Probably Expensive / Brittle
 | Source | URL | Platform | Notes |
