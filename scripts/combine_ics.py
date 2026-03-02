@@ -108,6 +108,12 @@ SOURCE_NAMES = {
     'songkick_blockhouse': 'Blockhouse Bar',
     # Bloomington - Squarespace
     'cardinal_spirits': 'Cardinal Spirits',
+    # Bloomington - Long tail community
+    'calendar_bloomington_in_gov_c657mi332p5sjpq2lcht9i': 'City Department Events',
+    'calendar_shweekend_40gmail_com_public': 'Bloomington Old-Time Music & Dance',
+    'writersguildbloomington': 'Writers Guild at Bloomington',
+    'bloomspinweave': 'Bloomington Spinners & Weavers Guild',
+    'hoosierflyfishers_list': 'Hoosier Fly Fishers',
     # Petaluma
     'petaluma_downtown': 'Petaluma Downtown Association',
     'meetup_mindful_petaluma': 'Meetup: Mindful Petaluma',
