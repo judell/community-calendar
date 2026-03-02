@@ -9,7 +9,7 @@ used across all city feeds, identified by their PRODID header.
 |----------|-------------|--------|------:|
 | **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 127 |
 | **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 69 |
-| **Google Calendar** | Public Google Calendar ICS export. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 37 |
+| **Google Calendar** | Public Google Calendar ICS export. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 38 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, montclair, raleighdurham, santarosa | 35 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 18 |
 | **MaxPreps** | High school sports schedules. | montclair, petaluma, santarosa | 10 |
@@ -58,11 +58,11 @@ WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **toronto** (26): bata_shoe_museum, bloor_west_village, boulderzclimbing, buddies_theatre, culturelink, factory_theatre, gardiner_museum, golatindance, grossmans_tavern, high_park_nature, indigenous, jazz_bistro, knitters_guild, now_toronto, ontario_historical_society, ontario_nature, scadding_court, site3, sunshinecentres, textile_museum, toronto_botanical, union_station, uoft_engineering, uoft_indigenous, uoft_philosophy, uoft_socialwork
 
-### Google Calendar (37 feeds)
+### Google Calendar (38 feeds)
 
 Public Google Calendar ICS export.
 
-**bloomington** (15): bloominglabs, bloomington_gov, bsquare_bptc, bsquare_critical_mass, bsquare_government, bsquare_misc_civic, btonline_events, btonline_food, btonline_shopping, calendar_bloomington_in_gov_c657mi332p5sjpq2lcht9i, calendar_cuc66guoam1hhcqq2rnaniinl8_40group_calend, calendar_shweekend_40gmail_com_public, city_boards_commissions, farmers_market, parks_and_rec
+**bloomington** (16): bloominglabs, bloomington_gov, bsquare_bptc, bsquare_critical_mass, bsquare_government, bsquare_misc_civic, btonline_events, btonline_food, btonline_shopping, calendar_bloomington_in_gov_c657mi332p5sjpq2lcht9i, calendar_cuc66guoam1hhcqq2rnaniinl8_40group_calend, calendar_r5lf3al9blontcsjnedbr2f2u0_40group_calend, calendar_shweekend_40gmail_com_public, city_boards_commissions, farmers_market, parks_and_rec
 
 **montclair** (2): fcc_montclair, uu_montclair
 
