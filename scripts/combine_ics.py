@@ -107,6 +107,11 @@ SOURCE_NAMES = {
     'songkick_blockhouse': 'Blockhouse Bar',
     # Bloomington - Squarespace
     'cardinal_spirits': 'Cardinal Spirits',
+    'sassafras_audubon': 'Sassafras Audubon Society',
+    'master_gardeners': 'Monroe County Master Gardeners',
+    # Bloomington - Scrapers (various platforms)
+    'constellation': 'Constellation Stage & Screen',
+    'cicada_cinema': 'Cicada Cinema',
     # Bloomington - Long tail community
     'calendar_bloomington_in_gov_c657mi332p5sjpq2lcht9i': 'City Department Events',
     'calendar_shweekend_40gmail_com_public': 'Bloomington Old-Time Music & Dance',
@@ -397,6 +402,7 @@ SOURCE_NAMES = {
     'njaudubon': 'NJ Audubon',
     'turtle_back_zoo': 'Turtle Back Zoo',
     'raptor_trust': 'The Raptor Trust',
+    'sycamore_land_trust': 'Sycamore Land Trust',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.

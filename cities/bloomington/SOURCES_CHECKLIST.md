@@ -43,8 +43,8 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | Parks and Recreation | ICS | ~1615 | Google Calendar via city website |
 | Knobstone Hiking Trail Meetup | ICS | ~10 | Meetup group - regional hiking |
 | Bloomington Atheists Meetup | ICS | ~10 | Meetup group - local social/discussion |
-| Bloomington Board Games Meetup | ICS | — | Meetup group (retested 2026-03) |
-| Bloomington Remote Workers Meetup | ICS | — | Meetup group (added 2026-03) |
+| ~~Bloomington Board Games Meetup~~ | ICS | — | Removed: 403 private (2026-03) |
+| ~~Bloomington Remote Workers Meetup~~ | ICS | — | Removed: dormant (2026-03) |
 | Bloomington Farmers Market | ICS | ~307 | Google Calendar via city website |
 | Bloomington Bicycle Club | ICS | ~5023 | Google Calendar - cycling rides, weekly events |
 | WonderLab Museum | ICS | ~30+ | WordPress ICS `?ical=1` — Cloudflare blocks HTML but not ICS! (added 2026-03) |
@@ -54,6 +54,11 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | Upland Brewing | ICS | — | WordPress Events Calendar ICS — dormant, populates seasonally (added 2026-03) |
 | Bloominglabs Makerspace | ICS | ~10+ | Google Calendar (added 2026-03) |
 | Cardinal Spirits | Scraper | ~5 | Squarespace scraper (added 2026-03) |
+| Sassafras Audubon Society | Scraper | ~31 | Squarespace scraper (added 2026-03) |
+| Monroe County Master Gardeners | Scraper | ~62 | Squarespace scraper (added 2026-03) |
+| Sycamore Land Trust | Scraper | ~131 | Custom WordPress scraper (added 2026-03) |
+| Constellation Stage & Screen | Scraper | ~45 | Spektrix API scraper (added 2026-03) |
+| Cicada Cinema | Scraper | ~6 | Shopify products API scraper (added 2026-03) |
 | People's Market | Scraper | ~10 | Squarespace scraper |
 | Lotus Festival | ICS | ~7 | WordPress Events Calendar ICS |
 
