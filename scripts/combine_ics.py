@@ -355,6 +355,7 @@ SOURCE_NAMES = {
     'shomrei_emunah': 'Congregation Shomrei Emunah',
     'unioncong': 'Union Congregational Church',
     'nertamid': 'Temple Ner Tamid',
+    'njaudubon': 'NJ Audubon',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -522,6 +523,7 @@ SOURCE_URLS = {
     'shomrei_emunah': 'https://shomrei.org/calendar/',
     'unioncong': 'https://www.unioncong.org/events/',
     'nertamid': 'https://www.nertamid.org/events/',
+    'njaudubon': 'https://njaudubon.org/calendar/',
     'maxpreps_montclair_high': 'https://www.maxpreps.com/nj/montclair/montclair-mounties/events/',
 }
 
