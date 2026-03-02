@@ -8,15 +8,15 @@ used across all city feeds, identified by their PRODID header.
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
 | **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 127 |
-| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 64 |
-| **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | montclair, raleighdurham, santarosa | 34 |
-| **Google Calendar** | Public Google Calendar ICS export. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 33 |
+| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 67 |
+| **Google Calendar** | Public Google Calendar ICS export. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 35 |
+| **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, montclair, raleighdurham, santarosa | 35 |
+| **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 18 |
 | **MaxPreps** | High school sports schedules. | montclair, petaluma, santarosa | 10 |
 | **Tockify** | Embeddable calendar widget with public ICS feeds. | bloomington, petaluma, santarosa, toronto | 8 |
-| **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 6 |
 | **GrowthZone** | Chamber of commerce / association management platform. | montclair, petaluma, raleighdurham | 5 |
+| **LibCal (Springshare)** | Library event management platform. | bloomington, montclair, raleighdurham | 4 |
 | **Modern Events Calendar (WordPress)** | WordPress plugin by Webnus. PRODID references wp-events-plugin.com. | petaluma, raleighdurham, toronto | 4 |
-| **LibCal (Springshare)** | Library event management platform. | montclair, raleighdurham | 2 |
 | **BiblioCommons** | Library discovery platform with event listings. | toronto | 2 |
 | **MembershipWorks** | Membership management platform with event calendar. | petaluma | 1 |
 | **Bedework** | Open-source enterprise calendar (Java). Used by Duke and some universities. | raleighdurham | 1 |
@@ -42,11 +42,11 @@ ICS export from meetup.com groups.
 
 **toronto** (50): meetup_20s30s_social, meetup_ai_ml, meetup_arts_crafts, meetup_arts_culture, meetup_bike_toronto, meetup_board_games_to, meetup_book_club_abcd, meetup_bruce_trail, meetup_canoe_trippers, meetup_devops, meetup_experience_to, meetup_founders_running, meetup_gta_hiking, meetup_heavy_boardgames, meetup_high_park_yoga, meetup_hiking_boots, meetup_hiking_network, meetup_improv_friends, meetup_improv_to, meetup_jpn_eng_exchange, meetup_lang_exchange_to, meetup_little_sunbeams, meetup_medieval_sca, meetup_mindful_movement, meetup_mini_me, meetup_movies_social, meetup_ms_reactor, meetup_photography_to, meetup_postapoc_books, meetup_postgres_to, meetup_python_to, meetup_sai_dham_volunteer, meetup_salsa_gta, meetup_scifi_books, meetup_silent_books, meetup_singles_social, meetup_soul_city, meetup_sup_kayak, meetup_tech_stack, meetup_techto, meetup_tile_language, meetup_toronto_dads, meetup_toronto_history_walks, meetup_toronto_paddlers, meetup_toronto_wellness, meetup_torontobabel, meetup_torontojs, meetup_try_new_things, meetup_wilderness_union, meetup_women_biz
 
-### The Events Calendar (WordPress) (64 feeds)
+### The Events Calendar (WordPress) (67 feeds)
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
-**bloomington** (2): bgc_bloomington, lotusfest
+**bloomington** (5): bgc_bloomington, brown_county_playhouse, community_band, first_united_church, lotusfest
 
 **montclair** (9): mhainspire, montclairfoundation_calendar_of_events, montclairlocal, neearth, nertamid, njaudubon, peakperfs, unioncong, whartonarts
 
@@ -58,21 +58,11 @@ WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **toronto** (26): bata_shoe_museum, bloor_west_village, boulderzclimbing, buddies_theatre, culturelink, factory_theatre, gardiner_museum, golatindance, grossmans_tavern, high_park_nature, indigenous, jazz_bistro, knitters_guild, now_toronto, ontario_historical_society, ontario_nature, scadding_court, site3, sunshinecentres, textile_museum, toronto_botanical, union_station, uoft_engineering, uoft_indigenous, uoft_philosophy, uoft_socialwork
 
-### CivicPlus (ical.net) (34 feeds)
-
-Government CMS using ical.net library. Common for city/county websites.
-
-**montclair** (1): montclair_engage_events_ics
-
-**raleighdurham** (1): durham_gov
-
-**santarosa** (32): SRCity_Art_in_Public_Places_Committee, SRCity_Board_of_Building_Regulation_Appeals, SRCity_COVID-19_Business_Webinars, SRCity_Charter_Review_Committee, SRCity_CityBus, SRCity_City_Council, SRCity_City_Offices_Closed, SRCity_Climate_Action_Subcommittee, SRCity_Community_Advisory_Board, SRCity_Community_Calendar, SRCity_Creek_Stewardship, SRCity_Cultural_Heritage_Board, SRCity_Design_Review_Board, SRCity_Downtown_Subcommittee, SRCity_Economic_Development_Subcommittee, SRCity_Events, SRCity_HCS_and_Code, SRCity_Main_Calendar, SRCity_Neighborhood_Meetings, SRCity_Parking, SRCity_Planning_Commission, SRCity_Planning_and_Economic_Development, SRCity_Police, SRCity_Public_Works, SRCity_Recreation_and_Parks, SRCity_Santa_Rosa_Water, SRCity_Subdivision_Committee, SRCity_Tourism_Business_Improvement_Area_Advisory_Board, SRCity_Transportation_and_Public_Works, SRCity_Waterways_Advisory_Committee, SRCity_Wildfire_Ready, SRCity_Zoning_Administrator
-
-### Google Calendar (33 feeds)
+### Google Calendar (35 feeds)
 
 Public Google Calendar ICS export.
 
-**bloomington** (11): bloomington_gov, bsquare_bptc, bsquare_critical_mass, bsquare_government, bsquare_misc_civic, btonline_events, btonline_food, btonline_shopping, calendar_cuc66guoam1hhcqq2rnaniinl8_40group_calend, farmers_market, parks_and_rec
+**bloomington** (13): bloominglabs, bloomington_gov, bsquare_bptc, bsquare_critical_mass, bsquare_government, bsquare_misc_civic, btonline_events, btonline_food, btonline_shopping, calendar_cuc66guoam1hhcqq2rnaniinl8_40group_calend, city_boards_commissions, farmers_market, parks_and_rec
 
 **montclair** (2): fcc_montclair, uu_montclair
 
@@ -83,6 +73,26 @@ Public Google Calendar ICS export.
 **santarosa** (2): arlene_francis_theater, sonoma_county_dsa
 
 **toronto** (3): cita_local_events, cita_seminars, cita_special_events
+
+### CivicPlus (ical.net) (35 feeds)
+
+Government CMS using ical.net library. Common for city/county websites.
+
+**bloomington** (1): iu_campuslabs
+
+**montclair** (1): montclair_engage_events_ics
+
+**raleighdurham** (1): durham_gov
+
+**santarosa** (32): SRCity_Art_in_Public_Places_Committee, SRCity_Board_of_Building_Regulation_Appeals, SRCity_COVID-19_Business_Webinars, SRCity_Charter_Review_Committee, SRCity_CityBus, SRCity_City_Council, SRCity_City_Offices_Closed, SRCity_Climate_Action_Subcommittee, SRCity_Community_Advisory_Board, SRCity_Community_Calendar, SRCity_Creek_Stewardship, SRCity_Cultural_Heritage_Board, SRCity_Design_Review_Board, SRCity_Downtown_Subcommittee, SRCity_Economic_Development_Subcommittee, SRCity_Events, SRCity_HCS_and_Code, SRCity_Main_Calendar, SRCity_Neighborhood_Meetings, SRCity_Parking, SRCity_Planning_Commission, SRCity_Planning_and_Economic_Development, SRCity_Police, SRCity_Public_Works, SRCity_Recreation_and_Parks, SRCity_Santa_Rosa_Water, SRCity_Subdivision_Committee, SRCity_Tourism_Business_Improvement_Area_Advisory_Board, SRCity_Transportation_and_Public_Works, SRCity_Waterways_Advisory_Committee, SRCity_Wildfire_Ready, SRCity_Zoning_Administrator
+
+### Localist (18 feeds)
+
+Campus/community event platform by Concept3D (Indiana University instance).
+
+**bloomington** (15): iu_arts_humanities, iu_asian_culture, iu_auditorium, iu_black_film, iu_cinema, iu_eskenazi_museum, iu_first_nations, iu_jacobs_music, iu_kelley_business, iu_la_casa, iu_lgbtq_culture, iu_libraries, iu_maurer_law, iu_neal_marshall, iu_theatre_dance
+
+**raleighdurham** (3): nc_cultural_resources, ncsu, unc_chapel_hill
 
 ### MaxPreps (10 feeds)
 
@@ -106,14 +116,6 @@ Embeddable calendar widget with public ICS feeds.
 
 **toronto** (4): distillery_events, jamaalmyers, st_lawrence_na, torevent
 
-### Localist (6 feeds)
-
-Campus/community event platform by Concept3D (Indiana University instance).
-
-**bloomington** (3): iu_auditorium, iu_eskenazi_museum, iu_jacobs_music
-
-**raleighdurham** (3): nc_cultural_resources, ncsu, unc_chapel_hill
-
 ### GrowthZone (5 feeds)
 
 Chamber of commerce / association management platform.
@@ -124,6 +126,16 @@ Chamber of commerce / association management platform.
 
 **raleighdurham** (3): apex_chamber, durham_chamber, wakeforest_chamber
 
+### LibCal (Springshare) (4 feeds)
+
+Library event management platform.
+
+**bloomington** (2): iu_libcal_scholars_commons, iu_libcal_screening_room
+
+**montclair** (1): bccls_ical_subscribe_php
+
+**raleighdurham** (1): durham_library
+
 ### Modern Events Calendar (WordPress) (4 feeds)
 
 WordPress plugin by Webnus. PRODID references wp-events-plugin.com.
@@ -133,14 +145,6 @@ WordPress plugin by Webnus. PRODID references wp-events-plugin.com.
 **raleighdurham** (2): american_tobacco_campus, gathering_place_games
 
 **toronto** (1): torontodance
-
-### LibCal (Springshare) (2 feeds)
-
-Library event management platform.
-
-**montclair** (1): bccls_ical_subscribe_php
-
-**raleighdurham** (1): durham_library
 
 ### BiblioCommons (2 feeds)
 
