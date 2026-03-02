@@ -321,7 +321,7 @@ function toggleSourceAndSave(source, userSettingsData, supabaseUrl, supabaseKey)
     : current.concat([source]);
 
   // Persist to Supabase (fire-and-forget)
-  fetch(supabaseUrl + '/rest/v1/user_settings', {
+  fetch(supabaseUrl + '/rest/v1/user_settings?on_conflict=user_id,city', {
     method: 'POST',
     headers: {
       apikey: supabaseKey,
