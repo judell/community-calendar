@@ -339,6 +339,14 @@ SOURCE_NAMES = {
     'songkick_wellmont': 'Wellmont Theater',
     'eventbrite_watchung_booksellers': 'Watchung Booksellers',
     'studio_montclair': 'Studio Montclair',
+    'neearth': 'Northeast Earth Coalition',
+    'mhainspire': 'MHA of Essex and Morris',
+    'meetup_lets_walkprogram': 'Meetup: Let\'s Walk!!',
+    'meetup_themindfulstream': 'Meetup: The Mindful Stream',
+    'meetup_everwalk_nj': 'Meetup: EverWalk NJ',
+    'meetup_lwv_montclair': 'Meetup: League of Women Voters Montclair',
+    'meetup_btcnj': 'Meetup: Bicycle Touring Club of North Jersey',
+    'eventbrite_loopwell': 'Loopwell',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -496,6 +504,9 @@ SOURCE_URLS = {
     'eventbrite_montclair_book_center': 'https://www.eventbrite.com/o/montclair-book-center-76893048773',
     'eventbrite_watchung_booksellers': 'https://www.eventbrite.com/o/watchung-booksellers-32491987875',
     'studio_montclair': 'https://studiomontclair.org/event-calendar/',
+    'neearth': 'https://neearth.org/events/',
+    'mhainspire': 'https://mhainspire.org/calendar/',
+    'eventbrite_loopwell': 'https://www.eventbrite.com/o/loopwell-wellness-in-montclair-nj-71213568773',
     'maxpreps_montclair_high': 'https://www.maxpreps.com/nj/montclair/montclair-mounties/events/',
 }
 

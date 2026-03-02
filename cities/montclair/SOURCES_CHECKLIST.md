@@ -1,6 +1,6 @@
 # Montclair NJ Sources Checklist
 
-## Currently Implemented (22 sources, ~1240 events)
+## Currently Implemented (30 sources, ~1300 events)
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
@@ -9,23 +9,31 @@
 | Montclair Film | JSON-LD scraper | 128 | ✅ Ready |
 | Essex County Parks | JSON API scraper | 90 | ✅ Ready |
 | Montclair Foundation / Van Vleck | WordPress ICS | 30 | ✅ Ready |
+| MHA of Essex and Morris | WordPress ICS | 30 | ✅ Ready |
 | Lackawanna Station | Squarespace scraper | 27 | ✅ Ready |
 | Montclair Local News | WordPress ICS | 24 | ✅ Ready |
 | North Essex Chamber of Commerce | GrowthZone scraper | 12 | ✅ Ready |
 | Montclair Brewery | Eventbrite scraper | 10 | ✅ Ready |
 | West African Drumming NJ | Meetup ICS | 10 | ✅ Ready |
+| Let's Walk!! | Meetup ICS | 10 | ✅ Ready |
+| The Mindful Stream | Meetup ICS | 10 | ✅ Ready (virtual) |
+| Northeast Earth Coalition | WordPress ICS | 8 | ✅ Ready |
 | South Mountain Conservancy | Meetup ICS | 6 | ✅ Ready |
 | Montclair Book Center | Eventbrite scraper | 5 | ✅ Ready |
 | Wellmont Theater | Songkick JSON-LD scraper | 4 | ✅ Ready |
 | Wharton Arts | WordPress ICS | 4 | ✅ Ready |
 | Montclair High School Athletics | MaxPreps scraper | 2 | ✅ Ready |
 | Metrotrails Hiking | Meetup ICS | 2 | ✅ Ready |
+| Loopwell | Eventbrite scraper | 1 | ✅ Ready |
+| EverWalk NJ | Meetup ICS | 1 | ✅ Ready |
 | Studio Montclair | WP REST API scraper | 1 | ✅ Ready |
 | Exploring Montclair | Meetup ICS | 1 | ✅ Ready |
 | Montclair GameNights | Meetup ICS | 1 | ✅ Ready |
 | NJ Code & Coffee | Meetup ICS | 1 | ✅ Ready |
 | PEAK Performances at MSU | WordPress ICS | 1 | ✅ Ready |
 | Watchung Booksellers | Eventbrite scraper | 0 | ✅ Ready (no upcoming events) |
+| League of Women Voters Montclair | Meetup ICS | 0 | ✅ Ready (events on ClubExpress) |
+| Bicycle Touring Club of NJ | Meetup ICS | 0 | ✅ Ready (seasonal, rides on btcnj.com) |
 
 ## Key Aggregators (potential allies)
 | Aggregator | URL | Notes |
