@@ -101,8 +101,7 @@ SOURCE_NAMES = {
     'upland_brewing': 'Upland Brewing',
     'city_boards_commissions': 'City Boards & Commissions',
     'bloominglabs': 'Bloominglabs Makerspace',
-    'meetup_board_games': 'Meetup: Bloomington Board Games',
-    'meetup_remote_workers': 'Meetup: Bloomington Remote Workers',
+    # meetup_board_games removed (403 private), meetup_remote_workers removed (dormant)
     # Bloomington - Songkick venues
     'songkick_bluebird': 'The Bluebird',
     'songkick_blockhouse': 'Blockhouse Bar',
@@ -114,6 +113,7 @@ SOURCE_NAMES = {
     'writersguildbloomington': 'Writers Guild at Bloomington',
     'bloomspinweave': 'Bloomington Spinners & Weavers Guild',
     'hoosierflyfishers_list': 'Hoosier Fly Fishers',
+    'calendar_r5lf3al9blontcsjnedbr2f2u0_40group_calend': 'Bloomington Velo Club',
     # Petaluma
     'petaluma_downtown': 'Petaluma Downtown Association',
     'meetup_mindful_petaluma': 'Meetup: Mindful Petaluma',
