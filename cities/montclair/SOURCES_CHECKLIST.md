@@ -25,7 +25,7 @@
 | NJ Code & Coffee | Meetup ICS | 1 | ✅ Ready |
 | PEAK Performances at MSU | WordPress ICS | 1 | ✅ Ready |
 
-## Key Aggregators (benchmark competitors)
+## Key Aggregators (potential allies)
 | Aggregator | URL | Notes |
 |------------|-----|-------|
 | Experience Montclair / Montclair Center | experiencemontclair.org | Vibemap platform, no public API, submission-driven |
