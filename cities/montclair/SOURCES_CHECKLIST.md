@@ -1,15 +1,19 @@
 # Montclair NJ Sources Checklist
 
-## Currently Implemented (30 sources, ~1300 events)
+## Currently Implemented (38 sources)
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
 | Montclair State University | CampusLabs ICS | 817 | ✅ Ready |
+| MSU Red Hawks Athletics | Sidearm ICS | 176 | ✅ Ready |
 | Montclair Public Library | LibCal ICS | 161 | ✅ Ready |
 | Montclair Film | JSON-LD scraper | 128 | ✅ Ready |
 | Essex County Parks | JSON API scraper | 90 | ✅ Ready |
+| Congregation Shomrei Emunah | TeamUp ICS | 80 | ✅ Ready |
 | Montclair Foundation / Van Vleck | WordPress ICS | 30 | ✅ Ready |
 | MHA of Essex and Morris | WordPress ICS | 30 | ✅ Ready |
+| Union Congregational Church | WordPress ICS | 30 | ✅ Ready |
+| Temple Ner Tamid | WordPress ICS | 30 | ✅ Ready |
 | Lackawanna Station | Squarespace scraper | 27 | ✅ Ready |
 | Montclair Local News | WordPress ICS | 24 | ✅ Ready |
 | North Essex Chamber of Commerce | GrowthZone scraper | 12 | ✅ Ready |
@@ -17,6 +21,7 @@
 | West African Drumming NJ | Meetup ICS | 10 | ✅ Ready |
 | Let's Walk!! | Meetup ICS | 10 | ✅ Ready |
 | The Mindful Stream | Meetup ICS | 10 | ✅ Ready (virtual) |
+| NJ Bowling, Volleyball, Tennis & More | Meetup ICS | 8 | ✅ Ready |
 | Northeast Earth Coalition | WordPress ICS | 8 | ✅ Ready |
 | South Mountain Conservancy | Meetup ICS | 6 | ✅ Ready |
 | Montclair Book Center | Eventbrite scraper | 5 | ✅ Ready |
@@ -31,9 +36,14 @@
 | Montclair GameNights | Meetup ICS | 1 | ✅ Ready |
 | NJ Code & Coffee | Meetup ICS | 1 | ✅ Ready |
 | PEAK Performances at MSU | WordPress ICS | 1 | ✅ Ready |
+| First Congregational Church | Google Calendar ICS | * | ✅ Ready |
+| UU Congregation of Montclair | Google Calendar ICS | * | ✅ Ready |
+| Montclair Kimberley Academy | MaxPreps scraper | * | ✅ Ready |
 | Watchung Booksellers | Eventbrite scraper | 0 | ✅ Ready (no upcoming events) |
 | League of Women Voters Montclair | Meetup ICS | 0 | ✅ Ready (events on ClubExpress) |
-| Bicycle Touring Club of NJ | Meetup ICS | 0 | ✅ Ready (seasonal, rides on btcnj.com) |
+| Bicycle Touring Club of NJ | Meetup ICS | 0 | ✅ Ready (seasonal) |
+
+\* Google Calendar feeds include historical events; pipeline filters to future only.
 
 ## Key Aggregators (potential allies)
 | Aggregator | URL | Notes |
@@ -72,14 +82,14 @@
 
 ## Potential Additional Sources — Community/Civic
 - [ ] Montclair YMCA (montclairymca.org - class schedules, special events)
-- [ ] Montclair Farmers' Market (static recurring: Saturdays 8am-2pm, Walnut St)
-- [ ] Montclair Community Farms
-- [ ] Montclair Kimberley Academy (MaxPreps - private school athletics)
+- [ ] Montclair Farmers' Market (Squarespace, seasonal Saturdays at Walnut St)
+- [ ] Montclair Community Farms (Squarespace, kids programs)
+- [ ] Montclair History Center (Squarespace, family programs)
+- [ ] Montclair Culinary Academy (Squarespace, cooking classes)
 
 ## Potential Additional Sources — Faith
-- [ ] Congregation Shomrei Emunah, Bnai Keshet, Temple Ner Tamid (check for calendar pages)
-- [ ] First Congregational Church (fccmontclair.org) — also hosts Outpost in the Burbs concerts
-- [ ] Unitarian Universalist of Montclair (uumontclair.org)
+- [ ] Bnai Keshet (site returns 406, no feed found)
+- [ ] Outpost in the Burbs (Wix + ThunderTix, no feed; concerts at FCC)
 
 ## Potential Additional Sources — Long-Tail Music Venues
 Most are Facebook/Instagram-only; listed here for future reference if platforms open up.

@@ -347,6 +347,14 @@ SOURCE_NAMES = {
     'meetup_lwv_montclair': 'Meetup: League of Women Voters Montclair',
     'meetup_btcnj': 'Meetup: Bicycle Touring Club of North Jersey',
     'eventbrite_loopwell': 'Loopwell',
+    'msu_athletics': 'MSU Red Hawks Athletics',
+    'maxpreps_mka': 'Montclair Kimberley Academy Athletics',
+    'meetup_nj_bvt_sports': 'Meetup: NJ Bowling, Volleyball, Tennis & More',
+    'fcc_montclair': 'First Congregational Church Montclair',
+    'uu_montclair': 'UU Congregation of Montclair',
+    'shomrei_emunah': 'Congregation Shomrei Emunah',
+    'unioncong': 'Union Congregational Church',
+    'nertamid': 'Temple Ner Tamid',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -507,6 +515,13 @@ SOURCE_URLS = {
     'neearth': 'https://neearth.org/events/',
     'mhainspire': 'https://mhainspire.org/calendar/',
     'eventbrite_loopwell': 'https://www.eventbrite.com/o/loopwell-wellness-in-montclair-nj-71213568773',
+    'msu_athletics': 'https://montclairathletics.com/calendar',
+    'maxpreps_mka': 'https://www.maxpreps.com/nj/montclair/montclair-kimberley-academy-cougars/events/',
+    'fcc_montclair': 'https://fccmontclair.org/upcoming-events-at-fcc/',
+    'uu_montclair': 'https://www.uumontclair.org/events',
+    'shomrei_emunah': 'https://shomrei.org/calendar/',
+    'unioncong': 'https://www.unioncong.org/events/',
+    'nertamid': 'https://www.nertamid.org/events/',
     'maxpreps_montclair_high': 'https://www.maxpreps.com/nj/montclair/montclair-mounties/events/',
 }
 
