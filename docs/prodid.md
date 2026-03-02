@@ -7,11 +7,11 @@ used across all city feeds, identified by their PRODID header.
 
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
-| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 121 |
-| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 59 |
+| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 127 |
+| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 63 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | montclair, raleighdurham, santarosa | 34 |
-| **Google Calendar** | Public Google Calendar ICS export. | bloomington, petaluma, raleighdurham, santarosa, toronto | 31 |
-| **MaxPreps** | High school sports schedules. | montclair, petaluma, santarosa | 9 |
+| **Google Calendar** | Public Google Calendar ICS export. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 33 |
+| **MaxPreps** | High school sports schedules. | montclair, petaluma, santarosa | 10 |
 | **Tockify** | Embeddable calendar widget with public ICS feeds. | bloomington, petaluma, santarosa, toronto | 8 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 6 |
 | **GrowthZone** | Chamber of commerce / association management platform. | montclair, petaluma, raleighdurham | 5 |
@@ -24,7 +24,7 @@ used across all city feeds, identified by their PRODID header.
 
 ## Detail
 
-### Meetup (121 feeds)
+### Meetup (127 feeds)
 
 ICS export from meetup.com groups.
 
@@ -32,7 +32,7 @@ ICS export from meetup.com groups.
 
 **davis** (7): meetup_art_in_action, meetup_board_games, meetup_intercultural, meetup_mindful, meetup_mosaics, meetup_pence_art, meetup_winters_write
 
-**montclair** (6): meetup_exploring_montclair, meetup_metrotrails, meetup_montclair_gamenights_and_social_networking_meetup_group, meetup_nj_code_coffee, meetup_somocon, meetup_west_african_drumming_nj
+**montclair** (12): meetup_btcnj, meetup_everwalk_nj, meetup_exploring_montclair, meetup_lets_walkprogram, meetup_lwv_montclair, meetup_metrotrails, meetup_montclair_gamenights_and_social_networking_meetup_group, meetup_nj_bvt_sports, meetup_nj_code_coffee, meetup_somocon, meetup_themindfulstream, meetup_west_african_drumming_nj
 
 **petaluma** (15): meetup_active_20_30, meetup_book_brew, meetup_brat_pack, meetup_candlelight_yoga, meetup_contra_dance, meetup_figure_drawing, meetup_go_wild_hikers, meetup_meditate_monk, meetup_mindful_petaluma, meetup_mindfull_hikes, meetup_north_bay_adventure, meetup_petaluma_salon, meetup_rebel_craft, meetup_sonoma_boomers, meetup_sonoma_outdoors
 
@@ -42,13 +42,13 @@ ICS export from meetup.com groups.
 
 **toronto** (50): meetup_20s30s_social, meetup_ai_ml, meetup_arts_crafts, meetup_arts_culture, meetup_bike_toronto, meetup_board_games_to, meetup_book_club_abcd, meetup_bruce_trail, meetup_canoe_trippers, meetup_devops, meetup_experience_to, meetup_founders_running, meetup_gta_hiking, meetup_heavy_boardgames, meetup_high_park_yoga, meetup_hiking_boots, meetup_hiking_network, meetup_improv_friends, meetup_improv_to, meetup_jpn_eng_exchange, meetup_lang_exchange_to, meetup_little_sunbeams, meetup_medieval_sca, meetup_mindful_movement, meetup_mini_me, meetup_movies_social, meetup_ms_reactor, meetup_photography_to, meetup_postapoc_books, meetup_postgres_to, meetup_python_to, meetup_sai_dham_volunteer, meetup_salsa_gta, meetup_scifi_books, meetup_silent_books, meetup_singles_social, meetup_soul_city, meetup_sup_kayak, meetup_tech_stack, meetup_techto, meetup_tile_language, meetup_toronto_dads, meetup_toronto_history_walks, meetup_toronto_paddlers, meetup_toronto_wellness, meetup_torontobabel, meetup_torontojs, meetup_try_new_things, meetup_wilderness_union, meetup_women_biz
 
-### The Events Calendar (WordPress) (59 feeds)
+### The Events Calendar (WordPress) (63 feeds)
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **bloomington** (2): bgc_bloomington, lotusfest
 
-**montclair** (4): montclairfoundation_calendar_of_events, montclairlocal, peakperfs, whartonarts
+**montclair** (8): mhainspire, montclairfoundation_calendar_of_events, montclairlocal, neearth, nertamid, peakperfs, unioncong, whartonarts
 
 **petaluma** (3): bigeasy, mcnears, polly_klaas
 
@@ -68,11 +68,13 @@ Government CMS using ical.net library. Common for city/county websites.
 
 **santarosa** (32): SRCity_Art_in_Public_Places_Committee, SRCity_Board_of_Building_Regulation_Appeals, SRCity_COVID-19_Business_Webinars, SRCity_Charter_Review_Committee, SRCity_CityBus, SRCity_City_Council, SRCity_City_Offices_Closed, SRCity_Climate_Action_Subcommittee, SRCity_Community_Advisory_Board, SRCity_Community_Calendar, SRCity_Creek_Stewardship, SRCity_Cultural_Heritage_Board, SRCity_Design_Review_Board, SRCity_Downtown_Subcommittee, SRCity_Economic_Development_Subcommittee, SRCity_Events, SRCity_HCS_and_Code, SRCity_Main_Calendar, SRCity_Neighborhood_Meetings, SRCity_Parking, SRCity_Planning_Commission, SRCity_Planning_and_Economic_Development, SRCity_Police, SRCity_Public_Works, SRCity_Recreation_and_Parks, SRCity_Santa_Rosa_Water, SRCity_Subdivision_Committee, SRCity_Tourism_Business_Improvement_Area_Advisory_Board, SRCity_Transportation_and_Public_Works, SRCity_Waterways_Advisory_Committee, SRCity_Wildfire_Ready, SRCity_Zoning_Administrator
 
-### Google Calendar (31 feeds)
+### Google Calendar (33 feeds)
 
 Public Google Calendar ICS export.
 
 **bloomington** (11): bloomington_gov, bsquare_bptc, bsquare_critical_mass, bsquare_government, bsquare_misc_civic, btonline_events, btonline_food, btonline_shopping, calendar_cuc66guoam1hhcqq2rnaniinl8_40group_calend, farmers_market, parks_and_rec
+
+**montclair** (2): fcc_montclair, uu_montclair
 
 **petaluma** (3): brooksnote, elks_lodge, garden_club
 
@@ -82,11 +84,11 @@ Public Google Calendar ICS export.
 
 **toronto** (3): cita_local_events, cita_seminars, cita_special_events
 
-### MaxPreps (9 feeds)
+### MaxPreps (10 feeds)
 
 High school sports schedules.
 
-**montclair** (1): maxpreps_montclair_high
+**montclair** (2): maxpreps_mka, maxpreps_montclair_high
 
 **petaluma** (2): maxpreps_casa_grande, maxpreps_petaluma_high
 
@@ -172,4 +174,6 @@ own scrapers, add a pattern to `OUR_SCRAPERS`.
 
 | PRODID | City | Feeds |
 |--------|------|-------|
+| `-//SIDEARM Sports//NONSGML SIDEARM//EN` | montclair | msu_athletics |
 | `-//Santa Rosa Junior College//NONSGML v1.0//EN` | santarosa | srjc |
+| `-//Teamup Solutions AG//Teamup Calendar//EN` | montclair | shomrei_emunah |
