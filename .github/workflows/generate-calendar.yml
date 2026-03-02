@@ -59,7 +59,7 @@ jobs:
       run: |
         INPUT="${{ github.event.inputs.locations }}"
         if [ -z "$INPUT" ] || [ "$INPUT" = "all" ]; then
-          echo "list=santarosa,bloomington,davis,petaluma,toronto" >> $GITHUB_OUTPUT
+          echo "list=santarosa,bloomington,davis,petaluma,toronto,montclair" >> $GITHUB_OUTPUT
         else
           echo "list=$INPUT" >> $GITHUB_OUTPUT
         fi
@@ -532,6 +532,40 @@ jobs:
         python scripts/combine_ics.py --input-dir cities/raleighdurham --output cities/raleighdurham/combined.ics --name "Raleigh-Durham Community Calendar"
 
     # ==========================================
+    # Montclair
+    # ==========================================
+    - name: Scrape Montclair sources
+      if: contains(steps.locations.outputs.list, 'montclair') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        echo "Scraping Montclair..."
+        python scrapers/growthzone.py --url "https://business.northessexchamber.com/api/events" --name "North Essex Chamber of Commerce" --output cities/montclair/north_essex_chamber.ics || true
+        python scrapers/maxpreps.py --url "https://www.maxpreps.com/nj/montclair/montclair-mounties/events/" --name "Montclair High School" --output cities/montclair/maxpreps_montclair_high.ics || true
+        python scrapers/squarespace.py --url "https://www.lackawanna.com/events" --name "Lackawanna Station" --output cities/montclair/lackawanna.ics || true
+        python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/montclair-brewery-17088451648" --name "Montclair Brewery" --output cities/montclair/eventbrite_montclair_brewery.ics || true
+        python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/montclair-book-center-76893048773" --name "Montclair Book Center" --output cities/montclair/eventbrite_montclair_book_center.ics || true
+        python scrapers/essex_county_parks.py --output cities/montclair/essex_county_parks.ics || true
+      continue-on-error: true
+
+    - name: Download Montclair live feeds and combine ICS
+      if: contains(steps.locations.outputs.list, 'montclair')
+      run: |
+        cd cities/montclair
+        curl -sL "https://montclairlocal.news/events/?ical=1" -o montclairlocal.ics || true
+        curl -sL "https://montclairfoundation.org/calendar-of-events/?ical=1" -o montclairfoundation_calendar_of_events.ics || true
+        curl -sL "https://whartonarts.org/events/?ical=1" -o whartonarts.ics || true
+        curl -sL "https://www.peakperfs.org/events/?ical=1" -o peakperfs.ics || true
+        curl -sL "https://bccls.libcal.com/ical_subscribe.php?src=p&cid=10306" -o bccls_ical_subscribe_php.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/exploring-montclair/events/ical/" -o meetup_exploring_montclair.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/somocon/events/ical/" -o meetup_somocon.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/montclair-gamenights-and-social-networking-meetup-group/events/ical/" -o meetup_montclair_gamenights_and_social_networking_meetup_group.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/nj-code-coffee/events/ical/" -o meetup_nj_code_coffee.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/metrotrails/events/ical/" -o meetup_metrotrails.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/west-african-drumming-nj/events/ical/" -o meetup_west_african_drumming_nj.ics || true
+        curl -sL "https://montclair.campuslabs.com/engage/events.ics" -o montclair_engage_events_ics.ics || true
+        cd ../..
+        python scripts/combine_ics.py --input-dir cities/montclair --output cities/montclair/combined.ics --name "Montclair Community Calendar"
+
+    # ==========================================
     # Post-processing (all cities)
     # ==========================================
     - name: Convert ICS to JSON for Supabase
@@ -571,7 +605,7 @@ jobs:
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         
         # Save generated files before any git operations
-        for city in santarosa bloomington davis petaluma toronto raleighdurham; do
+        for city in santarosa bloomington davis petaluma toronto raleighdurham montclair; do
           if [ -f "cities/$city/events.json" ]; then
             cp "cities/$city/events.json" "/tmp/${city}_events.json"
           fi
@@ -586,7 +620,7 @@ jobs:
             fi
             echo "Push failed, restoring generated files and retrying..."
             # Restore generated files that may have been clobbered by rebase
-            for city in santarosa bloomington davis petaluma toronto raleighdurham; do
+            for city in santarosa bloomington davis petaluma toronto raleighdurham montclair; do
               if [ -f "/tmp/${city}_events.json" ]; then
                 cp "/tmp/${city}_events.json" "cities/$city/events.json"
               fi

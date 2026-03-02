@@ -13,6 +13,7 @@ const EVENTS_URLS: Record<string, string> = {
   davis: "https://judell.github.io/community-calendar/cities/davis/events.json",
   toronto: "https://judell.github.io/community-calendar/cities/toronto/events.json",
   raleighdurham: "https://judell.github.io/community-calendar/cities/raleighdurham/events.json",
+  montclair: "https://judell.github.io/community-calendar/cities/montclair/events.json",
 };
 
 Deno.serve(async (req) => {

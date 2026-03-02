@@ -316,6 +316,25 @@ SOURCE_NAMES = {
     'cinnabar': 'Cinnabar Theater',
     'green_music_center': 'Green Music Center',
     'jack_london_park': 'Jack London State Historic Park',
+    # Montclair
+    'montclairlocal': 'Montclair Local News',
+    'montclairfoundation_calendar_of_events': 'Montclair Foundation',
+    'whartonarts': 'Wharton Arts',
+    'peakperfs': 'PEAK Performances at MSU',
+    'bccls_ical_subscribe_php': 'Montclair Public Library',
+    'meetup_exploring_montclair': 'Meetup: Exploring Montclair',
+    'meetup_somocon': 'Meetup: South Mountain Conservancy',
+    'meetup_montclair_gamenights_and_social_networking_meetup_group': 'Meetup: Montclair GameNights',
+    'meetup_nj_code_coffee': 'Meetup: NJ Code & Coffee',
+    'meetup_metrotrails': 'Meetup: Metrotrails Hiking',
+    'meetup_west_african_drumming_nj': 'Meetup: West African Drumming NJ',
+    'north_essex_chamber': 'North Essex Chamber of Commerce',
+    'maxpreps_montclair_high': 'Montclair High School Athletics',
+    'montclair_engage_events_ics': 'Montclair State University',
+    'lackawanna': 'Lackawanna Station',
+    'eventbrite_montclair_brewery': 'Montclair Brewery',
+    'eventbrite_montclair_book_center': 'Montclair Book Center',
+    'essex_county_parks': 'Essex County Parks',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -458,6 +477,14 @@ SOURCE_URLS = {
     'wake_audubon': 'https://www.wakeaudubon.org/events',
     'sw_durham_rotary': 'https://portal.clubrunner.ca/3674',
     'jack_london_park': 'https://jacklondonpark.com/events/',
+    # Montclair
+    'montclairlocal': 'https://montclairlocal.news/events/',
+    'montclairfoundation_calendar_of_events': 'https://montclairfoundation.org/calendar-of-events/',
+    'whartonarts': 'https://whartonarts.org/events/',
+    'peakperfs': 'https://www.peakperfs.org/events/',
+    'bccls_ical_subscribe_php': 'https://bccls.libcal.com/calendar/montclair',
+    'north_essex_chamber': 'https://business.northessexchamber.com/events',
+    'lackawanna': 'https://www.lackawanna.com/events',
 }
 
 
@@ -629,6 +656,7 @@ AGGREGATORS = {
     'GoLocal Cooperative',
     'NOW Toronto',
     'Toronto Events (Tockify)',
+    'Montclair Local News',
 }
 
 
