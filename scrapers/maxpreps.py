@@ -31,6 +31,7 @@ from lib.utils import DEFAULT_HEADERS
 
 
 PACIFIC = ZoneInfo('America/Los_Angeles')
+MOUNTAIN = ZoneInfo('America/Denver')
 EASTERN = ZoneInfo('America/Indiana/Indianapolis')
 
 # Known schools - add more as needed
@@ -242,25 +243,28 @@ def main():
     parser.add_argument('--url', help='Custom MaxPreps events URL')
     parser.add_argument('--name', default='MaxPreps School',
                         help='School name for custom URL')
+    parser.add_argument('--timezone', default=None,
+                        help='IANA timezone for --url mode (e.g., America/Denver). Defaults to America/Los_Angeles.')
     parser.add_argument('--output', '-o', required=True,
                         help='Output ICS file')
     parser.add_argument('--list-schools', action='store_true',
                         help='List all known schools')
-    
+
     args = parser.parse_args()
-    
+
     if args.list_schools:
         print("Known schools:")
         for key, config in KNOWN_SCHOOLS.items():
             print(f"  {key}: {config['name']}")
         return
-    
+
     if args.url:
+        tz = ZoneInfo(args.timezone) if args.timezone else PACIFIC
         config = {
             'name': args.name,
             'url': args.url,
             'location': '',
-            'timezone': PACIFIC,
+            'timezone': tz,
         }
     elif args.school:
         config = KNOWN_SCHOOLS[args.school]
