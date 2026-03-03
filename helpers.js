@@ -973,13 +973,23 @@ function getNextOccurrence(enrichments, eventId, originalStartTime) {
 }
 
 // Convert events to react-big-calendar format, with optional search filter
+// Parse a timestamp string as local time, stripping any UTC offset.
+// DB stores times like "2026-03-03 19:00:00+00" where +00 is misleading —
+// the time is actually local. Parsing as-is would apply UTC→local conversion.
+function parseLocalTime(ts) {
+  if (!ts) return new Date();
+  var stripped = ts.replace(/([+-]\d{2}(:\d{2})?|Z)\s*$/, '').trim();
+  stripped = stripped.replace(' ', 'T');
+  return new Date(stripped);
+}
+
 function toBigCalendarEvents(events, term) {
   var filtered = filterEvents(events, term) || [];
   return filtered.map(function(e) {
     return {
       title: e.title || '',
-      start: e.start_time,
-      end: e.end_time || e.start_time,
+      start: parseLocalTime(e.start_time),
+      end: parseLocalTime(e.end_time || e.start_time),
       allDay: false,
       resource: e
     };
