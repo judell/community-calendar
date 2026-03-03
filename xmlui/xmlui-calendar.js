@@ -81,4 +81,11 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
       .${h} .rbc-show-more {
         color: ${I};
       }
+      .${h} .rbc-agenda-event-cell a {
+        color: ${I};
+        text-decoration: underline;
+      }
+      .${h} .rbc-agenda-event-cell a:hover {
+        color: ${P};
+      }
     `},[v,h]);b.useEffect(()=>{r&&l(r)},[r]),b.useEffect(()=>{t&&f(new Date(t))},[t]);const y=b.useMemo(()=>JSON.stringify(e),[e]),w=b.useMemo(()=>b_(e),[y]),S=b.useCallback(O=>{O.resource?.url&&window.open(O.resource.url,"_blank"),s?.({type:"selectEvent",displayLabel:O.title||"event selected",title:O.title,start:O.start,end:O.end,resource:O.resource})},[s]),_=b.useCallback(O=>{f(O),s?.({type:"navigate",displayLabel:Vv(O).format("MMMM YYYY"),date:O.toISOString()})},[s]),g=b.useCallback(O=>{l(O),s?.({type:"viewChange",displayLabel:O,view:O})},[s]),E=b.useMemo(()=>({agenda:{event:({event:O})=>{const P=O.resource?.url;return P?$e.jsx("a",{href:P,target:"_blank",rel:"noopener noreferrer",children:O.title}):$e.jsx("span",{children:O.title})}}}),[]);return b.useEffect(()=>{o?.({getView:()=>u,getDate:()=>c})},[o,u,c]),$e.jsxs("div",{className:p_(h_.calendarContainer,h,i),style:{width:a,height:n},children:[$e.jsx("style",{children:m}),$e.jsx(t_,{localizer:m_,events:w,view:u,date:c,onNavigate:_,onView:g,onSelectEvent:S,components:E,style:{height:"100%"}})]})}return{namespace:"XMLUIExtensions",components:[Me.wrapComponent("BigCalendar",w_,{description:"A calendar view powered by react-big-calendar",props:{events:{description:"Array of { title, start, end, allDay?, resource? }"},view:{description:"month | week | day | agenda",availableValues:["month","week","day","agenda"]},date:{description:"Controlled navigation date (ISO string)"},height:{description:"Container height (default 600px)"},width:{description:"Container width (default 100%)"}}},{captureNativeEvents:!0})]}}));typeof window.xmlui<"u"&&window.xmlui.standalone.registerExtension(window["xmlui-calendar"].default||window["xmlui-calendar"]);
