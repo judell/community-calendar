@@ -28,6 +28,7 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | IU LGBTQ+ Culture Center | ICS | ~4 | LiveWhale `group_id/237` (added 2026-03) |
 | IU Black Film Center & Archive | ICS | ~9 | LiveWhale `group_id/221` (added 2026-03) |
 | IU Neal-Marshall Black Culture Center | ICS | — | LiveWhale `group_id/235` (seasonal, added 2026-03) |
+| IU Hamilton Lugar School | ICS | — | LiveWhale `group_id/135` (Global & International Studies, added 2026-03) |
 | IU Moving Image Archive | ICS | ~151 | LibCal `cid=5914` (added 2026-03) |
 | IU Scholars' Commons | ICS | ~26 | LibCal `cid=1228` (added 2026-03) |
 | IU beINvolved Student Orgs | ICS | ~16900 | CampusLabs `iub.campuslabs.com` (added 2026-03) |
@@ -88,6 +89,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | **LGBTQ+ Culture Center** | 237 | DONE | ~4 events (added 2026-03) |
 | **Black Film Center & Archive** | 221 | DONE | ~9 events (added 2026-03) |
 | **Neal-Marshall Black Culture Center** | 235 | DONE | Seasonal (added 2026-03) |
+| **Hamilton Lugar School** | 135 | DONE | Global & International Studies (added 2026-03) |
 
 ### Government / Civic ICS
 

@@ -88,6 +88,7 @@ SOURCE_NAMES = {
     'iu_lgbtq_culture': 'IU LGBTQ+ Culture Center',
     'iu_black_film': 'IU Black Film Center & Archive',
     'iu_neal_marshall': 'IU Neal-Marshall Black Culture Center',
+    'iu_hamilton_lugar': 'IU Hamilton Lugar School',
     # Bloomington - IU LibCal
     'iu_libcal_screening_room': 'IU Moving Image Archive',
     'iu_libcal_scholars_commons': 'IU Scholars\' Commons',
