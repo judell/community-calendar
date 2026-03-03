@@ -972,6 +972,20 @@ function getNextOccurrence(enrichments, eventId, originalStartTime) {
   }
 }
 
+// Convert events to react-big-calendar format, with optional search filter
+function toBigCalendarEvents(events, term) {
+  var filtered = filterEvents(events, term) || [];
+  return filtered.map(function(e) {
+    return {
+      title: e.title || '',
+      start: e.start_time,
+      end: e.end_time || e.start_time,
+      allDay: false,
+      resource: e
+    };
+  });
+}
+
 // Export for browser (attach to window)
 if (typeof window !== 'undefined') {
   window.toggleDay = toggleDay;
@@ -1019,4 +1033,5 @@ if (typeof window !== 'undefined') {
   };
   window.detectRecurrence = detectRecurrence;
   window.getOrdinalWeekday = getOrdinalWeekday;
+  window.toBigCalendarEvents = toBigCalendarEvents;
 }

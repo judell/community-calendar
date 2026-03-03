@@ -186,12 +186,18 @@
       onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; }"
       marginBottom="$space-2"
     />
-    <RadioGroup when="{window.authUser}" initialValue="{viewMode}" onDidChange="(val) => viewMode = val">
+    <RadioGroup initialValue="{viewMode}" onDidChange="(val) => viewMode = val">
       <HStack>
-        <Option value="all" label="all" />
-        <Option value="picks" label="my picks" />
+        <Option value="all" label="list" />
+        <Option when="{window.authUser}" value="calendar" label="calendar" />
+        <Option when="{window.authUser}" value="picks" label="my picks" />
       </HStack>
     </RadioGroup>
+    <BigCalendar
+      when="{events.loaded && viewMode === 'calendar'}"
+      events="{window.toBigCalendarEvents(window.filterHiddenSources(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []), filterTerm)}"
+      height="600px"
+    />
     <Spinner when="{!events.loaded && viewMode === 'all'}" />
     <Button
       when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasPrev}"
