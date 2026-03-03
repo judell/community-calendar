@@ -1789,6 +1789,61 @@
        *   2. Simple function references like: functionName (when code is just a name)
        * Excludes: method calls (obj.method), built-ins, keywords
        */
+      /**
+       * Classify handler code into a category for display.
+       * Shared by renderTraceGroupPretty and renderTraceRaw.
+       */
+      function parseHandlerCode(code) {
+        const trimmed = code.trim();
+        const xsFuncMatch = trimmed.match(/^(\w+)\(\)$/);
+        const windowMatch = trimmed.match(/^\{\s*window\.(\w+)\s*\([^)]*\)\s*\}$/);
+        const simpleFuncMatch = trimmed.match(/^\{\s*(\w+)\s*\([^)]*\)\s*\}$/);
+        const arrowMatch = trimmed.match(/^\([^)]*\)\s*=>\s*\{/);
+        const apiCallMatch = trimmed.match(/Actions\.callApi\s*\(\s*\{[^}]*method:\s*["']?([^"',}]+)["']?\s*,[^}]*url:\s*["']?([^"',}]+)["']?/s) ||
+                             trimmed.match(/Actions\.callApi\s*\(\s*\{[^}]*url:\s*["']?([^"',}]+)["']?\s*,[^}]*method:\s*["']?([^"',}]+)["']?/s);
+
+        if (apiCallMatch) {
+          const [, first, second] = apiCallMatch;
+          const hasSlash = (s) => s && s.includes("/");
+          const method = hasSlash(first) ? normalizeMethod(second) : normalizeMethod(first);
+          const url = hasSlash(first) ? first : second;
+          return { type: "apiCall", method, url, code: trimmed };
+        }
+        if (xsFuncMatch) return { type: "xsFunc", funcName: xsFuncMatch[1], code: trimmed };
+        if (windowMatch) return { type: "windowFunc", funcName: windowMatch[1], code: trimmed };
+        if (simpleFuncMatch && !windowMatch) return { type: "simpleFunc", funcName: simpleFuncMatch[1], code: trimmed };
+        if (arrowMatch) return { type: "arrow", firstLine: trimmed.split('\n')[0], code: trimmed };
+        if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+          return { type: "inline", innerCode: trimmed.slice(1, -1).trim(), code: trimmed };
+        }
+        return { type: "other", code: trimmed };
+      }
+
+      /**
+       * Classify a diff item into a category for rendering.
+       * Shared by pretty and raw views to avoid duplicated if/else chains.
+       */
+      function classifyDiffItem(d) {
+        const before = d.before;
+        const after = d.after;
+        if (Array.isArray(before) && Array.isArray(after) && (isKeyedArray(before) || isKeyedArray(after))) {
+          return { type: "keyedArrayDiff", before, after, path: d.path };
+        }
+        if (before === undefined && Array.isArray(after) && isKeyedArray(after)) {
+          return { type: "keyedArrayInit", after, path: d.path };
+        }
+        if (Array.isArray(before) && after === undefined && isKeyedArray(before)) {
+          return { type: "keyedArrayCleared", before, path: d.path };
+        }
+        if (before && after && typeof before === "object" && typeof after === "object" && !Array.isArray(before) && !Array.isArray(after)) {
+          return { type: "objectDiff", before, after, path: d.path };
+        }
+        if (before === undefined && after === undefined) {
+          return { type: "noop", path: d.path };
+        }
+        return { type: "scalarDiff", before, after, path: d.path };
+      }
+
       function extractFunctionCalls(code) {
         if (!code) return [];
         const builtIns = new Set([
@@ -2125,6 +2180,16 @@
           hasSource: e.ownerSource?.start !== undefined && e.ownerSource?.end !== undefined,
           sourceRange: e.ownerSource ? `${e.ownerSource.start}-${e.ownerSource.end}` : null,
         };
+      }
+
+      /**
+       * Determine whether a trace item has enough content to display.
+       * Shared by groupSimilarTraces, renderPrettyView, and renderRawView.
+       */
+      function shouldIncludeTrace(item) {
+        const isStartup = item.traceId && item.traceId.startsWith("startup-");
+        const hasContent = item.summary.changeCount > 0 || item.summary.hasError || item.summary.startCount > 0 || item.summary.behavioralEventCount > 0;
+        return hasContent || isStartup;
       }
 
       function buildTraceSummary(traceEntries) {
@@ -3259,10 +3324,7 @@
 
         items.forEach((item) => {
           if (item.type === "trace") {
-            // Skip traces with no meaningful content (but keep startup traces and traces with handlers)
-            const isStartup = item.traceId && item.traceId.startsWith("startup-");
-            const hasContent = item.summary.changeCount > 0 || item.summary.hasError || item.summary.startCount > 0 || item.summary.behavioralEventCount > 0;
-            if (!hasContent && !isStartup) return;
+            if (!shouldIncludeTrace(item)) return;
 
             if (!currentGroup) {
               currentGroup = { type: "trace-group", traces: [item] };
@@ -3321,9 +3383,7 @@
             }
           } else if (item.type === "trace") {
             // Should not happen after grouping, but handle just in case
-            const isStartup = item.traceId && item.traceId.startsWith("startup-");
-            const hasContent = item.summary.changeCount > 0 || item.summary.hasError || item.summary.startCount > 0 || item.summary.behavioralEventCount > 0;
-            if (!hasContent && !isStartup) return;
+            if (!shouldIncludeTrace(item)) return;
             blocks.push(renderTraceGroupPretty(item));
           } else if (item.type === "interaction") {
             blocks.push(renderInteractionPretty(item));
@@ -3642,15 +3702,15 @@
               // Check if this is an array diff that should be summarized
               if (e.diff.length === 1) {
                 const only = e.diff[0];
-                if (Array.isArray(only.before) && Array.isArray(only.after) && (isKeyedArray(only.before) || isKeyedArray(only.after))) {
-                  const analysis = analyzeArrayDiff(only.before, only.after);
+                const classified = classifyDiffItem(only);
+                if (classified.type === "keyedArrayDiff") {
+                  const analysis = analyzeArrayDiff(classified.before, classified.after);
                   if (analysis.isSignificant) {
                     bodyHtml += `<div>${renderArrayDiffSummary(analysis)}</div>`;
                     usedArraySummary = true;
                   }
-                } else if (only.before === undefined && Array.isArray(only.after) && isKeyedArray(only.after)) {
-                  // Init case: undefined → array
-                  bodyHtml += `<div class="text-success">${only.after.length} item${only.after.length !== 1 ? "s" : ""} initialized</div>`;
+                } else if (classified.type === "keyedArrayInit") {
+                  bodyHtml += `<div class="text-success">${classified.after.length} item${classified.after.length !== 1 ? "s" : ""} initialized</div>`;
                   usedArraySummary = true;
                 }
               }
@@ -3696,59 +3756,41 @@
 
             // Show handler code if available
             if (e.handlerCode) {
-              const code = e.handlerCode.trim();
-              // Check if it's a .xs function call (just function name with parens, like "functionName()")
-              const xsFuncMatch = code.match(/^(\w+)\(\)$/);
-              // Check if it's a window function call pattern
-              const windowMatch = code.match(/^\{\s*window\.(\w+)\s*\([^)]*\)\s*\}$/);
-              // Check if it's a simple function call inside braces
-              const simpleFuncMatch = code.match(/^\{\s*(\w+)\s*\([^)]*\)\s*\}$/);
-              // Check if it's an arrow function like (data) => { ... } or () => { ... }
-              const arrowMatch = code.match(/^\([^)]*\)\s*=>\s*\{/);
-              // Check if it's an APICall handler - extract method and url
-              const apiCallMatch = code.match(/Actions\.callApi\s*\(\s*\{[^}]*method:\s*["']?([^"',}]+)["']?\s*,[^}]*url:\s*["']?([^"',}]+)["']?/s) ||
-                                   code.match(/Actions\.callApi\s*\(\s*\{[^}]*url:\s*["']?([^"',}]+)["']?\s*,[^}]*method:\s*["']?([^"',}]+)["']?/s);
-
-              if (apiCallMatch) {
-                // APICall handler - show summarized method/url
-                const [, first, second] = apiCallMatch;
-                // Determine which is method vs url based on content
-                const hasSlash = (s) => s && s.includes("/");
-                const method = hasSlash(first) ? normalizeMethod(second) : normalizeMethod(first);
-                const url = hasSlash(first) ? first : second;
-                bodyHtml += `<div class="trace-meta">APICall: <code>${method} ${url}</code></div>`;
-                // Show full code in collapsed details for reference
-                bodyHtml += `<details><summary>Full Handler</summary><pre class="source-code">${code.replace(/</g, "&lt;")}</pre></details>`;
-              } else if (xsFuncMatch) {
-                // .xs function reference
-                bodyHtml += `<div class="trace-meta">.xs: <code>${xsFuncMatch[1]}()</code></div>`;
-              } else if (windowMatch) {
-                // Window function call
-                bodyHtml += `<div class="trace-meta">window: <code>${windowMatch[1]}()</code></div>`;
-              } else if (simpleFuncMatch && !windowMatch) {
-                // Simple function call (probably from .xs)
-                bodyHtml += `<div class="trace-meta">calls: <code>${simpleFuncMatch[1]}()</code></div>`;
-              } else if (arrowMatch) {
-                // Arrow function - show in expander (usually longer code)
-                bodyHtml += `<details><summary>Handler Code</summary><pre class="source-code">${code.replace(/</g, "&lt;")}</pre></details>`;
-              } else if (code.startsWith("{") && code.endsWith("}")) {
-                // Inline handler code
-                const innerCode = code.slice(1, -1).trim();
-                if (innerCode.length < 80) {
-                  bodyHtml += `<div class="trace-meta">inline: <code>${innerCode.replace(/</g, "&lt;")}</code></div>`;
-                } else {
-                  bodyHtml += `<details><summary>Inline Handler</summary><pre class="source-code">${innerCode.replace(/</g, "&lt;")}</pre></details>`;
-                }
-              } else if (code.length < 100) {
-                // Other short code
-                bodyHtml += `<div class="trace-meta">code: <code>${code.replace(/</g, "&lt;")}</code></div>`;
-              } else {
-                // Longer code - show in expander
-                bodyHtml += `<details><summary>Handler Code</summary><pre class="source-code">${code.replace(/</g, "&lt;")}</pre></details>`;
+              const parsed = parseHandlerCode(e.handlerCode);
+              switch (parsed.type) {
+                case "apiCall":
+                  bodyHtml += `<div class="trace-meta">APICall: <code>${parsed.method} ${parsed.url}</code></div>`;
+                  bodyHtml += `<details><summary>Full Handler</summary><pre class="source-code">${parsed.code.replace(/</g, "&lt;")}</pre></details>`;
+                  break;
+                case "xsFunc":
+                  bodyHtml += `<div class="trace-meta">.xs: <code>${parsed.funcName}()</code></div>`;
+                  break;
+                case "windowFunc":
+                  bodyHtml += `<div class="trace-meta">window: <code>${parsed.funcName}()</code></div>`;
+                  break;
+                case "simpleFunc":
+                  bodyHtml += `<div class="trace-meta">calls: <code>${parsed.funcName}()</code></div>`;
+                  break;
+                case "arrow":
+                  bodyHtml += `<details><summary>Handler Code</summary><pre class="source-code">${parsed.code.replace(/</g, "&lt;")}</pre></details>`;
+                  break;
+                case "inline":
+                  if (parsed.innerCode.length < 80) {
+                    bodyHtml += `<div class="trace-meta">inline: <code>${parsed.innerCode.replace(/</g, "&lt;")}</code></div>`;
+                  } else {
+                    bodyHtml += `<details><summary>Inline Handler</summary><pre class="source-code">${parsed.innerCode.replace(/</g, "&lt;")}</pre></details>`;
+                  }
+                  break;
+                default:
+                  if (parsed.code.length < 100) {
+                    bodyHtml += `<div class="trace-meta">code: <code>${parsed.code.replace(/</g, "&lt;")}</code></div>`;
+                  } else {
+                    bodyHtml += `<details><summary>Handler Code</summary><pre class="source-code">${parsed.code.replace(/</g, "&lt;")}</pre></details>`;
+                  }
               }
 
               // Extract and show function source lookups for called functions
-              const calledFuncs = extractFunctionCalls(code);
+              const calledFuncs = extractFunctionCalls(e.handlerCode);
               if (calledFuncs.length > 0) {
                 const sourceFile = evt.meta.resolvedFile || "";
                 calledFuncs.forEach(funcName => {
@@ -3761,7 +3803,7 @@
               }
 
               // Extract and show Action source lookups for .execute() calls
-              const actionRefs = extractActionReferences(code);
+              const actionRefs = extractActionReferences(e.handlerCode);
               if (actionRefs.length > 0) {
                 const sourceFile = evt.meta.resolvedFile || "";
                 actionRefs.forEach(actionId => {
@@ -3777,7 +3819,7 @@
               const appStateMethodPattern = /(\w+)\.value\.(\w+)\s*\(/g;
               let appStateMatch;
               const seenAppStateMethods = new Set();
-              while ((appStateMatch = appStateMethodPattern.exec(code)) !== null) {
+              while ((appStateMatch = appStateMethodPattern.exec(e.handlerCode)) !== null) {
                 const stateId = appStateMatch[1];
                 const methodName = appStateMatch[2];
                 const key = `${stateId}.${methodName}`;
@@ -3842,17 +3884,18 @@
             let arrayBefore = null, arrayAfter = null;
             if (e.diffJson.length === 1) {
               const only = e.diffJson[0];
-              if (Array.isArray(only.before) && Array.isArray(only.after) && (isKeyedArray(only.before) || isKeyedArray(only.after))) {
-                const analysis = analyzeArrayDiff(only.before, only.after);
+              const classified = classifyDiffItem(only);
+              if (classified.type === "keyedArrayDiff") {
+                const analysis = analyzeArrayDiff(classified.before, classified.after);
                 if (analysis.isSignificant) {
                   bodyHtml += `<div>${renderArrayDiffSummary(analysis)}</div>`;
                   usedArraySummary = true;
                   // Save arrays for full diff with context
-                  arrayBefore = only.before;
-                  arrayAfter = only.after;
+                  arrayBefore = classified.before;
+                  arrayAfter = classified.after;
                 }
-              } else if (Array.isArray(only.before) && only.after === undefined && isKeyedArray(only.before)) {
-                bodyHtml += `<div class="text-error">${only.before.length} item${only.before.length !== 1 ? "s" : ""} → cleared</div>`;
+              } else if (classified.type === "keyedArrayCleared") {
+                bodyHtml += `<div class="text-error">${classified.before.length} item${classified.before.length !== 1 ? "s" : ""} → cleared</div>`;
                 usedArraySummary = true;
               }
             }
@@ -3958,14 +4001,15 @@
               let usedArraySummary = false;
               if (e.diffJson.length === 1) {
                 const only = e.diffJson[0];
-                if (Array.isArray(only.before) && Array.isArray(only.after) && (isKeyedArray(only.before) || isKeyedArray(only.after))) {
-                  const analysis = analyzeArrayDiff(only.before, only.after);
+                const classified = classifyDiffItem(only);
+                if (classified.type === "keyedArrayDiff") {
+                  const analysis = analyzeArrayDiff(classified.before, classified.after);
                   if (analysis.isSignificant) {
                     html += `<div>${renderArrayDiffSummary(analysis)}</div>`;
                     usedArraySummary = true;
                   }
-                } else if (Array.isArray(only.before) && only.after === undefined && isKeyedArray(only.before)) {
-                  html += `<div class="text-error">${only.before.length} item${only.before.length !== 1 ? "s" : ""} → cleared</div>`;
+                } else if (classified.type === "keyedArrayCleared") {
+                  html += `<div class="text-error">${classified.before.length} item${classified.before.length !== 1 ? "s" : ""} → cleared</div>`;
                   usedArraySummary = true;
                 }
               }
@@ -3998,14 +4042,15 @@
           let usedArraySummary = false;
           if (entry.diffJson.length === 1) {
             const only = entry.diffJson[0];
-            if (Array.isArray(only.before) && Array.isArray(only.after) && (isKeyedArray(only.before) || isKeyedArray(only.after))) {
-              const analysis = analyzeArrayDiff(only.before, only.after);
+            const classified = classifyDiffItem(only);
+            if (classified.type === "keyedArrayDiff") {
+              const analysis = analyzeArrayDiff(classified.before, classified.after);
               if (analysis.isSignificant) {
                 html += `<div>${renderArrayDiffSummary(analysis)}</div>`;
                 usedArraySummary = true;
               }
-            } else if (Array.isArray(only.before) && only.after === undefined && isKeyedArray(only.before)) {
-              html += `<div class="text-error">${only.before.length} item${only.before.length !== 1 ? "s" : ""} → cleared</div>`;
+            } else if (classified.type === "keyedArrayCleared") {
+              html += `<div class="text-error">${classified.before.length} item${classified.before.length !== 1 ? "s" : ""} → cleared</div>`;
               usedArraySummary = true;
             }
           }
@@ -4037,10 +4082,7 @@
         let traceIndex = 0;
         processed.timelineItems.forEach((item) => {
           if (item.type === "trace") {
-            // Skip traces with no meaningful content (but keep startup traces and traces with handlers)
-            const isStartup = item.traceId && item.traceId.startsWith("startup-");
-            const hasContent = item.summary.changeCount > 0 || item.summary.hasError || item.summary.startCount > 0 || item.summary.behavioralEventCount > 0;
-            if (!hasContent && !isStartup) return;
+            if (!shouldIncludeTrace(item)) return;
             traceIndex++;
             lines.push(...renderTraceRaw(item, traceIndex));
             lines.push("");
@@ -4065,37 +4107,40 @@
               lines.push(`        Update ${i + 1} @ ${item.relTime}`);
               if (e.diffJson) {
                 e.diffJson.forEach((d) => {
-                  if (Array.isArray(d.before) && Array.isArray(d.after) && (isKeyedArray(d.before) || isKeyedArray(d.after))) {
-                    const summary = summarizeArrayDiff(d.before, d.after);
-                    lines.push(`            ${d.path}:`);
-                    summary.split("\n").forEach((line) => lines.push(`                ${line}`));
-                  } else if (Array.isArray(d.after) && d.before === undefined && isKeyedArray(d.after)) {
-                    lines.push(`            ${d.path}: initialized with ${d.after.length} items`);
-                  } else if (Array.isArray(d.before) && d.after === undefined && isKeyedArray(d.before)) {
-                    lines.push(`            ${d.path}: ${d.before.length} items → cleared`);
-                  } else if (d.before && d.after && typeof d.before === "object" && typeof d.after === "object" && !Array.isArray(d.before) && !Array.isArray(d.after)) {
-                    // Object diff - show which fields changed
-                    const allKeys = new Set([...Object.keys(d.before), ...Object.keys(d.after)]);
-                    const changedKeys = [];
-                    allKeys.forEach((key) => {
-                      const bv = JSON.stringify(d.before[key]);
-                      const av = JSON.stringify(d.after[key]);
-                      if (bv !== av) changedKeys.push(key);
-                    });
-                    if (changedKeys.length === 0) {
-                      lines.push(`            ${d.path}: (no visible change)`);
-                    } else {
+                  const classified = classifyDiffItem(d);
+                  switch (classified.type) {
+                    case "keyedArrayDiff": {
+                      const summary = summarizeArrayDiff(classified.before, classified.after);
                       lines.push(`            ${d.path}:`);
-                      changedKeys.forEach((key) => {
-                        const bv = d.before[key];
-                        const av = d.after[key];
-                        const bvStr = bv === undefined ? "undefined" : JSON.stringify(bv)?.slice(0, 60) || "null";
-                        const avStr = av === undefined ? "undefined" : JSON.stringify(av)?.slice(0, 60) || "null";
-                        lines.push(`                ${key}: ${bvStr} → ${avStr}`);
-                      });
+                      summary.split("\n").forEach((line) => lines.push(`                ${line}`));
+                      break;
                     }
-                  } else {
-                    lines.push(`            ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
+                    case "keyedArrayInit":
+                      lines.push(`            ${d.path}: initialized with ${classified.after.length} items`);
+                      break;
+                    case "keyedArrayCleared":
+                      lines.push(`            ${d.path}: ${classified.before.length} items → cleared`);
+                      break;
+                    case "objectDiff": {
+                      const allKeys = new Set([...Object.keys(classified.before), ...Object.keys(classified.after)]);
+                      const changedKeys = [];
+                      allKeys.forEach((key) => {
+                        if (JSON.stringify(classified.before[key]) !== JSON.stringify(classified.after[key])) changedKeys.push(key);
+                      });
+                      if (changedKeys.length === 0) {
+                        lines.push(`            ${d.path}: (no visible change)`);
+                      } else {
+                        lines.push(`            ${d.path}:`);
+                        changedKeys.forEach((key) => {
+                          const bvStr = classified.before[key] === undefined ? "undefined" : JSON.stringify(classified.before[key])?.slice(0, 60) || "null";
+                          const avStr = classified.after[key] === undefined ? "undefined" : JSON.stringify(classified.after[key])?.slice(0, 60) || "null";
+                          lines.push(`                ${key}: ${bvStr} → ${avStr}`);
+                        });
+                      }
+                      break;
+                    }
+                    default:
+                      lines.push(`            ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
                   }
                 });
               }
@@ -4229,43 +4274,36 @@
             }
             // Show handler code if available
             if (e.handlerCode) {
-              const code = e.handlerCode.trim();
-              const xsFuncMatch = code.match(/^(\w+)\(\)$/);
-              const windowMatch = code.match(/^\{\s*window\.(\w+)\s*\([^)]*\)\s*\}$/);
-              const simpleFuncMatch = code.match(/^\{\s*(\w+)\s*\([^)]*\)\s*\}$/);
-              const arrowMatch = code.match(/^\([^)]*\)\s*=>\s*\{/);
-              // Check if it's an APICall handler - extract method and url
-              const apiCallMatch = code.match(/Actions\.callApi\s*\(\s*\{[^}]*method:\s*["']?([^"',}]+)["']?\s*,[^}]*url:\s*["']?([^"',}]+)["']?/s) ||
-                                   code.match(/Actions\.callApi\s*\(\s*\{[^}]*url:\s*["']?([^"',}]+)["']?\s*,[^}]*method:\s*["']?([^"',}]+)["']?/s);
-
-              if (apiCallMatch) {
-                // APICall handler - show summarized method/url
-                const [, first, second] = apiCallMatch;
-                const hasSlash = (s) => s && s.includes("/");
-                const method = hasSlash(first) ? normalizeMethod(second) : normalizeMethod(first);
-                const url = hasSlash(first) ? first : second;
-                lines.push(`      APICall: ${method} ${url}`);
-              } else if (xsFuncMatch) {
-                lines.push(`      .xs: ${xsFuncMatch[1]}()`);
-              } else if (windowMatch) {
-                lines.push(`      window: ${windowMatch[1]}()`);
-              } else if (simpleFuncMatch && !windowMatch) {
-                lines.push(`      calls: ${simpleFuncMatch[1]}()`);
-              } else if (arrowMatch) {
-                // Arrow function - show first line
-                const firstLine = code.split('\n')[0];
-                lines.push(`      arrow: ${firstLine.length < 60 ? firstLine : firstLine.substring(0, 60) + "..."}`);
-              } else if (code.startsWith("{") && code.endsWith("}")) {
-                const innerCode = code.slice(1, -1).trim();
-                if (innerCode.length < 60) {
-                  lines.push(`      inline: ${innerCode}`);
-                } else {
-                  lines.push(`      inline: ${innerCode.substring(0, 60)}...`);
-                }
-              } else if (code.length < 80) {
-                lines.push(`      code: ${code}`);
-              } else {
-                lines.push(`      code: ${code.substring(0, 80)}...`);
+              const parsed = parseHandlerCode(e.handlerCode);
+              switch (parsed.type) {
+                case "apiCall":
+                  lines.push(`      APICall: ${parsed.method} ${parsed.url}`);
+                  break;
+                case "xsFunc":
+                  lines.push(`      .xs: ${parsed.funcName}()`);
+                  break;
+                case "windowFunc":
+                  lines.push(`      window: ${parsed.funcName}()`);
+                  break;
+                case "simpleFunc":
+                  lines.push(`      calls: ${parsed.funcName}()`);
+                  break;
+                case "arrow":
+                  lines.push(`      arrow: ${parsed.firstLine.length < 60 ? parsed.firstLine : parsed.firstLine.substring(0, 60) + "..."}`);
+                  break;
+                case "inline":
+                  if (parsed.innerCode.length < 60) {
+                    lines.push(`      inline: ${parsed.innerCode}`);
+                  } else {
+                    lines.push(`      inline: ${parsed.innerCode.substring(0, 60)}...`);
+                  }
+                  break;
+                default:
+                  if (parsed.code.length < 80) {
+                    lines.push(`      code: ${parsed.code}`);
+                  } else {
+                    lines.push(`      code: ${parsed.code.substring(0, 80)}...`);
+                  }
               }
             }
             return;
@@ -4296,66 +4334,71 @@
             // Summarize each var change
             e.diff.forEach((d) => {
               const varName = d.path || "value";
-              if (Array.isArray(d.before) && Array.isArray(d.after) && (isKeyedArray(d.before) || isKeyedArray(d.after))) {
-                // Array diff - summarize
-                const summary = summarizeArrayDiff(d.before, d.after);
-                lines.push(`        ${varName}:`);
-                summary.split("\n").forEach((line) => lines.push(`            ${line}`));
-              } else if (Array.isArray(d.after) && d.before === undefined && isKeyedArray(d.after)) {
-                // Init with array
-                lines.push(`        ${varName}: initialized with ${d.after.length} items`);
-                d.after.slice(0, 5).forEach((item) => lines.push(`            • ${getItemLabel(item)}`));
-                if (d.after.length > 5) lines.push(`            … and ${d.after.length - 5} more`);
-              } else if (d.after === undefined && d.before === undefined) {
-                // Skip no-op
-              } else {
-                // Simple value change - show compact
-                const beforeStr = d.before === undefined ? "undefined" : JSON.stringify(d.before);
-                const afterStr = d.after === undefined ? "undefined" : JSON.stringify(d.after);
-                // Truncate if too long
-                const maxLen = 80;
-                const beforeDisplay = beforeStr.length > maxLen ? beforeStr.slice(0, maxLen) + "..." : beforeStr;
-                const afterDisplay = afterStr.length > maxLen ? afterStr.slice(0, maxLen) + "..." : afterStr;
-                lines.push(`        ${varName}: ${beforeDisplay} → ${afterDisplay}`);
+              const classified = classifyDiffItem(d);
+              switch (classified.type) {
+                case "keyedArrayDiff": {
+                  const summary = summarizeArrayDiff(classified.before, classified.after);
+                  lines.push(`        ${varName}:`);
+                  summary.split("\n").forEach((line) => lines.push(`            ${line}`));
+                  break;
+                }
+                case "keyedArrayInit":
+                  lines.push(`        ${varName}: initialized with ${classified.after.length} items`);
+                  classified.after.slice(0, 5).forEach((item) => lines.push(`            • ${getItemLabel(item)}`));
+                  if (classified.after.length > 5) lines.push(`            … and ${classified.after.length - 5} more`);
+                  break;
+                case "noop":
+                  break;
+                default: {
+                  const beforeStr = d.before === undefined ? "undefined" : JSON.stringify(d.before);
+                  const afterStr = d.after === undefined ? "undefined" : JSON.stringify(d.after);
+                  const maxLen = 80;
+                  const beforeDisplay = beforeStr.length > maxLen ? beforeStr.slice(0, maxLen) + "..." : beforeStr;
+                  const afterDisplay = afterStr.length > maxLen ? afterStr.slice(0, maxLen) + "..." : afterStr;
+                  lines.push(`        ${varName}: ${beforeDisplay} → ${afterDisplay}`);
+                }
               }
             });
           }
 
           if (e.kind === "state:changes" && e.diffJson) {
             e.diffJson.forEach((d) => {
-              if (Array.isArray(d.before) && Array.isArray(d.after) && (isKeyedArray(d.before) || isKeyedArray(d.after))) {
-                const summary = summarizeArrayDiff(d.before, d.after);
-                lines.push(`        ${d.path}:`);
-                summary.split("\n").forEach((line) => lines.push(`            ${line}`));
-              } else if (Array.isArray(d.after) && d.before === undefined && isKeyedArray(d.after)) {
-                lines.push(`        ${d.path}: initialized with ${d.after.length} items`);
-                d.after.slice(0, 5).forEach((item) => lines.push(`            • ${getItemLabel(item)}`));
-                if (d.after.length > 5) lines.push(`            … and ${d.after.length - 5} more`);
-              } else if (Array.isArray(d.before) && d.after === undefined && isKeyedArray(d.before)) {
-                lines.push(`        ${d.path}: ${d.before.length} items → cleared`);
-              } else if (d.before && d.after && typeof d.before === "object" && typeof d.after === "object" && !Array.isArray(d.before) && !Array.isArray(d.after)) {
-                // Object diff - show which fields changed
-                const allKeys = new Set([...Object.keys(d.before), ...Object.keys(d.after)]);
-                const changedKeys = [];
-                allKeys.forEach((key) => {
-                  const bv = JSON.stringify(d.before[key]);
-                  const av = JSON.stringify(d.after[key]);
-                  if (bv !== av) changedKeys.push(key);
-                });
-                if (changedKeys.length === 0) {
-                  lines.push(`        ${d.path}: (no visible change)`);
-                } else {
+              const classified = classifyDiffItem(d);
+              switch (classified.type) {
+                case "keyedArrayDiff": {
+                  const summary = summarizeArrayDiff(classified.before, classified.after);
                   lines.push(`        ${d.path}:`);
-                  changedKeys.forEach((key) => {
-                    const bv = d.before[key];
-                    const av = d.after[key];
-                    const bvStr = bv === undefined ? "undefined" : JSON.stringify(bv)?.slice(0, 60) || "null";
-                    const avStr = av === undefined ? "undefined" : JSON.stringify(av)?.slice(0, 60) || "null";
-                    lines.push(`            ${key}: ${bvStr} → ${avStr}`);
-                  });
+                  summary.split("\n").forEach((line) => lines.push(`            ${line}`));
+                  break;
                 }
-              } else {
-                lines.push(`        ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
+                case "keyedArrayInit":
+                  lines.push(`        ${d.path}: initialized with ${classified.after.length} items`);
+                  classified.after.slice(0, 5).forEach((item) => lines.push(`            • ${getItemLabel(item)}`));
+                  if (classified.after.length > 5) lines.push(`            … and ${classified.after.length - 5} more`);
+                  break;
+                case "keyedArrayCleared":
+                  lines.push(`        ${d.path}: ${classified.before.length} items → cleared`);
+                  break;
+                case "objectDiff": {
+                  const allKeys = new Set([...Object.keys(classified.before), ...Object.keys(classified.after)]);
+                  const changedKeys = [];
+                  allKeys.forEach((key) => {
+                    if (JSON.stringify(classified.before[key]) !== JSON.stringify(classified.after[key])) changedKeys.push(key);
+                  });
+                  if (changedKeys.length === 0) {
+                    lines.push(`        ${d.path}: (no visible change)`);
+                  } else {
+                    lines.push(`        ${d.path}:`);
+                    changedKeys.forEach((key) => {
+                      const bvStr = classified.before[key] === undefined ? "undefined" : JSON.stringify(classified.before[key])?.slice(0, 60) || "null";
+                      const avStr = classified.after[key] === undefined ? "undefined" : JSON.stringify(classified.after[key])?.slice(0, 60) || "null";
+                      lines.push(`            ${key}: ${bvStr} → ${avStr}`);
+                    });
+                  }
+                  break;
+                }
+                default:
+                  lines.push(`        ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
               }
             });
           }
@@ -6599,6 +6642,137 @@
           const xmlui = new XmluiSource(source, "test.xmlui");
           const btn = xmlui.findById("staticId");
           assertTrue(btn !== null, "Should find element with static id");
+        });
+
+        // =========================================================================
+        // TEST SUITE: shouldIncludeTrace
+        // =========================================================================
+        test("shouldIncludeTrace", "returns false for empty trace", () => {
+          const item = { traceId: "t-test", summary: { changeCount: 0, hasError: false, startCount: 0, behavioralEventCount: 0 } };
+          assertEqual(shouldIncludeTrace(item), false, "Empty trace should not be included");
+        });
+
+        test("shouldIncludeTrace", "returns true for trace with changes", () => {
+          const item = { traceId: "t-test", summary: { changeCount: 1, hasError: false, startCount: 0, behavioralEventCount: 0 } };
+          assertEqual(shouldIncludeTrace(item), true, "Trace with changes should be included");
+        });
+
+        test("shouldIncludeTrace", "returns true for trace with error", () => {
+          const item = { traceId: "t-test", summary: { changeCount: 0, hasError: true, startCount: 0, behavioralEventCount: 0 } };
+          assertEqual(shouldIncludeTrace(item), true, "Trace with error should be included");
+        });
+
+        test("shouldIncludeTrace", "returns true for trace with handlers", () => {
+          const item = { traceId: "t-test", summary: { changeCount: 0, hasError: false, startCount: 1, behavioralEventCount: 0 } };
+          assertEqual(shouldIncludeTrace(item), true, "Trace with handlers should be included");
+        });
+
+        test("shouldIncludeTrace", "returns true for trace with behavioral events", () => {
+          const item = { traceId: "t-test", summary: { changeCount: 0, hasError: false, startCount: 0, behavioralEventCount: 1 } };
+          assertEqual(shouldIncludeTrace(item), true, "Trace with behavioral events should be included");
+        });
+
+        test("shouldIncludeTrace", "returns true for empty startup trace", () => {
+          const item = { traceId: "startup-test", summary: { changeCount: 0, hasError: false, startCount: 0, behavioralEventCount: 0 } };
+          assertEqual(shouldIncludeTrace(item), true, "Startup trace should always be included");
+        });
+
+        // =========================================================================
+        // TEST SUITE: parseHandlerCode
+        // =========================================================================
+        test("parseHandlerCode", "detects apiCall with method before url", () => {
+          const result = parseHandlerCode('Actions.callApi({ method: "GET", url: "/api/items" })');
+          assertEqual(result.type, "apiCall");
+          assertEqual(result.method, "GET");
+          assertEqual(result.url, "/api/items");
+        });
+
+        test("parseHandlerCode", "detects apiCall with url before method", () => {
+          const result = parseHandlerCode('Actions.callApi({ url: "/api/items", method: "post" })');
+          assertEqual(result.type, "apiCall");
+          assertEqual(result.method, "POST");
+          assertEqual(result.url, "/api/items");
+        });
+
+        test("parseHandlerCode", "detects xsFunc pattern", () => {
+          const result = parseHandlerCode("myFunction()");
+          assertEqual(result.type, "xsFunc");
+          assertEqual(result.funcName, "myFunction");
+        });
+
+        test("parseHandlerCode", "detects windowFunc pattern", () => {
+          const result = parseHandlerCode("{ window.doStuff(arg1) }");
+          assertEqual(result.type, "windowFunc");
+          assertEqual(result.funcName, "doStuff");
+        });
+
+        test("parseHandlerCode", "detects simpleFunc pattern", () => {
+          const result = parseHandlerCode("{ handleClick(e) }");
+          assertEqual(result.type, "simpleFunc");
+          assertEqual(result.funcName, "handleClick");
+        });
+
+        test("parseHandlerCode", "detects arrow function", () => {
+          const result = parseHandlerCode("(e) => {\n  doStuff(e);\n}");
+          assertEqual(result.type, "arrow");
+          assertEqual(result.firstLine, "(e) => {");
+        });
+
+        test("parseHandlerCode", "detects inline code", () => {
+          const result = parseHandlerCode("{ x = 42 }");
+          assertEqual(result.type, "inline");
+          assertEqual(result.innerCode, "x = 42");
+        });
+
+        test("parseHandlerCode", "falls back to other for plain code", () => {
+          const result = parseHandlerCode("some random code");
+          assertEqual(result.type, "other");
+          assertEqual(result.code, "some random code");
+        });
+
+        // =========================================================================
+        // TEST SUITE: classifyDiffItem
+        // =========================================================================
+        test("classifyDiffItem", "detects keyed array diff", () => {
+          const d = { before: [{id: 1, name: "a"}], after: [{id: 1, name: "b"}], path: "items" };
+          const result = classifyDiffItem(d);
+          assertEqual(result.type, "keyedArrayDiff");
+        });
+
+        test("classifyDiffItem", "detects keyed array init", () => {
+          const d = { before: undefined, after: [{id: 1}], path: "items" };
+          const result = classifyDiffItem(d);
+          assertEqual(result.type, "keyedArrayInit");
+        });
+
+        test("classifyDiffItem", "detects keyed array cleared", () => {
+          const d = { before: [{id: 1}], after: undefined, path: "items" };
+          const result = classifyDiffItem(d);
+          assertEqual(result.type, "keyedArrayCleared");
+        });
+
+        test("classifyDiffItem", "detects object diff", () => {
+          const d = { before: {x: 1}, after: {x: 2}, path: "config" };
+          const result = classifyDiffItem(d);
+          assertEqual(result.type, "objectDiff");
+        });
+
+        test("classifyDiffItem", "detects noop", () => {
+          const d = { before: undefined, after: undefined, path: "empty" };
+          const result = classifyDiffItem(d);
+          assertEqual(result.type, "noop");
+        });
+
+        test("classifyDiffItem", "detects scalar diff", () => {
+          const d = { before: "old", after: "new", path: "name" };
+          const result = classifyDiffItem(d);
+          assertEqual(result.type, "scalarDiff");
+        });
+
+        test("classifyDiffItem", "scalar for non-keyed arrays", () => {
+          const d = { before: [1, 2], after: [3, 4], path: "nums" };
+          const result = classifyDiffItem(d);
+          assertEqual(result.type, "scalarDiff");
         });
 
         // =========================================================================
