@@ -19,6 +19,7 @@
   - [Elfsight Calendar](#elfsight-calendar-scraperslibelfsigtpy)
   - [Legistar](#legistar-scraperslegistarpy---city-government-meetings)
   - [Bibliocommons](#bibliocommons-scraperslibbibliocommunspy---library-event-platforms)
+  - [GoDaddy Calendar](#godaddy-calendar-scraperslibgodaddypy---godaddy-website-builder)
 - [Platform-Specific Techniques](#platform-specific-techniques)
   - [SeeTickets Widgets](#seetickets-widgets)
   - [Wix Events](#wix-events)
@@ -260,6 +261,33 @@ To create a new city/library scraper, subclass `BibliocommonsEventsScraper` and 
 - `timezone`
 - optional filters like `audience_ids`, `type_ids`, `program_ids`, `language_ids`
 
+### GoDaddy Calendar (`scrapers/lib/godaddy.py`) - GoDaddy Website Builder
+For sites built with GoDaddy Website Builder that use the calendar/events widget. These sites serve event data from a JSON API at `calendar.apps.secureserver.net` — no headless browser needed.
+
+**Discovery:** Open the site's calendar page in a browser, open DevTools Network tab, and look for a GET request to `calendar.apps.secureserver.net/v1/events/{website_id}/{section_id}/{widget_id}`. The three UUIDs in the URL are what you need.
+
+To create a scraper, subclass `GoDaddyScraper` and set:
+- `website_id`, `section_id`, `widget_id` (from the API URL)
+- `default_location` (fallback when event has no location)
+- `timezone` (IANA timezone string, e.g., `"America/Denver"`)
+
+Example:
+```python
+from lib.godaddy import GoDaddyScraper
+
+class MyVenueScraper(GoDaddyScraper):
+    name = "My Venue"
+    domain = "myvenue.com"
+    website_id = "850abeb2-..."
+    section_id = "9c296a07-..."
+    widget_id = "f33a9bca-..."
+    default_location = "My Venue, 123 Main St, Anytown, CA"
+    timezone = "America/Los_Angeles"
+
+if __name__ == '__main__':
+    MyVenueScraper.main()
+```
+
 ---
 
 ## Platform-Specific Techniques
@@ -270,6 +298,7 @@ To create a new city/library scraper, subclass `BibliocommonsEventsScraper` and 
 | **Tockify** | `https://tockify.com/api/feeds/ics/{CALENDAR_ID}` |
 | **LiveWhale** | `https://{domain}/live/ical/events` |
 | **Localist** | `https://{domain}/api/2/events` |
+| **GoDaddy Calendar** | Check DevTools for `calendar.apps.secureserver.net` requests (use scraper) |
 | **WordPress Tribe** | `https://example.com/events/?ical=1` |
 | **WordPress MEC** | `https://example.com/events/?mec-ical-feed=1` |
 | **Legistar** | `https://webapi.legistar.com/v1/{client}/events` (WebAPI, use scraper) |
