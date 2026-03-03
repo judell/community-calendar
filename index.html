@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/rrule@2.8.1/dist/es5/rrule.min.js"></script>
     <script>console.log = function(){};</script>
-    <script src="xmlui/0.12.1.js"></script>
+    <script src="xmlui/0.12.5-dev.js"></script>
     <script src="helpers.js"></script>
     <script src="xs-trace.js"></script>
     <script>
@@ -34,10 +34,10 @@
       window.authUser = null;
       window.authSession = null;
 
-      window.signIn = () => {
+      window.signIn = (provider) => {
         const returnTo = window.location.origin + window.location.pathname + window.location.search;
         window.location.href = SUPABASE_URL +
-          '/auth/v1/authorize?provider=github&redirect_to=' + encodeURIComponent(returnTo);
+          '/auth/v1/authorize?provider=' + (provider || 'github') + '&redirect_to=' + encodeURIComponent(returnTo);
       };
 
       window.signOut = function() {

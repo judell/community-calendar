@@ -34,6 +34,15 @@ Real-world lessons from source discovery across cities. These complement the str
   - [Example: History/Heritage](#example-historyheritage)
   - [Other Topical Searches to Try](#other-topical-searches-to-try)
 - [When a Source Goes Dark, Follow the Events](#when-a-source-goes-dark-follow-the-events)
+- [WP REST API as Backdoor When ICS Is Blocked](#wp-rest-api-as-backdoor-when-ics-is-blocked)
+- [Modern Events Calendar (MEC): ICS Broken, REST Works](#modern-events-calendar-mec-ics-broken-rest-works)
+- [Squarespace Per-Event ICS Aggregation](#squarespace-per-event-ics-aggregation)
+- [Faith Communities Are a Rich Source Category](#faith-communities-are-a-rich-source-category)
+- [Sidearm Sports for NCAA Athletics](#sidearm-sports-for-ncaa-athletics)
+- [Indirection: Find the Data on a Third-Party Platform](#indirection-find-the-data-on-a-third-party-platform)
+- [LibCal Library Calendars](#libcal-library-calendars)
+- [CampusLabs University Calendars](#campuslabs-university-calendars)
+- [TeamUp Calendars](#teamup-calendars)
 
 ## "Curl-and-Done" Sources: No Scraper Needed
 
@@ -345,3 +354,114 @@ A curator who cares about volunteerism in Toronto won't stop there. The investig
 - Aggregator sites that may have picked up the events
 
 Don't give up on a category just because one source is inaccessible. The events are still happening — they're just published somewhere else.
+
+## WP REST API as Backdoor When ICS Is Blocked
+
+Some WordPress sites have `mod_security` or other WAF rules that block ICS feed requests (returning 403 or 406), but the WP REST API at `/wp-json/wp/v2/posts` still works. This is because WAF rules typically target file-download patterns (`.ics`, `?ical=1`) but allow JSON API endpoints through.
+
+**How to detect:** If `?ical=1` or `?mec-ical-feed=1` returns 403/406, try:
+```bash
+curl -sL "https://example.com/wp-json/wp/v2/posts?per_page=5" | head -c 200
+```
+If you get JSON back, you can build a scraper around the REST API.
+
+**Challenge:** The REST API returns post content as rendered HTML, not structured event data. You'll need to parse dates, times, and locations from the HTML content using regex patterns.
+
+**Example:** Studio Montclair's site blocks all ICS requests with mod_security, but `/wp-json/wp/v2/posts` returns exhibition posts with dates like "Exhibition Dates: January 30 to February 27, 2026" embedded in the HTML content. See `scrapers/studio_montclair.py`.
+
+## Modern Events Calendar (MEC): ICS Broken, REST Works
+
+MEC's ICS feed (`?mec-ical-feed=1`) is unreliable — some sites return HTML instead of ICS, and MEC's own REST API (`/wp-json/mec/v1/events`) sometimes returns 0 events even when events exist. However, MEC stores events as a custom post type (`mec-events`) accessible via the standard WP REST API:
+
+```bash
+curl -sL "https://example.com/wp-json/wp/v2/mec-events?per_page=50"
+```
+
+The catch: dates are embedded in the post content HTML, not in structured fields. Parse patterns like "Sunday, March 15, 2026 @10am" or "March 1 @ 1-3 PM" from the rendered content.
+
+**Example:** Turtle Back Zoo uses MEC. The ICS feed returns HTML, the MEC REST API returns 0 events, but `/wp-json/wp/v2/mec-events` returns all events with parseable dates. See `scrapers/turtle_back_zoo.py` (42 events).
+
+## Squarespace Per-Event ICS Aggregation
+
+Some Squarespace sites have events but `?format=json` returns 0 items (a Squarespace pagination quirk). These sites still serve per-event ICS files at `{event-url}?format=ical`. The strategy:
+
+1. Fetch the `/events` listing page as HTML
+2. Extract event slugs with regex: `href="(/events/[^"?#]+)"`
+3. Fetch each slug with `?format=ical` appended
+4. Parse the individual ICS files and combine
+
+This is more requests than a single feed, but it works when `?format=json` doesn't.
+
+**Example:** The Raptor Trust (Squarespace) — `?format=json` returns 0 items, but scraping 4 event slugs and fetching each as `?format=ical` yielded 4 future events. See `scrapers/raptor_trust.py`.
+
+## Faith Communities Are a Rich Source Category
+
+Houses of worship are underappreciated event sources. They host concerts, lectures, community meals, holiday celebrations, support groups, and more — most of which are open to the public. In Montclair, probing faith communities yielded 5 working feeds:
+
+| Platform | Example | Feed Pattern |
+|----------|---------|-------------|
+| Google Calendar | First Congregational Church, UU Congregation | Extract calendar ID from embedded iframe, use `/calendar/ical/{id}/public/basic.ics` |
+| TeamUp | Congregation Shomrei Emunah | `https://ics.teamup.com/{calendar_key}` |
+| WordPress ICS | Union Congregational Church, Temple Ner Tamid | `?ical=1` |
+
+**How to find them:** Search `{city} church events calendar`, `{city} synagogue calendar`, `{city} temple events`. Look for embedded Google Calendars (iframe in page source), WordPress Tribe Events (`?ical=1`), or TeamUp embeds.
+
+**Note:** Planning Center Online is used by many churches but has no public API — skip those.
+
+## Sidearm Sports for NCAA Athletics
+
+Universities with NCAA athletics often use Sidearm Sports for their athletics website. Sidearm exposes a composite ICS feed covering all sports:
+
+```
+https://{athletics-domain}/calendar.ashx/calendar.ics
+```
+
+This is a high-volume source. MSU Red Hawks Athletics returned 176 events covering basketball, baseball, softball, lacrosse, soccer, swimming, track, and more — all from a single curl command.
+
+**How to detect:** Athletics sites on Sidearm have URLs like `montclairathletics.com` or `{mascot}.{school}.edu`. View source and look for `sidearm` in script URLs.
+
+## Indirection: Find the Data on a Third-Party Platform
+
+When a venue's own site is blocked (bot protection, JS-rendered, Cloudflare), the same events may be published on a third-party platform with clean, scrapeable data. Before writing a complex scraper or giving up, check:
+
+| Blocked site type | Try instead |
+|-------------------|-------------|
+| Bookstore (Bookmanager, custom CMS) | Eventbrite organizer page |
+| Music venue (Wix, custom) | Songkick venue page (JSON-LD MusicEvent) |
+| Art museum (Cloudflare + Incapsula) | Direct outreach (no workaround) |
+| WordPress with mod_security | WP REST API (`/wp-json/wp/v2/posts`) |
+| Squarespace with empty `?format=json` | Per-event `?format=ical` |
+
+**Songkick specifically:** Artists push their own tour dates to Songkick/Bandsintown. Venue pages at `songkick.com/venues/{id}` contain `MusicEvent` JSON-LD for all upcoming shows. This is artist-sourced data — it doesn't depend on the venue updating their own site. See `scrapers/songkick.py` (reusable for any Songkick venue).
+
+**Eventbrite organizer pages:** Search `site:eventbrite.com "{venue name}"` to find organizer pages. Even if 0 upcoming events exist now, wiring in the Eventbrite scraper means future events will appear automatically.
+
+## LibCal Library Calendars
+
+Public libraries using Springshare's LibCal platform expose ICS feeds. The feed URL is typically:
+```
+https://{library}.libcal.com/ical_featured.php
+```
+or found via a "Subscribe" link on the library's event calendar page.
+
+**Example:** Montclair Public Library — 161 events from a single LibCal ICS feed.
+
+## CampusLabs University Calendars
+
+Some universities use CampusLabs (now part of Anthology) for their event calendar. These expose ICS feeds:
+```
+https://{school}.campuslabs.com/engage/events.ics
+```
+
+**Example:** Montclair State University — 817 events from a CampusLabs ICS feed. This was the single largest source in the Montclair build.
+
+## TeamUp Calendars
+
+TeamUp is a shared calendar platform used by synagogues, community organizations, and clubs. Public TeamUp calendars have ICS feeds at:
+```
+https://ics.teamup.com/{calendar_key}
+```
+
+Find the calendar key by looking for TeamUp embeds in the organization's website (iframe `src` containing `teamup.com`).
+
+**Example:** Congregation Shomrei Emunah — 80 events from a TeamUp ICS feed.

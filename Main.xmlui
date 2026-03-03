@@ -83,6 +83,16 @@
   />
 
   <DataSource
+    id="adminGoogleAccess"
+    when="{window.authSession && window.authUser?.email}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/admin_google_users?select=google_email&google_email=eq.' + window.authUser?.email + '&limit=1'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + window.authSession?.access_token
+    }}"
+  />
+
+  <DataSource
     id="enrichments"
     url="{appGlobals.supabaseUrl + '/rest/v1/event_enrichments?select=*&rrule=not.is.null' + (window.cityFilter ? '&city=eq.' + window.cityFilter : '')}"
     headers="{{
@@ -92,6 +102,7 @@
   />
 
   <!-- Dialogs -->
+  <SignInDialog id="signInDialog" />
   <SourcesDialog id="sourcesDialog" events="{events.value}" hiddenSources="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []}" />
   <CaptureDialog id="captureDialog" />
   <AudioCaptureDialog id="audioCaptureDialog" />
@@ -125,19 +136,28 @@
           <Text>{window.cityName} Events</Text>
           <SpaceFiller />
           <HStack gap="$space-1">
-            <Icon name="list" tooltip="Sources" width="20px" height="20px" onClick="sourcesDialog.open()" />
+            <Icon name="l-rss" tooltip="Sources" width="20px" height="20px" onClick="sourcesDialog.open()" />
             <Icon
-              name="user"
-              tooltip="{window.authUser ? 'Sign Out (' + (window.authUser?.user_metadata?.user_name || window.authUser?.email || 'user') + ')' : 'Sign In'}"
+              when="{!window.authUser}"
+              name="l-user"
+              tooltip="Sign In"
               width="20px"
               height="20px"
-              color="{window.authUser ? '$color-primary-500' : 'inherit'}"
-              backgroundColor="{window.authUser ? '$color-primary-100' : 'transparent'}"
-              onClick="{window.authUser ? window.signOut() : window.signIn()}"
+              onClick="signInDialog.open()"
             />
             <Icon
               when="{window.authUser}"
-              name="photo"
+              name="l-user"
+              tooltip="{'Sign Out (' + (window.authUser?.user_metadata?.user_name || window.authUser?.email || 'user') + ')'}"
+              width="20px"
+              height="20px"
+              color="$color-primary-500"
+              backgroundColor="$color-primary-100"
+              onClick="window.signOut()"
+            />
+            <Icon
+              when="{window.authUser}"
+              name="l-camera"
               tooltip="Capture Event from Poster"
               width="20px"
               height="20px"
@@ -146,8 +166,8 @@
               onClick="captureDialog.open()"
             />
             <Icon
-              when="{window.authUser && (adminGithubAccess.value || []).length > 0}"
-              name="play"
+              when="{window.authUser && ((adminGithubAccess.value || []).length > 0 || (adminGoogleAccess.value || []).length > 0)}"
+              name="mic"
               tooltip="Capture Event from Audio"
               width="20px"
               height="20px"
@@ -155,7 +175,7 @@
               backgroundColor="$color-primary-100"
               onClick="audioCaptureDialog.open()"
             />
-            <Icon name="cog" tooltip="Inspector" width="20px" height="20px" onClick="inspectorDialog.open()" />
+            <Icon name="l-search-code" tooltip="Inspector" width="20px" height="20px" onClick="inspectorDialog.open()" />
           </HStack>
         </HStack>
       </H1>
@@ -199,7 +219,7 @@
       <HStack verticalAlignment="center" gap="$space-1" wrapContent="true" width="100%">
         <Button
           size="xs"
-          icon="copy"
+          icon="l-copy"
           onClick="navigator.clipboard.writeText(appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + feedToken.value[0].token); toast('Copied', { duration: 1500 })"
         />
         <Text fontSize="$fontSize-xs" color="$color-text-secondary" overflowMode="flow">Click to copy link, paste into your calendar app to subscribe.</Text>
