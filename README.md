@@ -121,11 +121,11 @@ python scripts/combine_ics.py -i cities/santarosa -o cities/santarosa/combined.i
 
 ### Deduplication and Source Attribution
 
-**`scripts/combine_ics.py`** performs two rounds of deduplication:
+The pipeline performs two rounds of deduplication:
 
 1. **Cross-source dedup** — Events with identical title + date from different sources are merged. The non-aggregator version is kept (better URL/description), and `X-SOURCE` headers are merged alphabetically (e.g., "North Bay Bohemian, Press Democrat").
 
-2. **Fuzzy dedup** — An LLM (Claude Haiku) groups events with different titles that are the same actual gathering (e.g., "Boeing Boeing" vs "Boeing Boeing - The Play"). Runs per-date, keeps highest-priority source from each cluster.
+2. **Fuzzy dedup** — `scripts/ics_to_json.py` clusters events within the same timeslot using token-set string similarity (`difflib.SequenceMatcher`, threshold 0.85). Events at different locations are never clustered. Uses union-find to assign a shared `cluster_id` to similar titles — no events are removed; all are kept and tagged for the front-end to group visually.
 
 Source attribution flows through the pipeline as `X-SOURCE` ICS headers, which become the `source` column in the database. Display names are mapped from filenames via `SOURCE_NAMES` in `combine_ics.py`.
 
