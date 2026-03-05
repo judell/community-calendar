@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SCRAPE_MONTHS: ${{ github.event.inputs.months || '6' }}
-      #ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       #ENABLE_FUZZY_DEDUP: ${{ secrets.ANTHROPIC_API_KEY && 'true' || '' }}
 
     steps:
@@ -734,3 +734,9 @@ jobs:
           echo "$RESPONSE"
           exit 1
         fi
+
+    - name: Classify new events
+      if: env.ANTHROPIC_API_KEY
+      env:
+        SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      run: python3 scripts/classify_events_anthropic.py --limit 500
