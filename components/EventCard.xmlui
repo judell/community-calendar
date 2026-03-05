@@ -7,18 +7,10 @@
         color="$color-text-secondary"
         value="{window.formatDayOfWeek($props.event.start_time) + ' ' + window.formatMonthDay($props.event.start_time) + (window.formatTime($props.event.start_time) ? ', ' + window.formatTime($props.event.start_time) : '')}"
       />
-      <HStack verticalAlignment="center" gap="$space-1">
-        <Link when="{$props.event.url}" to="{$props.event.url}" target="_blank">
-          <Text fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
-        </Link>
-        <Text when="{!$props.event.url}" fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
-        <Badge
-          when="{$props.event.category}"
-          value="{$props.event.category}"
-          variant="pill"
-          colorMap="{window.categoryColorMap}"
-        />
-      </HStack>
+      <Link when="{$props.event.url}" to="{$props.event.url}" target="_blank">
+        <Text fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
+      </Link>
+      <Text when="{!$props.event.url}" fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
       <Text when="{$props.event.location}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{$props.event.location}" />
       <Markdown
         when="{$props.event.source}"
@@ -48,7 +40,34 @@
         onClick="detailDialog.open($props.event)"
         value="{window.getSnippet($props.event.description, $props.event.title)}"
       />
-      <HStack verticalAlignment="center" gap="$space-2">
+      <HStack verticalAlignment="center" gap="$space-2" marginTop="$space-1">
+        <Badge
+          when="{$props.event.category}"
+          value="{$props.event.category}"
+          variant="pill"
+          fontSize="0.65em"
+          colorMap="{window.categoryColorMap}"
+          cursor="pointer"
+          onClick="setCategoryFilter($props.event.category)"
+        />
+        <Icon
+          when="{window.authUser && $props.event.category}"
+          name="l-pencil"
+          width="14px"
+          height="14px"
+          color="$color-text-tertiary"
+          cursor="pointer"
+          tooltip="Override category"
+          onClick="categoryDialog.open($props.event)"
+        />
+        <Badge
+          when="{!$props.event.category && window.authUser}"
+          value="+ category"
+          variant="pill"
+          fontSize="0.65em"
+          cursor="pointer"
+          onClick="categoryDialog.open($props.event)"
+        />
         <SpaceFiller />
         <AddToCalendar event="{$props.event}" />
         <Checkbox
@@ -62,6 +81,30 @@
       </HStack>
     </VStack>
   </Card>
+
+  <ModalDialog id="categoryDialog" title="Set Category" var.selectedCategory="{$param.category || ''}">
+    <VStack gap="$space-3">
+      <Text fontSize="$fontSize-sm" fontWeight="bold" value="{$param.title}" />
+      <RadioGroup initialValue="{$param.category || ''}" onDidChange="(val) => selectedCategory = val">
+        <VStack gap="$space-1">
+          <Option value="Music & Concerts" label="Music & Concerts" />
+          <Option value="Sports & Fitness" label="Sports & Fitness" />
+          <Option value="Arts & Culture" label="Arts & Culture" />
+          <Option value="Education & Workshops" label="Education & Workshops" />
+          <Option value="Community & Social" label="Community & Social" />
+          <Option value="Family & Kids" label="Family & Kids" />
+          <Option value="Food & Drink" label="Food & Drink" />
+          <Option value="Health & Wellness" label="Health & Wellness" />
+          <Option value="Nature & Outdoors" label="Nature & Outdoors" />
+          <Option value="Religion & Spirituality" label="Religion & Spirituality" />
+        </VStack>
+      </RadioGroup>
+      <HStack gap="$space-2">
+        <Button label="Save" onClick="saveCategoryOverride($param.id, selectedCategory); categoryDialog.close()" />
+        <Button label="Cancel" variant="outlined" onClick="categoryDialog.close()" />
+      </HStack>
+    </VStack>
+  </ModalDialog>
 
   <ModalDialog id="detailDialog" title="{$param.title}">
     <VStack gap="$space-2">

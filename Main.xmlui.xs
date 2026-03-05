@@ -2,22 +2,29 @@
 // All variables and functions here are global (visible to all components)
 
 window.categoryColorMap = {
-  'Music & Concerts':        { label: '#fff', background: '#8b5cf6' },
-  'Sports & Fitness':        { label: '#fff', background: '#059669' },
-  'Arts & Culture':          { label: '#fff', background: '#d97706' },
-  'Education & Workshops':   { label: '#fff', background: '#2563eb' },
-  'Community & Social':      { label: '#fff', background: '#dc2626' },
-  'Family & Kids':           { label: '#fff', background: '#ec4899' },
-  'Food & Drink':            { label: '#fff', background: '#ea580c' },
-  'Health & Wellness':       { label: '#fff', background: '#0d9488' },
-  'Nature & Outdoors':       { label: '#fff', background: '#16a34a' },
-  'Religion & Spirituality': { label: '#fff', background: '#7c3aed' },
+  'Music & Concerts':        { label: '#5b4a8a', background: '#e8e0f0' },
+  'Sports & Fitness':        { label: '#3a6e5a', background: '#d6ece2' },
+  'Arts & Culture':          { label: '#8a6d2a', background: '#f0e8d0' },
+  'Education & Workshops':   { label: '#3a5a8a', background: '#d8e4f0' },
+  'Community & Social':      { label: '#8a3a3a', background: '#f0d8d8' },
+  'Family & Kids':           { label: '#8a3a6d', background: '#f0d8e8' },
+  'Food & Drink':            { label: '#8a5a2a', background: '#f0e0d0' },
+  'Health & Wellness':       { label: '#2a6e6e', background: '#d0ece8' },
+  'Nature & Outdoors':       { label: '#3a6e3a', background: '#d6ecd6' },
+  'Religion & Spirituality': { label: '#5a3a8a', background: '#e0d8f0' },
 };
 
 var pickEvent = null;
 var picksData = null;
 var enrichmentsData = null;
 var refreshCounter = 0;
+var categoryFilterValue = null;
+var categoryFilterCounter = 0;
+
+function setCategoryFilter(category) {
+  categoryFilterValue = category;
+  categoryFilterCounter = categoryFilterCounter + 1;
+}
 
 function togglePick(event) {
   if (!window.authSession) {
@@ -62,6 +69,44 @@ function togglePick(event) {
 function toggleSourceVisibility(source) {
   if (!window.authSession) return;
   userSettingsData = window.toggleSourceAndSave(source, userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
+}
+
+window.categoryList = [
+  'Music & Concerts',
+  'Sports & Fitness',
+  'Arts & Culture',
+  'Education & Workshops',
+  'Community & Social',
+  'Family & Kids',
+  'Food & Drink',
+  'Health & Wellness',
+  'Nature & Outdoors',
+  'Religion & Spirituality',
+];
+
+function saveCategoryOverride(eventId, category) {
+  if (!window.authSession) return;
+  const headers = {
+    apikey: appGlobals.supabasePublishableKey,
+    Authorization: 'Bearer ' + window.authSession?.access_token,
+  };
+  // Upsert override (on_conflict=event_id)
+  Actions.callApi({
+    method: 'post',
+    url: appGlobals.supabaseUrl + '/rest/v1/category_overrides?on_conflict=event_id',
+    headers: Object.assign({}, headers, {
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal,resolution=merge-duplicates',
+    }),
+    body: {
+      event_id: eventId,
+      category: category,
+      curator_id: window.authUser.id,
+    },
+    invalidates: [],
+  });
+  // DB trigger on category_overrides automatically updates events.category
+  refreshCounter = refreshCounter + 1;
 }
 
 function removePick(pickId) {

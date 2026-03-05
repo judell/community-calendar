@@ -58,6 +58,11 @@
   />
 
   <ChangeListener
+    listenTo="{categoryFilterCounter}"
+    onDidChange="() => searchBox.setValue(categoryFilterValue)"
+  />
+
+  <ChangeListener
     listenTo="{scrollRequest}"
     onDidChange="topAnchor.scrollIntoView()"
   />
@@ -181,6 +186,7 @@
       </H1>
     </Bookmark>
     <TextBox
+      id="searchBox"
       autoFocus="true"
       placeholder="Search events..."
       onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; }"

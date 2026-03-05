@@ -1,6 +1,20 @@
 // Community Calendar Helper Functions
 // Pure functions for filtering, formatting, and deduplication
 
+// --- Category Names (must match Main.xmlui.xs categoryColorMap keys) ---
+var CATEGORY_NAMES = {
+  'Music & Concerts': true,
+  'Sports & Fitness': true,
+  'Arts & Culture': true,
+  'Education & Workshops': true,
+  'Community & Social': true,
+  'Family & Kids': true,
+  'Food & Drink': true,
+  'Health & Wellness': true,
+  'Nature & Outdoors': true,
+  'Religion & Spirituality': true,
+};
+
 // --- Cluster Colors ---
 const CLUSTER_COLORS = ['#6b9bd2', '#7bc47f', '#d4a04a'];
 window.clusterBorder = function(clusterId, filtered) {
@@ -53,6 +67,10 @@ window.getRecordingFile = function() {
 function filterEvents(events, term) {
   if (!events) return events || [];
   if (!term) return events;
+  // Check if term is an exact category name
+  if (CATEGORY_NAMES[term]) {
+    return events.filter(e => e.category === term);
+  }
   const lower = term.toLowerCase();
   return events.filter(e =>
     (e.title && e.title.toLowerCase().includes(lower)) ||
