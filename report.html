@@ -156,6 +156,20 @@
         <div id="anomaly-list">Loading...</div>
     </details>
 
+    <div class="url-section" id="overrides-section" style="display:none">
+        <h2>Category Overrides</h2>
+        <div class="section-desc">Curator corrections to LLM-assigned categories (used as few-shot examples)</div>
+        <div id="overrides-report"></div>
+    </div>
+
+    <div class="help-overlay" id="eventDetailOverlay" onclick="if(event.target===this)closeEventDetail()">
+        <div class="help-dialog" style="max-width:600px">
+            <button class="help-close" onclick="closeEventDetail()">&times;</button>
+            <h3 id="eventDetailTitle"></h3>
+            <div id="eventDetailBody"></div>
+        </div>
+    </div>
+
     <div class="help-overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()">
         <div class="help-dialog">
             <button class="help-close" onclick="closeHelp()">&times;</button>
@@ -375,7 +389,74 @@
             document.getElementById('helpOverlay').classList.remove('open');
         }
 
+        var _overrideEvents = {};
+
+        function showEventDetail(id) {
+            var ev = _overrideEvents[id];
+            if (!ev) return;
+            document.getElementById('eventDetailTitle').textContent = ev.title || '';
+            var body = '';
+            if (ev.start_time) body += '<div><strong>When:</strong> ' + new Date(ev.start_time).toLocaleString() + '</div>';
+            if (ev.location) body += '<div><strong>Where:</strong> ' + ev.location + '</div>';
+            if (ev.source) body += '<div><strong>Source:</strong> ' + ev.source + '</div>';
+            if (ev.category) body += '<div><strong>Category:</strong> ' + ev.category + '</div>';
+            if (ev.url) body += '<div><a href="' + ev.url + '" target="_blank">Event link</a></div>';
+            if (ev.description) body += '<hr style="margin:8px 0"><div style="font-size:0.9em;white-space:pre-wrap">' + ev.description.substring(0, 1000) + '</div>';
+            document.getElementById('eventDetailBody').innerHTML = body;
+            document.getElementById('eventDetailOverlay').classList.add('open');
+        }
+
+        function closeEventDetail() {
+            document.getElementById('eventDetailOverlay').classList.remove('open');
+        }
+
+        async function loadOverrides() {
+            var SUPABASE_URL = 'https://dzpdualvwspgqghrysyz.supabase.co';
+            var SUPABASE_KEY = 'sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5';
+            try {
+                var [ovResp, viewResp] = await Promise.all([
+                    fetch(
+                        SUPABASE_URL + '/rest/v1/category_overrides?select=id,category,original_category,created_at,event_id,events(id,title,location,city,start_time,description,source,url,category)&order=created_at.desc',
+                        { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } }
+                    ),
+                    fetch(
+                        SUPABASE_URL + '/rest/v1/category_overrides_view?select=id,curator_name&order=id.desc',
+                        { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } }
+                    )
+                ]);
+                if (!ovResp.ok) return;
+                var overrides = await ovResp.json();
+                var curators = {};
+                if (viewResp.ok) {
+                    (await viewResp.json()).forEach(function(v) { curators[v.id] = v.curator_name; });
+                }
+                if (!overrides.length) return;
+                overrides.forEach(function(o) {
+                    if (o.events) _overrideEvents[o.events.id] = o.events;
+                });
+                var section = document.getElementById('overrides-section');
+                section.style.display = '';
+                document.getElementById('overrides-report').innerHTML =
+                    '<table class="url-table">' +
+                        '<tr><th>Event</th><th>City</th><th>Original</th><th>New Category</th><th>Curator</th><th>Date</th></tr>' +
+                        overrides.map(function(o) {
+                            var ev = o.events || {};
+                            return '<tr>' +
+                                '<td><a href="#" onclick="showEventDetail(' + (ev.id || 0) + ');return false">' + (ev.title || '?') + '</a></td>' +
+                                '<td>' + capitalize(ev.city || '?') + '</td>' +
+                                '<td>' + (o.original_category || '<span style="color:#999">n/a</span>') + '</td>' +
+                                '<td>' + o.category + '</td>' +
+                                '<td>' + (curators[o.id] || '<span style="color:#999">?</span>') + '</td>' +
+                                '<td>' + new Date(o.created_at).toLocaleDateString() + '</td>' +
+                            '</tr>';
+                        }).join('') +
+                    '</table>' +
+                    '<div style="margin-top:8px;font-size:0.85em;color:#666">' + overrides.length + ' override' + (overrides.length === 1 ? '' : 's') + ' total</div>';
+            } catch (e) { /* silently skip if unavailable */ }
+        }
+
         loadReport();
+        loadOverrides();
     </script>
 </body>
 </html>
