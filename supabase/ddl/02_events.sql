@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS events (
   transcript text,          -- Whisper transcript for audio-captured events
   cluster_id text,          -- groups similar events within same timeslot for UI display
   source_urls jsonb,        -- per-source URLs for aggregator attribution links
+  category text,            -- auto-classified bucket (e.g., 'Music & Concerts', 'Arts & Culture')
   created_at timestamptz DEFAULT now()
 );
 
@@ -23,6 +24,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS events_source_source_uid_key ON events (source
 
 -- Index for city filtering
 CREATE INDEX IF NOT EXISTS events_city_idx ON events (city);
+
+-- Index for category filtering
+CREATE INDEX IF NOT EXISTS events_category_idx ON events (category);
 
 -- Enable Row Level Security (public read access)
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;

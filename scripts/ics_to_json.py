@@ -6,9 +6,14 @@ Convert ICS calendar files to JSON format for Supabase ingestion.
 import argparse
 import json
 import re
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
+
+# Ensure scripts/ directory is on the path for sibling imports
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from classify_events import classify_event
 
 
 # Default timezone for converting UTC times
@@ -228,6 +233,9 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
                 source_urls = json.loads(source_urls_raw)
             except json.JSONDecodeError:
                 pass
+
+        # Classify event into category bucket (include description-level matches)
+        category, _confidence = classify_event(title, description, ics_categories=ics_cats, min_confidence='low')
 
         event = {
             'title': title,
