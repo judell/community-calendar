@@ -16,6 +16,7 @@ The gold standard is **iCalendar (ICS) feeds** — a format that machines can re
 - [Pipeline](#pipeline)
 - [Deployment Workflow](#deployment-workflow)
 - [Supabase Setup Notes](#supabase-setup-notes)
+- [Event Classification](#event-classification)
 - [Search and Performance](#search-and-performance)
 - [Personal Picks](#personal-picks)
 - [Event Capture](#event-capture)
@@ -330,6 +331,12 @@ Required for upsert operations:
 ```sql
 ALTER TABLE events ADD CONSTRAINT events_source_uid_unique UNIQUE (source_uid);
 ```
+
+## Event Classification
+
+Events are automatically classified into 10 categories (Music & Concerts, Sports & Fitness, Arts & Culture, etc.) by `scripts/classify_events_anthropic.py`, which runs in CI after each build. The script uses the Anthropic API (Claude Haiku) with batch classification — ~20 events per API call — to categorize all uncategorized future events. It pulls curator overrides from the `category_overrides` table as examples to improve accuracy over time.
+
+Curators can correct misclassified events via the UI. See [docs/curator-guide.md](docs/curator-guide.md#event-categories) for details on categories and the override workflow.
 
 ## Search and Performance
 
