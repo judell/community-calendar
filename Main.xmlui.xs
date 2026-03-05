@@ -68,6 +68,7 @@ function saveCategoryOverride(eventId, category) {
     Authorization: 'Bearer ' + window.authSession?.access_token,
   };
   // Upsert override (on_conflict=event_id)
+  // DB trigger on category_overrides automatically updates events.category
   Actions.callApi({
     method: 'post',
     url: appGlobals.supabaseUrl + '/rest/v1/category_overrides?on_conflict=event_id',
@@ -81,9 +82,8 @@ function saveCategoryOverride(eventId, category) {
       curator_id: window.authUser.id,
     },
     invalidates: [],
+    onSuccess: () => { refreshCounter = refreshCounter + 1; },
   });
-  // DB trigger on category_overrides automatically updates events.category
-  refreshCounter = refreshCounter + 1;
 }
 
 function removePick(pickId) {
