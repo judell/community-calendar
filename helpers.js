@@ -1,33 +1,14 @@
 // Community Calendar Helper Functions
 // Pure functions for filtering, formatting, and deduplication
 
-// --- Category Names (must match Main.xmlui.xs categoryColorMap keys) ---
-var CATEGORY_NAMES = {
-  'Music & Concerts': true,
-  'Sports & Fitness': true,
-  'Arts & Culture': true,
-  'Education & Workshops': true,
-  'Community & Social': true,
-  'Family & Kids': true,
-  'Food & Drink': true,
-  'Health & Wellness': true,
-  'Nature & Outdoors': true,
-  'Religion & Spirituality': true,
-};
-
-// --- Category Color Map ---
-window.categoryColorMap = {
-  'Music & Concerts':        { label: '#6b5a9a', background: '#f0ecf6' },
-  'Sports & Fitness':        { label: '#4a7e6a', background: '#e8f2ec' },
-  'Arts & Culture':          { label: '#9a7d3a', background: '#f6f0e0' },
-  'Education & Workshops':   { label: '#4a6a9a', background: '#e4ecf4' },
-  'Community & Social':      { label: '#9a5a5a', background: '#f4e8e8' },
-  'Family & Kids':           { label: '#9a4a7d', background: '#f4e4f0' },
-  'Food & Drink':            { label: '#9a6a3a', background: '#f4ece0' },
-  'Health & Wellness':       { label: '#3a7e7e', background: '#e0f0ec' },
-  'Nature & Outdoors':       { label: '#4a7e4a', background: '#e4f0e4' },
-  'Religion & Spirituality': { label: '#6a4a9a', background: '#ece4f4' },
-};
+// --- Categories (derived from categories.json, loaded in index.html) ---
+var CATEGORY_NAMES = {};
+window.categoryColorMap = {};
+window._categories.forEach(function(c) {
+  CATEGORY_NAMES[c.name] = true;
+  window.categoryColorMap[c.name] = { label: c.label, background: c.background };
+});
+window.categoryList = window._categories.map(function(c) { return c.name; });
 
 // --- Cluster Colors ---
 const CLUSTER_COLORS = ['#6b9bd2', '#7bc47f', '#d4a04a'];

@@ -60,18 +60,6 @@ function toggleSourceVisibility(source) {
   userSettingsData = window.toggleSourceAndSave(source, userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
 }
 
-window.categoryList = [
-  'Music & Concerts',
-  'Sports & Fitness',
-  'Arts & Culture',
-  'Education & Workshops',
-  'Community & Social',
-  'Family & Kids',
-  'Food & Drink',
-  'Health & Wellness',
-  'Nature & Outdoors',
-  'Religion & Spirituality',
-];
 
 function saveCategoryOverride(eventId, category) {
   if (!window.authSession) return;

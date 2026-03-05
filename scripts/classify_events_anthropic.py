@@ -25,18 +25,9 @@ SUPABASE_URL = "https://dzpdualvwspgqghrysyz.supabase.co"
 SUPABASE_KEY = "sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5"
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 
-CATEGORIES = [
-    "Music & Concerts",
-    "Sports & Fitness",
-    "Arts & Culture",
-    "Education & Workshops",
-    "Community & Social",
-    "Family & Kids",
-    "Food & Drink",
-    "Health & Wellness",
-    "Nature & Outdoors",
-    "Religion & Spirituality",
-]
+CATEGORIES_FILE = os.path.join(os.path.dirname(__file__), '..', 'categories.json')
+with open(CATEGORIES_FILE) as f:
+    CATEGORIES = [c['name'] for c in json.load(f)]
 
 VALID_CATEGORIES = set(CATEGORIES)
 BATCH_SIZE = 20
