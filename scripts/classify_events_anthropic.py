@@ -19,6 +19,7 @@ import os
 import sys
 import urllib.request
 import urllib.parse
+from datetime import datetime, timezone
 
 SUPABASE_URL = "https://dzpdualvwspgqghrysyz.supabase.co"
 SUPABASE_KEY = "sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5"
@@ -207,9 +208,11 @@ def main():
         print(f"Using {len(overrides)} curator overrides as few-shot examples")
 
     # Fetch unclassified events
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%dT00:00:00Z")
     path = (
         "events?select=id,title,location,description,ics_categories,category,source"
         "&category=is.null"
+        "&start_time=gte." + today +
         "&order=start_time.asc"
         "&limit=" + str(args.limit)
     )
