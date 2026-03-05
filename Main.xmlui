@@ -185,13 +185,24 @@
         </HStack>
       </H1>
     </Bookmark>
-    <TextBox
-      id="searchBox"
-      autoFocus="true"
-      placeholder="Search events..."
-      onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; }"
-      marginBottom="$space-2"
-    />
+    <HStack verticalAlignment="center" gap="$space-1" marginBottom="$space-2">
+      <TextBox
+        id="searchBox"
+        autoFocus="true"
+        placeholder="Search events..."
+        onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; }"
+        width="100%"
+      />
+      <Icon
+        when="{filterTerm}"
+        name="close"
+        width="20px"
+        height="20px"
+        cursor="pointer"
+        color="$color-text-tertiary"
+        onClick="searchBox.setValue('')"
+      />
+    </HStack>
     <RadioGroup initialValue="{viewMode}" onDidChange="(val) => viewMode = val">
       <HStack>
         <Option value="all" label="list" />
