@@ -16,6 +16,7 @@
   - [Throughout all phases](#throughout-all-phases)
 - [Duplicates and Event Ordering](#duplicates-and-event-ordering)
 - [Long-Running Events](#long-running-events)
+- [Event Categories](#event-categories)
 - [Working with an AI Agent](#working-with-an-ai-agent)
   - [Getting started with a cloud workspace](#getting-started-with-a-cloud-workspace)
   - [What about Git and the command line?](#what-about-git-and-the-command-line)
@@ -186,6 +187,35 @@ The calendar automatically collapses these long-running events to **show once pe
 - The event remains visible throughout its run, just not every day
 
 This reduces event count significantly (typically 10-15% fewer displayed events) while maintaining weekly visibility of ongoing attractions. Curators don't need to do anything — this happens automatically in the display layer.
+
+---
+
+## Event Categories
+
+Events are automatically classified into 10 categories by an AI model that runs after each daily build:
+
+| Category | Examples |
+|----------|----------|
+| Music & Concerts | live bands, open mic, jazz night |
+| Sports & Fitness | 5K runs, yoga classes, soccer league |
+| Arts & Culture | gallery openings, theater, film screenings |
+| Education & Workshops | lectures, craft classes, tech talks |
+| Community & Social | neighborhood meetings, potlucks, networking |
+| Family & Kids | story time, kids' camps, family festivals |
+| Food & Drink | farmers markets, wine tastings, cooking classes |
+| Health & Wellness | meditation, health screenings, support groups |
+| Nature & Outdoors | hikes, birding walks, garden tours |
+| Religion & Spirituality | services, interfaith events, meditation circles |
+
+**Colored badges** on each event card show its category. Click a badge to filter the calendar to that category.
+
+**Curator overrides.** When the AI gets a category wrong, you can fix it. Sign in, then:
+- Click the **pencil icon** next to an existing category badge to change it
+- Click **+ category** on an uncategorized event to assign one
+
+Your corrections teach the model. The next time it classifies events, it uses your overrides as examples of how to categorize similar events. Over time, the AI learns your community's patterns.
+
+The [health report](https://judell.github.io/community-calendar/report.html) includes a **Category Overrides** section showing all corrections — who changed what, the original classification, and the new one.
 
 ---
 

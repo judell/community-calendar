@@ -1,18 +1,7 @@
 // Code-behind for Main.xmlui
 // All variables and functions here are global (visible to all components)
 
-window.categoryColorMap = {
-  'Music & Concerts':        { label: '#5b4a8a', background: '#e8e0f0' },
-  'Sports & Fitness':        { label: '#3a6e5a', background: '#d6ece2' },
-  'Arts & Culture':          { label: '#8a6d2a', background: '#f0e8d0' },
-  'Education & Workshops':   { label: '#3a5a8a', background: '#d8e4f0' },
-  'Community & Social':      { label: '#8a3a3a', background: '#f0d8d8' },
-  'Family & Kids':           { label: '#8a3a6d', background: '#f0d8e8' },
-  'Food & Drink':            { label: '#8a5a2a', background: '#f0e0d0' },
-  'Health & Wellness':       { label: '#2a6e6e', background: '#d0ece8' },
-  'Nature & Outdoors':       { label: '#3a6e3a', background: '#d6ecd6' },
-  'Religion & Spirituality': { label: '#5a3a8a', background: '#e0d8f0' },
-};
+var categoryColorMap = window.categoryColorMap;
 
 var pickEvent = null;
 var picksData = null;
