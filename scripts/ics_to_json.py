@@ -202,6 +202,10 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
         source_urls_raw = extract_field(event_content, 'X-SOURCE-URLS')
         uid = extract_field(event_content, 'UID')
 
+        # Extract ICS CATEGORIES (raw tags for LLM classification)
+        ics_cats_raw = extract_field(event_content, 'CATEGORIES')
+        ics_categories = [c.strip() for c in ics_cats_raw.split(',')] if ics_cats_raw else []
+
         # Skip if no title or start time
         if not title or not start_time:
             continue
@@ -237,7 +241,8 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
             'source_id': source_id or '',
             'source_uid': uid or '',
             'source_urls': source_urls if source_urls else None,
-            'cluster_id': None
+            'cluster_id': None,
+            'ics_categories': ics_categories if ics_categories else None
         }
         events.append(event)
 
