@@ -192,20 +192,23 @@ This reduces event count significantly (typically 10-15% fewer displayed events)
 
 ## Event Categories
 
-Events are automatically classified into 10 categories by an AI model that runs after each daily build:
+Events are automatically classified into categories by an AI model that runs after each daily build. Categories are defined in [`categories.json`](../categories.json) — the single source of truth for both the UI and the classifier. Categories are currently system-wide (shared across all cities); per-city categories are TBD.
 
 | Category | Examples |
 |----------|----------|
-| Music & Concerts | live bands, open mic, jazz night |
-| Sports & Fitness | 5K runs, yoga classes, soccer league |
 | Arts & Culture | gallery openings, theater, film screenings |
-| Education & Workshops | lectures, craft classes, tech talks |
 | Community & Social | neighborhood meetings, potlucks, networking |
+| Education & Workshops | lectures, craft classes, tech talks |
 | Family & Kids | story time, kids' camps, family festivals |
 | Food & Drink | farmers markets, wine tastings, cooking classes |
+| Government & Civic | city council, planning commission, public hearings |
 | Health & Wellness | meditation, health screenings, support groups |
+| Music & Concerts | live bands, open mic, jazz night |
 | Nature & Outdoors | hikes, birding walks, garden tours |
 | Religion & Spirituality | services, interfaith events, meditation circles |
+| Sports & Fitness | 5K runs, yoga classes, soccer league |
+
+To add a new category, edit `categories.json` — the name, label color, and background color are all defined there. The change automatically propagates to the UI and the classifier.
 
 **Colored badges** on each event card show its category. Click a badge to filter the calendar to that category.
 
