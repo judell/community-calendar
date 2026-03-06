@@ -506,9 +506,11 @@ https://app.ticketmaster.com/discovery/v2/events.json?apikey={KEY}&venueId={VENU
 
 Free API keys are available at [developer.ticketmaster.com](https://developer.ticketmaster.com/products-and-docs/apis/getting-started/) (rate limit: 5 req/sec, 5000/day). Returns JSON with event name, date/time, URL, and images. Requires a scraper to convert to ICS.
 
-**Example:** DPAC (Durham Performing Arts Center, venueId `KovZpa2X8e`) — 507 events. Martin Marietta Center (Raleigh, venueId `369155`) is also on Ticketmaster.
+**Examples:** DPAC (Durham, venueId `KovZpa2X8e`) — 265 events. Martin Marietta Center (Raleigh, venueId `KovZpZAFF1nA`) — 123 events. In Toronto, 8 venues that were previously non-starters (404s, Cloudflare, custom SPAs) yielded ~951 events: Scotiabank Arena (631), History (127), Danforth Music Hall (68), Lee's Palace (49), Massey Hall (38), Horseshoe Tavern (19), Queen Elizabeth Theatre (11), Roy Thomson Hall (8).
 
-**How to find venue IDs:** Search `site:ticketmaster.com "{venue name}"` and extract from the URL, or use the API's venue search endpoint.
+**How to find venue IDs:** Use the API's venue search: `https://app.ticketmaster.com/discovery/v2/venues.json?apikey={KEY}&keyword={name}&countryCode={CC}&stateCode={SC}`. Or search `site:ticketmaster.com "{venue name}"` and extract from the URL.
+
+**Aggregator vs. authoritative source:** We generally prefer first-party venue feeds over aggregators, but Ticketmaster is a warranted exception. Many venues delegate their entire ticketing infrastructure to Ticketmaster — the venue's own website often redirects to TM for purchases. When a venue's site is blocked or has no feed, TM *is* the authoritative source for event listings. Each event's URL links directly to its ticket page, which is where users would end up anyway.
 
 ## Indirection: Find the Data on a Third-Party Platform
 
