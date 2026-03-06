@@ -22,6 +22,45 @@ window.clusterBorder = function(clusterId, filtered) {
   return '3px solid ' + CLUSTER_COLORS[clusterId % CLUSTER_COLORS.length];
 };
 
+// --- Image Resize (client-side, before upload) ---
+// Converts any image (including HEIC via browser decode) to JPEG under maxBytes
+window.resizeImageFile = function(file, maxBytes) {
+  maxBytes = maxBytes || 3500000; // ~3.5MB raw → ~4.8MB base64, under Claude's 5MB limit
+  return new Promise(function(resolve, reject) {
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function() {
+      URL.revokeObjectURL(url);
+      var canvas = document.createElement('canvas');
+      var w = img.width, h = img.height;
+      // Try at full resolution first, then scale down
+      var scale = 1.0;
+      var attempt = function() {
+        canvas.width = Math.round(w * scale);
+        canvas.height = Math.round(h * scale);
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function(blob) {
+          if (!blob) { reject(new Error('Canvas toBlob failed')); return; }
+          if (blob.size <= maxBytes || scale <= 0.2) {
+            resolve(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
+          } else {
+            scale *= 0.7;
+            attempt();
+          }
+        }, 'image/jpeg', 0.85);
+      };
+      attempt();
+    };
+    img.onerror = function() {
+      URL.revokeObjectURL(url);
+      // If browser can't decode (e.g. HEIC on non-Safari), pass through original
+      resolve(file);
+    };
+    img.src = url;
+  });
+};
+
 // --- Audio Recording ---
 window.audioRecorder = null;
 window.audioChunks = [];

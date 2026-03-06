@@ -98,6 +98,8 @@ async function callClaude(content: any[]): Promise<any> {
 }
 
 async function extractEventFromImage(imageBytes: Uint8Array, mediaType: string): Promise<any> {
+  console.log(`Processing image: ${mediaType}, ${imageBytes.length} bytes`);
+
   // Convert bytes to base64 (chunked to avoid stack overflow on large images)
   let binary = '';
   const chunkSize = 8192;
