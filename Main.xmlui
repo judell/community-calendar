@@ -58,8 +58,8 @@
   />
 
   <ChangeListener
-    listenTo="{categoryFilterCounter}"
-    onDidChange="() => searchBox.setValue(categoryFilterValue)"
+    listenTo="{categoryFilter}"
+    onDidChange="categorySelect.setValue(categoryFilter)"
   />
 
   <ChangeListener
@@ -106,9 +106,12 @@
     }}"
   />
 
+  <variable name="hiddenSources" value="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []}" />
+  <variable name="processedEvents" value="{window.filterHiddenSources(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), hiddenSources)}" />
+
   <!-- Dialogs -->
   <SignInDialog id="signInDialog" />
-  <SourcesDialog id="sourcesDialog" events="{events.value}" hiddenSources="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []}" />
+  <SourcesDialog id="sourcesDialog" events="{events.value}" hiddenSources="{hiddenSources}" />
   <CaptureDialog id="captureDialog" />
   <AudioCaptureDialog id="audioCaptureDialog" />
   <PickEditor when="{!!pickEvent}" event="{pickEvent}" onClose="pickEvent = null" onSaved="picks.refetch(); events.refetch(); enrichments.refetch();" />
@@ -135,6 +138,8 @@
   <!-- Main Content -->
   <HStack when="{!!window.cityFilter}" horizontalAlignment="center" width="100%">
   <VStack maxWidth="600px" width="100%">
+    <StickyBox to="top" backgroundColor="$color-surface-0">
+    <VStack gap="$space-2">
     <Bookmark id="topAnchor">
       <H1>
         <HStack width="100%" verticalAlignment="center">
@@ -185,23 +190,38 @@
         </HStack>
       </H1>
     </Bookmark>
-    <HStack verticalAlignment="center" gap="$space-1" marginBottom="$space-2">
-      <TextBox
-        id="searchBox"
-        autoFocus="true"
-        placeholder="Search events..."
-        onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; }"
-        width="100%"
-      />
-      <Icon
-        when="{filterTerm}"
-        name="close"
-        width="20px"
-        height="20px"
-        cursor="pointer"
-        color="$color-text-tertiary"
-        onClick="searchBox.setValue('')"
-      />
+    <HStack verticalAlignment="center" marginBottom="$space-2" flexWrap="wrap">
+      <HStack verticalAlignment="center" gap="$space-1" width="45%">
+        <TextBox
+          id="searchBox"
+          autoFocus="true"
+          placeholder="Search events..."
+          onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; }"
+          width="100%"
+        />
+        <Icon
+          when="{filterTerm}"
+          name="close"
+          width="20px"
+          height="20px"
+          cursor="pointer"
+          color="$color-text-tertiary"
+          onClick="searchBox.setValue(''); categorySelect.setValue(''); categoryFilter = ''"
+        />
+      </HStack>
+      <SpaceFiller />
+      <Select
+        id="categorySelect"
+        placeholder="All categories"
+        clearable="true"
+        dropdownHeight="520px"
+        onDidChange="(val) => { categoryFilter = val || ''; }"
+        width="45%"
+      >
+        <Items data="{window.getActiveCategories(processedEvents)}">
+          <Option value="{$item.name}" label="{$item.label}" />
+        </Items>
+      </Select>
     </HStack>
     <RadioGroup initialValue="{viewMode}" onDidChange="(val) => viewMode = val">
       <HStack>
@@ -210,9 +230,11 @@
         <Option when="{window.authUser}" value="picks" label="my picks" />
       </HStack>
     </RadioGroup>
+    </VStack>
+    </StickyBox>
     <BigCalendar
       when="{events.loaded && viewMode === 'calendar'}"
-      events="{window.toBigCalendarEvents(window.filterHiddenSources(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []), filterTerm)}"
+      events="{window.toBigCalendarEvents(processedEvents, filterTerm, categoryFilter)}"
       height="600px"
     />
     <Spinner when="{!events.loaded && viewMode === 'all'}" />
@@ -224,7 +246,7 @@
       marginBottom="$space-2"
       onClick="const prevIndex = window._morePrevIndex ?? 0; displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
     />
-    <List id="eventsList" when="{events.loaded && viewMode === 'all'}" data="{window.getPagedEvents(window.filterHiddenSources(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []), filterTerm, displayStartIndex, 50)}" fixedItemSize="true" limit="50">
+    <List id="eventsList" when="{events.loaded && viewMode === 'all'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, 50, categoryFilter)}" fixedItemSize="true" limit="50">
       <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
     </List>
     <Button

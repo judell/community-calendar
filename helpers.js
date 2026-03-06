@@ -9,6 +9,11 @@ window._categories.forEach(function(c) {
   window.categoryColorMap[c.name] = { label: c.label, background: c.background };
 });
 window.categoryList = window._categories.map(function(c) { return c.name; });
+window.getActiveCategories = function(events) {
+  var counts = {};
+  (events || []).forEach(function(e) { if (e.category) counts[e.category] = (counts[e.category] || 0) + 1; });
+  return window.categoryList.filter(function(c) { return counts[c]; }).map(function(c) { return { name: c, label: c + ' (' + counts[c] + ')' }; });
+};
 
 // --- Cluster Colors ---
 const CLUSTER_COLORS = ['#6b9bd2', '#7bc47f', '#d4a04a'];
@@ -59,15 +64,15 @@ window.getRecordingFile = function() {
 };
 
 // Filter events by search term (searches title, location, source, and description)
-function filterEvents(events, term) {
+function filterEvents(events, term, category) {
   if (!events) return events || [];
-  if (!term) return events;
-  // Check if term is an exact category name
-  if (CATEGORY_NAMES[term]) {
-    return events.filter(e => e.category === term);
+  var result = events;
+  if (category) {
+    result = result.filter(e => e.category === category);
   }
+  if (!term) return result;
   const lower = term.toLowerCase();
-  return events.filter(e =>
+  return result.filter(e =>
     (e.title && e.title.toLowerCase().includes(lower)) ||
     (e.location && e.location.toLowerCase().includes(lower)) ||
     (e.source && e.source.toLowerCase().includes(lower)) ||
@@ -77,8 +82,8 @@ function filterEvents(events, term) {
 
 // Return a fixed-size page from a start index.
 // Uses one-item overlap so prior page's last item is first on next page.
-function getPagedEvents(events, term, startIndex, pageSize) {
-  const filtered = filterEvents(events, term) || [];
+function getPagedEvents(events, term, startIndex, pageSize, category) {
+  const filtered = filterEvents(events, term, category) || [];
   const size = pageSize || 50;
   const index = Number.isFinite(startIndex) ? Math.max(0, startIndex) : 0;
   const step = Math.max(1, size - 1);
@@ -996,8 +1001,8 @@ function parseLocalTime(ts) {
   return new Date(stripped);
 }
 
-function toBigCalendarEvents(events, term) {
-  var filtered = filterEvents(events, term) || [];
+function toBigCalendarEvents(events, term, category) {
+  var filtered = filterEvents(events, term, category) || [];
   return filtered.map(function(e) {
     return {
       title: e.title || '',
@@ -1013,8 +1018,8 @@ function toBigCalendarEvents(events, term) {
 if (typeof window !== 'undefined') {
   window.toggleDay = toggleDay;
   var _filterEvents = filterEvents;
-  window.filterEvents = function(events, term) {
-    return window.xsTrace ? window.xsTrace("filterEvents", function() { return _filterEvents(events, term); }) : _filterEvents(events, term);
+  window.filterEvents = function(events, term, category) {
+    return window.xsTrace ? window.xsTrace("filterEvents", function() { return _filterEvents(events, term, category); }) : _filterEvents(events, term, category);
   };
   window.getPagedEvents = getPagedEvents;
   window.getDescriptionSnippet = getDescriptionSnippet;

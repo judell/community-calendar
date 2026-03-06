@@ -3,16 +3,14 @@
 
 var categoryColorMap = window.categoryColorMap;
 
+var categoryFilter = '';
 var pickEvent = null;
 var picksData = null;
 var enrichmentsData = null;
 var refreshCounter = 0;
-var categoryFilterValue = null;
-var categoryFilterCounter = 0;
 
 function setCategoryFilter(category) {
-  categoryFilterValue = category;
-  categoryFilterCounter = categoryFilterCounter + 1;
+  categoryFilter = category || '';
 }
 
 function togglePick(event) {
