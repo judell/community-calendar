@@ -46,6 +46,8 @@ SOURCE_NAMES = {
     # Ticketmaster venues - Raleigh-Durham
     'dpac': 'DPAC',
     'martin_marietta': 'Martin Marietta Center',
+    # Ticketmaster venues - Toronto
+    'lees_palace': "Lee's Palace",
     'meetup_pence_art': 'Meetup: Pence Art Programs',
     'meetup_art_in_action': 'Meetup: Art in Action',
     'meetup_mindful': 'Meetup: Mindful Embodied Spirituality',

@@ -463,8 +463,19 @@ jobs:
         curl -sL "https://golatindance.com/events/?ical=1" -o golatindance.ics || true
         curl -sL "https://boulderzclimbing.com/events/?ical=1" -o boulderzclimbing.ics || true
         curl -sL "https://www.torontodance.com/events/?ical=1" -o torontodance.ics || true
+        # Ticketmaster venues
+        python ../../scrapers/ticketmaster.py --venue-id KovZpZAFFE1A --name "Scotiabank Arena" --timezone America/Toronto -o scotiabank_arena.ics || true
+        python ../../scrapers/ticketmaster.py --venue-id KovZ917AJ4f --name "History" --timezone America/Toronto -o history.ics || true
+        python ../../scrapers/ticketmaster.py --venue-id KovZpa3yBe --name "Danforth Music Hall" --timezone America/Toronto -o danforth_music_hall.ics || true
+        python ../../scrapers/ticketmaster.py --venue-id KovZpZAdIFJA --name "Lee's Palace" --timezone America/Toronto -o lees_palace.ics || true
+        python ../../scrapers/ticketmaster.py --venue-id KovZpZAFnlnA --name "Massey Hall" --timezone America/Toronto -o massey_hall.ics || true
+        python ../../scrapers/ticketmaster.py --venue-id KovZpZAdt7JA --name "Horseshoe Tavern" --timezone America/Toronto -o horseshoe_tavern.ics || true
+        python ../../scrapers/ticketmaster.py --venue-id KovZpZAdIFtA --name "Queen Elizabeth Theatre" --timezone America/Toronto -o queen_elizabeth_theatre.ics || true
+        python ../../scrapers/ticketmaster.py --venue-id KovZpZAFl6JA --name "Roy Thomson Hall" --timezone America/Toronto -o roy_thomson_hall.ics || true
         cd ../..
         python scripts/combine_ics.py --input-dir cities/toronto --output cities/toronto/combined.ics --name "Toronto Community Calendar"
+      env:
+        TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
 
     # ==========================================
     # Raleigh-Durham

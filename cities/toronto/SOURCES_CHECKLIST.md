@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (83 sources)
+## Currently Implemented (97 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -20,6 +20,18 @@
 | Buddies in Bad Times Theatre | WordPress Tribe ICS | 4 | LGBTQ+ theatre |
 | Factory Theatre | WordPress Tribe ICS | 9 | Canadian theatre |
 | High Park Nature Centre | WordPress Tribe ICS | 10 | Outdoor/nature programs |
+
+### Ticketmaster Venues (via Discovery API)
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Scotiabank Arena | Ticketmaster scraper | ~631 | Raptors, Leafs, concerts |
+| History | Ticketmaster scraper | ~127 | Music venue |
+| Danforth Music Hall | Ticketmaster scraper | ~68 | Indie/rock concerts |
+| Lee's Palace | Ticketmaster scraper | ~49 | Indie music |
+| Massey Hall | Ticketmaster scraper | ~38 | Iconic concert hall |
+| Horseshoe Tavern | Ticketmaster scraper | ~19 | Legendary music venue |
+| Queen Elizabeth Theatre | Ticketmaster scraper | ~11 | Performing arts |
+| Roy Thomson Hall | Ticketmaster scraper | ~8 | TSO home venue |
 
 ### Universities
 | Source | Type | Events | Notes |
@@ -151,7 +163,7 @@
 | TIFF | No ICS/RSS found |
 | Mirvish | No feed found |
 | Harbourfront Centre | RSS feed exists but empty |
-| Massey Hall / Roy Thomson Hall | 404 |
+| ~~Massey Hall / Roy Thomson Hall~~ | ~~404~~ **Implemented** via Ticketmaster Discovery API |
 | Canadian Opera Company | 526 error |
 | do416.to | No feed |
 | To Do Canada | 403 Forbidden |
@@ -159,9 +171,9 @@
 | Dice.fm | No Toronto page |
 | Resident Advisor | 403 |
 | The Rex | Squarespace but not events collection type |
-| Horseshoe Tavern | Webflow, no feed |
-| Lee's Palace | Custom app, no feed |
-| Danforth Music Hall | Custom Chakra UI app, no feed |
+| ~~Horseshoe Tavern~~ | ~~Webflow, no feed~~ **Implemented** via Ticketmaster Discovery API |
+| ~~Lee's Palace~~ | ~~Custom app, no feed~~ **Implemented** via Ticketmaster Discovery API |
+| ~~Danforth Music Hall~~ | ~~Custom Chakra UI app, no feed~~ **Implemented** via Ticketmaster Discovery API |
 | TSO | No feed found |
 | Canadian Stage | No WordPress Tribe ICS |
 | Tarragon Theatre | No WordPress Tribe ICS |
