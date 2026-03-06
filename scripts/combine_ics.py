@@ -43,6 +43,9 @@ SOURCE_NAMES = {
     'meetup_mosaics': 'Meetup: Mosaics',
     'meetup_intercultural': 'Meetup: Intercultural Mosaics',
     'meetup_board_games': 'Meetup: Yolo Board Game Gathering',
+    # Ticketmaster venues - Raleigh-Durham
+    'dpac': 'DPAC',
+    'martin_marietta': 'Martin Marietta Center',
     'meetup_pence_art': 'Meetup: Pence Art Programs',
     'meetup_art_in_action': 'Meetup: Art in Action',
     'meetup_mindful': 'Meetup: Mindful Embodied Spirituality',

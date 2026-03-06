@@ -1,6 +1,6 @@
 # Raleigh-Durham (Research Triangle) Calendar Source Checklist
 
-## Currently Implemented (75 sources)
+## Currently Implemented (86 sources)
 
 ### Universities
 | Source | Type | Events | Notes |
@@ -8,6 +8,9 @@
 | UNC Chapel Hill | Localist ICS | ~461 | All campus events |
 | NC State University | Localist ICS | ~1,297 | All campus events |
 | Duke University | Localist ICS | ~40 | All campus events |
+| NC State Gregg Museum | Localist group ICS | ~35 | Art & design exhibitions, talks |
+| NC State African American Cultural Center | Localist group ICS | ~28 | Cultural programming, lectures |
+| Duke Arts Performances | Bedework ICS | ~15 | Duke Arts Presents series (complements duke_arts scraper) |
 
 ### Museums & Cultural Resources
 | Source | Type | Events | Notes |
@@ -19,6 +22,11 @@
 | Sarah P. Duke Gardens | WordPress Tribe ICS | ~30 | Duke campus |
 | NC Museum of Natural Sciences | WordPress Tribe ICS | ~30 | Raleigh; campfire art, nature detectives, etc. |
 
+### Arts & Culture
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| United Arts Wake County | WordPress Tribe ICS | ~30 | Raleigh arts umbrella org — grants, events, programs |
+
 ### Community Organizations
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
@@ -29,6 +37,11 @@
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Durham County Library | LibCal ICS | ~500 | Programs, workshops, kids events |
+
+### Parks & Recreation
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Durham Parks & Recreation | CivicPlus ICS | ~123 | Programs, engagement, community events |
 
 ### Government
 | Source | Type | Events | Notes |
@@ -78,6 +91,24 @@
 | Carolina Performing Arts | Custom scraper (JSON API) | ~18 | UNC Memorial Hall, REST API |
 | Duke Arts | Custom scraper (FacetWP HTML) | ~85 | Duke campus events, concerts, dance, film, workshops |
 | Raleigh Little Theatre | Custom scraper (show pages) | ~77 | Performance schedule parsing from date ranges + show times |
+
+### Sports
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| NC State Athletics | Sidearm API ICS | ~297 | All sports composite; gopack.com |
+| UNC Athletics | Sidearm API ICS | ~405 | All sports composite; goheels.com |
+| Duke Athletics | Sidearm API ICS | ~262 | All sports composite; goduke.com |
+| NC Courage (NWSL) | fixtur.es ICS | ~106 | Women's soccer; auto-updates with scores |
+
+### Faith Communities
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Islamic Association of Raleigh | WordPress Tribe ICS | ~1 | Community events, programs |
+
+### Bookstores
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Quail Ridge Books | Eventbrite via eb-to-ical | ~616 | Author events, readings; Raleigh |
 
 ### Activism & Community (Phase 3 feeds)
 | Source | Type | Events | Notes |
@@ -175,9 +206,13 @@
 | ~~Raleigh Little Theatre~~ | ~~raleighlittletheatre.org/shows-and-events/~~ | ~~WordPress~~ | **Implemented** — raleigh_little_theatre.py scraper, ~77 performances from show pages |
 | ~~Durham Resistance Hub~~ | ~~durhamresistance.com/calendar~~ | ~~Squarespace + Google Cal~~ | **Implemented** — 4 embedded Google Calendar ICS feeds, ~1,132 events |
 | ~~Haw River Ballroom~~ | ~~hawriverballroom.com/calendar~~ | ~~Squarespace~~ | Covered by catscradle.py RSS (shared venue network) |
-| DPAC | dpacnc.com/events/all | Custom/Ticketmaster | **Dead end** — blocks non-browser requests (JS SPA, 0 bytes from curl) |
+| ~~DPAC~~ | ~~dpacnc.com/events/all~~ | ~~Ticketmaster (venueId KovZpa2X8e)~~ | **Implemented** — Ticketmaster Discovery API scraper, ~265 events |
 | The Pour House (Raleigh) | pourhouseraleigh.com | Webflow | **Dead end** — minimal event data, Webflow platform |
-| NC Museum of Art | ncartmuseum.org/events-and-exhibitions/ | WordPress (MEC) | No public ICS from MEC; covered by DNCR Localist feed |
+| NC Museum of Art | ncartmuseum.org/events-and-exhibitions/ | WordPress (MEC) | Per-event ICS at `?method=ical&id={id}` works; post IDs via `/wp-json/wp/v2/mec-events`; also covered by DNCR |
+| ~~Martin Marietta Center~~ | ~~martinmariettacenter.com/events~~ | ~~Ticketmaster (venueId KovZpZAFF1nA)~~ | **Implemented** — Ticketmaster Discovery API scraper, ~123 events |
+| Goodnights Comedy | goodnightscomedy.com/events | SeatEngine | HTML listing + JSON-LD per show at /shows/{id} |
+| Flyleaf Books | flyleafbooks.com/upcoming-events | IndieCommerce (Drupal) | HTML scrape needed; UNC Localist venue exists but currently empty |
+| Regulator Bookshop | regulatorbookshop.com/events/calendar | IndieCommerce (Drupal) | HTML scrape needed; very low event volume currently |
 | NC Museum of History | ncmuseumofhistory.org/events | Drupal | No ICS feed; covered by DNCR Localist feed |
 | Durham Arts Council | durhamarts.org/dac-art-events/ | WordPress (custom) | **Dead end** — no event links in HTML, minimal content |
 | ~~American Tobacco Campus~~ | ~~americantobaccocampus.com~~ | ~~WordPress Tribe~~ | ICS works — moved to Implemented |
@@ -189,7 +224,7 @@
 | Museum of Life and Science | lifeandscience.org/explore/events/ | WordPress (Formidable Forms) | **Dead end** — RSS feed 404, only shows daily schedule (not events) |
 | NC Museum of Natural Sciences exhibits | naturalsciences.org/calendar/ | WordPress | Per-event iCal export only; main ICS already captured |
 | Boxyard RTP | boxyard.rtp.org/calendar/ | Custom | Per-event iCal export only |
-| Durham Parks & Recreation | dprplaymore.org/Calendar.aspx | CivicEngage | Deferred — may have iCal subscription |
+| ~~Durham Parks & Recreation~~ | ~~dprplaymore.org~~ | ~~CivicPlus~~ | **Implemented** — 123 events via CivicPlus ICS |
 | Durham People's Alliance | durhampa.org/calendar | NationBuilder | Deferred — NationBuilder API available |
 | Ellerbee Creek Watershed | ellerbecreek.org | Squarespace | **Dead end** — no events page at all |
 | ~~Keep Durham Beautiful~~ | ~~Squarespace~~ | ~~Implemented~~ | Moved to Implemented |
@@ -207,7 +242,7 @@
 | PNC Arena | Custom + Ticketmaster, no public feeds |
 | Red Hat Amphitheater | Custom, no feeds |
 | ~~NC Museum of Natural Sciences~~ | Now returns 30 events — moved to Implemented |
-| Quail Ridge Books | Custom bookstore platform, no feeds |
+| ~~Quail Ridge Books~~ | **Implemented** — 616 events via Eventbrite eb-to-ical converter |
 | ~~Eno River Association~~ | Google Calendar ID extracted — moved to Implemented |
 | Raleigh Chamber | Atlas SPA (web.raleighchamber.org), no server-side API |
 | Cary Chamber | Atlas SPA (web.carychamber.com), no server-side API |
@@ -307,7 +342,7 @@
 - **Durham Resistance Hub**: 4 embedded Google Calendar ICS feeds extracted from Squarespace page. ~1,132 activism events.
 
 **Dead ends investigated:**
-- DPAC: JS SPA blocks non-browser requests (0 bytes from curl with all headers)
+- ~~DPAC: JS SPA blocks non-browser requests~~ — **Solved** via Ticketmaster Discovery API scraper
 - Museum of Life and Science: RSS feed 404, only daily schedule (not events)
 - Durham Arts Council: No event links in HTML
 - Ellerbee Creek: No events page at all
@@ -317,7 +352,7 @@
 **Deferred:**
 - INDY Week Calendar, Triangle on the Cheap, Durham Parks & Rec, Durham People's Alliance
 
-**Total: 82 sources, ~12,000+ events**
+**Total: 88 sources, ~14,400+ events**
 
 ---
 
@@ -327,8 +362,8 @@ Track progress on topical searches to find long-tail community sources.
 
 ### Completed
 
-- Music venues — All top venues (Cat's Cradle, Motorco, Haw River Ballroom, Pour House, DPAC) tested; none have ICS feeds. All need scrapers.
-- Performing arts — Carolina Performing Arts, PlayMakers, Raleigh Little Theatre, Duke Performances: no ICS. DPAC: Ticketmaster only.
+- Music venues — All top venues (Cat's Cradle, Motorco, Haw River Ballroom, Pour House, DPAC) tested; none have ICS feeds. Cat's Cradle/Motorco/Haw River have scrapers. DPAC via Ticketmaster API.
+- Performing arts — Carolina Performing Arts, PlayMakers, Raleigh Little Theatre, Duke Performances: no ICS but scrapers built. DPAC + Martin Marietta Center: Ticketmaster API.
 - Food & drink — Gizmo Brew Works (Google Calendar, implemented). Ponysaurus + Fullsteam tested; Squarespace/Craft CMS, no ICS. Durham Food Hall `?ical=1` returns HTML.
 - Kids / family — Museum of Life and Science (WordPress, no Tribe ICS). Marbles, Kidzu: no ICS. Scrap Exchange: Squarespace.
 - Science / research — NIEHS, RTI: no public ICS. DNCR feed already covers state museums. NC Natural Sciences now implemented.
@@ -350,6 +385,35 @@ Track progress on topical searches to find long-tail community sources.
 - Play & Games — Triangle Board Games & Bars Meetup (10), The Gathering Place Games (50). Kitchen Table board game cafe (Squarespace, no ICS). Trivia companies (Hammered, Not Rocket Science) have venue listings, not event calendars.
 - Ideas & Learning — Morehead Planetarium (25), NC Humanities Council (30), Durham Writers Group (10), American Tobacco Campus (50). Bookstores (Quail Ridge, Regulator, Flyleaf, Letters) all no ICS. NC Writers' Network skipped (statewide, most events outside Triangle). Wake/Chapel Hill libraries on LibCal but subscriptions not responding.
 - Technology & Work — 8 new Meetup groups: Raleigh AI/ML/CV (10), All Things AI (7), Data Science Raleigh (10), Modern Web Triangle (3), Triangle DevOps (1), Splat Space (10), Cloud Security Alliance (1), Triangle Transitional Networking (1). CED skipped (national conferences). Coworking spaces (Frontier, Loading Dock) have no ICS. Many additional tech Meetups (TRINUG, Triangle JS, Rust, PHP, security groups) returned 0 events.
+
+### 2026-03-05: Discovery pass #2 — oblique approaches
+
+**New curl-and-done sources found (11 total):**
+- **Sidearm Sports API**: Discovered `/api/v2/Calendar/subscribe?type=ics` endpoint by searching minified Nuxt.js bundles. Works for all three Triangle schools: NC State (297), UNC (405), Duke (262).
+- **fixtur.es**: ICS feeds for pro/semi-pro sports. NC Courage NWSL (106 events).
+- **eb-to-ical**: Third-party Eventbrite-to-ICS converter. Quail Ridge Books (616 events via organizer ID 17882467120).
+- **CivicPlus iCalendar module**: Durham Parks & Rec (123 events from catID=22). Found by navigating to `/iCalendar.aspx` which lists all category feeds.
+- **Localist group sub-calendars**: NC State Gregg Museum (35) and AACC (28) via `/group/{slug}/calendar.ics`.
+- **Duke Bedework**: Duke Arts Performances (15 events) via `calendar.duke.edu/events/index.ics?gf[]=Duke+Arts`.
+- **WordPress Tribe probes**: United Arts Wake County (30), Islamic Association of Raleigh (1).
+
+**Oblique approaches that worked:**
+- Sidearm: source-diving minified JS to find undocumented API
+- Eventbrite: venue has no feed → find their Eventbrite organizer page → convert via eb-to-ical
+- CivicPlus: calendar page has no obvious feed → navigate to `/iCalendar.aspx` for hidden category feeds
+- Localist: huge university calendar → extract specific group sub-feeds
+- Ticketmaster Discovery API: DPAC (~265 events) and Martin Marietta Center (~123 events) — **implemented**
+
+**Confirmed dead ends:**
+- NC Theatre: bankrupt, 0 current events
+- CAM Raleigh: Tribe Events installed but empty
+- ERUUF: Joomla RS Events Pro ICS URL returns HTML
+- Mallarmé Music, TriangleSings, Actors Improv: calendar plugin feeds broken or disabled
+- NC Museum of Art, Artspace, Frontier RTP: MEC `?mec-ical-feed=1` returns HTML (per-event ICS workaround exists for NCMA)
+- Wake County / UNC Libraries LibCal: calendar IDs not extractable from rendered page
+- Flyleaf / Regulator Books: IndieCommerce has no feed; UNC Localist venue for Flyleaf exists but currently empty
+
+**Total: 86 sources, ~14,000+ events**
 
 ### Not Yet Done
 
@@ -399,35 +463,43 @@ All topical categories have been searched. Remaining gaps are scraper candidates
 
 **Remaining Gaps (need scrapers or not viable):**
 - Music venues (Cat's Cradle, Motorco, Lincoln Theatre, etc.) — need scrapers
-- DPAC — Ticketmaster integration, no ICS
+- ~~DPAC~~ — **Implemented** via Ticketmaster Discovery API
 - Bookstores (Flyleaf, Regulator) — Drupal IndieCommerce, need scraper
 - PlayMakers Rep — Tribe ICS broken
 
 ---
 
-## Coverage Assessment (2026-02-16)
+## Coverage Assessment (2026-03-05)
 
-With ~65 active sources and ~2,800+ future events, this is likely the most comprehensive open calendar aggregation for the Triangle region. Alternatives (Indy Week listings, N&O events, Eventbrite, Facebook Events) are curated subsets or platform-locked.
+With 99 active sources and ~14,400+ events, this is the most comprehensive open calendar aggregation for the Triangle region.
 
 ### Strengths
-- Strong university coverage (Duke, UNC, NC State)
-- ~20 Meetup groups across tech, outdoors, social
+- Strong university coverage (Duke, UNC, NC State main calendars + sub-calendars for Gregg Museum, AACC, Duke Arts)
+- College athletics (NC State, UNC, Duke — all via Sidearm API, ~964 events)
+- Pro sports (NC Courage NWSL via fixtur.es)
+- ~25 Meetup groups across tech, outdoors, social
 - Music venues via custom scrapers (Cat's Cradle, Motorco, Carolina Theatre)
-- Performing arts (Carolina Performing Arts, Raleigh Little Theatre, Duke Arts)
-- Nature/outdoors (Eno River, Wake Audubon, New Hope Bird Alliance, Triangle Land, NC Botanical)
-- Museums (Nasher, Ackland, NC Natural Sciences, Morehead Planetarium)
-- Government (3 Legistar instances, Durham gov, NC Cultural Resources)
-- Community orgs (Durham Resistance, LGBTQ Center, animal rescues)
+- Performing arts (Carolina Performing Arts, Raleigh Little Theatre, Duke Arts, Duke Performances, DPAC, Martin Marietta Center)
+- Nature/outdoors (Eno River, Wake Audubon, New Hope Bird Alliance, Triangle Land, NC Botanical, Durham Parks & Rec)
+- Museums (Nasher, Ackland, NC Natural Sciences, Morehead Planetarium, Gregg Museum)
+- Government (3 Legistar instances, Durham gov, Durham Parks & Rec, NC Cultural Resources)
+- Community orgs (Durham Resistance, LGBTQ Center, United Arts Wake, animal rescues)
+- Bookstores (Quail Ridge Books via Eventbrite)
+- Faith (Islamic Association of Raleigh)
 - Breweries (Ponysaurus, Gizmo Brew Works)
 
 ### Known Gaps
 
-**Raleigh underrepresented** — most sources skew Durham/Chapel Hill. Missing: Raleigh Parks & Rec, Raleigh Convention Center, CAM Raleigh, Raleigh City Farm, Visual Art Exchange.
+~~**Major venues**~~ — **Implemented** via Ticketmaster Discovery API: DPAC (~265 events), Martin Marietta Center (~123 events).
 
-**Major venues (platform-gated)** — DPAC (Ticketmaster), PNC Arena, Durham Bulls (MiLB), Red Hat Amphitheater.
+**Comedy** — Goodnights Comedy (SeatEngine, ~34 events via HTML scrape + JSON-LD). Needs scraper.
 
-**Libraries** — Only Durham County Library. Wake County (wakegov.libcal.com) and Chapel Hill Public Library not yet added.
+**Bookstores** — Flyleaf Books and Regulator Bookshop (IndieCommerce/Drupal, no feeds). Would need HTML scrapers.
 
-**Parks & Rec** — Durham, Raleigh, Cary, Chapel Hill all run programs we're not capturing.
+**Museums** — NC Museum of Art events available via per-event ICS (`?method=ical&id={id}` + WP REST API for IDs). Would need scraper to aggregate.
 
-**Untapped categories** — Farmers markets, food events, art galleries, comedy venues, faith-based community events (concerts, fundraisers, community meals).
+**Libraries** — Only Durham County Library. Wake County and UNC Libraries on LibCal but calendar IDs not extractable.
+
+**Raleigh civic** — City of Raleigh (Drupal, no ICS), Raleigh Parks & Rec (not on CivicPlus), CAM Raleigh (Tribe Events installed but empty).
+
+**Faith** — Many churches on Planning Center (Church Center) which supports ICS but requires browser interaction to get subscribe URL. ShulCloud synagogues similar.

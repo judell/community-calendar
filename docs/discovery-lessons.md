@@ -39,6 +39,12 @@ Real-world lessons from source discovery across cities. These complement the str
 - [Squarespace Per-Event ICS Aggregation](#squarespace-per-event-ics-aggregation)
 - [Faith Communities Are a Rich Source Category](#faith-communities-are-a-rich-source-category)
 - [Sidearm Sports for NCAA Athletics](#sidearm-sports-for-ncaa-athletics)
+- [Eventbrite-to-ICS via eb-to-ical](#eventbrite-to-ics-via-eb-to-ical)
+- [fixtur.es for Pro/Semi-Pro Sports Teams](#fixtures-for-prosemi-pro-sports-teams)
+- [CivicPlus Municipal Calendars](#civicplus-municipal-calendars)
+- [Localist Group/Venue Sub-Calendars](#localist-groupvenue-sub-calendars)
+- [MEC Per-Event ICS as Workaround](#mec-per-event-ics-as-workaround)
+- [Ticketmaster Discovery API for Major Venues](#ticketmaster-discovery-api-for-major-venues)
 - [Indirection: Find the Data on a Third-Party Platform](#indirection-find-the-data-on-a-third-party-platform)
 - [LibCal Library Calendars](#libcal-library-calendars)
 - [CampusLabs University Calendars](#campuslabs-university-calendars)
@@ -410,15 +416,99 @@ Houses of worship are underappreciated event sources. They host concerts, lectur
 
 ## Sidearm Sports for NCAA Athletics
 
-Universities with NCAA athletics often use Sidearm Sports for their athletics website. Sidearm exposes a composite ICS feed covering all sports:
+Universities with NCAA athletics often use Sidearm Sports for their athletics website. Sidearm exposes a composite ICS feed covering all sports. There are two URL patterns depending on the platform version:
 
+**New platform (Nuxt.js-based, 2024+):**
+```
+https://{athletics-domain}/api/v2/Calendar/subscribe?type=ics
+```
+Optional query params: `sportId=<N>` (filter by sport), `scheduleId=<N>` (specific season), `locationIndicator=HOME` or `AWAY`.
+
+**Legacy platform:**
 ```
 https://{athletics-domain}/calendar.ashx/calendar.ics
 ```
+Note: legacy URLs may redirect to `/sorry.ashx` (bot protection) on sites that have migrated to the new platform.
 
-This is a high-volume source. MSU Red Hawks Athletics returned 176 events covering basketball, baseball, softball, lacrosse, soccer, swimming, track, and more — all from a single curl command.
+This is a high-volume source. NC State (gopack.com) returned 297 events, UNC (goheels.com) 405, Duke (goduke.com) 262 — all from a single curl command each.
 
-**How to detect:** Athletics sites on Sidearm have URLs like `montclairathletics.com` or `{mascot}.{school}.edu`. View source and look for `sidearm` in script URLs.
+**How to detect:** Athletics sites on Sidearm have URLs like `montclairathletics.com`, `gopack.com`, `goheels.com`, or `goduke.com`. View source and look for `sidearm` in script URLs or `sidearmsports` in CSS/JS paths.
+
+**How the new API URL was found:** The ICS endpoint was discovered by searching minified Nuxt.js bundles (`/_nuxt/*.js`) for "Calendar/subscribe". The Sidearm `/api/v2/Calendar/subscribe` pattern works across all schools on the new platform.
+
+## Eventbrite-to-ICS via eb-to-ical
+
+When a venue uses Eventbrite for ticketing but has no ICS feed on their own site, the third-party service [eb-to-ical](https://eb-to-ical.daylightpirates.org/) converts any Eventbrite organizer page into an ICS subscription feed:
+
+```
+https://eb-to-ical.daylightpirates.org/eventbrite-organizer-ical?organizer={ORGANIZER_ID}
+```
+
+**How to find the organizer ID:** Search `site:eventbrite.com "{venue name}"` and look for the organizer page URL pattern `eventbrite.com/o/{name}-{ID}/`. The numeric suffix is the organizer ID.
+
+**Example:** Quail Ridge Books (Raleigh) — their IndieCommerce site has no feed, but their Eventbrite organizer page (`17882467120`) yields 616 events via eb-to-ical. Source: [eb-to-ical GitHub](https://github.com/diafygi/eb-to-ical).
+
+## fixtur.es for Pro/Semi-Pro Sports Teams
+
+[fixtur.es](https://fixtur.es/) provides auto-updating ICS feeds for professional and semi-pro sports teams:
+
+```
+webcal://ics.fixtur.es/v2/{team-slug}.ics
+```
+
+Feeds include scores for completed games and update automatically. Find team slugs by searching the fixtur.es site.
+
+**Example:** NC Courage (NWSL) — 106 events from `https://ics.fixtur.es/v2/north-carolina-courage.ics`.
+
+## CivicPlus Municipal Calendars
+
+Cities and agencies using CivicPlus (CivicEngage) expose ICS feeds per calendar category. Look for an "iCalendar" or "Subscribe" link on the calendar page, or navigate directly to `/iCalendar.aspx` to see all available category feeds:
+
+```
+https://{domain}/common/modules/iCalendar/iCalendar.aspx?catID={N}&feed=calendar
+```
+
+**Example:** Durham Parks & Recreation (`dprplaymore.org`) — 123 events from catID=22. The `/iCalendar.aspx` page lists all categories: Parks & Recreation, Special Events, Teen Zone, etc.
+
+## Localist Group/Venue Sub-Calendars
+
+Universities on Localist (Concept3D) have group and venue sub-calendars with their own ICS feeds:
+
+```
+https://calendar.{school}.edu/group/{group_slug}/calendar.ics
+```
+
+This is valuable for extracting specific departments or venues from large university calendars that may have thousands of events.
+
+**Examples:** NC State Gregg Museum of Art & Design (35 events), NC State African American Cultural Center (28 events) — both extracted as sub-feeds from the main NC State Localist calendar.
+
+**How to find groups:** Browse the university calendar site for department/group pages, or try `/groups` if the Localist instance supports it.
+
+## MEC Per-Event ICS as Workaround
+
+When MEC's global ICS feed (`?mec-ical-feed=1`) returns HTML instead of ICS (common), individual events can still be exported:
+
+```
+https://example.com/?method=ical&id={POST_ID}
+```
+
+Combine with the WP REST API to get post IDs: `https://example.com/wp-json/wp/v2/mec-events?per_page=100` returns JSON with post IDs. Then fetch each event's ICS individually.
+
+**Example:** NC Museum of Art — global MEC feed broken, but per-event ICS at `?method=ical&id={id}` works. Individual event pages also have JSON-LD with `startDate`/`endDate`.
+
+## Ticketmaster Discovery API for Major Venues
+
+Large venues (performing arts centers, arenas) often use Ticketmaster for ticketing. The [Ticketmaster Discovery API](https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/) provides structured event data by venue:
+
+```
+https://app.ticketmaster.com/discovery/v2/events.json?apikey={KEY}&venueId={VENUE_ID}&size=50
+```
+
+Free API keys are available at [developer.ticketmaster.com](https://developer.ticketmaster.com/products-and-docs/apis/getting-started/) (rate limit: 5 req/sec, 5000/day). Returns JSON with event name, date/time, URL, and images. Requires a scraper to convert to ICS.
+
+**Example:** DPAC (Durham Performing Arts Center, venueId `KovZpa2X8e`) — 507 events. Martin Marietta Center (Raleigh, venueId `369155`) is also on Ticketmaster.
+
+**How to find venue IDs:** Search `site:ticketmaster.com "{venue name}"` and extract from the URL, or use the API's venue search endpoint.
 
 ## Indirection: Find the Data on a Third-Party Platform
 

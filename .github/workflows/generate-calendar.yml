@@ -489,6 +489,11 @@ jobs:
         python scrapers/carolina_performing_arts.py --output cities/raleighdurham/carolina_performing_arts.ics || true
         python scrapers/duke_arts.py --output cities/raleighdurham/duke_arts.ics || true
         python scrapers/raleigh_little_theatre.py --output cities/raleighdurham/raleigh_little_theatre.ics || true
+        # Ticketmaster venues
+        python scrapers/ticketmaster.py --venue-id KovZpa2X8e --name "DPAC" -o cities/raleighdurham/dpac.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAFF1nA --name "Martin Marietta Center" -o cities/raleighdurham/martin_marietta.ics || true
+      env:
+        TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
       continue-on-error: true
 
     - name: Download Raleigh-Durham live feeds and combine ICS
@@ -568,10 +573,26 @@ jobs:
         curl -sL "https://calendar.google.com/calendar/ical/cb2ajgfjpk6bf9gifg6kg2hn1s%40group.calendar.google.com/public/basic.ics" -o triangle_cycling.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/c_j40ldpocctr71k99n0n2lr9c14%40group.calendar.google.com/public/basic.ics" -o gizmo_brew_works.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/lgbtqcenterofdurham.org_qb71v8n48d0a304sq7dtm89f84%40group.calendar.google.com/public/basic.ics" -o lgbtq_center_durham.ics || true
+        # Sports
+        curl -sL "https://ics.fixtur.es/v2/north-carolina-courage.ics" -o nc_courage.ics || true
+        # Arts & Culture
+        curl -sL "https://unitedarts.org/events/?ical=1" -o united_arts_wake.ics || true
+        curl -sL "https://calendar.duke.edu/events/index.ics?gf[]=Duke+Arts&future_days=90" -o duke_arts_bedework.ics || true
+        # Faith Communities
+        curl -sL "https://raleighmasjid.org/programs/?ical=1" -o islamic_assoc_raleigh.ics || true
+        # Parks & Recreation
+        curl -sL "https://www.dprplaymore.org/common/modules/iCalendar/iCalendar.aspx?catID=22&feed=calendar" -o durham_parks_rec.ics || true
+        # University Sub-Calendars
+        curl -sL "https://calendar.ncsu.edu/group/gregg_museum_of_art_design/calendar.ics" -o ncsu_gregg_museum.ics || true
+        curl -sL "https://calendar.ncsu.edu/group/african_american_cultural_center/calendar.ics" -o ncsu_aacc.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/e299fb559498ba8fef0f629f438f848f53d0b4bb946a74989b44f271146a12e5%40group.calendar.google.com/public/basic.ics" -o durham_resistance_1.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/41d85e1478a55e3b4adbf2e4951c5be9f6e49241ac55a65427c71d252849bf1c%40group.calendar.google.com/public/basic.ics" -o durham_resistance_2.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/f511c08827b961733168ea93761e472cd12de35e813c3a73af3e44c56b7fe53d%40group.calendar.google.com/public/basic.ics" -o durham_resistance_3.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/b32e7018b18e1a8650f0d178e5d8314fd6664c368233eead570b44e368f882c9%40group.calendar.google.com/public/basic.ics" -o durham_resistance_4.ics || true
+        curl -sL "https://gopack.com/api/v2/Calendar/subscribe?type=ics" -o ncsu_athletics.ics || true
+        curl -sL "https://goheels.com/api/v2/Calendar/subscribe?type=ics" -o unc_athletics.ics || true
+        curl -sL "https://goduke.com/api/v2/Calendar/subscribe?type=ics" -o duke_athletics.ics || true
+        curl -sL "https://eb-to-ical.daylightpirates.org/eventbrite-organizer-ical?organizer=17882467120" -o quail_ridge_books.ics || true
         cd ../..
         python scripts/combine_ics.py --input-dir cities/raleighdurham --output cities/raleighdurham/combined.ics --name "Raleigh-Durham Community Calendar"
 
