@@ -392,16 +392,17 @@ function getSourceCounts(events) {
 // Deduplicate events: merge events with same title + start_time, combine sources
 // Cache variables (module-level for browser, will be on window)
 let _dedupedEventsCache = null;
-let _dedupedEventsCacheKey = null;
+let _dedupedEventsLastInput = null;
 
 function dedupeEvents(events) {
   if (!events || !events.length) return [];
 
-  // Use cache if events array hasn't changed
-  const cacheKey = events.length + '-' + (events[0]?.id || '');
-  if (_dedupedEventsCacheKey === cacheKey && _dedupedEventsCache) {
+  // Use cache if events array reference hasn't changed
+  // (refetch returns a new array, so reference check busts cache correctly)
+  if (events === _dedupedEventsLastInput && _dedupedEventsCache) {
     return _dedupedEventsCache;
   }
+  _dedupedEventsLastInput = events;
 
   const groups = {};
   events.forEach(e => {
@@ -463,7 +464,6 @@ function dedupeEvents(events) {
 
   // Cache the result
   _dedupedEventsCache = result;
-  _dedupedEventsCacheKey = cacheKey;
   return result;
 }
 
@@ -540,7 +540,7 @@ function collapseLongRunningEvents(events) {
 // Clear dedupe cache (useful for testing)
 function clearDedupeCache() {
   _dedupedEventsCache = null;
-  _dedupedEventsCacheKey = null;
+  _dedupedEventsLastInput = null;
 }
 
 // Check if an event is picked (supports merged IDs from cross-source duplicates)
