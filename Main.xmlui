@@ -188,22 +188,22 @@
       </H1>
     </Bookmark>
     <HStack verticalAlignment="center" marginBottom="$space-2" gap="$space-2">
-      <HStack verticalAlignment="center" gap="$space-1" width="50%">
+      <HStack verticalAlignment="center" gap="$space-1" width="*">
         <TextBox
           id="searchBox"
           autoFocus="false"
           placeholder="Search events..."
           fontSize="$fontSize-sm"
           onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; }"
-          width="100%"
+          width="*"
         />
         <Icon
-          when="{filterTerm}"
           name="close"
           width="20px"
           height="20px"
           cursor="pointer"
           color="$color-text-tertiary"
+          opacity="{filterTerm ? 1 : 0}"
           onClick="searchBox.setValue(''); categorySelect.setValue(''); categoryFilter = ''"
         />
       </HStack>
@@ -214,7 +214,7 @@
         fontSize="$fontSize-sm"
         dropdownHeight="520px"
         onDidChange="(val) => { categoryFilter = val || ''; }"
-        width="50%"
+        width="*"
       >
         <Items data="{window.getActiveCategories(processedEvents)}">
           <Option value="{$item.name}" label="{$item.label}" />
