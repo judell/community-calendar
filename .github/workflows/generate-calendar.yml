@@ -672,17 +672,42 @@ jobs:
         IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
         echo "Processing cities: ${CITIES[*]}"
         for city in "${CITIES[@]}"; do
-          # Trim whitespace from city name
           city=$(echo "$city" | xargs)
           echo "Checking city: '$city'"
+          # Save previous events.json (with categories) before overwriting
+          if [ -f "cities/$city/events.json" ]; then
+            cp "cities/$city/events.json" "cities/$city/events.prev.json"
+          fi
           if [ -f "cities/$city/combined.ics" ]; then
             echo "Running ics_to_json for $city..."
             python scripts/ics_to_json.py "cities/$city/combined.ics" -o "cities/$city/events.json" --city "$city"
             echo "$city: Converted $(cat cities/$city/events.json | python -c 'import json,sys; print(len(json.load(sys.stdin)))') events to JSON"
+            # Carry forward categories from previous build
+            if [ -f "cities/$city/events.prev.json" ]; then
+              python scripts/merge_categories.py "cities/$city/events.prev.json" "cities/$city/events.json"
+              rm "cities/$city/events.prev.json"
+            fi
           else
             echo "WARNING: cities/$city/combined.ics not found!"
+            # Clean up prev file if no combined.ics
+            rm -f "cities/$city/events.prev.json"
           fi
         done
+
+    - name: Classify events in JSON files
+      if: env.ANTHROPIC_API_KEY
+      run: |
+        IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
+        FILES=""
+        for city in "${CITIES[@]}"; do
+          city=$(echo "$city" | xargs)
+          if [ -f "cities/$city/events.json" ]; then
+            FILES="$FILES cities/$city/events.json"
+          fi
+        done
+        if [ -n "$FILES" ]; then
+          python scripts/classify_events_json.py $FILES
+        fi
 
     - name: Generate feed health report
       run: |
@@ -767,8 +792,3 @@ jobs:
           exit 1
         fi
 
-    - name: Classify new events
-      if: env.ANTHROPIC_API_KEY
-      env:
-        SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-      run: python3 scripts/classify_events_anthropic.py --limit 500
