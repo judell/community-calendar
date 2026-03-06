@@ -20,15 +20,7 @@
             if (!files || files.length === 0) return;
             isExtracting = true;
             errorMessage = '';
-            const resized = window.resizeImageFile(files[0]);
-            const result = Actions.upload({
-              file: resized,
-              url: appGlobals.supabaseUrl + '/functions/v1/capture-event',
-              method: 'post',
-              asForm: true,
-              headers: { apikey: appGlobals.supabasePublishableKey },
-              formParams: { mode: 'extract' }
-            });
+            const result = window.resizeAndUpload(files[0], appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
             isExtracting = false;
             if (result && result.event) {
               pickEvent = {

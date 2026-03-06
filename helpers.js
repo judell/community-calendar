@@ -61,6 +61,23 @@ window.resizeImageFile = function(file, maxBytes) {
   });
 };
 
+// Resize image then upload to capture-event edge function via fetch
+// Returns Promise<{ event }> or Promise<{ error }>
+window.resizeAndUpload = function(file, supabaseUrl, publishableKey) {
+  return window.resizeImageFile(file).then(function(resized) {
+    var fd = new FormData();
+    fd.append('mode', 'extract');
+    fd.append('file', resized, resized.name);
+    return fetch(supabaseUrl + '/functions/v1/capture-event', {
+      method: 'POST',
+      headers: { 'apikey': publishableKey },
+      body: fd
+    });
+  }).then(function(resp) {
+    return resp.json();
+  });
+};
+
 // --- Audio Recording ---
 window.audioRecorder = null;
 window.audioChunks = [];
