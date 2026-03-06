@@ -12,14 +12,30 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 
-# Default timezone for converting UTC times
-PACIFIC = ZoneInfo('America/Los_Angeles')
+# Default timezone when city.conf is missing or has no timezone
+DEFAULT_TIMEZONE = 'America/Los_Angeles'
 
 
-def parse_ics_datetime(dt_str):
-    """Parse an ICS datetime string to ISO format string (in Pacific time)."""
+def load_city_timezone(city):
+    """Load timezone from cities/{city}/city.conf, fall back to default."""
+    if not city:
+        return ZoneInfo(DEFAULT_TIMEZONE)
+    conf = Path(__file__).parent.parent / 'cities' / city / 'city.conf'
+    if conf.exists():
+        for line in conf.read_text().splitlines():
+            if line.startswith('# timezone:'):
+                tz_name = line.split(':', 1)[1].strip()
+                return ZoneInfo(tz_name)
+    return ZoneInfo(DEFAULT_TIMEZONE)
+
+
+def parse_ics_datetime(dt_str, local_tz=None):
+    """Parse an ICS datetime string to ISO format string (in the city's local time)."""
     if not dt_str:
         return None
+
+    if local_tz is None:
+        local_tz = ZoneInfo(DEFAULT_TIMEZONE)
 
     # Handle property parameters like DTSTART;TZID=America/Los_Angeles:20240101T120000
     if ';' in dt_str:
@@ -29,9 +45,9 @@ def parse_ics_datetime(dt_str):
 
     try:
         if dt_str.endswith('Z'):
-            # UTC time - convert to Pacific
+            # UTC time - convert to city's local time
             dt = datetime.strptime(dt_str, '%Y%m%dT%H%M%SZ')
-            dt = dt.replace(tzinfo=timezone.utc).astimezone(PACIFIC)
+            dt = dt.replace(tzinfo=timezone.utc).astimezone(local_tz)
             return dt.strftime('%Y-%m-%dT%H:%M:%S')
         elif 'T' in dt_str:
             # Local time (already in correct timezone)
@@ -176,6 +192,7 @@ def cluster_by_title_similarity(events, threshold=0.85):
 
 def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
     """Convert an ICS file to JSON format for Supabase."""
+    local_tz = load_city_timezone(city)
     content = Path(ics_file).read_text(encoding='utf-8', errors='ignore')
 
     # Unfold continuation lines
@@ -193,8 +210,8 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
     for event_content in matches:
         # Extract fields
         title = extract_field(event_content, 'SUMMARY')
-        start_time = parse_ics_datetime(extract_field(event_content, 'DTSTART'))
-        end_time = parse_ics_datetime(extract_field(event_content, 'DTEND'))
+        start_time = parse_ics_datetime(extract_field(event_content, 'DTSTART'), local_tz)
+        end_time = parse_ics_datetime(extract_field(event_content, 'DTEND'), local_tz)
         location = extract_field(event_content, 'LOCATION')
         description = extract_field(event_content, 'DESCRIPTION')
         url = extract_field(event_content, 'URL')

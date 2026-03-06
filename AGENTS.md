@@ -60,7 +60,7 @@
    - `index.html`: add entry to `cityNames` map (e.g., `toronto: 'Toronto'`)
    - `Main.xmlui`: add a Button in the city picker VStack (search for "Choose your city")
 6. **Add city to load-events function** — add URL entry to `EVENTS_URLS` in `supabase/functions/load-events/index.ts`, then redeploy the edge function
-7. **Optionally set up geo-filtering** — create `allowed_cities.txt` if feeds include events outside your area. This is optional; if the file doesn't exist, all events pass through. See [docs/procedures.md](docs/procedures.md#5-geo-filtering-setup).
+7. **Optionally set up geo-filtering** — create `city.conf` if feeds include events outside your area. This is optional; if the file doesn't exist, all events pass through. See [docs/procedures.md](docs/procedures.md#5-geo-filtering-setup).
 8. **Update SOURCES_CHECKLIST.md** — document findings, track pending sources
 9. **Commit and push** — workflow runs daily or trigger manually
 

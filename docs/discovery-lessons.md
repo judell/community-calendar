@@ -195,7 +195,7 @@ curl -sL -A "Mozilla/5.0" "https://www.meetup.com/group/events/ical/"
 
 ## Regional Groups Need Geo-Filtering
 
-Regional Meetup groups (e.g., "Sonoma County Outdoors") cover a wide area. Adding them is fine — the `combine_ics.py` geo-filter (`allowed_cities.txt`) drops events outside the target area automatically.
+Regional Meetup groups (e.g., "Sonoma County Outdoors") cover a wide area. Adding them is fine — the `combine_ics.py` geo-filter (`city.conf`) drops events outside the target area automatically.
 
 ## LiveWhale University Calendars
 

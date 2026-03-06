@@ -589,7 +589,7 @@ def load_allowed_cities(input_dir):
     Returns (allowed_cities, excluded_cities) tuple.
     Lines starting with '!' are excluded cities (filtered even without address indicators).
     """
-    cities_file = Path(input_dir) / 'allowed_cities.txt'
+    cities_file = Path(input_dir) / 'city.conf'
     if not cities_file.exists():
         return None, None
     

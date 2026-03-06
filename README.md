@@ -619,7 +619,7 @@ See the detailed guides:
 - **[AGENTS.md](AGENTS.md)** — Technical reference for AI agents and developers
 
 Quick overview:
-1. Create city directory with `SOURCES_CHECKLIST.md`, `allowed_cities.txt`
+1. Create city directory with `SOURCES_CHECKLIST.md`, `city.conf`
 2. Run geo-filtering setup: `python scripts/geocode_cities.py --city {name}`
 3. Discover sources (Meetup, Eventbrite, local venues)
 4. Add to GitHub Actions workflow

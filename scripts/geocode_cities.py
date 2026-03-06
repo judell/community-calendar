@@ -3,7 +3,7 @@
 Geocode cities for geo-filtering.
 
 Uses Nominatim (OpenStreetMap) for free geocoding.
-Run once when setting up a new city to generate/update allowed_cities.txt.
+Run once when setting up a new city to generate/update city.conf.
 
 Usage:
     # Geocode cities for a city's allowed list:
@@ -90,7 +90,7 @@ def haversine(lat1, lng1, lat2, lng2):
 
 
 def parse_allowed_cities_file(filepath):
-    """Parse allowed_cities.txt and extract config."""
+    """Parse city.conf and extract config."""
     config = {
         'center': None,
         'radius': None,
@@ -119,7 +119,7 @@ def parse_allowed_cities_file(filepath):
 
 
 def write_allowed_cities_file(filepath, config, city_coords):
-    """Write allowed_cities.txt with config header."""
+    """Write city.conf with config header."""
     lines = [
         f"# center: {config['center'][0]}, {config['center'][1]}",
         f"# radius: {config['radius']}",
@@ -155,7 +155,7 @@ def main():
     args = parser.parse_args()
     
     city_dir = Path(__file__).parent.parent / 'cities' / args.city
-    allowed_file = city_dir / 'allowed_cities.txt'
+    allowed_file = city_dir / 'city.conf'
     
     if not allowed_file.exists():
         print(f"Error: {allowed_file} does not exist")

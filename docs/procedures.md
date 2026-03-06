@@ -19,7 +19,7 @@ These are the step-by-step procedures referenced by the [Curator Guide](curator-
 - [3. Document Findings](#3-document-findings)
 - [4. Add Working Feeds](#4-add-working-feeds)
 - [5. Geo-Filtering Setup](#5-geo-filtering-setup)
-  - [Create allowed_cities.txt](#create-allowed_citiestxt)
+  - [Create city.conf](#create-allowed_citiestxt)
   - [Geocode and Validate](#geocode-and-validate)
   - [How Geo-Filtering Works](#how-geo-filtering-works)
   - [Validate-Only Mode](#validate-only-mode)
@@ -209,9 +209,9 @@ The workflow YAML is the source of truth. `feeds.txt` is auto-generated document
 
 Geo-filtering prevents events from distant locations (e.g., away games, regional feeds) from appearing.
 
-### Create allowed_cities.txt
+### Create city.conf
 
-Create `cities/{cityname}/allowed_cities.txt` with a radius, state, and the names of nearby cities to include:
+Create `cities/{cityname}/city.conf` with a radius, state, and the names of nearby cities to include:
 
 ```
 # radius: 30
