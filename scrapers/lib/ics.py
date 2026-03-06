@@ -52,13 +52,13 @@ class IcsScraper(BaseScraper):
         }
 
         for url in urls:
-            self.logger.info(f"Fetching ICS: {url}")
+            self.logger.debug(f"Fetching ICS: {url}")
             try:
                 response = requests.get(url, headers=headers, timeout=self.request_timeout)
                 response.raise_for_status()
                 events = self._parse_ics(response.text)
                 all_events.extend(events)
-                self.logger.info(f"Parsed {len(events)} events from {url}")
+                self.logger.debug(f"Parsed {len(events)} events from {url}")
             except Exception as e:
                 self.logger.error(f"Error fetching {url}: {e}")
 
@@ -72,7 +72,7 @@ class IcsScraper(BaseScraper):
                     seen_uids.add(uid)
                 unique_events.append(event)
 
-        self.logger.info(f"Total events after dedup: {len(unique_events)}")
+        self.logger.debug(f"Total events after dedup: {len(unique_events)}")
         return unique_events
 
     def _parse_ics(self, ics_content: str) -> list[dict[str, Any]]:
