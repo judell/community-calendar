@@ -77,6 +77,8 @@ When an event card shows a source like "North Bay Bohemian," the title links to 
 
 The principle: **we could disintermediate aggregators and only link directly to primary sources, but we choose not to**. If we got an event via an aggregator, we provide a link to their event page. This respects the work aggregators do and gives readers a richer experience.
 
+**Ticketmaster is a warranted exception.** We generally prefer first-party venue feeds over aggregators, but many venues delegate their entire ticketing infrastructure to Ticketmaster — the venue's own website often redirects to TM for purchases. When a venue's site is blocked (Cloudflare, 404s, JS-rendered SPAs) or simply has no feed, Ticketmaster *is* the authoritative source for event listings. Each event's URL links directly to its ticket page, which is where users would end up anyway. In Toronto, 8 venues that were previously non-starters yielded ~951 events via the Ticketmaster Discovery API. See `scrapers/ticketmaster.py` and the [discovery lessons](discovery-lessons.md#ticketmaster-discovery-api-for-major-venues) for details.
+
 **For developers adding a new aggregator to a city:**
 
 1. Add the aggregator's friendly name to the `AGGREGATORS` set in `scripts/combine_ics.py` so deduplication correctly prefers primary sources over the aggregator's copies.
