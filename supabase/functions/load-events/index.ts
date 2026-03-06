@@ -5,15 +5,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Events JSON URLs by city
+// Events JSON URLs by city (raw.githubusercontent.com updates immediately on push,
+// unlike GitHub Pages which has a cache delay)
+const RAW_BASE = "https://raw.githubusercontent.com/judell/community-calendar/main/cities";
 const EVENTS_URLS: Record<string, string> = {
-  santarosa: "https://judell.github.io/community-calendar/cities/santarosa/events.json",
-  petaluma: "https://judell.github.io/community-calendar/cities/petaluma/events.json",
-  bloomington: "https://judell.github.io/community-calendar/cities/bloomington/events.json",
-  davis: "https://judell.github.io/community-calendar/cities/davis/events.json",
-  toronto: "https://judell.github.io/community-calendar/cities/toronto/events.json",
-  raleighdurham: "https://judell.github.io/community-calendar/cities/raleighdurham/events.json",
-  montclair: "https://judell.github.io/community-calendar/cities/montclair/events.json",
+  santarosa: `${RAW_BASE}/santarosa/events.json`,
+  petaluma: `${RAW_BASE}/petaluma/events.json`,
+  bloomington: `${RAW_BASE}/bloomington/events.json`,
+  davis: `${RAW_BASE}/davis/events.json`,
+  toronto: `${RAW_BASE}/toronto/events.json`,
+  raleighdurham: `${RAW_BASE}/raleighdurham/events.json`,
+  montclair: `${RAW_BASE}/montclair/events.json`,
 };
 
 Deno.serve(async (req) => {
