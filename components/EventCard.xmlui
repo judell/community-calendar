@@ -1,32 +1,27 @@
 <Component name="EventCard">
 
-  <Card padding="$space-2" marginBottom="$space-1" borderLeft="{window.clusterBorder($props.event.cluster_id, $props.filterTerm)}">
-    <VStack gap="$space-0">
+  <Card padding="2px 6px" marginBottom="4px" borderLeft="{window.clusterBorder($props.event.cluster_id, $props.filterTerm)}">
+    <VStack gap="0px">
       <Text
-        fontSize="$fontSize-xs"
+        fontSize="13px"
         color="$color-text-secondary"
         value="{window.formatDayOfWeek($props.event.start_time) + ' ' + window.formatMonthDay($props.event.start_time) + (window.formatTime($props.event.start_time) ? ', ' + window.formatTime($props.event.start_time) : '')}"
       />
       <Link when="{$props.event.url}" to="{$props.event.url}" target="_blank">
-        <Text fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
+        <Text fontWeight="600" fontSize="13px" overflowMode="flow" value="{$props.event.title}" />
       </Link>
-      <Text when="{!$props.event.url}" fontWeight="bold" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
-      <Text when="{$props.event.location}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{$props.event.location}" />
-      <Markdown
+      <Text when="{!$props.event.url}" fontWeight="600" fontSize="13px" overflowMode="flow" value="{$props.event.title}" />
+      <Text when="{$props.event.location}" fontSize="13px" color="$color-text-secondary" value="{$props.event.location}" />
+      <Text
         when="{$props.event.source}"
-        fontSize="$fontSize-xs"
-        fontStyle="italic"
+        fontSize="13px"
         color="$color-text-tertiary"
         overflowMode="flow"
-        breakMode="word"
-        openLinkInNewTab="true"
-        padding="0"
-        margin="0"
-        content="{window.formatSourceLinks($props.event.source, $props.event.source_urls, (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || [])}"
+        value="{$props.event.source}"
       />
       <Markdown
         when="{$props.filterTerm && window.getDescriptionSnippet($props.event.description, $props.filterTerm)}"
-        fontSize="$fontSize-xs"
+        fontSize="13px"
         color="$color-text-secondary"
         padding="0"
         margin="0"
@@ -34,13 +29,14 @@
       />
       <Text
         when="{window.getSnippet($props.event.description, $props.event.title)}"
-        fontSize="$fontSize-xs"
-        color="$color-primary"
+        fontSize="13px"
+        color="$color-text-secondary"
+        overflowMode="flow"
         cursor="pointer"
         onClick="detailDialog.open($props.event)"
         value="{window.getSnippet($props.event.description, $props.event.title)}"
       />
-      <HStack verticalAlignment="center" gap="$space-2" marginTop="$space-3">
+      <HStack verticalAlignment="center" gap="$space-2" marginTop="4px">
         <Badge
           when="{$props.event.category}"
           value="{$props.event.category}"
