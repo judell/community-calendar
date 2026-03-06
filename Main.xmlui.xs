@@ -11,6 +11,7 @@ var refreshCounter = 0;
 
 function setCategoryFilter(category) {
   categoryFilter = category || '';
+  categorySelect.setValue(categoryFilter);
 }
 
 function togglePick(event) {
