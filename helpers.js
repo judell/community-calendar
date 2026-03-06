@@ -74,7 +74,12 @@ window.resizeAndUpload = function(file, supabaseUrl, publishableKey) {
       body: fd
     });
   }).then(function(resp) {
+    if (!resp.ok) {
+      return resp.text().then(function(t) { return { error: 'Server error ' + resp.status + ': ' + t }; });
+    }
     return resp.json();
+  }).catch(function(err) {
+    return { error: 'Upload failed: ' + err.message };
   });
 };
 
