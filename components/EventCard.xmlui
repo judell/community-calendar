@@ -70,12 +70,14 @@
         />
         <SpaceFiller />
         <AddToCalendar event="{$props.event}" />
-        <Checkbox
+        <Icon
           when="{window.authUser}"
-          width="fit-content"
-          tooltip="Add to my picks"
-          readOnly="true"
-          initialValue="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData)}"
+          name="l-bookmark"
+          width="14px"
+          height="14px"
+          tooltip="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData) ? 'Remove from my picks' : 'Add to my picks'}"
+          color="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData) ? '$color-primary-500' : '$color-surface-500'}"
+          cursor="pointer"
           onClick="togglePick($props.event)"
         />
       </HStack>
