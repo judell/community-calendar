@@ -12,6 +12,24 @@ You need:
 
 ---
 
+## Getting API Keys
+
+**Anthropic API key** (required for event classification):
+1. Go to [console.anthropic.com](https://console.anthropic.com) and sign up or log in
+2. Go to **API Keys** and click **Create Key**
+3. Copy the key (starts with `sk-ant-`) — you won't be able to see it again
+
+**OpenAI API key** (optional, only needed for audio transcription):
+1. Go to [platform.openai.com](https://platform.openai.com) and sign up or log in
+2. Go to **API keys** and click **Create new secret key**
+3. Copy the key (starts with `sk-`)
+
+**Ticketmaster API key** (optional, only needed for Ticketmaster event sources):
+1. Go to [developer.ticketmaster.com](https://developer.ticketmaster.com) and sign up
+2. Create an app — the **Consumer Key** is your API key
+
+---
+
 ## Step 1: Create a Supabase Project
 
 1. Go to [supabase.com](https://supabase.com) and create a new project
@@ -19,11 +37,7 @@ You need:
 3. From **Settings → API**:
    - Copy the **publishable key** (`sb_publishable_...`) from the API Keys tab
    - Copy the **legacy anon key** (`eyJ...`) from the Legacy API Keys tab — needed for edge function invocation
-4. Enable required extensions in the SQL Editor:
-   ```sql
-   CREATE EXTENSION IF NOT EXISTS pg_net;
-   CREATE EXTENSION IF NOT EXISTS pg_cron;
-   ```
+
 
 ---
 
@@ -42,7 +56,9 @@ psql $DATABASE_URL -f supabase/ddl/08_admin_users.sql
 psql $DATABASE_URL -f supabase/ddl/09_admin_github_users.sql
 ```
 
-Then set up the scheduled cron job — edit `supabase/ddl/05_cron_jobs.sql`, replacing `YOUR_SUPABASE_URL` with your actual project URL, then run it.
+(Probably need to run the rest, too?)
+
+Then set up the scheduled cron job — edit `supabase/ddl/05_cron_jobs.sql`, replacing `YOUR_SUPABASE_URL` with your actual project URL, and adding your anon key, then run it.
 
 To grant yourself admin access:
 ```sql
@@ -92,6 +108,7 @@ Also update `report.html`, `test.html`, and `embed.html` — each has the same t
 ## Step 5: Deploy Edge Functions
 
 Install the [Supabase CLI](https://supabase.com/docs/guides/cli), then:
+(You don't have to set up docker, just get the supabase cli installed.)
 
 ```bash
 supabase login
@@ -101,6 +118,8 @@ supabase functions deploy load-events --no-verify-jwt
 supabase functions deploy my-picks --no-verify-jwt
 supabase functions deploy capture-event --no-verify-jwt
 ```
+
+(Cathy note: In my shell, I need to preface all of the above with `npx`)
 
 Set the required secrets:
 ```bash
@@ -118,13 +137,23 @@ supabase secrets set OPENAI_API_KEY=sk-...       # optional, for audio transcrip
 
 ## Step 6: Configure GitHub Actions
 
-In your GitHub repo, go to **Settings → Secrets and variables → Actions**:
+The workflow needs permission to commit and push the generated event data back to your repo. Create a GitHub Personal Access Token (PAT):
+
+1. Go to [github.com/settings/tokens](https://github.com/settings/tokens) → **Generate new token (classic)**
+2. Give it a name (e.g. `community-calendar-actions`)
+3. Check the **`repo`** scope (full control of private repositories)
+4. Click **Generate token** and copy it immediately
+5. In your GitHub repo → **Settings → Secrets and variables → Actions → New repository secret**, add it as `COMMUNITY_CALENDAR`
+
+Then add the remaining secrets and variables in **Settings → Secrets and variables → Actions**:
 
 **Secrets** (sensitive):
 | Name | Value |
 |------|-------|
+| `COMMUNITY_CALENDAR` | Your GitHub PAT (from above) — used by the workflow to push commits |
 | `SUPABASE_ANON_KEY` | Your legacy anon key (`eyJ...`) |
 | `ANTHROPIC_API_KEY` | Your Anthropic API key |
+| `TICKETMASTER_API_KEY` | Your Ticketmaster API key (optional — only needed if you use Ticketmaster sources) |
 
 **Variables** (non-sensitive):
 | Name | Value |
@@ -133,6 +162,38 @@ In your GitHub repo, go to **Settings → Secrets and variables → Actions**:
 | `SUPABASE_KEY` | Your publishable key (`sb_publishable_...`) |
 
 The workflow also uses `${{ github.repository }}` (automatically set to your fork's `owner/repo`) — no configuration needed for that.
+
+---
+
+## Step 6b: Limit Which Cities Are Scraped
+
+By default, the scheduled workflow discovers and scrapes **every city** that has a `cities/<name>/feeds.txt` file. This consumes API credits (Anthropic) for every run. For a new fork, you almost certainly want to limit this to just your city.
+
+**Recommended: delete the city directories you don't need.**
+
+The workflow auto-discovers cities by scanning `cities/*/feeds.txt`. Simply remove the subdirectories for cities you're not serving:
+
+```bash
+git rm -r cities/bloomington cities/davis cities/petaluma cities/toronto cities/raleighdurham cities/montclair
+git commit -m "Remove cities not relevant to this fork"
+git push
+```
+
+Keep only the `cities/<yourcity>/` directory (and add your own if it doesn't exist yet).
+
+**Alternative: pin the scheduled run to specific cities.**
+
+If you want to keep the other city directories in the repo but not scrape them automatically, you can change the fallback in the workflow. In `.github/workflows/generate-calendar.yml`, find the "Determine locations to process" step and replace the auto-discovery line:
+
+```yaml
+# Before (auto-discovers all cities):
+ALL=$(ls -d cities/*/feeds.txt 2>/dev/null | sed 's|cities/||;s|/feeds.txt||' | paste -sd, -)
+
+# After (hardcoded list):
+ALL="santarosa"
+```
+
+Manual runs via **Actions → Generate Calendar → Run workflow** always let you specify a comma-separated locations list (e.g. `santarosa,petaluma`) regardless of the default.
 
 ---
 
