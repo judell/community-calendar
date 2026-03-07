@@ -106,7 +106,11 @@ class BaseScraper(ABC):
         uid = data.get('uid') or generate_uid(title, dtstart, self.domain)
         event.add('uid', uid)
         event.add('x-source', self.name)
-        
+
+        if data.get('image_url'):
+            event.add('attach', data['image_url'],
+                       parameters={'fmttype': 'image/jpeg'})
+
         return event
     
     def default_output_filename(self) -> str:
