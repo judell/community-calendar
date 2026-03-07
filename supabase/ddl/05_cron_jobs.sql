@@ -7,7 +7,7 @@ SELECT cron.schedule(
   '0 6 * * *',
   $$
   SELECT net.http_post(
-    url := 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events',
+    url := 'YOUR_SUPABASE_URL/functions/v1/load-events',
     headers := jsonb_build_object(
       'Authorization', 'Bearer <YOUR_LEGACY_ANON_KEY>',
       'Content-Type', 'application/json'

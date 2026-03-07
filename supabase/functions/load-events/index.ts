@@ -7,7 +7,9 @@ const corsHeaders = {
 
 // Events JSON URLs by city (raw.githubusercontent.com updates immediately on push,
 // unlike GitHub Pages which has a cache delay)
-const RAW_BASE = "https://raw.githubusercontent.com/judell/community-calendar/main/cities";
+// Set GITHUB_REPO secret in Supabase to your fork's "owner/repo" (e.g. "my-org/community-calendar")
+const githubRepo = Deno.env.get("GITHUB_REPO") ?? "judell/community-calendar";
+const RAW_BASE = `https://raw.githubusercontent.com/${githubRepo}/main/cities`;
 const EVENTS_URLS: Record<string, string> = {
   santarosa: `${RAW_BASE}/santarosa/events.json`,
   petaluma: `${RAW_BASE}/petaluma/events.json`,

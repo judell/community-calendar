@@ -21,8 +21,8 @@ import urllib.request
 from pathlib import Path
 
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
-SUPABASE_URL = "https://dzpdualvwspgqghrysyz.supabase.co"
-SUPABASE_KEY = "sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5"
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
 
 CATEGORIES_FILE = os.path.join(os.path.dirname(__file__), '..', 'categories.json')
 with open(CATEGORIES_FILE) as f:
@@ -53,6 +53,8 @@ def anthropic_call(api_key, model, prompt):
 
 def fetch_overrides():
     """Fetch curator overrides from Supabase as few-shot examples."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return []
     path = "category_overrides?select=category,events(title,location,description)"
     url = SUPABASE_URL + "/rest/v1/" + path
     req = urllib.request.Request(url, headers={

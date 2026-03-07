@@ -28,6 +28,8 @@ jobs:
     env:
       SCRAPE_MONTHS: ${{ github.event.inputs.months || '2' }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ vars.SUPABASE_KEY }}
       #ENABLE_FUZZY_DEDUP: ${{ secrets.ANTHROPIC_API_KEY && 'true' || '' }}
 
     steps:
@@ -771,7 +773,7 @@ jobs:
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       run: |
         echo "Triggering Supabase Edge Function to reload events..."
-        RESPONSE=$(curl -sL -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
+        RESPONSE=$(curl -sL -X POST "${{ vars.SUPABASE_URL }}/functions/v1/load-events" \
           -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
           -H 'Content-Type: application/json')
         echo "$RESPONSE" | jq .
