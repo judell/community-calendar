@@ -172,13 +172,18 @@
       }"
     >
       <Fragment when="{!savedPickId}">
-        <FormItem bindTo="title" label="Title" required="true" requiredInvalidMessage="Title is required — what is this event called?" />
+        <FormItem
+          bindTo="title"
+          label="Title"
+          required="{!$props.event?.id}"
+          requiredInvalidMessage="Title is required — what is this event called?"
+        />
         <FormItem
           bindTo="date"
           label="Date"
-          required="true"
+          required="{!$props.event?.id}"
           requiredInvalidMessage="Date is required — we couldn't read the date from the image. Enter it as YYYY-MM-DD (e.g. 2026-03-15)."
-          regex="^\d{4}-\d{2}-\d{2}$"
+          regex="{$props.event?.id ? '' : '^\\d{4}-\\d{2}-\\d{2}$'}"
           regexInvalidMessage="Enter a valid date as YYYY-MM-DD (e.g. 2026-03-15)"
         />
         <HStack gap="$space-2">
@@ -186,14 +191,14 @@
             bindTo="time"
             label="Start"
             width="50%"
-            regex="^\d{2}:\d{2}$"
+            regex="{$props.event?.id ? '' : '^\\d{2}:\\d{2}$'}"
             regexInvalidMessage="Enter time as HH:MM (e.g. 19:00)"
           />
           <FormItem
             bindTo="endTime"
             label="End"
             width="50%"
-            regex="^(\d{2}:\d{2})?$"
+            regex="{$props.event?.id ? '' : '^(\\d{2}:\\d{2})?$'}"
             regexInvalidMessage="Enter time as HH:MM (e.g. 21:00)"
           />
         </HStack>
