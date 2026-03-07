@@ -38,8 +38,8 @@
 
       // Supabase auth setup (credentials loaded from config.json by XMLUI)
       // We need to hardcode these here since this runs before XMLUI loads config
-      const SUPABASE_URL = 'https://dzpdualvwspgqghrysyz.supabase.co';
-      const SUPABASE_KEY = 'sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5';
+      const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+      const SUPABASE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
       window.SUPABASE_URL = SUPABASE_URL;
       window.SUPABASE_KEY = SUPABASE_KEY;
       const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -55,7 +55,8 @@
 
       window.signOut = function() {
         console.log('signOut called');
-        localStorage.removeItem('sb-dzpdualvwspgqghrysyz-auth-token');
+        const projectRef = SUPABASE_URL.match(/https://([^.]+).supabase.co/)?.[1];
+        localStorage.removeItem(`sb-${projectRef}-auth-token`);
         console.log('localStorage cleared, reloading...');
         window.location.reload();
       };
