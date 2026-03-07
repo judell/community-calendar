@@ -82,6 +82,21 @@ def extract_field(event_content, field_name):
     return None
 
 
+def extract_image_url(event_content):
+    """Extract first image URL from ATTACH or X-TKF-FEATURED-IMAGE fields."""
+    # Match ATTACH with image FMTTYPE
+    pattern = r'^ATTACH;[^:]*FMTTYPE=image/[^:]*:(.+)'
+    match = re.search(pattern, event_content, re.IGNORECASE | re.MULTILINE)
+    if match:
+        return match.group(1).strip()
+    # Match Tockify featured image
+    pattern = r'^X-TKF-FEATURED-IMAGE:(.+)'
+    match = re.search(pattern, event_content, re.IGNORECASE | re.MULTILINE)
+    if match:
+        return match.group(1).strip()
+    return None
+
+
 def token_set_similarity(a, b):
     """Compare word sets, ignore order. Returns 0-1.
     'Family Storytime' vs 'Bilingual Family Storytime' scores high because
@@ -220,6 +235,9 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
         source_urls_raw = extract_field(event_content, 'X-SOURCE-URLS')
         uid = extract_field(event_content, 'UID')
 
+        # Extract image URL from ATTACH or X-TKF-FEATURED-IMAGE
+        image_url = extract_image_url(event_content)
+
         # Extract ICS CATEGORIES (raw tags for LLM classification)
         ics_cats_raw = extract_field(event_content, 'CATEGORIES')
         ics_categories = [c.strip() for c in ics_cats_raw.split(',')] if ics_cats_raw else []
@@ -260,7 +278,8 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
             'source_uid': uid or '',
             'source_urls': source_urls if source_urls else None,
             'cluster_id': None,
-            'ics_categories': ics_categories if ics_categories else None
+            'ics_categories': ics_categories if ics_categories else None,
+            'image_url': image_url
         }
         events.append(event)
 
