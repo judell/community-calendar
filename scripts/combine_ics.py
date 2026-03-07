@@ -48,6 +48,13 @@ SOURCE_NAMES = {
     'martin_marietta': 'Martin Marietta Center',
     # Ticketmaster venues - Toronto
     'lees_palace': "Lee's Palace",
+    # tribe_events feeds - Davis
+    'thedirt': 'The Dirt',
+    'visitdavis': 'Visit Davis',
+    'visityolo': 'Visit Yolo',
+    'putahcreek': 'Putah Creek Council',
+    'hatefreetogether': 'Hate-Free Together',
+    'davis_bike_club': 'Davis Bike Club',
     'meetup_pence_art': 'Meetup: Pence Art Programs',
     'meetup_art_in_action': 'Meetup: Art in Action',
     'meetup_mindful': 'Meetup: Mindful Embodied Spirituality',
