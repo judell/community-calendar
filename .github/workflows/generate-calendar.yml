@@ -28,6 +28,8 @@ jobs:
     env:
       SCRAPE_MONTHS: ${{ github.event.inputs.months || '2' }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ vars.SUPABASE_KEY }}
       #ENABLE_FUZZY_DEDUP: ${{ secrets.ANTHROPIC_API_KEY && 'true' || '' }}
 
     steps:
@@ -61,7 +63,8 @@ jobs:
         INPUT="${{ github.event.inputs.locations }}"
         if [ -z "$INPUT" ] || [ "$INPUT" = "all" ]; then
           # Derive city list from cities/ directory (any subdir with a feeds.txt)
-          ALL=$(ls -d cities/*/feeds.txt 2>/dev/null | sed 's|cities/||;s|/feeds.txt||' | paste -sd, -)
+        #  ALL=$(ls -d cities/*/feeds.txt 2>/dev/null | sed 's|cities/||;s|/feeds.txt||' | paste -sd, -)
+          ALL="petaluma"
           echo "list=$ALL" >> $GITHUB_OUTPUT
         else
           echo "list=$INPUT" >> $GITHUB_OUTPUT
@@ -267,6 +270,14 @@ jobs:
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/art-in-action/events/ical/" -o meetup_art_in_action.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mindful-embodied-spirituality/events/ical/" -o meetup_mindful.ics || true
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/winters-shut-up-and-write-meetup-group/events/ical/" -o meetup_winters_write.ics || true
+        # tribe_events ICS feeds
+        curl -sL -A "Mozilla/5.0" "https://thedirt.online/events/?ical=1" -o thedirt.ics || true
+        curl -sL -A "Mozilla/5.0" "https://visitdavis.org/events/?ical=1" -o visitdavis.ics || true
+        curl -sL -A "Mozilla/5.0" "https://visityolo.com/event/?ical=1" -o visityolo.ics || true
+        curl -sL -A "Mozilla/5.0" "https://putahcreekcouncil.org/events/?ical=1" -o putahcreek.ics || true
+        curl -sL -A "Mozilla/5.0" "https://hatefreetogether.org/events/?ical=1" -o hatefreetogether.ics || true
+        # Google Calendar feeds
+        curl -sL "https://calendar.google.com/calendar/ical/davisbikeclubwww%40gmail.com/public/basic.ics" -o davis_bike_club.ics || true
         cd ../..
 
     - name: Combine Davis ICS

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS events (
   cluster_id text,          -- groups similar events within same timeslot for UI display
   source_urls jsonb,        -- per-source URLs for aggregator attribution links
   category text,            -- auto-classified bucket (e.g., 'Music & Concerts', 'Arts & Culture')
+  image_url text,           -- event image URL from ICS ATTACH or scraper
   created_at timestamptz DEFAULT now()
 );
 
