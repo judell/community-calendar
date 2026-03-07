@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
     }
 
     const result = {
-      success: errors === 0,
+      success: inserted > 0 && errors < uniqueEvents.size,
       fetched: allEvents.length,
       unique: uniqueEvents.size,
       deleted,
