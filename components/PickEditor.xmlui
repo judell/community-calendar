@@ -55,9 +55,13 @@
     body="{$param}"
     onSuccess="(result) => {
       isSaving = false;
-      savedPickId = result.event_id || 'captured';
+      if (!result.event_id) {
+        errorMessage = result.error || 'Event was not saved — please check the form and try again';
+        return;
+      }
+      savedPickId = result.event_id;
       submittedData = pickForm.getData();
-      if (result.event_id && rruleFrequency !== 'none') {
+      if (rruleFrequency !== 'none') {
         const formData = pickForm.getData();
         const startTime = (formData.date || '') + 'T' + (formData.time || '00:00') + ':00';
         const endTime = formData.endTime ? (formData.date || '') + 'T' + formData.endTime + ':00' : null;
@@ -168,11 +172,30 @@
       }"
     >
       <Fragment when="{!savedPickId}">
-        <FormItem bindTo="title" label="Title" required="true" />
-        <FormItem bindTo="date" label="Date" required="true" />
+        <FormItem bindTo="title" label="Title" required="true" requiredInvalidMessage="Title is required — what is this event called?" />
+        <FormItem
+          bindTo="date"
+          label="Date"
+          required="true"
+          requiredInvalidMessage="Date is required — we couldn't read the date from the image. Enter it as YYYY-MM-DD (e.g. 2026-03-15)."
+          regex="^\d{4}-\d{2}-\d{2}$"
+          regexInvalidMessage="Enter a valid date as YYYY-MM-DD (e.g. 2026-03-15)"
+        />
         <HStack gap="$space-2">
-          <FormItem bindTo="time" label="Start" width="50%" />
-          <FormItem bindTo="endTime" label="End" width="50%" />
+          <FormItem
+            bindTo="time"
+            label="Start"
+            width="50%"
+            regex="^\d{2}:\d{2}$"
+            regexInvalidMessage="Enter time as HH:MM (e.g. 19:00)"
+          />
+          <FormItem
+            bindTo="endTime"
+            label="End"
+            width="50%"
+            regex="^(\d{2}:\d{2})?$"
+            regexInvalidMessage="Enter time as HH:MM (e.g. 21:00)"
+          />
         </HStack>
         <FormItem bindTo="location" label="Location" />
         <FormItem bindTo="description" label="Description" type="textarea" />

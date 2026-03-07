@@ -183,6 +183,11 @@ async function commitEvent(
   userId: string,
   transcript?: string
 ): Promise<{ event_id: number }> {
+  // Validate start_time is a proper datetime (not just a time fragment like "T00:00:00")
+  if (!/^\d{4}-\d{2}-\d{2}/.test(event.start_time)) {
+    throw new Error(`Invalid start_time: "${event.start_time}" — must start with a date (YYYY-MM-DD)`);
+  }
+
   // Generate unique source_uid
   const sourceUid = `poster_capture:${userId}:${crypto.randomUUID()}`;
 
