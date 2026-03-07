@@ -53,6 +53,8 @@ def anthropic_call(api_key, model, prompt):
 
 def fetch_overrides():
     """Fetch curator overrides from Supabase as few-shot examples."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return []
     path = "category_overrides?select=category,events(title,location,description)"
     url = SUPABASE_URL + "/rest/v1/" + path
     req = urllib.request.Request(url, headers={
