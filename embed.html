@@ -59,8 +59,8 @@
           window.cityFilter = cityParam;
           window.cityName = cityNames[cityParam] || cityParam;
 
-          const SUPABASE_URL = 'https://dzpdualvwspgqghrysyz.supabase.co';
-          const SUPABASE_KEY = 'sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5';
+          const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+          const SUPABASE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
           window.SUPABASE_URL = SUPABASE_URL;
           window.SUPABASE_KEY = SUPABASE_KEY;
           const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -75,7 +75,8 @@
           };
 
           window.signOut = function() {
-            localStorage.removeItem('sb-dzpdualvwspgqghrysyz-auth-token');
+            const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+            localStorage.removeItem(\`sb-${projectRef}-auth-token\`);
             window.location.reload();
           };
 
