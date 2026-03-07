@@ -54,9 +54,11 @@ psql $DATABASE_URL -f supabase/ddl/06_event_enrichments.sql
 psql $DATABASE_URL -f supabase/ddl/07_source_suggestions.sql
 psql $DATABASE_URL -f supabase/ddl/08_admin_users.sql
 psql $DATABASE_URL -f supabase/ddl/09_admin_github_users.sql
+psql $DATABASE_URL -f supabase/ddl/10_user_settings.sql
+psql $DATABASE_URL -f supabase/ddl/11_category_overrides.sql
+psql $DATABASE_URL -f supabase/ddl/11_admin_google_users.sql
+psql $DATABASE_URL -f supabase/ddl/12_ics_categories.sql
 ```
-
-(Probably need to run the rest, too?)
 
 Then set up the scheduled cron job — edit `supabase/ddl/05_cron_jobs.sql`, replacing `YOUR_SUPABASE_URL` with your actual project URL, and adding your anon key, then run it.
 
@@ -159,7 +161,9 @@ Then add the remaining secrets and variables in **Settings → Secrets and varia
 | Name | Value |
 |------|-------|
 | `SUPABASE_URL` | `https://YOUR_PROJECT_REF.supabase.co` |
-| `SUPABASE_KEY` | Your publishable key (`sb_publishable_...`) |
+| `SUPABASE_KEY` | Your legacy anon key (`eyJ...`) |
+
+> **Note:** `SUPABASE_KEY` and `SUPABASE_ANON_KEY` hold the same value (your legacy anon key). The workflow uses `SUPABASE_KEY` as an env var for Python scripts that call the Supabase REST API, and `SUPABASE_ANON_KEY` separately for the edge function curl call. The publishable key (`sb_publishable_...`) is only used in the frontend HTML files (Step 3), not here.
 
 The workflow also uses `${{ github.repository }}` (automatically set to your fork's `owner/repo`) — no configuration needed for that.
 
@@ -228,7 +232,7 @@ python3 -m http.server 8080
 For Python scripts that talk to Supabase, set env vars locally:
 ```bash
 export SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
-export SUPABASE_KEY=sb_publishable_...
+export SUPABASE_KEY=eyJ...   # your legacy anon key, NOT the publishable key
 export ANTHROPIC_API_KEY=sk-ant-...
 python3 scripts/classify_events_anthropic.py --limit 50 --dry-run
 ```
@@ -236,7 +240,7 @@ python3 scripts/classify_events_anthropic.py --limit 50 --dry-run
 Or create a `.env` file (never commit this):
 ```
 SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
-SUPABASE_KEY=sb_publishable_...
+SUPABASE_KEY=eyJ...
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 Then `export $(cat .env | xargs)` before running scripts.
