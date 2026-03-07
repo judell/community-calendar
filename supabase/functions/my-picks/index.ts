@@ -62,6 +62,9 @@ function generateICS(events: any[], calendarName: string): string {
     if (event.url) {
       lines.push(`URL:${event.url}`);
     }
+    if (event.image_url) {
+      lines.push(`ATTACH;FMTTYPE=image/jpeg:${event.image_url}`);
+    }
     // Categories from enrichment
     if (event.categories && event.categories.length > 0) {
       lines.push(`CATEGORIES:${event.categories.join(",")}`);
@@ -126,7 +129,8 @@ Deno.serve(async (req) => {
           location,
           description,
           url,
-          source
+          source,
+          image_url
         )
       `)
       .eq("user_id", userId);
