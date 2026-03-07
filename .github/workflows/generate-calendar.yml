@@ -678,6 +678,45 @@ jobs:
         python scripts/combine_ics.py --input-dir cities/montclair --output cities/montclair/combined.ics --name "Montclair Community Calendar"
 
     # ==========================================
+    # Roanoke
+    # ==========================================
+    - name: Scrape Roanoke sources
+      if: contains(steps.locations.outputs.list, 'roanoke') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        python scrapers/growthzone.py --url "https://business.roanokechamber.org/api/events" --name "Roanoke Regional Chamber" --output cities/roanoke/roanoke_chamber.ics || true
+        curl -sL "https://eb-to-ical.daylightpirates.org/eventbrite-organizer-ical?organizer=3245496552" -o roanoke_higher_ed_center.ics || true
+
+    - name: Download Roanoke live feeds and combine ICS
+      if: contains(steps.locations.outputs.list, 'roanoke')
+      run: |
+        cd cities/roanoke
+        # City of Salem (CivicPlus)
+        curl -sL "https://www.salemva.gov/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar" -o salem_main_calendar.ics || true
+        curl -sL "https://www.salemva.gov/common/modules/iCalendar/iCalendar.aspx?catID=26&feed=calendar" -o salem_civic_center.ics || true
+        curl -sL "https://www.salemva.gov/common/modules/iCalendar/iCalendar.aspx?catID=27&feed=calendar" -o salem_government_meetings.ics || true
+        curl -sL "https://www.salemva.gov/common/modules/iCalendar/iCalendar.aspx?catID=23&feed=calendar" -o salem_parks_rec.ics || true
+        # City of Roanoke (CivicPlus)
+        curl -sL "https://www.roanokeva.gov/common/modules/iCalendar/iCalendar.aspx?catID=39&feed=calendar" -o roanoke_special_events.ics || true
+        curl -sL "https://www.roanokeva.gov/common/modules/iCalendar/iCalendar.aspx?catID=25&feed=calendar" -o roanoke_public_events.ics || true
+        curl -sL "https://www.roanokeva.gov/common/modules/iCalendar/iCalendar.aspx?catID=35&feed=calendar" -o roanoke_neighborhood_events.ics || true
+        curl -sL "https://www.roanokeva.gov/common/modules/iCalendar/iCalendar.aspx?catID=28&feed=calendar" -o roanoke_city_council.ics || true
+        curl -sL "https://www.roanokeva.gov/common/modules/iCalendar/iCalendar.aspx?catID=38&feed=calendar" -o roanoke_boards_commissions.ics || true
+        # Venues & Arts
+        curl -sL "https://calendar.google.com/calendar/ical/ice.berglundcenter%40gmail.com/public/basic.ics" -o berglund_center.ics || true
+        curl -sL "https://www.hollins.edu/events/?ical=1" -o hollins_university.ics || true
+        curl -sL "https://taubmanmuseum.org/events/?ical=1" -o taubman_museum.ics || true
+        curl -sL "https://rso.com/events/?ical=1" -o roanoke_symphony.ics || true
+        # Meetup groups
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/make-roanoke/events/ical/" -o meetup_make_roanoke.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/pathfinders-for-greenways/events/ical/" -o meetup_pathfinders_greenways.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/southwest-va-toastmasters-meetup-group/events/ical/" -o meetup_sw_va_toastmasters.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/Roanoke-Spiritual-Experiences-Group/events/ical/" -o meetup_roanoke_spiritual.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/roanoke-valley-net-user-group/events/ical/" -o meetup_roanoke_valley_net.ics || true
+        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/shut-up-write-roanoke/events/ical/" -o meetup_shut_up_write.ics || true
+        cd ../..
+        python scripts/combine_ics.py --input-dir cities/roanoke --output cities/roanoke/combined.ics --name "Roanoke Community Calendar"
+
+    # ==========================================
     # Post-processing (all cities)
     # ==========================================
     - name: Convert ICS to JSON for Supabase
@@ -742,7 +781,7 @@ jobs:
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         
         # Save generated files before any git operations
-        for city in santarosa bloomington davis petaluma toronto raleighdurham montclair; do
+        for city in santarosa bloomington davis petaluma toronto raleighdurham montclair roanoke; do
           if [ -f "cities/$city/events.json" ]; then
             cp "cities/$city/events.json" "/tmp/${city}_events.json"
           fi
@@ -758,7 +797,7 @@ jobs:
             fi
             echo "Push failed, restoring generated files and retrying..."
             # Restore generated files that may have been clobbered by rebase
-            for city in santarosa bloomington davis petaluma toronto raleighdurham montclair; do
+            for city in santarosa bloomington davis petaluma toronto raleighdurham montclair roanoke; do
               if [ -f "/tmp/${city}_events.json" ]; then
                 cp "/tmp/${city}_events.json" "cities/$city/events.json"
               fi
