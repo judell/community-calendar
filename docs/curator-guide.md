@@ -21,6 +21,7 @@
   - [Getting started with a cloud workspace](#getting-started-with-a-cloud-workspace)
   - [What about Git and the command line?](#what-about-git-and-the-command-line)
   - [What if something goes wrong?](#what-if-something-goes-wrong)
+- [API Keys and Costs](#api-keys-and-costs)
 - [See Also](#see-also)
 
 ## Overview
@@ -268,6 +269,52 @@ If you want to learn more about any of this as you go, just ask the agent. It ca
 ### What if something goes wrong?
 
 Nothing you or the agent does is irreversible. Git keeps a complete history of every change. If a feed turns out to be broken, or a scraper doesn't work, the change can be undone cleanly. The worst case is wasted time, never wasted data.
+
+---
+
+## API Keys and Costs
+
+Running a community calendar requires a few API keys. Here's what they are, what they cost, and when you need them.
+
+### Supabase
+
+The database and edge function host. The [free tier](https://supabase.com/pricing) includes 500MB of database storage, 50,000 monthly active users, and 500,000 edge function invocations — more than enough for a community calendar. You'll likely never need a paid plan unless you're running dozens of cities from one project.
+
+**Keys:** A publishable key (embedded in the frontend for read access) and a service role key (used by edge functions for writes). Both are created automatically when you set up a Supabase project.
+
+### Anthropic API (Claude)
+
+Used for two things: **event classification** (frequent, cheap) and **event capture from images/audio** (occasional, moderate).
+
+**Classification** runs automatically after each daily build. Claude Haiku classifies newly added events into categories (Music & Concerts, Family & Kids, etc.) in batches of 50. This is the most frequent API usage but also the cheapest — Haiku costs $0.25/M input tokens and $1.25/M output tokens. A typical batch of 50 events uses ~2K input tokens and ~500 output tokens, so classifying 50 events costs roughly $0.001. Toronto currently has ~4,500 future events and adds ~20 new events per daily build — that's one Haiku call per day, well under $0.01/day.
+
+**Event capture** (poster images, audio memos) uses Claude Sonnet for vision/text extraction. This is on-demand — only when a user photographs a poster or records an audio memo. Sonnet costs $3/M input tokens and $15/M output tokens. A single image capture uses ~1,500 input tokens (prompt + image) and ~200 output tokens, costing roughly $0.008 per capture. Audio capture adds a Whisper transcription step (see OpenAI below) before the Sonnet call.
+
+**Key:** Set as a Supabase edge function secret (`ANTHROPIC_API_KEY`). Get one at [console.anthropic.com](https://console.anthropic.com/).
+
+### OpenAI API (Whisper)
+
+Used only for **audio event capture** — transcribing voice memos before Claude extracts event details. This is occasional/on-demand. Whisper costs $0.006 per minute of audio. A typical 30-second voice memo costs ~$0.003.
+
+**Key:** Set as a Supabase edge function secret (`OPENAI_API_KEY`). Get one at [platform.openai.com](https://platform.openai.com/). Not needed if you don't use audio capture.
+
+### Ticketmaster Discovery API
+
+Used by `scrapers/ticketmaster.py` to fetch events from major venues that delegate their ticketing to Ticketmaster. The [Discovery API](https://developer.ticketmaster.com/products-and-docs/apis/getting-started/) is free (rate-limited to 5,000 calls/day). Currently used for 8 Toronto venues (~951 events) and 2 Raleigh-Durham venues.
+
+**Key:** Set as a GitHub Actions secret (`TICKETMASTER_API_KEY`). Get a free key at [developer.ticketmaster.com](https://developer.ticketmaster.com/). Only needed if your city has Ticketmaster venues worth adding.
+
+### Cost summary
+
+| Service | What it does | Frequency | Estimated cost |
+|---------|-------------|-----------|---------------|
+| Supabase | Database, edge functions, auth | Always on | Free tier |
+| Anthropic (Haiku) | Classify new events | Daily build | < $0.01/day |
+| Anthropic (Sonnet) | Extract event from image | On-demand | ~$0.008/capture |
+| OpenAI (Whisper) | Transcribe audio memo | On-demand | ~$0.003/capture |
+| Ticketmaster | Fetch venue events | Daily build | Free |
+
+For a typical city with ~100 sources and a few thousand events, expect to spend well under $1/month on API calls. The main variable is how often users capture events from posters or audio — but even heavy use would be modest.
 
 ---
 
