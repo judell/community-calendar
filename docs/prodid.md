@@ -7,14 +7,14 @@ used across all city feeds, identified by their PRODID header.
 
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
-| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 127 |
-| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 71 |
-| **Google Calendar** | Public Google Calendar ICS export. | bloomington, montclair, petaluma, raleighdurham, santarosa, toronto | 42 |
-| **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, montclair, raleighdurham, santarosa | 37 |
+| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, roanoke, santarosa, toronto | 133 |
+| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, montclair, petaluma, raleighdurham, roanoke, santarosa, toronto | 74 |
+| **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, montclair, raleighdurham, roanoke, santarosa | 46 |
+| **Google Calendar** | Public Google Calendar ICS export. | bloomington, montclair, petaluma, raleighdurham, roanoke, santarosa, toronto | 43 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 21 |
 | **MaxPreps** | High school sports schedules. | montclair, petaluma, santarosa | 10 |
 | **Tockify** | Embeddable calendar widget with public ICS feeds. | bloomington, petaluma, santarosa, toronto | 8 |
-| **GrowthZone** | Chamber of commerce / association management platform. | montclair, petaluma, raleighdurham | 5 |
+| **GrowthZone** | Chamber of commerce / association management platform. | montclair, petaluma, raleighdurham, roanoke | 6 |
 | **LibCal (Springshare)** | Library event management platform. | bloomington, montclair, raleighdurham | 4 |
 | **Modern Events Calendar (WordPress)** | WordPress plugin by Webnus. PRODID references wp-events-plugin.com. | petaluma, raleighdurham, toronto | 4 |
 | **Bedework** | Open-source enterprise calendar (Java). Used by Duke and some universities. | raleighdurham | 2 |
@@ -24,7 +24,7 @@ used across all city feeds, identified by their PRODID header.
 
 ## Detail
 
-### Meetup (127 feeds)
+### Meetup (133 feeds)
 
 ICS export from meetup.com groups.
 
@@ -38,11 +38,13 @@ ICS export from meetup.com groups.
 
 **raleighdurham** (31): meetup_adventures, meetup_all_things_ai, meetup_all_things_open_rtp_meetup, meetup_blacks_in_tech_bit_rdu_durham_raleigh_meetup, meetup_chad2015, meetup_chicktech_rdu, meetup_code_for_america, meetup_csa_triangle, meetup_data_science_raleigh, meetup_discover_durham_together, meetup_downtown_techies_durham, meetup_durham_geeks, meetup_durham_writers, meetup_futureofdata_triangle, meetup_modern_web_triangle, meetup_outdoor_flow_yogis, meetup_plum_village_meditation, meetup_pydata_triangle, meetup_raleigh_ai_ml_cv, meetup_raleigh_triangle_activities, meetup_raleigh_wordpress_meetup_group, meetup_research_triangle_analysts, meetup_splatspace, meetup_triangle_board_games, meetup_triangle_devops, meetup_triangle_devs, meetup_triangle_techbreakfast, meetup_triangle_transitional, meetup_triangleai, meetup_tripython, meetup_yoga_in_nature
 
+**roanoke** (6): meetup_make_roanoke, meetup_pathfinders_greenways, meetup_roanoke_spiritual, meetup_roanoke_valley_net, meetup_shut_up_write, meetup_sw_va_toastmasters
+
 **santarosa** (10): meetup_amorc, meetup_boomers, meetup_creativity, meetup_go_wild_hikers, meetup_sarogn, meetup_scottish_dancing, meetup_shutupandwrite, meetup_toastmasters, meetup_womens_wine_club, meetup_yoga
 
 **toronto** (50): meetup_20s30s_social, meetup_ai_ml, meetup_arts_crafts, meetup_arts_culture, meetup_bike_toronto, meetup_board_games_to, meetup_book_club_abcd, meetup_bruce_trail, meetup_canoe_trippers, meetup_devops, meetup_experience_to, meetup_founders_running, meetup_gta_hiking, meetup_heavy_boardgames, meetup_high_park_yoga, meetup_hiking_boots, meetup_hiking_network, meetup_improv_friends, meetup_improv_to, meetup_jpn_eng_exchange, meetup_lang_exchange_to, meetup_little_sunbeams, meetup_medieval_sca, meetup_mindful_movement, meetup_mini_me, meetup_movies_social, meetup_ms_reactor, meetup_photography_to, meetup_postapoc_books, meetup_postgres_to, meetup_python_to, meetup_sai_dham_volunteer, meetup_salsa_gta, meetup_scifi_books, meetup_silent_books, meetup_singles_social, meetup_soul_city, meetup_sup_kayak, meetup_tech_stack, meetup_techto, meetup_tile_language, meetup_toronto_dads, meetup_toronto_history_walks, meetup_toronto_paddlers, meetup_toronto_wellness, meetup_torontobabel, meetup_torontojs, meetup_try_new_things, meetup_wilderness_union, meetup_women_biz
 
-### The Events Calendar (WordPress) (71 feeds)
+### The Events Calendar (WordPress) (74 feeds)
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
@@ -54,11 +56,27 @@ WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **raleighdurham** (19): ackland_art, aps_durham, downtown_durham, duke_gardens, durham_central_park, gardens, hope_animal_rescue, islamic_assoc_raleigh, morehead_planetarium, nasher_museum, nc_botanical_garden, nc_humanities, nc_natural_sciences, nc_wildlife_federation, resilient_durham, second_chance_pets, transitions_lifecare, triangle_land, united_arts_wake
 
+**roanoke** (3): hollins_university, roanoke_symphony, taubman_museum
+
 **santarosa** (7): golocal_coop, luther_burbank_center, schulz_museum, sonoma_com, sonoma_county_aa, srsymphony, uptowntheatrenapa
 
 **toronto** (26): bata_shoe_museum, bloor_west_village, boulderzclimbing, buddies_theatre, culturelink, factory_theatre, gardiner_museum, golatindance, grossmans_tavern, high_park_nature, indigenous, jazz_bistro, knitters_guild, now_toronto, ontario_historical_society, ontario_nature, scadding_court, site3, sunshinecentres, textile_museum, toronto_botanical, union_station, uoft_engineering, uoft_indigenous, uoft_philosophy, uoft_socialwork
 
-### Google Calendar (42 feeds)
+### CivicPlus (ical.net) (46 feeds)
+
+Government CMS using ical.net library. Common for city/county websites.
+
+**bloomington** (1): iu_campuslabs
+
+**montclair** (1): montclair_engage_events_ics
+
+**raleighdurham** (3): durham_gov, durham_gov_community, durham_parks_rec
+
+**roanoke** (9): roanoke_boards_commissions, roanoke_city_council, roanoke_neighborhood_events, roanoke_public_events, roanoke_special_events, salem_civic_center, salem_government_meetings, salem_main_calendar, salem_parks_rec
+
+**santarosa** (32): SRCity_Art_in_Public_Places_Committee, SRCity_Board_of_Building_Regulation_Appeals, SRCity_COVID-19_Business_Webinars, SRCity_Charter_Review_Committee, SRCity_CityBus, SRCity_City_Council, SRCity_City_Offices_Closed, SRCity_Climate_Action_Subcommittee, SRCity_Community_Advisory_Board, SRCity_Community_Calendar, SRCity_Creek_Stewardship, SRCity_Cultural_Heritage_Board, SRCity_Design_Review_Board, SRCity_Downtown_Subcommittee, SRCity_Economic_Development_Subcommittee, SRCity_Events, SRCity_HCS_and_Code, SRCity_Main_Calendar, SRCity_Neighborhood_Meetings, SRCity_Parking, SRCity_Planning_Commission, SRCity_Planning_and_Economic_Development, SRCity_Police, SRCity_Public_Works, SRCity_Recreation_and_Parks, SRCity_Santa_Rosa_Water, SRCity_Subdivision_Committee, SRCity_Tourism_Business_Improvement_Area_Advisory_Board, SRCity_Transportation_and_Public_Works, SRCity_Waterways_Advisory_Committee, SRCity_Wildfire_Ready, SRCity_Zoning_Administrator
+
+### Google Calendar (43 feeds)
 
 Public Google Calendar ICS export.
 
@@ -70,21 +88,11 @@ Public Google Calendar ICS export.
 
 **raleighdurham** (16): bike_durham, calendar_c_dl4511hfnoong3b3171k6smt74_40group_cale, calendar_c_j40ldpocctr71k99n0n2lr9c14_40group_cale, calendar_cb2ajgfjpk6bf9gifg6kg2hn1s_40group_calend, calendar_lgbtqcenterofdurham_org_qb71v8n48d0a304sq, durham_resistance_1, durham_resistance_2, durham_resistance_3, durham_resistance_4, eno_river, gizmo_brew_works, lgbtq_center_durham, new_hope_bird_alliance, sw_durham_rotary, triangle_cycling, wake_audubon
 
+**roanoke** (1): berglund_center
+
 **santarosa** (2): arlene_francis_theater, sonoma_county_dsa
 
 **toronto** (3): cita_local_events, cita_seminars, cita_special_events
-
-### CivicPlus (ical.net) (37 feeds)
-
-Government CMS using ical.net library. Common for city/county websites.
-
-**bloomington** (1): iu_campuslabs
-
-**montclair** (1): montclair_engage_events_ics
-
-**raleighdurham** (3): durham_gov, durham_gov_community, durham_parks_rec
-
-**santarosa** (32): SRCity_Art_in_Public_Places_Committee, SRCity_Board_of_Building_Regulation_Appeals, SRCity_COVID-19_Business_Webinars, SRCity_Charter_Review_Committee, SRCity_CityBus, SRCity_City_Council, SRCity_City_Offices_Closed, SRCity_Climate_Action_Subcommittee, SRCity_Community_Advisory_Board, SRCity_Community_Calendar, SRCity_Creek_Stewardship, SRCity_Cultural_Heritage_Board, SRCity_Design_Review_Board, SRCity_Downtown_Subcommittee, SRCity_Economic_Development_Subcommittee, SRCity_Events, SRCity_HCS_and_Code, SRCity_Main_Calendar, SRCity_Neighborhood_Meetings, SRCity_Parking, SRCity_Planning_Commission, SRCity_Planning_and_Economic_Development, SRCity_Police, SRCity_Public_Works, SRCity_Recreation_and_Parks, SRCity_Santa_Rosa_Water, SRCity_Subdivision_Committee, SRCity_Tourism_Business_Improvement_Area_Advisory_Board, SRCity_Transportation_and_Public_Works, SRCity_Waterways_Advisory_Committee, SRCity_Wildfire_Ready, SRCity_Zoning_Administrator
 
 ### Localist (21 feeds)
 
@@ -116,7 +124,7 @@ Embeddable calendar widget with public ICS feeds.
 
 **toronto** (4): distillery_events, jamaalmyers, st_lawrence_na, torevent
 
-### GrowthZone (5 feeds)
+### GrowthZone (6 feeds)
 
 Chamber of commerce / association management platform.
 
@@ -125,6 +133,8 @@ Chamber of commerce / association management platform.
 **petaluma** (1): petaluma_chamber
 
 **raleighdurham** (3): apex_chamber, durham_chamber, wakeforest_chamber
+
+**roanoke** (1): roanoke_chamber
 
 ### LibCal (Springshare) (4 feeds)
 
