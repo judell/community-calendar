@@ -254,6 +254,39 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
             for src, info in by_source.items()
         ], key=lambda x: -x['events'])[:15]
 
+        # Category breakdown
+        by_category = {}
+        for e in events:
+            cat = e.get('category') or '(uncategorized)'
+            by_category[cat] = by_category.get(cat, 0) + 1
+        category_breakdown = sorted(
+            [{'category': cat, 'count': cnt} for cat, cnt in by_category.items()],
+            key=lambda x: -x['count']
+        )
+
+        # Image coverage
+        with_image = sum(1 for e in events if e.get('image_url'))
+        by_source_images = {}
+        for e in events:
+            src = e.get('source') or '(none)'
+            if src not in by_source_images:
+                by_source_images[src] = {'total': 0, 'with_image': 0}
+            by_source_images[src]['total'] += 1
+            if e.get('image_url'):
+                by_source_images[src]['with_image'] += 1
+        image_by_source = sorted(
+            [{'source': src, 'total': info['total'], 'with_image': info['with_image']}
+             for src, info in by_source_images.items() if info['with_image'] > 0],
+            key=lambda x: -x['with_image']
+        )
+
+        report['cities'][city]['categories'] = category_breakdown
+        report['cities'][city]['images'] = {
+            'total': len(events),
+            'with_image': with_image,
+            'by_source': image_by_source
+        }
+
         report['cities'][city]['url_quality'] = {
             'total_with_url': total,
             'total_events': len(events),

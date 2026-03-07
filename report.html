@@ -146,6 +146,18 @@
     </details>
 
     <div class="url-section">
+        <h2>Categories</h2>
+        <div class="section-desc">Event distribution by category across all cities</div>
+        <div id="categories-report"></div>
+    </div>
+
+    <div class="url-section">
+        <h2>Image Coverage</h2>
+        <div class="section-desc">Events with image URLs from source feeds</div>
+        <div id="images-report"></div>
+    </div>
+
+    <div class="url-section">
         <h2>URL Quality</h2>
         <div class="section-desc">Deduplicated events from the combined calendar</div>
         <div id="url-report">Loading...</div>
@@ -246,6 +258,8 @@
             }
 
             renderBuildErrors(data);
+            renderCategories(data);
+            renderImages(data);
             renderUrlReport(data);
         }
 
@@ -309,6 +323,72 @@
                     </div>
                 </details>
             `;
+        }
+
+        function renderCategories(data) {
+            const container = document.getElementById('categories-report');
+            let html = '';
+            for (const [cityName, cityData] of Object.entries(data.cities || {})) {
+                const cats = cityData.categories;
+                if (!cats || !cats.length) continue;
+                const total = cats.reduce((s, c) => s + c.count, 0);
+                html += `
+                    <details>
+                        <summary><span class="city-name">${capitalize(cityName)}</span>
+                            <span class="city-stats">${cats.length} categories, ${total.toLocaleString()} events</span>
+                        </summary>
+                        <div class="city-content">
+                            <table class="url-table">
+                                <tr><th>Category</th><th>Events</th><th>%</th><th></th></tr>
+                                ${cats.map(c => {
+                                    const pct = Math.round(c.count / total * 100);
+                                    return `<tr>
+                                        <td>${c.category}</td>
+                                        <td class="num">${c.count}</td>
+                                        <td class="num">${pct}%</td>
+                                        <td><span class="pct-bar good" style="width:${Math.max(2, pct * 1.5)}px"></span></td>
+                                    </tr>`;
+                                }).join('')}
+                            </table>
+                        </div>
+                    </details>
+                `;
+            }
+            container.innerHTML = html || '<div>No category data available</div>';
+        }
+
+        function renderImages(data) {
+            const container = document.getElementById('images-report');
+            let html = '';
+            for (const [cityName, cityData] of Object.entries(data.cities || {})) {
+                const img = cityData.images;
+                if (!img) continue;
+                const pct = img.total > 0 ? Math.round(img.with_image / img.total * 100) : 0;
+                const barClass = pct >= 50 ? 'good' : pct >= 20 ? 'mid' : 'bad';
+                html += `
+                    <details>
+                        <summary><span class="city-name">${capitalize(cityName)}</span>
+                            <span class="city-stats">${img.with_image} / ${img.total} events (${pct}%) <span class="pct-bar ${barClass}" style="width:${Math.max(4, pct * 0.8)}px"></span></span>
+                        </summary>
+                        <div class="city-content">
+                            ${img.by_source.length ? `
+                            <table class="url-table">
+                                <tr><th>Source</th><th>With Image</th><th>Total</th><th>%</th></tr>
+                                ${img.by_source.map(s => {
+                                    const sp = Math.round(s.with_image / s.total * 100);
+                                    return `<tr>
+                                        <td>${s.source}</td>
+                                        <td class="num">${s.with_image}</td>
+                                        <td class="num">${s.total}</td>
+                                        <td class="num">${sp}%</td>
+                                    </tr>`;
+                                }).join('')}
+                            </table>` : '<div>No sources with images</div>'}
+                        </div>
+                    </details>
+                `;
+            }
+            container.innerHTML = html || '<div>No image data available</div>';
         }
 
         function renderUrlReport(data) {
