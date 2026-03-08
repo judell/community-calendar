@@ -1,9 +1,19 @@
-<App name="Community Calendar" codeBehind="Main.xmlui.xs" defaultTheme="community-calendar" var.filterTerm="" var.viewMode="{'all'}" var.displayStartIndex="{0}" var.browseStartIndex="{0}" var.scrollRequest="{0}" global.userSettingsData="{null}">
+<App
+  name="Community Calendar"
+  codeBehind="Main.xmlui.xs"
+  defaultTheme="community-calendar"
+  var.filterTerm=""
+  var.viewMode="{'all'}"
+  var.displayStartIndex="{0}"
+  var.browseStartIndex="{0}"
+  var.scrollRequest="{0}"
+  global.userSettingsData="{null}"
+  var.city="{window.cityFilter || null}">
 
   <!-- DataSources -->
   <DataSource
     id="events"
-    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate() + (window.cityFilter ? '&city=eq.' + window.cityFilter : '')}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate() + (city ? '&city=eq.' + city : '')}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       'Cache-Control': 'no-cache, no-store, must-revalidate'
@@ -24,7 +34,7 @@
   <DataSource
     id="userSettings"
     when="{window.authSession}"
-    url="{appGlobals.supabaseUrl + '/rest/v1/user_settings?select=*&city=eq.' + window.cityFilter + '&limit=1'}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/user_settings?select=*&city=eq.' + city + '&limit=1'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       Authorization: 'Bearer ' + window.authSession?.access_token,
@@ -95,7 +105,7 @@
 
   <DataSource
     id="enrichments"
-    url="{appGlobals.supabaseUrl + '/rest/v1/event_enrichments?select=*&rrule=not.is.null' + (window.cityFilter ? '&city=eq.' + window.cityFilter : '')}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/event_enrichments?select=*&rrule=not.is.null' + (city ? '&city=eq.' + city : '')}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       'Cache-Control': 'no-cache, no-store, must-revalidate'
@@ -118,21 +128,21 @@
   </ModalDialog>
 
   <!-- City picker (shown when no city selected) -->
-  <VStack when="{!window.cityFilter}" horizontalAlignment="center" width="100%" padding="$space-8">
+  <VStack when="{!city}" horizontalAlignment="center" width="100%" padding="$space-8">
     <H1>Community Calendar</H1>
     <VStack gap="$space-2" maxWidth="300px" width="100%">
-      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=santarosa'">Santa Rosa</Button>
-      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=petaluma'">Petaluma</Button>
-      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=davis'">Davis</Button>
-      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=bloomington'">Bloomington</Button>
-      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=toronto'">Toronto</Button>
-      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=raleighdurham'">Raleigh-Durham</Button>
-      <Button variant="outlined" width="100%" onClick="window.location.search = '?city=montclair'">Montclair</Button>
+      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'santarosa'; window.cityName = 'Santa Rosa'; document.title = 'Santa Rosa Community Calendar'; city = 'santarosa'">Santa Rosa</Button>
+      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'petaluma'; window.cityName = 'Petaluma'; document.title = 'Petaluma Community Calendar'; city = 'petaluma'">Petaluma</Button>
+      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'davis'; window.cityName = 'Davis'; document.title = 'Davis Community Calendar'; city = 'davis'">Davis</Button>
+      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'bloomington'; window.cityName = 'Bloomington'; document.title = 'Bloomington Community Calendar'; city = 'bloomington'">Bloomington</Button>
+      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'toronto'; window.cityName = 'Toronto'; document.title = 'Toronto Community Calendar'; city = 'toronto'">Toronto</Button>
+      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'raleighdurham'; window.cityName = 'Raleigh-Durham'; document.title = 'Raleigh-Durham Community Calendar'; city = 'raleighdurham'">Raleigh-Durham</Button>
+      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'montclair'; window.cityName = 'Montclair'; document.title = 'Montclair Community Calendar'; city = 'montclair'">Montclair</Button>
     </VStack>
   </VStack>
 
   <!-- Main Content -->
-  <HStack when="{!!window.cityFilter}" horizontalAlignment="center" width="100%" overflowX="hidden">
+  <HStack when="{!!city}" horizontalAlignment="center" width="100%" overflowX="hidden">
   <VStack maxWidth="600px" width="100%" overflowX="hidden">
     <VStack>
     <VStack gap="$space-2">

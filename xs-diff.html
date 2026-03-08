@@ -2321,8 +2321,8 @@
             const urlPath = e.url ? new URL(e.url, "http://x").pathname : "";
             expensiveParts.push({ name: `${method} ${urlPath}`, duration: e.duration, kind: "api" });
           }
-          if (e.kind === "app:timing" && typeof e.duration === "number" && e.duration > 0) {
-            expensiveParts.push({ name: `app:${e.label || "timing"}`, duration: e.duration, kind: "app" });
+          if (e.kind === "app:trace" && typeof e.duration === "number" && e.duration > 0) {
+            expensiveParts.push({ name: `app:${e.label || "trace"}`, duration: e.duration, kind: "app" });
           }
         });
         // Sort by duration descending, take top 3
@@ -2407,8 +2407,8 @@
                 timelineBreakdown.push({ phase: `api:${method} ${urlPath}`, duration, perfTs: e.perfTs, order: timelineOrder++ });
               }
             }
-            if (e.kind === "app:timing" && typeof e.duration === "number" && e.duration > 0) {
-              timelineBreakdown.push({ phase: `app:${e.label || "timing"}`, duration: e.duration, perfTs: e.perfTs, order: timelineOrder++ });
+            if (e.kind === "app:trace" && typeof e.duration === "number" && e.duration > 0) {
+              timelineBreakdown.push({ phase: `app:${e.label || "trace"}`, duration: e.duration, perfTs: e.perfTs, order: timelineOrder++ });
             }
           });
 
@@ -3846,10 +3846,11 @@
               bodyHtml += `</details>`;
               bodyHtml += `</div>`;
             }
-          } else if (e.kind === "app:timing") {
-            // App-level timing events from xsTrace()
+          } else if (e.kind === "app:trace") {
+            // App-level trace events from xsTrace() / xsTraceEvent() / xsTraceWith()
             const durationStr = typeof e.duration === "number" ? ` (${e.duration.toFixed(1)}ms)` : "";
-            bodyHtml += `<div class="trace-event-header">[app:timing] <strong>${e.label || "timing"}</strong>${durationStr}${metaInline}</div>`;
+            const dataStr = e.data ? ` <span class="trace-event-meta">${Object.entries(e.data).map(([k,v]) => `${k}=${JSON.stringify(v)}`).join(" | ")}</span>` : "";
+            bodyHtml += `<div class="trace-event-header">[app:trace] <strong>${e.label || "trace"}</strong>${durationStr}${dataStr}${metaInline}</div>`;
           } else if (e.kind === "interaction") {
             // Interaction events - show the interaction type (click, contextmenu, etc.)
             const interactionType = e.interaction || "unknown";
@@ -4230,9 +4231,10 @@
             }
             return;
           }
-          if (e.kind === "app:timing") {
+          if (e.kind === "app:trace") {
             const durationStr = typeof e.duration === "number" ? ` (${e.duration.toFixed(1)}ms)` : "";
-            lines.push(`    [app:timing]${durationStr} ${e.label || "timing"}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            const dataStr = e.data ? " " + Object.entries(e.data).map(([k,v]) => `${k}=${JSON.stringify(v)}`).join(" | ") : "";
+            lines.push(`    [app:trace]${durationStr} ${e.label || "trace"}${dataStr}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
             return;
           }
           if (e.kind === "error:boundary") {

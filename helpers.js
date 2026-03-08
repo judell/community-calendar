@@ -1080,7 +1080,10 @@ if (typeof window !== 'undefined') {
   window.toggleDay = toggleDay;
   var _filterEvents = filterEvents;
   window.filterEvents = function(events, term, category) {
-    return window.xsTrace ? window.xsTrace("filterEvents", function() { return _filterEvents(events, term, category); }) : _filterEvents(events, term, category);
+    return window.xsTraceWith
+      ? window.xsTraceWith("filterEvents", function() { return _filterEvents(events, term, category); },
+          function(result) { return { term: term || '', category: category || '', resultCount: result.length }; })
+      : _filterEvents(events, term, category);
   };
   window.getPagedEvents = getPagedEvents;
   window.getDescriptionSnippet = getDescriptionSnippet;
@@ -1097,7 +1100,10 @@ if (typeof window !== 'undefined') {
   window.getSourceCounts = getSourceCounts;
   var _dedupeEvents = dedupeEvents;
   window.dedupeEvents = function(events) {
-    return window.xsTrace ? window.xsTrace("dedupeEvents", function() { return _dedupeEvents(events); }) : _dedupeEvents(events);
+    return window.xsTraceWith
+      ? window.xsTraceWith("dedupeEvents", function() { return _dedupeEvents(events); },
+          function(result) { return { inputCount: (events || []).length, outputCount: result.length }; })
+      : _dedupeEvents(events);
   };
   window.collapseLongRunningEvents = collapseLongRunningEvents;
   window.clearDedupeCache = clearDedupeCache;
