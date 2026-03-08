@@ -614,50 +614,39 @@ After mock tests, `test.html` fetches 500 live events from Supabase and validate
 
 ## Regression Testing
 
-The community calendar uses [trace-tools](https://github.com/xmlui-org/trace-tools) for regression testing. Two trace-based tests run on every push and should stay green:
+The community calendar uses [trace-tools](https://github.com/xmlui-org/trace-tools) for regression testing. Three distilled baselines run on every push and should stay green:
 
-| Test | Type | What it covers |
-|------|------|----------------|
-| `pick-roundtrip` | Hand-written spec | Pick an existing event → verify in "my picks" → unpick |
-| `capture-roundtrip` | Hand-written spec | Audio capture via Whisper → review in PickEditor → save → verify in "my picks" → remove |
-| `search-roundtrip` | Generated from baseline | Search for events, filter by category, clear search — semantic comparison against baseline trace |
+| Baseline | What it covers | Video |
+|----------|----------------|-------|
+| `capture-roundtrip` | Audio capture via Whisper → review in PickEditor → save → verify → remove | [watch](cities/santarosa/traces/videos/capture-roundtrip.webm) |
+| `pick-roundtrip` | Pick an existing event → verify in "my picks" → unpick | [watch](cities/santarosa/traces/videos/pick-roundtrip.webm) |
+| `search-roundtrip` | Select city, search for events, clear search | [watch](cities/santarosa/traces/videos/search-roundtrip.webm) |
 
-**Current status:** These tests were bootstrapped with hand-written Playwright specs (in `traces/specs/`), with a synthetic baseline for `search-roundtrip` captured from one of the hand-written specs. The next step is to add a journey done "properly" via manual capture: interact with the app, export a trace from the XMLUI Inspector, save it as a baseline, and let the pipeline generate and run the Playwright test from it.
+Videos are recorded on every CI run and auto-committed, so they always reflect the current product behavior.
 
-**The intended workflow (manual capture):**
+**How it works:** Each baseline is a [distilled trace](https://github.com/xmlui-org/trace-tools#distilled-baselines-the-gold-standard) — a compact JSON file (5–30 KB) containing interaction steps, API calls, and app-level traces. The pipeline auto-generates a Playwright test from the baseline, replays it, captures a new trace, and compares the two semantically. If the same mutation APIs fire and the same interactions happen, it passes — regardless of internal refactoring.
 
-1. Open the app with the XMLUI inspector (the magnifying glass icon in the header)
-2. Perform a user journey — search for events, pick a category, clear the search, etc.
-3. In the inspector, click **Export → Download JSON** and give it a name like `search-roundtrip`
-4. Save it as a baseline: `./test.sh save ~/Downloads/search-roundtrip.json search-roundtrip`
-5. Run the regression test: `./test.sh run search-roundtrip`
+**CI:** The `Regression Tests` workflow runs `./test.sh run-all --video` on every push to main that touches app files. It mints a test auth session via Supabase admin API (no OAuth headless login needed). See [docs/regression-testing.md](docs/regression-testing.md) for auth setup, CI secrets, and local run instructions.
 
-The pipeline auto-generates a Playwright test from the baseline trace, replays it, captures a new trace, and compares the two semantically. If the same APIs fire and the same interactions happen, it passes — regardless of internal refactoring.
-
-**Hand-written specs** are for journeys that need explicit assertions or browser-native interactions (file uploads, auth-gated features). Place them in `traces/specs/`. The `convert` command runs a hand-written spec, captures its trace as a baseline, and generates a test from it.
-
-Santa Rosa is the reference city. From `cities/santarosa/`:
+**Adding a new baseline:**
 
 ```bash
-# Clone trace-tools (first time only)
-git clone https://github.com/xmlui-org/trace-tools.git
+# From cities/santarosa/:
 
-# Run all tests (specs + baseline regressions)
-./test.sh test-all
+# Option 1: capture manually via the XMLUI Inspector
+./test.sh save ~/Downloads/my-journey.json my-journey
 
-# Run a single spec
-./test.sh spec pick-roundtrip
+# Option 2: write a Playwright spec, then convert to baseline
+./test.sh convert my-journey
 
-# Run a baseline regression
-./test.sh run search-roundtrip
+# Run it
+./test.sh run my-journey
 
-# Run with video recording
-./test.sh run search-roundtrip --video
+# Run all baselines
+./test.sh run-all
 ```
 
-**CI:** The `Regression Tests` workflow (`.github/workflows/regression-tests.yml`) runs all tests on every push to main that touches app files (xmlui, js, html, json, css, themes, engine, baselines, or specs). It serves the app locally, clones trace-tools, mints a test auth session, and runs `./test.sh test-all`. Doc-only changes don't trigger it. You can also trigger it manually from the Actions tab.
-
-**What's checked in:** `traces/baselines/`, `traces/specs/`, `traces/fixtures/` (test audio/images), `traces/videos/` (reference recordings), `app-config.json`, `test.sh`. Generated tests and run artifacts are gitignored. The `trace-tools` repo is cloned at test time, not checked in. See the [trace-tools README](https://github.com/xmlui-org/trace-tools#readme) for full details.
+**What's checked in:** `traces/baselines/` (distilled), `traces/specs/`, `traces/fixtures/` (test audio/images), `traces/videos/` (CI-recorded), `app-config.json`, `test.sh`. Generated tests and run artifacts are gitignored. See the [trace-tools README](https://github.com/xmlui-org/trace-tools#readme) for the full framework docs.
 
 ## Adding a New City
 
