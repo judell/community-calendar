@@ -1,9 +1,19 @@
-<App name="Community Calendar" codeBehind="Main.xmlui.xs" defaultTheme="community-calendar" var.filterTerm="" var.viewMode="{'all'}" var.displayStartIndex="{0}" var.browseStartIndex="{0}" var.scrollRequest="{0}" global.userSettingsData="{null}">
+<App
+  name="Community Calendar"
+  codeBehind="Main.xmlui.xs"
+  defaultTheme="community-calendar"
+  var.filterTerm=""
+  var.viewMode="{'all'}"
+  var.displayStartIndex="{0}"
+  var.browseStartIndex="{0}"
+  var.scrollRequest="{0}"
+  global.userSettingsData="{null}"
+  var.city="{window.cityFilter || null}">
 
   <!-- DataSources -->
   <DataSource
     id="events"
-    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate() + (window.cityFilter ? '&city=eq.' + window.cityFilter : '')}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate() + (city ? '&city=eq.' + city : '')}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       'Cache-Control': 'no-cache, no-store, must-revalidate'
@@ -24,7 +34,7 @@
   <DataSource
     id="userSettings"
     when="{window.authSession}"
-    url="{appGlobals.supabaseUrl + '/rest/v1/user_settings?select=*&city=eq.' + window.cityFilter + '&limit=1'}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/user_settings?select=*&city=eq.' + city + '&limit=1'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       Authorization: 'Bearer ' + window.authSession?.access_token,
@@ -95,7 +105,7 @@
 
   <DataSource
     id="enrichments"
-    url="{appGlobals.supabaseUrl + '/rest/v1/event_enrichments?select=*&rrule=not.is.null' + (window.cityFilter ? '&city=eq.' + window.cityFilter : '')}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/event_enrichments?select=*&rrule=not.is.null' + (city ? '&city=eq.' + city : '')}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       'Cache-Control': 'no-cache, no-store, must-revalidate'
@@ -118,7 +128,7 @@
   </ModalDialog>
 
   <!-- City picker (shown when no city selected) -->
-  <VStack when="{!window.cityFilter}" horizontalAlignment="center" width="100%" padding="$space-8">
+  <VStack when="{!city}" horizontalAlignment="center" width="100%" padding="$space-8">
     <H1>Community Calendar</H1>
     <VStack gap="$space-2" maxWidth="300px" width="100%">
       <Button variant="outlined" width="100%" onClick="window.location.search = '?city=santarosa'">Santa Rosa</Button>
@@ -134,7 +144,7 @@
   </VStack>
 
   <!-- Main Content -->
-  <HStack when="{!!window.cityFilter}" horizontalAlignment="center" width="100%" overflowX="hidden">
+  <HStack when="{!!city}" horizontalAlignment="center" width="100%" overflowX="hidden">
   <VStack maxWidth="600px" width="100%" overflowX="hidden">
     <VStack>
     <VStack gap="$space-2">

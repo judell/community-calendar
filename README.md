@@ -23,7 +23,8 @@ The gold standard is **iCalendar (ICS) feeds** — a format that machines can re
 - [App Architecture](#app-architecture)
 - [XMLUI Resources](#xmlui-resources)
 - [Local Development](#local-development)
-- [Testing](#testing)
+- [Unit Tests](#unit-tests)
+- [Regression Testing](#regression-testing)
 - [Adding a New City](#adding-a-new-city)
 - [Recurrence and Enrichment](#recurrence-and-enrichment)
 - [Planned Improvements](#planned-improvements)
@@ -585,7 +586,7 @@ Run locally with `python3 -m http.server 8080`, then visit `http://localhost:808
 
 **Auth redirect for localhost:** GitHub OAuth redirects through Supabase back to your app. For this to work locally, `http://localhost:8080/**` must be in the Supabase dashboard under **Authentication > URL Configuration > Redirect URLs**. The wildcard is required — `http://localhost:8080` without `/**` won't match URLs with query parameters like `?city=santarosa`.
 
-## Testing
+## Unit Tests
 
 Browser-based tests for the JavaScript helper functions. Open `test.html` in a browser to run.
 
@@ -611,6 +612,42 @@ After mock tests, `test.html` fetches 500 live events from Supabase and validate
 - Helpers don't crash on real data edge cases
 - Deduplication finds actual duplicates (~9% reduction)
 - Long descriptions, null fields, and special characters handled correctly
+
+## Regression Testing
+
+The community calendar uses [trace-tools](https://github.com/xmlui-org/trace-tools) for regression testing. Three distilled baselines run on every push and should stay green:
+
+| Baseline | What it covers |
+|----------|----------------|
+| `capture-roundtrip` | Audio capture via Whisper → review in PickEditor → save → verify → remove |
+| `pick-roundtrip` | Pick an existing event → verify in "my picks" → unpick |
+| `search-roundtrip` | Select city, search for events, clear search |
+
+[**Watch the test videos**](https://judell.github.io/community-calendar/videos.html) — recorded on every CI run, always reflecting current product behavior.
+
+**How it works:** Each baseline is a [distilled trace](https://github.com/xmlui-org/trace-tools#distilled-baselines-the-gold-standard) — a compact JSON file (5–30 KB) containing interaction steps, API calls, and app-level traces. The pipeline auto-generates a Playwright test from the baseline, replays it, captures a new trace, and compares the two semantically. If the same mutation APIs fire and the same interactions happen, it passes — regardless of internal refactoring.
+
+**CI:** The `Regression Tests` workflow runs `./test.sh run-all --video` on every push to main that touches app files. It mints a test auth session via Supabase admin API (no OAuth headless login needed). See [docs/regression-testing.md](docs/regression-testing.md) for auth setup, CI secrets, and local run instructions.
+
+**Adding a new baseline:**
+
+```bash
+# From cities/santarosa/:
+
+# Option 1: capture manually via the XMLUI Inspector
+./test.sh save ~/Downloads/my-journey.json my-journey
+
+# Option 2: write a Playwright spec, then convert to baseline
+./test.sh convert my-journey
+
+# Run it
+./test.sh run my-journey
+
+# Run all baselines
+./test.sh run-all
+```
+
+**What's checked in:** `traces/baselines/` (distilled), `traces/specs/`, `traces/fixtures/` (test audio/images), `traces/videos/` (CI-recorded), `app-config.json`, `test.sh`. Generated tests and run artifacts are gitignored. See the [trace-tools README](https://github.com/xmlui-org/trace-tools#readme) for the full framework docs.
 
 ## Adding a New City
 

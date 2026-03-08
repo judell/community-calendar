@@ -29,7 +29,7 @@
         content="{window.getDescriptionSnippet($props.event.description, $props.filterTerm)}"
       />
       <Text
-        when="{window.getSnippet($props.event.description, $props.event.title)}"
+        when="{$props.event.description || $props.event.image_url}"
         fontSize="13px"
         lineHeight="1.3"
         color="$color-text-secondary"
@@ -37,7 +37,7 @@
         cursor="pointer"
         marginTop="$space-1"
         onClick="detailDialog.open($props.event)"
-        value="{window.getSnippet($props.event.description, $props.event.title)}"
+        value="{(window.getSnippet($props.event.description, $props.event.title) || '') + ' \u24d8'}"
       />
       <HStack verticalAlignment="center" gap="$space-2" marginTop="$space-2">
         <Badge

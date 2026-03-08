@@ -1,0 +1,422 @@
+{
+  "steps": [
+    {
+      "action": "startup",
+      "await": {
+        "api": [
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments",
+            "apiResult": {
+              "type": "rowcount",
+              "count": 3,
+              "keys": [
+                "categories",
+                "city",
+                "created_at",
+                "curator_id",
+                "curator_name",
+                "description",
+                "end_time",
+                "event_id",
+                "id",
+                "location",
+                "notes",
+                "rrule",
+                "start_time",
+                "title",
+                "updated_at",
+                "url"
+              ]
+            }
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/user_settings"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/feed_tokens",
+            "apiResult": {
+              "type": "snapshot",
+              "keys": [
+                "token"
+              ],
+              "values": {
+                "token": "49eca0ba-a159-44af-baae-b6a2a2427edb"
+              }
+            }
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_google_users",
+            "apiResult": {
+              "type": "snapshot",
+              "keys": [
+                "google_email"
+              ],
+              "values": {
+                "google_email": "ci-test@community-calendar.test"
+              }
+            }
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_github_users"
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "Santa Rosa",
+        "label": "Santa Rosa",
+        "targetTag": "BUTTON",
+        "ariaRole": "button",
+        "ariaName": "Santa Rosa"
+      },
+      "await": {
+        "api": [
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/events"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/user_settings"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments"
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "svg",
+        "label": null,
+        "targetTag": "svg",
+        "ariaRole": "button",
+        "ariaName": "Capture Event from Audio"
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "ModalDialog",
+        "label": "Capture Event from Audio",
+        "targetTag": "BUTTON",
+        "selectorPath": "[data-testid=\"dialog\"] >> text=Select Audio File",
+        "ariaRole": "button",
+        "ariaName": "Select Audio File",
+        "testId": "dialog"
+      },
+      "await": {
+        "api": [
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/feed_tokens"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_github_users"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_google_users"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/events"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/user_settings"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments"
+          }
+        ]
+      },
+      "valueChanges": [
+        {
+          "component": "FileInput",
+          "value": "stewarts-point.m4a",
+          "files": [
+            {
+              "name": "stewarts-point.m4a",
+              "size": 38032,
+              "type": "audio/x-m4a"
+            }
+          ]
+        }
+      ],
+      "appTraces": {
+        "filterEvents": [
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "Form",
+        "label": null,
+        "targetTag": "BUTTON",
+        "selectorPath": "[data-testid=\"pickForm\"] >> text=Add to My Picks",
+        "ariaRole": "button",
+        "ariaName": "Add to My Picks",
+        "testId": "pickForm",
+        "formData": {
+          "title": "Stewart's Point Coastal Route",
+          "date": "2026-03-08",
+          "time": "08:20",
+          "endTime": "12:20",
+          "location": "Mate Rio Community Centre, Bohemian Highway and Highway 116",
+          "description": "Coastal route event starting from Mate Rio Community Centre."
+        }
+      },
+      "await": {
+        "api": [
+          {
+            "method": "POST",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/capture-event"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/feed_tokens"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_github_users"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_google_users"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/events"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/user_settings"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments"
+          }
+        ]
+      },
+      "appTraces": {
+        "filterEvents": [
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "ModalDialog",
+        "label": "dialog",
+        "targetTag": "BUTTON",
+        "selectorPath": "[data-testid=\"dialog\"] >> text=Done",
+        "ariaRole": "button",
+        "ariaName": "Done",
+        "testId": "dialog"
+      },
+      "await": {
+        "api": [
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/events"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments"
+          }
+        ]
+      },
+      "appTraces": {
+        "filterEvents": [
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          }
+        ],
+        "dedupeEvents": [
+          {
+            "inputCount": 3603,
+            "outputCount": 3178
+          },
+          {
+            "inputCount": 3603,
+            "outputCount": 3178
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "button",
+        "label": null,
+        "targetTag": "BUTTON",
+        "ariaRole": "radio",
+        "ariaName": "my picks"
+      },
+      "appTraces": {
+        "filterEvents": [
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "use",
+        "label": "use",
+        "targetTag": "use",
+        "ariaRole": "button",
+        "ariaName": "Remove from my picks"
+      },
+      "await": {
+        "api": [
+          {
+            "method": "DELETE",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?id=eq.213"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/events"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments"
+          }
+        ]
+      },
+      "dataSourceChanges": [
+        {
+          "source": "DataSource:picks",
+          "added": [],
+          "removed": [
+            "4e0ad729-8ad0-4c65-b4da-69f270625a80"
+          ]
+        }
+      ]
+    }
+  ]
+}

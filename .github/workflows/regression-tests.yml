@@ -1,0 +1,67 @@
+name: Regression Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.xmlui'
+      - 'components/**'
+      - '*.js'
+      - '*.html'
+      - '*.json'
+      - '*.css'
+      - 'themes/**'
+      - 'xmlui/**'
+      - 'cities/*/traces/baselines/**'
+      - 'cities/*/traces/specs/**'
+      - 'cities/*/app-config.json'
+      - '.github/workflows/regression-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Start app server
+        run: python3 -m http.server 8080 &
+
+      - name: Clone trace-tools
+        run: |
+          git clone https://github.com/xmlui-org/trace-tools.git cities/santarosa/trace-tools
+          cd cities/santarosa/trace-tools
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Mint test user session
+        env:
+          SUPABASE_URL: https://dzpdualvwspgqghrysyz.supabase.co
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          BASE_URL: http://localhost:8080
+        run: node cities/santarosa/traces/mint-session.js
+
+      - name: Run regression tests
+        run: |
+          cd cities/santarosa
+          chmod +x test.sh
+          ./test.sh run-all --video
+
+      - name: Commit updated videos
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add cities/santarosa/traces/videos/*.webm
+          git diff --staged --quiet || git commit -m "Update regression test videos [skip ci]"
+          git push

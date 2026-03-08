@@ -1,0 +1,281 @@
+{
+  "steps": [
+    {
+      "action": "startup",
+      "await": {
+        "api": [
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_github_users"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_google_users",
+            "apiResult": {
+              "type": "snapshot",
+              "keys": [
+                "google_email"
+              ],
+              "values": {
+                "google_email": "ci-test@community-calendar.test"
+              }
+            }
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/user_settings"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/feed_tokens",
+            "apiResult": {
+              "type": "snapshot",
+              "keys": [
+                "token"
+              ],
+              "values": {
+                "token": "49eca0ba-a159-44af-baae-b6a2a2427edb"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "Santa Rosa",
+        "label": "Santa Rosa",
+        "targetTag": "BUTTON",
+        "ariaRole": "button",
+        "ariaName": "Santa Rosa"
+      },
+      "await": {
+        "api": [
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/events"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/user_settings"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments"
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "List",
+        "label": "List",
+        "targetTag": "svg",
+        "ariaRole": "button",
+        "ariaName": "Add to my picks",
+        "testId": "eventsList"
+      },
+      "await": {
+        "api": [
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?select=id&user_id=eq.4e0ad729-8ad0-4c65-b4da-69f270625a80&event_id=in.(2263416)"
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "Form",
+        "label": null,
+        "targetTag": "BUTTON",
+        "selectorPath": "[data-testid=\"pickForm\"] >> text=Add to My Picks",
+        "ariaRole": "button",
+        "ariaName": "Add to My Picks",
+        "testId": "pickForm",
+        "formData": {
+          "title": "Taylor Trades Outdoor Market - Sunday March 8",
+          "date": "2026-03-08",
+          "time": "07:00",
+          "endTime": "14:00",
+          "location": "Santa Rosa Veterans Memorial Building",
+          "description": "Taylor Trades is Sonoma County's premier Outdoor Market, held Sundays from 7AM – 2PM. Join us at the Santa Rosa Vets Building to shop a curated selection of antiques, vintage, vinyl, and collectibles. Enjoy local food options, coffee, and treats with FREE admission and FREE parking!"
+        }
+      },
+      "await": {
+        "api": [
+          {
+            "method": "POST",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/feed_tokens"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_github_users"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_google_users"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/events"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/user_settings"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments"
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "ModalDialog",
+        "label": "Add to My Picks",
+        "targetTag": "BUTTON",
+        "selectorPath": "[data-testid=\"dialog\"] >> text=Done",
+        "ariaRole": "button",
+        "ariaName": "Done",
+        "testId": "dialog"
+      },
+      "await": {
+        "api": [
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/events"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments"
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "button",
+        "label": null,
+        "targetTag": "BUTTON",
+        "ariaRole": "radio",
+        "ariaName": "my picks"
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "button",
+        "label": null,
+        "targetTag": "BUTTON",
+        "ariaRole": "radio",
+        "ariaName": "list"
+      },
+      "appTraces": {
+        "filterEvents": [
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "List",
+        "label": "List",
+        "targetTag": "svg",
+        "ariaRole": "button",
+        "ariaName": "Remove from my picks",
+        "testId": "eventsList"
+      },
+      "await": {
+        "api": [
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?select=id&user_id=eq.4e0ad729-8ad0-4c65-b4da-69f270625a80&event_id=in.(2263416)"
+          },
+          {
+            "method": "DELETE",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?id=eq.216"
+          },
+          {
+            "method": "DELETE",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments?event_id=eq.2263416&curator_id=eq.4e0ad729-8ad0-4c65-b4da-69f270625a80"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/events"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments"
+          }
+        ]
+      },
+      "appTraces": {
+        "filterEvents": [
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3178
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -9,20 +9,30 @@
       @supports (-webkit-touch-callout: none) {
         input, select { font-size: 16px !important; }
       }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/rrule@2.8.1/dist/es5/rrule.min.js"></script>
     <script>console.log = function(){};</script>
-    <script src="xmlui/xmlui-standalone.umd.js?v=16"></script>
-    <script src="xmlui/xmlui-calendar.js?v=16"></script>
+    <script>
+      var vxhr = new XMLHttpRequest();
+      vxhr.open('GET', 'version.txt', false);
+      vxhr.send();
+      window.APP_VERSION = (vxhr.responseText || '').trim() || String(Date.now());
+      var v = window.APP_VERSION;
+      document.write('<script src="xmlui/xmlui-standalone.umd.js?v=' + v + '"><\/script>');
+      document.write('<script src="xmlui/xmlui-calendar.js?v=' + v + '"><\/script>');
+    </script>
     <script>
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', 'categories.json', false);
+      xhr.open('GET', 'categories.json?v=' + window.APP_VERSION, false);
       xhr.send();
       window._categories = JSON.parse(xhr.responseText);
     </script>
-    <script src="helpers.js"></script>
-    <script src="xs-trace.js"></script>
+    <script>
+      document.write('<script src="helpers.js?v=' + window.APP_VERSION + '"><\/script>');
+      document.write('<script src="xs-trace.js?v=' + window.APP_VERSION + '"><\/script>');
+    </script>
     <script>
       // City from URL param, e.g. ?city=davis
       const params = new URLSearchParams(window.location.search);
@@ -47,8 +57,21 @@
       window.SUPABASE_KEY = SUPABASE_KEY;
       const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+      // Pre-populate auth from localStorage so XMLUI sees it at first render
+      // (onAuthStateChange is async and may fire after XMLUI evaluates when expressions)
       window.authUser = null;
       window.authSession = null;
+      try {
+        var projRef = new URL(SUPABASE_URL).hostname.split('.')[0];
+        var stored = localStorage.getItem('sb-' + projRef + '-auth-token');
+        if (stored) {
+          var parsed = JSON.parse(stored);
+          if (parsed.user) {
+            window.authUser = parsed.user;
+            window.authSession = parsed;
+          }
+        }
+      } catch(e) {}
 
       window.signIn = (provider) => {
         const returnTo = window.location.origin + window.location.pathname + window.location.search;
@@ -137,6 +160,7 @@
           const deleteUrl = `${SUPABASE_URL}/rest/v1/picks?id=eq.${existing[0].id}`;
           const deleteRes = await fetch(deleteUrl, { method: 'DELETE', headers });
           console.log('Delete response:', deleteRes.status);
+          if (window.xsTraceEvent) window.xsTraceEvent('unpick', { eventId, status: deleteRes.status });
         } else {
           // Add pick
           console.log('Adding pick for event:', eventId);
@@ -147,6 +171,7 @@
             body: JSON.stringify({ user_id: userId, event_id: eventId })
           });
           console.log('Insert response:', insertRes.status);
+          if (window.xsTraceEvent) window.xsTraceEvent('pick', { eventId, status: insertRes.status });
         }
       };
     </script>

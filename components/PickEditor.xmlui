@@ -30,7 +30,6 @@
       }
       savedPickId = result[0].id;
       submittedData = pickForm.getData();
-      emitEvent('saved');
     }"
     onError="(err) => {
       isSaving = false;
@@ -78,7 +77,6 @@
           curator_name: window.authUser.user_metadata?.user_name || window.authUser.email || 'curator'
         });
       }
-      emitEvent('saved');
     }"
     onError="(err) => {
       isSaving = false;
@@ -127,7 +125,6 @@
           errorMessage = 'Please sign in to pick events';
           return;
         }
-        isSaving = true;
         errorMessage = '';
         const formData = pickForm.getData();
         if ($props.event?.id) {
@@ -169,16 +166,22 @@
             transcript: $props.event?.transcript || null
           });
         }
+        isSaving = true;
       }"
     >
       <Fragment when="{!savedPickId}">
-        <FormItem bindTo="title" label="Title" required="true" requiredInvalidMessage="Title is required — what is this event called?" />
+        <FormItem
+          bindTo="title"
+          label="Title"
+          required="{!$props.event?.id}"
+          requiredInvalidMessage="Title is required — what is this event called?"
+        />
         <FormItem
           bindTo="date"
           label="Date"
-          required="true"
+          required="{!$props.event?.id}"
           requiredInvalidMessage="Date is required — we couldn't read the date from the image. Enter it as YYYY-MM-DD (e.g. 2026-03-15)."
-          regex="^\d{4}-\d{2}-\d{2}$"
+          regex="{$props.event?.id ? '' : '^\\d{4}-\\d{2}-\\d{2}$'}"
           regexInvalidMessage="Enter a valid date as YYYY-MM-DD (e.g. 2026-03-15)"
         />
         <HStack gap="$space-2">
@@ -186,14 +189,14 @@
             bindTo="time"
             label="Start"
             width="50%"
-            regex="^\d{2}:\d{2}$"
+            regex="{$props.event?.id ? '' : '^\\d{2}:\\d{2}$'}"
             regexInvalidMessage="Enter time as HH:MM (e.g. 19:00)"
           />
           <FormItem
             bindTo="endTime"
             label="End"
             width="50%"
-            regex="^(\d{2}:\d{2})?$"
+            regex="{$props.event?.id ? '' : '^(\\d{2}:\\d{2})?$'}"
             regexInvalidMessage="Enter time as HH:MM (e.g. 21:00)"
           />
         </HStack>
@@ -257,12 +260,12 @@
     <VStack when="{savedPickId}" gap="$space-4" horizontalAlignment="center" padding="$space-4">
       <Icon name="circle-check" size="lg" color="$color-success-500" />
       <Text fontWeight="bold" fontSize="$fontSize-lg">Event picked!</Text>
-      <Text color="$color-text-secondary" textAlignment="center">"{submittedData?.title}" has been added to your picks.</Text>
+      <Text color="$color-text-secondary" textAlignment="center">"{submittedData?.title || $props.event?.title}" has been added to your picks.</Text>
       <VStack gap="$space-2" width="100%">
         <Text fontWeight="bold" fontSize="$fontSize-sm">Add to your calendar:</Text>
         <AddToCalendar event="{{
           id: $props.event?.id || savedPickId,
-          title: submittedData?.title,
+          title: submittedData?.title || $props.event?.title,
           start_time: (submittedData?.date || '') + 'T' + (submittedData?.time || '00:00') + ':00',
           end_time: submittedData?.endTime ? (submittedData?.date || '') + 'T' + submittedData.endTime + ':00' : null,
           location: submittedData?.location,
@@ -272,11 +275,12 @@
         }}" />
         <Text fontSize="$fontSize-xs" color="$color-text-tertiary" textAlignment="center">For Apple Calendar: download .ics, then open the file.</Text>
       </VStack>
-      <Button label="Done" variant="ghost" onClick="emitEvent('close')" />
+      <Button label="Done" variant="ghost" onClick="emitEvent('saved'); emitEvent('close')" />
     </VStack>
 
     <!-- Error message -->
     <Text when="{errorMessage}" value="{errorMessage}" color="$color-danger-500" />
+
 
   </ModalDialog>
 </Component>

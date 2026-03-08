@@ -816,6 +816,9 @@ jobs:
             cp "cities/$city/events.json" "/tmp/${city}_events.json"
           fi
         done
+        
+        # Write version tag for cache busting
+        git describe --tags --always > version.txt
 
         git add .
         git diff --quiet && git diff --staged --quiet || (

@@ -17,6 +17,8 @@
 - [Duplicates and Event Ordering](#duplicates-and-event-ordering)
 - [Long-Running Events](#long-running-events)
 - [Event Categories](#event-categories)
+- [Event Images](#event-images)
+- [My Picks as an Event Submission System](#my-picks-as-an-event-submission-system)
 - [Working with an AI Agent](#working-with-an-ai-agent)
   - [Getting started with a cloud workspace](#getting-started-with-a-cloud-workspace)
   - [What about Git and the command line?](#what-about-git-and-the-command-line)
@@ -222,6 +224,84 @@ To add a new category, edit `categories.json` — the name, label color, and bac
 Your corrections teach the model. The next time it classifies events, it uses your overrides as examples of how to categorize similar events. Over time, the AI learns your community's patterns.
 
 The [health report](https://judell.github.io/community-calendar/report.html) includes a **Category Overrides** section showing all corrections — who changed what, the original classification, and the new one.
+
+---
+
+## Event Images
+
+Many event sources already publish images — performer headshots, exhibition posters, event logos — as part of their calendar feeds. The pipeline extracts these automatically. No curator action is needed for sources that already provide them.
+
+### How it works
+
+Three mechanisms capture images from feeds already in the pipeline:
+
+| Mechanism | Platforms | How it gets into ICS |
+|-----------|-----------|---------------------|
+| `ATTACH;FMTTYPE=image/*` | The Events Calendar (WordPress), WP Events Manager, Google Calendar | Standard ICS attachment field |
+| `X-TKF-FEATURED-IMAGE` | Tockify | Tockify's custom ICS extension |
+| `image_url` in scraper data | Any scraper that extracts `og:image` or API image fields | BaseScraper emits as `ATTACH` |
+
+The pipeline extracts these during the ICS-to-JSON conversion and stores them in an `image_url` column. Images appear in the event detail modal when a user clicks on an event card.
+
+### Current coverage
+
+On 3/7/2026, across 7 cities, 78 of 453 feeds (17%) already provide images, covering thousands of events with zero additional effort:
+
+| City | Feeds with images | Image events |
+|------|------------------|--------------|
+| Santa Rosa | 9 of 83 | ~275 |
+| Raleigh-Durham | 26 of 105 | ~538 |
+| Toronto | 22 of 102 | ~3,227 |
+| Bloomington | 10 of 66 | ~748 |
+| Montclair | 10 of 42 | ~219 |
+| Petaluma | 7 of 45 | ~720 |
+| Davis | 0 of 17 | 0 |
+
+The Events Calendar (WordPress) is the dominant source, producing images from 50 feeds. Tockify contributes 8, Google Calendar 16, and WP Events Manager 4.
+
+### What if a source doesn't provide images?
+
+**Already there, just not captured yet.** Some scrapers fetch event pages that have `og:image` meta tags but don't extract them. Adding one line to the scraper (`soup.find('meta', property='og:image')`) lights up images for that source. Candidates include: Spreckels PAC (Tribe Events REST API has an `image` object), SebArts and Jack London Park (already fetch event pages), and Sports Basement (Elfsight API has an `image` field).
+
+**Source provides.** An event producer can use the capture feature (photographing a poster) to produce a feed with an image of the poster. The publisher can subscribe to that feed.
+
+### Images in My Picks feeds
+
+When a user subscribes to their My Picks feed, images flow through to their calendar client. The ICS generator includes image URLs as standard `ATTACH;FMTTYPE=image/jpeg` fields. Apple Calendar renders these inline; other clients vary in support but ignore them harmlessly.
+
+### Image quality
+
+Images come from the source as-is. Quality varies: WordPress sites typically provide high-resolution promotional art (1080px+), while some sources serve small thumbnails. Google Calendar attachments are inconsistent — some are proper images, others are PDFs or Google Drive links requiring authentication.
+
+The pipeline does not resize, cache, or re-host images. They are served directly from the source's servers. No hosting costs, no copyright concerns, but also no control over availability. If a source removes an image, the event detail will simply not show one.
+
+---
+
+## My Picks as an Event Submission System
+
+My Picks started as a personal favorites mechanism — a way for individuals to bookmark events and subscribe to their own curated feed. But the infrastructure we built for it — authenticated event capture, outbound ICS feeds with images, token-based access — turns out to be something more general: an event submission system for producers who aren't on ICS-aware platforms.
+
+### The problem for long-tail producers
+
+The calendar's architecture treats event producers as authoritative sources. A theater with a WordPress site running The Events Calendar publishes an ICS feed, and we pull from it. But many small producers — a yoga teacher, a neighborhood book club, a food truck — don't have platforms that publish calendar feeds. Their events live on Instagram posts, paper flyers, or a simple web page with no structured data.
+
+These producers are the long tail. There are far more of them than there are theaters and libraries, but each one has only a few events. They're exactly the events that make a community calendar feel complete — and exactly the ones that are hardest to capture.
+
+### How it works for producers
+
+A producer signs up, gets a My Picks account, and uses the capture feature to add their events — typing them in, photographing a poster, or recording a voice memo. Each captured event lands in the community calendar and in their personal My Picks feed.
+
+That feed serves two purposes:
+
+**1. A feed for aggregators.** The producer's My Picks ICS feed URL is a stable, automatically-updating calendar feed — the same thing a WordPress site provides, but without needing WordPress. A community calendar curator adds that feed URL to the pipeline just like any other source. When the producer adds or updates events, the changes propagate automatically.
+
+**2. A widget for their own site.** The same feed can power an embeddable calendar widget on the producer's own website, showing only their events. A yoga teacher's site gets a live calendar of upcoming classes. A food truck's site shows where they'll be this week. The producer maintains events in one place (the capture interface), and both the community calendar and their own site stay in sync.
+
+### What this means for curators
+
+Instead of hunting for feeds and writing scrapers, a curator can invite producers to self-serve. "Add your events here, and they'll appear on the community calendar and on your own site." The curator's role shifts from source discovery to community outreach — which is arguably a better use of a local champion's energy.
+
+The technical infrastructure is already in place: capture, storage, ICS generation with images, token-based feed access. What's not yet built is the embeddable widget and the onboarding flow for producers. But the hardest parts — getting events in and getting feeds out — are done.
 
 ---
 
