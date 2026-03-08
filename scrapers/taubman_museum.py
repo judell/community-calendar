@@ -44,11 +44,15 @@ def fetch_event_page(url: str) -> tuple[str, str]:
             desc = '\n\n'.join(p for p in paragraphs if p)
 
         image_url = ''
-        img = soup.select_one('.banner-main img')
-        if img:
-            image_url = img.get('src', '')
-            if image_url and not image_url.startswith('http'):
-                image_url = BASE_URL + image_url
+        og = soup.find('meta', property='og:image') or soup.find('meta', attrs={'name': 'og:image'})
+        if og:
+            image_url = og.get('content', '')
+        if not image_url:
+            img = soup.select_one('.banner-main img')
+            if img:
+                image_url = img.get('src', '')
+                if image_url and not image_url.startswith('http'):
+                    image_url = BASE_URL + image_url
 
         return desc, image_url
     except Exception as e:

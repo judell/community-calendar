@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-Enrich Meetup ICS files with event images scraped from event pages.
+Enrich ICS files with event images scraped from event pages via og:image.
 
-Reads meetup_*.ics files in a directory, fetches each event's Meetup URL
-to extract the og:image meta tag, and injects ATTACH;FMTTYPE=image/jpeg
-lines into the VEVENT blocks. Rewrites files in-place.
+By default, processes meetup_*.ics files in a directory and only follows
+meetup.com URLs.  Use --any-url to process any ICS file and fetch og:image
+from whatever URL is in each event.
 
 Usage:
     python scripts/enrich_meetup_images.py --dir cities/roanoke
     python scripts/enrich_meetup_images.py cities/roanoke/meetup_make_roanoke.ics
+    python scripts/enrich_meetup_images.py --any-url cities/bloomington/buskirk_chumley.ics
 """
 
 import argparse
@@ -53,8 +54,12 @@ def unfold(content: str) -> str:
     return re.sub(r'\r?\n[ \t]', '', content)
 
 
-def enrich_ics_file(path: Path) -> int:
-    """Enrich a Meetup ICS file with image URLs. Returns number of images added."""
+def enrich_ics_file(path: Path, any_url: bool = False) -> int:
+    """Enrich an ICS file with image URLs. Returns number of images added.
+
+    If any_url is False (default), only follows meetup.com event URLs.
+    If any_url is True, fetches og:image from any URL found in each event.
+    """
     raw = path.read_text(encoding='utf-8', errors='ignore')
     content = unfold(raw).replace('\r\n', '\n').replace('\r', '\n')
 
@@ -74,7 +79,7 @@ def enrich_ics_file(path: Path) -> int:
         if not url_match:
             return m.group(0)
         url = url_match.group(1).strip()
-        if 'meetup.com' not in url:
+        if not any_url and 'meetup.com' not in url:
             return m.group(0)
 
         logger.info(f"  Fetching image for: {url}")
@@ -101,8 +106,10 @@ def enrich_ics_file(path: Path) -> int:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Enrich Meetup ICS files with event images')
+    parser = argparse.ArgumentParser(description='Enrich ICS files with event images via og:image')
     parser.add_argument('--dir', help='Directory to scan for meetup_*.ics files')
+    parser.add_argument('--any-url', action='store_true',
+                        help='Fetch og:image from any URL, not just meetup.com')
     parser.add_argument('files', nargs='*', help='Specific ICS file(s) to process')
     args = parser.parse_args()
 
@@ -121,7 +128,7 @@ def main():
             logger.warning(f"File not found: {path}")
             continue
         logger.info(f"Processing {path.name}...")
-        total += enrich_ics_file(path)
+        total += enrich_ics_file(path, any_url=args.any_url)
 
     logger.info(f"Done. Total images added: {total}")
 

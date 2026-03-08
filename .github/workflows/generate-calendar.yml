@@ -153,6 +153,7 @@ jobs:
         curl -sL "https://www.srsymphony.org/events/?ical=1" -o srsymphony.ics || true
         curl -sL "https://uptowntheatrenapa.com/events/?ical=1" -o uptowntheatrenapa.ics || true
         cd ../..
+        python scripts/enrich_meetup_images.py --dir cities/santarosa || true
         python scripts/combine_ics.py --input-dir cities/santarosa --output cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
 
     # ==========================================
@@ -238,6 +239,19 @@ jobs:
         curl -sL "https://www.hoosierflyfishers.com/events/list/?ical=1" -o hoosierflyfishers_list.ics || true
         curl -sL "https://calendar.google.com/calendar/ical/r5lf3al9blontcsjnedbr2f2u0%40group.calendar.google.com/public/basic.ics" -o calendar_r5lf3al9blontcsjnedbr2f2u0_40group_calend.ics || true
         cd ../..
+        python scripts/enrich_meetup_images.py --dir cities/bloomington || true
+        python scripts/enrich_meetup_images.py --any-url \
+          cities/bloomington/buskirk_chumley.ics \
+          cities/bloomington/comedy_attic.ics \
+          cities/bloomington/the_bishop.ics \
+          cities/bloomington/cicada_cinema.ics \
+          cities/bloomington/peoples_market.ics \
+          cities/bloomington/cardinal_spirits.ics \
+          cities/bloomington/sassafras_audubon.ics \
+          cities/bloomington/master_gardeners.ics \
+          cities/bloomington/sycamore_land_trust.ics \
+          cities/bloomington/songkick_bluebird.ics \
+          cities/bloomington/songkick_blockhouse.ics || true
         python scripts/combine_ics.py --input-dir cities/bloomington --output cities/bloomington/combined.ics --name "Bloomington Community Calendar"
 
     # ==========================================
@@ -283,6 +297,7 @@ jobs:
     - name: Combine Davis ICS
       if: contains(steps.locations.outputs.list, 'davis')
       run: |
+        python scripts/enrich_meetup_images.py --dir cities/davis || true
         python scripts/combine_ics.py --input-dir cities/davis --output cities/davis/combined.ics --name "Davis Community Calendar"
 
     # ==========================================
@@ -360,6 +375,7 @@ jobs:
         # Petaluma Bounty (WordPress Events Manager iCal feed)
         curl -sL "https://petalumabounty.org/events-calendar/?ical=1" -o petaluma_bounty.ics || true
         cd ../..
+        python scripts/enrich_meetup_images.py --dir cities/petaluma || true
         python scripts/combine_ics.py --input-dir cities/petaluma --output cities/petaluma/combined.ics --name "Petaluma Community Calendar"
 
     # ==========================================
@@ -486,6 +502,7 @@ jobs:
         python ../../scrapers/ticketmaster.py --venue-id KovZpZAdIFtA --name "Queen Elizabeth Theatre" --timezone America/Toronto -o queen_elizabeth_theatre.ics || true
         python ../../scrapers/ticketmaster.py --venue-id KovZpZAFl6JA --name "Roy Thomson Hall" --timezone America/Toronto -o roy_thomson_hall.ics || true
         cd ../..
+        python scripts/enrich_meetup_images.py --dir cities/toronto || true
         python scripts/combine_ics.py --input-dir cities/toronto --output cities/toronto/combined.ics --name "Toronto Community Calendar"
       env:
         TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
@@ -618,6 +635,7 @@ jobs:
         curl -sL "https://goduke.com/api/v2/Calendar/subscribe?type=ics" -o duke_athletics.ics || true
         curl -sL "https://eb-to-ical.daylightpirates.org/eventbrite-organizer-ical?organizer=17882467120" -o quail_ridge_books.ics || true
         cd ../..
+        python scripts/enrich_meetup_images.py --dir cities/raleighdurham || true
         python scripts/combine_ics.py --input-dir cities/raleighdurham --output cities/raleighdurham/combined.ics --name "Raleigh-Durham Community Calendar"
 
     # ==========================================
