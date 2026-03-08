@@ -22,12 +22,16 @@ test('pick-roundtrip', async ({ page }) => {
     await firstBookmark.click();
     await page.waitForTimeout(1000);
 
-    // Submit the PickEditor dialog to save the pick
-    await page.getByRole('button', { name: 'Add to My Picks' }).click();
+    // Submit the PickEditor dialog (button type="submit" with text "Add to My Picks")
+    await page.locator('button[type="submit"]').click();
+    await page.waitForTimeout(2000);
+
+    // After success, PickEditor shows "Done" button — click to close
+    await page.getByRole('button', { name: 'Done' }).click();
     await page.waitForTimeout(1000);
 
-    // Switch to "my picks" view via RadioGroup option
-    await page.getByRole('radio', { name: 'my picks' }).click();
+    // Switch to "my picks" view (label associated with radio via htmlFor)
+    await page.getByLabel('my picks').click();
     await page.waitForTimeout(1000);
 
     // Verify at least one pick is showing
@@ -35,7 +39,7 @@ test('pick-roundtrip', async ({ page }) => {
     await expect(pickCount).toBeVisible({ timeout: 5000 });
 
     // Switch back to list view
-    await page.getByRole('radio', { name: 'list' }).click();
+    await page.getByLabel('list').click();
     await page.waitForTimeout(500);
 
     // Unpick the same event (unpicking is one-click, no dialog)
