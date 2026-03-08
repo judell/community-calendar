@@ -614,9 +614,17 @@ After mock tests, `test.html` fetches 500 live events from Supabase and validate
 
 ## Regression Testing
 
-The community calendar uses [trace-tools](https://github.com/xmlui-org/trace-tools) for regression testing. The goal is to let curators — not just programmers — create and run tests. No Playwright knowledge is needed: you interact with the app, export a trace, and the pipeline generates and runs the Playwright test for you.
+The community calendar uses [trace-tools](https://github.com/xmlui-org/trace-tools) for regression testing. Two trace-based tests run on every push and should stay green:
 
-**The default workflow:**
+| Test | Type | What it covers |
+|------|------|----------------|
+| `pick-roundtrip` | Hand-written spec | Pick an existing event → verify in "my picks" → unpick |
+| `capture-roundtrip` | Hand-written spec | Audio capture via Whisper → review in PickEditor → save → verify in "my picks" → remove |
+| `search-roundtrip` | Generated from baseline | Search for events, filter by category, clear search — semantic comparison against baseline trace |
+
+**Current status:** These tests were bootstrapped with hand-written Playwright specs (in `traces/specs/`), with a synthetic baseline for `search-roundtrip` captured from one of the hand-written specs. The next step is to add a journey done "properly" via manual capture: interact with the app, export a trace from the XMLUI Inspector, save it as a baseline, and let the pipeline generate and run the Playwright test from it.
+
+**The intended workflow (manual capture):**
 
 1. Open the app with the XMLUI inspector (the magnifying glass icon in the header)
 2. Perform a user journey — search for events, pick a category, clear the search, etc.
@@ -626,7 +634,7 @@ The community calendar uses [trace-tools](https://github.com/xmlui-org/trace-too
 
 The pipeline auto-generates a Playwright test from the baseline trace, replays it, captures a new trace, and compares the two semantically. If the same APIs fire and the same interactions happen, it passes — regardless of internal refactoring.
 
-**Alternative: hand-written specs.** For cases where you need explicit assertions or browser-native interactions, you can write a Playwright spec directly and place it in `traces/specs/`. The `convert` command runs a hand-written spec, captures its trace as a baseline, and generates a test from it. This is useful when AI assistance or specific test logic is needed.
+**Hand-written specs** are for journeys that need explicit assertions or browser-native interactions (file uploads, auth-gated features). Place them in `traces/specs/`. The `convert` command runs a hand-written spec, captures its trace as a baseline, and generates a test from it.
 
 Santa Rosa is the reference city. From `cities/santarosa/`:
 
@@ -634,16 +642,22 @@ Santa Rosa is the reference city. From `cities/santarosa/`:
 # Clone trace-tools (first time only)
 git clone https://github.com/xmlui-org/trace-tools.git
 
-# Run a regression test
+# Run all tests (specs + baseline regressions)
+./test.sh test-all
+
+# Run a single spec
+./test.sh spec pick-roundtrip
+
+# Run a baseline regression
 ./test.sh run search-roundtrip
 
 # Run with video recording
 ./test.sh run search-roundtrip --video
 ```
 
-**CI:** The `Regression Tests` workflow (`.github/workflows/regression-tests.yml`) runs all tests on every push to main that touches app files (xmlui, js, html, json, css, themes, engine, baselines, or specs). It serves the app locally, clones trace-tools, and runs `./test.sh test-all`. Doc-only changes don't trigger it. You can also trigger it manually from the Actions tab.
+**CI:** The `Regression Tests` workflow (`.github/workflows/regression-tests.yml`) runs all tests on every push to main that touches app files (xmlui, js, html, json, css, themes, engine, baselines, or specs). It serves the app locally, clones trace-tools, mints a test auth session, and runs `./test.sh test-all`. Doc-only changes don't trigger it. You can also trigger it manually from the Actions tab.
 
-**What's checked in:** `traces/baselines/`, `traces/specs/`, `traces/videos/` (reference recordings), `app-config.json`, `test.sh`. Generated tests and run artifacts are gitignored. The `trace-tools` repo is cloned at test time, not checked in. See the [trace-tools README](https://github.com/xmlui-org/trace-tools#readme) for full details.
+**What's checked in:** `traces/baselines/`, `traces/specs/`, `traces/fixtures/` (test audio/images), `traces/videos/` (reference recordings), `app-config.json`, `test.sh`. Generated tests and run artifacts are gitignored. The `trace-tools` repo is cloned at test time, not checked in. See the [trace-tools README](https://github.com/xmlui-org/trace-tools#readme) for full details.
 
 ## Adding a New City
 
