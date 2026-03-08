@@ -4,10 +4,10 @@
 //
 // Required env vars:
 //   SUPABASE_URL          - e.g. https://dzpdualvwspgqghrysyz.supabase.co
-//   SUPABASE_SERVICE_KEY  - service role key (from Supabase dashboard)
+//   SUPABASE_SERVICE_KEY  - service role key (legacy JWT from Supabase dashboard)
 //   TEST_USER_EMAIL       - email of the test user
 //
-// The test user must already exist in Supabase auth (created once via admin API or dashboard).
+// Creates the user on first run if it doesn't exist.
 
 const fs = require('fs');
 const path = require('path');
@@ -21,36 +21,47 @@ if (!SUPABASE_URL || !SERVICE_KEY || !TEST_EMAIL) {
   process.exit(1);
 }
 
-async function mintSession() {
-  // List users to find the test user
-  const listRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users?page=1&per_page=50`, {
-    headers: {
-      'Authorization': `Bearer ${SERVICE_KEY}`,
-      'apikey': SERVICE_KEY,
-    },
+const headers = {
+  'Authorization': `Bearer ${SERVICE_KEY}`,
+  'apikey': SERVICE_KEY,
+  'Content-Type': 'application/json',
+};
+
+async function ensureUser() {
+  // Try to create the user — if it already exists, that's fine
+  const createRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      email: TEST_EMAIL,
+      email_confirm: true,
+      user_metadata: { user_name: 'ci-test-bot' },
+    }),
   });
 
-  if (!listRes.ok) {
-    console.error('Failed to list users:', listRes.status, await listRes.text());
-    process.exit(1);
+  if (createRes.ok) {
+    const user = await createRes.json();
+    console.log(`Created test user: ${user.email} (${user.id})`);
+    return;
   }
 
-  const { users } = await listRes.json();
-  const testUser = users.find(u => u.email === TEST_EMAIL);
-
-  if (!testUser) {
-    console.error(`Test user ${TEST_EMAIL} not found. Create it first in Supabase dashboard.`);
-    process.exit(1);
+  // 422 means user already exists — that's expected
+  if (createRes.status === 422) {
+    console.log('Test user already exists');
+    return;
   }
+
+  console.error('Failed to create user:', createRes.status, await createRes.text());
+  process.exit(1);
+}
+
+async function mintSession() {
+  await ensureUser();
 
   // Generate a magic link to get a session token
   const linkRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/generate_link`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${SERVICE_KEY}`,
-      'apikey': SERVICE_KEY,
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({
       type: 'magiclink',
       email: TEST_EMAIL,
@@ -82,10 +93,7 @@ async function mintSession() {
       'apikey': SERVICE_KEY,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      type,
-      token,
-    }),
+    body: JSON.stringify({ type, token }),
   });
 
   if (!verifyRes.ok) {
