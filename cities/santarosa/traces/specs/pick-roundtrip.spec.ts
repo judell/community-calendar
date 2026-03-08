@@ -16,14 +16,18 @@ test('pick-roundtrip', async ({ page }) => {
     await expect(page.getByPlaceholder('Search events...')).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1000);
 
-    // The bookmark icon — tooltip text is now the aria-label
+    // Click the bookmark icon to open the PickEditor dialog
     const firstBookmark = page.getByRole('button', { name: 'Add to my picks' }).first();
     await expect(firstBookmark).toBeVisible({ timeout: 5000 });
     await firstBookmark.click();
     await page.waitForTimeout(1000);
 
-    // Switch to "my picks" tab
-    await page.getByText('my picks').click();
+    // Submit the PickEditor dialog to save the pick
+    await page.getByRole('button', { name: 'Add to My Picks' }).click();
+    await page.waitForTimeout(1000);
+
+    // Switch to "my picks" view via RadioGroup option
+    await page.getByRole('radio', { name: 'my picks' }).click();
     await page.waitForTimeout(1000);
 
     // Verify at least one pick is showing
@@ -31,11 +35,12 @@ test('pick-roundtrip', async ({ page }) => {
     await expect(pickCount).toBeVisible({ timeout: 5000 });
 
     // Switch back to list view
-    await page.getByText('list', { exact: true }).click();
+    await page.getByRole('radio', { name: 'list' }).click();
     await page.waitForTimeout(500);
 
-    // Unpick the same event
-    await firstBookmark.click();
+    // Unpick the same event (unpicking is one-click, no dialog)
+    const removeBookmark = page.getByRole('button', { name: 'Remove from my picks' }).first();
+    await removeBookmark.click();
     await page.waitForTimeout(1000);
 
   } finally {
