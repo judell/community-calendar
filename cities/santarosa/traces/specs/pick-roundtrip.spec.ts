@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { captureTrace } from '../trace-capture';
+import { captureTrace } from './trace-capture';
 
 test('pick-roundtrip', async ({ page }) => {
   test.setTimeout(45000);
