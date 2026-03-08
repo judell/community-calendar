@@ -685,6 +685,7 @@ jobs:
       run: |
         python scrapers/growthzone.py --url "https://business.roanokechamber.org/api/events" --name "Roanoke Regional Chamber" --output cities/roanoke/roanoke_chamber.ics || true
         curl -sL "https://eb-to-ical.daylightpirates.org/eventbrite-organizer-ical?organizer=3245496552" -o roanoke_higher_ed_center.ics || true
+        python scrapers/taubman_museum.py --output cities/roanoke/taubman_museum.ics || true
 
     - name: Download Roanoke live feeds and combine ICS
       if: contains(steps.locations.outputs.list, 'roanoke')
@@ -704,7 +705,6 @@ jobs:
         # Venues & Arts
         curl -sL "https://calendar.google.com/calendar/ical/ice.berglundcenter%40gmail.com/public/basic.ics" -o berglund_center.ics || true
         curl -sL "https://www.hollins.edu/events/?ical=1" -o hollins_university.ics || true
-        curl -sL "https://taubmanmuseum.org/events/?ical=1" -o taubman_museum.ics || true
         curl -sL "https://rso.com/events/?ical=1" -o roanoke_symphony.ics || true
         # Meetup groups
         curl -sL -A "Mozilla/5.0" "https://www.meetup.com/make-roanoke/events/ical/" -o meetup_make_roanoke.ics || true

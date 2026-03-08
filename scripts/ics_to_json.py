@@ -68,6 +68,27 @@ def unfold_ics_lines(content):
     return content
 
 
+def clean_description(text):
+    """Normalize description text to prevent Markdown rendering artifacts.
+
+    Some sources (e.g. WordPress Tribe ICS) embed full page HTML in DESCRIPTION,
+    producing deeply-indented lines that render as Markdown code blocks.
+    Strip leading/trailing whitespace per line and collapse runs of blank lines.
+    """
+    lines = text.splitlines()
+    cleaned = [line.strip() for line in lines]
+    # Collapse consecutive blank lines into one
+    result = []
+    prev_blank = False
+    for line in cleaned:
+        is_blank = line == ''
+        if is_blank and prev_blank:
+            continue
+        result.append(line)
+        prev_blank = is_blank
+    return '\n'.join(result).strip()
+
+
 def extract_field(event_content, field_name):
     """Extract a field value from VEVENT content."""
     # Match field with optional parameters: FIELD;PARAM=VALUE:content or FIELD:content
@@ -229,6 +250,8 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
         end_time = parse_ics_datetime(extract_field(event_content, 'DTEND'), local_tz)
         location = extract_field(event_content, 'LOCATION')
         description = extract_field(event_content, 'DESCRIPTION')
+        if description:
+            description = clean_description(description)
         url = extract_field(event_content, 'URL')
         source = extract_field(event_content, 'X-SOURCE')
         source_id = extract_field(event_content, 'X-SOURCE-ID')
