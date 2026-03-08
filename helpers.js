@@ -1075,6 +1075,39 @@ function toBigCalendarEvents(events, term, category) {
   });
 }
 
+// Distribute events into N columns using shortest-column-first (masonry) packing.
+// Heights are estimated from card content so cards end up roughly balanced.
+function getMasonryColumns(events, numColumns) {
+  var n = numColumns || 4;
+  var columns = [];
+  var heights = [];
+  for (var i = 0; i < n; i++) { columns.push([]); heights.push(0); }
+  if (!events || !events.length) return columns;
+
+  for (var j = 0; j < events.length; j++) {
+    var ev = events[j];
+    // Estimate rendered card height in pixels
+    var h = 70; // date row + actions row baseline
+    if (ev.image_url) h += 170;
+    h += Math.ceil(((ev.title || '').length) / 28) * 20; // title wraps ~28 chars
+    if (ev.location) h += 20;
+    if (ev.source) h += 18;
+    if (ev.description) {
+      var plainDesc = ev.description.replace(/<[^>]+>/g, '');
+      h += Math.min(80, Math.ceil(plainDesc.length / 35) * 18);
+    }
+
+    // Find the shortest column
+    var minH = heights[0], minIdx = 0;
+    for (var k = 1; k < n; k++) {
+      if (heights[k] < minH) { minH = heights[k]; minIdx = k; }
+    }
+    columns[minIdx].push(ev);
+    heights[minIdx] += h;
+  }
+  return columns;
+}
+
 // Export for browser (attach to window)
 if (typeof window !== 'undefined') {
   window.toggleDay = toggleDay;
@@ -1129,4 +1162,5 @@ if (typeof window !== 'undefined') {
   window.detectRecurrence = detectRecurrence;
   window.getOrdinalWeekday = getOrdinalWeekday;
   window.toBigCalendarEvents = toBigCalendarEvents;
+  window.getMasonryColumns = getMasonryColumns;
 }

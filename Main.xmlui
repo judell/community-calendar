@@ -114,6 +114,8 @@
 
   <variable name="hiddenSources" value="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []}" />
   <variable name="processedEvents" value="{window.filterHiddenSources(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), hiddenSources)}" />
+  <variable name="pagedEvents" value="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, 50, categoryFilter)}" />
+  <variable name="masonryColumns" value="{window.getMasonryColumns(pagedEvents, 4)}" />
 
   <!-- Dialogs -->
   <SignInDialog id="signInDialog" />
@@ -145,7 +147,7 @@
 
   <!-- Main Content -->
   <HStack when="{!!city}" horizontalAlignment="center" width="100%" overflowX="hidden">
-  <VStack maxWidth="600px" width="100%" overflowX="hidden">
+  <VStack maxWidth="1400px" width="100%" overflowX="hidden">
     <VStack>
     <VStack gap="$space-2">
     <Bookmark id="topAnchor">
@@ -235,6 +237,7 @@
     <RadioGroup initialValue="{viewMode}" onDidChange="(val) => viewMode = val">
       <HStack>
         <Option value="all" label="list" />
+        <Option value="cards" label="cards" />
         <Option when="{window.authUser}" value="calendar" label="calendar" />
         <Option when="{window.authUser}" value="picks" label="my picks" />
       </HStack>
@@ -246,20 +249,44 @@
       events="{window.toBigCalendarEvents(processedEvents, filterTerm, categoryFilter)}"
       height="600px"
     />
-    <Spinner when="{!events.loaded && viewMode === 'all'}" />
+    <Spinner when="{!events.loaded && (viewMode === 'all' || viewMode === 'cards')}" />
     <Button
-      when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasPrev}"
+      when="{events.loaded && (viewMode === 'all' || viewMode === 'cards') && !filterTerm && window._moreHasPrev}"
       label="Earlier"
       variant="outlined"
       width="100%"
       marginBottom="$space-2"
       onClick="const prevIndex = window._morePrevIndex ?? 0; displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
     />
-    <List id="eventsList" when="{events.loaded && viewMode === 'all'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, 50, categoryFilter)}" fixedItemSize="true" limit="50">
-      <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
-    </List>
+    <HStack width="100%" horizontalAlignment="center">
+      <List when="{events.loaded && viewMode === 'all'}" maxWidth="600px" width="100%" data="{pagedEvents}" fixedItemSize="true" limit="50">
+        <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+      </List>
+    </HStack>
+    <HStack id="eventsList" when="{events.loaded && viewMode === 'cards'}" gap="$space-2" verticalAlignment="top">
+      <VStack width="*">
+        <Items data="{masonryColumns[0] || []}">
+          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+        </Items>
+      </VStack>
+      <VStack width="*">
+        <Items data="{masonryColumns[1] || []}">
+          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+        </Items>
+      </VStack>
+      <VStack width="*">
+        <Items data="{masonryColumns[2] || []}">
+          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+        </Items>
+      </VStack>
+      <VStack width="*">
+        <Items data="{masonryColumns[3] || []}">
+          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+        </Items>
+      </VStack>
+    </HStack>
     <Button
-      when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasMore}"
+      when="{events.loaded && (viewMode === 'all' || viewMode === 'cards') && !filterTerm && window._moreHasMore}"
       label="Later"
       variant="outlined"
       width="100%"
