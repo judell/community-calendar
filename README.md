@@ -641,6 +641,8 @@ git clone https://github.com/xmlui-org/trace-tools.git
 ./test.sh run search-roundtrip --video
 ```
 
+**CI:** The `Regression Tests` workflow (`.github/workflows/regression-tests.yml`) runs all tests on every push to main that touches app files (xmlui, js, html, json, css, themes, engine, baselines, or specs). It serves the app locally, clones trace-tools, and runs `./test.sh test-all`. Doc-only changes don't trigger it. You can also trigger it manually from the Actions tab.
+
 **What's checked in:** `traces/baselines/`, `traces/specs/`, `traces/videos/` (reference recordings), `app-config.json`, `test.sh`. Generated tests and run artifacts are gitignored. The `trace-tools` repo is cloned at test time, not checked in. See the [trace-tools README](https://github.com/xmlui-org/trace-tools#readme) for full details.
 
 ## Adding a New City
