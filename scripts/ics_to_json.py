@@ -4,6 +4,8 @@ Convert ICS calendar files to JSON format for Supabase ingestion.
 """
 
 import argparse
+import html
+import html.parser
 import json
 import re
 import sys
@@ -66,6 +68,38 @@ def unfold_ics_lines(content):
     # ICS spec: long lines are folded by inserting CRLF + space/tab
     content = re.sub(r'\r?\n[ \t]', '', content)
     return content
+
+
+class _HTMLStripper(html.parser.HTMLParser):
+    """Minimal HTML stripper that collects text nodes."""
+    def __init__(self):
+        super().__init__()
+        self._parts = []
+
+    def handle_data(self, data):
+        self._parts.append(data)
+
+    def handle_starttag(self, tag, attrs):
+        # Treat block-level / line-break tags as newlines
+        if tag in ('br', 'p', 'div', 'li', 'tr'):
+            self._parts.append('\n')
+
+    def get_text(self):
+        return ''.join(self._parts)
+
+
+def strip_html(text):
+    """Strip HTML tags and unescape entities; collapse whitespace."""
+    if not text or '<' not in text:
+        return text
+    stripper = _HTMLStripper()
+    stripper.feed(html.unescape(text))
+    result = stripper.get_text()
+    # Collapse runs of spaces/tabs, preserve newlines
+    result = re.sub(r'[^\S\n]+', ' ', result)
+    # Collapse multiple blank lines
+    result = re.sub(r'\n{3,}', '\n\n', result)
+    return result.strip()
 
 
 def clean_description(text):
@@ -249,8 +283,11 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
         start_time = parse_ics_datetime(extract_field(event_content, 'DTSTART'), local_tz)
         end_time = parse_ics_datetime(extract_field(event_content, 'DTEND'), local_tz)
         location = extract_field(event_content, 'LOCATION')
+        if location:
+            location = strip_html(location)
         description = extract_field(event_content, 'DESCRIPTION')
         if description:
+            description = strip_html(description)
             description = clean_description(description)
         url = extract_field(event_content, 'URL')
         source = extract_field(event_content, 'X-SOURCE')
