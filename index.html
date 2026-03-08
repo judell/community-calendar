@@ -54,8 +54,21 @@
       window.SUPABASE_KEY = SUPABASE_KEY;
       const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+      // Pre-populate auth from localStorage so XMLUI sees it at first render
+      // (onAuthStateChange is async and may fire after XMLUI evaluates when expressions)
       window.authUser = null;
       window.authSession = null;
+      try {
+        var projRef = new URL(SUPABASE_URL).hostname.split('.')[0];
+        var stored = localStorage.getItem('sb-' + projRef + '-auth-token');
+        if (stored) {
+          var parsed = JSON.parse(stored);
+          if (parsed.user) {
+            window.authUser = parsed.user;
+            window.authSession = parsed;
+          }
+        }
+      } catch(e) {}
 
       window.signIn = (provider) => {
         const returnTo = window.location.origin + window.location.pathname + window.location.search;
