@@ -76,7 +76,7 @@ async function mintSession() {
   const linkData = await linkRes.json();
 
   // Extract the token from the action_link and verify it to get a session
-  const actionLink = linkData.properties?.action_link;
+  const actionLink = linkData.action_link || linkData.properties?.action_link;
   if (!actionLink) {
     console.error('No action_link in response:', JSON.stringify(linkData, null, 2));
     process.exit(1);
