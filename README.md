@@ -24,6 +24,7 @@ The gold standard is **iCalendar (ICS) feeds** — a format that machines can re
 - [XMLUI Resources](#xmlui-resources)
 - [Local Development](#local-development)
 - [Testing](#testing)
+- [Regression Testing](#regression-testing)
 - [Adding a New City](#adding-a-new-city)
 - [Recurrence and Enrichment](#recurrence-and-enrichment)
 - [Planned Improvements](#planned-improvements)
