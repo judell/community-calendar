@@ -12,13 +12,13 @@ test('pick-roundtrip', async ({ page }) => {
       page.getByText('Santa Rosa', { exact: true }).click(),
     ]);
 
-    // Wait for the event list to render
+    // Wait for auth to be ready and events to render
     await expect(page.getByPlaceholder('Search events...')).toBeVisible({ timeout: 10000 });
+    await page.waitForFunction(() => (window as any).authUser !== null, { timeout: 10000 });
     await page.waitForTimeout(1000);
 
-    // The bookmark icon is only visible when authenticated.
-    // Pick the first event by clicking its bookmark icon.
-    const firstBookmark = page.locator('[data-icon="l-bookmark"]').first();
+    // The bookmark icon (role="button", tooltip="Add to my picks") is only visible when authenticated.
+    const firstBookmark = page.getByRole('button', { name: 'Add to my picks' }).first();
     await expect(firstBookmark).toBeVisible({ timeout: 5000 });
     await firstBookmark.click();
     await page.waitForTimeout(1000);
