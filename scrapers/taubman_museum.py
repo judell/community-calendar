@@ -22,6 +22,7 @@ from lib.utils import fetch_with_retry, append_source
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 BASE_URL = 'https://taubmanmuseum.org'
+BASE_URL_WWW = 'https://www.taubmanmuseum.org'
 ICS_URL = f'{BASE_URL}/events/?ical=1'
 LOCATION = 'Taubman Museum of Art, 110 Salem Ave SE, Roanoke, VA 24011'
 
@@ -29,21 +30,21 @@ LOCATION = 'Taubman Museum of Art, 110 Salem Ave SE, Roanoke, VA 24011'
 def fetch_event_page(url: str) -> tuple[str, str]:
     """Fetch an event page and return (description, image_url).
 
-    Description comes from .events-main-text-block .col-text .events-main-text <p> tags.
-    Image comes from .media-block-wrap img[src].
+    Description comes from div.events-main-text <p> tags.
+    Image comes from div.banner-main img.
     """
     try:
         html = fetch_with_retry(url, max_retries=3, base_delay=1.0)
         soup = BeautifulSoup(html, 'html.parser')
 
         desc = ''
-        block = soup.select_one('.events-main-text-block .col-text .events-main-text')
+        block = soup.select_one('div.events-main-text')
         if block:
             paragraphs = [p.get_text(separator=' ', strip=True) for p in block.find_all('p')]
             desc = '\n\n'.join(p for p in paragraphs if p)
 
         image_url = ''
-        img = soup.select_one('section.banner-main img')
+        img = soup.select_one('.banner-main img')
         if img:
             image_url = img.get('src', '')
 
@@ -62,7 +63,7 @@ class TaubmanMuseumScraper(IcsScraper):
 
     def transform_event(self, event):
         url = event.get('url') or ''
-        if url and url.startswith(BASE_URL):
+        if url and (url.startswith(BASE_URL) or url.startswith(BASE_URL_WWW)):
             desc, image_url = fetch_event_page(url)
             event['description'] = append_source(desc, url)
             if image_url:

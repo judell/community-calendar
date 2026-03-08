@@ -149,6 +149,17 @@ curl -sL "https://example.com/events/?mec-ical-feed=1" | head -20     # Modern E
 curl -sL "https://example.com/events/feed/" | head -20
 ```
 
+**Check descriptions before accepting the feed:**
+```bash
+curl -sL "https://example.com/events/?ical=1" | grep "^DESCRIPTION:" | head -3
+```
+If descriptions contain HTML tags or generic nav text ("WHAT'S HAPPENING..."), the ICS DESCRIPTION is a full-page HTML dump — not usable as-is. You'll need a scraper that fetches each event page to extract clean text. Use `IcsScraper` + `transform_event()` for this pattern (see `scrapers/taubman_museum.py`).
+
+**When writing a per-page enrichment scraper:**
+- Check whether event URLs use `www.` — verify your `BASE_URL` constant matches exactly, or any `startswith()` guard will silently skip all per-page fetches
+- Inspect the live event page HTML to find the correct CSS selectors (use `BeautifulSoup` + `soup.find_all(class_=True)` to enumerate containers with text)
+- Images typically require a separate selector from the description; check parent classes of `<img>` tags to find the right container
+
 ### MembershipWorks
 Look for "Subscribe" dropdown on calendar pages. Feed URL pattern:
 ```

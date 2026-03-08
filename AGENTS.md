@@ -148,9 +148,19 @@ Before considering a scraper "done", verify:
 |------|---------------|
 | Scraper runs | `python scrapers/myscraper.py -o cities/{city}/myscraper.ics` |
 | ICS has events | `grep -c 'BEGIN:VEVENT' cities/{city}/myscraper.ics` |
+| Descriptions are clean | `grep '^DESCRIPTION:' cities/{city}/myscraper.ics \| head -3` — should be plain text, not raw HTML or site-wide nav text |
+| URLs are correct | `grep '^URL:' cities/{city}/myscraper.ics \| head -3` — check if domain uses `www.` and that any `startswith()` checks in the scraper match |
+| Images present (if expected) | `grep '^X-IMAGE:' cities/{city}/myscraper.ics \| head -3` |
 | In workflow | `grep myscraper .github/workflows/generate-calendar.yml` |
 | In combine_ics.py | `grep myscraper scripts/combine_ics.py` |
 | Committed | `git status` shows no uncommitted scraper files |
+
+**Common ICS feed pitfall — raw HTML descriptions:** WordPress Tribe ICS feeds often include the full rendered page HTML in the `DESCRIPTION` field. If descriptions look like navigation/header text ("WHAT'S HAPPENING AT THE MUSEUM...") rather than the event description, the feed is not usable as-is. Fix by fetching each event page and extracting clean text with BeautifulSoup. See `scrapers/taubman_museum.py` for the pattern.
+
+**Per-page enrichment pattern (descriptions + images):**
+1. Use the ICS feed for event metadata (title, dates, URL)
+2. In `transform_event()`, fetch each event's URL and extract clean description + image
+3. Verify the `BASE_URL` used in `startswith()` checks includes (or excludes) `www.` to match the actual URLs in the feed — a mismatch silently skips all per-page fetches
 
 ### Recommended: Use the add_scraper script
 
