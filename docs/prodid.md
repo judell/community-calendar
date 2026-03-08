@@ -8,7 +8,7 @@ used across all city feeds, identified by their PRODID header.
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
 | **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, roanoke, santarosa, toronto | 133 |
-| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, matsu, montclair, petaluma, raleighdurham, roanoke, santarosa, toronto | 77 |
+| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, matsu, montclair, petaluma, raleighdurham, roanoke, santarosa, toronto | 76 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, matsu, montclair, raleighdurham, roanoke, santarosa | 52 |
 | **Google Calendar** | Public Google Calendar ICS export. | bloomington, montclair, petaluma, raleighdurham, roanoke, santarosa, toronto | 43 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 21 |
@@ -44,13 +44,13 @@ ICS export from meetup.com groups.
 
 **toronto** (50): meetup_20s30s_social, meetup_ai_ml, meetup_arts_crafts, meetup_arts_culture, meetup_bike_toronto, meetup_board_games_to, meetup_book_club_abcd, meetup_bruce_trail, meetup_canoe_trippers, meetup_devops, meetup_experience_to, meetup_founders_running, meetup_gta_hiking, meetup_heavy_boardgames, meetup_high_park_yoga, meetup_hiking_boots, meetup_hiking_network, meetup_improv_friends, meetup_improv_to, meetup_jpn_eng_exchange, meetup_lang_exchange_to, meetup_little_sunbeams, meetup_medieval_sca, meetup_mindful_movement, meetup_mini_me, meetup_movies_social, meetup_ms_reactor, meetup_photography_to, meetup_postapoc_books, meetup_postgres_to, meetup_python_to, meetup_sai_dham_volunteer, meetup_salsa_gta, meetup_scifi_books, meetup_silent_books, meetup_singles_social, meetup_soul_city, meetup_sup_kayak, meetup_tech_stack, meetup_techto, meetup_tile_language, meetup_toronto_dads, meetup_toronto_history_walks, meetup_toronto_paddlers, meetup_toronto_wellness, meetup_torontobabel, meetup_torontojs, meetup_try_new_things, meetup_wilderness_union, meetup_women_biz
 
-### The Events Calendar (WordPress) (77 feeds)
+### The Events Calendar (WordPress) (76 feeds)
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **bloomington** (7): bgc_bloomington, bloomspinweave, brown_county_playhouse, community_band, first_united_church, hoosierflyfishers_list, lotusfest
 
-**matsu** (3): connect_matsu, skeetawk, visit_palmer
+**matsu** (2): connect_matsu, visit_palmer
 
 **montclair** (9): mhainspire, montclairfoundation_calendar_of_events, montclairlocal, neearth, nertamid, njaudubon, peakperfs, unioncong, whartonarts
 
