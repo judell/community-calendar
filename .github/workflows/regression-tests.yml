@@ -1,0 +1,47 @@
+name: Regression Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.xmlui'
+      - 'components/**'
+      - '*.js'
+      - '*.html'
+      - '*.json'
+      - '*.css'
+      - 'themes/**'
+      - 'xmlui/**'
+      - 'cities/*/traces/baselines/**'
+      - 'cities/*/traces/specs/**'
+      - 'cities/*/app-config.json'
+      - '.github/workflows/regression-tests.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Start app server
+        run: python3 -m http.server 8080 &
+
+      - name: Clone trace-tools
+        run: |
+          git clone https://github.com/xmlui-org/trace-tools.git cities/santarosa/trace-tools
+          cd cities/santarosa/trace-tools
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Run regression tests
+        run: |
+          cd cities/santarosa
+          chmod +x test.sh
+          ./test.sh test-all

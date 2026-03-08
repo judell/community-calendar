@@ -614,7 +614,7 @@ After mock tests, `test.html` fetches 500 live events from Supabase and validate
 
 ## Regression Testing
 
-The community calendar uses [trace-tools](https://github.com/judell/trace-tools) for regression testing. The goal is to let curators — not just programmers — create and run tests. No Playwright knowledge is needed: you interact with the app, export a trace, and the pipeline generates and runs the Playwright test for you.
+The community calendar uses [trace-tools](https://github.com/xmlui-org/trace-tools) for regression testing. The goal is to let curators — not just programmers — create and run tests. No Playwright knowledge is needed: you interact with the app, export a trace, and the pipeline generates and runs the Playwright test for you.
 
 **The default workflow:**
 
@@ -632,7 +632,7 @@ Santa Rosa is the reference city. From `cities/santarosa/`:
 
 ```bash
 # Clone trace-tools (first time only)
-git clone https://github.com/judell/trace-tools.git
+git clone https://github.com/xmlui-org/trace-tools.git
 
 # Run a regression test
 ./test.sh run search-roundtrip
@@ -641,7 +641,7 @@ git clone https://github.com/judell/trace-tools.git
 ./test.sh run search-roundtrip --video
 ```
 
-**What's checked in:** `traces/baselines/`, `traces/specs/`, `traces/videos/` (reference recordings), `app-config.json`, `test.sh`. Generated tests and run artifacts are gitignored. The `trace-tools` repo is cloned at test time, not checked in. See the [trace-tools README](https://github.com/judell/trace-tools#readme) for full details.
+**What's checked in:** `traces/baselines/`, `traces/specs/`, `traces/videos/` (reference recordings), `app-config.json`, `test.sh`. Generated tests and run artifacts are gitignored. The `trace-tools` repo is cloned at test time, not checked in. See the [trace-tools README](https://github.com/xmlui-org/trace-tools#readme) for full details.
 
 ## Adding a New City
 
