@@ -1162,6 +1162,7 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar",
     """
     all_events = []
     geo_filtered_count = 0
+    geo_filtered_details = []  # Track what got filtered for curator visibility
     exclude_sources = exclude_sources or set()
     # Use 24 hours ago to avoid filtering out same-day events due to timezone differences
     from datetime import timedelta
@@ -1211,6 +1212,14 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar",
                         filtered_events.append(e)
                     else:
                         geo_filtered_count += 1
+                        title_match = re.search(r'SUMMARY:([^\r\n]+)', e['content'])
+                        title = title_match.group(1) if title_match else '(no title)'
+                        geo_filtered_details.append({
+                            'source': source_name,
+                            'source_id': source_id,
+                            'title': title,
+                            'location': location.replace('\\,', ','),
+                        })
                 future_events = filtered_events
             
             all_events.extend(future_events)
@@ -1272,6 +1281,21 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar",
     
     if geo_filtered_count > 0:
         print(f"  (Geo-filtered {geo_filtered_count} events outside allowed cities)")
+        # Write sidecar for report visibility
+        geo_report_path = Path(output_file).parent / 'geo_filtered.json'
+        # Summarize by source + city extracted from location
+        by_source_city = {}
+        for d in geo_filtered_details:
+            key = (d['source'], d['source_id'], d['location'])
+            if key not in by_source_city:
+                by_source_city[key] = {'source': d['source'], 'source_id': d['source_id'],
+                                        'location': d['location'], 'count': 0, 'titles': []}
+            by_source_city[key]['count'] += 1
+            if len(by_source_city[key]['titles']) < 3:
+                by_source_city[key]['titles'].append(d['title'])
+        geo_summary = sorted(by_source_city.values(), key=lambda x: -x['count'])
+        import json as json_mod
+        geo_report_path.write_text(json_mod.dumps(geo_summary, indent=2))
     print(f"\nCombined {len(unique_events)} unique future events into {output_file}")
     return len(unique_events)
 

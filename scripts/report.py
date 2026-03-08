@@ -287,6 +287,16 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
             'by_source': image_by_source
         }
 
+        # Geo-filtered events (from combine_ics.py sidecar)
+        geo_filtered_path = f'{city_dir}/geo_filtered.json'
+        try:
+            with open(geo_filtered_path, 'r') as f:
+                geo_filtered = json.load(f)
+            if geo_filtered:
+                report['cities'][city]['geo_filtered'] = geo_filtered
+        except (FileNotFoundError, json.JSONDecodeError):
+            pass
+
         report['cities'][city]['url_quality'] = {
             'total_with_url': total,
             'total_events': len(events),

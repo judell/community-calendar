@@ -158,6 +158,12 @@
     </div>
 
     <div class="url-section">
+        <h2>Geo-Filtered Events <span class="help-btn" onclick="showHelp('geofilter')">?</span></h2>
+        <div class="section-desc">Events dropped because their location isn't in the city's allowed list</div>
+        <div id="geo-filtered-report"></div>
+    </div>
+
+    <div class="url-section">
         <h2>URL Quality</h2>
         <div class="section-desc">Deduplicated events from the combined calendar</div>
         <div id="url-report">Loading...</div>
@@ -258,6 +264,7 @@
             }
 
             renderBuildErrors(data);
+            renderGeoFiltered(data);
             renderCategories(data);
             renderImages(data);
             renderUrlReport(data);
@@ -276,6 +283,43 @@
                     <div class="meta">${e.date}</div>
                 </div>
             `).join('');
+        }
+
+        function renderGeoFiltered(data) {
+            const container = document.getElementById('geo-filtered-report');
+            let html = '';
+            let anyData = false;
+            for (const [cityName, cityData] of Object.entries(data.cities || {})) {
+                const gf = cityData.geo_filtered;
+                if (!gf || !gf.length) continue;
+                anyData = true;
+                const totalDropped = gf.reduce((s, g) => s + g.count, 0);
+                html += `
+                    <details>
+                        <summary><span class="city-name">${capitalize(cityName)}</span>
+                            <span class="city-stats">${totalDropped} events dropped from ${gf.length} source/location combinations</span>
+                        </summary>
+                        <div class="city-content">
+                            <table class="url-table">
+                                <tr><th>Source</th><th>Location</th><th>Dropped</th><th>Example Events</th></tr>
+                                ${gf.map(g => `
+                                    <tr>
+                                        <td>${g.source}</td>
+                                        <td>${g.location}</td>
+                                        <td class="num">${g.count}</td>
+                                        <td style="font-size:0.85em;color:#666">${(g.titles || []).join('; ')}</td>
+                                    </tr>
+                                `).join('')}
+                            </table>
+                        </div>
+                    </details>
+                `;
+            }
+            if (!anyData) {
+                container.innerHTML = '<div style="color:#4caf50">No geo-filtered events</div>';
+            } else {
+                container.innerHTML = html;
+            }
         }
 
         function renderFeed(name, feed) {
@@ -447,6 +491,10 @@
         }
 
         const helpDefs = {
+            geofilter: {
+                title: 'Geo-Filtered Events',
+                body: 'Events whose location doesn\'t match any city in the <code>city.conf</code> allowed list. This often means:<br><br><b>Missing city:</b> A venue is in a town not yet added to city.conf (e.g., Nicasio, Mill Valley). Fix: add the city to city.conf.<br><br><b>Intentionally excluded:</b> The source covers a wide area and some events are too far away. These are expected.<br><br>Review this list after adding new sources to make sure intentional events aren\'t being silently dropped.'
+            },
             generic: {
                 title: 'Generic URL Events',
                 body: 'Events whose URL points to a generic page (homepage, calendar listing) rather than a page about that specific event. Every event from the domain shares the same URL. Clicking takes the user to a page with no direct connection to the event they were looking at.<br><br>Common causes: the source calendar doesn\'t provide per-event links, or the scraper can only extract the venue\'s top-level URL.'
