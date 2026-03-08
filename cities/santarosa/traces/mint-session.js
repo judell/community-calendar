@@ -75,25 +75,23 @@ async function mintSession() {
 
   const linkData = await linkRes.json();
 
-  // Extract the token from the action_link and verify it to get a session
-  const actionLink = linkData.action_link || linkData.properties?.action_link;
-  if (!actionLink) {
-    console.error('No action_link in response:', JSON.stringify(linkData, null, 2));
+  // Use the hashed_token with POST verify
+  const tokenHash = linkData.hashed_token;
+  if (!tokenHash) {
+    console.error('No hashed_token in response:', JSON.stringify(linkData, null, 2));
     process.exit(1);
   }
 
-  const url = new URL(actionLink);
-  const token = url.searchParams.get('token');
-  const type = url.searchParams.get('type') || 'magiclink';
-
-  // Verify the OTP to get access + refresh tokens
   const verifyRes = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
     method: 'POST',
     headers: {
       'apikey': SERVICE_KEY,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ type, token, email: TEST_EMAIL }),
+    body: JSON.stringify({
+      type: 'magiclink',
+      token_hash: tokenHash,
+    }),
   });
 
   if (!verifyRes.ok) {
