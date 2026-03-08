@@ -262,12 +262,12 @@
     <VStack when="{savedPickId}" gap="$space-4" horizontalAlignment="center" padding="$space-4">
       <Icon name="circle-check" size="lg" color="$color-success-500" />
       <Text fontWeight="bold" fontSize="$fontSize-lg">Event picked!</Text>
-      <Text color="$color-text-secondary" textAlignment="center">"{submittedData?.title}" has been added to your picks.</Text>
+      <Text color="$color-text-secondary" textAlignment="center">"{submittedData?.title || $props.event?.title}" has been added to your picks.</Text>
       <VStack gap="$space-2" width="100%">
         <Text fontWeight="bold" fontSize="$fontSize-sm">Add to your calendar:</Text>
         <AddToCalendar event="{{
           id: $props.event?.id || savedPickId,
-          title: submittedData?.title,
+          title: submittedData?.title || $props.event?.title,
           start_time: (submittedData?.date || '') + 'T' + (submittedData?.time || '00:00') + ':00',
           end_time: submittedData?.endTime ? (submittedData?.date || '') + 'T' + submittedData.endTime + ':00' : null,
           location: submittedData?.location,

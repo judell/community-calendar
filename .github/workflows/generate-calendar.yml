@@ -745,6 +745,9 @@ jobs:
           fi
         done
         
+        # Write version tag for cache busting
+        git describe --tags --always > version.txt
+
         git add .
         git diff --quiet && git diff --staged --quiet || (
           git commit -m "Auto-generate calendar"
