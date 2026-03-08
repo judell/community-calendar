@@ -43,7 +43,7 @@ def fetch_event_page(url: str) -> tuple[str, str]:
             desc = '\n\n'.join(p for p in paragraphs if p)
 
         image_url = ''
-        img = soup.select_one('.media-block-wrap img')
+        img = soup.select_one('section.banner-main img')
         if img:
             image_url = img.get('src', '')
 
