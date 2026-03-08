@@ -16,7 +16,7 @@ test('pick-roundtrip', async ({ page }) => {
     await expect(page.getByPlaceholder('Search events...')).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1000);
 
-    // The bookmark icon (role="button", tooltip="Add to my picks") is only visible when authenticated.
+    // The bookmark icon — tooltip text is now the aria-label
     const firstBookmark = page.getByRole('button', { name: 'Add to my picks' }).first();
     await expect(firstBookmark).toBeVisible({ timeout: 5000 });
     await firstBookmark.click();
