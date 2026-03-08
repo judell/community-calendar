@@ -30,7 +30,6 @@
       }
       savedPickId = result[0].id;
       submittedData = pickForm.getData();
-      emitEvent('saved');
     }"
     onError="(err) => {
       isSaving = false;
@@ -78,7 +77,6 @@
           curator_name: window.authUser.user_metadata?.user_name || window.authUser.email || 'curator'
         });
       }
-      emitEvent('saved');
     }"
     onError="(err) => {
       isSaving = false;
@@ -127,7 +125,6 @@
           errorMessage = 'Please sign in to pick events';
           return;
         }
-        isSaving = true;
         errorMessage = '';
         const formData = pickForm.getData();
         if ($props.event?.id) {
@@ -169,6 +166,7 @@
             transcript: $props.event?.transcript || null
           });
         }
+        isSaving = true;
       }"
     >
       <Fragment when="{!savedPickId}">
@@ -277,11 +275,12 @@
         }}" />
         <Text fontSize="$fontSize-xs" color="$color-text-tertiary" textAlignment="center">For Apple Calendar: download .ics, then open the file.</Text>
       </VStack>
-      <Button label="Done" variant="ghost" onClick="emitEvent('close')" />
+      <Button label="Done" variant="ghost" onClick="emitEvent('saved'); emitEvent('close')" />
     </VStack>
 
     <!-- Error message -->
     <Text when="{errorMessage}" value="{errorMessage}" color="$color-danger-500" />
+
 
   </ModalDialog>
 </Component>

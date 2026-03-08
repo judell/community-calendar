@@ -5,11 +5,13 @@ test('pick-roundtrip', async ({ page }) => {
   test.setTimeout(45000);
 
   try {
-    // Start at root and pick Santa Rosa
+    // Start at root, wait for page to load, then pick Santa Rosa
     await page.goto('./');
+    const santaRosaBtn = page.getByText('Santa Rosa', { exact: true });
+    await expect(santaRosaBtn).toBeVisible({ timeout: 10000 });
     await Promise.all([
-      page.waitForResponse(r => r.url().includes('/rest/v1/events')),
-      page.getByText('Santa Rosa', { exact: true }).click(),
+      page.waitForResponse(r => r.url().includes('/rest/v1/events') && !r.url().includes('event_enrichments')),
+      santaRosaBtn.click(),
     ]);
 
     // Wait for the event list to render
@@ -22,16 +24,19 @@ test('pick-roundtrip', async ({ page }) => {
     await firstBookmark.click();
     await page.waitForTimeout(1000);
 
-    // Submit the PickEditor dialog (button type="submit" with text "Add to My Picks")
-    await page.locator('button[type="submit"]').click();
-    await page.waitForTimeout(2000);
+    // Submit the PickEditor dialog and wait for the POST to complete
+    await Promise.all([
+      page.waitForResponse(r => r.url().includes('/rest/v1/picks') && r.request().method() === 'POST'),
+      page.locator('button[type="submit"]').click(),
+    ]);
 
     // After success, PickEditor shows "Done" button — click to close
+    await expect(page.getByRole('button', { name: 'Done' })).toBeVisible({ timeout: 15000 });
     await page.getByRole('button', { name: 'Done' }).click();
     await page.waitForTimeout(1000);
 
-    // Switch to "my picks" view (label associated with radio via htmlFor)
-    await page.getByLabel('my picks').click();
+    // Switch to "my picks" view via the radio button
+    await page.getByRole('radio', { name: 'my picks' }).click();
     await page.waitForTimeout(1000);
 
     // Verify at least one pick is showing
@@ -39,7 +44,7 @@ test('pick-roundtrip', async ({ page }) => {
     await expect(pickCount).toBeVisible({ timeout: 5000 });
 
     // Switch back to list view
-    await page.getByLabel('list').click();
+    await page.getByRole('radio', { name: 'list' }).click();
     await page.waitForTimeout(500);
 
     // Unpick the same event (unpicking is one-click, no dialog)
