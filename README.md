@@ -612,6 +612,37 @@ After mock tests, `test.html` fetches 500 live events from Supabase and validate
 - Deduplication finds actual duplicates (~9% reduction)
 - Long descriptions, null fields, and special characters handled correctly
 
+## Regression Testing
+
+The community calendar uses [trace-tools](https://github.com/judell/trace-tools) for regression testing. The goal is to let curators — not just programmers — create and run tests. No Playwright knowledge is needed: you interact with the app, export a trace, and the pipeline generates and runs the Playwright test for you.
+
+**The default workflow:**
+
+1. Open the app with the XMLUI inspector (the magnifying glass icon in the header)
+2. Perform a user journey — search for events, pick a category, clear the search, etc.
+3. In the inspector, click **Export → Download JSON** and give it a name like `search-roundtrip`
+4. Save it as a baseline: `./test.sh save ~/Downloads/search-roundtrip.json search-roundtrip`
+5. Run the regression test: `./test.sh run search-roundtrip`
+
+The pipeline auto-generates a Playwright test from the baseline trace, replays it, captures a new trace, and compares the two semantically. If the same APIs fire and the same interactions happen, it passes — regardless of internal refactoring.
+
+**Alternative: hand-written specs.** For cases where you need explicit assertions or browser-native interactions, you can write a Playwright spec directly and place it in `traces/specs/`. The `convert` command runs a hand-written spec, captures its trace as a baseline, and generates a test from it. This is useful when AI assistance or specific test logic is needed.
+
+Santa Rosa is the reference city. From `cities/santarosa/`:
+
+```bash
+# Clone trace-tools (first time only)
+git clone https://github.com/judell/trace-tools.git
+
+# Run a regression test
+./test.sh run search-roundtrip
+
+# Run with video recording
+./test.sh run search-roundtrip --video
+```
+
+**What's checked in:** `traces/baselines/`, `traces/specs/`, `traces/videos/` (reference recordings), `app-config.json`, `test.sh`. Generated tests and run artifacts are gitignored. The `trace-tools` repo is cloned at test time, not checked in. See the [trace-tools README](https://github.com/judell/trace-tools#readme) for full details.
+
 ## Adding a New City
 
 See the detailed guides:
