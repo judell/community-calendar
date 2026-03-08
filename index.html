@@ -143,6 +143,7 @@
           const deleteUrl = `${SUPABASE_URL}/rest/v1/picks?id=eq.${existing[0].id}`;
           const deleteRes = await fetch(deleteUrl, { method: 'DELETE', headers });
           console.log('Delete response:', deleteRes.status);
+          if (window.xsTraceEvent) window.xsTraceEvent('unpick', { eventId, status: deleteRes.status });
         } else {
           // Add pick
           console.log('Adding pick for event:', eventId);
@@ -153,6 +154,7 @@
             body: JSON.stringify({ user_id: userId, event_id: eventId })
           });
           console.log('Insert response:', insertRes.status);
+          if (window.xsTraceEvent) window.xsTraceEvent('pick', { eventId, status: insertRes.status });
         }
       };
     </script>

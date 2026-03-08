@@ -40,15 +40,13 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
-      # Authenticated tests: uncomment when baselines are captured with auth.
-      # mint-session.js creates .auth-state.json which Playwright auto-detects.
-      # - name: Mint test user session
-      #   env:
-      #     SUPABASE_URL: https://dzpdualvwspgqghrysyz.supabase.co
-      #     SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      #     TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
-      #     BASE_URL: http://localhost:8080
-      #   run: node cities/santarosa/traces/mint-session.js
+      - name: Mint test user session
+        env:
+          SUPABASE_URL: https://dzpdualvwspgqghrysyz.supabase.co
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          BASE_URL: http://localhost:8080
+        run: node cities/santarosa/traces/mint-session.js
 
       - name: Run regression tests
         run: |
