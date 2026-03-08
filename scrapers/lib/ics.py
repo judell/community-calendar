@@ -1,12 +1,27 @@
 """ICS feed scraper base class."""
 
+import html
 import logging
+import re
 from typing import Any, Optional
 
 import requests
 from icalendar import Calendar
 
 from .base import BaseScraper
+
+
+def _strip_html(text: str) -> str:
+    """Remove HTML tags and unescape HTML entities from a string."""
+    if not text:
+        return text
+    # Remove HTML tags
+    text = re.sub(r'<[^>]+>', '', text)
+    # Unescape HTML entities (&amp; &apos; &nbsp; etc.)
+    text = html.unescape(text)
+    # Collapse extra whitespace
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
 
 
 class IcsScraper(BaseScraper):
@@ -111,8 +126,8 @@ class IcsScraper(BaseScraper):
             dtend = component.get('dtend')
             dt_end = dtend.dt if dtend else None
 
-            location = str(component.get('location', '')).strip() or self.default_location
-            description = str(component.get('description', '')).strip() or None
+            location = _strip_html(str(component.get('location', '')).strip()) or self.default_location
+            description = _strip_html(str(component.get('description', '')).strip()) or None
             url = str(component.get('url', '')).strip() or self.default_url
             uid = str(component.get('uid', '')).strip()
 
