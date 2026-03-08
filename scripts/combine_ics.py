@@ -673,15 +673,23 @@ VIRTUAL_LOCATION_PATTERNS = [
 
 # Patterns that indicate location is a real address (worth geo-filtering)
 # If none of these match, we skip geo-filtering for that event
-ADDRESS_INDICATORS = re.compile(
-    r'(?:'
-    r', [A-Z]{2}\b|'              # State abbreviation: ", CA"
-    r'\b\d{5}\b|'                 # ZIP code
-    r', [A-Z][a-z]+ [A-Z]{2}|'     # City, State: ", Santa Rosa CA"
-    r'\d+\s+\w+\s+(?:street|st|avenue|ave|road|rd|drive|dr|boulevard|blvd|lane|ln|way|court|ct)\b'  # Street address: "123 Main St"
-    r')',
+US_STATES = (
+    'AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|'
+    'MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|'
+    'SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC'
+)
+_STATE_RE = re.compile(rf', (?:{US_STATES})\b')                   # ", CA" (case-sensitive)
+_CITY_STATE_RE = re.compile(rf', [A-Z][a-z]+ (?:{US_STATES})\b')  # ", Santa Rosa CA"
+_ZIP_RE = re.compile(r'\b\d{5}\b')
+_STREET_RE = re.compile(
+    r'\d+\s+\w+\s+(?:street|st|avenue|ave|road|rd|drive|dr|boulevard|blvd|lane|ln|way|court|ct)\b',
     re.IGNORECASE
 )
+
+def _has_address_indicator(location):
+    """Check if a location string looks like a real address."""
+    return bool(_STATE_RE.search(location) or _ZIP_RE.search(location) or
+                _CITY_STATE_RE.search(location) or _STREET_RE.search(location))
 
 
 def location_matches_allowed_cities(location, allowed_cities, excluded_cities=None):
@@ -711,7 +719,7 @@ def location_matches_allowed_cities(location, allowed_cities, excluded_cities=No
     
     # Check if location looks like an address
     # If not, allow it through (venue name only, no geo info to filter on)
-    if not ADDRESS_INDICATORS.search(location):
+    if not _has_address_indicator(location):
         return True
     
     # Location has address info - check against allowed cities
