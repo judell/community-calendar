@@ -7,8 +7,8 @@ used across all city feeds, identified by their PRODID header.
 
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
-| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 127 |
-| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 73 |
+| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 126 |
+| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 75 |
 | **Google Calendar** | Public Google Calendar ICS export. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 43 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, montclair, raleighdurham, santarosa | 37 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 21 |
@@ -24,7 +24,7 @@ used across all city feeds, identified by their PRODID header.
 
 ## Detail
 
-### Meetup (127 feeds)
+### Meetup (126 feeds)
 
 ICS export from meetup.com groups.
 
@@ -38,11 +38,11 @@ ICS export from meetup.com groups.
 
 **raleighdurham** (31): meetup_adventures, meetup_all_things_ai, meetup_all_things_open_rtp_meetup, meetup_blacks_in_tech_bit_rdu_durham_raleigh_meetup, meetup_chad2015, meetup_chicktech_rdu, meetup_code_for_america, meetup_csa_triangle, meetup_data_science_raleigh, meetup_discover_durham_together, meetup_downtown_techies_durham, meetup_durham_geeks, meetup_durham_writers, meetup_futureofdata_triangle, meetup_modern_web_triangle, meetup_outdoor_flow_yogis, meetup_plum_village_meditation, meetup_pydata_triangle, meetup_raleigh_ai_ml_cv, meetup_raleigh_triangle_activities, meetup_raleigh_wordpress_meetup_group, meetup_research_triangle_analysts, meetup_splatspace, meetup_triangle_board_games, meetup_triangle_devops, meetup_triangle_devs, meetup_triangle_techbreakfast, meetup_triangle_transitional, meetup_triangleai, meetup_tripython, meetup_yoga_in_nature
 
-**santarosa** (10): meetup_amorc, meetup_boomers, meetup_creativity, meetup_go_wild_hikers, meetup_sarogn, meetup_scottish_dancing, meetup_shutupandwrite, meetup_toastmasters, meetup_womens_wine_club, meetup_yoga
+**santarosa** (9): meetup_amorc, meetup_creativity, meetup_go_wild_hikers, meetup_sarogn, meetup_scottish_dancing, meetup_shutupandwrite, meetup_toastmasters, meetup_womens_wine_club, meetup_yoga
 
 **toronto** (50): meetup_20s30s_social, meetup_ai_ml, meetup_arts_crafts, meetup_arts_culture, meetup_bike_toronto, meetup_board_games_to, meetup_book_club_abcd, meetup_bruce_trail, meetup_canoe_trippers, meetup_devops, meetup_experience_to, meetup_founders_running, meetup_gta_hiking, meetup_heavy_boardgames, meetup_high_park_yoga, meetup_hiking_boots, meetup_hiking_network, meetup_improv_friends, meetup_improv_to, meetup_jpn_eng_exchange, meetup_lang_exchange_to, meetup_little_sunbeams, meetup_medieval_sca, meetup_mindful_movement, meetup_mini_me, meetup_movies_social, meetup_ms_reactor, meetup_photography_to, meetup_postapoc_books, meetup_postgres_to, meetup_python_to, meetup_sai_dham_volunteer, meetup_salsa_gta, meetup_scifi_books, meetup_silent_books, meetup_singles_social, meetup_soul_city, meetup_sup_kayak, meetup_tech_stack, meetup_techto, meetup_tile_language, meetup_toronto_dads, meetup_toronto_history_walks, meetup_toronto_paddlers, meetup_toronto_wellness, meetup_torontobabel, meetup_torontojs, meetup_try_new_things, meetup_wilderness_union, meetup_women_biz
 
-### The Events Calendar (WordPress) (73 feeds)
+### The Events Calendar (WordPress) (75 feeds)
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
@@ -56,7 +56,7 @@ WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **raleighdurham** (19): ackland_art, aps_durham, downtown_durham, duke_gardens, durham_central_park, gardens, hope_animal_rescue, islamic_assoc_raleigh, morehead_planetarium, nasher_museum, nc_botanical_garden, nc_humanities, nc_natural_sciences, nc_wildlife_federation, resilient_durham, second_chance_pets, transitions_lifecare, triangle_land, united_arts_wake
 
-**santarosa** (7): golocal_coop, luther_burbank_center, schulz_museum, sonoma_com, sonoma_county_aa, srsymphony, uptowntheatrenapa
+**santarosa** (9): bigeasypetaluma, golocal_coop, luther_burbank_center, ranchonicasio, schulz_museum, sonoma_com, sonoma_county_aa, srsymphony, uptowntheatrenapa
 
 **toronto** (24): bata_shoe_museum, bloor_west_village, boulderzclimbing, buddies_theatre, culturelink, factory_theatre, gardiner_museum, golatindance, grossmans_tavern, high_park_nature, indigenous, jazz_bistro, knitters_guild, now_toronto, ontario_historical_society, ontario_nature, scadding_court, site3, textile_museum, toronto_botanical, union_station, uoft_engineering, uoft_philosophy, uoft_socialwork
 
@@ -184,8 +184,13 @@ own scrapers, add a pattern to `OUR_SCRAPERS`.
 |--------|------|-------|
 | `-//173.236.243.198//NONSGML kigkonsult.se iCalcreator 2.26.9//` | bloomington | writersguildbloomington |
 | `-//DaylightPirates//EB-to-iCAL//EN` | raleighdurham | quail_ridge_books |
+| `-//Elephant in the Room (Eventbrite)//eventbrite.com//` | santarosa | eventbrite_elephant |
+| `-//Elephant in the Room (Songkick)//songkick.com//` | santarosa | songkick_elephant |
+| `-//Phoenix Theater (Eventbrite)//eventbrite.com//` | santarosa | eventbrite_phoenix |
+| `-//Rancho Nicasio (Songkick)//songkick.com//` | santarosa | songkick_rancho_nicasio |
 | `-//SIDEARM Sports//NONSGML SIDEARM//EN` | montclair | msu_athletics |
 | `-//SIDEARM Sports//NONSGML SIDEARM//EN` | raleighdurham | duke_athletics, ncsu_athletics, unc_athletics |
 | `-//Santa Rosa Junior College//NONSGML v1.0//EN` | santarosa | srjc |
 | `-//Teamup Solutions AG//Teamup Calendar//EN` | montclair | shomrei_emunah |
+| `-//The Big Easy (Songkick)//songkick.com//` | santarosa | songkick_big_easy |
 | `www.maak-agenda.nl` | raleighdurham | nc_courage |
