@@ -601,17 +601,17 @@ SOURCE_URLS = {
     'raptor_trust': 'https://www.theraptortrust.org/events',
     'maxpreps_montclair_high': 'https://www.maxpreps.com/nj/montclair/montclair-mounties/events/',
     # MatSu (Matanuska-Susitna)
-    'wasilla_library': 'https://www.cityofwasilla.gov/calendar',
-    'wasilla_menard_center': 'https://www.cityofwasilla.gov/facilities/menard-center',
-    'wasilla_city_council': 'https://www.cityofwasilla.gov/calendar',
-    'wasilla_airport_advisory': 'https://www.cityofwasilla.gov/calendar',
-    'wasilla_planning': 'https://www.cityofwasilla.gov/calendar',
-    'wasilla_parks_rec': 'https://www.cityofwasilla.gov/calendar',
+    'wasilla_library': 'https://www.cityofwasilla.gov/calendar?catID=23',
+    'wasilla_menard_center': 'https://www.cityofwasilla.gov/calendar?catID=25',
+    'wasilla_city_council': 'https://www.cityofwasilla.gov/calendar?catID=26',
+    'wasilla_airport_advisory': 'https://www.cityofwasilla.gov/calendar?catID=27',
+    'wasilla_planning': 'https://www.cityofwasilla.gov/calendar?catID=28',
+    'wasilla_parks_rec': 'https://www.cityofwasilla.gov/calendar?catID=29',
     'connect_matsu': 'https://www.connectmatsu.org/events/',
     'visit_palmer': 'https://visitpalmer.com/events/',
     'skeetawk': 'https://skeetawk.com/events/',
     'matsu_borough_assembly': 'https://matanuska.legistar.com/Calendar.aspx',
-    'matsuk12': 'https://www.matsuk12.us/calendar',
+    'matsuk12': 'https://www.matsuk12.us/about-us/calendars',
     'alaskavisit': 'https://www.alaskavisit.com/events/',
 }
 
@@ -1111,9 +1111,12 @@ def extract_events(ics_content, source_name=None, source_id=None, fallback_url=N
         if dtstart_match:
             dt = parse_ics_datetime(dtstart_match.group(1))
             if dt:
-                # Add fallback URL if no URL exists
-                if fallback_url and 'URL:' not in event_content:
-                    event_content = f'URL:{fallback_url}\r\n{event_content}'
+                # Add fallback URL if no URL exists, or if the existing URL is relative
+                if fallback_url:
+                    existing_url = extract_field(event_content, 'URL')
+                    if not existing_url or existing_url.startswith('/'):
+                        event_content = re.sub(r'URL:[^\r\n]*\r?\n', '', event_content)
+                        event_content = f'URL:{fallback_url}\r\n{event_content}'
 
                 # Add X-SOURCE, X-SOURCE-ID, and X-SOURCE-URLS headers
                 # (source attribution is rendered by the app from X-SOURCE)
