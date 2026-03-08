@@ -8,8 +8,10 @@ test('inspect pick flow DOM', async ({ page }) => {
   ]);
   await page.waitForTimeout(3000);
 
+  const info: string[] = [];
+
   const authUser = await page.evaluate(() => (window as any).authUser);
-  console.log('=== authUser:', authUser ? authUser.email : 'NULL');
+  info.push('authUser: ' + (authUser ? authUser.email : 'NULL'));
 
   // Radio group options
   const radios = await page.evaluate(() => {
@@ -21,7 +23,7 @@ test('inspect pick flow DOM', async ({ page }) => {
       id: el.id,
     }));
   });
-  console.log('=== Radios:', JSON.stringify(radios, null, 2));
+  info.push('Radios: ' + JSON.stringify(radios));
 
   const labels = await page.evaluate(() => {
     return Array.from(document.querySelectorAll('label')).map(el => ({
@@ -29,7 +31,7 @@ test('inspect pick flow DOM', async ({ page }) => {
       htmlFor: el.htmlFor,
     }));
   });
-  console.log('=== Labels:', JSON.stringify(labels, null, 2));
+  info.push('Labels: ' + JSON.stringify(labels));
 
   // Bookmark buttons
   const bookmarkBtns = await page.evaluate(() => {
@@ -37,11 +39,14 @@ test('inspect pick flow DOM', async ({ page }) => {
       .filter(el => (el.getAttribute('aria-label') || '').includes('picks'))
       .map(el => ({ ariaLabel: el.getAttribute('aria-label'), tag: el.tagName }));
   });
-  console.log('=== Bookmark buttons:', JSON.stringify(bookmarkBtns, null, 2));
+  info.push('Bookmark buttons: ' + JSON.stringify(bookmarkBtns));
 
   // Click bookmark if visible
   const firstBookmark = page.getByRole('button', { name: 'Add to my picks' }).first();
-  if (await firstBookmark.isVisible().catch(() => false)) {
+  const bookmarkVisible = await firstBookmark.isVisible().catch(() => false);
+  info.push('Bookmark visible: ' + bookmarkVisible);
+
+  if (bookmarkVisible) {
     await firstBookmark.click();
     await page.waitForTimeout(2000);
 
@@ -57,8 +62,9 @@ test('inspect pick flow DOM', async ({ page }) => {
           text: el.textContent?.trim().substring(0, 60),
         }));
     });
-    console.log('=== Dialog buttons:', JSON.stringify(dialogBtns, null, 2));
-  } else {
-    console.log('=== Bookmark NOT visible');
+    info.push('Dialog buttons: ' + JSON.stringify(dialogBtns));
   }
+
+  // Fail with all the info so it shows in CI output
+  throw new Error('DOM INSPECTION:\n' + info.join('\n'));
 });
