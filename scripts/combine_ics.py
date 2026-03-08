@@ -1112,11 +1112,15 @@ def extract_events(ics_content, source_name=None, source_id=None, fallback_url=N
             dt = parse_ics_datetime(dtstart_match.group(1))
             if dt:
                 # Add fallback URL if no URL exists, or if the existing URL is relative
-                if fallback_url:
-                    existing_url = extract_field(event_content, 'URL')
-                    if not existing_url or existing_url.startswith('/'):
+                existing_url = extract_field(event_content, 'URL')
+                if not existing_url or existing_url.startswith('/'):
+                    # Try to extract an absolute URL from the DESCRIPTION field first
+                    desc = extract_field(event_content, 'DESCRIPTION') or ''
+                    desc_url_match = re.search(r'https?://\S+', desc)
+                    replacement_url = desc_url_match.group(0) if desc_url_match else fallback_url
+                    if replacement_url:
                         event_content = re.sub(r'URL:[^\r\n]*\r?\n', '', event_content)
-                        event_content = f'URL:{fallback_url}\r\n{event_content}'
+                        event_content = f'URL:{replacement_url}\r\n{event_content}'
 
                 # Add X-SOURCE, X-SOURCE-ID, and X-SOURCE-URLS headers
                 # (source attribution is rendered by the app from X-SOURCE)
