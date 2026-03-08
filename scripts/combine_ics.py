@@ -5,6 +5,7 @@ Filters to only include events from today forward.
 """
 
 import argparse
+import html
 import json
 import re
 from datetime import datetime, timezone
@@ -751,6 +752,19 @@ def normalize_title(title):
     return ''.join(c.lower() for c in title if c.isalnum())[:40]
 
 
+def strip_html(text):
+    """Strip HTML tags and decode HTML entities from a string."""
+    # Replace <br> variants with a space before stripping tags
+    text = re.sub(r'<br\s*/?>', ' ', text, flags=re.IGNORECASE)
+    # Strip all remaining HTML tags
+    text = re.sub(r'<[^>]+>', '', text)
+    # Decode HTML entities (e.g. &apos; &amp; &nbsp;)
+    text = html.unescape(text)
+    # Collapse whitespace
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
+
 def extract_field(event_content, field_name):
     """Extract a field value from VEVENT content, handling line folding."""
     # Match field, handling continuation lines (start with space/tab)
@@ -763,6 +777,9 @@ def extract_field(event_content, field_name):
         value = re.sub(r'[\r\n]+[ \t]', '', match.group(1))
         # Unescape ICS escapes
         value = value.replace('\\n', ' ').replace('\\,', ',').replace('\\;', ';').replace('\\\\', '\\')
+        # Strip any HTML tags/entities (some sources embed HTML in fields)
+        if '<' in value or '&' in value:
+            value = strip_html(value)
         return value.strip()
     return None
 
