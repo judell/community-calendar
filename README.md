@@ -23,7 +23,7 @@ The gold standard is **iCalendar (ICS) feeds** — a format that machines can re
 - [App Architecture](#app-architecture)
 - [XMLUI Resources](#xmlui-resources)
 - [Local Development](#local-development)
-- [Testing](#testing)
+- [Unit Tests](#unit-tests)
 - [Regression Testing](#regression-testing)
 - [Adding a New City](#adding-a-new-city)
 - [Recurrence and Enrichment](#recurrence-and-enrichment)
@@ -586,7 +586,7 @@ Run locally with `python3 -m http.server 8080`, then visit `http://localhost:808
 
 **Auth redirect for localhost:** GitHub OAuth redirects through Supabase back to your app. For this to work locally, `http://localhost:8080/**` must be in the Supabase dashboard under **Authentication > URL Configuration > Redirect URLs**. The wildcard is required — `http://localhost:8080` without `/**` won't match URLs with query parameters like `?city=santarosa`.
 
-## Testing
+## Unit Tests
 
 Browser-based tests for the JavaScript helper functions. Open `test.html` in a browser to run.
 
