@@ -93,7 +93,7 @@ async function mintSession() {
       'apikey': SERVICE_KEY,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ type, token }),
+    body: JSON.stringify({ type, token, email: TEST_EMAIL }),
   });
 
   if (!verifyRes.ok) {
