@@ -617,13 +617,13 @@ After mock tests, `test.html` fetches 500 live events from Supabase and validate
 
 The community calendar uses [trace-tools](https://github.com/xmlui-org/trace-tools) for regression testing. Three distilled baselines run on every push and should stay green:
 
-| Baseline | What it covers | Video |
-|----------|----------------|-------|
-| `capture-roundtrip` | Audio capture via Whisper → review in PickEditor → save → verify → remove | [watch](cities/santarosa/traces/videos/capture-roundtrip.webm) |
-| `pick-roundtrip` | Pick an existing event → verify in "my picks" → unpick | [watch](cities/santarosa/traces/videos/pick-roundtrip.webm) |
-| `search-roundtrip` | Select city, search for events, clear search | [watch](cities/santarosa/traces/videos/search-roundtrip.webm) |
+| Baseline | What it covers |
+|----------|----------------|
+| `capture-roundtrip` | Audio capture via Whisper → review in PickEditor → save → verify → remove |
+| `pick-roundtrip` | Pick an existing event → verify in "my picks" → unpick |
+| `search-roundtrip` | Select city, search for events, clear search |
 
-Videos are recorded on every CI run and auto-committed, so they always reflect the current product behavior.
+[**Watch the test videos**](https://judell.github.io/community-calendar/videos.html) — recorded on every CI run, always reflecting current product behavior.
 
 **How it works:** Each baseline is a [distilled trace](https://github.com/xmlui-org/trace-tools#distilled-baselines-the-gold-standard) — a compact JSON file (5–30 KB) containing interaction steps, API calls, and app-level traces. The pipeline auto-generates a Playwright test from the baseline, replays it, captures a new trace, and compares the two semantically. If the same mutation APIs fire and the same interactions happen, it passes — regardless of internal refactoring.
 
