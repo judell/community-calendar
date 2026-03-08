@@ -26,19 +26,31 @@ ICS_URL = f'{BASE_URL}/events/?ical=1'
 LOCATION = 'Taubman Museum of Art, 110 Salem Ave SE, Roanoke, VA 24011'
 
 
-def fetch_event_description(url: str) -> str:
-    """Fetch an event page and extract description from .events-main-text-block .col-text."""
+def fetch_event_page(url: str) -> tuple[str, str]:
+    """Fetch an event page and return (description, image_url).
+
+    Description comes from .events-main-text-block .col-text .events-main-text <p> tags.
+    Image comes from .media-block-wrap img[src].
+    """
     try:
         html = fetch_with_retry(url, max_retries=3, base_delay=1.0)
         soup = BeautifulSoup(html, 'html.parser')
-        block = soup.select_one('.events-main-text-block .col-text')
+
+        desc = ''
+        block = soup.select_one('.events-main-text-block .col-text .events-main-text')
         if block:
             paragraphs = [p.get_text(separator=' ', strip=True) for p in block.find_all('p')]
-            text = '\n\n'.join(p for p in paragraphs if p)
-            return text
+            desc = '\n\n'.join(p for p in paragraphs if p)
+
+        image_url = ''
+        img = soup.select_one('.media-block-wrap img')
+        if img:
+            image_url = img.get('src', '')
+
+        return desc, image_url
     except Exception as e:
-        logging.warning(f"Could not fetch description from {url}: {e}")
-    return ''
+        logging.warning(f"Could not fetch event page {url}: {e}")
+    return '', ''
 
 
 class TaubmanMuseumScraper(IcsScraper):
@@ -51,11 +63,10 @@ class TaubmanMuseumScraper(IcsScraper):
     def transform_event(self, event):
         url = event.get('url') or ''
         if url and url.startswith(BASE_URL):
-            desc = fetch_event_description(url)
-            if desc:
-                event['description'] = append_source(desc, url)
-            else:
-                event['description'] = append_source('', url)
+            desc, image_url = fetch_event_page(url)
+            event['description'] = append_source(desc, url)
+            if image_url:
+                event['image_url'] = image_url
             time.sleep(0.5)  # be polite
         elif url:
             event['description'] = append_source(event.get('description') or '', url)
