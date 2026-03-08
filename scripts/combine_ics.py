@@ -416,6 +416,19 @@ SOURCE_NAMES = {
     'turtle_back_zoo': 'Turtle Back Zoo',
     'raptor_trust': 'The Raptor Trust',
     'sycamore_land_trust': 'Sycamore Land Trust',
+    # MatSu (Matanuska-Susitna)
+    'wasilla_library': 'Wasilla Public Library',
+    'wasilla_menard_center': 'Menard Center',
+    'wasilla_city_council': 'Wasilla City Council',
+    'wasilla_airport_advisory': 'Wasilla Airport Advisory Commission',
+    'wasilla_planning': 'Wasilla Planning Commission',
+    'wasilla_parks_rec': 'Wasilla Parks & Recreation Commission',
+    'connect_matsu': 'Connect Mat-Su',
+    'visit_palmer': 'Visit Palmer',
+    'skeetawk': 'Skeetawk / Hatcher Pass',
+    'matsu_borough_assembly': 'Mat-Su Borough Assembly',
+    'matsuk12': 'Mat-Su School District',
+    'alaskavisit': 'Mat-Su CVB',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -587,6 +600,19 @@ SOURCE_URLS = {
     'turtle_back_zoo': 'https://www.turtlebackzoo.com/events/',
     'raptor_trust': 'https://www.theraptortrust.org/events',
     'maxpreps_montclair_high': 'https://www.maxpreps.com/nj/montclair/montclair-mounties/events/',
+    # MatSu (Matanuska-Susitna)
+    'wasilla_library': 'https://www.cityofwasilla.gov/calendar',
+    'wasilla_menard_center': 'https://www.cityofwasilla.gov/facilities/menard-center',
+    'wasilla_city_council': 'https://www.cityofwasilla.gov/calendar',
+    'wasilla_airport_advisory': 'https://www.cityofwasilla.gov/calendar',
+    'wasilla_planning': 'https://www.cityofwasilla.gov/calendar',
+    'wasilla_parks_rec': 'https://www.cityofwasilla.gov/calendar',
+    'connect_matsu': 'https://www.connectmatsu.org/events/',
+    'visit_palmer': 'https://visitpalmer.com/events/',
+    'skeetawk': 'https://skeetawk.com/events/',
+    'matsu_borough_assembly': 'https://matanuska.legistar.com/Calendar.aspx',
+    'matsuk12': 'https://www.matsuk12.us/calendar',
+    'alaskavisit': 'https://www.alaskavisit.com/events/',
 }
 
 

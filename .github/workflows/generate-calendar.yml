@@ -64,7 +64,7 @@ jobs:
         if [ -z "$INPUT" ] || [ "$INPUT" = "all" ]; then
           # Derive city list from cities/ directory (any subdir with a feeds.txt)
           ALL=$(ls -d cities/*/feeds.txt 2>/dev/null | sed 's|cities/||;s|/feeds.txt||' | paste -sd, -)
-          ALL="roanoke"
+          ALL="roanoke,matsu"
           echo "list=$ALL" >> $GITHUB_OUTPUT
         else
           echo "list=$INPUT" >> $GITHUB_OUTPUT
@@ -717,6 +717,36 @@ jobs:
         python scripts/combine_ics.py --input-dir cities/roanoke --output cities/roanoke/combined.ics --name "Roanoke Community Calendar"
 
     # ==========================================
+    # MatSu (Matanuska-Susitna)
+    # ==========================================
+    - name: Scrape MatSu sources
+      if: contains(steps.locations.outputs.list, 'matsu') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        python scrapers/legistar.py --client matanuska --source "Mat-Su Borough Assembly" --output cities/matsu/matsu_borough_assembly.ics || true
+        python scrapers/alaskavisit.py --output cities/matsu/alaskavisit.ics || true
+
+    - name: Download MatSu live feeds and combine ICS
+      if: contains(steps.locations.outputs.list, 'matsu')
+      run: |
+        cd cities/matsu
+        # City of Wasilla (CivicPlus)
+        curl -sL "https://www.cityofwasilla.gov/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=23" -o wasilla_library.ics || true
+        curl -sL "https://www.cityofwasilla.gov/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=25" -o wasilla_menard_center.ics || true
+        curl -sL "https://www.cityofwasilla.gov/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=26" -o wasilla_city_council.ics || true
+        curl -sL "https://www.cityofwasilla.gov/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=27" -o wasilla_airport_advisory.ics || true
+        curl -sL "https://www.cityofwasilla.gov/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=28" -o wasilla_planning.ics || true
+        curl -sL "https://www.cityofwasilla.gov/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29" -o wasilla_parks_rec.ics || true
+        # Mat-Su School District (Finalsite calendar-manager)
+        curl -sL "https://www.matsuk12.us/fs/calendar-manager/events.ics?calendar_ids[]=134&calendar_ids[]=121&calendar_ids[]=31&calendar_ids[]=30&calendar_ids[]=117&calendar_ids[]=116&calendar_ids[]=74&calendar_ids[]=73&calendar_ids[]=70&calendar_ids[]=69&calendar_ids[]=115&calendar_ids[]=114&calendar_ids[]=29&calendar_ids[]=28&calendar_ids[]=113&calendar_ids[]=112&calendar_ids[]=111&calendar_ids[]=110&calendar_ids[]=54&calendar_ids[]=53&calendar_ids[]=109&calendar_ids[]=108&calendar_ids[]=68&calendar_ids[]=67&calendar_ids[]=107&calendar_ids[]=106&calendar_ids[]=105&calendar_ids[]=104&calendar_ids[]=103&calendar_ids[]=102&calendar_ids[]=72&calendar_ids[]=71&calendar_ids[]=101&calendar_ids[]=100&calendar_ids[]=26&calendar_ids[]=25&calendar_ids[]=66&calendar_ids[]=65&calendar_ids[]=98&calendar_ids[]=97&calendar_ids[]=64&calendar_ids[]=63&calendar_ids[]=120&calendar_ids[]=133&calendar_ids[]=124&calendar_ids[]=52&calendar_ids[]=51&calendar_ids[]=96&calendar_ids[]=95&calendar_ids[]=49&calendar_ids[]=48&calendar_ids[]=47&calendar_ids[]=46&calendar_ids[]=94&calendar_ids[]=93&calendar_ids[]=92&calendar_ids[]=91&calendar_ids[]=45&calendar_ids[]=44&calendar_ids[]=90&calendar_ids[]=89&calendar_ids[]=88&calendar_ids[]=87&calendar_ids[]=24&calendar_ids[]=23&calendar_ids[]=62&calendar_ids[]=61&calendar_ids[]=43&calendar_ids[]=42&calendar_ids[]=86&calendar_ids[]=85&calendar_ids[]=41&calendar_ids[]=40&calendar_ids[]=84&calendar_ids[]=83&calendar_ids[]=82&calendar_ids[]=81&calendar_ids[]=80&calendar_ids[]=79&calendar_ids[]=60&calendar_ids[]=59&calendar_ids[]=21&calendar_ids[]=20&calendar_ids[]=131&calendar_ids[]=58&calendar_ids[]=57&calendar_ids[]=39&calendar_ids[]=38&calendar_ids[]=78&calendar_ids[]=77&calendar_ids[]=37&calendar_ids[]=36&calendar_ids[]=76&calendar_ids[]=75&calendar_ids[]=56&calendar_ids[]=55&calendar_ids[]=35&calendar_ids[]=34&calendar_ids[]=33&calendar_ids[]=32" -o matsuk12.ics || true
+        # Community calendars
+        curl -sL "https://www.connectmatsu.org/events/list/?ical=1" -o connect_matsu.ics || true
+        curl -sL "https://visitpalmer.com/?post_type=tribe_events&ical=1&eventDisplay=list" -o visit_palmer.ics || true
+        # Outdoor / recreation
+        curl -sL "https://skeetawk.com/?post_type=tribe_events&ical=1&eventDisplay=list" -o skeetawk.ics || true
+        cd ../..
+        python scripts/combine_ics.py --input-dir cities/matsu --output cities/matsu/combined.ics --name "MatSu Community Calendar"
+
+    # ==========================================
     # Post-processing (all cities)
     # ==========================================
     - name: Convert ICS to JSON for Supabase
@@ -781,12 +811,12 @@ jobs:
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         
         # Save generated files before any git operations
-        for city in santarosa bloomington davis petaluma toronto raleighdurham montclair roanoke; do
+        for city in santarosa bloomington davis petaluma toronto raleighdurham montclair roanoke matsu; do
           if [ -f "cities/$city/events.json" ]; then
             cp "cities/$city/events.json" "/tmp/${city}_events.json"
           fi
         done
-        
+
         git add .
         git diff --quiet && git diff --staged --quiet || (
           git commit -m "Auto-generate calendar"
@@ -797,7 +827,7 @@ jobs:
             fi
             echo "Push failed, restoring generated files and retrying..."
             # Restore generated files that may have been clobbered by rebase
-            for city in santarosa bloomington davis petaluma toronto raleighdurham montclair roanoke; do
+            for city in santarosa bloomington davis petaluma toronto raleighdurham montclair roanoke matsu; do
               if [ -f "/tmp/${city}_events.json" ]; then
                 cp "/tmp/${city}_events.json" "cities/$city/events.json"
               fi

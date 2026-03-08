@@ -19,6 +19,7 @@ const EVENTS_URLS: Record<string, string> = {
   raleighdurham: `${RAW_BASE}/raleighdurham/events.json`,
   montclair: `${RAW_BASE}/montclair/events.json`,
   roanoke: `${RAW_BASE}/roanoke/events.json`,
+  matsu: `${RAW_BASE}/matsu/events.json`,
 };
 
 Deno.serve(async (req) => {
