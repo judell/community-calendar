@@ -249,6 +249,14 @@ python scrapers/montclair_film.py -o cities/montclair/montclair_film.ics
 ```
 Montclair Film uses WordPress with a groundplan-pro plugin. The listing page at `/all-event/` links to ~15 current films; each film page has JSON-LD with a `subEvent` array of individual screenings. This is a site-specific scraper but illustrates the **listing page + JSON-LD** pattern: discover URLs from a listing page, then extract structured data from each. 16 fetches yield 128 screenings.
 
+### Sweetwater Music Hall (`scrapers/sweetwater.py`) - RSS Feed + JSON-LD
+```bash
+python scrapers/sweetwater.py -o cities/santarosa/sweetwater.ics
+```
+Sweetwater's WordPress site has an RSS feed at `/events/feed/` with ~90 items. Each item links to an event page with clean JSON-LD (`startDate`, location, etc.). The RSS `pubDate` is the **publish date**, not the event date, so we must fetch individual pages for accurate dates.
+
+**Limiting strategy for listing-page + per-page scrapers:** When a listing page (RSS, sitemap, index page) has many items but most are past events, filter before fetching individual pages. Sweetwater's scraper skips RSS items with `pubDate` older than 60 days — this cut 90 fetches to ~49 while still capturing all future events. The same principle applies to any scraper that discovers URLs from a listing and then fetches each one: find a cheap signal (publish date, URL pattern, list position) to skip items that are almost certainly past, and only pay the per-page fetch cost for likely-future events.
+
 ### Bibliocommons (`scrapers/lib/bibliocommons.py`) - Library Event Platforms
 Reusable base for public-library systems on Bibliocommons gateway APIs.
 
@@ -354,6 +362,22 @@ City names like "Petaluma" or "Bloomington" are discriminatory enough to filter 
 - Community organizations
 - Recurring events (trivia nights, farmers markets)
 
+**Search for directories, not just venues.** Also search for curated venue lists and directories — these are force multipliers. A single directory can surface dozens of venues that individual topical searches miss.
+
+Search patterns:
+- `"live music venues" + {city/county}` — local music blogs, tourism boards
+- `"things to do" + {city/county}` — lifestyle aggregators
+- `"best {topic}" + {city/county}` — magazine/blog roundups
+
+Example directories that proved valuable for Sonoma County:
+- `northbaylivemusic.com/venues` — 350+ venues, comprehensive
+- `sonomamag.com` roundups — curated picks by category
+- `sonomacounty.com/activities` — tourism board
+
+Cross-reference directories against existing sources to find gaps. A second topical pass using directories found 26 music venues with regular programming that the initial pass missed — roadhouses, brewpubs, and neighborhood bars that don't use Eventbrite/Meetup/WordPress.
+
+**Discovery is iterative.** The first pass catches the obvious venues. Come back later and cross-reference against directories. Each pass finds things the previous one missed.
+
 ### Strategy 3: Meetup ICS Pattern
 
 Every Meetup group has a public ICS feed at:
@@ -366,9 +390,9 @@ No scraping needed - just discover groups and add their feeds. Test with:
 curl -s "https://www.meetup.com/{group-slug}/events/ical/" | head -30
 ```
 
-### Strategy 4: Artist-Sourced Data (Songkick, Bandsintown)
+### Strategy 4: Artist-Sourced Data (Songkick only — not Bandsintown)
 
-When a music venue's own site is hard to scrape (bot protection, heavy JS, ticketing widgets), **look for the venue on platforms where artists push their own tour dates**. Artists and their management maintain tour data on Songkick and Bandsintown, which aggregate it onto clean venue pages with structured JSON-LD.
+When a music venue's own site is hard to scrape (bot protection, heavy JS, ticketing widgets), **look for the venue on Songkick**, where artists push their own tour dates. Songkick aggregates these onto clean venue pages with structured JSON-LD.
 
 **Why this works:** The data flows artist → aggregator → venue page. You're getting artist-sourced tour data, not scraping the venue. A single page fetch returns `MusicEvent` JSON-LD for all upcoming shows.
 
@@ -384,6 +408,8 @@ curl -sL "https://www.songkick.com/venues/32209-wellmont-theater" | grep -c 'Mus
 ```
 
 **Reusable scraper:** `scrapers/songkick.py` handles any Songkick venue page (see [Reusable Scrapers](#reusable-scrapers) below).
+
+**Why NOT Bandsintown:** Bandsintown looks similar but is a walled garden. The website is behind Cloudflare (403 on curl). The REST API (`rest.bandsintown.com`) requires an app ID that needs written approval from Bandsintown — it's not self-serve like Ticketmaster. And even with API access, there is **no venue endpoint** — only `/artists/{name}/events`, so you can't query "all events at venue X." Songkick is the only viable platform in this category.
 
 **When to use this strategy:**
 - Venue site has bot protection (ShowDog, Cloudflare, etc.)
@@ -433,4 +459,6 @@ python scripts/validate_pipeline.py --cities santarosa --strict
 | **Cloudflare-protected sites** | Challenge pages block scrapers |
 | **Facebook Events** | No public API since 2018 |
 | **Granicus video** | RSS feeds at `{instance}.granicus.com/ViewPublisherRSS.php?view_id={N}` are **backward-looking only** (archived meeting videos). Not useful for upcoming events. Don't confuse with Legistar (also Granicus-owned), which has a forward-looking WebAPI. |
+| **Bandsintown** | Website behind Cloudflare (403 on curl). REST API requires written approval from Bandsintown. Even with API access, no venue endpoint — only `/artists/{name}/events`. Not viable. |
+| **SeeTickets / Eventim US** | SeeTickets US rebranded as Eventim in March 2025 (same platform). No public API — affiliate account required. Cannot filter by single venue. US platform runs legacy ASP.NET (`wafform.aspx`), unlike Eventim Europe which has an unauthenticated search API at `public-api.eventim.com`. Venues like Mystic Theatre and HopMonk use this platform for ticketing. |
 | **BoardDocs** | Used by some cities for agenda publishing (e.g., `go.boarddocs.com/nc/raleigh/`). No public calendar API; LlamaIndex has a reader but it's for document extraction, not event feeds. |

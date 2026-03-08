@@ -116,6 +116,21 @@ This is a conversation with your agent. The topics below are a starting point �
 | Civic & Social Good | volunteering, mutual aid, civic engagement |
 | Technology & Work | tech, digital skills, careers |
 
+**Search for directories, not just venues.** For each category, also search for *curated lists and directories* — these are force multipliers. A single directory can surface dozens of venues that individual topical searches miss. Search patterns:
+
+- `"live music venues" + {city/county}` — finds local music blogs, tourism board lists, magazine roundups
+- `"things to do" + {city/county}` — finds tourism and lifestyle aggregators
+- `"best {topic}" + {city/county}` — finds magazine/blog roundups
+
+Every region has equivalents of these. For Sonoma County, the key directories were:
+- **northbaylivemusic.com/venues** — 350+ North Bay music venues
+- **sonomamag.com** "live music" roundups — curated top picks
+- **sonomacounty.com/activities** — tourism board listings
+
+Cross-referencing directories against your existing sources reveals gaps. A second topical pass using directories found 26 music venues with regular programming that the initial pass missed — including roadhouses, brewpubs, and neighborhood bars that don't show up in platform searches because they don't use Eventbrite, Meetup, or WordPress calendars.
+
+**Repeat topical passes.** The first pass catches the obvious venues. Come back later and cross-reference against directories to find what you missed. Discovery is iterative, not one-shot.
+
 ### Phase 3: Custom scrapers (last resort for high-value sources)
 Only after exhausting phases 1 and 2, build scrapers for important sources that have no feeds. Prioritize by event volume and community relevance.
 

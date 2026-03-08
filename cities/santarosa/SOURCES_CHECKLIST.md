@@ -33,6 +33,24 @@
 | Creative Sonoma | `creative_sonoma.py` | County arts agency aggregator (55 events) |
 | Cinnabar Theater | `cinnabar.py` | Petaluma community theater (5 shows/season) |
 | Green Music Center | `green_music_center.py` | Sonoma State performing arts venue (10 events) |
+| Elephant in the Room (Songkick) | `songkick.py` | Healdsburg music pub — artist-sourced tour dates |
+| Elephant in the Room (Eventbrite) | `eventbrite.py` | Healdsburg music pub — ticketed events |
+| Rancho Nicasio | iCal feed | Nicasio roadhouse — WordPress Tribe Events (30 events) |
+| The Big Easy | iCal feed | Petaluma underground nightclub — WordPress Tribe Events (30 events) |
+| Sweetwater Music Hall | `songkick.py` | Mill Valley — flagship North Bay venue (8+ events) |
+| Mystic Theatre | `songkick.py` | Petaluma — major indie venue (8+ events) |
+| HopMonk Tavern Sebastopol | `songkick.py` | Sebastopol — beer garden + live music (8+ events) |
+| Phoenix Theater | `songkick.py` + `eventbrite.py` | Petaluma — Songkick (8+) + Eventbrite (13 events) |
+| The Will Call | `songkick.py` | Cotati — music venue (8+ events) |
+| Blue Note Napa | `songkick.py` | Napa — major jazz venue (8+ events) |
+| Twin Oaks Roadhouse | `songkick.py` | Penngrove — HopMonk-owned roadhouse (3 events) |
+| The Lost Church | `songkick.py` | Santa Rosa — intimate listening room (3 events) |
+| The Fern Bar | `songkick.py` | Sebastopol — nightly live music (3 events) |
+| Shady Oak Barrel House | `songkick.py` | Santa Rosa — brewery + live music (3 events) |
+| THE 222 | `songkick.py` | Healdsburg — music venue (3 events) |
+| Rio Nido Roadhouse | `songkick.py` | Rio Nido — live music (3 events) |
+| Redwood Cafe | `songkick.py` | Cotati — live music (2 events) |
+| HenHouse Brewing | `songkick.py` | Santa Rosa — brewery (1 event) |
 
 ### City of Santa Rosa Calendars
 Multiple ICS feeds from `srcity.org`:
