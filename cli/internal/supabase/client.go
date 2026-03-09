@@ -1,7 +1,6 @@
 package supabase
 
 import (
-	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -130,22 +129,8 @@ func (c *Client) UpdateAuthConfig(ref string, config map[string]interface{}) err
 }
 
 // DeployEdgeFunction deploys an edge function using the multipart deploy endpoint.
-// The source is packaged into a ZIP bundle with index.ts as the entrypoint.
+// The source file is sent directly as a multipart form field.
 func (c *Client) DeployEdgeFunction(ref, name, source string, verifyJWT bool) error {
-	// Create ZIP bundle in memory
-	var zipBuf bytes.Buffer
-	zw := zip.NewWriter(&zipBuf)
-	fw, err := zw.Create("index.ts")
-	if err != nil {
-		return fmt.Errorf("creating zip entry: %w", err)
-	}
-	if _, err := fw.Write([]byte(source)); err != nil {
-		return fmt.Errorf("writing zip entry: %w", err)
-	}
-	if err := zw.Close(); err != nil {
-		return fmt.Errorf("closing zip: %w", err)
-	}
-
 	// Build multipart form
 	var formBuf bytes.Buffer
 	mw := multipart.NewWriter(&formBuf)
@@ -162,12 +147,12 @@ func (c *Client) DeployEdgeFunction(ref, name, source string, verifyJWT bool) er
 		return fmt.Errorf("writing metadata field: %w", err)
 	}
 
-	// Add ZIP file
-	filePart, err := mw.CreateFormFile("file", name+".zip")
+	// Add source file directly (not zipped)
+	filePart, err := mw.CreateFormFile("file", "index.ts")
 	if err != nil {
 		return fmt.Errorf("creating file field: %w", err)
 	}
-	if _, err := filePart.Write(zipBuf.Bytes()); err != nil {
+	if _, err := filePart.Write([]byte(source)); err != nil {
 		return fmt.Errorf("writing file field: %w", err)
 	}
 	mw.Close()
