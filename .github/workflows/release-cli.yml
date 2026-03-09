@@ -71,4 +71,31 @@ jobs:
       with:
         tag_name: ${{ github.event.inputs.tag }}
         files: artifacts/cc-cli-*/*
-        generate_release_notes: true
+        generate_release_notes: false
+        body: |
+          ## cc-cli ${{ github.event.inputs.tag }}
+
+          CLI tool to set up a Community Calendar fork with its own Supabase backend.
+
+          ### Download
+
+          Pick the binary for your platform, then:
+
+          ```
+          chmod +x cc-cli-*
+          sudo mv cc-cli-* /usr/local/bin/cc-cli
+          ```
+
+          **macOS users:** Gatekeeper will block the unsigned binary. After downloading, run:
+          ```
+          xattr -d com.apple.quarantine cc-cli-*
+          ```
+
+          ### Usage
+
+          ```
+          cd your-fork
+          cc-cli init     # guided setup
+          cc-cli build    # trigger calendar build
+          cc-cli status   # check workflow runs
+          ```
