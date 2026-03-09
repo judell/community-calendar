@@ -7,6 +7,7 @@
   var.displayStartIndex="{0}"
   var.browseStartIndex="{0}"
   var.scrollRequest="{0}"
+  var.displayCount="{50}"
   global.userSettingsData="{null}"
   var.city="{window.cityFilter || null}">
 
@@ -67,6 +68,21 @@
     onDidChange="displayStartIndex = browseStartIndex;"
   />
 
+  <ChangeListener
+    listenTo="{categoryFilter}"
+    onDidChange="displayCount = 50"
+  />
+
+  <ChangeListener
+    listenTo="{viewMode}"
+    onDidChange="() => { if (viewMode === 'cards') { displayCount = 50; window.setupInfiniteScroll && window.setupInfiniteScroll(); } }"
+  />
+
+  <ChangeListener
+    listenTo="{events.loaded}"
+    onDidChange="() => { if (events.loaded) window.setupInfiniteScroll && window.setupInfiniteScroll(); }"
+  />
+
 
   <ChangeListener
     listenTo="{scrollRequest}"
@@ -115,7 +131,8 @@
   <variable name="hiddenSources" value="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []}" />
   <variable name="processedEvents" value="{window.filterHiddenSources(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), hiddenSources)}" />
   <variable name="pagedEvents" value="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, 50, categoryFilter)}" />
-  <variable name="masonryColumns" value="{window.getMasonryColumns(pagedEvents, 4)}" />
+  <variable name="cardEvents" value="{window.getCumulativeEvents(processedEvents, filterTerm, displayCount, categoryFilter)}" />
+  <variable name="masonryColumns" value="{window.getMasonryColumns(cardEvents, 4)}" />
 
   <!-- Dialogs -->
   <SignInDialog id="signInDialog" />
@@ -251,7 +268,7 @@
     />
     <Spinner when="{!events.loaded && (viewMode === 'all' || viewMode === 'cards')}" />
     <Button
-      when="{events.loaded && (viewMode === 'all' || viewMode === 'cards') && !filterTerm && window._moreHasPrev}"
+      when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasPrev}"
       label="Earlier"
       variant="outlined"
       width="100%"
@@ -285,8 +302,20 @@
         </Items>
       </VStack>
     </HStack>
+    <Bookmark
+      id="loadMoreSentinel"
+      when="{events.loaded && viewMode === 'cards' && !filterTerm && window._cardsHasMore}"
+    />
     <Button
-      when="{events.loaded && (viewMode === 'all' || viewMode === 'cards') && !filterTerm && window._moreHasMore}"
+      when="{events.loaded && viewMode === 'cards' && !filterTerm && window._cardsHasMore}"
+      label="Loading more..."
+      variant="ghost"
+      width="100%"
+      marginTop="$space-2"
+      onClick="displayCount = displayCount + 50"
+    />
+    <Button
+      when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasMore}"
       label="Later"
       variant="outlined"
       width="100%"
