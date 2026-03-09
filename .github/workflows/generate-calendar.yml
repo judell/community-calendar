@@ -140,38 +140,15 @@ jobs:
         done
       continue-on-error: true
 
-    - name: Download Santa Rosa live feeds and combine ICS
+    - name: Download Santa Rosa live feeds
       if: contains(steps.locations.outputs.list, 'santarosa')
       run: |
-        cd cities/santarosa
-        curl -sL "https://calendar.google.com/calendar/ical/eventsatarlenefransictheater@gmail.com/public/basic.ics" -o arlene_francis_theater.ics || true
-        curl -sL "https://lutherburbankcenter.org/events/?ical=1" -o luther_burbank_center.ics || true
-        curl -sL "https://schulzmuseum.org/events/?ical=1" -o schulz_museum.ics || true
-        curl -sL "https://www.sonoma.com/events/?ical=1" -o sonoma_com.ics || true
-        curl -sL "https://golocal.coop/?post_type=tribe_events&ical=1&eventDisplay=list" -o golocal_coop.ics || true
-        curl -sL "https://sonomacountyaa.org/events/?ical=1" -o sonoma_county_aa.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/dsasonomacounty%40gmail.com/public/basic.ics" -o sonoma_county_dsa.ics || true
-        # Meetup groups
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-go-wild-hikers/events/ical/" -o meetup_go_wild_hikers.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/shutupandwritewinecountry/events/ical/" -o meetup_shutupandwrite.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/scottish-country-dancing/events/ical/" -o meetup_scottish_dancing.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-womens-wine-club/events/ical/" -o meetup_womens_wine_club.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/santa-rosa-toastmasters-public-speaking-meetup-group/events/ical/" -o meetup_toastmasters.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/nataraja-school-of-traditional-yoga/events/ical/" -o meetup_yoga.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/santa-rosa-womens-creativity-collective/events/ical/" -o meetup_creativity.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-boomers/events/ical/" -o meetup_boomers.ics || true
-        curl -sL "https://tockify.com/api/feeds/ics/rileystreet.art.com" -o rileystreet_art.ics || true
-        # LiveWhale
-        curl -sL "https://calendar.santarosa.edu/live/ical/events" -o srjc.ics || true
-        # Additional Meetup groups
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/amorc-santa-rosa-pronaos/events/ical/" -o meetup_amorc.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sarogn/events/ical/" -o meetup_sarogn.ics || true
-        curl -sL "https://sonomacommunitycenter.org/events/?ical=1" -o sonomacommunitycenter.ics || true
-        curl -sL "https://www.srsymphony.org/events/?ical=1" -o srsymphony.ics || true
-        curl -sL "https://uptowntheatrenapa.com/events/?ical=1" -o uptowntheatrenapa.ics || true
-        curl -sL "https://ranchonicasio.com/?post_type=tribe_events&ical=1&eventDisplay=list" -o ranchonicasio.ics || true
-        curl -sL "https://bigeasypetaluma.com/?post_type=tribe_events&ical=1&eventDisplay=list" -o bigeasypetaluma.ics || true
-        cd ../..
+        echo "Downloading Santa Rosa live feeds from feeds.txt..."
+        python scripts/download_feeds.py santarosa
+
+    - name: Combine Santa Rosa ICS
+      if: contains(steps.locations.outputs.list, 'santarosa')
+      run: |
         python scripts/combine_ics.py --input-dir cities/santarosa --output cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
 
     # ==========================================
@@ -196,67 +173,15 @@ jobs:
         python scrapers/shopify_events.py --url "https://cicadacinema.com" --name "Cicada Cinema" --output cities/bloomington/cicada_cinema.ics || true
       continue-on-error: true
 
-    - name: Download Bloomington live feeds and combine ICS
+    - name: Download Bloomington live feeds
       if: contains(steps.locations.outputs.list, 'bloomington')
       run: |
-        cd cities/bloomington
-        curl -sL "https://bgcbloomington.org/events/list/?ical=1" -o bgc_bloomington.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/bloomington.in.gov_1b95au4d2ueudldosb024fimp0@group.calendar.google.com/public/basic.ics" -o bloomington_gov.ics || true
-        curl -sL "https://tockify.com/api/feeds/ics/bloomington.arts.calendar" -o bloomington_arts.ics || true
-        # IU LiveWhale feeds
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/56" -o iu_jacobs_music.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/378" -o iu_auditorium.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/234" -o iu_eskenazi_museum.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/81" -o iu_cinema.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/59" -o iu_la_casa.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/64" -o iu_maurer_law.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/343" -o iu_kelley_business.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/130" -o iu_arts_humanities.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/261" -o iu_libraries.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/218" -o iu_theatre_dance.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/314" -o iu_asian_culture.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/275" -o iu_first_nations.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/237" -o iu_lgbtq_culture.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/221" -o iu_black_film.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/235" -o iu_neal_marshall.ics || true
-        curl -sL "https://events.iu.edu/live/ical/events/group_id/135" -o iu_hamilton_lugar.ics || true
-        # B-Square Bulletin Google Calendars
-        curl -sL "https://calendar.google.com/calendar/ical/bloomington.in.gov_35a6qiaiperdn7b1r6v2ksjlig@group.calendar.google.com/public/basic.ics" -o bsquare_government.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/4dj0guhji982ca5k90ljeliul0@group.calendar.google.com/public/basic.ics" -o bsquare_misc_civic.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/2gd73d7gc46mstrdnr6k7v7b2o@group.calendar.google.com/public/basic.ics" -o bsquare_critical_mass.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/c_02o6fd3erhdmhe4oc5so149ir0@group.calendar.google.com/public/basic.ics" -o bsquare_bptc.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/d1087e97d4ace1c1ca2dd6336d417bea870ddac277be6d1711cbc0235aa85228%40group.calendar.google.com/public/basic.ics" -o btonline_events.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/j6botrehcce8vobqe6vpb4hnhk%40group.calendar.google.com/public/basic.ics" -o btonline_food.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/2db8c2cf65a3558e38c4caaea43cb56e722090235237a95f137b087306353e51%40group.calendar.google.com/public/basic.ics" -o btonline_shopping.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/bloomington.in.gov_1rosks8nont4ebaq41tfgg8v7g@group.calendar.google.com/public/basic.ics" -o parks_and_rec.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/knobstone-hiking-trail-association-of-indiana-meetup/events/ical/" -o meetup_knobstone_hiking_trail_association_of_indiana_meetup.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/Bloomington-Atheists-and-Rationally-Awesome-People/events/ical/" -o meetup_bloomington_atheists_and_rationally_awesome_people.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/bloomington.in.gov_0l6e93fe54psagva4dhojra2q0@group.calendar.google.com/public/basic.ics" -o farmers_market.ics || true
-        curl -sL "https://www.lotusfest.org/events/?ical=1" -o lotusfest.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/cuc66guoam1hhcqq2rnaniinl8%40group.calendar.google.com/public/basic.ics" -o calendar_cuc66guoam1hhcqq2rnaniinl8_40group_calend.ics || true
-        # IU LibCal feeds
-        curl -sL "https://iub.libcal.com/ical_subscribe.php?src=p&cid=5914" -o iu_libcal_screening_room.ics || true
-        curl -sL "https://iub.libcal.com/ical_subscribe.php?src=p&cid=1228" -o iu_libcal_scholars_commons.ics || true
-        # CampusLabs / beINvolved (student org events)
-        curl -sL "https://iub.campuslabs.com/engage/events.ics" -o iu_campuslabs.ics || true
-        # Community ICS feeds
-        curl -sL "https://wonderlab.org/events/?ical=1" -o wonderlab.ics || true
-        curl -sL "https://firstuc.org/events/?ical=1" -o first_united_church.ics || true
-        curl -sL "https://www.bloomingtoncommunityband.org/events/?ical=1" -o community_band.ics || true
-        curl -sL "https://browncountyplayhouse.org/events/?ical=1" -o brown_county_playhouse.ics || true
-        curl -sL "https://uplandbeer.com/events/?ical=1" -o upland_brewing.ics || true
-        # Google Calendar feeds
-        curl -sL "https://calendar.google.com/calendar/ical/bloomington.in.gov_r7b1mkrme1r8uhl3b5amhb50bc@group.calendar.google.com/public/basic.ics" -o city_boards_commissions.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/bloominglabs%40gmail.com/public/basic.ics" -o bloominglabs.ics || true
-        # Meetup feeds (Board Games: 403 private; Remote Workers: dormant — removed 2026-03)
+        echo "Downloading Bloomington live feeds from feeds.txt..."
+        python scripts/download_feeds.py bloomington
 
-        curl -sL "https://calendar.google.com/calendar/ical/bloomington.in.gov_c657mi332p5sjpq2lcht9imu60%40group.calendar.google.com/public/basic.ics" -o calendar_bloomington_in_gov_c657mi332p5sjpq2lcht9i.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/shweekend%40gmail.com/public/basic.ics" -o calendar_shweekend_40gmail_com_public.ics || true
-        curl -sL "https://writersguildbloomington.com/?plugin=all-in-one-event-calendar&controller=ai1ec_exporter_controller&action=export_events&no_html=true" -o writersguildbloomington.ics || true
-        curl -sL "https://bloomspinweave.org/?post_type=tribe_events&ical=1&eventDisplay=list" -o bloomspinweave.ics || true
-        curl -sL "https://www.hoosierflyfishers.com/events/list/?ical=1" -o hoosierflyfishers_list.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/r5lf3al9blontcsjnedbr2f2u0%40group.calendar.google.com/public/basic.ics" -o calendar_r5lf3al9blontcsjnedbr2f2u0_40group_calend.ics || true
-        cd ../..
+    - name: Combine Bloomington ICS
+      if: contains(steps.locations.outputs.list, 'bloomington')
+      run: |
         python scripts/combine_ics.py --input-dir cities/bloomington --output cities/bloomington/combined.ics --name "Bloomington Community Calendar"
 
     # ==========================================
@@ -314,184 +239,52 @@ jobs:
         python scrapers/cool_petaluma.py --output cities/petaluma/cool_petaluma.ics || true
       continue-on-error: true
 
-    - name: Download Petaluma live feeds and combine ICS
+    - name: Download Petaluma live feeds
       if: contains(steps.locations.outputs.list, 'petaluma')
       run: |
-        cd cities/petaluma
-        # Tockify feeds
-        curl -sL "https://tockify.com/api/feeds/ics/pdaevents" -o petaluma_downtown.ics || true
-        # Aqus Community (MembershipWorks)
-        curl -sL "https://api.membershipworks.com/v2/events?_op=ics&org=15499" -o aqus_community.ics || true
-        # Meetup groups
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mindfulnesspetaluma/events/ical/" -o meetup_mindful_petaluma.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/the-rebel-craft-collective/events/ical/" -o meetup_rebel_craft.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/meetup-group-bwkyqavs/events/ical/" -o meetup_candlelight_yoga.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-figure-drawing-meetup-group/events/ical/" -o meetup_figure_drawing.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-marin-brat-pack/events/ical/" -o meetup_brat_pack.ics || true
-        # Additional Meetup groups
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-salon/events/ical/" -o meetup_petaluma_salon.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-book-and-brew-club/events/ical/" -o meetup_book_brew.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/petaluma-active-20-30/events/ical/" -o meetup_active_20_30.ics || true
-        # Regional Meetup groups with Petaluma events
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-outdoors/events/ical/" -o meetup_sonoma_outdoors.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/north-bay-contra-dance/events/ical/" -o meetup_contra_dance.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-boomers/events/ical/" -o meetup_sonoma_boomers.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-go-wild-hikers/events/ical/" -o meetup_go_wild_hikers.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/meditate-with-a-monk-in-sonoma-county/events/ical/" -o meetup_meditate_monk.ics || true
-        # Hiking & Outdoors Meetup groups (discovered 2026-02-14)
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/northbayhiking/events/ical/" -o meetup_north_bay_adventure.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/north-bay-tails-and-trails/events/ical/" -o meetup_tails_trails.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/meetup-group-qXYJpXNx/events/ical/" -o meetup_north_bay_50plus.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/senior-walkabouters/events/ical/" -o meetup_senior_walkabouters.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sonoma-county-wanderers/events/ical/" -o meetup_sonoma_wanderers.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/meetup-group-ohazunav/events/ical/" -o meetup_mindfull_hikes.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/Four-Corners-Hiking-Beer/events/ical/" -o meetup_four_corners.ics || true
-        # The Big Easy (WordPress + The Events Calendar iCal feed)
-        curl -sL "https://bigeasypetaluma.com/events/?ical=1" -o bigeasy.ics || true
-        # Polly Klaas Community Theater (WordPress + The Events Calendar iCal feed)
-        curl -sL "https://pollyklaastheater.org/events/?ical=1" -o polly_klaas.ics || true
-        # Brooks Note Winery (public Google Calendar ICS feed)
-        curl -sL "https://calendar.google.com/calendar/ical/c_69dcaa6c13b06c1111a1706565ebb272c3d24290c650a9378bdbd37bff886879%40group.calendar.google.com/public/basic.ics" -o brooksnote.ics || true
-        # McNear's Saloon (WordPress + The Events Calendar iCal feed)
-        curl -sL "https://www.mcnears.com/event/?ical=1" -o mcnears.ics || true
-        # Griffo Distillery (Tockify ICS feed)
-        curl -sL "https://tockify.com/api/feeds/ics/tom.l" -o griffo.ics || true
-        # Petaluma Elks Lodge (public Google Calendar ICS feed)
-        curl -sL "https://calendar.google.com/calendar/ical/elks0901%40gmail.com/public/basic.ics" -o elks_lodge.ics || true
-        # Petaluma Garden Club (public Google Calendar ICS feed)
-        curl -sL "https://calendar.google.com/calendar/ical/petalumagardenclub%40gmail.com/public/basic.ics" -o garden_club.ics || true
-        # Petaluma Bounty (WordPress Events Manager iCal feed)
-        curl -sL "https://petalumabounty.org/events-calendar/?ical=1" -o petaluma_bounty.ics || true
-        cd ../..
+        echo "Downloading Petaluma live feeds from feeds.txt..."
+        python scripts/download_feeds.py petaluma
+
+    - name: Combine Petaluma ICS
+      if: contains(steps.locations.outputs.list, 'petaluma')
+      run: |
         python scripts/combine_ics.py --input-dir cities/petaluma --output cities/petaluma/combined.ics --name "Petaluma Community Calendar"
 
     # ==========================================
     # Toronto
     # ==========================================
-    - name: Download Toronto live feeds and combine ICS
-      if: contains(steps.locations.outputs.list, 'toronto')
-      run: |
-        cd cities/toronto
-        # Aggregators
-        curl -sL "https://nowtoronto.com/events/?ical=1" -o now_toronto.ics || true
-        curl -sL "https://tockify.com/api/feeds/ics/torevent" -o torevent.ics || true
-        # Music Venues
-        curl -sL "https://jazzbistro.ca/events/?ical=1" -o jazz_bistro.ics || true
-        curl -sL "https://grossmanstavern.com/events/?ical=1" -o grossmans_tavern.ics || true
-        # Venues & Institutions
-        curl -sL "https://torontounion.ca/toronto-union-events/?ical=1" -o union_station.ics || true
-        curl -sL "https://tockify.com/api/feeds/ics/distilleryevents" -o distillery_events.ics || true
-        curl -sL "https://www.gardinermuseum.on.ca/events/?ical=1" -o gardiner_museum.ics || true
-        curl -sL "https://www.torontobotanicalgarden.ca/events/?ical=1" -o toronto_botanical.ics || true
-        curl -sL "https://www.textilemuseum.ca/events/?ical=1" -o textile_museum.ics || true
-        curl -sL "https://batashoemuseum.ca/events/?ical=1" -o bata_shoe_museum.ics || true
-        curl -sL "https://www.buddiesinbadtimes.com/events/?ical=1" -o buddies_theatre.ics || true
-        curl -sL "https://www.factorytheatre.ca/events/?ical=1" -o factory_theatre.ics || true
-        curl -sL "https://highparknaturecentre.com/events/?ical=1" -o high_park_nature.ics || true
-        # Universities
-        curl -sL "https://events.yorku.ca/events/?mec-ical-feed=1" -o york_university.ics || true
-        python ../../scrapers/uoft_events.py -o uoft_events.ics || true
-        curl -sL "https://www.engineering.utoronto.ca/engineering-events/?ical=1" -o uoft_engineering.ics || true
-        curl -sL "https://philosophy.utoronto.ca/events/?ical=1" -o uoft_philosophy.ics || true
-        curl -sL "https://socialwork.utoronto.ca/events/?ical=1" -o uoft_socialwork.ics || true
-        curl -sL "https://indigenous.utoronto.ca/events/?ical=1&tribe-bar-date=2024-01-01" -o uoft_indigenous.ics || true
-        # Indigenous
-        python ../../scrapers/squarespace.py --url https://nativeearth.ca/shows/all-shows --name "Native Earth Performing Arts" -o native_earth.ics || true
-        # Crafts & Makers
-        curl -sL "https://repaircafetoronto.ca/feed/events/" -o repair_cafe_toronto.ics || true
-        curl -sL "https://torontoknittersguild.ca/events/?ical=1" -o knitters_guild.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.site3.ca/events/?ical=1" -o site3.ics || true
-        # Government & Public Affairs
-        python ../../scrapers/toronto_meetings.py -o toronto_meetings.ics || true
-        python ../../scrapers/toronto_festivals.py -o toronto_festivals.ics || true
-        # Volunteering / mutual aid
-        python ../../scrapers/volunteer_toronto.py -o volunteer_toronto.ics || true
-        # Kids / family
-        python ../../scrapers/toronto_public_library.py -o tpl_events.ics || true
-        # Outdoor & Nature
-        curl -sL -A "Mozilla/5.0" "https://ontarionature.org/events-calendar/?ical=1" -o ontario_nature.ics || true
-        # Community Organizations
-        curl -sL "https://www.culturelink.ca/events/?ical=1" -o culturelink.ics || true
-        curl -sL "https://scaddingcourt.org/events/?ical=1" -o scadding_court.ics || true
-        curl -sL "https://tockify.com/api/feeds/ics/st.lawrence.na" -o st_lawrence_na.ics || true
-        curl -sL "https://www.bloorwestvillagebia.com/events/?ical=1" -o bloor_west_village.ics || true
-        curl -sL "https://tockify.com/api/feeds/ics/jamaalmyers" -o jamaalmyers.ics || true
-        curl -sL "https://showuptoronto.ca/static/showupto.ics" -o showup_toronto.ics || true
-        # Meetup groups
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/sai-dham-canada-toronto-volunteer-group/events/ical/" -o meetup_sai_dham_volunteer.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/torontodadsgroup/events/ical/" -o meetup_toronto_dads.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/little-sunbeams-parents-tots-meetup/events/ical/" -o meetup_little_sunbeams.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mini-me-meetups/events/ical/" -o meetup_mini_me.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/torontobabel/events/ical/" -o meetup_torontobabel.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/torontotnt/events/ical/" -o meetup_try_new_things.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-arts-and-culture/events/ical/" -o meetup_arts_culture.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/these-boots-are-made-for-hiking/events/ical/" -o meetup_hiking_boots.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/torontobikemeetup/events/ical/" -o meetup_bike_toronto.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/boardgamestoronto/events/ical/" -o meetup_board_games_to.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/salsa-bachata-kizomba-gta/events/ical/" -o meetup_salsa_gta.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-photography-group/events/ical/" -o meetup_photography_to.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/a-book-club-downtown-abcd/events/ical/" -o meetup_book_club_abcd.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/comedy-improv-and-acting/events/ical/" -o meetup_improv_to.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/techto/events/ical/" -o meetup_techto.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/torontojs/events/ical/" -o meetup_torontojs.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/python-toronto/events/ical/" -o meetup_python_to.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/founders-running-club-toronto/events/ical/" -o meetup_founders_running.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/high-park-yoga/events/ical/" -o meetup_high_park_yoga.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mindful-movement-toronto/events/ical/" -o meetup_mindful_movement.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-wellness-yoga-art-therapy-meditation-chakra/events/ical/" -o meetup_toronto_wellness.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/torontoadventurers/events/ical/" -o meetup_sup_kayak.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/the-toronto-paddlers-meetup-group/events/ical/" -o meetup_toronto_paddlers.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/torontocanoetrippers/events/ical/" -o meetup_canoe_trippers.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/20s-30s-toronto-social-activities/events/ical/" -o meetup_20s30s_social.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/soulcity/events/ical/" -o meetup_soul_city.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/experiencetoronto/events/ical/" -o meetup_experience_to.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/hiking-network/events/ical/" -o meetup_hiking_network.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/gta-hiking-meetup/events/ical/" -o meetup_gta_hiking.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/Toronto-Bruce-Trail-Club/events/ical/" -o meetup_bruce_trail.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/wildernessunion/events/ical/" -o meetup_wilderness_union.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-heavy-boardgamers/events/ical/" -o meetup_heavy_boardgames.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-movies-and-social-group/events/ical/" -o meetup_movies_social.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/thescifibookclub/events/ical/" -o meetup_scifi_books.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/post-apocalyptic-book-club-toronto-chapter/events/ical/" -o meetup_postapoc_books.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-silent-book-club-meetup-group/events/ical/" -o meetup_silent_books.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/tjex-ca/events/ical/" -o meetup_jpn_eng_exchange.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto/events/ical/" -o meetup_lang_exchange_to.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/biggest-language-party-event-social-in-toronto/events/ical/" -o meetup_tile_language.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/meetup-group-fqsmjvcq/events/ical/" -o meetup_improv_friends.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-ai-machine-learning-data-science/events/ical/" -o meetup_ai_ml.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/microsoft-reactor-toronto/events/ical/" -o meetup_ms_reactor.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-tech-stack-exchange/events/ical/" -o meetup_tech_stack.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-enterprise-devops-user-group/events/ical/" -o meetup_devops.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-postgres/events/ical/" -o meetup_postgres_to.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/downtown-toronto-women-in-business-meetup/events/ical/" -o meetup_women_biz.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-20s-to-50s-singles-social/events/ical/" -o meetup_singles_social.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/toronto-3d-printing/events/ical/" -o meetup_3d_printing.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/midtown-arts-and-crafts-group/events/ical/" -o meetup_arts_crafts.ics || true
-        # History / Heritage
-        curl -sL -A "Mozilla/5.0" "https://ontariohistoricalsociety.ca/events/?ical=1" -o ontario_historical_society.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/the-history-of-parkdale/events/ical/" -o meetup_toronto_history_walks.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/Medieval-Renaissance-Toronto-Royal-Citie-of-Eoforwic-SCA/events/ical/" -o meetup_medieval_sca.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/qfg129sn6k25ah00ioakus0gds%40group.calendar.google.com/public/basic.ics" -o cita_local_events.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/4h7dspldpuviiv4o1slj9o5p5c%40group.calendar.google.com/public/basic.ics" -o cita_seminars.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/d7muv9fjli72io6q1a7hkdpf04%40group.calendar.google.com/public/basic.ics" -o cita_special_events.ics || true
-        curl -sL "https://indigenous.utoronto.ca/events/?ical=1&tribe-bar-date=2024-01-01" -o indigenous.ics || true
-        curl -sL "https://sunshinecentres.com/events/?ical=1" -o sunshinecentres.ics || true
-        curl -sL "https://golatindance.com/events/?ical=1" -o golatindance.ics || true
-        curl -sL "https://boulderzclimbing.com/events/?ical=1" -o boulderzclimbing.ics || true
-        curl -sL "https://www.torontodance.com/events/?ical=1" -o torontodance.ics || true
-        # Ticketmaster venues
-        python ../../scrapers/ticketmaster.py --venue-id KovZpZAFFE1A --name "Scotiabank Arena" --timezone America/Toronto -o scotiabank_arena.ics || true
-        python ../../scrapers/ticketmaster.py --venue-id KovZ917AJ4f --name "History" --timezone America/Toronto -o history.ics || true
-        python ../../scrapers/ticketmaster.py --venue-id KovZpa3yBe --name "Danforth Music Hall" --timezone America/Toronto -o danforth_music_hall.ics || true
-        python ../../scrapers/ticketmaster.py --venue-id KovZpZAdIFJA --name "Lee's Palace" --timezone America/Toronto -o lees_palace.ics || true
-        python ../../scrapers/ticketmaster.py --venue-id KovZpZAFnlnA --name "Massey Hall" --timezone America/Toronto -o massey_hall.ics || true
-        python ../../scrapers/ticketmaster.py --venue-id KovZpZAdt7JA --name "Horseshoe Tavern" --timezone America/Toronto -o horseshoe_tavern.ics || true
-        python ../../scrapers/ticketmaster.py --venue-id KovZpZAdIFtA --name "Queen Elizabeth Theatre" --timezone America/Toronto -o queen_elizabeth_theatre.ics || true
-        python ../../scrapers/ticketmaster.py --venue-id KovZpZAFl6JA --name "Roy Thomson Hall" --timezone America/Toronto -o roy_thomson_hall.ics || true
-        cd ../..
-        python scripts/combine_ics.py --input-dir cities/toronto --output cities/toronto/combined.ics --name "Toronto Community Calendar"
+    - name: Scrape Toronto sources
+      if: contains(steps.locations.outputs.list, 'toronto') && github.event.inputs.regenerate_only != 'true'
       env:
         TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+      run: |
+        echo "Scraping Toronto..."
+        python scrapers/uoft_events.py -o cities/toronto/uoft_events.ics || true
+        python scrapers/squarespace.py --url https://nativeearth.ca/shows/all-shows --name "Native Earth Performing Arts" -o cities/toronto/native_earth.ics || true
+        python scrapers/toronto_meetings.py -o cities/toronto/toronto_meetings.ics || true
+        python scrapers/toronto_festivals.py -o cities/toronto/toronto_festivals.ics || true
+        python scrapers/volunteer_toronto.py -o cities/toronto/volunteer_toronto.ics || true
+        python scrapers/toronto_public_library.py -o cities/toronto/tpl_events.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAFFE1A --name "Scotiabank Arena" --timezone America/Toronto -o cities/toronto/scotiabank_arena.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZ917AJ4f --name "History" --timezone America/Toronto -o cities/toronto/history.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpa3yBe --name "Danforth Music Hall" --timezone America/Toronto -o cities/toronto/danforth_music_hall.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAdIFJA --name "Lee's Palace" --timezone America/Toronto -o cities/toronto/lees_palace.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAFnlnA --name "Massey Hall" --timezone America/Toronto -o cities/toronto/massey_hall.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAdt7JA --name "Horseshoe Tavern" --timezone America/Toronto -o cities/toronto/horseshoe_tavern.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAdIFtA --name "Queen Elizabeth Theatre" --timezone America/Toronto -o cities/toronto/queen_elizabeth_theatre.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAFl6JA --name "Roy Thomson Hall" --timezone America/Toronto -o cities/toronto/roy_thomson_hall.ics || true
+      continue-on-error: true
+
+    - name: Download Toronto live feeds
+      if: contains(steps.locations.outputs.list, 'toronto')
+      run: |
+        echo "Downloading Toronto live feeds from feeds.txt..."
+        python scripts/download_feeds.py toronto
+
+    - name: Combine Toronto ICS
+      if: contains(steps.locations.outputs.list, 'toronto')
+      run: |
+        python scripts/combine_ics.py --input-dir cities/toronto --output cities/toronto/combined.ics --name "Toronto Community Calendar"
 
     # ==========================================
     # Raleigh-Durham
@@ -523,104 +316,15 @@ jobs:
         TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
       continue-on-error: true
 
-    - name: Download Raleigh-Durham live feeds and combine ICS
+    - name: Download Raleigh-Durham live feeds
       if: contains(steps.locations.outputs.list, 'raleighdurham')
       run: |
-        cd cities/raleighdurham
-        curl -sL "https://calendar.unc.edu/calendar/1.ics" -o unc_chapel_hill.ics || true
-        curl -sL "https://calendar.ncsu.edu/calendar/1.ics" -o ncsu.ics || true
-        curl -sL "https://calendar.duke.edu/events/index.ics" -o duke.ics || true
-        curl -sL "https://events.dncr.nc.gov/calendar/1.ics" -o nc_cultural_resources.ics || true
-        curl -sL "https://events.ackland.org/events/?ical=1" -o ackland_art.ics || true
-        curl -sL "https://ncbg.unc.edu/calendar/?ical=1" -o nc_botanical_garden.ics || true
-        curl -sL "https://nasher.duke.edu/events/?ical=1" -o nasher_museum.ics || true
-        curl -sL "https://triangleland.org/events/list/?ical=1" -o triangle_land.ics || true
-        curl -sL "https://durhamcentralpark.org/events/list/?ical=1" -o durham_central_park.ics || true
-        curl -sL "https://gardens.duke.edu/calendar/?ical=1" -o duke_gardens.ics || true
-        curl -sL "https://naturalsciences.org/calendar/events/?ical=1" -o nc_natural_sciences.ics || true
-        curl -sL "https://durhamcountylibrary.libcal.com/ical_subscribe.php?src=p&cid=14288" -o durham_library.ics || true
-        curl -sL "https://www.durhamnc.gov/common/modules/iCalendar/iCalendar.aspx?catID=29&feed=calendar" -o durham_gov.ics || true
-        curl -sL "https://www.durhamnc.gov/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar" -o durham_gov_community.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/tripython/events/ical/" -o meetup_tripython.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/PyData-Triangle/events/ical/" -o meetup_pydata_triangle.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/Research-Triangle-Analysts/events/ical/" -o meetup_research_triangle_analysts.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/triangleai/events/ical/" -o meetup_triangleai.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/triangle-devs/events/ical/" -o meetup_triangle_devs.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/all-things-open-rtp-meetup/events/ical/" -o meetup_all_things_open_rtp_meetup.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/triangle-techbreakfast/events/ical/" -o meetup_triangle_techbreakfast.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/futureofdata-triangle/events/ical/" -o meetup_futureofdata_triangle.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/Blacks-In-Tech-BIT-RDU-Durham-Raleigh-Meetup/events/ical/" -o meetup_blacks_in_tech_bit_rdu_durham_raleigh_meetup.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/downtown-techies-durham/events/ical/" -o meetup_downtown_techies_durham.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/raleigh-wordpress-meetup-group/events/ical/" -o meetup_raleigh_wordpress_meetup_group.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/adventures/events/ical/" -o meetup_adventures.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/durham-geeks/events/ical/" -o meetup_durham_geeks.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/durham-board-games-meetup-group/events/ical/" -o meetup_durham_board_games_meetup_group.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/CHAD2015/events/ical/" -o meetup_chad2015.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/discover-durham-together/events/ical/" -o meetup_discover_durham_together.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/ChickTech-RDU/events/ical/" -o meetup_chicktech_rdu.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/raleigh-triangle-activities/events/ical/" -o meetup_raleigh_triangle_activities.ics || true
-        curl -sL "https://www.transitionslifecare.org/events/?ical=1" -o transitions_lifecare.ics || true
-        curl -sL "https://ncwf.org/events/?ical=1" -o nc_wildlife_federation.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/triangle-code-for-america/events/ical/" -o meetup_code_for_america.ics || true
-        curl -sL "https://resilientdurhamnc.org/events/?ical=1" -o resilient_durham.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/swdrotary%40gmail.com/public/basic.ics" -o sw_durham_rotary.ics || true
-        # Google Calendar - Birding & Nature
-        curl -sL "https://calendar.google.com/calendar/ical/wakeaudubon%40signalinc.com/public/basic.ics" -o wake_audubon.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/newhopeaudubon%40gmail.com/public/basic.ics" -o new_hope_bird_alliance.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/enoriver.org_9u7o786v1jlk6heq5cp3k1gr1k%40group.calendar.google.com/public/basic.ics" -o eno_river.ics || true
-        # Downtown Durham Inc
-        curl -sL "https://downtowndurham.com/events/?ical=1" -o downtown_durham.ics || true
-        # Health & Well-Being
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/yogainnaturenc/events/ical/" -o meetup_yoga_in_nature.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/outdooryogapals/events/ical/" -o meetup_outdoor_flow_yogis.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/durhamplumvillagemeditationcircle/events/ical/" -o meetup_plum_village_meditation.ics || true
-        # Animals & Rescue
-        curl -sL "https://animalrescue.net/events/?ical=1" -o independent_animal_rescue.ics || true
-        curl -sL "https://www.hopeanimals.org/events/?ical=1" -o hope_animal_rescue.ics || true
-        curl -sL "https://www.apsofdurham.org/events/?ical=1" -o aps_durham.ics || true
-        curl -sL "https://secondchancenc.org/events/?ical=1" -o second_chance_pets.ics || true
-        # Play & Games
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/Triangle-Board-Games-and-Bars/events/ical/" -o meetup_triangle_board_games.ics || true
-        curl -sL "https://gatheringplacegames.com/events/?ical=1" -o gathering_place_games.ics || true
-        # Ideas & Learning
-        curl -sL "https://moreheadplanetarium.org/events/?ical=1" -o morehead_planetarium.ics || true
-        curl -sL "https://nchumanities.org/events/?ical=1" -o nc_humanities.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/dwg-writers/events/ical/" -o meetup_durham_writers.ics || true
-        curl -sL "https://americantobaccocampus.com/events/?ical=1" -o american_tobacco_campus.ics || true
-        # Technology & Work (additional Meetups)
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/raleigh-ai-machine-learning-and-computer-vision-meetup/events/ical/" -o meetup_raleigh_ai_ml_cv.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/rdu-artificial-intelligence-meetup-group/events/ical/" -o meetup_all_things_ai.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/data-science-nc/events/ical/" -o meetup_data_science_raleigh.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/trianglemodernweb/events/ical/" -o meetup_modern_web_triangle.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/triangle-devops/events/ical/" -o meetup_triangle_devops.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/splatspace/events/ical/" -o meetup_splatspace.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/cloud-security-alliance-triangle-chapter/events/ical/" -o meetup_csa_triangle.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/RTP-Career-Management/events/ical/" -o meetup_triangle_transitional.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/c_dl4511hfnoong3b3171k6smt74%40group.calendar.google.com/public/basic.ics" -o bike_durham.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/cb2ajgfjpk6bf9gifg6kg2hn1s%40group.calendar.google.com/public/basic.ics" -o triangle_cycling.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/c_j40ldpocctr71k99n0n2lr9c14%40group.calendar.google.com/public/basic.ics" -o gizmo_brew_works.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/lgbtqcenterofdurham.org_qb71v8n48d0a304sq7dtm89f84%40group.calendar.google.com/public/basic.ics" -o lgbtq_center_durham.ics || true
-        # Sports
-        curl -sL "https://ics.fixtur.es/v2/north-carolina-courage.ics" -o nc_courage.ics || true
-        # Arts & Culture
-        curl -sL "https://unitedarts.org/events/?ical=1" -o united_arts_wake.ics || true
-        curl -sL "https://calendar.duke.edu/events/index.ics?gf[]=Duke+Arts&future_days=90" -o duke_arts_bedework.ics || true
-        # Faith Communities
-        curl -sL "https://raleighmasjid.org/programs/?ical=1" -o islamic_assoc_raleigh.ics || true
-        # Parks & Recreation
-        curl -sL "https://www.dprplaymore.org/common/modules/iCalendar/iCalendar.aspx?catID=22&feed=calendar" -o durham_parks_rec.ics || true
-        # University Sub-Calendars
-        curl -sL "https://calendar.ncsu.edu/group/gregg_museum_of_art_design/calendar.ics" -o ncsu_gregg_museum.ics || true
-        curl -sL "https://calendar.ncsu.edu/group/african_american_cultural_center/calendar.ics" -o ncsu_aacc.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/e299fb559498ba8fef0f629f438f848f53d0b4bb946a74989b44f271146a12e5%40group.calendar.google.com/public/basic.ics" -o durham_resistance_1.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/41d85e1478a55e3b4adbf2e4951c5be9f6e49241ac55a65427c71d252849bf1c%40group.calendar.google.com/public/basic.ics" -o durham_resistance_2.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/f511c08827b961733168ea93761e472cd12de35e813c3a73af3e44c56b7fe53d%40group.calendar.google.com/public/basic.ics" -o durham_resistance_3.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/b32e7018b18e1a8650f0d178e5d8314fd6664c368233eead570b44e368f882c9%40group.calendar.google.com/public/basic.ics" -o durham_resistance_4.ics || true
-        curl -sL "https://gopack.com/api/v2/Calendar/subscribe?type=ics" -o ncsu_athletics.ics || true
-        curl -sL "https://goheels.com/api/v2/Calendar/subscribe?type=ics" -o unc_athletics.ics || true
-        curl -sL "https://goduke.com/api/v2/Calendar/subscribe?type=ics" -o duke_athletics.ics || true
-        curl -sL "https://eb-to-ical.daylightpirates.org/eventbrite-organizer-ical?organizer=17882467120" -o quail_ridge_books.ics || true
-        cd ../..
+        echo "Downloading Raleigh-Durham live feeds from feeds.txt..."
+        python scripts/download_feeds.py raleighdurham
+
+    - name: Combine Raleigh-Durham ICS
+      if: contains(steps.locations.outputs.list, 'raleighdurham')
+      run: |
         python scripts/combine_ics.py --input-dir cities/raleighdurham --output cities/raleighdurham/combined.ics --name "Raleigh-Durham Community Calendar"
 
     # ==========================================
@@ -646,38 +350,15 @@ jobs:
         python scrapers/raptor_trust.py --output cities/montclair/raptor_trust.ics || true
       continue-on-error: true
 
-    - name: Download Montclair live feeds and combine ICS
+    - name: Download Montclair live feeds
       if: contains(steps.locations.outputs.list, 'montclair')
       run: |
-        cd cities/montclair
-        curl -sL "https://montclairlocal.news/events/?ical=1" -o montclairlocal.ics || true
-        curl -sL "https://montclairfoundation.org/calendar-of-events/?ical=1" -o montclairfoundation_calendar_of_events.ics || true
-        curl -sL "https://whartonarts.org/events/?ical=1" -o whartonarts.ics || true
-        curl -sL "https://www.peakperfs.org/events/?ical=1" -o peakperfs.ics || true
-        curl -sL "https://bccls.libcal.com/ical_subscribe.php?src=p&cid=10306" -o bccls_ical_subscribe_php.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/exploring-montclair/events/ical/" -o meetup_exploring_montclair.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/somocon/events/ical/" -o meetup_somocon.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/montclair-gamenights-and-social-networking-meetup-group/events/ical/" -o meetup_montclair_gamenights_and_social_networking_meetup_group.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/nj-code-coffee/events/ical/" -o meetup_nj_code_coffee.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/metrotrails/events/ical/" -o meetup_metrotrails.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/west-african-drumming-nj/events/ical/" -o meetup_west_african_drumming_nj.ics || true
-        curl -sL "https://montclair.campuslabs.com/engage/events.ics" -o montclair_engage_events_ics.ics || true
-        curl -sL "https://neearth.org/?post_type=tribe_events&ical=1&eventDisplay=list" -o neearth.ics || true
-        curl -sL "https://mhainspire.org/events/?ical=1" -o mhainspire.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/lets-walkprogram/events/ical/" -o meetup_lets_walkprogram.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/themindfulstream/events/ical/" -o meetup_themindfulstream.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/EverWalk-NJ/events/ical/" -o meetup_everwalk_nj.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/league-of-women-voters-of-the-montclair-area/events/ical/" -o meetup_lwv_montclair.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/bicycle-touring-club-of-north-jersey/events/ical/" -o meetup_btcnj.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/north-jersey-bowling-soccer-volleyball/events/ical/" -o meetup_nj_bvt_sports.ics || true
-        curl -sL "https://montclairathletics.com/calendar.ashx/calendar.ics" -o msu_athletics.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/id8bbkkkfmscdavi2jilkb2muo%40group.calendar.google.com/public/basic.ics" -o fcc_montclair.ics || true
-        curl -sL "https://calendar.google.com/calendar/ical/uumontclair.org_9kptanknnvqcom49ks44nnaaak%40group.calendar.google.com/public/basic.ics" -o uu_montclair.ics || true
-        curl -sL "https://ics.teamup.com/feed/kstx8swyw669kakgqa/6478083.ics" -o shomrei_emunah.ics || true
-        curl -sL "https://www.unioncong.org/events/list/?ical=1" -o unioncong.ics || true
-        curl -sL "https://www.nertamid.org/events/?ical=1" -o nertamid.ics || true
-        curl -sL "https://njaudubon.org/events/?ical=1" -o njaudubon.ics || true
-        cd ../..
+        echo "Downloading Montclair live feeds from feeds.txt..."
+        python scripts/download_feeds.py montclair
+
+    - name: Combine Montclair ICS
+      if: contains(steps.locations.outputs.list, 'montclair')
+      run: |
         python scripts/combine_ics.py --input-dir cities/montclair --output cities/montclair/combined.ics --name "Montclair Community Calendar"
 
     # ==========================================
