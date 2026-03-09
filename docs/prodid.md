@@ -7,9 +7,9 @@ used across all city feeds, identified by their PRODID header.
 
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
-| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 132 |
-| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 80 |
-| **Google Calendar** | Public Google Calendar ICS export. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 44 |
+| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 125 |
+| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 76 |
+| **Google Calendar** | Public Google Calendar ICS export. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 43 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, montclair, raleighdurham, santarosa | 37 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 21 |
 | **MaxPreps** | High school sports schedules. | montclair, petaluma, santarosa | 10 |
@@ -24,13 +24,13 @@ used across all city feeds, identified by their PRODID header.
 
 ## Detail
 
-### Meetup (132 feeds)
+### Meetup (125 feeds)
 
 ICS export from meetup.com groups.
 
 **bloomington** (2): meetup_bloomington_atheists_and_rationally_awesome_people, meetup_knobstone_hiking_trail_association_of_indiana_meetup
 
-**davis** (14): meetup_art_in_action, meetup_board_games, meetup_intercultural, meetup_mindful, meetup_mosaics, meetup_pence_art, meetup_winters_write, www_meetup_com_art_in_action_events_ical_, www_meetup_com_intercultural_mosaics_events_ical_, www_meetup_com_mindful_embodied_spirituality_events_ical_, www_meetup_com_mosaics_events_ical_, www_meetup_com_pence_adult_art_programs_events_ical_, www_meetup_com_winters_shut_up_and_write_meetup_group_events_ical_, www_meetup_com_yolo_county_board_game_gathering_events_ical_
+**davis** (7): meetup_art_in_action, meetup_intercultural_mosaics, meetup_mindful_embodied_spirituality, meetup_mosaics, meetup_pence_adult_art_programs, meetup_winters_shut_up_and_write_meetup_group, meetup_yolo_county_board_game_gathering
 
 **montclair** (12): meetup_btcnj, meetup_everwalk_nj, meetup_exploring_montclair, meetup_lets_walkprogram, meetup_lwv_montclair, meetup_metrotrails, meetup_montclair_gamenights_and_social_networking_meetup_group, meetup_nj_bvt_sports, meetup_nj_code_coffee, meetup_somocon, meetup_themindfulstream, meetup_west_african_drumming_nj
 
@@ -42,13 +42,13 @@ ICS export from meetup.com groups.
 
 **toronto** (50): meetup_20s30s_social, meetup_ai_ml, meetup_arts_crafts, meetup_arts_culture, meetup_bike_toronto, meetup_board_games_to, meetup_book_club_abcd, meetup_bruce_trail, meetup_canoe_trippers, meetup_devops, meetup_experience_to, meetup_founders_running, meetup_gta_hiking, meetup_heavy_boardgames, meetup_high_park_yoga, meetup_hiking_boots, meetup_hiking_network, meetup_improv_friends, meetup_improv_to, meetup_jpn_eng_exchange, meetup_lang_exchange_to, meetup_little_sunbeams, meetup_medieval_sca, meetup_mindful_movement, meetup_mini_me, meetup_movies_social, meetup_ms_reactor, meetup_photography_to, meetup_postapoc_books, meetup_postgres_to, meetup_python_to, meetup_sai_dham_volunteer, meetup_salsa_gta, meetup_scifi_books, meetup_silent_books, meetup_singles_social, meetup_soul_city, meetup_sup_kayak, meetup_tech_stack, meetup_techto, meetup_tile_language, meetup_toronto_dads, meetup_toronto_history_walks, meetup_toronto_paddlers, meetup_toronto_wellness, meetup_torontobabel, meetup_torontojs, meetup_try_new_things, meetup_wilderness_union, meetup_women_biz
 
-### The Events Calendar (WordPress) (80 feeds)
+### The Events Calendar (WordPress) (76 feeds)
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **bloomington** (7): bgc_bloomington, bloomspinweave, brown_county_playhouse, community_band, first_united_church, hoosierflyfishers_list, lotusfest
 
-**davis** (8): hatefreetogether, hatefreetogether_org_events__ical_1, thedirt, thedirt_online_events__ical_1, visitdavis, visitdavis_org_events__ical_1, visityolo, visityolo_com_event__ical_1
+**davis** (4): hatefreetogether, thedirt, visitdavis, visityolo_event
 
 **montclair** (9): mhainspire, montclairfoundation_calendar_of_events, montclairlocal, neearth, nertamid, njaudubon, peakperfs, unioncong, whartonarts
 
@@ -60,13 +60,13 @@ WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **toronto** (25): bata_shoe_museum, bloor_west_village, boulderzclimbing, buddies_theatre, culturelink, factory_theatre, gardiner_museum, golatindance, grossmans_tavern, high_park_nature, indigenous, jazz_bistro, knitters_guild, now_toronto, ontario_historical_society, ontario_nature, scadding_court, sunshinecentres, textile_museum, toronto_botanical, union_station, uoft_engineering, uoft_indigenous, uoft_philosophy, uoft_socialwork
 
-### Google Calendar (44 feeds)
+### Google Calendar (43 feeds)
 
 Public Google Calendar ICS export.
 
 **bloomington** (16): bloominglabs, bloomington_gov, bsquare_bptc, bsquare_critical_mass, bsquare_government, bsquare_misc_civic, btonline_events, btonline_food, btonline_shopping, calendar_bloomington_in_gov_c657mi332p5sjpq2lcht9i, calendar_cuc66guoam1hhcqq2rnaniinl8_40group_calend, calendar_r5lf3al9blontcsjnedbr2f2u0_40group_calend, calendar_shweekend_40gmail_com_public, city_boards_commissions, farmers_market, parks_and_rec
 
-**davis** (2): calendar_google_com_calendar_ical_davisbikeclubwww_40gmail_com_public_basic_ics, davis_bike_club
+**davis** (1): gcal_davisbikeclubwww
 
 **montclair** (2): fcc_montclair, uu_montclair
 
