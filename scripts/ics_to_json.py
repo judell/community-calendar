@@ -138,7 +138,7 @@ def extract_field(event_content, field_name):
 
 
 def extract_image_url(event_content):
-    """Extract first image URL from ATTACH or X-TKF-FEATURED-IMAGE fields."""
+    """Extract first image URL from ATTACH or vendor image fields."""
     # Match ATTACH with image FMTTYPE
     pattern = r'^ATTACH;[^:]*FMTTYPE=image/[^:]*:(.+)'
     match = re.search(pattern, event_content, re.IGNORECASE | re.MULTILINE)
@@ -149,6 +149,36 @@ def extract_image_url(event_content):
     match = re.search(pattern, event_content, re.IGNORECASE | re.MULTILINE)
     if match:
         return match.group(1).strip()
+    # Match LiveWhale image (IU events) - unescape \, and request a larger size
+    pattern = r'^X-LIVEWHALE-IMAGE:(.+)'
+    match = re.search(pattern, event_content, re.IGNORECASE | re.MULTILINE)
+    if match:
+        url = match.group(1).strip().replace('\\,', ',')
+        # Replace thumbnail dimensions with a larger display size
+        url = re.sub(r'/width/\d+/height/\d+/', '/width/400/height/300/', url)
+        return url
+    # Match RFC 7986 IMAGE field (e.g. Skedda/Aqus events)
+    # Prefer FULLSIZE, accept any display type
+    for display in ('fullsize', 'badge', 'thumbnail', ''):
+        pat = rf'^IMAGE;[^:]*DISPLAY={display}[^:]*:(https?://.+)' if display else r'^IMAGE;[^:]*:(https?://.+)'
+        match = re.search(pat, event_content, re.IGNORECASE | re.MULTILINE)
+        if match:
+            return match.group(1).strip()
+    # Match WordPress X-WP-IMAGES-URL (format: size\;url\;w\;h\,...,size\;url\;...)
+    pattern = r'^X-WP-IMAGES-URL:(.+)'
+    match = re.search(pattern, event_content, re.IGNORECASE | re.MULTILINE)
+    if match:
+        raw = match.group(1).strip()
+        # Parse comma-separated entries: size\;url\;w\;h
+        for size in ('large', 'full', 'medium'):
+            m = re.search(rf'(?:^|,){size}\\;(https?://[^\\,]+)', raw, re.IGNORECASE)
+            if m:
+                return m.group(1)
+    # Match Bedework image (Duke) - relative URL, base is calendar.duke.edu
+    pattern = r'^X-BEDEWORK-IMAGE:(/public/Images/.+)'
+    match = re.search(pattern, event_content, re.IGNORECASE | re.MULTILINE)
+    if match:
+        return 'https://calendar.duke.edu' + match.group(1).strip()
     return None
 
 
