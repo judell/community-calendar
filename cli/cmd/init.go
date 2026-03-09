@@ -454,6 +454,16 @@ func Init() error {
 		}
 		fmt.Println(" ✓")
 
+		// Remove non-essential workflows (keep only generate-calendar.yml)
+		fmt.Printf("Removing non-essential workflows...")
+		if removed, err := removeNonEssentialWorkflows(repoRoot); err != nil {
+			return fmt.Errorf("\n  %w", err)
+		} else if len(removed) > 0 {
+			fmt.Printf(" ✓ (removed %s)\n", strings.Join(removed, ", "))
+		} else {
+			fmt.Println(" ✓")
+		}
+
 		// Ensure download_feeds.py exists (fork may predate it)
 		feedsScript := filepath.Join(repoRoot, "scripts", "download_feeds.py")
 		if _, err := os.Stat(feedsScript); os.IsNotExist(err) {
@@ -504,17 +514,6 @@ func Init() error {
 			return fmt.Errorf("\n  %w", err)
 		}
 		fmt.Println(" ✓")
-
-		fmt.Printf("Disabling non-essential workflows...")
-		disabled, err := github.DisableNonEssentialWorkflows(repo)
-		if err != nil {
-			// Non-fatal — workflows may not be enabled yet on fork
-			fmt.Println(" (skipped)")
-		} else if len(disabled) > 0 {
-			fmt.Printf(" ✓ (%s)\n", strings.Join(disabled, ", "))
-		} else {
-			fmt.Println(" ✓ (none to disable)")
-		}
 
 		s.Step = 10
 		if err := state.Save(repoRoot, s); err != nil {
@@ -727,6 +726,27 @@ func stripScrapeBlocks(repoRoot string) error {
 	}
 
 	return os.WriteFile(workflowPath, []byte(strings.Join(result, "\n")), 0644)
+}
+
+// removeNonEssentialWorkflows deletes all workflow files except generate-calendar.yml.
+func removeNonEssentialWorkflows(repoRoot string) ([]string, error) {
+	workflowDir := filepath.Join(repoRoot, ".github", "workflows")
+	entries, err := os.ReadDir(workflowDir)
+	if err != nil {
+		return nil, err
+	}
+	keep := "generate-calendar.yml"
+	var removed []string
+	for _, e := range entries {
+		if e.IsDir() || e.Name() == keep {
+			continue
+		}
+		if err := os.Remove(filepath.Join(workflowDir, e.Name())); err != nil {
+			return removed, fmt.Errorf("removing %s: %w", e.Name(), err)
+		}
+		removed = append(removed, e.Name())
+	}
+	return removed, nil
 }
 
 func findRepoRoot() (string, error) {
