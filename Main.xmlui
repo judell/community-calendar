@@ -127,17 +127,23 @@
     <IFrame src="xs-diff.html" width="100%" height="80vh"/>
   </ModalDialog>
 
+  <!-- City list from Supabase (distinct cities with events) -->
+  <DataSource
+    id="cityList"
+    url="{appGlobals.supabaseUrl + '/rest/v1/distinct_cities?select=city'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey
+    }}"
+  />
+
   <!-- City picker (shown when no city selected) -->
   <VStack when="{!city}" horizontalAlignment="center" width="100%" padding="$space-8">
     <H1>Community Calendar</H1>
-    <VStack gap="$space-2" maxWidth="300px" width="100%">
-      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'santarosa'; window.cityName = 'Santa Rosa'; document.title = 'Santa Rosa Community Calendar'; city = 'santarosa'">Santa Rosa</Button>
-      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'petaluma'; window.cityName = 'Petaluma'; document.title = 'Petaluma Community Calendar'; city = 'petaluma'">Petaluma</Button>
-      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'davis'; window.cityName = 'Davis'; document.title = 'Davis Community Calendar'; city = 'davis'">Davis</Button>
-      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'bloomington'; window.cityName = 'Bloomington'; document.title = 'Bloomington Community Calendar'; city = 'bloomington'">Bloomington</Button>
-      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'toronto'; window.cityName = 'Toronto'; document.title = 'Toronto Community Calendar'; city = 'toronto'">Toronto</Button>
-      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'raleighdurham'; window.cityName = 'Raleigh-Durham'; document.title = 'Raleigh-Durham Community Calendar'; city = 'raleighdurham'">Raleigh-Durham</Button>
-      <Button variant="outlined" width="100%" onClick="window.cityFilter = 'montclair'; window.cityName = 'Montclair'; document.title = 'Montclair Community Calendar'; city = 'montclair'">Montclair</Button>
+    <Spinner when="{!cityList.loaded}" />
+    <VStack when="{cityList.loaded}" gap="$space-2" maxWidth="300px" width="100%">
+      <Items data="{cityList.value}">
+        <Button variant="outlined" width="100%" onClick="window.selectCity($item.city); city = $item.city">{window.toDisplayName($item.city)}</Button>
+      </Items>
     </VStack>
   </VStack>
 
@@ -149,7 +155,7 @@
     <Bookmark id="topAnchor">
       <H1>
         <HStack width="100%" verticalAlignment="center">
-          <Text overflowMode="ellipsis" maxLines="1" width="*">{window.cityName}</Text>
+          <Text overflowMode="ellipsis" maxLines="1" width="*">{window.toDisplayName(city)}</Text>
           <HStack gap="$space-1" verticalAlignment="center">
             <Icon name="l-rss" tooltip="Sources" width="20px" height="20px" color="$color-surface-500" onClick="sourcesDialog.open()" />
             <Icon

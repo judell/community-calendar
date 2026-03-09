@@ -37,14 +37,30 @@
       // City from URL param, e.g. ?city=davis
       const params = new URLSearchParams(window.location.search);
       const cityParam = params.get('city');
-      const cityNames = {
-        santarosa: 'Santa Rosa', davis: 'Davis', bloomington: 'Bloomington', petaluma: 'Petaluma', toronto: 'Toronto', raleighdurham: 'Raleigh-Durham', montclair: 'Montclair'
+      // Title-case a slug: "santarosa" -> "Santa Rosa", "raleighdurham" -> "Raleighdurham"
+      // Override specific names that need special casing
+      const cityNameOverrides = {
+        santarosa: 'Santa Rosa', raleighdurham: 'Raleigh-Durham'
+      };
+      window.toDisplayName = function(slug) {
+        if (!slug) return '';
+        if (cityNameOverrides[slug]) return cityNameOverrides[slug];
+        return slug.charAt(0).toUpperCase() + slug.slice(1);
       };
       window.cityFilter = cityParam || null;
-      window.cityName = cityNames[cityParam] || cityParam;
+      window.cityName = window.toDisplayName(cityParam);
       if (cityParam) {
-        document.title = (cityNames[cityParam] || cityParam) + ' Community Calendar';
+        document.title = window.cityName + ' Community Calendar';
       }
+      // Select a city: update URL, globals, and XMLUI var
+      window.selectCity = function(slug) {
+        const url = new URL(window.location);
+        url.searchParams.set('city', slug);
+        window.history.pushState({}, '', url);
+        window.cityFilter = slug;
+        window.cityName = window.toDisplayName(slug);
+        document.title = window.cityName + ' Community Calendar';
+      };
 
       // Supabase auth setup (credentials loaded from config.json by XMLUI)
       // We need to hardcode these here since this runs before XMLUI loads config
