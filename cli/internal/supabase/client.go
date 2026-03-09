@@ -1,12 +1,13 @@
 package supabase
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -128,25 +129,69 @@ func (c *Client) UpdateAuthConfig(ref string, config map[string]interface{}) err
 	return c.patch(fmt.Sprintf("/v1/projects/%s/config/auth", ref), config)
 }
 
-// DeployEdgeFunction creates or updates an edge function.
-// Uses POST to create, PATCH to update if it already exists.
-func (c *Client) DeployEdgeFunction(ref, name, body string, verifyJWT bool) error {
-	payload := map[string]interface{}{
-		"slug":       name,
-		"name":       name,
-		"verify_jwt": verifyJWT,
-		"body":       body,
+// DeployEdgeFunction deploys an edge function using the multipart deploy endpoint.
+// The source is packaged into a ZIP bundle with index.ts as the entrypoint.
+func (c *Client) DeployEdgeFunction(ref, name, source string, verifyJWT bool) error {
+	// Create ZIP bundle in memory
+	var zipBuf bytes.Buffer
+	zw := zip.NewWriter(&zipBuf)
+	fw, err := zw.Create("index.ts")
+	if err != nil {
+		return fmt.Errorf("creating zip entry: %w", err)
 	}
-	var result interface{}
-	err := c.post(fmt.Sprintf("/v1/projects/%s/functions", ref), payload, &result)
-	if err != nil && strings.Contains(err.Error(), "409") {
-		// Already exists — update via PATCH
-		return c.patch(fmt.Sprintf("/v1/projects/%s/functions/%s", ref, name), map[string]interface{}{
-			"verify_jwt": verifyJWT,
-			"body":       body,
-		})
+	if _, err := fw.Write([]byte(source)); err != nil {
+		return fmt.Errorf("writing zip entry: %w", err)
 	}
-	return err
+	if err := zw.Close(); err != nil {
+		return fmt.Errorf("closing zip: %w", err)
+	}
+
+	// Build multipart form
+	var formBuf bytes.Buffer
+	mw := multipart.NewWriter(&formBuf)
+
+	// Add metadata
+	metadata := map[string]interface{}{
+		"name":            name,
+		"slug":            name,
+		"entrypoint_path": "index.ts",
+		"verify_jwt":      verifyJWT,
+	}
+	metaJSON, _ := json.Marshal(metadata)
+	if err := mw.WriteField("metadata", string(metaJSON)); err != nil {
+		return fmt.Errorf("writing metadata field: %w", err)
+	}
+
+	// Add ZIP file
+	filePart, err := mw.CreateFormFile("file", name+".zip")
+	if err != nil {
+		return fmt.Errorf("creating file field: %w", err)
+	}
+	if _, err := filePart.Write(zipBuf.Bytes()); err != nil {
+		return fmt.Errorf("writing file field: %w", err)
+	}
+	mw.Close()
+
+	// POST to deploy endpoint
+	url := fmt.Sprintf("%s/v1/projects/%s/functions/deploy", apiBase, ref)
+	req, err := http.NewRequest("POST", url, &formBuf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	respBody, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode >= 300 {
+		return fmt.Errorf("deploy %s failed (HTTP %d): %s", name, resp.StatusCode, string(respBody))
+	}
+	return nil
 }
 
 // SetSecrets sets environment secrets for a project's edge functions.
