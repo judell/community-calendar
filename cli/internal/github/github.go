@@ -53,6 +53,23 @@ func GetCurrentRepo() (string, error) {
 	return "", fmt.Errorf("could not parse GitHub repo from origin URL: %s", url)
 }
 
+// ForkAndClone forks the upstream repo and clones the fork into the current directory.
+// Returns the path to the cloned directory.
+func ForkAndClone(upstream string) (string, error) {
+	_, err := RunGH("repo", "fork", upstream, "--clone")
+	if err != nil {
+		return "", err
+	}
+	// Extract repo name from "owner/repo"
+	parts := strings.Split(upstream, "/")
+	return parts[len(parts)-1], nil
+}
+
+// GetCurrentUser returns the authenticated GitHub username.
+func GetCurrentUser() (string, error) {
+	return RunGH("api", "user", "--jq", ".login")
+}
+
 // SetDefaultRepo sets the gh default repo for this directory.
 func SetDefaultRepo(repo string) error {
 	_, err := RunGH("repo", "set-default", repo)

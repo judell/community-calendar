@@ -18,7 +18,10 @@ import (
 	"github.com/judell/community-calendar/cli/internal/supabase"
 )
 
+const upstreamRepo = "judell/community-calendar"
+
 // Steps:
+//  0 = fork+clone (if not already in a repo)
 //  1 = gathered token + org
 //  2 = gathered city + user + API keys
 //  3 = project created + ready + keys retrieved
@@ -41,9 +44,23 @@ func Init() error {
 		return err
 	}
 
+	// If not in a community-calendar repo, fork and clone
 	repoRoot, err := findRepoRoot()
 	if err != nil {
-		return fmt.Errorf("not in a community-calendar repo: %w", err)
+		fmt.Println("Not in a community-calendar repo. Forking and cloning...")
+		dirName, err := github.ForkAndClone(upstreamRepo)
+		if err != nil {
+			return fmt.Errorf("fork and clone: %w", err)
+		}
+		// cd into the cloned directory
+		if err := os.Chdir(dirName); err != nil {
+			return fmt.Errorf("entering %s: %w", dirName, err)
+		}
+		repoRoot, err = findRepoRoot()
+		if err != nil {
+			return fmt.Errorf("could not find repo root after clone: %w", err)
+		}
+		fmt.Println(" ✓")
 	}
 
 	repo, err := github.GetCurrentRepo()
