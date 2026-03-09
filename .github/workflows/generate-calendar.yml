@@ -277,27 +277,11 @@ jobs:
         python scrapers/ucdavis_athletics.py --output cities/davis/ucdavis_athletics.ics || true
       continue-on-error: true
 
-    - name: Download Davis Meetup feeds
+    - name: Download Davis live feeds
       if: contains(steps.locations.outputs.list, 'davis')
       run: |
-        cd cities/davis
-        # Meetup groups
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mosaics/events/ical/" -o meetup_mosaics.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/intercultural-mosaics/events/ical/" -o meetup_intercultural.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/yolo-county-board-game-gathering/events/ical/" -o meetup_board_games.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/pence-adult-art-programs/events/ical/" -o meetup_pence_art.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/art-in-action/events/ical/" -o meetup_art_in_action.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/mindful-embodied-spirituality/events/ical/" -o meetup_mindful.ics || true
-        curl -sL -A "Mozilla/5.0" "https://www.meetup.com/winters-shut-up-and-write-meetup-group/events/ical/" -o meetup_winters_write.ics || true
-        # tribe_events ICS feeds
-        curl -sL -A "Mozilla/5.0" "https://thedirt.online/events/?ical=1" -o thedirt.ics || true
-        curl -sL -A "Mozilla/5.0" "https://visitdavis.org/events/?ical=1" -o visitdavis.ics || true
-        curl -sL -A "Mozilla/5.0" "https://visityolo.com/event/?ical=1" -o visityolo.ics || true
-        curl -sL -A "Mozilla/5.0" "https://putahcreekcouncil.org/events/?ical=1" -o putahcreek.ics || true
-        curl -sL -A "Mozilla/5.0" "https://hatefreetogether.org/events/?ical=1" -o hatefreetogether.ics || true
-        # Google Calendar feeds
-        curl -sL "https://calendar.google.com/calendar/ical/davisbikeclubwww%40gmail.com/public/basic.ics" -o davis_bike_club.ics || true
-        cd ../..
+        echo "Downloading Davis live feeds from feeds.txt..."
+        python scripts/download_feeds.py davis
 
     - name: Combine Davis ICS
       if: contains(steps.locations.outputs.list, 'davis')
@@ -761,7 +745,9 @@ jobs:
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         
         # Save generated files before any git operations
-        for city in santarosa bloomington davis petaluma toronto raleighdurham montclair; do
+        IFS=',' read -ra SAVE_CITIES <<< "${{ steps.locations.outputs.list }}"
+        for city in "${SAVE_CITIES[@]}"; do
+          city=$(echo "$city" | xargs)
           if [ -f "cities/$city/events.json" ]; then
             cp "cities/$city/events.json" "/tmp/${city}_events.json"
           fi
@@ -780,7 +766,8 @@ jobs:
             fi
             echo "Push failed, restoring generated files and retrying..."
             # Restore generated files that may have been clobbered by rebase
-            for city in santarosa bloomington davis petaluma toronto raleighdurham montclair; do
+            for city in "${SAVE_CITIES[@]}"; do
+              city=$(echo "$city" | xargs)
               if [ -f "/tmp/${city}_events.json" ]; then
                 cp "/tmp/${city}_events.json" "cities/$city/events.json"
               fi
