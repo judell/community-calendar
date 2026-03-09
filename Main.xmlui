@@ -8,6 +8,7 @@
   var.browseStartIndex="{0}"
   var.scrollRequest="{0}"
   var.displayCount="{50}"
+  var.resizeCounter="{0}"
   global.userSettingsData="{null}"
   var.city="{window.cityFilter || null}">
 
@@ -80,7 +81,7 @@
 
   <ChangeListener
     listenTo="{events.loaded}"
-    onDidChange="() => { if (events.loaded) window.setupInfiniteScroll && window.setupInfiniteScroll(); }"
+    onDidChange="() => { if (events.loaded) { window.setupInfiniteScroll && window.setupInfiniteScroll(); window.setupResizeHandler && window.setupResizeHandler(); } }"
   />
 
 
@@ -132,7 +133,8 @@
   <variable name="processedEvents" value="{window.filterHiddenSources(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), hiddenSources)}" />
   <variable name="pagedEvents" value="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, 50, categoryFilter)}" />
   <variable name="cardEvents" value="{window.getCumulativeEvents(processedEvents, filterTerm, displayCount, categoryFilter)}" />
-  <variable name="masonryColumns" value="{window.getMasonryColumns(cardEvents, 4)}" />
+  <variable name="columnCount" value="{resizeCounter >= 0 && window.getResponsiveColumnCount ? window.getResponsiveColumnCount() : 4}" />
+  <variable name="masonryColumns" value="{window.getMasonryColumns(cardEvents, columnCount)}" />
 
   <!-- Dialogs -->
   <SignInDialog id="signInDialog" />
@@ -161,6 +163,10 @@
       <Button variant="outlined" width="100%" onClick="window.location.search = '?city=matsu'">MatSu</Button>
     </VStack>
   </VStack>
+
+  <!-- Resize trigger: JS resize handler finds this anchor and clicks the next button -->
+  <Bookmark id="resizeTrigger" when="{!!city}" />
+  <Button when="{!!city}" label="" onClick="resizeCounter = resizeCounter + 1" width="0" height="0" padding="0" overflow="hidden" />
 
   <!-- Main Content -->
   <HStack when="{!!city}" horizontalAlignment="center" width="100%" overflowX="hidden">
@@ -283,22 +289,22 @@
     <HStack id="eventsList" when="{events.loaded && viewMode === 'cards'}" gap="$space-2" verticalAlignment="top">
       <VStack width="*">
         <Items data="{masonryColumns[0] || []}">
-          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" compact="true" />
         </Items>
       </VStack>
-      <VStack width="*">
+      <VStack when="{columnCount >= 2}" width="*">
         <Items data="{masonryColumns[1] || []}">
-          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" compact="true" />
         </Items>
       </VStack>
-      <VStack width="*">
+      <VStack when="{columnCount >= 3}" width="*">
         <Items data="{masonryColumns[2] || []}">
-          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" compact="true" />
         </Items>
       </VStack>
-      <VStack width="*">
+      <VStack when="{columnCount >= 4}" width="*">
         <Items data="{masonryColumns[3] || []}">
-          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+          <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" compact="true" />
         </Items>
       </VStack>
     </HStack>

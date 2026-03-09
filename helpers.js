@@ -1174,6 +1174,39 @@ function toBigCalendarEvents(events, term, category) {
   });
 }
 
+// Return number of masonry columns based on current viewport width.
+function getResponsiveColumnCount() {
+  var w = (typeof window !== 'undefined') ? window.innerWidth : 1400;
+  if (w >= 1100) return 4;
+  if (w >= 800) return 3;
+  if (w >= 500) return 2;
+  return 1;
+}
+
+// Set up a window resize listener that clicks the #resizeTrigger button
+// whenever the responsive column count changes, causing XMLUI to recompute columnCount.
+function setupResizeHandler() {
+  if (window._resizeHandler) {
+    window.removeEventListener('resize', window._resizeHandler);
+  }
+  window._lastColumnCount = getResponsiveColumnCount();
+  window._resizeHandler = function() {
+    var newCount = getResponsiveColumnCount();
+    if (newCount !== window._lastColumnCount) {
+      window._lastColumnCount = newCount;
+      var anchor = document.getElementById('resizeTrigger');
+      if (!anchor) return;
+      var btn = anchor.nextElementSibling;
+      while (btn && btn.tagName !== 'BUTTON') {
+        btn = btn.querySelector ? btn.querySelector('button') : null;
+        break;
+      }
+      if (btn) btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    }
+  };
+  window.addEventListener('resize', window._resizeHandler);
+}
+
 // Distribute events into N columns using shortest-column-first (masonry) packing.
 // Heights are estimated from card content so cards end up roughly balanced.
 function getMasonryColumns(events, numColumns) {
@@ -1263,4 +1296,6 @@ if (typeof window !== 'undefined') {
   window.toBigCalendarEvents = toBigCalendarEvents;
   window.getMasonryColumns = getMasonryColumns;
   window.getCumulativeEvents = getCumulativeEvents;
+  window.getResponsiveColumnCount = getResponsiveColumnCount;
+  window.setupResizeHandler = setupResizeHandler;
 }
