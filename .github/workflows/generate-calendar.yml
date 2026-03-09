@@ -140,16 +140,6 @@ jobs:
         done
       continue-on-error: true
 
-    - name: Download Santa Rosa live feeds
-      if: contains(steps.locations.outputs.list, 'santarosa')
-      run: |
-        echo "Downloading Santa Rosa live feeds from feeds.txt..."
-        python scripts/download_feeds.py santarosa
-
-    - name: Combine Santa Rosa ICS
-      if: contains(steps.locations.outputs.list, 'santarosa')
-      run: |
-        python scripts/combine_ics.py --input-dir cities/santarosa --output cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
 
     # ==========================================
     # Bloomington
@@ -173,16 +163,6 @@ jobs:
         python scrapers/shopify_events.py --url "https://cicadacinema.com" --name "Cicada Cinema" --output cities/bloomington/cicada_cinema.ics || true
       continue-on-error: true
 
-    - name: Download Bloomington live feeds
-      if: contains(steps.locations.outputs.list, 'bloomington')
-      run: |
-        echo "Downloading Bloomington live feeds from feeds.txt..."
-        python scripts/download_feeds.py bloomington
-
-    - name: Combine Bloomington ICS
-      if: contains(steps.locations.outputs.list, 'bloomington')
-      run: |
-        python scripts/combine_ics.py --input-dir cities/bloomington --output cities/bloomington/combined.ics --name "Bloomington Community Calendar"
 
     # ==========================================
     # Davis
@@ -202,16 +182,6 @@ jobs:
         python scrapers/ucdavis_athletics.py --output cities/davis/ucdavis_athletics.ics || true
       continue-on-error: true
 
-    - name: Download Davis live feeds
-      if: contains(steps.locations.outputs.list, 'davis')
-      run: |
-        echo "Downloading Davis live feeds from feeds.txt..."
-        python scripts/download_feeds.py davis
-
-    - name: Combine Davis ICS
-      if: contains(steps.locations.outputs.list, 'davis')
-      run: |
-        python scripts/combine_ics.py --input-dir cities/davis --output cities/davis/combined.ics --name "Davis Community Calendar"
 
     # ==========================================
     # Petaluma
@@ -239,16 +209,6 @@ jobs:
         python scrapers/cool_petaluma.py --output cities/petaluma/cool_petaluma.ics || true
       continue-on-error: true
 
-    - name: Download Petaluma live feeds
-      if: contains(steps.locations.outputs.list, 'petaluma')
-      run: |
-        echo "Downloading Petaluma live feeds from feeds.txt..."
-        python scripts/download_feeds.py petaluma
-
-    - name: Combine Petaluma ICS
-      if: contains(steps.locations.outputs.list, 'petaluma')
-      run: |
-        python scripts/combine_ics.py --input-dir cities/petaluma --output cities/petaluma/combined.ics --name "Petaluma Community Calendar"
 
     # ==========================================
     # Toronto
@@ -275,16 +235,6 @@ jobs:
         python scrapers/ticketmaster.py --venue-id KovZpZAFl6JA --name "Roy Thomson Hall" --timezone America/Toronto -o cities/toronto/roy_thomson_hall.ics || true
       continue-on-error: true
 
-    - name: Download Toronto live feeds
-      if: contains(steps.locations.outputs.list, 'toronto')
-      run: |
-        echo "Downloading Toronto live feeds from feeds.txt..."
-        python scripts/download_feeds.py toronto
-
-    - name: Combine Toronto ICS
-      if: contains(steps.locations.outputs.list, 'toronto')
-      run: |
-        python scripts/combine_ics.py --input-dir cities/toronto --output cities/toronto/combined.ics --name "Toronto Community Calendar"
 
     # ==========================================
     # Raleigh-Durham
@@ -316,16 +266,6 @@ jobs:
         TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
       continue-on-error: true
 
-    - name: Download Raleigh-Durham live feeds
-      if: contains(steps.locations.outputs.list, 'raleighdurham')
-      run: |
-        echo "Downloading Raleigh-Durham live feeds from feeds.txt..."
-        python scripts/download_feeds.py raleighdurham
-
-    - name: Combine Raleigh-Durham ICS
-      if: contains(steps.locations.outputs.list, 'raleighdurham')
-      run: |
-        python scripts/combine_ics.py --input-dir cities/raleighdurham --output cities/raleighdurham/combined.ics --name "Raleigh-Durham Community Calendar"
 
     # ==========================================
     # Montclair
@@ -350,16 +290,33 @@ jobs:
         python scrapers/raptor_trust.py --output cities/montclair/raptor_trust.ics || true
       continue-on-error: true
 
-    - name: Download Montclair live feeds
-      if: contains(steps.locations.outputs.list, 'montclair')
-      run: |
-        echo "Downloading Montclair live feeds from feeds.txt..."
-        python scripts/download_feeds.py montclair
 
-    - name: Combine Montclair ICS
-      if: contains(steps.locations.outputs.list, 'montclair')
+    # ==========================================
+    # Download feeds + Combine ICS (all cities)
+    # ==========================================
+    - name: Download live feeds
       run: |
-        python scripts/combine_ics.py --input-dir cities/montclair --output cities/montclair/combined.ics --name "Montclair Community Calendar"
+        IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
+        for city in "${CITIES[@]}"; do
+          city=$(echo "$city" | xargs)
+          if [ -f "cities/$city/feeds.txt" ]; then
+            echo "Downloading feeds for $city..."
+            python scripts/download_feeds.py "$city"
+          fi
+        done
+
+    - name: Combine ICS files
+      run: |
+        IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
+        for city in "${CITIES[@]}"; do
+          city=$(echo "$city" | xargs)
+          # Title-case the city name for the calendar name
+          display=$(echo "$city" | sed 's/-/ /g;s/\b\(.\)/\u\1/g')
+          if [ -d "cities/$city" ]; then
+            echo "Combining ICS for $city..."
+            python scripts/combine_ics.py --input-dir "cities/$city" --output "cities/$city/combined.ics" --name "$display Community Calendar"
+          fi
+        done
 
     # ==========================================
     # Post-processing (all cities)
@@ -461,12 +418,17 @@ jobs:
 
     - name: Trigger Supabase events reload
       env:
+        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       run: |
         echo "Triggering Supabase Edge Function to reload events..."
-        RESPONSE=$(curl -sL -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
+        # Build city list JSON array from locations
+        IFS=',' read -ra RELOAD_CITIES <<< "${{ steps.locations.outputs.list }}"
+        CITIES_JSON=$(printf '%s\n' "${RELOAD_CITIES[@]}" | xargs -I{} echo '"{}"' | paste -sd, - | sed 's/^/[/;s/$/]/')
+        RESPONSE=$(curl -sL -X POST "${SUPABASE_URL}/functions/v1/load-events" \
           -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
-          -H 'Content-Type: application/json')
+          -H 'Content-Type: application/json' \
+          -d "{\"cities\":${CITIES_JSON}}")
         echo "$RESPONSE" | jq .
 
         # Check for success

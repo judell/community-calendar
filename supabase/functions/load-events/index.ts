@@ -5,35 +5,55 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Events JSON URLs by city (raw.githubusercontent.com updates immediately on push,
-// unlike GitHub Pages which has a cache delay)
-const RAW_BASE = "https://raw.githubusercontent.com/judell/community-calendar/main/cities";
-const EVENTS_URLS: Record<string, string> = {
-  santarosa: `${RAW_BASE}/santarosa/events.json`,
-  petaluma: `${RAW_BASE}/petaluma/events.json`,
-  bloomington: `${RAW_BASE}/bloomington/events.json`,
-  davis: `${RAW_BASE}/davis/events.json`,
-  toronto: `${RAW_BASE}/toronto/events.json`,
-  raleighdurham: `${RAW_BASE}/raleighdurham/events.json`,
-  montclair: `${RAW_BASE}/montclair/events.json`,
-};
-
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Create Supabase client with service role for database access
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch events from all cities, delete stale records, then upsert
+    // Determine repo for raw GitHub URLs (forks set GITHUB_REPO secret)
+    const ghRepo = Deno.env.get("GITHUB_REPO") || "judell/community-calendar";
+    const RAW_BASE = `https://raw.githubusercontent.com/${ghRepo}/main/cities`;
+
+    // Accept city list from request body, or discover from GitHub API
+    let cities: string[] = [];
+    try {
+      const body = await req.json();
+      if (body.cities && Array.isArray(body.cities)) {
+        cities = body.cities;
+      }
+    } catch {}
+
+    if (cities.length === 0) {
+      try {
+        const apiUrl = `https://api.github.com/repos/${ghRepo}/contents/cities`;
+        const resp = await fetch(apiUrl, { headers: { "User-Agent": "load-events" } });
+        if (resp.ok) {
+          const entries = await resp.json();
+          cities = entries.filter((e: any) => e.type === "dir").map((e: any) => e.name);
+        }
+      } catch (e) {
+        console.error("Failed to discover cities:", e);
+      }
+    }
+
+    if (cities.length === 0) {
+      return new Response(JSON.stringify({ success: false, error: "No cities found" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log(`Processing cities: ${cities.join(", ")}`);
+
     const allEvents: any[] = [];
     let deleted = 0;
-    for (const [city, url] of Object.entries(EVENTS_URLS)) {
+    for (const city of cities) {
+      const url = `${RAW_BASE}/${city}/events.json`;
       console.log(`Fetching events from ${city}:`, url);
       try {
         const response = await fetch(url);
@@ -42,11 +62,9 @@ Deno.serve(async (req) => {
           continue;
         }
         const events = await response.json();
-        // Ensure city is set on each event
         for (const event of events) {
           event.city = event.city || city;
         }
-        // Delete existing events for this city to remove stale records
         const { count, error: delError } = await supabase
           .from("events")
           .delete({ count: "exact" })
@@ -65,7 +83,6 @@ Deno.serve(async (req) => {
     }
     console.log(`Total fetched: ${allEvents.length} events`);
 
-    // Deduplicate by source_uid
     const uniqueEvents = new Map();
     for (const event of allEvents) {
       if (event.source_uid && !uniqueEvents.has(event.source_uid)) {
@@ -74,7 +91,6 @@ Deno.serve(async (req) => {
     }
     console.log(`Unique events: ${uniqueEvents.size}`);
 
-    // Insert events in batches
     const batchSize = 500;
     const eventsArray = Array.from(uniqueEvents.values());
     let inserted = 0;
@@ -82,14 +98,9 @@ Deno.serve(async (req) => {
 
     for (let i = 0; i < eventsArray.length; i += batchSize) {
       const batch = eventsArray.slice(i, i + batchSize);
-
       const { error } = await supabase
         .from("events")
-        .upsert(batch, {
-          onConflict: "source_uid",
-          ignoreDuplicates: false
-        });
-
+        .upsert(batch, { onConflict: "source_uid", ignoreDuplicates: false });
       if (error) {
         console.error(`Batch ${i / batchSize} error:`, error);
         errors += batch.length;
@@ -98,17 +109,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    const result = {
-      success: errors === 0,
-      fetched: allEvents.length,
-      unique: uniqueEvents.size,
-      deleted,
-      inserted,
-      errors,
-    };
-
+    const result = { success: errors === 0, fetched: allEvents.length, unique: uniqueEvents.size, deleted, inserted, errors };
     console.log("Result:", result);
-
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -116,10 +118,7 @@ Deno.serve(async (req) => {
     console.error("Error:", error);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
