@@ -157,8 +157,8 @@ func (c *Client) DeployEdgeFunction(ref, name, source string, verifyJWT bool) er
 	}
 	mw.Close()
 
-	// POST to deploy endpoint
-	url := fmt.Sprintf("%s/v1/projects/%s/functions/deploy", apiBase, ref)
+	// POST to deploy endpoint — slug must be in query string for correct routing
+	url := fmt.Sprintf("%s/v1/projects/%s/functions/deploy?slug=%s&verify_jwt=%v", apiBase, ref, name, verifyJWT)
 	req, err := http.NewRequest("POST", url, &formBuf)
 	if err != nil {
 		return err

@@ -19,6 +19,7 @@
 - Disable non-essential workflows during init (via GitHub API)
 
 ## Next build
+- Move DisableNonEssentialWorkflows from init to `cc-cli build` (first run): init can't disable workflows because they aren't enabled yet on forks; `cc-cli build` should disable extras before triggering
 - `cc-cli init` does fork+clone: user installs binary from release, runs `cc-cli init` which forks judell/community-calendar, clones it, then continues with setup
 - Spinner/elapsed time during "Waiting for project to be ready" (currently silent, looks stuck)
 - Make XMLUI city picker dynamic (query distinct cities from Supabase)
