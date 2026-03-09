@@ -430,6 +430,20 @@ func Init() error {
 			return fmt.Errorf("\n  updating workflow locations: %w", err)
 		}
 
+		// Strip per-city scrape blocks from workflow (forks use feeds.txt only)
+		fmt.Printf("Stripping upstream scrape blocks from workflow...")
+		if err := stripScrapeBlocks(repoRoot); err != nil {
+			return fmt.Errorf("\n  %w", err)
+		}
+		fmt.Println(" ✓")
+
+		// Ensure download_feeds.py exists (fork may predate it)
+		feedsScript := filepath.Join(repoRoot, "scripts", "download_feeds.py")
+		if _, err := os.Stat(feedsScript); os.IsNotExist(err) {
+			fmt.Println("  Warning: scripts/download_feeds.py not found.")
+			fmt.Println("  Sync your fork from upstream to get this required script.")
+		}
+
 		s.Step = 9
 		if err := state.Save(repoRoot, s); err != nil {
 			return fmt.Errorf("saving state: %w", err)
@@ -638,6 +652,60 @@ func updateWorkflowLocations(repoRoot string) error {
 	}
 
 	return os.WriteFile(workflowPath, []byte(strings.Join(lines, "\n")), 0644)
+}
+
+// stripScrapeBlocks removes per-city "Scrape <City> sources" blocks from the
+// workflow. Forks don't have the scrapers — they use feeds.txt only.
+// Each block starts with a "# ====.../<City>" comment header and the
+// "- name: Scrape ..." step, ending just before the next "# ====" header
+// or the "Download live feeds" section.
+func stripScrapeBlocks(repoRoot string) error {
+	workflowPath := filepath.Join(repoRoot, ".github", "workflows", "generate-calendar.yml")
+	content, err := os.ReadFile(workflowPath)
+	if err != nil {
+		return err
+	}
+
+	lines := strings.Split(string(content), "\n")
+	var result []string
+	inScrapeBlock := false
+
+	for i := 0; i < len(lines); i++ {
+		trimmed := strings.TrimSpace(lines[i])
+
+		// Detect start of a city-specific scrape section:
+		// A "# ====..." header followed by a "- name: Scrape" step
+		if strings.HasPrefix(trimmed, "# =") && strings.Contains(trimmed, "=") {
+			// Look ahead to see if this section contains a Scrape step
+			isScrapeSection := false
+			for j := i + 1; j < len(lines) && j < i+5; j++ {
+				if strings.Contains(lines[j], "- name: Scrape") {
+					isScrapeSection = true
+					break
+				}
+			}
+			if isScrapeSection {
+				inScrapeBlock = true
+				continue
+			}
+		}
+
+		if inScrapeBlock {
+			// End of scrape block: next "# ====" header or non-blank/non-comment content
+			if strings.HasPrefix(trimmed, "# =") && strings.Contains(trimmed, "=") {
+				inScrapeBlock = false
+				// Re-process this line (it might be the Download section header)
+				i--
+				continue
+			}
+			// Skip all lines in the scrape block
+			continue
+		}
+
+		result = append(result, lines[i])
+	}
+
+	return os.WriteFile(workflowPath, []byte(strings.Join(result, "\n")), 0644)
 }
 
 func findRepoRoot() (string, error) {

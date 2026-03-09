@@ -13,13 +13,13 @@
 - `cc-cli status` — shows recent workflow runs
 - CLI does git commit+push with suppressed output
 - Enable workflows prompt in "Next steps"
+- Strip per-city scrape blocks from workflow during init (forks use feeds.txt only)
+- Warn if download_feeds.py missing (fork may predate it)
+- ics_categories column covered by DDL (02_events.sql)
+- Disable non-essential workflows during init (via GitHub API)
 
 ## Next build
 - Spinner/elapsed time during "Waiting for project to be ready" (currently silent, looks stuck)
-- During init, remove upstream-only workflows (regression-tests.yml)
-- During init, strip per-city scrape blocks from generate-calendar.yml
-- During init, ensure download_feeds.py exists (fork may predate it)
-- During init, add ics_categories column (missing from DDL, needed for upsert)
 - Make XMLUI city picker dynamic (query distinct cities from Supabase)
 
 ## Future subcommands
