@@ -188,6 +188,105 @@ function getPagedEvents(events, term, startIndex, pageSize, category) {
   return page;
 }
 
+// Return events cumulatively from index 0 up to `count`.
+// Used by cards view infinite scroll. Sets window._cardsHasMore.
+function getCumulativeEvents(events, term, count, category) {
+  var filtered = filterEvents(events, term, category) || [];
+  var n = (Number.isFinite(count) && count > 0) ? count : 50;
+  if (!filtered.length) {
+    if (typeof window !== 'undefined') window._cardsHasMore = false;
+    return [];
+  }
+  if (term) {
+    if (typeof window !== 'undefined') window._cardsHasMore = false;
+    return filtered;
+  }
+  if (typeof window !== 'undefined') window._cardsHasMore = filtered.length > n;
+  return filtered.slice(0, n);
+}
+
+window.setupInfiniteScroll = function() {
+  // Tear down prior scroll listener
+  if (window._infiniteScrollListener && window._infiniteScrollTarget) {
+    window._infiniteScrollTarget.removeEventListener('scroll', window._infiniteScrollListener);
+  }
+  window._infiniteScrollListener = null;
+  window._infiniteScrollTarget = null;
+
+  // Tear down prior IntersectionObserver
+  if (window._infiniteScrollObserver) {
+    window._infiniteScrollObserver.disconnect();
+    window._infiniteScrollObserver = null;
+  }
+
+  // Tear down prior MutationObserver
+  if (window._infiniteMutationObserver) {
+    window._infiniteMutationObserver.disconnect();
+    window._infiniteMutationObserver = null;
+  }
+
+  var _throttled = false;
+  function triggerLoadMore() {
+    if (_throttled || !window._cardsHasMore) return;
+    // The Bookmark sentinel (#loadMoreSentinel) renders as a <span> with the id in the DOM.
+    // The Button component does NOT forward id, so we find the button by traversing
+    // forward from the sentinel to the next <button> element.
+    var sentinel = document.getElementById('loadMoreSentinel');
+    if (!sentinel) return;
+    var btn = null;
+    var el = sentinel;
+    // Walk forward through siblings and their descendants
+    while (el && !btn) {
+      el = el.nextElementSibling;
+      if (!el) break;
+      if (el.tagName === 'BUTTON') { btn = el; break; }
+      btn = el.querySelector('button');
+    }
+    if (!btn) return;
+    _throttled = true;
+    btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    setTimeout(function() { _throttled = false; }, 600);
+  }
+
+  // Primary: IntersectionObserver on the Bookmark sentinel.
+  // Bookmark renders <span id="loadMoreSentinel" data-anchor="true"> in the DOM.
+  // IntersectionObserver works regardless of whether scroll is on window or OverlayScrollbars.
+  var io = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting) triggerLoadMore();
+  }, { rootMargin: '0px 0px 800px 0px', threshold: 0 });
+  window._infiniteScrollObserver = io;
+
+  function observeSentinel() {
+    var sentinel = document.getElementById('loadMoreSentinel');
+    if (sentinel) { io.observe(sentinel); return true; }
+    return false;
+  }
+
+  if (!observeSentinel()) {
+    // Sentinel not yet in DOM — watch for it via MutationObserver
+    var mo = new MutationObserver(function() {
+      if (observeSentinel()) { mo.disconnect(); window._infiniteMutationObserver = null; }
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+    window._infiniteMutationObserver = mo;
+  }
+
+  // Secondary: scroll listener on the OverlayScrollbars viewport (XMLUI's actual scroll
+  // container) or window as fallback.
+  var scrollTarget = document.querySelector('[data-overlayscrollbars-viewport]') || window;
+  window._infiniteScrollTarget = scrollTarget;
+  window._infiniteScrollListener = function() {
+    var scrolled = (scrollTarget === window)
+      ? window.scrollY + window.innerHeight
+      : scrollTarget.scrollTop + scrollTarget.clientHeight;
+    var total = (scrollTarget === window)
+      ? document.documentElement.scrollHeight
+      : scrollTarget.scrollHeight;
+    if (scrolled >= total - 1200) triggerLoadMore();
+  };
+  scrollTarget.addEventListener('scroll', window._infiniteScrollListener, { passive: true });
+};
+
 // Get description snippet with context around search term (returns null if no match in description)
 function getDescriptionSnippet(description, term) {
   if (!description || !term) return null;
@@ -1163,4 +1262,5 @@ if (typeof window !== 'undefined') {
   window.getOrdinalWeekday = getOrdinalWeekday;
   window.toBigCalendarEvents = toBigCalendarEvents;
   window.getMasonryColumns = getMasonryColumns;
+  window.getCumulativeEvents = getCumulativeEvents;
 }
