@@ -8,6 +8,7 @@ import {
   buildRRule, parseRRule, toggleDay, detectRecurrence, getOrdinalWeekday,
   buildGoogleCalendarUrl, downloadEventICS,
 } from '../lib/helpers.js';
+import CATEGORIES from '../lib/categories.js';
 
 const DAYS = [
   { code: 'SU', label: 'Su' }, { code: 'MO', label: 'Mo' }, { code: 'TU', label: 'Tu' },
@@ -30,13 +31,14 @@ const DAY_OPTIONS = [
 export default function EnrichmentEditor({ event, pick, mode = 'pick', onClose, onSaved }) {
   const { user, session } = useAuth();
 
-  // Form fields (pick mode)
+  // Form fields
   const [title, setTitle] = useState(event?.title || '');
   const [date, setDate] = useState((event?.start_time || '').substring(0, 10));
   const [time, setTime] = useState((event?.start_time || '').substring(11, 16));
   const [endTime, setEndTime] = useState(event?.end_time ? event.end_time.substring(11, 16) : '');
   const [location, setLocation] = useState(event?.location || '');
   const [description, setDescription] = useState(event?.description || '');
+  const [category, setCategory] = useState(event?.category || '');
 
   // Recurrence
   const detected = useMemo(() => detectRecurrence(event?.description, event?.title), [event]);
@@ -76,11 +78,20 @@ export default function EnrichmentEditor({ event, pick, mode = 'pick', onClose, 
       .then(r => r.json())
       .then(data => {
         if (data?.[0]) {
-          const p = parseRRule(data[0].rrule);
+          const e = data[0];
+          const p = parseRRule(e.rrule);
           setFrequency(p.frequency);
           setDays(p.days);
-          setUrlValue(data[0].url || '');
-          setNotesValue(data[0].notes || '');
+          setUrlValue(e.url || '');
+          setNotesValue(e.notes || '');
+          if (e.title) setTitle(e.title);
+          if (e.location) setLocation(e.location);
+          if (e.description) setDescription(e.description);
+          if (e.start_time) {
+            setDate(e.start_time.substring(0, 10));
+            setTime(e.start_time.substring(11, 16));
+          }
+          if (e.end_time) setEndTime(e.end_time.substring(11, 16));
           if (p.frequency !== 'none') setShowRecurrence(true);
         }
       })
@@ -136,8 +147,10 @@ export default function EnrichmentEditor({ event, pick, mode = 'pick', onClose, 
 
         setSuccess(true);
       } else {
-        // Enrich mode — upsert enrichment
+        // Enrich mode — upsert enrichment with all fields
         const eventId = pick.event_id || pick.events?.id;
+        const startTime = (date || '') + 'T' + (time || '00:00') + ':00';
+        const endTimeStr = endTime ? (date || '') + 'T' + endTime + ':00' : null;
         await fetch(`${SUPABASE_URL}/rest/v1/event_enrichments?on_conflict=event_id,curator_id`, {
           method: 'POST',
           headers: { ...headers, Prefer: 'return=minimal,resolution=merge-duplicates' },
@@ -145,10 +158,27 @@ export default function EnrichmentEditor({ event, pick, mode = 'pick', onClose, 
             event_id: eventId,
             curator_id: user.id,
             rrule: rruleStr,
+            title, start_time: startTime, end_time: endTimeStr,
+            location: location || null, description: description || null,
             url: urlValue || null,
             notes: notesValue || null,
+            city: new URLSearchParams(window.location.search).get('city') || null,
+            curator_name: curatorName,
           }),
         });
+
+        // Save category override if changed
+        if (category !== (event?.category || '')) {
+          await fetch(`${SUPABASE_URL}/rest/v1/category_overrides?on_conflict=event_id`, {
+            method: 'POST',
+            headers: { ...headers, Prefer: 'return=minimal,resolution=merge-duplicates' },
+            body: JSON.stringify({
+              event_id: eventId,
+              category: category || null,
+              curator_id: user.id,
+            }),
+          });
+        }
 
         onSaved?.();
         onClose();
@@ -195,26 +225,37 @@ export default function EnrichmentEditor({ event, pick, mode = 'pick', onClose, 
               <p className="font-semibold text-gray-900 text-sm">{event?.title || pick?.events?.title}</p>
               {eventDate && <p className="text-xs text-gray-500 mb-4">{eventDate}</p>}
 
-              {mode === 'pick' && (
-                <div className="space-y-3 mb-4">
-                  <Field label="Title" value={title} onChange={setTitle} />
-                  <Field label="Date" value={date} onChange={setDate} placeholder="YYYY-MM-DD" />
-                  <div className="flex gap-3">
-                    <Field label="Start" value={time} onChange={setTime} placeholder="HH:MM" className="flex-1" />
-                    <Field label="End" value={endTime} onChange={setEndTime} placeholder="HH:MM" className="flex-1" />
-                  </div>
-                  <Field label="Location" value={location} onChange={setLocation} />
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
-                    <textarea
-                      value={description}
-                      onChange={e => setDescription(e.target.value)}
-                      rows={3}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0 focus:outline-none resize-none"
-                    />
-                  </div>
+              <div className="space-y-3 mb-4">
+                <Field label="Title" value={title} onChange={setTitle} />
+                <Field label="Date" value={date} onChange={setDate} placeholder="YYYY-MM-DD" />
+                <div className="flex gap-3">
+                  <Field label="Start" value={time} onChange={setTime} placeholder="HH:MM" className="flex-1" />
+                  <Field label="End" value={endTime} onChange={setEndTime} placeholder="HH:MM" className="flex-1" />
                 </div>
-              )}
+                <Field label="Location" value={location} onChange={setLocation} />
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Category</label>
+                  <select
+                    value={category}
+                    onChange={e => setCategory(e.target.value)}
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0 focus:outline-none text-gray-600"
+                  >
+                    <option value="">None</option>
+                    {CATEGORIES.map(cat => (
+                      <option key={cat.name} value={cat.name}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
+                  <textarea
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    rows={3}
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0 focus:outline-none resize-none"
+                  />
+                </div>
+              </div>
 
               {/* Recurrence section */}
               <div className="border-t border-gray-100 pt-3 mb-4">
@@ -284,13 +325,10 @@ export default function EnrichmentEditor({ event, pick, mode = 'pick', onClose, 
                 )}
               </div>
 
-              {/* Enrich mode: URL + Notes */}
-              {mode === 'enrich' && (
-                <div className="space-y-3 mb-4">
-                  <Field label="URL" value={urlValue} onChange={setUrlValue} placeholder="Reference URL" />
-                  <Field label="Notes" value={notesValue} onChange={setNotesValue} placeholder="Internal notes" />
-                </div>
-              )}
+              <div className="space-y-3 mb-4">
+                <Field label="URL" value={urlValue} onChange={setUrlValue} placeholder="Reference URL" />
+                <Field label="Notes" value={notesValue} onChange={setNotesValue} placeholder="Internal notes" />
+              </div>
 
               {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
 
