@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, createContext, useContext, useSyncExternalStore } from 'react';
 import { useAuth } from './useAuth.jsx';
 import { SUPABASE_URL, SUPABASE_KEY } from '../lib/supabase.js';
+import { applyEnrichments } from '../lib/helpers.js';
 
 const PicksContext = createContext(null);
 
@@ -41,11 +42,27 @@ export function PicksProvider({ city, children }) {
       return;
     }
 
-    const url = `${SUPABASE_URL}/rest/v1/picks?select=id,event_id,events(id,title,start_time,end_time,location,url,source,description,image_url,category)&user_id=eq.${user.id}&order=created_at.desc`;
-    fetch(url, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + session.access_token } })
-      .then(r => r.json())
-      .then(data => {
-        const arr = Array.isArray(data) ? data : [];
+    const headers = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + session.access_token };
+    const picksUrl = `${SUPABASE_URL}/rest/v1/picks?select=id,event_id,events(id,title,start_time,end_time,location,url,source,description,image_url,category)&user_id=eq.${user.id}&order=created_at.desc`;
+    const enrichUrl = `${SUPABASE_URL}/rest/v1/event_enrichments?curator_id=eq.${user.id}&select=*`;
+
+    Promise.all([
+      fetch(picksUrl, { headers }).then(r => r.json()),
+      fetch(enrichUrl, { headers }).then(r => r.json()),
+    ])
+      .then(([picksData, enrichData]) => {
+        const arr = Array.isArray(picksData) ? picksData : [];
+        const enrichments = Array.isArray(enrichData) ? enrichData : [];
+
+        // Apply enrichment overrides to the embedded event objects
+        if (enrichments.length > 0) {
+          const events = arr.map(p => p.events).filter(Boolean);
+          const enriched = applyEnrichments(events, enrichments);
+          const byId = {};
+          enriched.forEach(e => { byId[e.id] = e; });
+          arr.forEach(p => { if (p.events && byId[p.events.id]) p.events = byId[p.events.id]; });
+        }
+
         setPicks(arr);
         pickedStore.set(new Set(arr.map(p => p.event_id)));
       })
