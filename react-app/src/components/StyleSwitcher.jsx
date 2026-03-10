@@ -13,6 +13,7 @@ const STYLES = [
   { id: 'splitimage', label: 'Split+Icon', desc: 'Split with icon placeholder' },
   { id: 'polaroid', label: 'Polaroid', desc: 'Photo frame style' },
   { id: 'ticket', label: 'Ticket', desc: 'Event ticket stub' },
+  { id: 'list', label: 'List', desc: 'Single-column list' },
 ];
 
 export default function StyleSwitcher({ value, onChange }) {

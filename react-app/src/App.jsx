@@ -29,8 +29,11 @@ function App() {
   const { events, loading } = useEvents(city);
   const enrichments = useEnrichments(city);
   const rawColumnCount = useColumnCount();
+  const oneColStyles = ['list'];
   const twoColStyles = ['compact', 'split', 'splitimage'];
-  const columnCount = twoColStyles.includes(cardStyle) ? Math.min(rawColumnCount, 2) : rawColumnCount;
+  const columnCount = oneColStyles.includes(cardStyle) ? 1
+    : twoColStyles.includes(cardStyle) ? Math.min(rawColumnCount, 2)
+    : rawColumnCount;
 
   const { processedEvents, cardEvents, hasMore, masonryColumns } = useProcessedEvents(
     events,

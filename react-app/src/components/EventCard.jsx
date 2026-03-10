@@ -24,6 +24,7 @@ const VARIANTS = {
   splitimage: SplitImageCard,
   polaroid: PolaroidCard,
   ticket: TicketCard,
+  list: SplitCard,
 };
 
 export default function EventCard({ event, filterTerm, onCategoryFilter, variant }) {
