@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { X, CheckCircle, ChevronDown, ChevronRight, CalendarPlus, Download } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { SUPABASE_URL, SUPABASE_KEY } from '../lib/supabase.js';
@@ -174,7 +175,7 @@ export default function EnrichmentEditor({ event, pick, mode = 'pick', onClose, 
     ? formatDayOfWeek(event.start_time) + ' ' + formatMonthDay(event.start_time)
     : '';
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl max-w-md w-full max-h-[85vh] overflow-y-auto shadow-xl" onClick={e => e.stopPropagation()}>
         {/* Header */}
@@ -350,7 +351,8 @@ export default function EnrichmentEditor({ event, pick, mode = 'pick', onClose, 
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

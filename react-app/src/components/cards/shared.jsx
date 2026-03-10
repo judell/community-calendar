@@ -1,12 +1,13 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import {
-  Info, CalendarPlus, Download, Bookmark,
+  Info, CalendarPlus, Download, Bookmark, Pencil,
   Palette, BookOpen, Laugh, Users, Drama, GraduationCap, Baby,
   Film, UtensilsCrossed, Landmark, Heart, Clock, Music,
   TreePine, Church, Dumbbell, Calendar,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth.jsx';
-import { usePicks } from '../../hooks/usePicks.jsx';
+import { usePicks, useIsEventPicked } from '../../hooks/usePicks.jsx';
 import EnrichmentEditor from '../EnrichmentEditor.jsx';
 import {
   formatDayOfWeek,
@@ -19,6 +20,8 @@ import {
   downloadEventICS,
 } from '../../lib/helpers.js';
 import { categoryColorMap } from '../../lib/categories.js';
+import CATEGORIES from '../../lib/categories.js';
+import { SUPABASE_URL, SUPABASE_KEY } from '../../lib/supabase.js';
 
 export const CATEGORY_ICONS = {
   'Arts / Culture': Palette,
@@ -66,6 +69,9 @@ export function useEventCardData(event, filterTerm) {
 }
 
 export function ActionBar({ event, onCategoryFilter, onShowDetail, colors }) {
+  const { user } = useAuth();
+  const [showCatModal, setShowCatModal] = React.useState(false);
+
   return (
     <div className="flex items-center gap-2">
       <CategoryBadgeInline
@@ -73,6 +79,29 @@ export function ActionBar({ event, onCategoryFilter, onShowDetail, colors }) {
         colors={colors}
         onClick={() => onCategoryFilter && onCategoryFilter(event.category)}
       />
+      {user && event.category && (
+        <button
+          onClick={() => setShowCatModal(true)}
+          className="text-gray-300 hover:text-gray-500 transition-colors"
+          title="Override category"
+        >
+          <Pencil size={12} />
+        </button>
+      )}
+      {user && !event.category && (
+        <button
+          onClick={() => setShowCatModal(true)}
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          + category
+        </button>
+      )}
+      {showCatModal && (
+        <CategoryOverrideModal
+          event={event}
+          onClose={() => setShowCatModal(false)}
+        />
+      )}
       <div className="flex-1" />
       <BookmarkButton event={event} />
       {(event.description || event.image_url) && (
@@ -106,13 +135,12 @@ export function ActionBar({ event, onCategoryFilter, onShowDetail, colors }) {
 
 function BookmarkButton({ event }) {
   const { user } = useAuth();
-  const { isEventPicked, togglePick } = usePicks();
+  const { togglePick } = usePicks();
+  const picked = useIsEventPicked(event.id);
   const [toggling, setToggling] = React.useState(false);
   const [showEditor, setShowEditor] = React.useState(false);
 
   if (!user) return null;
-
-  const picked = isEventPicked(event.id);
 
   async function handleClick() {
     if (picked) {
@@ -222,4 +250,91 @@ export function EventTitle({ event, className }) {
     );
   }
   return <h5 className={base}>{event.title}</h5>;
+}
+
+function CategoryOverrideModal({ event, onClose }) {
+  const { user, session } = useAuth();
+  const [selected, setSelected] = React.useState(event.category || '');
+  const [saving, setSaving] = React.useState(false);
+
+  async function handleSave() {
+    if (!user || !session) return;
+    setSaving(true);
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/category_overrides?on_conflict=event_id`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: 'Bearer ' + session.access_token,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal,resolution=merge-duplicates',
+        },
+        body: JSON.stringify({
+          event_id: event.id,
+          category: selected,
+          curator_id: user.id,
+        }),
+      });
+      // Optimistically update the event object so the UI reflects the change
+      event.category = selected;
+      onClose();
+    } catch {
+      // silent fail
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl max-w-sm w-full max-h-[70vh] overflow-y-auto shadow-xl" onClick={e => e.stopPropagation()}>
+        <div className="px-5 pt-4 pb-2">
+          <h3 className="text-base font-bold text-gray-900">Set Category</h3>
+          <p className="text-sm text-gray-500 truncate mt-0.5">{event.title}</p>
+        </div>
+        <div className="px-5 py-2 space-y-1">
+          {CATEGORIES.map(cat => {
+            const isSelected = selected === cat.name;
+            return (
+              <label
+                key={cat.name}
+                className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer transition-colors ${
+                  isSelected ? 'bg-gray-100' : 'hover:bg-gray-50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="category"
+                  checked={isSelected}
+                  onChange={() => setSelected(cat.name)}
+                  className="accent-gray-900"
+                />
+                <span
+                  className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: cat.label }}
+                />
+                <span className="text-sm text-gray-700">{cat.name}</span>
+              </label>
+            );
+          })}
+        </div>
+        <div className="flex justify-end gap-2 px-5 py-3 border-t border-gray-100">
+          <button
+            onClick={onClose}
+            className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-4 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-40"
+          >
+            {saving ? 'Saving...' : 'Save'}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
 }
