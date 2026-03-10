@@ -376,6 +376,36 @@ export function expandEnrichments(enrichments, fromDateStr, toDateStr) {
   return virtualEvents;
 }
 
+// --- Apply enrichment overrides to matching events ---
+export function applyEnrichments(events, enrichments) {
+  if (!enrichments || !enrichments.length) return events;
+
+  // Index enrichments by event_id (take the most recent per event)
+  const byEventId = {};
+  enrichments.forEach(e => {
+    if (!e.event_id) return;
+    if (!byEventId[e.event_id] || (e.id > byEventId[e.event_id].id)) {
+      byEventId[e.event_id] = e;
+    }
+  });
+
+  return events.map(event => {
+    const enrichment = byEventId[event.id];
+    if (!enrichment) return event;
+
+    const overrides = {};
+    if (enrichment.title) overrides.title = enrichment.title;
+    if (enrichment.start_time) overrides.start_time = enrichment.start_time;
+    if (enrichment.end_time) overrides.end_time = enrichment.end_time;
+    if (enrichment.location) overrides.location = enrichment.location;
+    if (enrichment.description) overrides.description = enrichment.description;
+    if (enrichment.url) overrides.url = enrichment.url;
+
+    if (Object.keys(overrides).length === 0) return event;
+    return { ...event, ...overrides };
+  });
+}
+
 // --- Masonry layout ---
 export function getResponsiveColumnCount(width) {
   const w = width || (typeof window !== 'undefined' ? window.innerWidth : 1400);

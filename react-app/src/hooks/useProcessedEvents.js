@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import {
+  applyEnrichments,
   dedupeEvents,
   expandEnrichments,
   filterHiddenSources,
@@ -13,8 +14,9 @@ export function useProcessedEvents(events, enrichments, filterTerm, displayCount
 
   const processedEvents = useMemo(() => {
     if (!events) return [];
+    const enriched = applyEnrichments(events, enrichments);
     const expanded = expandEnrichments(enrichments, from, to);
-    const combined = [...events, ...expanded];
+    const combined = [...enriched, ...expanded];
     const deduped = dedupeEvents(combined);
     return filterHiddenSources(deduped, []);
   }, [events, enrichments, from, to]);

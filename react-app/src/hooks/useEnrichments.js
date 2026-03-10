@@ -10,7 +10,7 @@ export function useEnrichments(city) {
       return;
     }
 
-    const url = `${SUPABASE_URL}/rest/v1/event_enrichments?select=*&rrule=not.is.null&city=eq.${city}`;
+    const url = `${SUPABASE_URL}/rest/v1/event_enrichments?select=*&city=eq.${city}`;
 
     fetch(url, {
       headers: {
