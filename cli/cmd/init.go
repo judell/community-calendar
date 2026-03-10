@@ -255,6 +255,7 @@ func Init() error {
 		fmt.Println("    Click 'New OAuth App' (not GitHub App)")
 		fmt.Printf("    Homepage URL:     %s\n", siteURL)
 		fmt.Printf("    Callback URL:     %s\n", callbackURL)
+		fmt.Println("    ⚠ Copy the callback URL exactly — it must include .supabase.co")
 		fmt.Println("    Leave 'Enable Device Flow' unchecked")
 		s.GHOAuthID, err = prompt.AskRequired("Client ID")
 		if err != nil {
@@ -279,6 +280,7 @@ func Init() error {
 		fmt.Println("      8. Application type: Web application")
 		fmt.Println("      9. Authorized redirect URIs: add the callback URL below")
 		fmt.Printf("    Callback URL: %s\n", callbackURL)
+		fmt.Println("    ⚠ Copy the callback URL exactly — it must include .supabase.co")
 		s.GoogleOAuthID, err = prompt.AskRequired("Client ID")
 		if err != nil {
 			return err
