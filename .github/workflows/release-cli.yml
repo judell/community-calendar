@@ -77,24 +77,39 @@ jobs:
 
           CLI tool to set up a Community Calendar fork with its own Supabase backend.
 
-          ### Download
+          ### Install
 
-          Pick the binary for your platform, then:
+          Requires [GitHub CLI (`gh`)](https://cli.github.com/). Pick the command for your platform:
 
           ```
-          chmod +x cc-cli-*
-          sudo mv cc-cli-* /usr/local/bin/cc-cli
-          ```
+          # macOS Apple Silicon (M1/M2/M3/M4)
+          gh release download -R judell/community-calendar -p 'cc-cli-darwin-arm64'
+          sudo mv cc-cli-darwin-arm64 /usr/local/bin/cc-cli
+          chmod +x /usr/local/bin/cc-cli
 
-          **macOS users:** Gatekeeper will block the unsigned binary. After downloading, run:
-          ```
-          xattr -d com.apple.quarantine cc-cli-*
+          # macOS Intel
+          gh release download -R judell/community-calendar -p 'cc-cli-darwin-amd64'
+          sudo mv cc-cli-darwin-amd64 /usr/local/bin/cc-cli
+          chmod +x /usr/local/bin/cc-cli
+
+          # Linux x86_64
+          gh release download -R judell/community-calendar -p 'cc-cli-linux-amd64'
+          sudo mv cc-cli-linux-amd64 /usr/local/bin/cc-cli
+          chmod +x /usr/local/bin/cc-cli
+
+          # Linux ARM64
+          gh release download -R judell/community-calendar -p 'cc-cli-linux-arm64'
+          sudo mv cc-cli-linux-arm64 /usr/local/bin/cc-cli
+          chmod +x /usr/local/bin/cc-cli
+
+          # Windows (run in PowerShell)
+          gh release download -R judell/community-calendar -p 'cc-cli-windows-amd64.exe'
+          Rename-Item cc-cli-windows-amd64.exe cc-cli.exe
           ```
 
           ### Usage
 
           ```
-          cd your-fork
           cc-cli init     # guided setup
           cc-cli build    # trigger calendar build
           cc-cli status   # check workflow runs
