@@ -1,86 +1,98 @@
 <Component name="EventCard">
 
-  <Card padding="$space-2" width="100%" marginBottom="{$props.compact ? '0' : '$space-1'}" borderLeft="{window.clusterBorder($props.event.cluster_id, $props.filterTerm)}">
+  <Card padding="0" overflow="hidden" width="100%" marginBottom="{$props.compact ? '0' : '$space-1'}" borderLeft="{window.clusterBorder($props.event.cluster_id, $props.filterTerm)}">
     <VStack gap="0px">
-      <Image when="{$props.event.image_url}" src="{$props.event.image_url}" width="100%" height="160px" fit="cover" marginBottom="$space-1" />
-      <Text
-        fontSize="13px"
-        color="$color-text-secondary"
-        marginBottom="-2px"
-        value="{window.formatDayOfWeek($props.event.start_time) + ' ' + window.formatMonthDay($props.event.start_time) + (window.formatTime($props.event.start_time) ? ', ' + window.formatTime($props.event.start_time) : '')}"
-      />
-      <Link when="{$props.event.url}" to="{$props.event.url}" target="_blank" marginBottom="2px">
-        <Text fontWeight="600" fontSize="13px" overflowMode="flow" value="{$props.event.title}" />
-      </Link>
-      <Text when="{!$props.event.url}" fontWeight="600" fontSize="13px" overflowMode="flow" marginBottom="2px" value="{$props.event.title}" />
-      <Text when="{$props.event.location}" fontSize="13px" lineHeight="1.3" color="$color-text-secondary" overflowMode="flow" value="{$props.event.location}" />
-      <Text
-        when="{$props.event.source}"
-        fontSize="13px"
-        color="$color-text-tertiary"
-        overflowMode="flow"
-        value="{$props.event.source}"
-      />
-      <Markdown
-        when="{$props.filterTerm && window.getDescriptionSnippet($props.event.description, $props.filterTerm)}"
-        fontSize="13px"
-        color="$color-text-secondary"
-        padding="0"
-        margin="0"
-        content="{window.getDescriptionSnippet($props.event.description, $props.filterTerm)}"
-      />
-      <Text
-        when="{$props.event.description || $props.event.image_url}"
-        fontSize="13px"
-        lineHeight="1.3"
-        color="$color-text-secondary"
-        overflowMode="flow"
-        cursor="pointer"
-        marginTop="$space-1"
-        onClick="detailDialog.open($props.event)"
-        value="{(window.getSnippet($props.event.description, $props.event.title) || '') + ' \u24d8'}"
-      />
-      <HStack verticalAlignment="center" gap="$space-2" marginTop="$space-2">
-        <Badge
-          when="{$props.event.category}"
-          value="{$props.event.category}"
-          variant="pill"
-          fontSize="0.65em"
-          colorMap="{$props.categoryColorMap}"
-          cursor="pointer"
-          onClick="setCategoryFilter($props.event.category)"
+      <Image when="{$props.event.image_url}" src="{$props.event.image_url}" width="100%" height="160px" fit="cover" borderRadius="8px 8px 0 0" />
+      <VStack gap="0px" padding="$space-3" paddingTop="{$props.event.image_url ? '$space-2' : '$space-3'}">
+        <Text
+          fontSize="13px"
+          color="$color-text-secondary"
+          marginBottom="-2px"
+          value="{window.formatDayOfWeek($props.event.start_time) + ' ' + window.formatMonthDay($props.event.start_time) + (window.formatTime($props.event.start_time) ? ', ' + window.formatTime($props.event.start_time) : '')}"
         />
-        <Icon
-          when="{window.authUser && $props.event.category}"
-          name="l-pencil"
-          width="14px"
-          height="14px"
+        <Link when="{$props.event.url}" to="{$props.event.url}" target="_blank" marginBottom="2px">
+          <Text fontWeight="600" fontSize="13px" overflowMode="flow" value="{$props.event.title}" />
+        </Link>
+        <Text when="{!$props.event.url}" fontWeight="600" fontSize="13px" overflowMode="flow" marginBottom="2px" value="{$props.event.title}" />
+        <Text when="{$props.event.location}" fontSize="13px" lineHeight="1.3" color="$color-text-secondary" overflowMode="flow" value="{$props.event.location}" />
+        <Text
+          when="{$props.event.source}"
+          fontSize="13px"
           color="$color-text-tertiary"
-          cursor="pointer"
-          tooltip="Override category"
-          onClick="categoryDialog.open($props.event)"
+          overflowMode="flow"
+          value="{$props.event.source}"
         />
-        <Badge
-          when="{!$props.event.category && window.authUser}"
-          value="+ category"
-          variant="pill"
-          fontSize="0.65em"
-          cursor="pointer"
-          onClick="categoryDialog.open($props.event)"
+        <Markdown
+          when="{$props.filterTerm && window.getDescriptionSnippet($props.event.description, $props.filterTerm)}"
+          fontSize="13px"
+          color="$color-text-secondary"
+          padding="0"
+          margin="0"
+          content="{window.getDescriptionSnippet($props.event.description, $props.filterTerm)}"
         />
-        <SpaceFiller />
-        <AddToCalendar event="{$props.event}" />
-        <Icon
-          when="{window.authUser}"
-          name="l-bookmark"
-          width="14px"
-          height="14px"
-          tooltip="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData) ? 'Remove from my picks' : 'Add to my picks'}"
-          color="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData) ? '$color-primary-500' : '$color-surface-500'}"
+        <Text
+          when="{$props.event.description}"
+          fontSize="13px"
+          lineHeight="1.3"
+          color="$color-text-secondary"
+          overflowMode="flow"
           cursor="pointer"
-          onClick="togglePick($props.event)"
+          marginTop="$space-1"
+          onClick="detailDialog.open($props.event)"
+          value="{window.getSnippet($props.event.description, $props.event.title)}"
         />
-      </HStack>
+        <HStack verticalAlignment="center" gap="$space-2" marginTop="$space-2">
+          <Badge
+            when="{$props.event.category}"
+            value="{$props.event.category}"
+            variant="pill"
+            fontSize="0.65em"
+            colorMap="{$props.categoryColorMap}"
+            cursor="pointer"
+            onClick="setCategoryFilter($props.event.category)"
+          />
+          <Icon
+            when="{window.authUser && $props.event.category}"
+            name="l-pencil"
+            width="14px"
+            height="14px"
+            color="$color-text-tertiary"
+            cursor="pointer"
+            tooltip="Override category"
+            onClick="categoryDialog.open($props.event)"
+          />
+          <Badge
+            when="{!$props.event.category && window.authUser}"
+            value="+ category"
+            variant="pill"
+            fontSize="0.65em"
+            cursor="pointer"
+            onClick="categoryDialog.open($props.event)"
+          />
+          <SpaceFiller />
+          <Icon
+            when="{$props.event.description || $props.event.image_url}"
+            name="l-info"
+            width="16px"
+            height="16px"
+            color="$color-surface-500"
+            cursor="pointer"
+            tooltip="View details"
+            onClick="detailDialog.open($props.event)"
+          />
+          <AddToCalendar event="{$props.event}" />
+          <Icon
+            when="{window.authUser}"
+            name="l-bookmark"
+            width="14px"
+            height="14px"
+            tooltip="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData) ? 'Remove from my picks' : 'Add to my picks'}"
+            color="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData) ? '$color-primary-500' : '$color-surface-500'}"
+            cursor="pointer"
+            onClick="togglePick($props.event)"
+          />
+        </HStack>
+      </VStack>
     </VStack>
   </Card>
 
