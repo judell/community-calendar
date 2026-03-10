@@ -1,10 +1,13 @@
 import React from 'react';
 import {
-  Info, CalendarPlus, Download,
+  Info, CalendarPlus, Download, Bookmark,
   Palette, BookOpen, Laugh, Users, Drama, GraduationCap, Baby,
   Film, UtensilsCrossed, Landmark, Heart, Clock, Music,
   TreePine, Church, Dumbbell, Calendar,
 } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth.jsx';
+import { usePicks } from '../../hooks/usePicks.jsx';
+import EnrichmentEditor from '../EnrichmentEditor.jsx';
 import {
   formatDayOfWeek,
   formatMonthDay,
@@ -71,6 +74,7 @@ export function ActionBar({ event, onCategoryFilter, onShowDetail, colors }) {
         onClick={() => onCategoryFilter && onCategoryFilter(event.category)}
       />
       <div className="flex-1" />
+      <BookmarkButton event={event} />
       {(event.description || event.image_url) && (
         <button
           onClick={onShowDetail}
@@ -97,6 +101,49 @@ export function ActionBar({ event, onCategoryFilter, onShowDetail, colors }) {
         <Download size={16} />
       </button>
     </div>
+  );
+}
+
+function BookmarkButton({ event }) {
+  const { user } = useAuth();
+  const { isEventPicked, togglePick } = usePicks();
+  const [toggling, setToggling] = React.useState(false);
+  const [showEditor, setShowEditor] = React.useState(false);
+
+  if (!user) return null;
+
+  const picked = isEventPicked(event.id);
+
+  async function handleClick() {
+    if (picked) {
+      // Unpick directly
+      if (toggling) return;
+      setToggling(true);
+      try { await togglePick(event); } finally { setToggling(false); }
+    } else {
+      // Open pick editor
+      setShowEditor(true);
+    }
+  }
+
+  return (
+    <>
+      <button
+        onClick={handleClick}
+        className={`transition-colors ${picked ? 'text-amber-500 hover:text-amber-600' : 'text-gray-300 hover:text-gray-500'}`}
+        title={picked ? 'Remove from picks' : 'Add to picks'}
+      >
+        <Bookmark size={16} fill={picked ? 'currentColor' : 'none'} />
+      </button>
+      {showEditor && (
+        <EnrichmentEditor
+          event={event}
+          mode="pick"
+          onClose={() => setShowEditor(false)}
+          onSaved={() => {}}
+        />
+      )}
+    </>
   );
 }
 

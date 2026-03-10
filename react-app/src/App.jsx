@@ -4,24 +4,27 @@ import Header from './components/Header.jsx';
 import SearchBar from './components/SearchBar.jsx';
 import StyleSwitcher from './components/StyleSwitcher.jsx';
 import MasonryGrid from './components/MasonryGrid.jsx';
+import PicksList from './components/PicksList.jsx';
 import { useEvents } from './hooks/useEvents.js';
 import { useEnrichments } from './hooks/useEnrichments.js';
 import { useProcessedEvents } from './hooks/useProcessedEvents.js';
 import { useInfiniteScroll } from './hooks/useInfiniteScroll.js';
 import { useColumnCount } from './hooks/useColumnCount.js';
+import { useAuth } from './hooks/useAuth.jsx';
 import { getActiveCategories } from './lib/helpers.js';
 
 function App() {
-  // Read city from URL params
   const city = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('city') || null;
   }, []);
 
+  const { user } = useAuth();
   const [filterTerm, setFilterTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [displayCount, setDisplayCount] = useState(50);
   const [cardStyle, setCardStyle] = useState('accent');
+  const [viewMode, setViewMode] = useState('cards');
 
   const { events, loading } = useEvents(city);
   const enrichments = useEnrichments(city);
@@ -59,7 +62,6 @@ function App() {
     setCategoryFilter('');
   }, []);
 
-  // Update page title
   useMemo(() => {
     if (city) {
       const CITY_NAMES = {
@@ -78,39 +80,68 @@ function App() {
   return (
     <div className="flex justify-center w-full overflow-x-hidden bg-gray-50 min-h-screen">
       <div className="max-w-[1400px] w-full px-4 py-6">
-        <Header city={city} />
-        <SearchBar
-          filterTerm={filterTerm}
-          onFilterTermChange={(val) => { setFilterTerm(val); setDisplayCount(50); }}
-          categoryFilter={categoryFilter}
-          onCategoryFilterChange={handleCategoryFilter}
-          activeCategories={activeCategories}
-          onClearAll={handleClearAll}
-        />
-        <StyleSwitcher value={cardStyle} onChange={setCardStyle} />
+        <Header city={city} events={processedEvents} />
 
-        {loading && (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
-          </div>
-        )}
+        {/* View mode tabs — only show picks tab when signed in */}
+        <div className="flex gap-1 mb-4">
+          <button
+            onClick={() => setViewMode('cards')}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              viewMode === 'cards' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Cards
+          </button>
+          {user && (
+            <button
+              onClick={() => setViewMode('picks')}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                viewMode === 'picks' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              My Picks
+            </button>
+          )}
+        </div>
 
-        {!loading && events && (
+        {viewMode === 'cards' && (
           <>
-            <MasonryGrid
-              masonryColumns={masonryColumns}
+            <SearchBar
               filterTerm={filterTerm}
-              onCategoryFilter={handleCategoryFilter}
-              variant={cardStyle}
+              onFilterTermChange={(val) => { setFilterTerm(val); setDisplayCount(50); }}
+              categoryFilter={categoryFilter}
+              onCategoryFilterChange={handleCategoryFilter}
+              activeCategories={activeCategories}
+              onClearAll={handleClearAll}
             />
+            <StyleSwitcher value={cardStyle} onChange={setCardStyle} />
 
-            {hasMore && !filterTerm && (
-              <div ref={sentinelRef} className="w-full text-center py-4 text-gray-400 text-sm">
-                Loading more...
+            {loading && (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
               </div>
+            )}
+
+            {!loading && events && (
+              <>
+                <MasonryGrid
+                  masonryColumns={masonryColumns}
+                  filterTerm={filterTerm}
+                  onCategoryFilter={handleCategoryFilter}
+                  variant={cardStyle}
+                />
+
+                {hasMore && !filterTerm && (
+                  <div ref={sentinelRef} className="w-full text-center py-4 text-gray-400 text-sm">
+                    Loading more...
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
+
+        {viewMode === 'picks' && <PicksList />}
       </div>
     </div>
   );

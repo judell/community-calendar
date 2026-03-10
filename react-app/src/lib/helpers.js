@@ -443,6 +443,21 @@ export function buildGoogleCalendarUrl(event) {
   return 'https://calendar.google.com/calendar/render?' + params.toString();
 }
 
+// --- Source counts ---
+export function getSourceCounts(events) {
+  if (!events || !events.length) return [];
+  const counts = {};
+  events.forEach(e => {
+    const sources = (e.source || 'Unknown').split(', ');
+    sources.forEach(src => {
+      counts[src] = (counts[src] || 0) + 1;
+    });
+  });
+  return Object.entries(counts)
+    .map(([source, count]) => ({ source, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
 // --- ICS download ---
 function formatICSDate(isoString) {
   if (!isoString) return '';
@@ -499,4 +514,116 @@ export function downloadEventICS(event) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// --- RRULE helpers ---
+
+export function buildRRule(frequency, selectedDays, ordinal, monthDay) {
+  if (!frequency || frequency === 'none') return null;
+
+  const dayMap = {
+    SU: RRule.SU, MO: RRule.MO, TU: RRule.TU, WE: RRule.WE,
+    TH: RRule.TH, FR: RRule.FR, SA: RRule.SA,
+  };
+
+  const options = {
+    freq: frequency === 'WEEKLY' ? RRule.WEEKLY : RRule.MONTHLY,
+  };
+
+  if (frequency === 'WEEKLY' && selectedDays?.length > 0) {
+    options.byweekday = selectedDays.map(d => dayMap[d]).filter(Boolean);
+  }
+
+  if (frequency === 'MONTHLY' && monthDay && ordinal) {
+    options.byweekday = [dayMap[monthDay].nth(ordinal)];
+  }
+
+  const rule = new RRule(options);
+  return rule.toString().replace('RRULE:', '');
+}
+
+export function parseRRule(rruleString) {
+  if (!rruleString) return { frequency: 'none', days: [] };
+
+  try {
+    const fullRule = rruleString.startsWith('RRULE:') ? rruleString : 'RRULE:' + rruleString;
+    const rule = RRule.fromString(fullRule);
+
+    const freqMap = {
+      [RRule.WEEKLY]: 'WEEKLY',
+      [RRule.MONTHLY]: 'MONTHLY',
+      [RRule.DAILY]: 'DAILY',
+      [RRule.YEARLY]: 'YEARLY',
+    };
+
+    const dayCodeMap = { 0: 'MO', 1: 'TU', 2: 'WE', 3: 'TH', 4: 'FR', 5: 'SA', 6: 'SU' };
+
+    const frequency = freqMap[rule.options.freq] || 'none';
+    const days = (rule.options.byweekday || []).map(d => {
+      const dayNum = typeof d === 'number' ? d : d.weekday;
+      return dayCodeMap[dayNum];
+    }).filter(Boolean);
+
+    return { frequency, days };
+  } catch (e) {
+    return { frequency: 'none', days: [] };
+  }
+}
+
+export function toggleDay(days, day) {
+  return days.includes(day) ? days.filter(d => d !== day) : [...days, day];
+}
+
+export function getOrdinalWeekday(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + 'T12:00:00Z');
+  const dayOfMonth = d.getUTCDate();
+  const ordinal = Math.ceil(dayOfMonth / 7);
+  const dayCodes = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+  const day = dayCodes[d.getUTCDay()];
+  return { ordinal, day };
+}
+
+export function detectRecurrence(...texts) {
+  const dayMap = { sunday: 'SU', monday: 'MO', tuesday: 'TU', wednesday: 'WE', thursday: 'TH', friday: 'FR', saturday: 'SA' };
+
+  for (const text of texts) {
+    const result = _detectRecurrenceInText(text);
+    if (result) {
+      if (result.frequency === 'WEEKLY' && result.days.length === 0) {
+        for (const t of texts) {
+          if (t) {
+            const dayMatch = t.toLowerCase().match(/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)s?\b/);
+            if (dayMatch) { result.days = [dayMap[dayMatch[1]]]; break; }
+          }
+        }
+      }
+      return result;
+    }
+  }
+  return null;
+}
+
+function _detectRecurrenceInText(text) {
+  if (!text) return null;
+  const lower = text.toLowerCase();
+  const dayMap = { sunday: 'SU', monday: 'MO', tuesday: 'TU', wednesday: 'WE', thursday: 'TH', friday: 'FR', saturday: 'SA' };
+
+  const everyDay = lower.match(/(?:every|on)\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)s?(?![,\s]+(?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b)/);
+  if (everyDay) return { frequency: 'WEEKLY', days: [dayMap[everyDay[1]]] };
+
+  if (/\bevery\s+week\b|\bweekly\b/.test(lower)) {
+    const dayInText = lower.match(/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)s?\b/);
+    return { frequency: 'WEEKLY', days: dayInText ? [dayMap[dayInText[1]]] : [] };
+  }
+
+  const ordinalMatch = lower.match(/(\d+)(?:st|nd|rd|th)\s+(?:and\s+\d+(?:st|nd|rd|th)\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/);
+  if (ordinalMatch) return { frequency: 'MONTHLY', days: [], ordinal: parseInt(ordinalMatch[1]), monthDay: dayMap[ordinalMatch[2]] };
+
+  const wordOrdinalMap = { first: 1, second: 2, third: 3, fourth: 4 };
+  const wordOrdinalMatch = lower.match(/(first|second|third|fourth)\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/);
+  if (wordOrdinalMatch) return { frequency: 'MONTHLY', days: [], ordinal: wordOrdinalMap[wordOrdinalMatch[1]], monthDay: dayMap[wordOrdinalMatch[2]] };
+
+  if (/\bmonthly\b/.test(lower)) return { frequency: 'MONTHLY', days: [] };
+  return null;
 }
