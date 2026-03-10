@@ -33,14 +33,29 @@ CREATE TRIGGER on_category_override
   BEFORE INSERT OR UPDATE ON category_overrides
   FOR EACH ROW EXECUTE FUNCTION apply_category_override();
 
--- View for report: joins curator name from auth.users
-CREATE OR REPLACE VIEW category_overrides_view AS
+-- SECURITY DEFINER function to resolve curator name without exposing auth.users
+CREATE OR REPLACE FUNCTION public.get_curator_name(curator_uuid uuid)
+RETURNS text
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = ''
+AS $$
+  SELECT raw_user_meta_data->>'user_name'
+  FROM auth.users
+  WHERE id = curator_uuid;
+$$;
+
+-- View for report: uses function instead of direct auth.users join
+CREATE OR REPLACE VIEW category_overrides_view WITH (security_invoker = true) AS
 SELECT
   co.id,
   co.category,
   co.original_category,
   co.created_at,
   co.event_id,
-  u.raw_user_meta_data->>'user_name' AS curator_name
-FROM category_overrides co
-LEFT JOIN auth.users u ON u.id = co.curator_id;
+  public.get_curator_name(co.curator_id) AS curator_name
+FROM category_overrides co;
+
+REVOKE ALL ON category_overrides_view FROM anon, authenticated;
+GRANT SELECT ON category_overrides_view TO anon, authenticated;
