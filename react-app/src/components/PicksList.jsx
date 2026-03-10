@@ -1,24 +1,74 @@
-import React, { useState } from 'react';
-import { X, CalendarPlus, Download, ExternalLink, Settings2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, CalendarPlus, Download, ExternalLink, Settings2, FolderPlus } from 'lucide-react';
 import { usePicks } from '../hooks/usePicks.jsx';
+import { useCollections } from '../hooks/useCollections.js';
 import { formatDayOfWeek, formatMonthDay, formatTime, buildGoogleCalendarUrl, downloadEventICS } from '../lib/helpers.js';
 import EnrichmentEditor from './EnrichmentEditor.jsx';
+import CollectionManager from './CollectionManager.jsx';
+
+function CollectionDropdown({ eventId, collections, addEventToCollection }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  if (!collections.length) return null;
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="text-gray-300 hover:text-gray-500 transition-colors p-1"
+        title="Add to collection"
+      >
+        <FolderPlus size={14} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px] py-1">
+          {collections.map(col => (
+            <button
+              key={col.id}
+              onClick={async () => {
+                await addEventToCollection(col.id, eventId);
+                setOpen(false);
+              }}
+              className="block w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 truncate"
+            >
+              {col.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function PicksList() {
   const { picks, removePick } = usePicks();
+  const { collections, addEventToCollection } = useCollections();
   const [enrichPick, setEnrichPick] = useState(null);
 
   if (!picks.length) {
     return (
-      <div className="text-center py-12 text-gray-400">
-        <p className="text-lg font-medium mb-1">No picks yet</p>
-        <p className="text-sm">Bookmark events from the cards to save them here.</p>
+      <div className="max-w-2xl mx-auto">
+        <CollectionManager />
+        <div className="text-center py-12 text-gray-400">
+          <p className="text-lg font-medium mb-1">No picks yet</p>
+          <p className="text-sm">Bookmark events from the cards to save them here.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto">
+      <CollectionManager />
+
       <div className="space-y-2">
         {picks.map(pick => {
           const event = pick.events;
@@ -46,6 +96,11 @@ export default function PicksList() {
               </div>
 
               <div className="flex items-center gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                <CollectionDropdown
+                  eventId={event.id}
+                  collections={collections}
+                  addEventToCollection={addEventToCollection}
+                />
                 <button
                   onClick={() => setEnrichPick(pick)}
                   className="text-gray-300 hover:text-gray-500 transition-colors p-1"
