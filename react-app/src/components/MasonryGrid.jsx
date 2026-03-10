@@ -5,7 +5,7 @@ export default function MasonryGrid({ masonryColumns, filterTerm, onCategoryFilt
   if (!masonryColumns || !masonryColumns.length) return null;
 
   return (
-    <div className={`flex items-start w-full ${variant === 'minimal' ? 'gap-8' : 'gap-4'}`}>
+    <div className={`flex items-start w-full ${variant === 'minimal' ? 'gap-8' : 'gap-4'} ${variant === 'list' ? 'max-w-[600px] mx-auto' : ''}`}>
       {masonryColumns.map((column, colIdx) => (
         <div key={colIdx} className="flex-1 min-w-0 flex flex-col">
           {column.map(event => (
