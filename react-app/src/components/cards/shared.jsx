@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth.jsx';
 import { usePicks, useIsEventPicked } from '../../hooks/usePicks.jsx';
-import EnrichmentEditor from '../EnrichmentEditor.jsx';
 import {
   formatDayOfWeek,
   formatMonthDay,
@@ -133,44 +132,35 @@ export function ActionBar({ event, onCategoryFilter, onShowDetail, colors }) {
   );
 }
 
+const DEFAULT_BOOKMARK_COLOR = '#1e3a5f';
+
 function BookmarkButton({ event }) {
   const { user } = useAuth();
   const { togglePick } = usePicks();
   const picked = useIsEventPicked(event.id);
   const [toggling, setToggling] = React.useState(false);
-  const [showEditor, setShowEditor] = React.useState(false);
 
   if (!user) return null;
 
+  const colors = categoryColorMap[event.category];
+  const pickedColor = colors ? colors.label : DEFAULT_BOOKMARK_COLOR;
+
   async function handleClick() {
-    if (picked) {
-      // Unpick directly
-      if (toggling) return;
-      setToggling(true);
-      try { await togglePick(event); } finally { setToggling(false); }
-    } else {
-      // Open pick editor
-      setShowEditor(true);
-    }
+    if (toggling) return;
+    setToggling(true);
+    try { await togglePick(event); } finally { setToggling(false); }
   }
 
   return (
     <>
       <button
         onClick={handleClick}
-        className={`transition-colors ${picked ? 'text-amber-500 hover:text-amber-600' : 'text-gray-300 hover:text-gray-500'}`}
+        className={`transition-colors ${picked ? '' : 'text-gray-300 hover:text-gray-500'}`}
+        style={picked ? { color: pickedColor } : undefined}
         title={picked ? 'Remove from picks' : 'Add to picks'}
       >
         <Bookmark size={16} fill={picked ? 'currentColor' : 'none'} />
       </button>
-      {showEditor && (
-        <EnrichmentEditor
-          event={event}
-          mode="pick"
-          onClose={() => setShowEditor(false)}
-          onSaved={() => {}}
-        />
-      )}
     </>
   );
 }
