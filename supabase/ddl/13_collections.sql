@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS collections (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  city text NOT NULL,
   name text NOT NULL,
   card_style text DEFAULT 'accent',
   description text,

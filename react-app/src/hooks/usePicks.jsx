@@ -43,8 +43,10 @@ export function PicksProvider({ city, children }) {
     }
 
     const headers = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + session.access_token };
-    const picksUrl = `${SUPABASE_URL}/rest/v1/picks?select=id,event_id,events(id,title,start_time,end_time,location,url,source,description,image_url,category)&user_id=eq.${user.id}&order=created_at.desc`;
-    const enrichUrl = `${SUPABASE_URL}/rest/v1/event_enrichments?curator_id=eq.${user.id}&select=*`;
+    const cityFilter = city ? `&events.city=eq.${city}` : '';
+    const picksUrl = `${SUPABASE_URL}/rest/v1/picks?select=id,event_id,events!inner(id,title,start_time,end_time,location,url,source,description,image_url,category,city)&user_id=eq.${user.id}${cityFilter}&order=created_at.desc`;
+    const enrichCityFilter = city ? `&city=eq.${city}` : '';
+    const enrichUrl = `${SUPABASE_URL}/rest/v1/event_enrichments?curator_id=eq.${user.id}${enrichCityFilter}&select=*`;
 
     Promise.all([
       fetch(picksUrl, { headers }).then(r => r.json()),
@@ -70,7 +72,7 @@ export function PicksProvider({ city, children }) {
         setPicks([]);
         pickedStore.set(new Set());
       });
-  }, [user, session, refreshKey]);
+  }, [user, session, city, refreshKey]);
 
   const togglePick = useCallback(async (event) => {
     const headers = getHeaders();
@@ -127,7 +129,7 @@ export function PicksProvider({ city, children }) {
   }, [getHeaders, picks, pickedStore]);
 
   return (
-    <PicksContext.Provider value={{ picks, pickedStore, togglePick, removePick }}>
+    <PicksContext.Provider value={{ picks, pickedStore, togglePick, removePick, city }}>
       {children}
     </PicksContext.Provider>
   );
