@@ -1,0 +1,28 @@
+// Category definitions — matches categories.json from the main app
+const CATEGORIES = [
+  { name: "Arts / Culture", label: "#9a7d3a", background: "#f6f0e0" },
+  { name: "Books / Literature / Poetry", label: "#7a6a4a", background: "#eee8dc" },
+  { name: "Comedy / Improv", label: "#8a7a3a", background: "#f2eee0" },
+  { name: "Community / Social", label: "#9a5a5a", background: "#f4e8e8" },
+  { name: "Dance / Performance", label: "#8a4a6a", background: "#f2e4ec" },
+  { name: "Education / Workshops", label: "#4a6a9a", background: "#e4ecf4" },
+  { name: "Family / Kids", label: "#9a4a7d", background: "#f4e4f0" },
+  { name: "Film / Cinema", label: "#6a5a4a", background: "#ece4dc" },
+  { name: "Food / Drink", label: "#9a6a3a", background: "#f4ece0" },
+  { name: "Government / Civic", label: "#5a6a7a", background: "#e4e8ee" },
+  { name: "Health / Wellness", label: "#3a7e7e", background: "#e0f0ec" },
+  { name: "History / Heritage", label: "#7a5a3a", background: "#f0e8dc" },
+  { name: "Music / Concerts", label: "#6b5a9a", background: "#f0ecf6" },
+  { name: "Nature / Outdoors / Recreation", label: "#4a7e4a", background: "#e4f0e4" },
+  { name: "Religion / Spirituality", label: "#6a4a9a", background: "#ece4f4" },
+  { name: "Sports / Fitness", label: "#4a7e6a", background: "#e8f2ec" },
+];
+
+export const categoryList = CATEGORIES.map(c => c.name);
+
+export const categoryColorMap = {};
+CATEGORIES.forEach(c => {
+  categoryColorMap[c.name] = { label: c.label, background: c.background };
+});
+
+export default CATEGORIES;
