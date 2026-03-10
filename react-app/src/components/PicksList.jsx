@@ -95,7 +95,7 @@ export default function PicksList() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1.5 flex-shrink-0">
                 <CollectionDropdown
                   eventId={event.id}
                   collections={collections}
