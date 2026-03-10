@@ -11,17 +11,32 @@ Command-line tool to set up a Community Calendar fork with its own Supabase back
 
 ## Install
 
-Download the binary for your platform from the [Releases page](https://github.com/judell/community-calendar/releases).
+Since `gh` is already required, the easiest way to install is:
 
 ```
-chmod +x cc-cli-*
-sudo mv cc-cli-* /usr/local/bin/cc-cli
-```
+# macOS Apple Silicon (M1/M2/M3/M4)
+gh release download -R judell/community-calendar -p 'cc-cli-darwin-arm64'
+sudo mv cc-cli-darwin-arm64 /usr/local/bin/cc-cli
+chmod +x /usr/local/bin/cc-cli
 
-**macOS users:** Gatekeeper will block the unsigned binary. After downloading, run:
+# macOS Intel
+gh release download -R judell/community-calendar -p 'cc-cli-darwin-amd64'
+sudo mv cc-cli-darwin-amd64 /usr/local/bin/cc-cli
+chmod +x /usr/local/bin/cc-cli
 
-```
-xattr -d com.apple.quarantine cc-cli-*
+# Linux x86_64
+gh release download -R judell/community-calendar -p 'cc-cli-linux-amd64'
+sudo mv cc-cli-linux-amd64 /usr/local/bin/cc-cli
+chmod +x /usr/local/bin/cc-cli
+
+# Linux ARM64
+gh release download -R judell/community-calendar -p 'cc-cli-linux-arm64'
+sudo mv cc-cli-linux-arm64 /usr/local/bin/cc-cli
+chmod +x /usr/local/bin/cc-cli
+
+# Windows (run in PowerShell)
+gh release download -R judell/community-calendar -p 'cc-cli-windows-amd64.exe'
+Rename-Item cc-cli-windows-amd64.exe cc-cli.exe
 ```
 
 Or build from source:
@@ -67,7 +82,7 @@ Shows recent workflow runs.
 ## What you'll need
 
 - A [Supabase](https://supabase.com) account and access token
-- A [GitHub OAuth App](https://github.com/settings/developers) (Client ID + Secret)
-- A [Google OAuth App](https://console.cloud.google.com/apis/credentials) (Client ID + Secret)
-- An [Anthropic API key](https://console.anthropic.com) (for event classification)
-- Optionally: [OpenAI](https://platform.openai.com) and [Ticketmaster](https://developer.ticketmaster.com) API keys
+- A [GitHub OAuth App](https://github.com/settings/developers) (Client ID + Secret) — required for admin login
+- Optionally: a [Google OAuth App](https://console.cloud.google.com/apis/credentials) (Client ID + Secret) — enables Google login for users
+- An [Anthropic API key](https://console.anthropic.com) (for event classification and image recognition)
+- Optionally: [OpenAI](https://platform.openai.com) API key (for audio transcription) and [Ticketmaster](https://developer.ticketmaster.com) API key (for venue-based event discovery)
