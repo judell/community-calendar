@@ -50,7 +50,7 @@ function CollectionDropdown({ eventId, collections, addEventToCollection }) {
 
 export default function PicksList() {
   const { picks, removePick } = usePicks();
-  const { collections, addEventToCollection } = useCollections();
+  const { collections, membershipMap, addEventToCollection } = useCollections();
   const [enrichPick, setEnrichPick] = useState(null);
 
   if (!picks.length) {
@@ -93,6 +93,15 @@ export default function PicksList() {
                   {dateStr}{timeStr ? ` \u00B7 ${timeStr}` : ''}
                   {event.location ? ` \u00B7 ${event.location}` : ''}
                 </p>
+                {membershipMap[event.id]?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {membershipMap[event.id].map(col => (
+                      <span key={col.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-indigo-50 text-indigo-600">
+                        {col.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-1.5 flex-shrink-0">

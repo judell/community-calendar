@@ -8,6 +8,7 @@ export function useCollections() {
   const { user, session } = useAuth();
   const { city } = usePicks();
   const [collections, setCollections] = useState([]);
+  const [membershipMap, setMembershipMap] = useState({});  // event_id → [{id, name}]
   const [refreshKey, setRefreshKey] = useState(0);
 
   const headers = useCallback(() => {
@@ -30,6 +31,28 @@ export function useCollections() {
       .then(data => setCollections(Array.isArray(data) ? data : []))
       .catch(() => setCollections([]));
   }, [user, session, city, refreshKey]);
+
+  // Build reverse map: event_id → collections it belongs to
+  useEffect(() => {
+    if (!session || !collections.length) { setMembershipMap({}); return; }
+    const ids = collections.map(c => c.id);
+    fetch(
+      `${SUPABASE_URL}/rest/v1/collection_events?collection_id=in.(${ids.join(',')})&select=collection_id,event_id`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + session.access_token } }
+    )
+      .then(r => r.json())
+      .then(rows => {
+        if (!Array.isArray(rows)) { setMembershipMap({}); return; }
+        const colMap = Object.fromEntries(collections.map(c => [c.id, c.name]));
+        const map = {};
+        for (const row of rows) {
+          if (!map[row.event_id]) map[row.event_id] = [];
+          map[row.event_id].push({ id: row.collection_id, name: colMap[row.collection_id] });
+        }
+        setMembershipMap(map);
+      })
+      .catch(() => setMembershipMap({}));
+  }, [session, collections]);
 
   const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
 
@@ -84,5 +107,5 @@ export function useCollections() {
     return Array.isArray(data) ? data : [];
   }, [headers]);
 
-  return { collections, createCollection, deleteCollection, addEventToCollection, removeEventFromCollection, getCollectionEvents, refresh };
+  return { collections, membershipMap, createCollection, deleteCollection, addEventToCollection, removeEventFromCollection, getCollectionEvents, refresh };
 }
