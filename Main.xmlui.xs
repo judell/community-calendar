@@ -10,14 +10,19 @@ var enrichmentsData = null;
 var refreshCounter = 0;
 
 function setCategoryFilter(category) {
+  if (window._settingCategory) return;
+  window._settingCategory = true;
   categoryFilter = category || '';
   window.syncCategoryParam(categoryFilter);
+  window._settingCategory = false;
 }
 
 function setCategoryFromTag(category) {
+  window._settingCategory = true;
   categoryFilter = category || '';
   categorySelect.setValue(categoryFilter);
   window.syncCategoryParam(categoryFilter);
+  window._settingCategory = false;
 }
 
 function togglePick(event) {
