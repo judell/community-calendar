@@ -2,7 +2,7 @@
   name="Community Calendar"
   codeBehind="Main.xmlui.xs"
   defaultTheme="community-calendar"
-  var.filterTerm=""
+  var.filterTerm="{window.initialSearch || ''}"
   var.viewMode="{'all'}"
   var.displayStartIndex="{0}"
   var.browseStartIndex="{0}"
@@ -62,10 +62,7 @@
     onDidChange="picks.refetch(); events.refetch(); enrichments.refetch()"
   />
 
-  <ChangeListener
-    listenTo="{filterTerm}"
-    onDidChange="displayStartIndex = browseStartIndex;"
-  />
+  <!-- filterTerm ChangeListener removed: TextBox onDidChange already sets displayStartIndex -->
 
 
 
@@ -114,7 +111,7 @@
   />
 
   <variable name="hiddenSources" value="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []}" />
-  <variable name="processedEvents" value="{window.filterHiddenSources(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), hiddenSources)}" />
+  <variable name="processedEvents" value="{window.buildSearchIndex(window.filterHiddenSources(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), hiddenSources))}" />
 
   <!-- Dialogs -->
   <SignInDialog id="signInDialog" />
@@ -210,7 +207,8 @@
           autoFocus="false"
           placeholder="Search events..."
           fontSize="$fontSize-sm"
-          onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; }"
+          initialValue="{window.initialSearch || ''}"
+          onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; window.syncSearchParam(val); }"
           width="*"
         />
         <Icon
@@ -220,7 +218,7 @@
           cursor="pointer"
           color="$color-text-tertiary"
           opacity="{filterTerm ? 1 : 0}"
-          onClick="searchBox.setValue(''); setCategoryFilter('')"
+          onClick="searchBox.setValue(''); setCategoryFilter(''); window.syncSearchParam('')"
         />
       </HStack>
       <Select
@@ -255,7 +253,7 @@
       marginBottom="$space-2"
       onClick="const prevIndex = window._morePrevIndex ?? 0; displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
     />
-    <List id="eventsList" when="{events.loaded && viewMode === 'all'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, 50, categoryFilter)}" fixedItemSize="true" limit="50">
+    <List id="eventsList" when="{events.loaded && viewMode === 'all'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" fixedItemSize="true" limit="{filterTerm ? 10 : 50}">
       <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
     </List>
     <Button

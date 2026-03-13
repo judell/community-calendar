@@ -26,6 +26,21 @@ window.syncCategoryParam = function(category) {
   window.history.replaceState({}, '', url);
 };
 
+// --- URL sync for search filter (debounced) ---
+var _searchSyncTimer = null;
+window.syncSearchParam = function(search) {
+  clearTimeout(_searchSyncTimer);
+  _searchSyncTimer = setTimeout(function() {
+    var url = new URL(window.location);
+    if (search) {
+      url.searchParams.set('search', search);
+    } else {
+      url.searchParams.delete('search');
+    }
+    window.history.replaceState({}, '', url);
+  }, 500);
+};
+
 // --- Cluster Colors ---
 const CLUSTER_COLORS = ['#6b9bd2', '#7bc47f', '#d4a04a'];
 window.clusterBorder = function(clusterId, filtered) {
@@ -135,21 +150,40 @@ window.getRecordingFile = function() {
   return new File([window.audioBlob], 'recording.' + ext, { type: window.audioMimeType });
 };
 
-// Filter events by search term (searches title, location, source, and description)
+// Pre-compute a lowercase search string per event (call once after events load)
+function buildSearchIndex(events) {
+  if (!events) return events || [];
+  for (var i = 0; i < events.length; i++) {
+    var e = events[i];
+    if (!e._search) {
+      e._search = ((e.title || '') + ' ' + (e.location || '') + ' ' + (e.source || '') + ' ' + (e.description || '')).toLowerCase();
+    }
+  }
+  return events;
+}
+
+// Filter events by search term with progressive narrowing
+var _prevTerm = '';
+var _prevCategory = '';
+var _prevFiltered = null;
+
 function filterEvents(events, term, category) {
   if (!events) return events || [];
-  var result = events;
-  if (category) {
-    result = result.filter(e => e.category === category);
-  }
-  if (!term) return result;
-  const lower = term.toLowerCase();
-  return result.filter(e =>
-    (e.title && e.title.toLowerCase().includes(lower)) ||
-    (e.location && e.location.toLowerCase().includes(lower)) ||
-    (e.source && e.source.toLowerCase().includes(lower)) ||
-    (e.description && e.description.toLowerCase().includes(lower))
-  );
+  var t0 = performance.now();
+  var base = category ? events.filter(function(e) { return e.category === category; }) : events;
+  if (!term) { _prevTerm = ''; _prevCategory = ''; _prevFiltered = null; return base; }
+  var lower = term.toLowerCase();
+  // Progressive narrowing: reuse previous result if extending the same search within same category
+  var narrowing = (_prevTerm && lower.startsWith(_prevTerm) && category === _prevCategory && _prevFiltered);
+  var source = narrowing ? _prevFiltered : base;
+  var result = source.filter(function(e) { return e._search && e._search.includes(lower); });
+  var t1 = performance.now();
+  if (!window._filterLog) window._filterLog = [];
+  window._filterLog.push('filterEvents: ' + (t1 - t0).toFixed(1) + 'ms, source=' + source.length + (narrowing ? ' (narrowed)' : ' (full)') + ', results=' + result.length + ', term="' + term + '"');
+  _prevTerm = lower;
+  _prevCategory = category || '';
+  _prevFiltered = result;
+  return result;
 }
 
 // Return a fixed-size page from a start index.
@@ -1096,6 +1130,7 @@ if (typeof window !== 'undefined') {
           function(result) { return { term: term || '', category: category || '', resultCount: result.length }; })
       : _filterEvents(events, term, category);
   };
+  window.buildSearchIndex = buildSearchIndex;
   window.getPagedEvents = getPagedEvents;
   window.getDescriptionSnippet = getDescriptionSnippet;
   window.formatDayOfWeek = formatDayOfWeek;
