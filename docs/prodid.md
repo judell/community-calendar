@@ -186,6 +186,7 @@ own scrapers, add a pattern to `OUR_SCRAPERS`.
 | `-//DaylightPirates//EB-to-iCAL//EN` | raleighdurham | eb_to_ical_eventbrite_organizer_ical, quail_ridge_books |
 | `-//Elephant in the Room (Eventbrite)//eventbrite.com//` | santarosa | eventbrite_elephant |
 | `-//Elephant in the Room (Songkick)//songkick.com//` | santarosa | songkick_elephant |
+| `-//Indivisible Sonoma County (Mobilize)//mobilize.us//` | santarosa | mobilize_indivisible_sonoma |
 | `-//Phoenix Theater (Eventbrite)//eventbrite.com//` | santarosa | eventbrite_phoenix |
 | `-//Rancho Nicasio (Songkick)//songkick.com//` | santarosa | songkick_rancho_nicasio |
 | `-//SIDEARM Sports//NONSGML SIDEARM//EN` | montclair | montclairathletics_calendar_ashx_calendar_ics, msu_athletics |
