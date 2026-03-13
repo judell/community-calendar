@@ -395,6 +395,7 @@ SOURCE_NAMES = {
     'songkick_redwood_cafe': 'Redwood Cafe',
     'songkick_henhouse': 'HenHouse Brewing',
     'eventbrite_phoenix': 'Phoenix Theater',
+    'mobilize_indivisible_sonoma': 'Indivisible Sonoma County (Mobilize)',
     # Montclair
     'montclairlocal': 'Montclair Local News',
     'montclairfoundation_calendar_of_events': 'Montclair Foundation',
@@ -602,6 +603,7 @@ SOURCE_URLS = {
     'songkick_redwood_cafe': 'https://www.songkick.com/venues/1900888-redwood-cafe',
     'songkick_henhouse': 'https://www.songkick.com/venues/4617123-henhouse-brewing',
     'eventbrite_phoenix': 'https://www.eventbrite.com/o/phoenix-theater-26319831111',
+    'mobilize_indivisible_sonoma': 'https://www.mobilize.us/indivisiblesonomacounty/',
     # Montclair
     'montclairlocal': 'https://montclairlocal.news/events/',
     'montclairfoundation_calendar_of_events': 'https://montclairfoundation.org/calendar-of-events/',

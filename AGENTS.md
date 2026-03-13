@@ -20,6 +20,7 @@
   - [Legistar](#legistar-scraperslegistarpy---city-government-meetings)
   - [Bibliocommons](#bibliocommons-scraperslibbibliocommunspy---library-event-platforms)
   - [GoDaddy Calendar](#godaddy-calendar-scraperslibgodaddypy---godaddy-website-builder)
+  - [Mobilize.us](#mobilizeus-scrapersmobilizepy---civic-and-political-organizing)
 - [Platform-Specific Techniques](#platform-specific-techniques)
   - [SeeTickets Widgets](#seetickets-widgets)
   - [Wix Events](#wix-events)
@@ -295,6 +296,19 @@ class MyVenueScraper(GoDaddyScraper):
 if __name__ == '__main__':
     MyVenueScraper.main()
 ```
+
+### Mobilize.us (`scrapers/mobilize.py`) - Civic and Political Organizing
+Mobilize.us hosts event pages for political and civic organizations. Each organization has a public page (e.g., `mobilize.us/indivisiblesonomacounty/`) that embeds event data as JSON in `window.__MLZ_EMBEDDED_DATA__`. The scraper extracts this data — no API key needed.
+
+```bash
+python scrapers/mobilize.py --url "https://www.mobilize.us/indivisiblesonomacounty/" --name "Indivisible Sonoma County (Mobilize)" --output cities/santarosa/mobilize_indivisible_sonoma.ics
+```
+
+Events often have multiple timeslots (recurring phone banks, weekly protests, etc.) — each timeslot becomes a separate calendar event. The scraper handles virtual events, location data, and event images.
+
+**Discovery:** Search `site:mobilize.us "{city name}"` or `site:mobilize.us "{county name}"` to find organizations in a given area.
+
+**Note:** Mobilize.us appears to have a public API at `api.mobilize.us/v1/` but we could not find the correct organization endpoint for specific groups. The embedded-data approach works reliably. If you find a working API pattern, prefer it over HTML parsing.
 
 ---
 

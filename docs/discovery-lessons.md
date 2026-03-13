@@ -49,6 +49,7 @@ Real-world lessons from source discovery across cities. These complement the str
 - [LibCal Library Calendars](#libcal-library-calendars)
 - [CampusLabs University Calendars](#campuslabs-university-calendars)
 - [TeamUp Calendars](#teamup-calendars)
+- [Mobilize.us for Civic and Political Organizing](#mobilizeus-for-civic-and-political-organizing)
 
 ## "Curl-and-Done" Sources: No Scraper Needed
 
@@ -557,3 +558,22 @@ https://ics.teamup.com/{calendar_key}
 Find the calendar key by looking for TeamUp embeds in the organization's website (iframe `src` containing `teamup.com`).
 
 **Example:** Congregation Shomrei Emunah — 80 events from a TeamUp ICS feed.
+
+## Mobilize.us for Civic and Political Organizing
+
+[Mobilize.us](https://www.mobilize.us) is a platform used by political and civic organizations to coordinate events — phone banks, canvassing, protests, town halls, voter registration drives. Each organization has a public page like `mobilize.us/{org-slug}/` that server-renders event data into a `window.__MLZ_EMBEDDED_DATA__` JSON blob.
+
+The scraper (`scrapers/mobilize.py`) extracts this embedded JSON and converts events to ICS. It's reusable for any organization:
+```bash
+python scrapers/mobilize.py --url "https://www.mobilize.us/indivisiblesonomacounty/" --name "Indivisible Sonoma County (Mobilize)" -o events.ics
+```
+
+**Discovery:** Search `site:mobilize.us "{city or county name}"` to find local organizations.
+
+**Key characteristics:**
+- Organization pages often show events from partner organizations too (e.g., Indivisible Sonoma County's page includes events from Swing Left, No Kings, etc.)
+- Many events are recurring with multiple timeslots — the scraper expands each timeslot into a separate calendar event
+- Events include both virtual (Zoom calls, phone banks) and in-person (rallies, canvassing)
+- Event volume can be high: Indivisible Sonoma County yielded 142 future events
+
+**API situation:** Mobilize.us has a public API at `api.mobilize.us/v1/` that lists organizations and events. However, we were unable to find the correct endpoint to query events for a specific organization by slug. The API returned all 289K+ events globally rather than filtering to a specific org. The embedded-data approach is reliable and avoids this issue. If someone discovers the correct API pattern for org-specific queries, it would be preferable — it would support pagination (the embedded data is limited to the first page of ~25 events) and avoid HTML parsing.

@@ -218,6 +218,20 @@ The Bohemian, Press Democrat, and NorCal Public Media calendars all use **CitySp
 
 The film festival doesn't maintain its own events feed - it's more of a promotional site. Their events are listed through SebArts and may also appear in Bohemian/Press Democrat coverage.
 
+## Mobilize.us (Added 2026-03-12)
+
+| Field | Value |
+|-------|-------|
+| URL | https://www.mobilize.us/indivisiblesonomacounty/ |
+| Platform | Mobilize.us (embedded `__MLZ_EMBEDDED_DATA__`) |
+| Script | `scrapers/mobilize.py --url <org_page> --name <source_name>` |
+| Output | `cities/santarosa/mobilize_indivisible_sonoma.ics` |
+| Events Found | ~142 (as of 2026-03-12) |
+
+**Note:** Generic scraper — can be reused for any Mobilize.us organization page in any city. Events include civic actions, phone banks, protests, and political organizing from Indivisible Sonoma County and partner orgs (Swing Left, No Kings, etc.). Many events are recurring with multiple timeslots.
+
+---
+
 ## City of Santa Rosa Legistar (Added 2026-02-14)
 
 | Field | Value |
