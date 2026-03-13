@@ -12,13 +12,7 @@ var refreshCounter = 0;
 function setCategoryFilter(category) {
   categoryFilter = category || '';
   categorySelect.setValue(categoryFilter);
-  var url = new URL(window.location);
-  if (categoryFilter) {
-    url.searchParams.set('category', categoryFilter);
-  } else {
-    url.searchParams.delete('category');
-  }
-  window.history.replaceState({}, '', url);
+  window.syncCategoryParam(categoryFilter);
 }
 
 function togglePick(event) {

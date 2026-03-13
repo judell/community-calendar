@@ -15,6 +15,17 @@ window.getActiveCategories = function(events) {
   return window.categoryList.filter(function(c) { return counts[c]; }).map(function(c) { return { name: c, label: c + ' (' + counts[c] + ')' }; });
 };
 
+// --- URL sync for category filter ---
+window.syncCategoryParam = function(category) {
+  var url = new URL(window.location);
+  if (category) {
+    url.searchParams.set('category', category);
+  } else {
+    url.searchParams.delete('category');
+  }
+  window.history.replaceState({}, '', url);
+};
+
 // --- Cluster Colors ---
 const CLUSTER_COLORS = ['#6b9bd2', '#7bc47f', '#d4a04a'];
 window.clusterBorder = function(clusterId, filtered) {
