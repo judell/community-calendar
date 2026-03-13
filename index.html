@@ -72,6 +72,8 @@
 
       // Pre-populate auth from localStorage so XMLUI sees it at first render
       // (onAuthStateChange is async and may fire after XMLUI evaluates when expressions)
+      // Only use cached session if the access token hasn't expired yet,
+      // otherwise DataSources fire with a stale token before onAuthStateChange refreshes it
       window.authUser = null;
       window.authSession = null;
       try {
@@ -79,9 +81,12 @@
         var stored = localStorage.getItem('sb-' + projRef + '-auth-token');
         if (stored) {
           var parsed = JSON.parse(stored);
-          if (parsed.user) {
-            window.authUser = parsed.user;
-            window.authSession = parsed;
+          if (parsed.user && parsed.expires_at) {
+            var nowSec = Math.floor(Date.now() / 1000);
+            if (parsed.expires_at > nowSec) {
+              window.authUser = parsed.user;
+              window.authSession = parsed;
+            }
           }
         }
       } catch(e) {}
