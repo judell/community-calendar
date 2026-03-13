@@ -21,6 +21,7 @@
 | Putah Creek Council | tribe_events ICS | ~5 | Environmental org |
 | Hate-Free Together | tribe_events ICS | ~12 | Community/social justice |
 | Davis Bike Club | Google Calendar ICS | ~107 | Cycling rides & events |
+| Indivisible Yolo | Mobilize.us scraper | ~110 | `mobilize.py` — civic/political organizing (added 2026-03) |
 
 ### Meetup Groups (Discovered 2025-02-08)
 | Group | Events | Notes |

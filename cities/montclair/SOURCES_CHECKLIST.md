@@ -45,6 +45,7 @@
 | NJ Audubon | WordPress ICS | 30 | ✅ Ready |
 | The Raptor Trust | Squarespace per-event ICS | 4 | ✅ Ready |
 | Bicycle Touring Club of NJ | Meetup ICS | 0 | ✅ Ready (seasonal) |
+| Indivisible One NJ | Mobilize.us scraper | 3 | ✅ Ready — `mobilize.py` civic/political organizing (added 2026-03) |
 
 \* Google Calendar feeds include historical events; pipeline filters to future only.
 
