@@ -11,6 +11,11 @@ var refreshCounter = 0;
 
 function setCategoryFilter(category) {
   categoryFilter = category || '';
+  window.syncCategoryParam(categoryFilter);
+}
+
+function setCategoryFromTag(category) {
+  categoryFilter = category || '';
   categorySelect.setValue(categoryFilter);
   window.syncCategoryParam(categoryFilter);
 }
