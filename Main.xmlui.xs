@@ -3,7 +3,7 @@
 
 var categoryColorMap = window.categoryColorMap;
 
-var categoryFilter = '';
+var categoryFilter = window.initialCategory || '';
 var pickEvent = null;
 var picksData = null;
 var enrichmentsData = null;
@@ -12,6 +12,13 @@ var refreshCounter = 0;
 function setCategoryFilter(category) {
   categoryFilter = category || '';
   categorySelect.setValue(categoryFilter);
+  var url = new URL(window.location);
+  if (categoryFilter) {
+    url.searchParams.set('category', categoryFilter);
+  } else {
+    url.searchParams.delete('category');
+  }
+  window.history.replaceState({}, '', url);
 }
 
 function togglePick(event) {
