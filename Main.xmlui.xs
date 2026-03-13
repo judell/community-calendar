@@ -11,7 +11,6 @@ var refreshCounter = 0;
 
 function setCategoryFilter(category) {
   categoryFilter = category || '';
-  categorySelect.setValue(category || '');
   window.syncCategoryParam(categoryFilter);
 }
 

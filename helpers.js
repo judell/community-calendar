@@ -16,13 +16,6 @@ window.getActiveCategories = function(events) {
 };
 
 // --- URL sync for category filter ---
-window._settingCategory = false;
-window.guardCategory = function(fn) {
-  if (window._settingCategory) return;
-  window._settingCategory = true;
-  fn();
-  window._settingCategory = false;
-};
 window.syncCategoryParam = function(category) {
   var url = new URL(window.location);
   if (category) {
