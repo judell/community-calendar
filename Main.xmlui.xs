@@ -10,19 +10,18 @@ var enrichmentsData = null;
 var refreshCounter = 0;
 
 function setCategoryFilter(category) {
-  if (window._settingCategory) return;
-  window._settingCategory = true;
-  categoryFilter = category || '';
-  window.syncCategoryParam(categoryFilter);
-  window._settingCategory = false;
+  window.guardCategory(function() {
+    categoryFilter = category || '';
+    window.syncCategoryParam(categoryFilter);
+  });
 }
 
 function setCategoryFromTag(category) {
-  window._settingCategory = true;
-  categoryFilter = category || '';
-  categorySelect.setValue(categoryFilter);
-  window.syncCategoryParam(categoryFilter);
-  window._settingCategory = false;
+  window.guardCategory(function() {
+    categoryFilter = category || '';
+    categorySelect.setValue(categoryFilter);
+    window.syncCategoryParam(categoryFilter);
+  });
 }
 
 function togglePick(event) {
