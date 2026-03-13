@@ -396,6 +396,10 @@ SOURCE_NAMES = {
     'songkick_henhouse': 'HenHouse Brewing',
     'eventbrite_phoenix': 'Phoenix Theater',
     'mobilize_indivisible_sonoma': 'Indivisible Sonoma County (Mobilize)',
+    # Bloomington
+    'mobilize_indivisible_central_indiana': 'Indivisible Central Indiana (Mobilize)',
+    # Davis
+    'mobilize_indivisible_yolo': 'Indivisible Yolo (Mobilize)',
     # Montclair
     'montclairlocal': 'Montclair Local News',
     'montclairfoundation_calendar_of_events': 'Montclair Foundation',
@@ -438,6 +442,7 @@ SOURCE_NAMES = {
     'njaudubon': 'NJ Audubon',
     'turtle_back_zoo': 'Turtle Back Zoo',
     'raptor_trust': 'The Raptor Trust',
+    'mobilize_indivisible_nj': 'Indivisible One NJ (Mobilize)',
     'sycamore_land_trust': 'Sycamore Land Trust',
 }
 
@@ -604,6 +609,10 @@ SOURCE_URLS = {
     'songkick_henhouse': 'https://www.songkick.com/venues/4617123-henhouse-brewing',
     'eventbrite_phoenix': 'https://www.eventbrite.com/o/phoenix-theater-26319831111',
     'mobilize_indivisible_sonoma': 'https://www.mobilize.us/indivisiblesonomacounty/',
+    # Bloomington
+    'mobilize_indivisible_central_indiana': 'https://www.mobilize.us/indivisiblecentralindiana/',
+    # Davis
+    'mobilize_indivisible_yolo': 'https://www.mobilize.us/indivisibleyolo/',
     # Montclair
     'montclairlocal': 'https://montclairlocal.news/events/',
     'montclairfoundation_calendar_of_events': 'https://montclairfoundation.org/calendar-of-events/',
@@ -632,6 +641,7 @@ SOURCE_URLS = {
     'njaudubon': 'https://njaudubon.org/calendar/',
     'turtle_back_zoo': 'https://www.turtlebackzoo.com/events/',
     'raptor_trust': 'https://www.theraptortrust.org/events',
+    'mobilize_indivisible_nj': 'https://www.mobilize.us/ionj/',
     'maxpreps_montclair_high': 'https://www.maxpreps.com/nj/montclair/montclair-mounties/events/',
 }
 
