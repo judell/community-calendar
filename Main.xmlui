@@ -69,7 +69,7 @@
 
   <ChangeListener
     listenTo="{events.loaded}"
-    onDidChange="() => { if (window.initialCategory && events.loaded) categorySelect.setValue(window.initialCategory) }"
+    onDidChange="() => { if (window.initialCategory && events.loaded && !window._categoryApplied) { window._categoryApplied = true; setCategoryFilter(window.initialCategory); } }"
   />
 
 
@@ -230,7 +230,6 @@
       <Select
         id="categorySelect"
         placeholder="All categories"
-        initialValue="{window.initialCategory}"
         clearable="true"
         fontSize="$fontSize-sm"
         dropdownHeight="520px"
