@@ -220,7 +220,7 @@
           cursor="pointer"
           color="$color-text-tertiary"
           opacity="{filterTerm ? 1 : 0}"
-          onClick="searchBox.setValue(''); setCategoryFromTag('')"
+          onClick="searchBox.setValue(''); setCategoryFilter('')"
         />
       </HStack>
       <Select
@@ -229,7 +229,7 @@
         clearable="true"
         fontSize="$fontSize-sm"
         dropdownHeight="520px"
-        onDidChange="(val) => { setCategoryFilter(val); }"
+        onDidChange="(val) => { categoryFilter = val || ''; window.syncCategoryParam(categoryFilter); }"
         width="*"
       >
         <Items data="{window.getActiveCategories(processedEvents)}">

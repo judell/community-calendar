@@ -10,18 +10,9 @@ var enrichmentsData = null;
 var refreshCounter = 0;
 
 function setCategoryFilter(category) {
-  window.guardCategory(function() {
-    categoryFilter = category || '';
-    window.syncCategoryParam(categoryFilter);
-  });
-}
-
-function setCategoryFromTag(category) {
-  window.guardCategory(function() {
-    categoryFilter = category || '';
-    categorySelect.setValue(categoryFilter);
-    window.syncCategoryParam(categoryFilter);
-  });
+  categoryFilter = category || '';
+  categorySelect.setValue(category || '');
+  window.syncCategoryParam(categoryFilter);
 }
 
 function togglePick(event) {
