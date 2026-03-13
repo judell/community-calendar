@@ -8,6 +8,7 @@ import json
 import re
 import sys
 from datetime import datetime, timezone
+from html import unescape as html_unescape
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -254,11 +255,11 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
 
     for event_content in matches:
         # Extract fields
-        title = extract_field(event_content, 'SUMMARY')
+        title = html_unescape(extract_field(event_content, 'SUMMARY') or '')
         start_time = parse_ics_datetime(extract_field(event_content, 'DTSTART'), local_tz)
         end_time = parse_ics_datetime(extract_field(event_content, 'DTEND'), local_tz)
-        location = extract_field(event_content, 'LOCATION')
-        description = extract_field(event_content, 'DESCRIPTION')
+        location = html_unescape(extract_field(event_content, 'LOCATION') or '')
+        description = html_unescape(extract_field(event_content, 'DESCRIPTION') or '')
         url = extract_field(event_content, 'URL')
         source = extract_field(event_content, 'X-SOURCE')
         source_id = extract_field(event_content, 'X-SOURCE-ID')

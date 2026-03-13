@@ -1,28 +1,27 @@
 <Component name="EventCard">
 
-  <Card padding="2px 6px" marginBottom="4px" borderLeft="{window.clusterBorder($props.event.cluster_id, $props.filterTerm)}">
-    <VStack gap="0px">
+  <Card padding="$space-0_5 $space-1_5" marginBottom="0px" borderRadius="0" boxShadow="none" borderTop="1px solid $color-surface-200" borderBottom="none" borderRight="none" borderLeft="{window.clusterBorder($props.event.cluster_id, $props.filterTerm)}">
+    <VStack gap="$space-0">
       <Text
-        fontSize="13px"
+        fontSize="$fontSize-sm"
         color="$color-text-secondary"
-        marginBottom="-2px"
         value="{window.formatDayOfWeek($props.event.start_time) + ' ' + window.formatMonthDay($props.event.start_time) + (window.formatTime($props.event.start_time) ? ', ' + window.formatTime($props.event.start_time) : '')}"
       />
-      <Link when="{$props.event.url}" to="{$props.event.url}" target="_blank" marginBottom="2px">
-        <Text fontWeight="600" fontSize="13px" overflowMode="flow" value="{$props.event.title}" />
+      <Link when="{$props.event.url}" to="{$props.event.url}" target="_blank">
+        <Text fontWeight="600" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
       </Link>
-      <Text when="{!$props.event.url}" fontWeight="600" fontSize="13px" overflowMode="flow" marginBottom="2px" value="{$props.event.title}" />
-      <Text when="{$props.event.location}" fontSize="13px" lineHeight="1.3" color="$color-text-secondary" overflowMode="flow" value="{$props.event.location}" />
+      <Text when="{!$props.event.url}" fontWeight="600" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
+      <Text when="{$props.event.location}" fontSize="$fontSize-sm" lineHeight="1.3" color="$color-text-secondary" overflowMode="flow" value="{$props.event.location}" />
       <Text
         when="{$props.event.source}"
-        fontSize="13px"
+        fontSize="$fontSize-sm"
         color="$color-text-tertiary"
         overflowMode="flow"
         value="{$props.event.source}"
       />
       <Markdown
         when="{$props.filterTerm && window.getDescriptionSnippet($props.event.description, $props.filterTerm)}"
-        fontSize="13px"
+        fontSize="$fontSize-sm"
         color="$color-text-secondary"
         padding="0"
         margin="0"
@@ -30,7 +29,7 @@
       />
       <Text
         when="{$props.event.description || $props.event.image_url}"
-        fontSize="13px"
+        fontSize="$fontSize-sm"
         lineHeight="1.3"
         color="$color-text-secondary"
         overflowMode="flow"
@@ -39,7 +38,7 @@
         onClick="detailDialog.open($props.event)"
         value="{(window.getSnippet($props.event.description, $props.event.title) || '') + ' \u24d8'}"
       />
-      <HStack verticalAlignment="center" gap="$space-2" marginTop="$space-2">
+      <HStack verticalAlignment="center" gap="$space-1" marginTop="$space-1_5" paddingTop="$space-1" marginBottom="$space-1">
         <Badge
           when="{$props.event.category}"
           value="{$props.event.category}"
@@ -52,9 +51,9 @@
         <Icon
           when="{window.authUser && $props.event.category}"
           name="l-pencil"
-          width="14px"
-          height="14px"
-          color="$color-text-tertiary"
+          width="$space-3"
+          height="$space-3"
+          color="$color-surface-400"
           cursor="pointer"
           tooltip="Override category"
           onClick="categoryDialog.open($props.event)"
@@ -72,8 +71,8 @@
         <Icon
           when="{window.authUser}"
           name="l-bookmark"
-          width="14px"
-          height="14px"
+          width="$space-3"
+          height="$space-3"
           tooltip="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData) ? 'Remove from my picks' : 'Add to my picks'}"
           color="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData) ? '$color-primary-500' : '$color-surface-500'}"
           cursor="pointer"
@@ -100,17 +99,18 @@
     </VStack>
   </ModalDialog>
 
-  <ModalDialog id="detailDialog" title="{$param.title}">
-    <VStack gap="$space-2">
+  <ModalDialog id="detailDialog">
+    <VStack gap="$space-0">
+      <Text fontWeight="600" fontSize="$fontSize-lg" value="{$param.title}" />
       <Text
-        fontSize="$fontSize-xs"
+        fontSize="$fontSize-sm"
         color="$color-text-secondary"
         value="{window.formatDayOfWeek($param.start_time) + ' ' + window.formatMonthDay($param.start_time) + (window.formatTime($param.start_time) ? ', ' + window.formatTime($param.start_time) : '')}"
       />
       <Text when="{$param.location}" fontSize="$fontSize-sm" value="{$param.location}" />
       <Markdown
         when="{$param.source}"
-        fontSize="$fontSize-xs"
+        fontSize="$fontSize-sm"
         fontStyle="italic"
         color="$color-text-tertiary"
         overflowMode="flow"
@@ -119,7 +119,7 @@
         content="{window.formatSourceLinks($param.source, $param.source_urls, (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || [])}"
       />
       <Image when="{$param.image_url}" src="{$param.image_url}" width="100%" fit="contain" />
-      <Markdown when="{$param.description}" content="{$param.description}" />
+      <Markdown when="{$param.description}" fontSize="$fontSize-sm" content="{$param.description}" />
       <Link when="{$param.url}" to="{$param.url}" target="_blank">
         <Text fontSize="$fontSize-sm" value="Event link" />
       </Link>
