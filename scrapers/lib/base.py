@@ -92,8 +92,11 @@ class BaseScraper(ABC):
         
         event = Event()
         event.add('summary', title)
-        event.add('dtstart', dtstart)
-        event.add('dtend', data.get('dtend') or dtstart)
+        tz_params = {}
+        if hasattr(dtstart, 'tzinfo') and dtstart.tzinfo is not None:
+            tz_params = {'TZID': self.timezone}
+        event.add('dtstart', dtstart, parameters=tz_params)
+        event.add('dtend', data.get('dtend') or dtstart, parameters=tz_params)
         
         if data.get('url'):
             event.add('url', data['url'])
