@@ -1,3 +1,26 @@
+# Regression Tests
+#
+# XMLUI engine dependency:
+#   Tests use Playwright getByRole() selectors that depend on XMLUI emitting
+#   proper ARIA attributes. The CDN build at cdn.xmlui.org/xmlui.js (as of
+#   2026-03-13) does NOT emit these, so we use a pinned local copy at
+#   xmlui/xmlui-standalone.umd.js.
+#
+#   To switch to a newer XMLUI build, it must emit these roles and labels:
+#
+#   role="button":
+#     - "Add to my picks"
+#     - "Remove from my picks"
+#     - "Capture Event from Audio"
+#     - "Select Audio File"
+#     - "Done"
+#
+#   role="radio":
+#     - "my picks"
+#     - "list"
+#
+#   Verify with: document.querySelectorAll('[role="button"]').length > 0
+#
 name: Regression Tests
 
 on:
