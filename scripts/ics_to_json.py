@@ -49,11 +49,12 @@ def parse_ics_datetime(dt_str, local_tz=None):
             # UTC time - convert to city's local time
             dt = datetime.strptime(dt_str, '%Y%m%dT%H%M%SZ')
             dt = dt.replace(tzinfo=timezone.utc).astimezone(local_tz)
-            return dt.strftime('%Y-%m-%dT%H:%M:%S')
+            return dt.isoformat()
         elif 'T' in dt_str:
-            # Local time (already in correct timezone)
+            # Local time (already in correct timezone) - attach tz so offset is included
             dt = datetime.strptime(dt_str, '%Y%m%dT%H%M%S')
-            return dt.strftime('%Y-%m-%dT%H:%M:%S')
+            dt = dt.replace(tzinfo=local_tz)
+            return dt.isoformat()
         else:
             # All-day event
             dt = datetime.strptime(dt_str, '%Y%m%d')

@@ -278,12 +278,11 @@ function formatDate(isoString) {
 }
 
 // Format time for display
-// Times were stored as local times but Supabase added +00:00, so use UTC values directly
 function formatTime(isoString) {
   if (!isoString) return '';
   const d = new Date(isoString);
-  const hours = d.getUTCHours();
-  const mins = d.getUTCMinutes();
+  const hours = d.getHours();
+  const mins = d.getMinutes();
   // Skip midnight times (likely means time unknown)
   if (hours === 0 && mins === 0) return '';
   // Format as 12-hour time
@@ -586,14 +585,14 @@ function collapseLongRunningEvents(events) {
   const MIN_OCCURRENCES = 5;  // Need at least this many to consider "long-running"
   const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-  // Get start of today (midnight UTC)
+  // Get start of today (midnight local)
   const now = new Date();
-  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   // Helper: get week number relative to today (0 = this week, 1 = next week, etc.)
   function getWeekFromToday(dateStr) {
     const d = new Date(dateStr);
-    const eventDay = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    const eventDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     const daysDiff = Math.floor((eventDay - todayStart) / (24 * 60 * 60 * 1000));
     return Math.floor(daysDiff / 7);
   }
@@ -602,7 +601,7 @@ function collapseLongRunningEvents(events) {
   const groups = {};
   events.forEach(e => {
     const d = new Date(e.start_time);
-    const timeOfDay = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+    const timeOfDay = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     const key = (e.title || '').trim().toLowerCase() + '|' + (e.location || '').trim().toLowerCase() + '|' + timeOfDay;
     if (!groups[key]) {
       groups[key] = [];
@@ -627,7 +626,7 @@ function collapseLongRunningEvents(events) {
 
   events.forEach(e => {
     const d = new Date(e.start_time);
-    const timeOfDay = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+    const timeOfDay = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     const key = (e.title || '').trim().toLowerCase() + '|' + (e.location || '').trim().toLowerCase() + '|' + timeOfDay;
 
     if (longRunningKeys.has(key)) {
