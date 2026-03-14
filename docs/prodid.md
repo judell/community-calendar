@@ -7,11 +7,11 @@ used across all city feeds, identified by their PRODID header.
 
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
-| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 206 |
-| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 124 |
+| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 228 |
+| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 143 |
 | **Google Calendar** | Public Google Calendar ICS export. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 81 |
+| **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, lancaster, montclair, raleighdurham, santarosa | 44 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 42 |
-| **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, montclair, raleighdurham, santarosa | 41 |
 | **Tockify** | Embeddable calendar widget with public ICS feeds. | bloomington, petaluma, santarosa, toronto | 16 |
 | **MaxPreps** | High school sports schedules. | montclair, petaluma, santarosa | 10 |
 | **LibCal (Springshare)** | Library event management platform. | bloomington, montclair, raleighdurham | 8 |
@@ -24,13 +24,15 @@ used across all city feeds, identified by their PRODID header.
 
 ## Detail
 
-### Meetup (206 feeds)
+### Meetup (228 feeds)
 
 ICS export from meetup.com groups.
 
 **bloomington** (2): meetup_bloomington_atheists_and_rationally_awesome_people, meetup_knobstone_hiking_trail_association_of_indiana_meetup
 
 **davis** (7): meetup_art_in_action, meetup_intercultural_mosaics, meetup_mindful_embodied_spirituality, meetup_mosaics, meetup_pence_adult_art_programs, meetup_winters_shut_up_and_write_meetup_group, meetup_yolo_county_board_game_gathering
+
+**lancaster** (22): meetup_authors_in_the_making, meetup_beingonecenterlancaster, meetup_centralpagameclub, meetup_cposc, meetup_data_lancaster, meetup_gamelancaster, meetup_lancaster_bicycle_club, meetup_lancaster_craft_club, meetup_lancaster_elastic_user_group, meetup_lancaster_freethought_society, meetup_lancaster_guided_meditation_meetup_group_with_buddhist_nun, meetup_lancaster_young_adults_meetup, meetup_lanclug, meetup_levelupmeetup, meetup_meet_people_lancaster, meetup_meetup_group_phcrfejq, meetup_scrapandcraft, meetup_tech_lancaster_meetups, meetup_the_creative_house_of_lancaster, meetup_walking_tails, meetup_womensfriendship60, meetup_wordpress_lancaster
 
 **montclair** (15): meetup_bicycle_touring_club_of_north_jersey, meetup_btcnj, meetup_everwalk_nj, meetup_exploring_montclair, meetup_league_of_women_voters_of_the_montclair_area, meetup_lets_walkprogram, meetup_lwv_montclair, meetup_metrotrails, meetup_montclair_gamenights_and_social_networking_meetup_group, meetup_nj_bvt_sports, meetup_nj_code_coffee, meetup_north_jersey_bowling_soccer_volleyball, meetup_somocon, meetup_themindfulstream, meetup_west_african_drumming_nj
 
@@ -42,13 +44,15 @@ ICS export from meetup.com groups.
 
 **toronto** (95): meetup_20s30s_social, meetup_20s_30s_toronto_social_activities, meetup_a_book_club_downtown_abcd, meetup_ai_ml, meetup_arts_crafts, meetup_arts_culture, meetup_biggest_language_party_event_social_in_toronto, meetup_bike_toronto, meetup_board_games_to, meetup_boardgamestoronto, meetup_book_club_abcd, meetup_bruce_trail, meetup_canoe_trippers, meetup_comedy_improv_and_acting, meetup_devops, meetup_downtown_toronto_women_in_business_meetup, meetup_experience_to, meetup_experiencetoronto, meetup_founders_running, meetup_founders_running_club_toronto, meetup_gta_hiking, meetup_gta_hiking_meetup, meetup_heavy_boardgames, meetup_high_park_yoga, meetup_hiking_boots, meetup_hiking_network, meetup_improv_friends, meetup_improv_to, meetup_jpn_eng_exchange, meetup_lang_exchange_to, meetup_little_sunbeams, meetup_little_sunbeams_parents_tots_meetup, meetup_medieval_renaissance_toronto_royal_citie_of_eoforwic_sca, meetup_medieval_sca, meetup_meetup_group_fqsmjvcq, meetup_microsoft_reactor_toronto, meetup_midtown_arts_and_crafts_group, meetup_mindful_movement, meetup_mindful_movement_toronto, meetup_mini_me, meetup_mini_me_meetups, meetup_movies_social, meetup_ms_reactor, meetup_photography_to, meetup_post_apocalyptic_book_club_toronto_chapter, meetup_postapoc_books, meetup_postgres_to, meetup_python_to, meetup_python_toronto, meetup_sai_dham_canada_toronto_volunteer_group, meetup_sai_dham_volunteer, meetup_salsa_bachata_kizomba_gta, meetup_salsa_gta, meetup_scifi_books, meetup_silent_books, meetup_singles_social, meetup_soul_city, meetup_soulcity, meetup_sup_kayak, meetup_tech_stack, meetup_techto, meetup_the_history_of_parkdale, meetup_the_toronto_paddlers_meetup_group, meetup_thescifibookclub, meetup_these_boots_are_made_for_hiking, meetup_tile_language, meetup_tjex_ca, meetup_toronto, meetup_toronto_20s_to_50s_singles_social, meetup_toronto_ai_machine_learning_data_science, meetup_toronto_arts_and_culture, meetup_toronto_bruce_trail_club, meetup_toronto_dads, meetup_toronto_enterprise_devops_user_group, meetup_toronto_heavy_boardgamers, meetup_toronto_history_walks, meetup_toronto_movies_and_social_group, meetup_toronto_paddlers, meetup_toronto_photography_group, meetup_toronto_postgres, meetup_toronto_silent_book_club_meetup_group, meetup_toronto_tech_stack_exchange, meetup_toronto_wellness, meetup_toronto_wellness_yoga_art_therapy_meditation_chakra, meetup_torontoadventurers, meetup_torontobabel, meetup_torontobikemeetup, meetup_torontocanoetrippers, meetup_torontodadsgroup, meetup_torontojs, meetup_torontotnt, meetup_try_new_things, meetup_wilderness_union, meetup_wildernessunion, meetup_women_biz
 
-### The Events Calendar (WordPress) (124 feeds)
+### The Events Calendar (WordPress) (143 feeds)
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **bloomington** (12): bgc_bloomington, bgcbloomington, bloomingtoncommunityband, bloomspinweave, brown_county_playhouse, browncountyplayhouse, community_band, first_united_church, firstuc, hoosierflyfishers, hoosierflyfishers_list, lotusfest
 
 **davis** (4): hatefreetogether, thedirt, visitdavis, visityolo_event
+
+**lancaster** (19): amtshows, apostlesucc, bird_in_hand, calvarychurch, candyissweet, eastlampetertownship, grandviewwines, lancasterbirdclub, lancasterpa, lancastersciencefactory, lancastertrust, lancasterwatersheds, mickeysblackbox, northmuseum, saintjameslancaster, sdlancaster, stevensandsmithcenter, visitlancastercity, zestchef
 
 **montclair** (9): mhainspire, montclairfoundation_calendar_of_events, montclairlocal, neearth, nertamid, njaudubon, peakperfs, unioncong, whartonarts
 
@@ -78,6 +82,20 @@ Public Google Calendar ICS export.
 
 **toronto** (6): cita_local_events, cita_seminars, cita_special_events, gcal_4h7dspldpuviiv4o1slj9o5p5c, gcal_d7muv9fjli72io6q1a7hkdpf04, gcal_qfg129sn6k25ah00ioakus0gds
 
+### CivicPlus (ical.net) (44 feeds)
+
+Government CMS using ical.net library. Common for city/county websites.
+
+**bloomington** (2): campuslabs_iub, iu_campuslabs
+
+**lancaster** (3): co_common_modules, manheimtownship_common_modules, westlampeter_common_modules
+
+**montclair** (2): campuslabs_montclair, montclair_engage_events_ics
+
+**raleighdurham** (5): dprplaymore_common_modules, durham_gov, durham_gov_community, durham_parks_rec, durhamnc_common_modules
+
+**santarosa** (32): SRCity_Art_in_Public_Places_Committee, SRCity_Board_of_Building_Regulation_Appeals, SRCity_COVID-19_Business_Webinars, SRCity_Charter_Review_Committee, SRCity_CityBus, SRCity_City_Council, SRCity_City_Offices_Closed, SRCity_Climate_Action_Subcommittee, SRCity_Community_Advisory_Board, SRCity_Community_Calendar, SRCity_Creek_Stewardship, SRCity_Cultural_Heritage_Board, SRCity_Design_Review_Board, SRCity_Downtown_Subcommittee, SRCity_Economic_Development_Subcommittee, SRCity_Events, SRCity_HCS_and_Code, SRCity_Main_Calendar, SRCity_Neighborhood_Meetings, SRCity_Parking, SRCity_Planning_Commission, SRCity_Planning_and_Economic_Development, SRCity_Police, SRCity_Public_Works, SRCity_Recreation_and_Parks, SRCity_Santa_Rosa_Water, SRCity_Subdivision_Committee, SRCity_Tourism_Business_Improvement_Area_Advisory_Board, SRCity_Transportation_and_Public_Works, SRCity_Waterways_Advisory_Committee, SRCity_Wildfire_Ready, SRCity_Zoning_Administrator
+
 ### Localist (42 feeds)
 
 Campus/community event platform by Concept3D (Indiana University instance).
@@ -85,18 +103,6 @@ Campus/community event platform by Concept3D (Indiana University instance).
 **bloomington** (33): events_livewhale_130, events_livewhale_135, events_livewhale_218, events_livewhale_221, events_livewhale_234, events_livewhale_235, events_livewhale_237, events_livewhale_261, events_livewhale_275, events_livewhale_314, events_livewhale_343, events_livewhale_378, events_livewhale_56, events_livewhale_59, events_livewhale_64, events_livewhale_81, events_search_events_ics_ics, iu_arts_humanities, iu_asian_culture, iu_auditorium, iu_black_film, iu_cinema, iu_eskenazi_museum, iu_first_nations, iu_hamilton_lugar, iu_jacobs_music, iu_kelley_business, iu_la_casa, iu_lgbtq_culture, iu_libraries, iu_maurer_law, iu_neal_marshall, iu_theatre_dance
 
 **raleighdurham** (9): calendar_1_ics, calendar_group_african_american_cultural_center, calendar_group_gregg_museum_of_art_design, events_1_ics, nc_cultural_resources, ncsu, ncsu_aacc, ncsu_gregg_museum, unc_chapel_hill
-
-### CivicPlus (ical.net) (41 feeds)
-
-Government CMS using ical.net library. Common for city/county websites.
-
-**bloomington** (2): campuslabs_iub, iu_campuslabs
-
-**montclair** (2): campuslabs_montclair, montclair_engage_events_ics
-
-**raleighdurham** (5): dprplaymore_common_modules, durham_gov, durham_gov_community, durham_parks_rec, durhamnc_common_modules
-
-**santarosa** (32): SRCity_Art_in_Public_Places_Committee, SRCity_Board_of_Building_Regulation_Appeals, SRCity_COVID-19_Business_Webinars, SRCity_Charter_Review_Committee, SRCity_CityBus, SRCity_City_Council, SRCity_City_Offices_Closed, SRCity_Climate_Action_Subcommittee, SRCity_Community_Advisory_Board, SRCity_Community_Calendar, SRCity_Creek_Stewardship, SRCity_Cultural_Heritage_Board, SRCity_Design_Review_Board, SRCity_Downtown_Subcommittee, SRCity_Economic_Development_Subcommittee, SRCity_Events, SRCity_HCS_and_Code, SRCity_Main_Calendar, SRCity_Neighborhood_Meetings, SRCity_Parking, SRCity_Planning_Commission, SRCity_Planning_and_Economic_Development, SRCity_Police, SRCity_Public_Works, SRCity_Recreation_and_Parks, SRCity_Santa_Rosa_Water, SRCity_Subdivision_Committee, SRCity_Tourism_Business_Improvement_Area_Advisory_Board, SRCity_Transportation_and_Public_Works, SRCity_Waterways_Advisory_Committee, SRCity_Wildfire_Ready, SRCity_Zoning_Administrator
 
 ### Tockify (16 feeds)
 
@@ -186,10 +192,12 @@ own scrapers, add a pattern to `OUR_SCRAPERS`.
 | `-//DaylightPirates//EB-to-iCAL//EN` | raleighdurham | eb_to_ical_eventbrite_organizer_ical, quail_ridge_books |
 | `-//Elephant in the Room (Eventbrite)//eventbrite.com//` | santarosa | eventbrite_elephant |
 | `-//Elephant in the Room (Songkick)//songkick.com//` | santarosa | songkick_elephant |
+| `-//Facilities Management eXpress, LLC//Facilities Manager//EN` | lancaster | mtwp_ics_hs_ics, mtwp_ics_mt_ics |
 | `-//Indivisible Central Indiana (Mobilize)//mobilize.us//` | bloomington | mobilize_indivisible_central_indiana |
 | `-//Indivisible One NJ (Mobilize)//mobilize.us//` | montclair | mobilize_indivisible_nj |
 | `-//Indivisible Sonoma County (Mobilize)//mobilize.us//` | santarosa | mobilize_indivisible_sonoma |
 | `-//Indivisible Yolo (Mobilize)//mobilize.us//` | davis | mobilize_indivisible_yolo |
+| `-//Lancaster County Dems (Mobilize)//mobilize.us//` | lancaster | mobilize_lancaster_county_dems |
 | `-//Phoenix Theater (Eventbrite)//eventbrite.com//` | santarosa | eventbrite_phoenix |
 | `-//Rancho Nicasio (Songkick)//songkick.com//` | santarosa | songkick_rancho_nicasio |
 | `-//SIDEARM Sports//NONSGML SIDEARM//EN` | montclair | montclairathletics_calendar_ashx_calendar_ics, msu_athletics |
