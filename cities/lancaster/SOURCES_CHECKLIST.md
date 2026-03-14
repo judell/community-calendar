@@ -90,13 +90,13 @@ Prioritized list of potential event sources for the Lancaster, PA community cale
 | McCaskey HS | Scraper | `maxpreps.py` jp-mccaskey-red-tornado |
 | Donegal HS | Scraper | `maxpreps.py` donegal-indians |
 | F&M Athletics (26 sports) | Scraper | `sidearm.py` godiplomats.com, ~274 future events |
+| Lancaster Libraries | Scraper | `drupal_events.py` calendar.lancasterlibraries.org, ~2566 events |
 
 ## Needs Scraper
 
 | Source | Platform | URL | Notes |
 |--------|----------|-----|-------|
 | Lancaster Chamber | GrowthZone App | lancasterchamber.growthzoneapp.com | Uses growthzoneapp.com, not standard /api/events |
-| Lancaster Libraries | Drupal 11 JSON API | calendar.lancasterlibraries.org | JSON feed at `/events/feed/json`, high-value |
 | F&M College events | CampusGroups JSON API | ampersand.fandm.edu/mobile_ws/v17/mobile_events_list | ~376 events but ~90% have "Private Location" — low yield |
 | Millersville University | CampusLabs | engage.millersville.edu | College events |
 | Elizabethtown College | 25Live | -- | College events |
