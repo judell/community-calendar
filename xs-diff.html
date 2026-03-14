@@ -2221,7 +2221,11 @@
           componentText = parts.join(" ");
         } else {
           const interaction = traceEntries.find((e) => e.kind === "interaction");
-          const nativeEvent = traceEntries.find((e) => e.kind?.startsWith("native:"));
+          // Prefer native:click/dblclick for the summary label (most meaningful);
+          // fall back to the first native event if no click exists.
+          const nativeEvent =
+            traceEntries.find((e) => e.kind === "native:click" || e.kind === "native:dblclick") ||
+            traceEntries.find((e) => e.kind?.startsWith("native:"));
           if (interaction) {
             const label = interaction.componentLabel || interaction.uid || "Unknown";
             const action = interaction.interaction || interaction.eventName || "";
@@ -2642,6 +2646,10 @@
           } else if (compName) {
             label = compName;
           }
+          // Append canvas coordinates for native events (used for positional replay)
+          if (typeof e.offsetX === "number") {
+            label += ` [${Math.round(e.offsetX)}, ${Math.round(e.offsetY)}]`;
+          }
 
           events.push({
             entry: e, meta,
@@ -2652,7 +2660,7 @@
 
         // Add collapsed value:change/focus:change/native:* ranges
         for (const [, data] of valueChangeRanges) {
-          const { firstEntry, count, firstValue, lastValue, meta } = data;
+          const { firstEntry, lastEntry, count, firstValue, lastValue, meta } = data;
           const compType = firstEntry.component || "";
           const compId = firstEntry.componentLabel || "";
           const compName = compType && compId && compType !== compId ? `${compType} "${compId}"` : compId || compType;
@@ -2661,6 +2669,11 @@
             label = compName && firstValue ? `${compName} "${firstValue}"` : firstValue ? `"${firstValue}"` : compName;
           } else {
             label = compName ? `${compName} "${firstValue}" → "${lastValue}"` : `"${firstValue}" → "${lastValue}"`;
+          }
+          // Append canvas coordinates from the last entry in the range
+          const coordEntry = count === 1 ? firstEntry : lastEntry;
+          if (typeof coordEntry.offsetX === "number") {
+            label += ` [${Math.round(coordEntry.offsetX)}, ${Math.round(coordEntry.offsetY)}]`;
           }
           events.push({
             entry: { ...firstEntry, _dedupCount: count },
@@ -3291,8 +3304,12 @@
           otherOrphans: otherOrphans.map((e) => {
             // Build title - include URL for API events
             let title = e.kind;
-            if (e.eventName) title += ` ${e.eventName}`;
+            if (e.displayLabel) title += ` ${e.displayLabel}`;
+            else if (e.eventName) title += ` ${e.eventName}`;
             else if (e.url) title += ` ${normalizeMethod(e.method)} ${normalizeUrl(e.url)}`;
+            if (typeof e.offsetX === "number") {
+              title += ` [${Math.round(e.offsetX)}, ${Math.round(e.offsetY)}]`;
+            }
             return { entry: e, meta: buildEntryMeta(e), title };
           }),
           collisions: findDataSourceCollisions(entries),
