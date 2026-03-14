@@ -238,8 +238,8 @@ class MaxPrepsScraper(BaseScraper):
 
 def main():
     parser = argparse.ArgumentParser(description='Scrape MaxPreps high school athletics')
-    parser.add_argument('--school', choices=list(KNOWN_SCHOOLS.keys()),
-                        help='Known school to scrape')
+    parser.add_argument('--school',
+                        help='School slug (e.g., warwick-warriors). Known schools use preconfigured settings; unknown slugs auto-construct the URL.')
     parser.add_argument('--url', help='Custom MaxPreps events URL')
     parser.add_argument('--name', default='MaxPreps School',
                         help='School name for custom URL')
@@ -267,7 +267,13 @@ def main():
             'timezone': tz,
         }
     elif args.school:
-        config = KNOWN_SCHOOLS[args.school]
+        if args.school in KNOWN_SCHOOLS:
+            config = KNOWN_SCHOOLS[args.school]
+        else:
+            parser.error(
+                f"Unknown school '{args.school}'. Use --url instead, e.g.:\n"
+                f"  --url 'https://www.maxpreps.com/pa/lititz/{args.school}/events/' --name 'School Name'"
+            )
     else:
         parser.error('Either --school or --url is required')
     
