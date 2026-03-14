@@ -67,7 +67,6 @@ Prioritized list of potential event sources for the Lancaster, PA community cale
 | The Village | Scraper | `songkick.py` venue 65068 |
 | Lancaster Dispensing Co. | Scraper | `songkick.py` venue 778176 |
 | Southern Market Lancaster | Scraper | `squarespace.py` events/trivia/music |
-| Demuth Museum | Scraper | `squarespace.py` art museum |
 | Lancaster Art Vault | Scraper | `squarespace.py` gallery/workshops |
 | Creatively Lancaster | Scraper | `squarespace.py` arts community |
 | Lancaster Conservancy | Scraper | `eventbrite.py` org 6683570777, nature events |
@@ -123,3 +122,4 @@ Prioritized list of potential event sources for the Lancaster, PA community cale
 | CNP Trivia | Custom site, trivia every night at various bars |
 | Discover Lancaster | Tourism aggregator, useful for phase 4 upstream authority |
 | Lancaster Bible College | Ticketmaster venue Z7r9jZadtj, check for campus calendar |
+| Demuth Museum | Squarespace brochure site, no events feature — needs custom scraper or RSS |
