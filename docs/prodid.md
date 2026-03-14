@@ -12,7 +12,7 @@ used across all city feeds, identified by their PRODID header.
 | **Google Calendar** | Public Google Calendar ICS export. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 81 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, lancaster, montclair, raleighdurham, santarosa | 44 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 42 |
-| **MaxPreps** | High school sports schedules. | lancaster, montclair, petaluma, santarosa | 22 |
+| **MaxPreps** | High school sports schedules. | lancaster, montclair, petaluma, santarosa | 17 |
 | **Tockify** | Embeddable calendar widget with public ICS feeds. | bloomington, petaluma, santarosa, toronto | 16 |
 | **LibCal (Springshare)** | Library event management platform. | bloomington, montclair, raleighdurham | 8 |
 | **Modern Events Calendar (WordPress)** | WordPress plugin by Webnus. PRODID references wp-events-plugin.com. | petaluma, raleighdurham, toronto | 7 |
@@ -104,7 +104,7 @@ Campus/community event platform by Concept3D (Indiana University instance).
 
 **raleighdurham** (9): calendar_1_ics, calendar_group_african_american_cultural_center, calendar_group_gregg_museum_of_art_design, events_1_ics, nc_cultural_resources, ncsu, ncsu_aacc, ncsu_gregg_museum, unc_chapel_hill
 
-### MaxPreps (22 feeds)
+### MaxPreps (17 feeds)
 
 High school sports schedules.
 
@@ -114,7 +114,7 @@ High school sports schedules.
 
 **petaluma** (2): maxpreps_casa_grande, maxpreps_petaluma_high
 
-**santarosa** (6): maxpreps_cardinal_newman, maxpreps_elsie_allen, maxpreps_maria_carrillo, maxpreps_montgomery_high, maxpreps_piner_high, maxpreps_santa_rosa_high
+**santarosa** (1): maxpreps_elsie_allen
 
 ### Tockify (16 feeds)
 
