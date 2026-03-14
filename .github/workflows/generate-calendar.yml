@@ -298,6 +298,56 @@ jobs:
 
 
     # ==========================================
+    # Lancaster
+    # ==========================================
+    - name: Scrape Lancaster sources
+      if: contains(steps.locations.outputs.list, 'lancaster') && github.event.inputs.regenerate_only != 'true'
+      env:
+        TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+      run: |
+        echo "Scraping Lancaster..."
+        python scrapers/mobilize.py --url "https://www.mobilize.us/lancastercountydems/" --name "Lancaster County Dems (Mobilize)" --output cities/lancaster/mobilize_lancaster_county_dems.ics || true
+        # Songkick venues
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/1614528-tellus-360" --name "Tellus360" --output cities/lancaster/songkick_tellus360.ics || true
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/3942704-temple-tellus360" --name "Tellus360 - The Temple" --output cities/lancaster/songkick_tellus360_temple.ics || true
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/415-chameleon-club" --name "Chameleon Club" --output cities/lancaster/songkick_chameleon.ics || true
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/4369005-phantom-power" --name "Phantom Power" --output cities/lancaster/songkick_phantom_power.ics || true
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/4420425-freedom-hall-lancaster-convention-center" --name "Freedom Hall" --output cities/lancaster/songkick_freedom_hall.ics || true
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/65068-village" --name "The Village" --output cities/lancaster/songkick_village.ics || true
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/778176-lancaster-dispensing-company" --name "Lancaster Dispensing Co." --output cities/lancaster/songkick_dispensing.ics || true
+        # Squarespace venues
+        python scrapers/squarespace.py --url "https://www.southernmarketlancaster.com/happenings" --name "Southern Market Lancaster" -o cities/lancaster/southern_market.ics || true
+        python scrapers/squarespace.py --url "https://www.demuth.org" --name "Demuth Museum" -o cities/lancaster/demuth.ics || true
+        python scrapers/squarespace.py --url "https://www.lancasterartvault.com/shows-workshops-events" --name "Lancaster Art Vault" -o cities/lancaster/lancaster_art_vault.ics || true
+        python scrapers/squarespace.py --url "https://www.creativelylancaster.com/events" --name "Creatively Lancaster" -o cities/lancaster/creatively_lancaster.ics || true
+        # Eventbrite
+        python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/lancaster-conservancy-6683570777" --name "Lancaster Conservancy" --output cities/lancaster/eventbrite_lancaster_conservancy.ics || true
+        # Ticketmaster venues
+        python scrapers/ticketmaster.py --venue-id ZFr9jZ7FaA --name "Penn Medicine Park" -o cities/lancaster/tm_penn_medicine_park.ics || true
+        python scrapers/ticketmaster.py --venue-id ZFr9jZe1Fk --name "Fulton Opera House" -o cities/lancaster/tm_fulton.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAEe6dA --name "Freedom Hall" -o cities/lancaster/tm_freedom_hall.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAEeklA --name "Tellus 360" -o cities/lancaster/tm_tellus360.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZ917AxW7 --name "Phantom Power" -o cities/lancaster/tm_phantom_power.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAa1t1A --name "Chameleon Club" -o cities/lancaster/tm_chameleon.ics || true
+        # College athletics (Sidearm JSON-LD)
+        python scrapers/sidearm.py --url "https://godiplomats.com" --name "F&M Athletics" -o cities/lancaster/fandm_athletics.ics || true
+        # High school athletics (MaxPreps)
+        python scrapers/maxpreps.py --school lancaster-catholic-crusaders --output cities/lancaster/maxpreps_lancaster_catholic.ics || true
+        python scrapers/maxpreps.py --school lancaster-mennonite-blazers --output cities/lancaster/maxpreps_lancaster_mennonite.ics || true
+        python scrapers/maxpreps.py --school manheim-township-blue-streaks --output cities/lancaster/maxpreps_manheim_township.ics || true
+        python scrapers/maxpreps.py --school hempfield-black-knights --output cities/lancaster/maxpreps_hempfield.ics || true
+        python scrapers/maxpreps.py --school penn-manor-comets --output cities/lancaster/maxpreps_penn_manor.ics || true
+        python scrapers/maxpreps.py --school conestoga-valley-buckskins --output cities/lancaster/maxpreps_conestoga_valley.ics || true
+        python scrapers/maxpreps.py --school lampeter-strasburg-pioneers --output cities/lancaster/maxpreps_lampeter_strasburg.ics || true
+        python scrapers/maxpreps.py --school ephrata-mountaineers --output cities/lancaster/maxpreps_ephrata.ics || true
+        python scrapers/maxpreps.py --school warwick-warriors --output cities/lancaster/maxpreps_warwick.ics || true
+        python scrapers/maxpreps.py --school elizabethtown-bears --output cities/lancaster/maxpreps_elizabethtown.ics || true
+        python scrapers/maxpreps.py --school jp-mccaskey-red-tornado --output cities/lancaster/maxpreps_mccaskey.ics || true
+        python scrapers/maxpreps.py --school donegal-indians --output cities/lancaster/maxpreps_donegal.ics || true
+      continue-on-error: true
+
+
+    # ==========================================
     # Download feeds + Combine ICS (all cities)
     # ==========================================
     - name: Download live feeds
