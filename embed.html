@@ -131,11 +131,9 @@
           };
 
           (function() {
-            const pad = n => n.toString().padStart(2, '0');
-            const formatLocal = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
             const now = new Date();
-            window.fromDate = formatLocal(new Date(now.getTime() - 60 * 60 * 1000));
-            window.toDate = formatLocal(new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000));
+            window.fromDate = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+            window.toDate = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString();
           })();
           window.getFromDate = function() { return window.fromDate; };
           window.getToDate = function() { return window.toDate; };

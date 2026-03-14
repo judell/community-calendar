@@ -195,19 +195,15 @@
       };
     </script>
     <script>
-      // Date range helpers for upcoming events (one hour ago to one week out)
+      // Date range helpers for upcoming events (one hour ago to three months out)
       // Pre-compute at load time to avoid timing issues with XMLUI expressions
-      // NOTE: Event times are stored as local times with +00:00 marker, so we format
-      // local times directly (not true UTC) to match the database format
+      // Use ISO 8601 with UTC offset so Postgres compares correctly against timestamptz
       (function() {
-        const pad = n => n.toString().padStart(2, '0');
-        const formatLocal = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-
         const now = new Date();
         const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
         const threeMonthsLater = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
-        window.fromDate = formatLocal(oneHourAgo);
-        window.toDate = formatLocal(threeMonthsLater);
+        window.fromDate = oneHourAgo.toISOString();
+        window.toDate = threeMonthsLater.toISOString();
         console.log('Date range initialized:', window.fromDate, 'to', window.toDate);
       })();
 
