@@ -164,10 +164,18 @@ After creating the scraper in `scrapers/`, use `add_scraper.py` to wire it into 
 With `--test`, it also runs the scraper first and checks that it produces a valid .ics file with events.
 
 ```bash
+# Simple scraper (dedicated .py file)
 python scripts/add_scraper.py myscraper santarosa "My Source Name"
 python scripts/add_scraper.py myscraper santarosa "My Source Name" --test      # test first
 python scripts/add_scraper.py myscraper santarosa "My Source Name" --dry-run   # preview
+
+# Reusable/parameterized scraper (e.g. eventbrite, squarespace, songkick)
+python scripts/add_scraper.py eventbrite petaluma "Blue Zones Project Petaluma" \
+  --extra-args '--url "https://www.eventbrite.com/o/78957912343" --name "Blue Zones Project Petaluma"' \
+  --output-name bluezones_petaluma
 ```
+
+`--extra-args` inserts flags before `--output` in the workflow command. `--output-name` overrides the .ics filename (default: scraper name). The script is idempotent — safe to run again on an already-added scraper.
 
 You still need to manually update `SOURCES_CHECKLIST.md` and commit/push.
 
