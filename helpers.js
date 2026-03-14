@@ -258,16 +258,16 @@ function getDescriptionSnippet(description, term) {
   return snippet;
 }
 
-// Format day of week (using UTC since times were stored as local but marked UTC)
+// Format day of week
 function formatDayOfWeek(isoString) {
   if (!isoString) return '';
-  return new Date(isoString).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+  return new Date(isoString).toLocaleDateString('en-US', { weekday: 'short' });
 }
 
-// Format month and day (using UTC since times were stored as local but marked UTC)
+// Format month and day
 function formatMonthDay(isoString) {
   if (!isoString) return '';
-  return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 // Format date for display
@@ -1096,14 +1096,10 @@ function getNextOccurrence(enrichments, eventId, originalStartTime) {
 }
 
 // Convert events to react-big-calendar format, with optional search filter
-// Parse a timestamp string as local time, stripping any UTC offset.
-// DB stores times like "2026-03-03 19:00:00+00" where +00 is misleading —
-// the time is actually local. Parsing as-is would apply UTC→local conversion.
+// Parse a timestamp string into a Date object.
 function parseLocalTime(ts) {
   if (!ts) return new Date();
-  var stripped = ts.replace(/([+-]\d{2}(:\d{2})?|Z)\s*$/, '').trim();
-  stripped = stripped.replace(' ', 'T');
-  return new Date(stripped);
+  return new Date(ts.replace(' ', 'T'));
 }
 
 function toBigCalendarEvents(events, term, category) {
