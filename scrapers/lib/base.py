@@ -92,11 +92,16 @@ class BaseScraper(ABC):
         
         event = Event()
         event.add('summary', title)
-        tz_params = {}
+        # Strip tzinfo and set TZID explicitly as a string to avoid icalendar
+        # serializing ZoneInfo objects (which older versions can't handle)
         if hasattr(dtstart, 'tzinfo') and dtstart.tzinfo is not None:
             tz_params = {'TZID': self.timezone}
-        event.add('dtstart', dtstart, parameters=tz_params)
-        event.add('dtend', data.get('dtend') or dtstart, parameters=tz_params)
+            event.add('dtstart', dtstart.replace(tzinfo=None), parameters=tz_params)
+            dtend = data.get('dtend') or dtstart
+            event.add('dtend', dtend.replace(tzinfo=None), parameters=tz_params)
+        else:
+            event.add('dtstart', dtstart)
+            event.add('dtend', data.get('dtend') or dtstart)
         
         if data.get('url'):
             event.add('url', data['url'])

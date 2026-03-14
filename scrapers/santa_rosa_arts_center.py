@@ -224,13 +224,17 @@ def create_calendar(events: list[dict], year: int, month: int) -> Calendar:
         event = Event()
         event.add('summary', event_data['title'])
         tz_params = {'TZID': 'America/Los_Angeles'}
-        event.add('dtstart', event_data['dtstart'], parameters=tz_params)
+        dtstart = event_data['dtstart']
+        naive_start = dtstart.replace(tzinfo=None) if hasattr(dtstart, 'tzinfo') and dtstart.tzinfo else dtstart
+        event.add('dtstart', naive_start, parameters=tz_params)
 
         if event_data.get('dtend'):
-            event.add('dtend', event_data['dtend'], parameters=tz_params)
+            dtend = event_data['dtend']
+            naive_end = dtend.replace(tzinfo=None) if hasattr(dtend, 'tzinfo') and dtend.tzinfo else dtend
+            event.add('dtend', naive_end, parameters=tz_params)
         else:
             # Default 2-hour duration
-            event.add('dtend', event_data['dtstart'] + timedelta(hours=2), parameters=tz_params)
+            event.add('dtend', naive_start + timedelta(hours=2), parameters=tz_params)
         
         if event_data.get('location'):
             event.add('location', event_data['location'])
