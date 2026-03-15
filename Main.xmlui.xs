@@ -15,18 +15,18 @@ function setCategoryFilter(category) {
 }
 
 function togglePick(event) {
-  if (!window.authSession) {
+  if (!authSession) {
     alert('Please sign in to pick events');
     return;
   }
   const headers = {
     apikey: appGlobals.supabasePublishableKey,
-    Authorization: 'Bearer ' + window.authSession?.access_token
+    Authorization: 'Bearer ' + authSession?.access_token
   };
   const ids = event.mergedIds || [event.id];
   const existing = Actions.callApi({
     method: 'get',
-    url: appGlobals.supabaseUrl + '/rest/v1/picks?select=id&user_id=eq.' + window.authUser.id + '&event_id=in.(' + ids.join(',') + ')',
+    url: appGlobals.supabaseUrl + '/rest/v1/picks?select=id&user_id=eq.' + authUser.id + '&event_id=in.(' + ids.join(',') + ')',
     headers,
     invalidates: []
   });
@@ -42,7 +42,7 @@ function togglePick(event) {
     ids.forEach(function(eid) {
       Actions.callApi({
         method: 'delete',
-        url: appGlobals.supabaseUrl + '/rest/v1/event_enrichments?event_id=eq.' + eid + '&curator_id=eq.' + window.authUser.id,
+        url: appGlobals.supabaseUrl + '/rest/v1/event_enrichments?event_id=eq.' + eid + '&curator_id=eq.' + authUser.id,
         headers,
         invalidates: []
       });
@@ -55,16 +55,16 @@ function togglePick(event) {
 }
 
 function toggleSourceVisibility(source) {
-  if (!window.authSession) return;
+  if (!authSession) return;
   userSettingsData = window.toggleSourceAndSave(source, userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
 }
 
 
 function saveCategoryOverride(eventId, category) {
-  if (!window.authSession) return;
+  if (!authSession) return;
   const headers = {
     apikey: appGlobals.supabasePublishableKey,
-    Authorization: 'Bearer ' + window.authSession?.access_token,
+    Authorization: 'Bearer ' + authSession?.access_token,
   };
   // Upsert override (on_conflict=event_id)
   // DB trigger on category_overrides automatically updates events.category
@@ -78,7 +78,7 @@ function saveCategoryOverride(eventId, category) {
     body: {
       event_id: eventId,
       category: category,
-      curator_id: window.authUser.id,
+      curator_id: authUser.id,
     },
     invalidates: [],
     onSuccess: () => { refreshCounter = refreshCounter + 1; },
@@ -91,7 +91,7 @@ function removePick(pickId) {
     url: appGlobals.supabaseUrl + '/rest/v1/picks?id=eq.' + pickId,
     headers: {
       apikey: appGlobals.supabasePublishableKey,
-      Authorization: 'Bearer ' + window.authSession?.access_token
+      Authorization: 'Bearer ' + authSession?.access_token
     },
     invalidates: []
   });

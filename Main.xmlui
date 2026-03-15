@@ -8,6 +8,8 @@
   var.browseStartIndex="{0}"
   var.scrollRequest="{0}"
   global.userSettingsData="{null}"
+  global.authUser="{authUser}"
+  global.authSession="{authSession}"
   var.city="{window.cityFilter || null}">
 
   <!-- DataSources -->
@@ -22,22 +24,22 @@
 
   <DataSource
     id="picks"
-    when="{window.authSession}"
+    when="{authSession}"
     url="{appGlobals.supabaseUrl + '/rest/v1/picks?select=*,events(*)'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
-      Authorization: 'Bearer ' + window.authSession?.access_token,
+      Authorization: 'Bearer ' + authSession?.access_token,
       'Cache-Control': 'no-cache, no-store, must-revalidate'
     }}"
   />
 
   <DataSource
     id="userSettings"
-    when="{window.authSession}"
+    when="{authSession}"
     url="{appGlobals.supabaseUrl + '/rest/v1/user_settings?select=*&city=eq.' + city + '&limit=1'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
-      Authorization: 'Bearer ' + window.authSession?.access_token,
+      Authorization: 'Bearer ' + authSession?.access_token,
       'Cache-Control': 'no-cache, no-store, must-revalidate'
     }}"
   />
@@ -73,31 +75,31 @@
 
   <DataSource
     id="feedToken"
-    when="{window.authSession}"
+    when="{authSession}"
     url="{appGlobals.supabaseUrl + '/rest/v1/feed_tokens?select=token&limit=1'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
-      Authorization: 'Bearer ' + window.authSession?.access_token
+      Authorization: 'Bearer ' + authSession?.access_token
     }}"
   />
 
   <DataSource
     id="adminGithubAccess"
-    when="{window.authSession && window.authUser?.user_metadata?.user_name}"
-    url="{appGlobals.supabaseUrl + '/rest/v1/admin_github_users?select=github_user&github_user=eq.' + window.authUser?.user_metadata?.user_name + '&limit=1'}"
+    when="{authSession && authUser?.user_metadata?.user_name}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/admin_github_users?select=github_user&github_user=eq.' + authUser?.user_metadata?.user_name + '&limit=1'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
-      Authorization: 'Bearer ' + window.authSession?.access_token
+      Authorization: 'Bearer ' + authSession?.access_token
     }}"
   />
 
   <DataSource
     id="adminGoogleAccess"
-    when="{window.authSession && window.authUser?.email}"
-    url="{appGlobals.supabaseUrl + '/rest/v1/admin_google_users?select=google_email&google_email=eq.' + window.authUser?.email + '&limit=1'}"
+    when="{authSession && authUser?.email}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/admin_google_users?select=google_email&google_email=eq.' + authUser?.email + '&limit=1'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
-      Authorization: 'Bearer ' + window.authSession?.access_token
+      Authorization: 'Bearer ' + authSession?.access_token
     }}"
   />
 
@@ -155,9 +157,8 @@
         <HStack width="100%" verticalAlignment="center">
           <Text overflowMode="ellipsis" maxLines="1" width="*">{window.toDisplayName(city)}</Text>
           <HStack gap="$space-1" verticalAlignment="center">
-            <Icon name="l-rss" tooltip="Sources" width="20px" height="20px" color="$color-surface-500" onClick="sourcesDialog.open()" />
             <Icon
-              when="{!window.authUser}"
+              when="{!authUser}"
               name="l-user"
               tooltip="Sign In"
               width="20px"
@@ -166,32 +167,31 @@
               onClick="signInDialog.open()"
             />
             <Icon
-              when="{window.authUser}"
+              when="{authUser}"
               name="l-user"
-              tooltip="{'Sign Out (' + (window.authUser?.user_metadata?.user_name || window.authUser?.email || 'user') + ')'}"
+              tooltip="{'Sign Out (' + (authUser?.user_metadata?.user_name || authUser?.email || 'user') + ')'}"
               width="20px"
               height="20px"
               color="$color-surface-500"
               onClick="window.signOut()"
             />
             <Icon
-              when="{window.authUser}"
               name="l-camera"
-              tooltip="Capture Event from Poster"
+              tooltip="{authUser ? 'Capture Event from Poster' : 'Sign in to capture events from posters'}"
               width="20px"
               height="20px"
-              color="$color-surface-500"
-              onClick="captureDialog.open()"
+              color="{authUser ? '$color-surface-500' : '$color-surface-300'}"
+              onClick="{ if (authUser) { captureDialog.open() } else { signInDialog.open() } }"
             />
             <Icon
-              when="{window.authUser && ((adminGithubAccess.value || []).length > 0 || (adminGoogleAccess.value || []).length > 0)}"
               name="mic"
-              tooltip="Capture Event from Audio"
+              tooltip="{authUser ? 'Capture Event from Audio' : 'Sign in to capture events with voice'}"
               width="20px"
               height="20px"
-              color="$color-surface-500"
-              onClick="audioCaptureDialog.open()"
+              color="{authUser ? '$color-surface-500' : '$color-surface-300'}"
+              onClick="{ if (authUser) { audioCaptureDialog.open() } else { signInDialog.open() } }"
             />
+            <Icon name="l-rss" tooltip="Sources" width="20px" height="20px" color="$color-surface-500" onClick="sourcesDialog.open()" />
             <Icon name="l-search-code" tooltip="Inspector" width="20px" height="20px" color="$color-surface-500" onClick="inspectorDialog.open()" />
             <Stack transform="scale(0.5)" marginRight="-18px" marginLeft="-12px" height="20px" verticalAlignment="center">
               <ToneSwitch />
@@ -236,7 +236,7 @@
         </Items>
       </Select>
     </HStack>
-    <RadioGroup when="{window.authUser}" initialValue="{viewMode}" onDidChange="(val) => viewMode = val">
+    <RadioGroup when="{authUser}" initialValue="{viewMode}" onDidChange="(val) => viewMode = val">
       <HStack>
         <Option value="all" label="list" />
         <Option value="picks" label="my picks" />

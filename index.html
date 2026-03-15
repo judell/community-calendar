@@ -99,6 +99,15 @@
           '/auth/v1/authorize?provider=' + (provider || 'github') + '&redirect_to=' + encodeURIComponent(returnTo);
       };
 
+      window.signInWithEmail = async function(email, onSuccess) {
+        const { error } = await sb.auth.signInWithOtp({
+          email: email,
+          options: { emailRedirectTo: window.location.origin + window.location.pathname + window.location.search }
+        });
+        if (error) alert('Error: ' + error.message);
+        else if (onSuccess) onSuccess();
+      };
+
       window.signOut = function() {
         console.log('signOut called');
         localStorage.removeItem('sb-dzpdualvwspgqghrysyz-auth-token');
