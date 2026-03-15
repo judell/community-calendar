@@ -7,8 +7,11 @@ Filters to only include events from today forward.
 import argparse
 import json
 import re
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+
+import icalendar
+import recurring_ical_events
 
 # Map filenames to friendly source names.
 # Only needed when the filename doesn't convert cleanly via stem.replace('_', ' ').title().
@@ -125,6 +128,11 @@ SOURCE_NAMES = {
     # Bloomington - Scrapers (various platforms)
     'constellation': 'Constellation Stage & Screen',
     'cicada_cinema': 'Cicada Cinema',
+    # Bloomington - Aggregators
+    'gcal_e1egkmmhjj98nf0rgd2oa4u3ng': 'Let\'s Go! Bloomington',
+    'btonline_events': 'BloomingtonOnline Events',
+    'btonline_food': 'BloomingtonOnline Food & Drink',
+    'btonline_shopping': 'BloomingtonOnline Shopping',
     # Bloomington - Long tail community
     'calendar_bloomington_in_gov_c657mi332p5sjpq2lcht9i': 'City Department Events',
     'calendar_shweekend_40gmail_com_public': 'Bloomington Old-Time Music & Dance',
@@ -611,6 +619,10 @@ SOURCE_URLS = {
     'mobilize_indivisible_sonoma': 'https://www.mobilize.us/indivisiblesonomacounty/',
     # Bloomington
     'mobilize_indivisible_central_indiana': 'https://www.mobilize.us/indivisiblecentralindiana/',
+    'gcal_e1egkmmhjj98nf0rgd2oa4u3ng': 'https://letsgo.terrorware.com/',
+    'btonline_events': 'https://bloomingtononline.com/events/',
+    'btonline_food': 'https://bloomingtononline.com/events/',
+    'btonline_shopping': 'https://bloomingtononline.com/events/',
     # Davis
     'mobilize_indivisible_yolo': 'https://www.mobilize.us/indivisibleyolo/',
     # Montclair
@@ -775,6 +787,92 @@ def parse_ics_datetime(dt_str):
         return None
 
 
+def _serialize_vevent(event, original_had_rrule):
+    """Serialize an icalendar VEVENT component back to ICS text content.
+
+    Returns the inner content (without BEGIN:VEVENT / END:VEVENT wrappers).
+    For expanded recurring instances, strips RRULE/EXDATE/RDATE and mutates UID.
+    """
+    raw = event.to_ical().decode('utf-8', errors='replace')
+    # Extract inner content between BEGIN:VEVENT and END:VEVENT
+    m = re.search(r'BEGIN:VEVENT\r?\n(.*?)\r?\nEND:VEVENT', raw, re.DOTALL)
+    if not m:
+        return None
+    content = m.group(1)
+
+    if original_had_rrule:
+        # Strip recurrence properties — each instance is standalone
+        content = re.sub(r'^(RRULE|EXDATE|RDATE|RECURRENCE-ID)[;:][^\r\n]*\r?\n?', '', content, flags=re.MULTILINE)
+
+        # Mutate UID to include instance date
+        dtstart = event.get('DTSTART')
+        if dtstart:
+            dt = dtstart.dt
+            if isinstance(dt, datetime):
+                date_suffix = dt.strftime('%Y%m%d')
+            else:
+                date_suffix = dt.strftime('%Y%m%d')
+            uid_match = re.search(r'^UID:([^\r\n]+)', content, re.MULTILINE)
+            if uid_match:
+                original_uid = uid_match.group(1).strip()
+                # Only add suffix if not already present (avoid double-suffixing)
+                if not original_uid.endswith(f'__{date_suffix}'):
+                    new_uid = f'{original_uid}__{date_suffix}'
+                    content = re.sub(r'^UID:[^\r\n]+', f'UID:{new_uid}', content, flags=re.MULTILINE)
+
+    return content
+
+
+def expand_rrules(ics_content, window_days=90):
+    """Expand recurring events in ICS content into individual instances.
+
+    Returns a list of ICS VEVENT content strings (one per occurrence).
+    Non-recurring events are included as-is (single entry).
+    Only expands RRULEs inside VEVENTs, not VTIMEZONEs.
+
+    Args:
+        ics_content: Raw ICS file content string
+        window_days: How many days forward to expand (default 90)
+
+    Returns:
+        List of VEVENT content strings, or None if parsing fails
+    """
+    try:
+        cal = icalendar.Calendar.from_ical(ics_content)
+    except Exception:
+        return None
+
+    # Identify which UIDs have RRULEs (to know whether to mutate UID)
+    uids_with_rrule = set()
+    for component in cal.walk('VEVENT'):
+        if component.get('RRULE'):
+            uid = str(component.get('UID', ''))
+            if uid:
+                uids_with_rrule.add(uid)
+
+    # If no recurring events, return None to use the faster regex path
+    if not uids_with_rrule:
+        return None
+
+    today = date.today()
+    window_end = today + timedelta(days=window_days)
+
+    try:
+        expanded = recurring_ical_events.of(cal).between(today, window_end)
+    except Exception:
+        return None
+
+    results = []
+    for event in expanded:
+        uid = str(event.get('UID', ''))
+        had_rrule = uid in uids_with_rrule or uid.split('__')[0] in uids_with_rrule
+        content = _serialize_vevent(event, had_rrule)
+        if content:
+            results.append(content)
+
+    return results
+
+
 def normalize_title(title):
     """Normalize title for dedup matching: strip leading article, lowercase, alphanumeric only, first 40 chars."""
     if not title:
@@ -824,6 +922,10 @@ AGGREGATORS = {
     'Toronto Events (Tockify)',
     'Montclair Local News',
     'LancasterPA.com',
+    'Let\'s Go! Bloomington',
+    'BloomingtonOnline Events',
+    'BloomingtonOnline Food & Drink',
+    'BloomingtonOnline Shopping',
 }
 
 
@@ -1139,11 +1241,22 @@ JSON:"""
 
 
 def extract_events(ics_content, source_name=None, source_id=None, fallback_url=None):
-    """Extract VEVENT blocks from ICS content."""
+    """Extract VEVENT blocks from ICS content, expanding recurring events."""
     events = []
 
-    pattern = r'BEGIN:VEVENT\r?\n(.*?)\r?\nEND:VEVENT'
-    matches = re.findall(pattern, ics_content, re.DOTALL)
+    # Try RRULE expansion first; returns None if no RRULEs or parsing fails
+    expanded_blocks = None
+    try:
+        expanded_blocks = expand_rrules(ics_content)
+    except Exception as e:
+        print(f"  RRULE expansion error ({e}), falling back to regex")
+
+    if expanded_blocks is not None:
+        matches = expanded_blocks
+    else:
+        # Standard regex extraction (no recurring events, or expansion failed)
+        pattern = r'BEGIN:VEVENT\r?\n(.*?)\r?\nEND:VEVENT'
+        matches = re.findall(pattern, ics_content, re.DOTALL)
 
     for event_content in matches:
         dtstart_match = re.search(r'DTSTART[^:]*:([^\r\n]+)', event_content)

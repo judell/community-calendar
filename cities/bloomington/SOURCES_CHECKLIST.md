@@ -63,6 +63,7 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | People's Market | Scraper | ~10 | Squarespace scraper |
 | Lotus Festival | ICS | ~7 | WordPress Events Calendar ICS |
 | Indivisible Central Indiana | Mobilize.us scraper | ~21 | `mobilize.py` — civic/political organizing (added 2026-03) |
+| Let's Go! Bloomington | ICS | — | Google Calendar aggregator — indie venues, shows, art openings (added 2026-03) |
 
 ---
 

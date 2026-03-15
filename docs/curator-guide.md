@@ -68,9 +68,26 @@ The [health report](https://judell.github.io/community-calendar/report.html) is 
 
 https://github.com/judell/community-calendar/raw/main/video/event-poster-capture.mp4
 
-**Skip**: Facebook events (API restrictions), Cloudflare-protected sites.
+**Skip**: Facebook events (API restrictions), Cloudflare-protected sites, and platforms listed in **Blocked Platforms** below.
 
 When you find a source that needs a scraper, document it in the city's `SOURCES_CHECKLIST.md` with the URL and any notes about the page structure. A developer (or you, with LLM assistance) can then build the scraper.
+
+### Blocked Platforms
+
+Some platforms host event data for community organizations but don't expose public feeds or APIs. When you encounter one of these, don't spend time trying to scrape — document it and move on.
+
+| Platform | Used by | Why it's blocked | API? |
+|----------|---------|-----------------|------|
+| **ReClique Core (now Daxko)** | YMCAs nationwide (Montclair NJ, Bloomington IN, Lancaster PA, Monroe County IN, and many others) | No ICS/RSS feeds at any level. Calendar pages are JS-rendered. Some sites return 403 on automated requests. | Partner API exists ([docs.partners.daxko.com](https://docs.partners.daxko.com/)) with program/session endpoints (JSON only, no ICS), but requires OAuth credentials granted by Daxko sales — not public access. ReClique sites are WordPress-based so `/wp-json/` may be accessible on some instances. |
+| **Facebook Events** | Many small producers | Graph API severely restricted since 2018. No public access to event data. | Effectively none for third-party use. |
+
+**What to do when you hit a blocked platform:**
+1. Note it in the city's `SOURCES_CHECKLIST.md` as blocked
+2. Check if the organization cross-posts events to a platform we *can* reach (Google Calendar, Eventbrite, their own website)
+3. If the organization is high-value, consider reaching out to ask them to publish an ICS feed or share API credentials
+4. As a last resort, the organization could use the [My Picks capture feature](#my-picks-as-an-event-submission-system) to self-publish events
+
+If you discover other widely-used platforms that block public access, add them to this table.
 
 ## About Aggregators
 
@@ -189,6 +206,7 @@ Current cities and their known aggregators:
 
 - **Santa Rosa:** North Bay Bohemian, Press Democrat, Creative Sonoma, GoLocal Cooperative
 - **Toronto:** NOW Toronto, Toronto Events (Tockify)
+- **Bloomington:** Let's Go! Bloomington, BloomingtonOnline Events, BloomingtonOnline Food & Drink, BloomingtonOnline Shopping
 
 To add your city or flag an aggregator, [open an issue](https://github.com/judell/community-calendar/issues/new?template=add-city-or-aggregator.md). Just name your city and any aggregators you know about — we'll help you figure out the rest.
 

@@ -217,13 +217,24 @@ def main():
         print("Nothing to classify.")
         return
 
-    # Classify in batches
+    # Group by title to avoid re-classifying recurring event instances
+    from collections import defaultdict, Counter
+    title_groups = defaultdict(list)
+    for event in events:
+        title_key = (event.get("title") or "").strip().lower()
+        title_groups[title_key].append(event)
+
+    # Pick one representative per title group
+    representative_events = [group[0] for group in title_groups.values()]
+    if len(representative_events) < len(events):
+        print(f"  {len(representative_events)} unique titles (deduplicated from {len(events)} events)")
+
+    # Classify in batches (using representatives only)
     all_results = []
-    all_updates = []
-    for batch_start in range(0, len(events), BATCH_SIZE):
-        batch = events[batch_start:batch_start + BATCH_SIZE]
+    for batch_start in range(0, len(representative_events), BATCH_SIZE):
+        batch = representative_events[batch_start:batch_start + BATCH_SIZE]
         batch_num = batch_start // BATCH_SIZE + 1
-        total_batches = (len(events) + BATCH_SIZE - 1) // BATCH_SIZE
+        total_batches = (len(representative_events) + BATCH_SIZE - 1) // BATCH_SIZE
         print(f"  Batch {batch_num}/{total_batches} ({len(batch)} events)...", flush=True)
 
         results = classify_batch(batch, few_shot, api_key, args.model)
@@ -231,8 +242,14 @@ def main():
             title = event.get("title", "")[:60]
             print(f"    {title} → {category or '(none)'}")
             all_results.append((event, category))
-            if category:
-                all_updates.append((event["id"], category))
+
+    # Fan out classifications to all events sharing each title
+    all_updates = []
+    for event, category in all_results:
+        if category:
+            title_key = (event.get("title") or "").strip().lower()
+            for grouped_event in title_groups[title_key]:
+                all_updates.append((grouped_event["id"], category))
 
     # Batch update DB unless dry-run
     if not args.dry_run and all_updates:
@@ -242,7 +259,7 @@ def main():
 
     # Summary
     print("\n--- Summary ---")
-    from collections import Counter
+    print(f"  {len(representative_events)} unique titles classified → {len(all_updates)} total events to update")
     cats = Counter(cat for _, cat in all_results)
     for cat, count in cats.most_common():
         print(f"  {count:4d}  {cat or '(none)'}")
