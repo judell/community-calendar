@@ -67,7 +67,7 @@ The [health report](https://judell.github.io/community-calendar/report.html) is 
 
 **Fallback 3 — Event posters**: For events promoted only via images (posters, flyers), an LLM can extract event details from a photo. Point your phone at a poster, and the system can parse it into calendar data.
 
-https://github.com/judell/community-calendar/raw/main/video/event-poster-capture.mp4
+https://judell.github.io/community-calendar/videos.html
 
 **Skip**: Facebook events (API restrictions), Cloudflare-protected sites, and platforms listed in **Blocked Platforms** below.
 
