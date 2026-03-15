@@ -35,9 +35,14 @@ from .base import BaseScraper
 
 logger = logging.getLogger(__name__)
 
-EVENT_TYPES = {'Event', 'MusicEvent', 'SocialEvent', 'Festival', 'TheaterEvent',
-               'DanceEvent', 'ScreeningEvent', 'LiteraryEvent', 'ExhibitionEvent',
-               'EducationEvent', 'BusinessEvent', 'FoodEvent', 'SportsEvent'}
+# All schema.org Event subtypes end in "Event" except these three.
+# Match dynamically so new subtypes (e.g. EducationEvent) aren't silently missed.
+_EVENT_EXTRAS = {'Festival', 'Hackathon', 'CourseInstance', 'EventSeries'}
+
+
+def _is_event_type(t: str) -> bool:
+    """True if t is 'Event', any schema.org Event subtype, or a known extra."""
+    return t == 'Event' or t.endswith('Event') or t in _EVENT_EXTRAS
 
 
 def fix_malformed_description(raw: str) -> str:
@@ -78,8 +83,11 @@ def extract_jsonld_blocks(html: str) -> list[dict]:
     return blocks
 
 
-def extract_events_from_blocks(blocks: list[dict], event_types: set[str] = EVENT_TYPES) -> list[dict]:
+def extract_events_from_blocks(blocks: list[dict], is_event=None) -> list[dict]:
     """Extract Event objects from JSON-LD blocks.
+
+    is_event can be a callable (str -> bool) or a set of type names.
+    Defaults to _is_event_type which matches all schema.org Event subtypes.
 
     Handles:
     - Top-level Event objects
@@ -87,18 +95,23 @@ def extract_events_from_blocks(blocks: list[dict], event_types: set[str] = EVENT
     - @graph arrays
     - Events nested under other types (e.g., HighSchool.event)
     """
+    if is_event is None:
+        is_event = _is_event_type
+    elif isinstance(is_event, set):
+        type_set = is_event
+        is_event = lambda t: t in type_set
     events = []
     for data in blocks:
         if isinstance(data, list):
             for item in data:
-                if isinstance(item, dict) and item.get('@type') in event_types:
+                if isinstance(item, dict) and is_event(item.get('@type', '')):
                     events.append(item)
         elif isinstance(data, dict):
-            if data.get('@type') in event_types:
+            if is_event(data.get('@type', '')):
                 events.append(data)
             # Check @graph
             for item in data.get('@graph', []):
-                if isinstance(item, dict) and item.get('@type') in event_types:
+                if isinstance(item, dict) and is_event(item.get('@type', '')):
                     events.append(item)
             # Check nested event arrays (e.g., HighSchool.event)
             for item in data.get('event', []):
@@ -151,7 +164,7 @@ class JsonLdScraper(BaseScraper):
     url: str = ''
     urls: list[str] = []
     default_location: str = ''
-    event_types: set[str] = EVENT_TYPES
+    event_types = None  # None = match all schema.org Event subtypes
     location_filter: Optional[str] = None
     headers: dict = {
         'User-Agent': 'Mozilla/5.0 (compatible; CommunityCalendar/1.0)',
