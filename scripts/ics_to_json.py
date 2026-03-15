@@ -56,9 +56,10 @@ def parse_ics_datetime(dt_str, local_tz=None):
             dt = dt.replace(tzinfo=local_tz)
             return dt.isoformat()
         else:
-            # All-day event
+            # All-day event — anchor to midnight in the city's local timezone
             dt = datetime.strptime(dt_str, '%Y%m%d')
-            return dt.strftime('%Y-%m-%dT%H:%M:%S')
+            dt = dt.replace(tzinfo=local_tz)
+            return dt.isoformat()
     except ValueError:
         return None
 
