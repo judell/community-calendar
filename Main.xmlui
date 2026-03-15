@@ -10,7 +10,8 @@
   global.userSettingsData="{null}"
   global.authUser="{authUser}"
   global.authSession="{authSession}"
-  var.city="{window.cityFilter || null}">
+  var.city="{window.cityFilter || null}"
+  global.isAdmin="{false}">
 
   <!-- DataSources -->
   <DataSource
@@ -110,6 +111,15 @@
       apikey: appGlobals.supabasePublishableKey,
       'Cache-Control': 'no-cache, no-store, must-revalidate'
     }}"
+  />
+
+  <ChangeListener
+    listenTo="{adminGithubAccess.value}"
+    onDidChange="() => isAdmin = (adminGithubAccess.value || []).length > 0 || (adminGoogleAccess.value || []).length > 0"
+  />
+  <ChangeListener
+    listenTo="{adminGoogleAccess.value}"
+    onDidChange="() => isAdmin = (adminGithubAccess.value || []).length > 0 || (adminGoogleAccess.value || []).length > 0"
   />
 
   <variable name="hiddenSources" value="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []}" />
