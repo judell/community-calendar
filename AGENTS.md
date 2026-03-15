@@ -454,6 +454,46 @@ Many event platforms have predictable feed URLs:
 
 ---
 
+## Event Classification
+
+Events are classified into categories (Music & Concerts, Community Events, etc.) by Claude Haiku. There are **two classifiers** — one for CI, one for manual use. Both do title-dedup to avoid re-classifying recurring event instances (e.g., "Tuesday Food Deals" × 13 weeks is classified once).
+
+### `classify_events_json.py` — CI pipeline classifier
+
+Used by the GitHub Actions workflow during the build. Operates on `events.json` files on disk. This is the one that runs automatically.
+
+```bash
+python scripts/classify_events_json.py cities/bloomington/events.json
+python scripts/classify_events_json.py cities/*/events.json
+python scripts/classify_events_json.py cities/bloomington/events.json --dry-run
+```
+
+- Reads events from JSON files, classifies events missing a `category` field
+- Writes classifications back to the same JSON file
+- Categories carried forward from previous builds via `merge_categories.py` (runs first in CI)
+- Curator overrides from the `category_overrides` Supabase table are used as few-shot examples
+
+### `classify_events_anthropic.py` — Manual/Supabase classifier
+
+For ad-hoc classification of events already in Supabase. Operates directly on the database.
+
+```bash
+python scripts/classify_events_anthropic.py --limit 500
+python scripts/classify_events_anthropic.py --limit 50 --city bloomington --dry-run
+```
+
+- Fetches events where `category IS NULL` from Supabase
+- Updates categories directly in the database via psql (requires `SUPABASE_DB_URL`)
+- Useful for backfilling categories after schema changes or manual data loads
+
+### Curator overrides
+
+Both classifiers respect the `category_overrides` table in Supabase. When a curator manually sets a category via the pencil icon in the UI, it's stored as an override that:
+1. Is never overwritten by the classifier
+2. Is used as a few-shot example to improve future classifications
+
+---
+
 ## Pipeline Validation
 
 ### Validation Script
