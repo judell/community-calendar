@@ -161,16 +161,28 @@ def process_file(filepath, api_key, model, few_shot, dry_run=False):
     if not to_classify:
         return
 
-    # Classify in batches
-    classified = 0
-    from collections import Counter
-    cats = Counter()
+    # Group by title to avoid re-classifying recurring event instances
+    from collections import Counter, defaultdict
+    title_groups = defaultdict(list)
+    for idx, event in to_classify:
+        title_key = (event.get("title") or "").strip().lower()
+        title_groups[title_key].append((idx, event))
 
-    for batch_start in range(0, len(to_classify), BATCH_SIZE):
-        batch_items = to_classify[batch_start:batch_start + BATCH_SIZE]
+    # Pick one representative per title group
+    representative_items = [(group[0][0], group[0][1]) for group in title_groups.values()]
+    if len(representative_items) < len(to_classify):
+        print(f"  {len(representative_items)} unique titles (deduplicated from {len(to_classify)} events)")
+
+    # Classify in batches (using representatives only)
+    classified = 0
+    cats = Counter()
+    rep_results = {}  # maps representative index to category
+
+    for batch_start in range(0, len(representative_items), BATCH_SIZE):
+        batch_items = representative_items[batch_start:batch_start + BATCH_SIZE]
         batch_events = [e for _, e in batch_items]
         batch_num = batch_start // BATCH_SIZE + 1
-        total_batches = (len(to_classify) + BATCH_SIZE - 1) // BATCH_SIZE
+        total_batches = (len(representative_items) + BATCH_SIZE - 1) // BATCH_SIZE
         print(f"  Batch {batch_num}/{total_batches} ({len(batch_events)} events)...", flush=True)
 
         result_map = classify_batch(batch_events, few_shot, api_key, model)
@@ -178,11 +190,19 @@ def process_file(filepath, api_key, model, few_shot, dry_run=False):
         for j, (orig_idx, event) in enumerate(batch_items):
             cat = result_map.get(j + 1)
             if cat:
+                title_key = (event.get("title") or "").strip().lower()
+                rep_results[title_key] = cat
+
+    # Fan out classifications to all events sharing each title
+    for title_key, group in title_groups.items():
+        cat = rep_results.get(title_key)
+        if cat:
+            for orig_idx, event in group:
                 events[orig_idx]["category"] = cat
                 classified += 1
                 cats[cat] += 1
 
-    print(f"  Classified {classified}/{len(to_classify)} events")
+    print(f"  Classified {classified}/{len(to_classify)} events ({len(representative_items)} unique titles)")
     for cat, count in cats.most_common():
         print(f"    {count:4d}  {cat}")
 
