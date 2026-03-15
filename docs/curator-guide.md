@@ -16,6 +16,7 @@
   - [Throughout all phases](#throughout-all-phases)
 - [Duplicates and Event Ordering](#duplicates-and-event-ordering)
 - [Long-Running Events](#long-running-events)
+- [Recurring Events](#recurring-events)
 - [Event Categories](#event-categories)
 - [Event Images](#event-images)
 - [My Picks as an Event Submission System](#my-picks-as-an-event-submission-system)
@@ -226,6 +227,27 @@ The calendar automatically collapses these long-running events to **show once pe
 - The event remains visible throughout its run, just not every day
 
 This reduces event count significantly (typically 10-15% fewer displayed events) while maintaining weekly visibility of ongoing attractions. Curators don't need to do anything — this happens automatically in the display layer.
+
+---
+
+## Recurring Events
+
+Many event sources publish recurring events using RRULE (recurrence rules) in the ICS standard — "every Tuesday at 7 PM," "first Saturday of the month," "weekly until June." The pipeline automatically expands these rules into individual event instances over a 90-day window.
+
+**Why this matters:** Before RRULE expansion, recurring events were silently dropped. A feed might advertise 133 events but yield 0 in the calendar because every event was defined as a recurrence pattern rather than individual occurrences. This particularly affected Google Calendar feeds (community groups, faith organizations) and feeds from platforms like BloomingtonOnline that rely heavily on recurrence. When RRULE expansion was added to the Bloomington build, event count jumped from 3,040 to 3,977 (+31%).
+
+**How it works:**
+- The pipeline detects RRULE properties in ICS feeds and expands them into standalone events
+- Each instance gets a unique ID (original UID + date suffix) so duplicates are handled correctly
+- The expansion window is 90 days forward — far enough to be useful, bounded enough to prevent runaway expansion
+- Non-recurring events pass through unchanged
+- If expansion fails for any reason, the pipeline falls back to the standard regex parser
+
+**What curators should know:**
+- **No action needed.** RRULE expansion is automatic. When you add a feed that uses recurrence rules, the recurring events appear automatically.
+- **Event counts will be higher.** A feed with 10 weekly events produces 130+ instances over 90 days. This is correct — each instance is a real, upcoming event.
+- **Classification is efficient.** The classifier deduplicates by title before calling the API. "Tuesday Open Mic" appearing 13 times is classified once, and the category is applied to all instances. This keeps API costs flat regardless of how many recurring instances exist.
+- **All-day recurring events** (like "Monday Food Deals") are anchored to midnight in the city's local timezone, so they display on the correct day.
 
 ---
 

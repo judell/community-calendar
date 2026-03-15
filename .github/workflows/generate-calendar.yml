@@ -378,6 +378,9 @@ jobs:
     # ==========================================
     # Post-processing (all cities)
     # ==========================================
+    - name: Generate cities.json
+      run: python scripts/generate_cities_json.py
+
     - name: Convert ICS to JSON for Supabase
       run: |
         IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"

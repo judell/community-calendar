@@ -258,38 +258,48 @@ function getDescriptionSnippet(description, term) {
   return snippet;
 }
 
+// Get the IANA timezone for the current city (e.g. "America/New_York")
+function getCityTimezone() {
+  var city = window.cityFilter;
+  if (city && window._cities && window._cities[city]) {
+    return window._cities[city].timezone;
+  }
+  return undefined; // fall back to browser default
+}
+
 // Format day of week
 function formatDayOfWeek(isoString) {
   if (!isoString) return '';
-  return new Date(isoString).toLocaleDateString('en-US', { weekday: 'short' });
+  return new Date(isoString).toLocaleDateString('en-US', { weekday: 'short', timeZone: getCityTimezone() });
 }
 
 // Format month and day
 function formatMonthDay(isoString) {
   if (!isoString) return '';
-  return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: getCityTimezone() });
 }
 
 // Format date for display
 function formatDate(isoString) {
   if (!isoString) return '';
-  const d = new Date(isoString);
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  var tz = getCityTimezone();
+  return new Date(isoString).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: tz });
 }
 
 // Format time for display
 function formatTime(isoString) {
   if (!isoString) return '';
-  const d = new Date(isoString);
-  const hours = d.getHours();
-  const mins = d.getMinutes();
+  var tz = getCityTimezone();
+  var d = new Date(isoString);
+  var hours = parseInt(d.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: tz }));
+  var mins = parseInt(d.toLocaleString('en-US', { minute: 'numeric', timeZone: tz }));
   // Skip midnight times (likely means time unknown)
   if (hours === 0 && mins === 0) return '';
   // Format as 12-hour time
-  const h = hours % 12 || 12;
-  const ampm = hours < 12 ? 'AM' : 'PM';
-  const m = mins.toString().padStart(2, '0');
-  return `${h}:${m} ${ampm}`;
+  var h = hours % 12 || 12;
+  var ampm = hours < 12 ? 'AM' : 'PM';
+  var m = mins.toString().padStart(2, '0');
+  return h + ':' + m + ' ' + ampm;
 }
 
 // Extract a short readable snippet from an event description (for always-visible preview)
@@ -597,11 +607,19 @@ function collapseLongRunningEvents(events) {
     return Math.floor(daysDiff / 7);
   }
 
+  // Get time-of-day string in city timezone
+  const tz = getCityTimezone();
+  function getTimeOfDay(dateStr) {
+    const d = new Date(dateStr);
+    const h = String(parseInt(d.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: tz }))).padStart(2, '0');
+    const m = String(parseInt(d.toLocaleString('en-US', { minute: 'numeric', timeZone: tz }))).padStart(2, '0');
+    return h + ':' + m;
+  }
+
   // Group by title + location + time-of-day to identify long-running events
   const groups = {};
   events.forEach(e => {
-    const d = new Date(e.start_time);
-    const timeOfDay = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    const timeOfDay = getTimeOfDay(e.start_time);
     const key = (e.title || '').trim().toLowerCase() + '|' + (e.location || '').trim().toLowerCase() + '|' + timeOfDay;
     if (!groups[key]) {
       groups[key] = [];
@@ -625,8 +643,7 @@ function collapseLongRunningEvents(events) {
   const result = [];
 
   events.forEach(e => {
-    const d = new Date(e.start_time);
-    const timeOfDay = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    const timeOfDay = getTimeOfDay(e.start_time);
     const key = (e.title || '').trim().toLowerCase() + '|' + (e.location || '').trim().toLowerCase() + '|' + timeOfDay;
 
     if (longRunningKeys.has(key)) {
