@@ -8,7 +8,7 @@ Prioritized list of potential event sources for the Lancaster, PA community cale
 |--------|------|-------|
 | Visit Lancaster City | ICS | `visitlancastercity.com` WordPress/Tribe Events |
 | FIG Lancaster | ICS | `figlancaster.com` WordPress/Tribe Events |
-| LancasterPA.com | ICS | `lancasterpa.com` community events aggregator |
+| LancasterPA.com | ICS | `lancasterpa.com` **AGGREGATOR** — community events aggregator, low dedup priority |
 | Mickey's Black Box | ICS | `mickeysblackbox.com` Lititz venue |
 | The Candy Factory | ICS | `candyissweet.com` WordPress/Tribe Events |
 | Bird-in-Hand | ICS | `bird-in-hand.com` tourism/artisan events |
