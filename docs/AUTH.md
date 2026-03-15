@@ -77,7 +77,13 @@ In Supabase dashboard: Authentication → URL Configuration:
 
 ## Access control
 
-- **Anyone:** search, browse events
-- **Authenticated users:** pick events, subscribe to picks feed, capture events (camera/audio)
-- **Admin users:** override event categories (pencil icon), gated by `admin_github_users` and `admin_google_users` tables
-- **RLS:** picks, feed_tokens, user_settings scoped by `auth.uid()`
+- **Anyone:** search, browse, add-to-calendar, download ICS, hide sources (ephemeral — not saved)
+- **Authenticated users:** all above + bookmark/pick events, subscribe to picks feed, capture events (camera/audio), hide sources (persisted to `user_settings`)
+- **Admin users:** all above + override event categories (pencil icon), gated by `admin_github_users` and `admin_google_users` tables
+
+The `isAdmin` variable in Main.xmlui is derived from the `adminGithubAccess` and `adminGoogleAccess` DataSources and is visible to all components.
+
+### RLS
+
+- `picks`, `feed_tokens`, `user_settings` scoped by `auth.uid()`
+- `events` and `event_enrichments` are public-read
