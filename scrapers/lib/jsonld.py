@@ -36,7 +36,8 @@ from .base import BaseScraper
 logger = logging.getLogger(__name__)
 
 EVENT_TYPES = {'Event', 'MusicEvent', 'SocialEvent', 'Festival', 'TheaterEvent',
-               'DanceEvent', 'ScreeningEvent', 'LiteraryEvent', 'ExhibitionEvent'}
+               'DanceEvent', 'ScreeningEvent', 'LiteraryEvent', 'ExhibitionEvent',
+               'EducationEvent', 'BusinessEvent', 'FoodEvent', 'SportsEvent'}
 
 
 def fix_malformed_description(raw: str) -> str:

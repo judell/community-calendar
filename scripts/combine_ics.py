@@ -128,6 +128,7 @@ SOURCE_NAMES = {
     # Bloomington - Scrapers (various platforms)
     'constellation': 'Constellation Stage & Screen',
     'cicada_cinema': 'Cicada Cinema',
+    'eventbrite_morgenstern_books': 'Morgenstern Books',
     # Bloomington - Aggregators
     'gcal_e1egkmmhjj98nf0rgd2oa4u3ng': 'Let\'s Go! Bloomington',
     'btonline_events': 'BloomingtonOnline Events',

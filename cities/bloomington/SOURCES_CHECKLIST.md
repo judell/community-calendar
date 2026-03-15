@@ -64,6 +64,7 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | Lotus Festival | ICS | ~7 | WordPress Events Calendar ICS |
 | Indivisible Central Indiana | Mobilize.us scraper | ~21 | `mobilize.py` — civic/political organizing (added 2026-03) |
 | Let's Go! Bloomington | ICS | — | Google Calendar aggregator — indie venues, shows, art openings (added 2026-03) |
+| Morgenstern Books | Eventbrite scraper | ~9 | Author events, book clubs via Eventbrite organizer page (added 2026-03) |
 
 ---
 
@@ -259,6 +260,7 @@ bloomingtononline.com embeds a master Google Calendar with multiple source calen
 | WCLS 97.7 | Site suspended |
 | IDS Events Calendar | No ICS feed |
 | Chamber of Commerce Atlas | No ICS feed |
+| Pillar Arts | WordPress + The Events Calendar but ICS export broken (returns HTML), calendar appears inactive |
 
 ---
 
