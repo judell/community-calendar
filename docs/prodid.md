@@ -8,12 +8,12 @@ used across all city feeds, identified by their PRODID header.
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
 | **Meetup** | ICS export from meetup.com groups. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 228 |
-| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 141 |
+| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 142 |
 | **Google Calendar** | Public Google Calendar ICS export. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 81 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, lancaster, montclair, raleighdurham, santarosa | 44 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 42 |
 | **Tockify** | Embeddable calendar widget with public ICS feeds. | bloomington, petaluma, santarosa, toronto | 16 |
-| **MaxPreps** | High school sports schedules. | lancaster, montclair, santarosa | 12 |
+| **MaxPreps** | High school sports schedules. | lancaster, montclair, santarosa | 14 |
 | **LibCal (Springshare)** | Library event management platform. | bloomington, montclair, raleighdurham | 8 |
 | **Modern Events Calendar (WordPress)** | WordPress plugin by Webnus. PRODID references wp-events-plugin.com. | petaluma, raleighdurham, toronto | 7 |
 | **GrowthZone** | Chamber of commerce / association management platform. | montclair, petaluma, raleighdurham | 5 |
@@ -44,7 +44,7 @@ ICS export from meetup.com groups.
 
 **toronto** (95): meetup_20s30s_social, meetup_20s_30s_toronto_social_activities, meetup_a_book_club_downtown_abcd, meetup_ai_ml, meetup_arts_crafts, meetup_arts_culture, meetup_biggest_language_party_event_social_in_toronto, meetup_bike_toronto, meetup_board_games_to, meetup_boardgamestoronto, meetup_book_club_abcd, meetup_bruce_trail, meetup_canoe_trippers, meetup_comedy_improv_and_acting, meetup_devops, meetup_downtown_toronto_women_in_business_meetup, meetup_experience_to, meetup_experiencetoronto, meetup_founders_running, meetup_founders_running_club_toronto, meetup_gta_hiking, meetup_gta_hiking_meetup, meetup_heavy_boardgames, meetup_high_park_yoga, meetup_hiking_boots, meetup_hiking_network, meetup_improv_friends, meetup_improv_to, meetup_jpn_eng_exchange, meetup_lang_exchange_to, meetup_little_sunbeams, meetup_little_sunbeams_parents_tots_meetup, meetup_medieval_renaissance_toronto_royal_citie_of_eoforwic_sca, meetup_medieval_sca, meetup_meetup_group_fqsmjvcq, meetup_microsoft_reactor_toronto, meetup_midtown_arts_and_crafts_group, meetup_mindful_movement, meetup_mindful_movement_toronto, meetup_mini_me, meetup_mini_me_meetups, meetup_movies_social, meetup_ms_reactor, meetup_photography_to, meetup_post_apocalyptic_book_club_toronto_chapter, meetup_postapoc_books, meetup_postgres_to, meetup_python_to, meetup_python_toronto, meetup_sai_dham_canada_toronto_volunteer_group, meetup_sai_dham_volunteer, meetup_salsa_bachata_kizomba_gta, meetup_salsa_gta, meetup_scifi_books, meetup_silent_books, meetup_singles_social, meetup_soul_city, meetup_soulcity, meetup_sup_kayak, meetup_tech_stack, meetup_techto, meetup_the_history_of_parkdale, meetup_the_toronto_paddlers_meetup_group, meetup_thescifibookclub, meetup_these_boots_are_made_for_hiking, meetup_tile_language, meetup_tjex_ca, meetup_toronto, meetup_toronto_20s_to_50s_singles_social, meetup_toronto_ai_machine_learning_data_science, meetup_toronto_arts_and_culture, meetup_toronto_bruce_trail_club, meetup_toronto_dads, meetup_toronto_enterprise_devops_user_group, meetup_toronto_heavy_boardgamers, meetup_toronto_history_walks, meetup_toronto_movies_and_social_group, meetup_toronto_paddlers, meetup_toronto_photography_group, meetup_toronto_postgres, meetup_toronto_silent_book_club_meetup_group, meetup_toronto_tech_stack_exchange, meetup_toronto_wellness, meetup_toronto_wellness_yoga_art_therapy_meditation_chakra, meetup_torontoadventurers, meetup_torontobabel, meetup_torontobikemeetup, meetup_torontocanoetrippers, meetup_torontodadsgroup, meetup_torontojs, meetup_torontotnt, meetup_try_new_things, meetup_wilderness_union, meetup_wildernessunion, meetup_women_biz
 
-### The Events Calendar (WordPress) (141 feeds)
+### The Events Calendar (WordPress) (142 feeds)
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
@@ -56,7 +56,7 @@ WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **montclair** (9): mhainspire, montclairfoundation_calendar_of_events, montclairlocal, neearth, nertamid, njaudubon, peakperfs, unioncong, whartonarts
 
-**petaluma** (5): bigeasy, bigeasypetaluma, mcnears, polly_klaas, pollyklaastheater
+**petaluma** (6): bigeasy, bigeasypetaluma, mcnears, petalumamuseum, polly_klaas, pollyklaastheater
 
 **raleighdurham** (35): ackland_art, aps_durham, apsofdurham, downtown_durham, downtowndurham, duke_gardens, durham_central_park, durhamcentralpark, events, gardens, hope_animal_rescue, hopeanimals, islamic_assoc_raleigh, morehead_planetarium, moreheadplanetarium, nasher, nasher_museum, naturalsciences, nc_botanical_garden, nc_humanities, nc_natural_sciences, nc_wildlife_federation, ncbg, nchumanities, ncwf, resilient_durham, resilientdurhamnc, second_chance_pets, secondchancenc, transitions_lifecare, transitionslifecare, triangle_land, triangleland, united_arts_wake, unitedarts
 
@@ -116,7 +116,7 @@ Embeddable calendar widget with public ICS feeds.
 
 **toronto** (8): distillery_events, jamaalmyers, st_lawrence_na, tockify_distilleryevents, tockify_jamaalmyers, tockify_st.lawrence.na, tockify_torevent, torevent
 
-### MaxPreps (12 feeds)
+### MaxPreps (14 feeds)
 
 High school sports schedules.
 
@@ -124,7 +124,7 @@ High school sports schedules.
 
 **montclair** (2): maxpreps_mka, maxpreps_montclair_high
 
-**santarosa** (1): maxpreps_elsie_allen
+**santarosa** (3): maxpreps_elsie_allen, maxpreps_montgomery_high, maxpreps_piner_high
 
 ### LibCal (Springshare) (8 feeds)
 
