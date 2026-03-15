@@ -160,6 +160,12 @@
     </div>
 
     <div class="url-section">
+        <h2>Timezone Anomalies <span class="help-btn" onclick="showHelp('tzanomaly')">?</span></h2>
+        <div class="section-desc">Events at suspicious hours that may have local time mislabeled as UTC</div>
+        <div id="tz-anomalies-report"></div>
+    </div>
+
+    <div class="url-section">
         <h2>Geo-Filtered Events <span class="help-btn" onclick="showHelp('geofilter')">?</span></h2>
         <div class="section-desc">Events dropped because their location isn't in the city's allowed list</div>
         <div id="geo-filtered-report"></div>
@@ -266,6 +272,7 @@
             }
 
             renderBuildErrors(data);
+            renderTzAnomalies(data);
             renderGeoFiltered(data);
             renderCategories(data);
             renderImages(data);
@@ -285,6 +292,49 @@
                     <div class="meta">${e.date}</div>
                 </div>
             `).join('');
+        }
+
+        function renderTzAnomalies(data) {
+            const container = document.getElementById('tz-anomalies-report');
+            let html = '';
+            let anyData = false;
+            for (const [cityName, cityData] of Object.entries(data.cities || {})) {
+                const anomalies = cityData.tz_anomalies;
+                if (!anomalies || !anomalies.length) continue;
+                anyData = true;
+                const totalFlagged = anomalies.reduce((s, a) => s + a.count, 0);
+                html += `
+                    <details>
+                        <summary><span class="city-name">${capitalize(cityName)}</span>
+                            <span class="city-stats">${totalFlagged} events from ${anomalies.length} sources</span>
+                        </summary>
+                        <div class="city-content">
+                            ${anomalies.map(a => `
+                                <div style="margin-bottom:12px">
+                                    <strong>${a.source}</strong>
+                                    <span class="city-stats">${a.count} of ${a.total} events likely shifted by ${Math.abs(a.offset)}h</span>
+                                    <table class="url-table" style="margin-top:4px">
+                                        <tr><th>Time</th><th>Shows</th><th>Likely</th><th>Event</th></tr>
+                                        ${a.samples.map(s => `
+                                            <tr>
+                                                <td>${s.start_time}</td>
+                                                <td style="color:#d32f2f">${s.shows}</td>
+                                                <td style="color:#4caf50">${s.likely}</td>
+                                                <td>${s.title}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </table>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </details>
+                `;
+            }
+            if (!anyData) {
+                container.innerHTML = '<div style="color:#4caf50">No timezone anomalies detected</div>';
+            } else {
+                container.innerHTML = html;
+            }
         }
 
         function renderGeoFiltered(data) {
@@ -493,6 +543,10 @@
         }
 
         const helpDefs = {
+            tzanomaly: {
+                title: 'Timezone Anomalies',
+                body: 'Detects events scheduled between midnight and 5 AM where shifting by the city\'s UTC offset produces a normal daytime hour (8 AM\u20136 PM). This pattern usually means the source feed published local time with a UTC <code>Z</code> suffix.<br><br><b>Example:</b> A 9 AM Eastern event published as <code>DTSTART:20260314T090000Z</code> (which means 9 AM UTC = 5 AM Eastern). The pipeline correctly converts to 5 AM, but the event is really at 9 AM.<br><br>These are upstream data bugs \u2014 the fix is to contact the source and ask them to either use <code>TZID=America/New_York</code> or convert to true UTC before adding the <code>Z</code> suffix.'
+            },
             geofilter: {
                 title: 'Geo-Filtered Events',
                 body: 'Events whose location doesn\'t match any city in the <code>city.conf</code> allowed list. This often means:<br><br><b>Missing city:</b> A venue is in a town not yet added to city.conf (e.g., Nicasio, Mill Valley). Fix: add the city to city.conf.<br><br><b>Intentionally excluded:</b> The source covers a wide area and some events are too far away. These are expected.<br><br>Review this list after adding new sources to make sure intentional events aren\'t being silently dropped.'

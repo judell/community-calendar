@@ -18,6 +18,21 @@ import os
 import re
 from datetime import datetime, date, timezone, timedelta
 from typing import Optional
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+DEFAULT_TIMEZONE = 'America/Los_Angeles'
+
+
+def get_city_timezone(city):
+    """Load timezone string from cities/{city}/city.conf, fall back to default."""
+    conf = Path(__file__).parent.parent / 'cities' / city / 'city.conf'
+    if conf.exists():
+        for line in conf.read_text().splitlines():
+            if line.startswith('# timezone:'):
+                return line.split(':', 1)[1].strip()
+    return DEFAULT_TIMEZONE
+
 
 # Anomaly thresholds
 DROP_THRESHOLD = 0.5  # 50% drop from previous
@@ -307,6 +322,66 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
             'http_domains': len(http_domains),
             'source_specificity': source_specificity
         }
+
+    # Timezone anomaly detection
+    for city in cities:
+        events_json = f'cities/{city}/events.json'
+        try:
+            with open(events_json, 'r') as f:
+                events = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
+
+        tz_name = get_city_timezone(city)
+        tz = ZoneInfo(tz_name)
+        ref = datetime(2026, 3, 15, 12, 0, 0, tzinfo=tz)
+        offset_hours = int(ref.utcoffset().total_seconds() / 3600)
+
+        by_source = {}
+        for e in events:
+            st = e.get('start_time', '')
+            if 'T' not in st:
+                continue
+            src = e.get('source', 'unknown')
+            try:
+                hour = int(st[11:13])
+                minute = int(st[14:16])
+            except (ValueError, IndexError):
+                continue
+            by_source.setdefault(src, []).append({
+                'hour': hour, 'minute': minute,
+                'title': e.get('title', '')[:60],
+                'start_time': st[:16]
+            })
+
+        tz_anomalies = []
+        for src, entries in by_source.items():
+            if len(entries) < 3:
+                continue
+            suspicious = [e for e in entries if 0 <= e['hour'] < 5]
+            if len(suspicious) < 2:
+                continue
+            shifted = [((e['hour'] - offset_hours) % 24) for e in suspicious]
+            daytime = sum(1 for h in shifted if 8 <= h <= 18)
+            if daytime >= len(suspicious) * 0.7:
+                samples = []
+                for e, sh in zip(suspicious[:5], shifted[:5]):
+                    samples.append({
+                        'start_time': e['start_time'],
+                        'shows': f"{e['hour']:02d}:{e['minute']:02d}",
+                        'likely': f"{sh:02d}:{e['minute']:02d}",
+                        'title': e['title']
+                    })
+                tz_anomalies.append({
+                    'source': src,
+                    'count': len(suspicious),
+                    'total': len(entries),
+                    'offset': offset_hours,
+                    'samples': samples
+                })
+
+        if tz_anomalies:
+            report['cities'][city]['tz_anomalies'] = tz_anomalies
 
     report['generated'] = now
 
