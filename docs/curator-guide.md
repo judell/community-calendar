@@ -122,17 +122,25 @@ This is a conversation with your agent. The topics below are a starting point �
 
 | Category | Topics |
 |----------|--------|
-| Arts & Culture | music, theater, comedy, dance, film, art, crafts, literature |
-| Ideas & Learning | poetry, book clubs, writing, history, genealogy, philosophy, talks |
-| Outdoors & Nature | hiking, walking, running, cycling, gardening, birding, conservation |
-| Health & Well-Being | yoga, fitness, mindfulness, mental health, wellness |
-| Food & Drink | beer, wine, food, cooking, farmers markets |
-| Play & Games | trivia, board games, puzzles, casual gaming |
-| Animals & Environment | pets, wildlife, animal care, sustainability |
-| Community & Life Stages | kids, families, seniors, caregivers, newcomers |
-| Identity & Belonging | faith, LGBTQ+, cultural heritage |
-| Civic & Social Good | volunteering, mutual aid, civic engagement |
-| Technology & Work | tech, digital skills, careers |
+| Arts / Culture | theater, art, crafts, galleries, museums |
+| Books / Literature / Poetry | book clubs, author readings, writing, poetry slams |
+| Comedy / Improv | comedy clubs, open mic, improv, stand-up |
+| Community / Social | neighborhood meetings, potlucks, networking, seniors, newcomers |
+| Dance / Performance | dance classes, ballet, recitals, performances |
+| Education / Workshops | lectures, classes, talks, history, genealogy, philosophy |
+| Family / Kids | story time, kids' camps, family festivals |
+| Film / Cinema | film screenings, movie nights, film festivals |
+| Food / Drink | beer, wine, food, cooking, farmers markets |
+| Games / Trivia | trivia nights, board games, puzzles, casual gaming |
+| Government / Civic | city council, volunteering, mutual aid, civic engagement |
+| Health / Wellness | yoga, mindfulness, mental health, wellness, meditation |
+| History / Heritage | historical societies, heritage tours, cultural heritage |
+| LGBTQ+ / Gender | pride events, drag shows, queer community, gender studies |
+| Music / Concerts | live bands, open mic, jazz, concerts |
+| Nature / Outdoors / Recreation | hiking, cycling, gardening, birding, conservation, wildlife, sustainability |
+| Religion / Spirituality | services, interfaith events, meditation circles |
+| Sports / Fitness | 5K runs, yoga classes, fitness, soccer, running, cycling |
+| Technology / Careers | tech meetups, hackathons, digital skills, career fairs |
 
 **Search for directories, not just venues.** For each category, also search for *curated lists and directories* — these are force multipliers. A single directory can surface dozens of venues that individual topical searches miss. Search patterns:
 
@@ -257,17 +265,25 @@ Events are automatically classified into categories by an AI model that runs aft
 
 | Category | Examples |
 |----------|----------|
-| Arts & Culture | gallery openings, theater, film screenings |
-| Community & Social | neighborhood meetings, potlucks, networking |
-| Education & Workshops | lectures, craft classes, tech talks |
-| Family & Kids | story time, kids' camps, family festivals |
-| Food & Drink | farmers markets, wine tastings, cooking classes |
-| Government & Civic | city council, planning commission, public hearings |
-| Health & Wellness | meditation, health screenings, support groups |
-| Music & Concerts | live bands, open mic, jazz night |
-| Nature & Outdoors | hikes, birding walks, garden tours |
-| Religion & Spirituality | services, interfaith events, meditation circles |
-| Sports & Fitness | 5K runs, yoga classes, soccer league |
+| Arts / Culture | gallery openings, theater, visual art |
+| Books / Literature / Poetry | author readings, book clubs, poetry slams |
+| Comedy / Improv | stand-up, open mic comedy, improv shows |
+| Community / Social | neighborhood meetings, potlucks, networking |
+| Dance / Performance | dance classes, ballet, recitals |
+| Education / Workshops | lectures, craft classes, workshops |
+| Family / Kids | story time, kids' camps, family festivals |
+| Film / Cinema | film screenings, movie nights, film festivals |
+| Food / Drink | farmers markets, wine tastings, cooking classes |
+| Games / Trivia | trivia nights, board game meetups, puzzles |
+| Government / Civic | city council, volunteering, public hearings |
+| Health / Wellness | meditation, health screenings, support groups |
+| History / Heritage | historical tours, heritage events, genealogy |
+| LGBTQ+ / Gender | pride events, drag shows, queer community |
+| Music / Concerts | live bands, open mic, jazz night |
+| Nature / Outdoors / Recreation | hikes, birding walks, garden tours |
+| Religion / Spirituality | services, interfaith events, meditation circles |
+| Sports / Fitness | 5K runs, yoga classes, soccer league |
+| Technology / Careers | tech meetups, hackathons, career fairs |
 
 To add a new category, edit `categories.json` — the name, label color, and background color are all defined there. The change automatically propagates to the UI and the classifier.
 
