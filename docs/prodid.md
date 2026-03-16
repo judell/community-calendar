@@ -7,7 +7,7 @@ used across all city feeds, identified by their PRODID header.
 
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
-| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 228 |
+| **Meetup** | ICS export from meetup.com groups. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 232 |
 | **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 141 |
 | **Google Calendar** | Public Google Calendar ICS export. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 82 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, lancaster, montclair, raleighdurham, santarosa | 44 |
@@ -24,7 +24,7 @@ used across all city feeds, identified by their PRODID header.
 
 ## Detail
 
-### Meetup (228 feeds)
+### Meetup (232 feeds)
 
 ICS export from meetup.com groups.
 
@@ -34,7 +34,7 @@ ICS export from meetup.com groups.
 
 **lancaster** (22): meetup_authors_in_the_making, meetup_beingonecenterlancaster, meetup_centralpagameclub, meetup_cposc, meetup_data_lancaster, meetup_gamelancaster, meetup_lancaster_bicycle_club, meetup_lancaster_craft_club, meetup_lancaster_elastic_user_group, meetup_lancaster_freethought_society, meetup_lancaster_guided_meditation_meetup_group_with_buddhist_nun, meetup_lancaster_young_adults_meetup, meetup_lanclug, meetup_levelupmeetup, meetup_meet_people_lancaster, meetup_meetup_group_phcrfejq, meetup_scrapandcraft, meetup_tech_lancaster_meetups, meetup_the_creative_house_of_lancaster, meetup_walking_tails, meetup_womensfriendship60, meetup_wordpress_lancaster
 
-**montclair** (15): meetup_bicycle_touring_club_of_north_jersey, meetup_btcnj, meetup_everwalk_nj, meetup_exploring_montclair, meetup_league_of_women_voters_of_the_montclair_area, meetup_lets_walkprogram, meetup_lwv_montclair, meetup_metrotrails, meetup_montclair_gamenights_and_social_networking_meetup_group, meetup_nj_bvt_sports, meetup_nj_code_coffee, meetup_north_jersey_bowling_soccer_volleyball, meetup_somocon, meetup_themindfulstream, meetup_west_african_drumming_nj
+**montclair** (19): meetup_bicycle_touring_club_of_north_jersey, meetup_board_game_night_at_verona_inn, meetup_board_gamers_of_greater_nutley, meetup_btcnj, meetup_cloud_data_driven, meetup_everwalk_nj, meetup_exploring_montclair, meetup_league_of_women_voters_of_the_montclair_area, meetup_lets_walkprogram, meetup_lwv_montclair, meetup_metrotrails, meetup_montclair_gamenights_and_social_networking_meetup_group, meetup_nj_bvt_sports, meetup_nj_code_coffee, meetup_north_jersey_bowling_soccer_volleyball, meetup_somocon, meetup_themindfulstream, meetup_west_african_drumming_nj, meetup_wordpress_montclair_meetup
 
 **petaluma** (27): meetup_active_20_30, meetup_book_brew, meetup_brat_pack, meetup_candlelight_yoga, meetup_contra_dance, meetup_figure_drawing, meetup_go_wild_hikers, meetup_meditate_monk, meetup_meditate_with_a_monk_in_sonoma_county, meetup_meetup_group_bwkyqavs, meetup_meetup_group_ohazunav, meetup_mindful_petaluma, meetup_mindfull_hikes, meetup_mindfulnesspetaluma, meetup_north_bay_adventure, meetup_north_bay_contra_dance, meetup_northbayhiking, meetup_petaluma_active_20_30, meetup_petaluma_book_and_brew_club, meetup_petaluma_figure_drawing_meetup_group, meetup_petaluma_salon, meetup_rebel_craft, meetup_sonoma_county_go_wild_hikers, meetup_sonoma_county_outdoors, meetup_sonoma_marin_brat_pack, meetup_sonoma_outdoors, meetup_the_rebel_craft_collective
 
