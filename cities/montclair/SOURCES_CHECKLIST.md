@@ -1,6 +1,6 @@
 # Montclair NJ Sources Checklist
 
-## Currently Implemented (41 sources)
+## Currently Implemented (47 sources)
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
@@ -46,6 +46,12 @@
 | The Raptor Trust | Squarespace per-event ICS | 4 | ✅ Ready |
 | Bicycle Touring Club of NJ | Meetup ICS | 0 | ✅ Ready (seasonal) |
 | Indivisible One NJ | Mobilize.us scraper | 3 | ✅ Ready — `mobilize.py` civic/political organizing (added 2026-03) |
+| Board Gamers of Greater Nutley | Meetup ICS | 10 | ✅ Ready (added 2026-03-15) |
+| Board Game Night at Verona Inn | Meetup ICS | 6 | ✅ Ready (added 2026-03-15) |
+| WordPress Montclair | Meetup ICS | 10 | ✅ Ready (added 2026-03-15) |
+| Cloud Data Driven | Meetup ICS | 4 | ✅ Ready (added 2026-03-15) |
+| Trivia AD | Eventbrite scraper | 121 | ✅ Ready (added 2026-03-15) |
+| Montclair History Center | Squarespace scraper | 13 | ✅ Ready (added 2026-03-15) |
 
 \* Google Calendar feeds include historical events; pipeline filters to future only.
 
@@ -63,7 +69,7 @@
 |--------|------|-------|
 | Montclair Entrepreneurs | montclair-entrepreneurs | 0 events (2026-03-01) |
 | Living Mindfully | Say-Yes-To-Your-Life-Montclair | 0 events (2026-03-01) |
-| WordPress Montclair | wordpress-montclair-meetup | Not tested |
+| WordPress Montclair | wordpress-montclair-meetup | ✅ Added (10 events) |
 
 ## Needs Scraper — Probably Expensive / Brittle
 | Source | URL | Platform | Notes |
@@ -83,12 +89,19 @@
 | Out Montclair | WordPress/Tribe Events, empty feed (0 events) |
 | Churches (Planning Center) | No public API; Redeemer Montclair & Montclair Community Church both use it |
 | Trumpets Jazz Club | Closed September 2021, building sold |
+| Out & Active NJ (Meetup) | 404 — group not found (2026-03-15) |
+| Montclair D&D (Meetup) | 404 — group not found (2026-03-15) |
+| NJ Linux User Group (Meetup) | 404 — group not found (2026-03-15) |
+| WineStyles Montclair (Eventbrite) | No organizer page on Eventbrite (2026-03-15) |
+| MC Hotel (Eventbrite) | Venue only, no organizer page (2026-03-15) |
+| Montclair Comedy Festival (Eventbrite) | No dedicated organizer; small comedy orgs have 1 event each (2026-03-15) |
+| Pride Center of NJ | Duda platform, stale events (last Oct 2025), no structured feed (2026-03-15) |
 
 ## Potential Additional Sources — Community/Civic
 - [ ] Montclair YMCA (montclairymca.org - class schedules, special events)
 - [ ] Montclair Farmers' Market (Squarespace, seasonal Saturdays at Walnut St)
 - [ ] Montclair Community Farms (Squarespace, kids programs)
-- [ ] Montclair History Center (Squarespace, family programs)
+- [x] Montclair History Center — ✅ Added via Squarespace scraper (13 events, 2026-03-15)
 - [ ] Montclair Culinary Academy (Squarespace, cooking classes)
 
 ## Potential Additional Sources — Faith

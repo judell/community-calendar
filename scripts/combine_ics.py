@@ -443,8 +443,8 @@ SOURCE_NAMES = {
     'msu_athletics': 'MSU Red Hawks Athletics',
     'maxpreps_mka': 'Montclair Kimberley Academy Athletics',
     'meetup_nj_bvt_sports': 'Meetup: NJ Bowling, Volleyball, Tennis & More',
-    'fcc_montclair': 'First Congregational Church Montclair',
-    'uu_montclair': 'UU Congregation of Montclair',
+    'gcal_id8bbkkkfmscdavi2jilkb2muo': 'First Congregational Church Montclair',
+    'gcal_uumontclair_org_9kptanknnvqcom49ks44nnaaak': 'UU Congregation of Montclair',
     'shomrei_emunah': 'Congregation Shomrei Emunah',
     'unioncong': 'Union Congregational Church',
     'nertamid': 'Temple Ner Tamid',
@@ -453,6 +453,12 @@ SOURCE_NAMES = {
     'raptor_trust': 'The Raptor Trust',
     'mobilize_indivisible_nj': 'Indivisible One NJ (Mobilize)',
     'sycamore_land_trust': 'Sycamore Land Trust',
+    'eventbrite_trivia_ad': 'Trivia AD',
+    'montclair_history_center': 'Montclair History Center',
+    'meetup_board_gamers_of_greater_nutley': 'Meetup: Board Gamers of Greater Nutley',
+    'meetup_board_game_night_at_verona_inn': 'Meetup: Board Game Night at Verona Inn',
+    'meetup_wordpress_montclair_meetup': 'Meetup: WordPress Montclair',
+    'meetup_cloud_data_driven': 'Meetup: Cloud Data Driven',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
@@ -646,8 +652,8 @@ SOURCE_URLS = {
     'eventbrite_loopwell': 'https://www.eventbrite.com/o/loopwell-wellness-in-montclair-nj-71213568773',
     'msu_athletics': 'https://montclairathletics.com/calendar',
     'maxpreps_mka': 'https://www.maxpreps.com/nj/montclair/montclair-kimberley-academy-cougars/events/',
-    'fcc_montclair': 'https://fccmontclair.org/upcoming-events-at-fcc/',
-    'uu_montclair': 'https://www.uumontclair.org/events',
+    'gcal_id8bbkkkfmscdavi2jilkb2muo': 'https://fccmontclair.org/upcoming-events-at-fcc/',
+    'gcal_uumontclair_org_9kptanknnvqcom49ks44nnaaak': 'https://www.uumontclair.org/events',
     'shomrei_emunah': 'https://shomrei.org/calendar/',
     'unioncong': 'https://www.unioncong.org/events/',
     'nertamid': 'https://www.nertamid.org/events/',
@@ -656,6 +662,12 @@ SOURCE_URLS = {
     'raptor_trust': 'https://www.theraptortrust.org/events',
     'mobilize_indivisible_nj': 'https://www.mobilize.us/ionj/',
     'maxpreps_montclair_high': 'https://www.maxpreps.com/nj/montclair/montclair-mounties/events/',
+    'eventbrite_trivia_ad': 'https://www.eventbrite.com/o/trivia-ad-4701927701',
+    'montclair_history_center': 'https://www.montclairhistory.org/all-events',
+    'meetup_board_gamers_of_greater_nutley': 'https://www.meetup.com/board-gamers-of-greater-nutley/',
+    'meetup_board_game_night_at_verona_inn': 'https://www.meetup.com/board-game-night-at-verona-inn/',
+    'meetup_wordpress_montclair_meetup': 'https://www.meetup.com/wordpress-montclair-meetup/',
+    'meetup_cloud_data_driven': 'https://www.meetup.com/cloud-data-driven/',
 }
 
 
