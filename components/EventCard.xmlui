@@ -1,6 +1,16 @@
 <Component name="EventCard">
 
-  <Card padding="$space-0_5 $space-1_5" marginBottom="0px" borderRadius="0" boxShadow="none" borderTop="1px solid $color-surface-200" borderBottom="none" borderRight="none" borderLeft="{window.clusterBorder($props.event.cluster_id, $props.filterTerm)}">
+  <Card
+    padding="{window.layoutMode === 'multicol' ? '$space-1_5' : '$space-0_5 $space-1_5'}"
+    marginBottom="{window.layoutMode === 'multicol' ? undefined : '0px'}"
+    borderRadius="{window.layoutMode === 'multicol' ? '$borderRadius' : '0'}"
+    boxShadow="{window.layoutMode === 'multicol' ? undefined : 'none'}"
+    borderTop="{window.layoutMode === 'multicol' ? undefined : '1px solid $color-surface-200'}"
+    borderBottom="{window.layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none'}"
+    borderRight="{window.layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none'}"
+    border="{window.layoutMode === 'multicol' ? '1px solid $color-surface-200' : undefined}"
+    borderLeft="{window.clusterBorder($props.event.cluster_id, $props.filterTerm) || (window.layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none')}"
+  >
     <VStack gap="$space-0">
       <Text
         fontSize="$fontSize-sm"

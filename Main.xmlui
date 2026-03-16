@@ -123,7 +123,7 @@
   />
 
   <variable name="hiddenSources" value="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []}" />
-  <variable name="processedEvents" value="{window.buildSearchIndex(window.filterHiddenSources(window.dedupeEvents([...(events.value || []), ...window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())]), hiddenSources))}" />
+  <variable name="processedEvents" value="{window.buildSearchIndex(window.filterHiddenSources(window.dedupeEvents([...(Array.isArray(events.value) ? events.value : []), ...(Array.isArray(window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())) ? window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate()) : [])]), hiddenSources))}" />
 
   <!-- Dialogs -->
   <SignInDialog id="signInDialog" />
@@ -150,16 +150,27 @@
   <VStack when="{!city}" horizontalAlignment="center" width="100%" padding="$space-8">
     <H1>Community Calendar</H1>
     <Spinner when="{!cityList.loaded}" />
-    <VStack when="{cityList.loaded}" gap="$space-2" maxWidth="300px" width="100%">
-      <Items data="{cityList.value}">
-        <Button variant="outlined" width="100%" onClick="window.selectCity($item.city); city = $item.city">{window.toDisplayName($item.city)}</Button>
-      </Items>
+    <VStack when="{cityList.loaded}" gap="$space-4" maxWidth="300px" width="100%">
+      <VStack gap="$space-2">
+        <Items data="{cityList.value}">
+          <Button variant="outlined" width="100%" onClick="window.selectCity($item.city); city = $item.city">{window.toDisplayName($item.city)}</Button>
+        </Items>
+      </VStack>
+      <HStack verticalAlignment="center" gap="$space-2">
+        <Text fontSize="$fontSize-sm" color="$color-text-secondary">Columns:</Text>
+        <RadioGroup initialValue="{window.layoutMode}" onDidChange="(val) => window.setLayoutMode(val)">
+          <HStack>
+            <Option value="list" label="single" />
+            <Option value="multicol" label="multi" />
+          </HStack>
+        </RadioGroup>
+      </HStack>
     </VStack>
   </VStack>
 
   <!-- Main Content -->
   <HStack when="{!!city}" horizontalAlignment="center" width="100%" overflowX="hidden">
-  <VStack maxWidth="600px" width="100%" overflowX="hidden">
+  <VStack maxWidth="{window.layoutMode === 'multicol' ? '1200px' : '600px'}" width="100%" overflowX="hidden">
     <VStack>
     <VStack gap="$space-2">
     <Bookmark id="topAnchor">
@@ -263,7 +274,10 @@
       marginBottom="$space-2"
       onClick="const prevIndex = window._morePrevIndex ?? 0; displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
     />
-    <List id="eventsList" when="{events.loaded && viewMode === 'all'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" fixedItemSize="true" limit="{filterTerm ? 10 : 50}">
+    <Masonry when="{events.loaded && viewMode === 'all' && window.layoutMode === 'multicol'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" columns="3" gap="$space-3" rowGap="0" minColumnWidth="300px">
+      <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+    </Masonry>
+    <List when="{events.loaded && viewMode === 'all' && window.layoutMode !== 'multicol'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" fixedItemSize="true" limit="{filterTerm ? 10 : 50}">
       <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
     </List>
     <Button

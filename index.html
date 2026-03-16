@@ -21,6 +21,7 @@
       window.APP_VERSION = (vxhr.responseText || '').trim() || String(Date.now());
       var v = window.APP_VERSION;
       document.write('<script src="xmlui/xmlui-standalone.umd.js?v=' + v + '"><\/script>');
+      document.write('<script src="xmlui/xmlui-masonry.js?v=' + v + '"><\/script>');
       // xmlui-calendar.js removed — BigCalendar view hidden from UI
     </script>
     <script>
@@ -40,9 +41,17 @@
       document.write('<script src="xs-trace.js?v=' + window.APP_VERSION + '"><\/script>');
     </script>
     <script>
-      // City from URL param, e.g. ?city=davis
+      // URL params, e.g. ?city=davis&mode=multicol
       const params = new URLSearchParams(window.location.search);
       const cityParam = params.get('city');
+      window.layoutMode = params.get('mode') || 'list';
+      window.setLayoutMode = function(val) {
+        window.layoutMode = val;
+        var url = new URL(window.location);
+        if (val === 'multicol') { url.searchParams.set('mode', 'multicol'); }
+        else { url.searchParams.delete('mode'); }
+        window.history.replaceState({}, '', url);
+      };
       window.initialCategory = params.get('category') || '';
       window.initialSearch = params.get('search') || '';
       // Title-case a slug: "santarosa" -> "Santa Rosa", "raleighdurham" -> "Raleighdurham"
