@@ -204,7 +204,7 @@ def add_to_feeds_txt(url: str, city: str, display_name: str) -> bool:
         print(f"✅ Already in feeds.txt")
         return True
     
-    # Append the new feed
+    # Append the new feed with structured comment
     entry = f"\n# {display_name}\n{url}\n"
     
     with open(feeds_path, 'a') as f:

@@ -4,7 +4,16 @@
 Usage: python scripts/download_feeds.py <city>
 
 Reads cities/<city>/feeds.txt, downloads each https:// URL to an auto-named
-.ics file in cities/<city>/. Skips comments and local file references.
+.ics file in cities/<city>/. Parses structured comments above each URL to
+get the friendly source name and optional fallback URL, then injects
+X-SOURCE (and X-SOURCE-URL) headers into each downloaded VEVENT.
+
+feeds.txt format:
+    # Friendly Name | https://fallback-url/
+    https://actual-feed-url/ical/
+
+    # Friendly Name
+    https://another-feed-url/ical/
 """
 
 import os
@@ -80,6 +89,79 @@ def slugify(url: str) -> str:
     return slug[:50]
 
 
+def parse_feeds_txt(feeds_file: str):
+    """Parse feeds.txt, yielding (url, friendly_name, fallback_url) tuples.
+
+    Structured comment format:
+        # Friendly Name | https://fallback-url/
+        https://feed-url/
+
+    A comment line immediately before a URL line is the metadata for that URL.
+    Category headers (comments before blank lines or other comments) are ignored.
+    """
+    pending_name = None
+    pending_fallback = None
+
+    with open(feeds_file) as f:
+        for line in f:
+            stripped = line.strip()
+
+            if stripped.startswith('#'):
+                body = stripped[1:].strip()
+                if '|' in body:
+                    parts = body.split('|', 1)
+                    pending_name = parts[0].strip()
+                    pending_fallback = parts[1].strip() or None
+                else:
+                    pending_name = body
+                    pending_fallback = None
+                continue
+
+            if not stripped or not stripped.startswith('https://'):
+                # Blank line or local file ref resets pending comment
+                pending_name = None
+                pending_fallback = None
+                continue
+
+            yield stripped, pending_name, pending_fallback
+            pending_name = None
+            pending_fallback = None
+
+
+def inject_source_headers(filepath: str, friendly_name: str, fallback_url: str | None) -> None:
+    """Inject X-SOURCE (and optionally X-SOURCE-URL) into each VEVENT in an ICS file."""
+    try:
+        with open(filepath, 'rb') as f:
+            raw = f.read()
+    except Exception:
+        return
+
+    if b'BEGIN:VCALENDAR' not in raw:
+        return  # Not valid ICS
+
+    # Detect line ending style from raw bytes
+    crlf = b'\r\n' if b'\r\n' in raw else b'\n'
+
+    name_bytes = friendly_name.encode('utf-8')
+    headers = b'X-SOURCE:' + name_bytes + crlf
+    if fallback_url:
+        headers += b'X-SOURCE-URL:' + fallback_url.encode('utf-8') + crlf
+
+    marker = b'BEGIN:VEVENT' + crlf
+    parts = raw.split(marker)
+
+    result = [parts[0]]
+    for part in parts[1:]:
+        vevent_head = part.split(b'END:VEVENT')[0]
+        if b'X-SOURCE:' not in vevent_head:
+            result.append(headers + part)
+        else:
+            result.append(part)
+
+    with open(filepath, 'wb') as f:
+        f.write(marker.join(result))
+
+
 def download_feeds(city: str) -> None:
     feeds_file = os.path.join("cities", city, "feeds.txt")
     output_dir = os.path.join("cities", city)
@@ -89,36 +171,36 @@ def download_feeds(city: str) -> None:
         return
 
     count = 0
-    with open(feeds_file) as f:
-        for line in f:
-            # Strip comments and whitespace
-            line = line.split("#")[0].strip()
-            if not line or not line.startswith("https://"):
-                continue
+    for url, friendly_name, fallback_url in parse_feeds_txt(feeds_file):
+        filename = slugify(url) + ".ics"
+        outfile = os.path.join(output_dir, filename)
 
-            filename = slugify(line) + ".ics"
-            outfile = os.path.join(output_dir, filename)
+        # Meetup requires User-Agent
+        cmd = ["curl", "-sL"]
+        if "meetup.com" in url:
+            cmd += ["-A", "Mozilla/5.0"]
+        cmd += [url, "-o", outfile]
 
-            # Meetup requires User-Agent
-            cmd = ["curl", "-sL"]
-            if "meetup.com" in line:
-                cmd += ["-A", "Mozilla/5.0"]
-            cmd += [line, "-o", outfile]
+        subprocess.run(cmd)
 
-            subprocess.run(cmd)
+        # Report result
+        if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
+            try:
+                with open(outfile) as ics:
+                    events = ics.read().count("BEGIN:VEVENT")
+            except Exception:
+                events = 0
 
-            # Report result
-            if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
-                try:
-                    with open(outfile) as ics:
-                        events = ics.read().count("BEGIN:VEVENT")
-                except Exception:
-                    events = 0
-                print(f"  ✅ {filename}: {events} events")
-            else:
-                print(f"  ❌ {filename}: empty or failed")
+            # Inject source headers from feeds.txt metadata
+            if friendly_name:
+                inject_source_headers(outfile, friendly_name, fallback_url)
 
-            count += 1
+            print(f"  ✅ {filename}: {events} events"
+                  f"{' (source: ' + friendly_name + ')' if friendly_name else ''}")
+        else:
+            print(f"  ❌ {filename}: empty or failed")
+
+        count += 1
 
     print(f"Downloaded {count} feeds for {city}")
 
