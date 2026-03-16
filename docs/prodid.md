@@ -13,7 +13,7 @@ used across all city feeds, identified by their PRODID header.
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, lancaster, montclair, raleighdurham, santarosa | 44 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 42 |
 | **Tockify** | Embeddable calendar widget with public ICS feeds. | bloomington, petaluma, santarosa, toronto | 16 |
-| **MaxPreps** | High school sports schedules. | lancaster, montclair, santarosa | 14 |
+| **MaxPreps** | High school sports schedules. | lancaster, montclair, santarosa | 13 |
 | **LibCal (Springshare)** | Library event management platform. | bloomington, montclair, raleighdurham | 8 |
 | **Modern Events Calendar (WordPress)** | WordPress plugin by Webnus. PRODID references wp-events-plugin.com. | petaluma, raleighdurham, toronto | 7 |
 | **GrowthZone** | Chamber of commerce / association management platform. | montclair, petaluma, raleighdurham | 5 |
@@ -116,13 +116,13 @@ Embeddable calendar widget with public ICS feeds.
 
 **toronto** (8): distillery_events, jamaalmyers, st_lawrence_na, tockify_distilleryevents, tockify_jamaalmyers, tockify_st.lawrence.na, tockify_torevent, torevent
 
-### MaxPreps (14 feeds)
+### MaxPreps (13 feeds)
 
 High school sports schedules.
 
 **lancaster** (9): maxpreps_conestoga_valley, maxpreps_donegal, maxpreps_elizabethtown, maxpreps_ephrata, maxpreps_lancaster_catholic, maxpreps_lancaster_mennonite, maxpreps_manheim_township, maxpreps_mccaskey, maxpreps_penn_manor
 
-**montclair** (2): maxpreps_mka, maxpreps_montclair_high
+**montclair** (1): maxpreps_mka
 
 **santarosa** (3): maxpreps_elsie_allen, maxpreps_montgomery_high, maxpreps_piner_high
 
