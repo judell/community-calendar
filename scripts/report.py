@@ -203,6 +203,7 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
 
     # URL quality analysis from events.json
     for city in cities:
+        city_dir = f'cities/{city}'
         events_json = f'cities/{city}/events.json'
         try:
             with open(events_json, 'r') as f:
@@ -309,8 +310,10 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
                 geo_filtered = json.load(f)
             if geo_filtered:
                 report['cities'][city]['geo_filtered'] = geo_filtered
+            else:
+                report['cities'][city].pop('geo_filtered', None)
         except (FileNotFoundError, json.JSONDecodeError):
-            pass
+            report['cities'][city].pop('geo_filtered', None)
 
         report['cities'][city]['url_quality'] = {
             'total_with_url': total,
