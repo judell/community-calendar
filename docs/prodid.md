@@ -12,8 +12,8 @@ used across all city feeds, identified by their PRODID header.
 | **Google Calendar** | Public Google Calendar ICS export. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 82 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, lancaster, montclair, raleighdurham, santarosa | 44 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 42 |
+| **MaxPreps** | High school sports schedules. | lancaster, montclair, petaluma, santarosa | 22 |
 | **Tockify** | Embeddable calendar widget with public ICS feeds. | bloomington, petaluma, santarosa, toronto | 16 |
-| **MaxPreps** | High school sports schedules. | lancaster, montclair, santarosa | 14 |
 | **LibCal (Springshare)** | Library event management platform. | bloomington, montclair, raleighdurham | 8 |
 | **Modern Events Calendar (WordPress)** | WordPress plugin by Webnus. PRODID references wp-events-plugin.com. | petaluma, raleighdurham, toronto | 7 |
 | **GrowthZone** | Chamber of commerce / association management platform. | montclair, petaluma, raleighdurham | 5 |
@@ -48,7 +48,7 @@ ICS export from meetup.com groups.
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
-**bloomington** (11): bgc_bloomington, bgcbloomington, bloomspinweave, brown_county_playhouse, browncountyplayhouse, community_band, first_united_church, firstuc, hoosierflyfishers, hoosierflyfishers_list, lotusfest
+**bloomington** (12): bgc_bloomington, bgcbloomington, bloomingtoncommunityband, bloomspinweave, brown_county_playhouse, browncountyplayhouse, community_band, first_united_church, firstuc, hoosierflyfishers, hoosierflyfishers_list, lotusfest
 
 **davis** (4): hatefreetogether, thedirt, visitdavis, visityolo_event
 
@@ -62,7 +62,7 @@ WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **santarosa** (14): bigeasypetaluma, golocal, golocal_coop, luther_burbank_center, lutherburbankcenter, ranchonicasio, schulz_museum, schulzmuseum, sonoma, sonoma_com, sonoma_county_aa, sonomacountyaa, srsymphony, uptowntheatrenapa
 
-**toronto** (43): bata_shoe_museum, batashoemuseum, bloor_west_village, bloorwestvillagebia, boulderzclimbing, buddies_theatre, buddiesinbadtimes, culturelink, engineering_engineering_events, factory_theatre, factorytheatre, gardiner_museum, gardinermuseum, golatindance, grossmans_tavern, grossmanstavern, high_park_nature, highparknaturecentre, indigenous, jazz_bistro, jazzbistro, knitters_guild, now_toronto, nowtoronto, ontario_historical_society, ontario_nature, ontariohistoricalsociety, philosophy, scadding_court, scaddingcourt, socialwork, sunshinecentres, textile_museum, textilemuseum, toronto_botanical, torontobotanicalgarden, torontoknittersguild, torontounion_toronto_union_events, union_station, uoft_engineering, uoft_indigenous, uoft_philosophy, uoft_socialwork
+**toronto** (42): bata_shoe_museum, batashoemuseum, bloor_west_village, bloorwestvillagebia, boulderzclimbing, buddies_theatre, buddiesinbadtimes, culturelink, engineering_engineering_events, factory_theatre, factorytheatre, gardiner_museum, gardinermuseum, grossmans_tavern, grossmanstavern, high_park_nature, highparknaturecentre, indigenous, jazz_bistro, jazzbistro, knitters_guild, now_toronto, nowtoronto, ontario_historical_society, ontario_nature, ontariohistoricalsociety, philosophy, scadding_court, scaddingcourt, socialwork, sunshinecentres, textile_museum, textilemuseum, toronto_botanical, torontobotanicalgarden, torontoknittersguild, torontounion_toronto_union_events, union_station, uoft_engineering, uoft_indigenous, uoft_philosophy, uoft_socialwork
 
 ### Google Calendar (82 feeds)
 
@@ -104,6 +104,18 @@ Campus/community event platform by Concept3D (Indiana University instance).
 
 **raleighdurham** (9): calendar_1_ics, calendar_group_african_american_cultural_center, calendar_group_gregg_museum_of_art_design, events_1_ics, nc_cultural_resources, ncsu, ncsu_aacc, ncsu_gregg_museum, unc_chapel_hill
 
+### MaxPreps (22 feeds)
+
+High school sports schedules.
+
+**lancaster** (12): maxpreps_conestoga_valley, maxpreps_donegal, maxpreps_elizabethtown, maxpreps_ephrata, maxpreps_hempfield, maxpreps_lampeter_strasburg, maxpreps_lancaster_catholic, maxpreps_lancaster_mennonite, maxpreps_manheim_township, maxpreps_mccaskey, maxpreps_penn_manor, maxpreps_warwick
+
+**montclair** (2): maxpreps_mka, maxpreps_montclair_high
+
+**petaluma** (2): maxpreps_casa_grande, maxpreps_petaluma_high
+
+**santarosa** (6): maxpreps_cardinal_newman, maxpreps_elsie_allen, maxpreps_maria_carrillo, maxpreps_montgomery_high, maxpreps_piner_high, maxpreps_santa_rosa_high
+
 ### Tockify (16 feeds)
 
 Embeddable calendar widget with public ICS feeds.
@@ -115,16 +127,6 @@ Embeddable calendar widget with public ICS feeds.
 **santarosa** (2): rileystreet_art, tockify_rileystreet.art.com
 
 **toronto** (8): distillery_events, jamaalmyers, st_lawrence_na, tockify_distilleryevents, tockify_jamaalmyers, tockify_st.lawrence.na, tockify_torevent, torevent
-
-### MaxPreps (14 feeds)
-
-High school sports schedules.
-
-**lancaster** (9): maxpreps_conestoga_valley, maxpreps_donegal, maxpreps_elizabethtown, maxpreps_ephrata, maxpreps_lancaster_catholic, maxpreps_lancaster_mennonite, maxpreps_manheim_township, maxpreps_mccaskey, maxpreps_penn_manor
-
-**montclair** (2): maxpreps_mka, maxpreps_montclair_high
-
-**santarosa** (3): maxpreps_elsie_allen, maxpreps_montgomery_high, maxpreps_piner_high
 
 ### LibCal (Springshare) (8 feeds)
 
