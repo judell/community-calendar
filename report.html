@@ -182,6 +182,12 @@
         <div id="anomaly-list">Loading...</div>
     </details>
 
+    <div class="url-section" id="suggestions-section" style="display:none">
+        <h2>Source Suggestions</h2>
+        <div class="section-desc">Feed suggestions submitted by users via the Sources dialog</div>
+        <div id="suggestions-report"></div>
+    </div>
+
     <div class="url-section" id="overrides-section" style="display:none">
         <h2>Category Overrides</h2>
         <div class="section-desc">Curator corrections to LLM-assigned categories (used as few-shot examples)</div>
@@ -639,8 +645,40 @@
             } catch (e) { /* silently skip if unavailable */ }
         }
 
+        async function loadSuggestions() {
+            var SUPABASE_URL = 'https://dzpdualvwspgqghrysyz.supabase.co';
+            var SUPABASE_KEY = 'sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5';
+            try {
+                var resp = await fetch(
+                    SUPABASE_URL + '/rest/v1/source_suggestions?select=*&order=created_at.desc',
+                    { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } }
+                );
+                if (!resp.ok) return;
+                var suggestions = await resp.json();
+                if (!suggestions.length) return;
+                var section = document.getElementById('suggestions-section');
+                section.style.display = '';
+                document.getElementById('suggestions-report').innerHTML =
+                    '<table class="url-table">' +
+                        '<tr><th>City</th><th>Name</th><th>URL</th><th>Type</th><th>Notes</th><th>Date</th></tr>' +
+                        suggestions.map(function(s) {
+                            return '<tr>' +
+                                '<td>' + capitalize(s.city || '?') + '</td>' +
+                                '<td>' + (s.name || '') + '</td>' +
+                                '<td>' + (s.url ? '<a href="' + s.url + '" target="_blank">' + (s.url.length > 50 ? s.url.substring(0, 50) + '...' : s.url) + '</a>' : '') + '</td>' +
+                                '<td>' + (s.feed_type || '<span style="color:#999">—</span>') + '</td>' +
+                                '<td>' + (s.notes || '<span style="color:#999">—</span>') + '</td>' +
+                                '<td>' + new Date(s.created_at).toLocaleDateString() + '</td>' +
+                            '</tr>';
+                        }).join('') +
+                    '</table>' +
+                    '<div style="margin-top:8px;font-size:0.85em;color:#666">' + suggestions.length + ' suggestion' + (suggestions.length === 1 ? '' : 's') + ' total</div>';
+            } catch (e) { /* silently skip if unavailable */ }
+        }
+
         loadReport();
         loadOverrides();
+        loadSuggestions();
 
         async function loadFooter() {
             try {
