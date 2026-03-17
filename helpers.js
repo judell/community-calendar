@@ -545,15 +545,28 @@ function dedupeEvents(events) {
       if (!groups[key].cluster_id && e.cluster_id) groups[key].cluster_id = e.cluster_id;
     }
   });
-  // Convert sources Set to comma-separated string, with authoritative source first
-  // (a source whose name appears in the event location is considered authoritative)
+  // Convert sources Set to comma-separated string, with authoritative source first.
+  // Known aggregators sort to the end; among non-aggregators, a source whose name
+  // appears in the event location is promoted to the front.
   // Filter mergedIds to only include numeric IDs (exclude synthetic enrichment IDs)
+  var AGGREGATORS = new Set([
+    'North Bay Bohemian', 'Press Democrat', 'Creative Sonoma', 'GoLocal Cooperative',
+    'NOW Toronto', 'Toronto Events (Tockify)', 'Montclair Local News',
+    'LancasterPA.com', "Let's Go! Bloomington", 'BloomingtonOnline Events',
+    'BloomingtonOnline Food & Drink', 'BloomingtonOnline Shopping',
+    'Show Up Toronto'
+  ]);
   let result = Object.values(groups).map(e => {
-    const sourcesArr = Array.from(e.sources).sort();
+    const sourcesArr = Array.from(e.sources).sort((a, b) => {
+      var aAgg = AGGREGATORS.has(a) ? 1 : 0;
+      var bAgg = AGGREGATORS.has(b) ? 1 : 0;
+      if (aAgg !== bAgg) return aAgg - bAgg;
+      return a.localeCompare(b);
+    });
     const loc = (e.location || '').toLowerCase();
     if (loc) {
-      // Move any source whose name is found in the location to the front
-      const authIdx = sourcesArr.findIndex(s => loc.includes(s.toLowerCase()));
+      // Among non-aggregators, promote a source whose name appears in the location
+      const authIdx = sourcesArr.findIndex(s => !AGGREGATORS.has(s) && loc.includes(s.toLowerCase()));
       if (authIdx > 0) {
         const [auth] = sourcesArr.splice(authIdx, 1);
         sourcesArr.unshift(auth);
