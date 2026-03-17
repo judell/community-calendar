@@ -113,6 +113,8 @@ The principle: **we could disintermediate aggregators and only link directly to 
 ### Phase 1: Platform searches (grab the easy wins)
 Search for feeds by platform — Tockify, Meetup ICS, WordPress `?ical=1` (a URL suffix you can append to WordPress event pages to get an ICS feed), Localist, Google Calendar embeds. These reliably turn up dozens of ready-to-use ICS feeds in a single pass.
 
+For **tech-heavy cities**, also search `site:guild.host "{city}"`. Guild.host is a community platform used mainly by tech groups (JavaScript meetups, civic tech, DevTools, etc.). No ICS feeds, but we have a scraper (`scrapers/guildhost.py`) that extracts JSON-LD from event pages.
+
 ### Phase 2: Topical searches (find venues by category)
 Search by topic to find venues and organizations, then probe their websites for feeds (try `?ical=1`, check for Squarespace `?format=json`, look for Google Calendar embeds). This is where you find the Jazz Bistros and Grossman's Taverns that don't show up in platform searches.
 

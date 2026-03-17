@@ -255,6 +255,14 @@ For cities using Legistar for agenda management. Client name is from the Legista
 
 **Gotcha:** Some cities have a `{city}.legistar.com` web UI but a broken API (e.g., Raleigh returns "LegistarConnectionString not set up"). These cities use Granicus for video but not Legistar for legislative data. Always test the API before adding to the workflow.
 
+### Guild.host (`scrapers/guildhost.py`) - Tech Community Events
+```bash
+python scrapers/guildhost.py --group civic-tech-toronto --name "Civic Tech Toronto" -o cities/toronto/guildhost_civic_tech.ics
+```
+Guild.host is a community platform used mainly by **tech-focused groups** (JavaScript meetups, civic tech, DevTools, etc.). No ICS feeds — it's a JS-rendered SPA, but individual event pages have clean JSON-LD `Event` schema. The scraper fetches the listing page, extracts event slugs, then parses JSON-LD from each event page. Handles mixed physical + virtual locations.
+
+**Discovery:** `site:guild.host "{city}"` — the platform has no location-based search. Most useful for cities with active tech scenes (Toronto, Montreal, London, Amsterdam). For a typical non-tech city, expect zero results.
+
 ### Songkick (`scrapers/songkick.py`) - Music Venue Showtimes
 ```bash
 python scrapers/songkick.py --url "https://www.songkick.com/venues/32209-wellmont-theater" --name "Wellmont Theater" -o events.ics
@@ -343,6 +351,7 @@ Events often have multiple timeslots (recurring phone banks, weekly protests, et
 | **Legistar** | `https://webapi.legistar.com/v1/{client}/events` (WebAPI, use scraper) |
 | **CivicPlus** | `https://www.{city}.org/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID={N}` |
 | **Songkick** | `https://www.songkick.com/venues/{ID}-{slug}` (JSON-LD MusicEvent, use `scrapers/songkick.py`) |
+| **Guild.host** | No ICS feeds. JSON-LD Event on individual pages. Tech-focused platform. Use `scrapers/guildhost.py` |
 
 ### SeeTickets Widgets
 HTML classes: `.title a`, `.date`, `.see-showtime`, `.see-doortime`, `.genre`, `.ages`, `.price`
