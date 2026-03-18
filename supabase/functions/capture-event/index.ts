@@ -11,32 +11,37 @@ const EVENT_JSON_FORMAT = `{
   "end_time": "ISO8601 datetime or null",
   "location": "venue/address or null",
   "description": "brief description or null",
-  "url": "website if visible or null"
+  "url": "website if visible or null",
+  "timezone": "IANA timezone identifier if mentioned or inferable from location (e.g., \\"America/New_York\\"), otherwise omit"
 }`;
 
-function getSharedRules(): string {
+function getSharedRules(defaultTimezone?: string): string {
   const today = new Date().toISOString().substring(0, 10);
+  const tzRule = defaultTimezone
+    ? `- This event is for a calendar in the "${defaultTimezone}" timezone. If the source material explicitly mentions a different timezone, use that. Otherwise, set the "timezone" field to "${defaultTimezone}".`
+    : `- If the source material mentions a timezone or a location that implies one, include a "timezone" field with the IANA timezone identifier (e.g., "America/New_York"). If no timezone is mentioned or inferable, omit the field.`;
   return `Rules:
 - Today's date is ${today}. Use this to calculate upcoming dates (e.g., "next Tuesday" means the next Tuesday on or after today).
 - If you cannot determine the exact time, make a reasonable guess (e.g., evening events at 19:00).
 - If end_time is unknown, estimate a reasonable duration (e.g., 1 hour for meetups, 2-3 hours for concerts/festivals).
 - If the date/time is completely unreadable, set start_time to null.
 - Keep description brief (1-2 sentences max).
+${tzRule}
 - Return ONLY the JSON object, no markdown or explanation.`;
 }
 
-function getImageExtractionPrompt(): string {
+function getImageExtractionPrompt(defaultTimezone?: string): string {
   return `Extract event details from this poster image. Return ONLY valid JSON, no other text:
 ${EVENT_JSON_FORMAT}
 
-${getSharedRules()}`;
+${getSharedRules(defaultTimezone)}`;
 }
 
-function getAudioExtractionPrompt(): string {
+function getAudioExtractionPrompt(defaultTimezone?: string): string {
   return `Extract event details from this transcript of an audio recording (e.g., a voice memo, radio ad, or voicemail about an event). Return ONLY valid JSON, no other text:
 ${EVENT_JSON_FORMAT}
 
-${getSharedRules()}
+${getSharedRules(defaultTimezone)}
 - The transcript may contain filler words, false starts, or informal speech — extract the key event details.
 - If multiple events are mentioned, extract only the first/primary one.
 - If a day of the week is mentioned or implied (e.g., "Thursday night trivia", "Saturday morning farmers market"), set start_time to the NEXT upcoming occurrence of that day.
@@ -97,7 +102,7 @@ async function callClaude(content: any[]): Promise<any> {
   return parseEventJson(textContent.text);
 }
 
-async function extractEventFromImage(imageBytes: Uint8Array, mediaType: string): Promise<any> {
+async function extractEventFromImage(imageBytes: Uint8Array, mediaType: string, defaultTimezone?: string): Promise<any> {
   console.log(`Processing image: ${mediaType}, ${imageBytes.length} bytes`);
 
   // Convert bytes to base64 (chunked to avoid stack overflow on large images)
@@ -114,7 +119,7 @@ async function extractEventFromImage(imageBytes: Uint8Array, mediaType: string):
       type: "image",
       source: { type: "base64", media_type: mediaType, data: base64 },
     },
-    { type: "text", text: getImageExtractionPrompt() },
+    { type: "text", text: getImageExtractionPrompt(defaultTimezone) },
   ]);
 }
 
@@ -164,13 +169,13 @@ async function transcribeAudio(audioBytes: Uint8Array, mediaType: string): Promi
   return result.text;
 }
 
-async function extractEventFromAudio(audioBytes: Uint8Array, mediaType: string): Promise<{ event: any; transcript: string }> {
+async function extractEventFromAudio(audioBytes: Uint8Array, mediaType: string, defaultTimezone?: string): Promise<{ event: any; transcript: string }> {
   const transcript = await transcribeAudio(audioBytes, mediaType);
 
   const event = await callClaude([
     {
       type: "text",
-      text: `${getAudioExtractionPrompt()}\n\nTranscript:\n${transcript}`,
+      text: `${getAudioExtractionPrompt(defaultTimezone)}\n\nTranscript:\n${transcript}`,
     },
   ]);
 
@@ -249,6 +254,7 @@ Deno.serve(async (req) => {
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
       const mode = formData.get("mode") as string;
+      const defaultTimezone = formData.get("timezone") as string | null;
 
       // Find the file - Actions.upload uses the filename as the field name
       let file: File | null = null;
@@ -274,12 +280,12 @@ Deno.serve(async (req) => {
         console.log(`Extracting event from ${isAudio ? "audio" : "image"}, mediaType: ${mediaType}, size: ${fileBytes.length}`);
 
         if (isAudio) {
-          const { event: extractedEvent, transcript } = await extractEventFromAudio(fileBytes, mediaType);
+          const { event: extractedEvent, transcript } = await extractEventFromAudio(fileBytes, mediaType, defaultTimezone || undefined);
           return new Response(JSON.stringify({ event: extractedEvent, transcript }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         } else {
-          const extractedEvent = await extractEventFromImage(fileBytes, mediaType);
+          const extractedEvent = await extractEventFromImage(fileBytes, mediaType, defaultTimezone || undefined);
           return new Response(JSON.stringify({ event: extractedEvent }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
@@ -290,7 +296,7 @@ Deno.serve(async (req) => {
     // Handle application/json (for commit mode and legacy base64 extract)
     if (contentType.includes("application/json")) {
       const body = await req.json();
-      const { mode, image, media_type, event, transcript } = body;
+      const { mode, image, media_type, event, transcript, timezone: bodyTimezone } = body;
 
       if (mode === "extract") {
         // Legacy base64 mode
@@ -308,7 +314,7 @@ Deno.serve(async (req) => {
         for (let i = 0; i < binaryString.length; i++) {
           imageBytes[i] = binaryString.charCodeAt(i);
         }
-        const extractedEvent = await extractEventFromImage(imageBytes, mediaType);
+        const extractedEvent = await extractEventFromImage(imageBytes, mediaType, bodyTimezone);
 
         return new Response(JSON.stringify({ event: extractedEvent }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
