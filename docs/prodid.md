@@ -8,10 +8,10 @@ used across all city feeds, identified by their PRODID header.
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
 | **Meetup** | ICS export from meetup.com groups. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 195 |
-| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 107 |
+| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 108 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, lancaster, montclair, raleighdurham, santarosa | 40 |
-| **Google Calendar** | Public Google Calendar ICS export. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 38 |
-| **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 25 |
+| **Google Calendar** | Public Google Calendar ICS export. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 40 |
+| **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 26 |
 | **MaxPreps** | High school sports schedules. | lancaster, montclair, petaluma, santarosa | 22 |
 | **Tockify** | Embeddable calendar widget with public ICS feeds. | bloomington, petaluma, santarosa, toronto | 8 |
 | **LibCal (Springshare)** | Library event management platform. | bloomington, montclair, raleighdurham | 7 |
@@ -44,7 +44,7 @@ ICS export from meetup.com groups.
 
 **toronto** (76): meetup_20s_30s_toronto_social_activities, meetup_a_book_club_downtown_abcd, meetup_arts_crafts, meetup_biggest_language_party_event_social_in_toronto, meetup_boardgamestoronto, meetup_book_club_abcd, meetup_canoe_trippers, meetup_civic_tech_toronto, meetup_comedy_improv_and_acting, meetup_downtown_toronto_women_in_business_meetup, meetup_experiencetoronto, meetup_founders_running_club_toronto, meetup_gta_hiking, meetup_gta_hiking_meetup, meetup_heavy_boardgames, meetup_high_park_yoga, meetup_hiking_boots, meetup_hiking_network, meetup_improv_friends, meetup_improv_to, meetup_jpn_eng_exchange, meetup_lang_exchange_to, meetup_little_sunbeams, meetup_little_sunbeams_parents_tots_meetup, meetup_medieval_renaissance_toronto_royal_citie_of_eoforwic_sca, meetup_meetup_group_fqsmjvcq, meetup_microsoft_reactor_toronto, meetup_midtown_arts_and_crafts_group, meetup_mindful_movement, meetup_mindful_movement_toronto, meetup_mini_me, meetup_mini_me_meetups, meetup_movies_social, meetup_ms_reactor, meetup_photography_to, meetup_post_apocalyptic_book_club_toronto_chapter, meetup_python_toronto, meetup_sai_dham_canada_toronto_volunteer_group, meetup_sai_dham_volunteer, meetup_salsa_bachata_kizomba_gta, meetup_salsa_gta, meetup_soulcity, meetup_sup_kayak, meetup_techto, meetup_the_history_of_parkdale, meetup_the_toronto_paddlers_meetup_group, meetup_thescifibookclub, meetup_these_boots_are_made_for_hiking, meetup_tjex_ca, meetup_toronto, meetup_toronto_20s_to_50s_singles_social, meetup_toronto_ai_machine_learning_data_science, meetup_toronto_arts_and_culture, meetup_toronto_bruce_trail_club, meetup_toronto_dads, meetup_toronto_enterprise_devops_user_group, meetup_toronto_heavy_boardgamers, meetup_toronto_history_walks, meetup_toronto_movies_and_social_group, meetup_toronto_paddlers, meetup_toronto_photography_group, meetup_toronto_postgres, meetup_toronto_silent_book_club_meetup_group, meetup_toronto_tech_stack_exchange, meetup_toronto_wellness, meetup_toronto_wellness_yoga_art_therapy_meditation_chakra, meetup_torontoadventurers, meetup_torontobabel, meetup_torontobikemeetup, meetup_torontocanoetrippers, meetup_torontodadsgroup, meetup_torontojs, meetup_torontotnt, meetup_try_new_things, meetup_wildernessunion, meetup_women_biz
 
-### The Events Calendar (WordPress) (107 feeds)
+### The Events Calendar (WordPress) (108 feeds)
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
@@ -56,7 +56,7 @@ WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **montclair** (9): mhainspire, montclairfoundation_calendar_of_events, montclairlocal, neearth, nertamid, njaudubon, peakperfs, unioncong, whartonarts
 
-**petaluma** (4): bigeasy, bigeasypetaluma, mcnears, pollyklaastheater
+**petaluma** (5): bigeasy, bigeasypetaluma, mcnears, petalumamuseum, pollyklaastheater
 
 **raleighdurham** (24): ackland_art, aps_durham, apsofdurham, downtown_durham, durhamcentralpark, events, gardens, hopeanimals, islamic_assoc_raleigh, moreheadplanetarium, nasher, nasher_museum, naturalsciences, nc_botanical_garden, nc_natural_sciences, ncbg, nchumanities, ncwf, resilientdurhamnc, secondchancenc, transitionslifecare, triangleland, united_arts_wake, unitedarts
 
@@ -78,11 +78,11 @@ Government CMS using ical.net library. Common for city/county websites.
 
 **santarosa** (32): SRCity_Art_in_Public_Places_Committee, SRCity_Board_of_Building_Regulation_Appeals, SRCity_COVID-19_Business_Webinars, SRCity_Charter_Review_Committee, SRCity_CityBus, SRCity_City_Council, SRCity_City_Offices_Closed, SRCity_Climate_Action_Subcommittee, SRCity_Community_Advisory_Board, SRCity_Community_Calendar, SRCity_Creek_Stewardship, SRCity_Cultural_Heritage_Board, SRCity_Design_Review_Board, SRCity_Downtown_Subcommittee, SRCity_Economic_Development_Subcommittee, SRCity_Events, SRCity_HCS_and_Code, SRCity_Main_Calendar, SRCity_Neighborhood_Meetings, SRCity_Parking, SRCity_Planning_Commission, SRCity_Planning_and_Economic_Development, SRCity_Police, SRCity_Public_Works, SRCity_Recreation_and_Parks, SRCity_Santa_Rosa_Water, SRCity_Subdivision_Committee, SRCity_Tourism_Business_Improvement_Area_Advisory_Board, SRCity_Transportation_and_Public_Works, SRCity_Waterways_Advisory_Committee, SRCity_Wildfire_Ready, SRCity_Zoning_Administrator
 
-### Google Calendar (38 feeds)
+### Google Calendar (40 feeds)
 
 Public Google Calendar ICS export.
 
-**bloomington** (15): gcal_2db8c2cf65a3558e38c4caaea43cb56e722090235237a95f137b087306353e51, gcal_2gd73d7gc46mstrdnr6k7v7b2o_group_calendar_google_com, gcal_4dj0guhji982ca5k90ljeliul0_group_calendar_google_com, gcal_bloominglabs, gcal_bloomington_in_gov_0l6e93fe54psagva4dhojra2q0_group_calendar_google_com, gcal_bloomington_in_gov_1rosks8nont4ebaq41tfgg8v7g_group_calendar_google_com, gcal_bloomington_in_gov_c657mi332p5sjpq2lcht9imu60, gcal_bloomington_in_gov_r7b1mkrme1r8uhl3b5amhb50bc_group_calendar_google_com, gcal_c_02o6fd3erhdmhe4oc5so149ir0_group_calendar_google_com, gcal_cuc66guoam1hhcqq2rnaniinl8, gcal_d1087e97d4ace1c1ca2dd6336d417bea870ddac277be6d1711cbc0235aa85228, gcal_e1egkmmhjj98nf0rgd2oa4u3ng, gcal_j6botrehcce8vobqe6vpb4hnhk, gcal_r5lf3al9blontcsjnedbr2f2u0, gcal_shweekend
+**bloomington** (17): gcal_2db8c2cf65a3558e38c4caaea43cb56e722090235237a95f137b087306353e51, gcal_2gd73d7gc46mstrdnr6k7v7b2o_group_calendar_google_com, gcal_4dj0guhji982ca5k90ljeliul0_group_calendar_google_com, gcal_bloominglabs, gcal_bloomington_in_gov_0l6e93fe54psagva4dhojra2q0_group_calendar_google_com, gcal_bloomington_in_gov_1b95au4d2ueudldosb024fimp0_group_calendar_google_com, gcal_bloomington_in_gov_1rosks8nont4ebaq41tfgg8v7g_group_calendar_google_com, gcal_bloomington_in_gov_35a6qiaiperdn7b1r6v2ksjlig_group_calendar_google_com, gcal_bloomington_in_gov_c657mi332p5sjpq2lcht9imu60, gcal_bloomington_in_gov_r7b1mkrme1r8uhl3b5amhb50bc_group_calendar_google_com, gcal_c_02o6fd3erhdmhe4oc5so149ir0_group_calendar_google_com, gcal_cuc66guoam1hhcqq2rnaniinl8, gcal_d1087e97d4ace1c1ca2dd6336d417bea870ddac277be6d1711cbc0235aa85228, gcal_e1egkmmhjj98nf0rgd2oa4u3ng, gcal_j6botrehcce8vobqe6vpb4hnhk, gcal_r5lf3al9blontcsjnedbr2f2u0, gcal_shweekend
 
 **davis** (1): gcal_davisbikeclubwww
 
@@ -96,13 +96,13 @@ Public Google Calendar ICS export.
 
 **toronto** (3): gcal_4h7dspldpuviiv4o1slj9o5p5c, gcal_d7muv9fjli72io6q1a7hkdpf04, gcal_qfg129sn6k25ah00ioakus0gds
 
-### Localist (25 feeds)
+### Localist (26 feeds)
 
 Campus/community event platform by Concept3D (Indiana University instance).
 
 **bloomington** (21): events_livewhale_130, events_livewhale_135, events_livewhale_218, events_livewhale_221, events_livewhale_234, events_livewhale_235, events_livewhale_237, events_livewhale_261, events_livewhale_275, events_livewhale_314, events_livewhale_343, events_livewhale_378, events_livewhale_56, events_livewhale_59, events_livewhale_64, events_livewhale_81, events_search_events_ics_ics, iu_hamilton_lugar, iu_la_casa, iu_libraries, iu_neal_marshall
 
-**raleighdurham** (4): calendar_group_african_american_cultural_center, calendar_group_gregg_museum_of_art_design, events_1_ics, unc_chapel_hill
+**raleighdurham** (5): calendar_1_ics, calendar_group_african_american_cultural_center, calendar_group_gregg_museum_of_art_design, events_1_ics, unc_chapel_hill
 
 ### MaxPreps (22 feeds)
 
