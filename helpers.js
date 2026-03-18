@@ -93,6 +93,11 @@ window.resizeAndUpload = function(file, supabaseUrl, publishableKey) {
   return window.resizeImageFile(file).then(function(resized) {
     var fd = new FormData();
     fd.append('mode', 'extract');
+    // Pass city timezone so Claude uses it as the default for extracted events
+    var cityTz = window._cities && window.cityFilter && window._cities[window.cityFilter];
+    if (cityTz && cityTz.timezone) {
+      fd.append('timezone', cityTz.timezone);
+    }
     fd.append('file', resized, resized.name);
     return fetch(supabaseUrl + '/functions/v1/capture-event', {
       method: 'POST',
