@@ -22,7 +22,8 @@
       var v = window.APP_VERSION;
       document.write('<script src="xmlui/xmlui-standalone.umd.js?v=' + v + '"><\/script>');
       document.write('<script src="xmlui/xmlui-masonry.js?v=' + v + '"><\/script>');
-      // xmlui-calendar.js removed — BigCalendar view hidden from UI
+      document.write('<link rel="stylesheet" href="xmlui/xmlui-grid-layout.css?v=' + v + '">');
+      document.write('<script src="xmlui/xmlui-grid-layout.js?v=' + v + '"><\/script>');
     </script>
     <script>
       var xhr = new XMLHttpRequest();
@@ -48,7 +49,7 @@
       window.setLayoutMode = function(val) {
         window.layoutMode = val;
         var url = new URL(window.location);
-        if (val === 'multicol') { url.searchParams.set('mode', 'multicol'); }
+        if (val === 'multicol' || val === 'dashboard') { url.searchParams.set('mode', val); }
         else { url.searchParams.delete('mode'); }
         window.history.replaceState({}, '', url);
       };

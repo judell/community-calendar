@@ -60,6 +60,21 @@
     onDidChange="() => { if (!userSettingsData) userSettingsData = userSettings.value }"
   />
 
+  <DataSource
+    id="dashboardSettings"
+    when="{authSession}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/user_settings?select=dashboard&city=eq._dashboard&limit=1'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + authSession?.access_token,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    }}"
+  />
+  <ChangeListener
+    listenTo="{dashboardSettings.value}"
+    onDidChange="() => { const d = dashboardSettings.value; if (d && d[0] && d[0].dashboard) { dashboardTiles = d[0].dashboard.tiles || []; dashboardGridLayout = d[0].dashboard.gridLayout || []; } dashboardSettingsLoaded = true; }"
+  />
+
   <ChangeListener
     listenTo="{refreshCounter}"
     onDidChange="picks.refetch(); events.refetch(); enrichments.refetch()"
@@ -132,10 +147,6 @@
   <AudioCaptureDialog id="audioCaptureDialog" />
   <PickEditor when="{!!pickEvent}" event="{pickEvent}" onClose="pickEvent = null" onSaved="picks.refetch(); events.refetch(); enrichments.refetch();" />
 
-  <!-- Inspector Dialog -->
-  <ModalDialog id="inspectorDialog" title="XMLUI Inspector" minWidth="85vw" minHeight="85vh">
-    <IFrame src="xs-diff.html" width="100%" height="80vh"/>
-  </ModalDialog>
 
   <!-- City list from Supabase (distinct cities with events) -->
   <DataSource
@@ -146,8 +157,8 @@
     }}"
   />
 
-  <!-- City picker (shown when no city selected) -->
-  <VStack when="{!city}" horizontalAlignment="center" width="100%" padding="$space-8">
+  <!-- City picker (shown when no city selected and not in dashboard mode) -->
+  <VStack when="{!city && window.layoutMode !== 'dashboard'}" horizontalAlignment="center" width="100%" padding="$space-8">
     <H1>Community Calendar</H1>
     <Spinner when="{!cityList.loaded}" />
     <VStack when="{cityList.loaded}" gap="$space-4" maxWidth="300px" width="100%">
@@ -157,11 +168,12 @@
         </Items>
       </VStack>
       <HStack verticalAlignment="center" gap="$space-2">
-        <Text fontSize="$fontSize-sm" color="$color-text-secondary">Columns:</Text>
+        <Text fontSize="$fontSize-sm" color="$color-text-secondary"></Text>
         <RadioGroup initialValue="{window.layoutMode}" onDidChange="(val) => window.setLayoutMode(val)">
           <HStack>
-            <Option value="list" label="single" />
-            <Option value="multicol" label="multi" />
+            <Option value="list" label="Single column" />
+            <Option value="multicol" label="Multi column" />
+            <Option value="dashboard" label="Dashboard" />
           </HStack>
         </RadioGroup>
       </HStack>
@@ -169,7 +181,7 @@
   </VStack>
 
   <!-- Main Content -->
-  <HStack when="{!!city}" horizontalAlignment="center" width="100%" overflowX="hidden">
+  <HStack when="{!!city && window.layoutMode !== 'dashboard'}" horizontalAlignment="center" width="100%" overflowX="hidden">
   <VStack maxWidth="{window.layoutMode === 'multicol' ? '1200px' : '600px'}" width="100%" overflowX="hidden">
     <VStack>
     <VStack gap="$space-2">
@@ -213,7 +225,7 @@
               onClick="{ if (authUser) { audioCaptureDialog.open() } else { signInDialog.open() } }"
             />
             <Icon name="l-rss" tooltip="Sources" width="20px" height="20px" color="$color-surface-500" onClick="sourcesDialog.open()" />
-            <Icon name="l-search-code" tooltip="Inspector" width="20px" height="20px" color="$color-surface-500" onClick="inspectorDialog.open()" />
+            <Inspector />
             <Stack transform="scale(0.5)" marginRight="-18px" marginLeft="-12px" height="20px" verticalAlignment="center">
               <ToneSwitch />
             </Stack>
@@ -306,4 +318,14 @@
     </VStack>
   </VStack>
   </HStack>
+
+  <!-- Dashboard mode -->
+  <VStack when="{window.layoutMode === 'dashboard'}" width="100%" padding="$space-3">
+    <HStack verticalAlignment="center" gap="$space-3" marginBottom="$space-3">
+      <H1>{window.cityName || 'Community Calendar'}</H1>
+      <SpaceFiller />
+      <Inspector />
+    </HStack>
+    <DashboardView />
+  </VStack>
 </App>
