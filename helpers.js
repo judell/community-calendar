@@ -1205,4 +1205,55 @@ if (typeof window !== 'undefined') {
   window.detectRecurrence = detectRecurrence;
   window.getOrdinalWeekday = getOrdinalWeekday;
   window.toBigCalendarEvents = toBigCalendarEvents;
+
+  // --- Dashboard helpers ---
+  window.filterTileEvents = function(events, category, search) {
+    if (!events || !Array.isArray(events)) return [];
+    var result = events;
+    if (category) {
+      result = result.filter(function(e) { return e.category === category; });
+    }
+    if (search) {
+      var term = search.toLowerCase();
+      result = result.filter(function(e) {
+        return (e.title && e.title.toLowerCase().indexOf(term) >= 0) ||
+               (e.description && e.description.toLowerCase().indexOf(term) >= 0) ||
+               (e.location && e.location.toLowerCase().indexOf(term) >= 0);
+      });
+    }
+    return result;
+  };
+
+  window.getCityList = function() {
+    return Object.keys(window._cities).sort();
+  };
+
+  window.defaultDashboardTile = function(city) {
+    var id = 'tile-' + Date.now();
+    return { i: id, city: city || window.getCityList()[0] || '', category: '', search: '' };
+  };
+
+  window.defaultDashboardLayout = function(tileId) {
+    return { i: tileId, x: 0, y: 0, w: 6, h: 4 };
+  };
+
+  window.saveDashboardConfig = function(tiles, gridLayout, supabaseUrl, supabaseKey) {
+    if (!window.authSession) return;
+    var config = { tiles: tiles, gridLayout: gridLayout };
+    fetch(supabaseUrl + '/rest/v1/user_settings?on_conflict=user_id,city', {
+      method: 'POST',
+      headers: {
+        apikey: supabaseKey,
+        Authorization: 'Bearer ' + window.authSession.access_token,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({
+        user_id: window.authUser.id,
+        city: '_dashboard',
+        dashboard: config,
+        updated_at: new Date().toISOString()
+      })
+    });
+  };
 }

@@ -9,6 +9,12 @@ var picksData = null;
 var enrichmentsData = null;
 var refreshCounter = 0;
 
+// Dashboard state — start with one default tile
+var _defaultTile = { i: 'tile-1', city: window.getCityList()[0] || 'santarosa', category: window.categoryList[0] || '', search: '' };
+var dashboardTiles = [_defaultTile];
+var dashboardGridLayout = [{ i: 'tile-1', x: 0, y: 0, w: 6, h: 4 }];
+var dashboardSettingsLoaded = false;
+
 function setCategoryFilter(category) {
   categoryFilter = category || '';
   window.syncCategoryParam(categoryFilter);
@@ -83,6 +89,48 @@ function saveCategoryOverride(eventId, category) {
     invalidates: [],
     onSuccess: () => { refreshCounter = refreshCounter + 1; },
   });
+}
+
+// Dashboard functions
+function addTile() {
+  const tile = window.defaultDashboardTile(city);
+  const layout = window.defaultDashboardLayout(tile.i);
+  dashboardTiles = dashboardTiles.concat([tile]);
+  dashboardGridLayout = dashboardGridLayout.concat([layout]);
+  persistDashboard();
+}
+
+function removeTile(tileId) {
+  dashboardTiles = dashboardTiles.filter(t => t.i !== tileId);
+  dashboardGridLayout = dashboardGridLayout.filter(l => l.i !== tileId);
+  persistDashboard();
+}
+
+function updateTile(tileId, field, value) {
+  dashboardTiles = dashboardTiles.map(t => {
+    if (t.i !== tileId) return t;
+    const updated = Object.assign({}, t);
+    updated[field] = value;
+    return updated;
+  });
+  persistDashboard();
+}
+
+function updateGridLayout(newLayout) {
+  // Reconcile layout item IDs with tile IDs — react-grid-layout may
+  // report fallback index keys if layout/children are briefly out of sync
+  dashboardGridLayout = newLayout.map(function(item, idx) {
+    if (dashboardTiles[idx] && item.i !== dashboardTiles[idx].i) {
+      return Object.assign({}, item, { i: dashboardTiles[idx].i });
+    }
+    return item;
+  });
+  persistDashboard();
+}
+
+function persistDashboard() {
+  if (!dashboardSettingsLoaded) return;
+  window.saveDashboardConfig(dashboardTiles, dashboardGridLayout, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
 }
 
 function removePick(pickId) {

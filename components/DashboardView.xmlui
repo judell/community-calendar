@@ -1,0 +1,32 @@
+<Component name="DashboardView">
+
+  <GridLayout
+    when="{dashboardTiles.length > 0}"
+    columns="{12}"
+    rowHeight="{80}"
+    gap="$space-3"
+    layout="{dashboardGridLayout}"
+    data="{dashboardTiles}"
+    draggableCancel="a, button, input, select, [role=button], [role=listbox]"
+    onLayoutChange="(evt) => updateGridLayout(evt.layout)"
+  >
+    <Card height="100%" overflow="hidden" border="1px solid $color-surface-200">
+      <FeedTile
+        tileId="{$item.i}"
+        city="{$item.city}"
+        category="{$item.category}"
+        search="{$item.search}"
+      />
+    </Card>
+  </GridLayout>
+
+  <HStack padding="$space-3" horizontalAlignment="center">
+    <Button
+      icon="l-plus"
+      label="Add tile"
+      variant="outlined"
+      onClick="addTile()"
+    />
+  </HStack>
+
+</Component>
