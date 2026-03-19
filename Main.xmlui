@@ -70,9 +70,10 @@
       'Cache-Control': 'no-cache, no-store, must-revalidate'
     }}"
   />
+
   <ChangeListener
     listenTo="{dashboardSettings.value}"
-    onDidChange="() => { const d = dashboardSettings.value; if (d && d[0] && d[0].dashboard) { dashboardTiles = d[0].dashboard.tiles || []; dashboardGridLayout = d[0].dashboard.gridLayout || []; } dashboardSettingsLoaded = true; }"
+    onDidChange="() => { if (dashboardTiles !== null) return; const d = dashboardSettings.value; if (d && d[0] && d[0].dashboard) { dashboardTiles = d[0].dashboard.tiles || []; dashboardGridLayout = d[0].dashboard.gridLayout || []; } else { dashboardTiles = []; dashboardGridLayout = []; } }"
   />
 
   <ChangeListener
@@ -150,21 +151,21 @@
   <ModalDialog id="settingsDialog" title="Display Settings">
     <HStack verticalAlignment="start" gap="$space-6">
       <VStack gap="$space-1">
-        <Text fontWeight="$fontWeight-semibold" fontSize="$fontSize-sm">Layout</Text>
+        <Text fontWeight="$fontWeight-bold" fontSize="$fontSize-sm">Layout</Text>
         <RadioGroup initialValue="{layoutMode}" onDidChange="(val) => { window.setLayoutMode(val); layoutMode = val }">
           <VStack>
-            <Option value="list" label="Single column" />
-            <Option value="multicol" label="Multi column" />
-            <Option value="dashboard" label="Dashboard" />
+            <Option value="list" label="Single column" fontSize="$fontSize-sm" />
+            <Option value="multicol" label="Multi column" fontSize="$fontSize-sm" />
+            <Option value="dashboard" label="Dashboard" fontSize="$fontSize-sm" />
           </VStack>
         </RadioGroup>
       </VStack>
       <VStack gap="$space-1">
-        <Text fontWeight="$fontWeight-semibold" fontSize="$fontSize-sm">Images</Text>
+        <Text fontWeight="$fontWeight-bold" fontSize="$fontSize-sm">Images</Text>
         <RadioGroup initialValue="{showListImages ? 'list' : 'preview'}" onDidChange="(val) => { window.setShowListImages(val); showListImages = (val !== 'preview') }">
           <VStack>
-            <Option value="list" label="Everywhere" />
-            <Option value="preview" label="Only in previews" />
+            <Option value="list" label="Everywhere" fontSize="$fontSize-sm" />
+            <Option value="preview" label="Only in previews" fontSize="$fontSize-sm" />
           </VStack>
         </RadioGroup>
       </VStack>
@@ -192,21 +193,21 @@
       </VStack>
       <HStack horizontalAlignment="center" verticalAlignment="start" gap="$space-6" marginTop="$space-2">
         <VStack gap="$space-1">
-          <Text fontWeight="$fontWeight-semibold" fontSize="$fontSize-sm">Layout</Text>
+          <Text fontWeight="$fontWeight-bold" fontSize="$fontSize-sm">Layout</Text>
           <RadioGroup initialValue="{layoutMode}" onDidChange="(val) => { window.setLayoutMode(val); layoutMode = val }">
             <VStack>
-              <Option value="list" label="Single column" />
-              <Option value="multicol" label="Multi column" />
-              <Option value="dashboard" label="Dashboard" />
+              <Option value="list" label="Single column" fontSize="$fontSize-sm" />
+              <Option value="multicol" label="Multi column" fontSize="$fontSize-sm" />
+              <Option value="dashboard" label="Dashboard" fontSize="$fontSize-sm" />
             </VStack>
           </RadioGroup>
         </VStack>
         <VStack gap="$space-1">
-          <Text fontWeight="$fontWeight-semibold" fontSize="$fontSize-sm">Images</Text>
+          <Text fontWeight="$fontWeight-bold" fontSize="$fontSize-sm">Images</Text>
           <RadioGroup initialValue="{showListImages ? 'list' : 'preview'}" onDidChange="(val) => { window.setShowListImages(val); showListImages = (val !== 'preview') }">
             <VStack>
-              <Option value="list" label="Everywhere" />
-              <Option value="preview" label="Only in previews" />
+              <Option value="list" label="Everywhere" fontSize="$fontSize-sm" />
+              <Option value="preview" label="Only in previews" fontSize="$fontSize-sm" />
             </VStack>
           </RadioGroup>
         </VStack>
@@ -314,8 +315,8 @@
   </HStack>
 
   <!-- Dashboard mode (gate on settings loaded to avoid flash of default state) -->
-  <Spinner when="{layoutMode === 'dashboard' && authSession && !dashboardSettingsLoaded}" />
-  <VStack when="{layoutMode === 'dashboard' && (!authSession || dashboardSettingsLoaded)}" width="100%" padding="$space-3">
+  <Spinner when="{layoutMode === 'dashboard' && authSession && dashboardTiles === null}" />
+  <VStack when="{layoutMode === 'dashboard' && (dashboardTiles !== null)}" width="100%" padding="$space-3">
     <H1>
       <HStack width="100%" verticalAlignment="center">
         <Text overflowMode="ellipsis" maxLines="1" width="*">{window.cityName || 'Community Calendar'}</Text>

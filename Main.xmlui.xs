@@ -12,11 +12,10 @@ var picksData = null;
 var enrichmentsData = null;
 var refreshCounter = 0;
 
-// Dashboard state — start with one default tile
-var _defaultTile = { i: 'tile-1', city: window.getCityList()[0] || 'santarosa', category: window.categoryList[0] || '', search: '' };
-var dashboardTiles = [_defaultTile];
-var dashboardGridLayout = [{ i: 'tile-1', x: 0, y: 0, w: 6, h: 4 }];
-var dashboardSettingsLoaded = false;
+// Dashboard state — null means "use server data", non-null means "user has modified"
+var dashboardTiles = null;
+var dashboardGridLayout = null;
+
 
 function setCategoryFilter(category) {
   categoryFilter = category || '';
@@ -98,42 +97,46 @@ function saveCategoryOverride(eventId, category) {
 function addTile() {
   const tile = window.defaultDashboardTile(city);
   const layout = window.defaultDashboardLayout(tile.i);
-  dashboardTiles = dashboardTiles.concat([tile]);
-  dashboardGridLayout = dashboardGridLayout.concat([layout]);
-  persistDashboard();
+  const newTiles = (dashboardTiles || []).concat([tile]);
+  const newLayout = (dashboardGridLayout || []).concat([layout]);
+  dashboardTiles = newTiles;
+  dashboardGridLayout = newLayout;
+  persistDashboard(newTiles, newLayout);
 }
 
 function removeTile(tileId) {
-  dashboardTiles = dashboardTiles.filter(t => t.i !== tileId);
-  dashboardGridLayout = dashboardGridLayout.filter(l => l.i !== tileId);
-  persistDashboard();
+  const newTiles = (dashboardTiles || []).filter(t => t.i !== tileId);
+  const newLayout = (dashboardGridLayout || []).filter(l => l.i !== tileId);
+  dashboardTiles = newTiles;
+  dashboardGridLayout = newLayout;
+  persistDashboard(newTiles, newLayout);
 }
 
 function updateTile(tileId, field, value) {
-  dashboardTiles = dashboardTiles.map(t => {
+  const newTiles = (dashboardTiles || []).map(t => {
     if (t.i !== tileId) return t;
     const updated = Object.assign({}, t);
     updated[field] = value;
     return updated;
   });
-  persistDashboard();
+  dashboardTiles = newTiles;
+  persistDashboard(newTiles, dashboardGridLayout || (dashboardGridLayout || []));
 }
 
 function updateGridLayout(newLayout) {
-  // Reconcile layout item IDs with tile IDs — react-grid-layout may
-  // report fallback index keys if layout/children are briefly out of sync
-  dashboardGridLayout = newLayout.map(function(item, idx) {
-    if (dashboardTiles[idx] && item.i !== dashboardTiles[idx].i) {
-      return Object.assign({}, item, { i: dashboardTiles[idx].i });
+  const tiles = (dashboardTiles || []);
+  const newGridLayout = newLayout.map(function(item, idx) {
+    if (tiles[idx] && item.i !== tiles[idx].i) {
+      return Object.assign({}, item, { i: tiles[idx].i });
     }
     return item;
   });
-  persistDashboard();
+  dashboardGridLayout = newGridLayout;
+  persistDashboard(dashboardTiles || tiles, newGridLayout);
 }
 
-function persistDashboard() {
-  if (!dashboardSettingsLoaded) return;
-  window.saveDashboardConfig(dashboardTiles, dashboardGridLayout, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
+function persistDashboard(tiles, layout) {
+  window.saveDashboardConfig(tiles, layout, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
 }
 
 function removePick(pickId) {
