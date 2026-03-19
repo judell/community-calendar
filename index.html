@@ -53,6 +53,14 @@
         else { url.searchParams.delete('mode'); }
         window.history.replaceState({}, '', url);
       };
+      window.showListImages = params.get('images') !== 'preview';
+      window.setShowListImages = function(val) {
+        window.showListImages = val !== 'preview';
+        var url = new URL(window.location);
+        if (val === 'preview') { url.searchParams.set('images', 'preview'); }
+        else { url.searchParams.delete('images'); }
+        window.history.replaceState({}, '', url);
+      };
       window.initialCategory = params.get('category') || '';
       window.initialSearch = params.get('search') || '';
       // Title-case a slug: "santarosa" -> "Santa Rosa", "raleighdurham" -> "Raleighdurham"

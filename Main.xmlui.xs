@@ -3,6 +3,9 @@
 
 var categoryColorMap = window.categoryColorMap;
 
+var layoutMode = window.layoutMode;
+var showListImages = window.showListImages;
+
 var categoryFilter = window.initialCategory || '';
 var pickEvent = null;
 var picksData = null;

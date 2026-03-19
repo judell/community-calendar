@@ -1,17 +1,18 @@
 <Component name="EventCard">
 
   <Card
-    padding="{window.layoutMode === 'multicol' ? '$space-1_5' : '$space-0_5 $space-1_5'}"
-    marginBottom="{window.layoutMode === 'multicol' ? undefined : '0px'}"
-    borderRadius="{window.layoutMode === 'multicol' ? '$borderRadius' : '0'}"
-    boxShadow="{window.layoutMode === 'multicol' ? undefined : 'none'}"
-    borderTop="{window.layoutMode === 'multicol' ? undefined : '1px solid $color-surface-200'}"
-    borderBottom="{window.layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none'}"
-    borderRight="{window.layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none'}"
-    border="{window.layoutMode === 'multicol' ? '1px solid $color-surface-200' : undefined}"
-    borderLeft="{window.clusterBorder($props.event.cluster_id, $props.filterTerm) || (window.layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none')}"
+    padding="0"
+    overflow="hidden"
+    marginBottom="{layoutMode === 'multicol' ? undefined : '0px'}"
+    borderRadius="{layoutMode === 'multicol' ? '$borderRadius' : '0'}"
+    boxShadow="{layoutMode === 'multicol' ? undefined : 'none'}"
+    borderTop="{layoutMode === 'multicol' ? undefined : '1px solid $color-surface-200'}"
+    borderBottom="{layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none'}"
+    borderRight="{layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none'}"
+    border="{layoutMode === 'multicol' ? '1px solid $color-surface-200' : undefined}"
+    borderLeft="{window.clusterBorder($props.event.cluster_id, $props.filterTerm) || (layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none')}"
   >
-    <VStack gap="$space-0">
+    <VStack gap="$space-0" padding="{layoutMode === 'multicol' ? '$space-1_5' : '$space-0_5 $space-1_5'}">
       <Text
         fontSize="$fontSize-sm"
         color="$color-text-secondary"
@@ -48,6 +49,7 @@
         onClick="detailDialog.open($props.event)"
         value="{(window.getSnippet($props.event.description, $props.event.title) || '') + ' \u24d8'}"
       />
+      <Image when="{showListImages && $props.event.image_url}" src="{$props.event.image_url}" width="100%" maxHeight="160px" fit="cover" marginTop="$space-1" />
       <HStack verticalAlignment="center" gap="$space-1" marginTop="$space-1_5" paddingTop="$space-1" marginBottom="$space-1">
         <Badge
           when="{$props.event.category}"

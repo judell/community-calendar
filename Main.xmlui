@@ -147,6 +147,29 @@
   <AudioCaptureDialog id="audioCaptureDialog" />
   <PickEditor when="{!!pickEvent}" event="{pickEvent}" onClose="pickEvent = null" onSaved="picks.refetch(); events.refetch(); enrichments.refetch();" />
 
+  <ModalDialog id="settingsDialog" title="Display Settings">
+    <HStack verticalAlignment="start" gap="$space-6">
+      <VStack gap="$space-1">
+        <Text fontWeight="$fontWeight-semibold" fontSize="$fontSize-sm">Layout</Text>
+        <RadioGroup initialValue="{layoutMode}" onDidChange="(val) => { window.setLayoutMode(val); layoutMode = val }">
+          <VStack>
+            <Option value="list" label="Single column" />
+            <Option value="multicol" label="Multi column" />
+            <Option value="dashboard" label="Dashboard" />
+          </VStack>
+        </RadioGroup>
+      </VStack>
+      <VStack gap="$space-1">
+        <Text fontWeight="$fontWeight-semibold" fontSize="$fontSize-sm">Images</Text>
+        <RadioGroup initialValue="{showListImages ? 'list' : 'preview'}" onDidChange="(val) => { window.setShowListImages(val); showListImages = (val !== 'preview') }">
+          <VStack>
+            <Option value="list" label="Everywhere" />
+            <Option value="preview" label="Only in previews" />
+          </VStack>
+        </RadioGroup>
+      </VStack>
+    </HStack>
+  </ModalDialog>
 
   <!-- City list from Supabase (distinct cities with events) -->
   <DataSource
@@ -158,7 +181,7 @@
   />
 
   <!-- City picker (shown when no city selected and not in dashboard mode) -->
-  <VStack when="{!city && window.layoutMode !== 'dashboard'}" horizontalAlignment="center" width="100%" padding="$space-8">
+  <VStack when="{!city && layoutMode !== 'dashboard'}" horizontalAlignment="center" width="100%" padding="$space-8">
     <H1>Community Calendar</H1>
     <Spinner when="{!cityList.loaded}" />
     <VStack when="{cityList.loaded}" gap="$space-4" maxWidth="300px" width="100%">
@@ -167,69 +190,40 @@
           <Button variant="outlined" width="100%" onClick="window.selectCity($item.city); city = $item.city">{window.toDisplayName($item.city)}</Button>
         </Items>
       </VStack>
-      <HStack verticalAlignment="center" gap="$space-2">
-        <Text fontSize="$fontSize-sm" color="$color-text-secondary"></Text>
-        <RadioGroup initialValue="{window.layoutMode}" onDidChange="(val) => window.setLayoutMode(val)">
-          <HStack>
-            <Option value="list" label="Single column" />
-            <Option value="multicol" label="Multi column" />
-            <Option value="dashboard" label="Dashboard" />
-          </HStack>
-        </RadioGroup>
+      <HStack horizontalAlignment="center" verticalAlignment="start" gap="$space-6" marginTop="$space-2">
+        <VStack gap="$space-1">
+          <Text fontWeight="$fontWeight-semibold" fontSize="$fontSize-sm">Layout</Text>
+          <RadioGroup initialValue="{layoutMode}" onDidChange="(val) => { window.setLayoutMode(val); layoutMode = val }">
+            <VStack>
+              <Option value="list" label="Single column" />
+              <Option value="multicol" label="Multi column" />
+              <Option value="dashboard" label="Dashboard" />
+            </VStack>
+          </RadioGroup>
+        </VStack>
+        <VStack gap="$space-1">
+          <Text fontWeight="$fontWeight-semibold" fontSize="$fontSize-sm">Images</Text>
+          <RadioGroup initialValue="{showListImages ? 'list' : 'preview'}" onDidChange="(val) => { window.setShowListImages(val); showListImages = (val !== 'preview') }">
+            <VStack>
+              <Option value="list" label="Everywhere" />
+              <Option value="preview" label="Only in previews" />
+            </VStack>
+          </RadioGroup>
+        </VStack>
       </HStack>
     </VStack>
   </VStack>
 
   <!-- Main Content -->
-  <HStack when="{!!city && window.layoutMode !== 'dashboard'}" horizontalAlignment="center" width="100%" overflowX="hidden">
-  <VStack maxWidth="{window.layoutMode === 'multicol' ? '1200px' : '600px'}" width="100%" overflowX="hidden">
+  <HStack when="{!!city && layoutMode !== 'dashboard'}" horizontalAlignment="center" width="100%" overflowX="hidden">
+  <VStack maxWidth="{layoutMode === 'multicol' ? '1200px' : '600px'}" width="100%" overflowX="hidden">
     <VStack>
     <VStack gap="$space-2">
     <Bookmark id="topAnchor">
       <H1>
         <HStack width="100%" verticalAlignment="center">
           <Text overflowMode="ellipsis" maxLines="1" width="*">{window.toDisplayName(city)}</Text>
-          <HStack gap="$space-1" verticalAlignment="center">
-            <Icon
-              when="{!authUser}"
-              name="l-user"
-              tooltip="Sign In"
-              width="20px"
-              height="20px"
-              color="$color-surface-500"
-              onClick="signInDialog.open()"
-            />
-            <Icon
-              when="{authUser}"
-              name="l-user"
-              tooltip="{'Sign Out (' + (authUser?.user_metadata?.user_name || authUser?.email || 'user') + ')'}"
-              width="20px"
-              height="20px"
-              color="$color-surface-500"
-              onClick="window.signOut()"
-            />
-            <Icon
-              name="l-camera"
-              tooltip="{authUser ? 'Capture Event from Poster' : 'Sign in to capture events from posters'}"
-              width="20px"
-              height="20px"
-              color="{authUser ? '$color-surface-500' : '$color-surface-300'}"
-              onClick="{ if (authUser) { captureDialog.open() } else { signInDialog.open() } }"
-            />
-            <Icon
-              name="mic"
-              tooltip="{authUser ? 'Capture Event from Audio' : 'Sign in to capture events with voice'}"
-              width="20px"
-              height="20px"
-              color="{authUser ? '$color-surface-500' : '$color-surface-300'}"
-              onClick="{ if (authUser) { audioCaptureDialog.open() } else { signInDialog.open() } }"
-            />
-            <Icon name="l-rss" tooltip="Sources" width="20px" height="20px" color="$color-surface-500" onClick="sourcesDialog.open()" />
-            <Inspector />
-            <Stack transform="scale(0.5)" marginRight="-18px" marginLeft="-12px" height="20px" verticalAlignment="center">
-              <ToneSwitch />
-            </Stack>
-          </HStack>
+          <IncludeMarkup url="components/IconRow.xmlui" />
         </HStack>
       </H1>
     </Bookmark>
@@ -286,10 +280,10 @@
       marginBottom="$space-2"
       onClick="const prevIndex = window._morePrevIndex ?? 0; displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
     />
-    <Masonry when="{events.loaded && viewMode === 'all' && window.layoutMode === 'multicol'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" columns="3" gap="$space-3" rowGap="0" minColumnWidth="300px">
+    <Masonry when="{events.loaded && viewMode === 'all' && layoutMode === 'multicol'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" columns="3" gap="$space-3" rowGap="0" minColumnWidth="300px">
       <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
     </Masonry>
-    <List when="{events.loaded && viewMode === 'all' && window.layoutMode !== 'multicol'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" fixedItemSize="true" limit="{filterTerm ? 10 : 50}">
+    <List when="{events.loaded && viewMode === 'all' && layoutMode !== 'multicol'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" fixedItemSize="true" limit="{filterTerm ? 10 : 50}">
       <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
     </List>
     <Button
@@ -319,13 +313,15 @@
   </VStack>
   </HStack>
 
-  <!-- Dashboard mode -->
-  <VStack when="{window.layoutMode === 'dashboard'}" width="100%" padding="$space-3">
-    <HStack verticalAlignment="center" gap="$space-3" marginBottom="$space-3">
-      <H1>{window.cityName || 'Community Calendar'}</H1>
-      <SpaceFiller />
-      <Inspector />
-    </HStack>
+  <!-- Dashboard mode (gate on settings loaded to avoid flash of default state) -->
+  <Spinner when="{layoutMode === 'dashboard' && authSession && !dashboardSettingsLoaded}" />
+  <VStack when="{layoutMode === 'dashboard' && (!authSession || dashboardSettingsLoaded)}" width="100%" padding="$space-3">
+    <H1>
+      <HStack width="100%" verticalAlignment="center">
+        <Text overflowMode="ellipsis" maxLines="1" width="*">{window.cityName || 'Community Calendar'}</Text>
+        <IncludeMarkup url="components/IconRow.xmlui" />
+      </HStack>
+    </H1>
     <DashboardView />
   </VStack>
 </App>

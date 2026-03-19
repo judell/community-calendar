@@ -1,0 +1,44 @@
+<Fragment>
+  <HStack gap="$space-1" verticalAlignment="center">
+    <Icon
+      when="{!authUser}"
+      name="l-user"
+      tooltip="Sign In"
+      width="20px"
+      height="20px"
+      color="$color-surface-500"
+      onClick="signInDialog.open()"
+    />
+    <Icon
+      when="{authUser}"
+      name="l-user"
+      tooltip="{'Sign Out (' + (authUser?.user_metadata?.user_name || authUser?.email || 'user') + ')'}"
+      width="20px"
+      height="20px"
+      color="$color-surface-500"
+      onClick="window.signOut()"
+    />
+    <Icon
+      name="l-camera"
+      tooltip="{authUser ? 'Capture Event from Poster' : 'Sign in to capture events from posters'}"
+      width="20px"
+      height="20px"
+      color="{authUser ? '$color-surface-500' : '$color-surface-300'}"
+      onClick="{ if (authUser) { captureDialog.open() } else { signInDialog.open() } }"
+    />
+    <Icon
+      name="mic"
+      tooltip="{authUser ? 'Capture Event from Audio' : 'Sign in to capture events with voice'}"
+      width="20px"
+      height="20px"
+      color="{authUser ? '$color-surface-500' : '$color-surface-300'}"
+      onClick="{ if (authUser) { audioCaptureDialog.open() } else { signInDialog.open() } }"
+    />
+    <Icon name="l-rss" tooltip="Sources" width="20px" height="20px" color="$color-surface-500" onClick="sourcesDialog.open()" />
+    <Icon name="l-settings" tooltip="Display settings" width="20px" height="20px" color="$color-surface-500" onClick="settingsDialog.open()" />
+    <Inspector />
+    <Stack transform="scale(0.5)" marginRight="-18px" marginLeft="-12px" height="20px" verticalAlignment="center">
+      <ToneSwitch />
+    </Stack>
+  </HStack>
+</Fragment>
