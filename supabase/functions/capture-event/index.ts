@@ -54,6 +54,34 @@ ${getSharedRules(defaultTimezone)}
 - If no source is mentioned, leave url as null.`;
 }
 
+// Append UTC offset to a naive datetime using the IANA timezone from extraction
+function applyTimezoneOffset(naiveDatetime: string, timezone: string): string {
+  if (!timezone || !naiveDatetime) return naiveDatetime;
+  // Already has an offset or Z suffix — leave it alone
+  if (/[+-]\d{2}(:\d{2})?$/.test(naiveDatetime) || naiveDatetime.endsWith("Z")) {
+    return naiveDatetime;
+  }
+  // Compute the UTC offset for this timezone at the given wall-clock time
+  const fakeUtc = new Date(naiveDatetime + "Z");
+  const inTz = new Date(fakeUtc.toLocaleString("en-US", { timeZone: timezone }));
+  const inUtc = new Date(fakeUtc.toLocaleString("en-US", { timeZone: "UTC" }));
+  const offsetMin = (inTz.getTime() - inUtc.getTime()) / 60000;
+  const sign = offsetMin >= 0 ? "+" : "-";
+  const abs = Math.abs(offsetMin);
+  const h = String(Math.floor(abs / 60)).padStart(2, "0");
+  const m = String(abs % 60).padStart(2, "0");
+  return `${naiveDatetime}${sign}${h}:${m}`;
+}
+
+// Apply timezone offset to start_time and end_time on an extracted event object
+function applyEventTimezone(event: any): void {
+  const tz = event.timezone;
+  if (tz) {
+    if (event.start_time) event.start_time = applyTimezoneOffset(event.start_time, tz);
+    if (event.end_time) event.end_time = applyTimezoneOffset(event.end_time, tz);
+  }
+}
+
 function parseEventJson(text: string): any {
   try {
     return JSON.parse(text);
@@ -193,6 +221,15 @@ async function commitEvent(
     throw new Error(`Invalid start_time: "${event.start_time}" — must start with a date (YYYY-MM-DD)`);
   }
 
+  // Apply timezone offset so Postgres interprets the time correctly
+  const tz = event.timezone;
+  if (tz) {
+    event.start_time = applyTimezoneOffset(event.start_time, tz);
+    if (event.end_time) {
+      event.end_time = applyTimezoneOffset(event.end_time, tz);
+    }
+  }
+
   // Generate unique source_uid
   const sourceUid = `poster_capture:${userId}:${crypto.randomUUID()}`;
 
@@ -281,11 +318,13 @@ Deno.serve(async (req) => {
 
         if (isAudio) {
           const { event: extractedEvent, transcript } = await extractEventFromAudio(fileBytes, mediaType, defaultTimezone || undefined);
+          applyEventTimezone(extractedEvent);
           return new Response(JSON.stringify({ event: extractedEvent, transcript }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         } else {
           const extractedEvent = await extractEventFromImage(fileBytes, mediaType, defaultTimezone || undefined);
+          applyEventTimezone(extractedEvent);
           return new Response(JSON.stringify({ event: extractedEvent }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
@@ -315,6 +354,7 @@ Deno.serve(async (req) => {
           imageBytes[i] = binaryString.charCodeAt(i);
         }
         const extractedEvent = await extractEventFromImage(imageBytes, mediaType, bodyTimezone);
+        applyEventTimezone(extractedEvent);
 
         return new Response(JSON.stringify({ event: extractedEvent }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
