@@ -8,7 +8,7 @@ used across all city feeds, identified by their PRODID header.
 | Platform | Description | Cities | Feeds |
 |----------|-------------|--------|------:|
 | **Meetup** | ICS export from meetup.com groups. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 195 |
-| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 108 |
+| **The Events Calendar (WordPress)** | WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version. | bloomington, davis, lancaster, montclair, petaluma, raleighdurham, santarosa, toronto | 107 |
 | **CivicPlus (ical.net)** | Government CMS using ical.net library. Common for city/county websites. | bloomington, lancaster, montclair, raleighdurham, santarosa | 40 |
 | **Google Calendar** | Public Google Calendar ICS export. | bloomington, davis, montclair, petaluma, raleighdurham, santarosa, toronto | 40 |
 | **Localist** | Campus/community event platform by Concept3D (Indiana University instance). | bloomington, raleighdurham | 26 |
@@ -44,7 +44,7 @@ ICS export from meetup.com groups.
 
 **toronto** (76): meetup_20s_30s_toronto_social_activities, meetup_a_book_club_downtown_abcd, meetup_arts_crafts, meetup_biggest_language_party_event_social_in_toronto, meetup_boardgamestoronto, meetup_book_club_abcd, meetup_canoe_trippers, meetup_civic_tech_toronto, meetup_comedy_improv_and_acting, meetup_downtown_toronto_women_in_business_meetup, meetup_experiencetoronto, meetup_founders_running_club_toronto, meetup_gta_hiking, meetup_gta_hiking_meetup, meetup_heavy_boardgames, meetup_high_park_yoga, meetup_hiking_boots, meetup_hiking_network, meetup_improv_friends, meetup_improv_to, meetup_jpn_eng_exchange, meetup_lang_exchange_to, meetup_little_sunbeams, meetup_little_sunbeams_parents_tots_meetup, meetup_medieval_renaissance_toronto_royal_citie_of_eoforwic_sca, meetup_meetup_group_fqsmjvcq, meetup_microsoft_reactor_toronto, meetup_midtown_arts_and_crafts_group, meetup_mindful_movement, meetup_mindful_movement_toronto, meetup_mini_me, meetup_mini_me_meetups, meetup_movies_social, meetup_ms_reactor, meetup_photography_to, meetup_post_apocalyptic_book_club_toronto_chapter, meetup_python_toronto, meetup_sai_dham_canada_toronto_volunteer_group, meetup_sai_dham_volunteer, meetup_salsa_bachata_kizomba_gta, meetup_salsa_gta, meetup_soulcity, meetup_sup_kayak, meetup_techto, meetup_the_history_of_parkdale, meetup_the_toronto_paddlers_meetup_group, meetup_thescifibookclub, meetup_these_boots_are_made_for_hiking, meetup_tjex_ca, meetup_toronto, meetup_toronto_20s_to_50s_singles_social, meetup_toronto_ai_machine_learning_data_science, meetup_toronto_arts_and_culture, meetup_toronto_bruce_trail_club, meetup_toronto_dads, meetup_toronto_enterprise_devops_user_group, meetup_toronto_heavy_boardgamers, meetup_toronto_history_walks, meetup_toronto_movies_and_social_group, meetup_toronto_paddlers, meetup_toronto_photography_group, meetup_toronto_postgres, meetup_toronto_silent_book_club_meetup_group, meetup_toronto_tech_stack_exchange, meetup_toronto_wellness, meetup_toronto_wellness_yoga_art_therapy_meditation_chakra, meetup_torontoadventurers, meetup_torontobabel, meetup_torontobikemeetup, meetup_torontocanoetrippers, meetup_torontodadsgroup, meetup_torontojs, meetup_torontotnt, meetup_try_new_things, meetup_wildernessunion, meetup_women_biz
 
-### The Events Calendar (WordPress) (108 feeds)
+### The Events Calendar (WordPress) (107 feeds)
 
 WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
@@ -56,7 +56,7 @@ WordPress plugin (aka "Tribe Events"). PRODID includes site name + ECP version.
 
 **montclair** (9): mhainspire, montclairfoundation_calendar_of_events, montclairlocal, neearth, nertamid, njaudubon, peakperfs, unioncong, whartonarts
 
-**petaluma** (5): bigeasy, bigeasypetaluma, mcnears, petalumamuseum, pollyklaastheater
+**petaluma** (4): bigeasy, mcnears, petalumamuseum, pollyklaastheater
 
 **raleighdurham** (24): ackland_art, aps_durham, apsofdurham, downtown_durham, durhamcentralpark, events, gardens, hopeanimals, islamic_assoc_raleigh, moreheadplanetarium, nasher, nasher_museum, naturalsciences, nc_botanical_garden, nc_natural_sciences, ncbg, nchumanities, ncwf, resilientdurhamnc, secondchancenc, transitionslifecare, triangleland, united_arts_wake, unitedarts
 
