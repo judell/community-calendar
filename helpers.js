@@ -87,6 +87,27 @@ window.resizeImageFile = function(file, maxBytes) {
   });
 };
 
+// Convert a UTC ISO datetime string to local date/time parts using the city timezone
+// Returns { date: 'YYYY-MM-DD', time: 'HH:MM' }
+window.utcToLocal = function(isoString, timezone) {
+  if (!isoString) return { date: '', time: '' };
+  if (!timezone) {
+    // Fallback: naive substring (no conversion)
+    return { date: isoString.substring(0, 10), time: isoString.substring(11, 16) };
+  }
+  var d = new Date(isoString);
+  if (isNaN(d.getTime())) return { date: '', time: '' };
+  var parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(d);
+  var vals = {};
+  parts.forEach(function(p) { vals[p.type] = p.value; });
+  // Intl hour12:false can return "24" for midnight in some engines; normalize
+  var hour = vals.hour === '24' ? '00' : vals.hour;
+  return { date: vals.year + '-' + vals.month + '-' + vals.day, time: hour + ':' + vals.minute };
+};
+
 // Resize image then upload to capture-event edge function via fetch
 // Returns Promise<{ event }> or Promise<{ error }>
 window.resizeAndUpload = function(file, supabaseUrl, publishableKey) {

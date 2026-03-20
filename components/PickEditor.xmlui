@@ -108,14 +108,20 @@
 
     <Form
       id="pickForm"
-      data="{{
-        title: $props.event?.title || '',
-        date: ($props.event?.start_time || '').substring(0, 10),
-        time: ($props.event?.start_time || '').substring(11, 16),
-        endTime: $props.event?.end_time ? $props.event.end_time.substring(11, 16) : '',
-        location: $props.event?.location || '',
-        description: $props.event?.description || ''
-      }}"
+      data="{(() => {
+        const tz = (window._cities && window.cityFilter && window._cities[window.cityFilter]?.timezone) || null;
+        const useLocal = !!$props.event?.id;
+        const st = useLocal ? window.utcToLocal($props.event?.start_time, tz) : { date: ($props.event?.start_time || '').substring(0, 10), time: ($props.event?.start_time || '').substring(11, 16) };
+        const et = useLocal && $props.event?.end_time ? window.utcToLocal($props.event.end_time, tz) : { time: $props.event?.end_time ? $props.event.end_time.substring(11, 16) : '' };
+        return {
+          title: $props.event?.title || '',
+          date: st.date,
+          time: st.time,
+          endTime: et.time,
+          location: $props.event?.location || '',
+          description: $props.event?.description || ''
+        };
+      })()}"
       keepModalOpenOnSubmit="true"
       hideButtonRow="{!!savedPickId}"
       saveLabel="{isSaving ? 'Saving...' : 'Add to My Picks'}"
