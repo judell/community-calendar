@@ -1,0 +1,6 @@
+- monetization options
+- auto pull from email (???)
+- self-serve listings
+- revenue generation
+- improve events/entertainment coverage (Evanston)
+- format for email (something they can copy paste)
