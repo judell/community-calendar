@@ -8,6 +8,7 @@ import { FeaturedProvider } from './hooks/useFeatured.jsx'
 import { TargetCollectionProvider } from './hooks/useTargetCollection.jsx'
 import { EmbedViewportProvider } from './hooks/useEmbedViewport.jsx'
 import './index.css'
+import './xmlui-fixes.css'
 
 function Root() {
   // Read city for PicksProvider

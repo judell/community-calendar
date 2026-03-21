@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User, LogOut, Rss } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import SignInModal from './SignInModal.jsx';
-import SourcesDialog from './SourcesDialog.jsx';
+import SourcesDialog from './XmluiSourcesDialog.jsx';
 
 const CITY_NAMES = {
   santarosa: 'Santa Rosa',
