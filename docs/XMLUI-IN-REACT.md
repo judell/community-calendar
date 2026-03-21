@@ -1,5 +1,11 @@
 # Embedding XMLUI Components in a React App
 
+
+
+https://github.com/user-attachments/assets/01f37d46-5531-4656-b35b-ba7e9777d22e
+
+
+
 This documents a working proof-of-concept: rendering XMLUI components inside a React/Tailwind frontend, using the same `.xmlui` source files that power the XMLUI frontend. Two components are shared so far — **SourcesDialog** (source list, event counts, suggest-a-source form with Supabase submission) and **SignInDialog** (GitHub, Google, and magic-link auth) — both rendering and functioning identically in both frontends from the same source files.
 
 ## What this means
