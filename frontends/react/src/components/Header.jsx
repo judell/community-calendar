@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, LogOut, Rss } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
-import SignInModal from './SignInModal.jsx';
+import SignInModal from './XmluiSignInDialog.jsx';
 import SourcesDialog from './XmluiSourcesDialog.jsx';
 
 const CITY_NAMES = {

@@ -1,6 +1,6 @@
 # Embedding XMLUI Components in a React App
 
-This documents a working proof-of-concept: rendering XMLUI components inside a React/Tailwind frontend, using the same `.xmlui` source files that power the XMLUI frontend. The SourcesDialog — complete with source list, event counts, and a "Suggest a source" form that submits to Supabase — renders and functions identically in both frontends from a single source file.
+This documents a working proof-of-concept: rendering XMLUI components inside a React/Tailwind frontend, using the same `.xmlui` source files that power the XMLUI frontend. Two components are shared so far — **SourcesDialog** (source list, event counts, suggest-a-source form with Supabase submission) and **SignInDialog** (GitHub, Google, and magic-link auth) — both rendering and functioning identically in both frontends from the same source files.
 
 ## What this means
 
@@ -207,6 +207,8 @@ export default function XmluiEmbed({ xmlui, entry, globalProps = {}, className, 
   const mergedProps = useMemo(() => ({
     supabaseUrl: SUPABASE_URL,
     supabasePublishableKey: SUPABASE_KEY,
+    xsVerbose: true,
+    xsVerboseLogMax: 200,
     ...globalProps,
   }), [globalProps]);
 
@@ -250,19 +252,15 @@ const entry = `
 </Fragment>
 `;
 
-export default function XmluiSourcesDialog({ events, onClose }) {
+export default function XmluiSourcesDialog({ events }) {
   const globalProps = useMemo(() => ({ events }), [events]);
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-         onClick={onClose}>
-      <XmluiEmbed
-        xmlui={sourcesXmlui}
-        entry={entry}
-        globalProps={globalProps}
-        onClick={e => e.stopPropagation()}
-      />
-    </div>
+    <XmluiEmbed
+      xmlui={sourcesXmlui}
+      entry={entry}
+      globalProps={globalProps}
+    />
   );
 }
 ```
@@ -453,19 +451,15 @@ const entry = `
 </Fragment>
 `;
 
-export default function XmluiSourcesDialog({ events, onClose }) {
+export default function XmluiSourcesDialog({ events }) {
   const globalProps = useMemo(() => ({ events }), [events]);
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-         onClick={onClose}>
-      <XmluiEmbed
-        xmlui={sourcesXmlui}
-        entry={entry}
-        globalProps={globalProps}
-        onClick={e => e.stopPropagation()}
-      />
-    </div>
+    <XmluiEmbed
+      xmlui={sourcesXmlui}
+      entry={entry}
+      globalProps={globalProps}
+    />
   );
 }
 ```
@@ -474,18 +468,28 @@ export default function XmluiSourcesDialog({ events, onClose }) {
 
 The total line count is higher for the shared approach (187 + 30 + 47 = 264 vs 198). But the 47-line `XmluiEmbed` is written once and reused for every shared component, and the 187-line `.xmlui` file already exists — it's not new code. The marginal cost of sharing the next component is ~30 lines of wrapper.
 
+## Frontend switching
+
+The router `index.html` supports both config-based and URL-based frontend switching:
+
+- **Config-based**: set `"frontend": "react"` or `"frontend": "xmlui"` in `config.json`
+- **URL-based**: append `?frontend=react` or `?frontend=xmlui` to the URL (overrides config, param is stripped before redirect)
+
 ## Files changed
 
 | File | Change |
 |------|--------|
-| `config.json` | `"frontend": "xmlui"` → `"frontend": "react"` (switch frontends) |
-| `frontends/react/src/components/Header.jsx` | Import `SourcesDialog.jsx` → `XmluiSourcesDialog.jsx` |
-| `frontends/react/src/components/XmluiSourcesDialog.jsx` | **New** — React wrapper for the XMLUI component |
+| `index.html` | URL-based frontend switching (`?frontend=react`) |
+| `config.json` | `"frontend": "xmlui"` → `"frontend": "react"` (default switch) |
+| `frontends/react/src/components/Header.jsx` | Imports → `XmluiSourcesDialog.jsx`, `XmluiSignInDialog.jsx` |
+| `frontends/react/src/components/XmluiEmbed.jsx` | **New** — reusable XMLUI embedding wrapper |
+| `frontends/react/src/components/XmluiSourcesDialog.jsx` | **New** — wrapper for SourcesDialog.xmlui |
+| `frontends/react/src/components/XmluiSignInDialog.jsx` | **New** — wrapper for SignInDialog.xmlui |
 | `frontends/react/src/xmlui-fixes.css` | **New** — suppresses double focus ring on XMLUI inputs |
 | `frontends/react/src/index.css` | Added base resets (box-sizing, font-family, margins) |
 | `frontends/react/src/main.jsx` | Added `import './xmlui-fixes.css'` |
 | `frontends/react/tailwind.config.js` | Added `corePlugins: { preflight: false }` |
-| `frontends/react/vite.config.js` | Added XMLUI CSS externalizer plugin, React/XMLUI aliases |
+| `frontends/react/vite.config.js` | Added XMLUI CSS externalizer plugin, React/XMLUI aliases, Inspector files |
 | `frontends/react/package.json` | Added `react-router-dom`, `sass` |
 | `docs/XMLUI-IN-REACT.md` | **New** — this document |
 
@@ -523,6 +527,6 @@ The Inspector immediately proved useful: it showed that each keystroke in the su
 
 ## What's next
 
-- **Close/callback bridge**: Wire XMLUI's ModalDialog close event back to React's `onClose` callback.
-- **More components**: SignIn, PickEditor, AudioCapture, Enrichment — the full set of shared modals.
+- **More components**: PickEditor, AudioCapture, Enrichment — the remaining shared modals.
 - **Shared helpers**: The `window.*` function bridge works but is fragile. Consider a shared helpers module both frontends import, with automatic `window` assignment for XMLUI compatibility.
+- **Inspector integration**: The Inspector renders via `<IFrame>` but needs z-index/styling work to open cleanly above XMLUI's own ModalDialog portal. The `Inspector` component (which wraps the IFrame in a proper modal) exists in XMLUI source but isn't included in the pre-built library.

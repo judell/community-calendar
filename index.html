@@ -3,16 +3,25 @@
 <head><meta charset="utf-8" /></head>
 <body>
 <script>
-  fetch('config.json').then(r => r.json()).then(cfg => {
-    var frontend = cfg.frontend || 'xmlui';
-    var search = window.location.search;
+  var params = new URLSearchParams(window.location.search);
+  var frontend = params.get('frontend');
+  if (!frontend) {
+    fetch('config.json').then(r => r.json()).then(cfg => {
+      redirect(cfg.frontend || 'xmlui');
+    });
+  } else {
+    params.delete('frontend');
+    redirect(frontend);
+  }
+  function redirect(fe) {
+    var search = params.toString() ? '?' + params.toString() : '';
     var hash = window.location.hash;
-    if (frontend === 'react') {
+    if (fe === 'react') {
       window.location.replace('react-build/index.html' + search + hash);
     } else {
       window.location.replace('frontends/xmlui/index.html' + search + hash);
     }
-  });
+  }
 </script>
 </body>
 </html>
