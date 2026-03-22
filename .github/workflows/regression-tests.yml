@@ -89,10 +89,10 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add cities/santarosa/traces/videos/*.webm
           git diff --staged --quiet || git commit -m "Update regression test videos [skip ci]"
+          git stash --include-untracked
           if ! git pull --rebase; then
-            # Binary video files can't auto-merge; keep our freshly-recorded versions
-            git checkout --theirs cities/santarosa/traces/videos/*.webm
-            git add cities/santarosa/traces/videos/*.webm
-            git rebase --continue
+            git rebase --abort
+            git pull --no-rebase
           fi
-          git push
+          git stash pop || true
+          git push || true
