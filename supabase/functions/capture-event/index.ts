@@ -17,17 +17,25 @@ const EVENT_JSON_FORMAT = `{
 }`;
 
 function getSharedRules(defaultTimezone?: string): string {
-  const today = new Date().toISOString().substring(0, 10);
+  const now = new Date();
+  const today = now.toISOString().substring(0, 10);
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const todayDay = dayNames[now.getUTCDay()];
+  // Pre-compute next 7 days so the model doesn't have to do day-of-week arithmetic
+  const upcoming = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() + i);
+    return `${dayNames[d.getUTCDay()]} = ${d.toISOString().substring(0, 10)}`;
+  }).join(', ');
   const tzRule = defaultTimezone
     ? `- This event is for a calendar in the "${defaultTimezone}" timezone. If the source material explicitly mentions a different timezone, use that. Otherwise, set the "timezone" field to "${defaultTimezone}".`
     : `- If the source material mentions a timezone or a location that implies one, include a "timezone" field with the IANA timezone identifier (e.g., "America/New_York"). If no timezone is mentioned or inferable, omit the field.`;
   return `Rules:
-- Today's date is ${today}. Use this to calculate upcoming dates (e.g., "next Tuesday" means the next Tuesday on or after today).
+- Today is ${todayDay}, ${today}. The next 7 days are: ${upcoming}. Use these dates when a day of the week is mentioned — do NOT compute day-of-week yourself, use the mapping above.
 - If you cannot determine the exact time, make a reasonable guess (e.g., evening events at 19:00).
 - If end_time is unknown, estimate a reasonable duration (e.g., 1 hour for meetups, 2-3 hours for concerts/festivals).
 - If the date/time is completely unreadable, set start_time to null.
 - Keep description brief (1-2 sentences max).
-- If a day of the week is mentioned or implied (e.g., "Thursday night trivia", "Saturday morning farmers market"), set start_time to the NEXT upcoming occurrence of that day.
 - If the event sounds recurring (e.g., "every week", "weekly", a named day implying regularity), mention the recurrence in the description (e.g., "Weekly on Thursdays"). If an end date for the series is mentioned or visible (e.g., "until June 25", "through the end of May", "January-June"), set recurrence_until to that date as YYYY-MM-DD.
 - If multiple events are mentioned, extract only the first/primary one.
 ${tzRule}
