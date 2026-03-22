@@ -12,7 +12,8 @@ const EVENT_JSON_FORMAT = `{
   "location": "venue/address or null",
   "description": "brief description or null",
   "url": "website if visible or null",
-  "timezone": "IANA timezone identifier if mentioned or inferable from location (e.g., \\"America/New_York\\"), otherwise omit"
+  "timezone": "IANA timezone identifier if mentioned or inferable from location (e.g., \\"America/New_York\\"), otherwise omit",
+  "recurrence_until": "ISO8601 date (YYYY-MM-DD) when a recurring series ends, or null"
 }`;
 
 function getSharedRules(defaultTimezone?: string): string {
@@ -26,6 +27,9 @@ function getSharedRules(defaultTimezone?: string): string {
 - If end_time is unknown, estimate a reasonable duration (e.g., 1 hour for meetups, 2-3 hours for concerts/festivals).
 - If the date/time is completely unreadable, set start_time to null.
 - Keep description brief (1-2 sentences max).
+- If a day of the week is mentioned or implied (e.g., "Thursday night trivia", "Saturday morning farmers market"), set start_time to the NEXT upcoming occurrence of that day.
+- If the event sounds recurring (e.g., "every week", "weekly", a named day implying regularity), mention the recurrence in the description (e.g., "Weekly on Thursdays"). If an end date for the series is mentioned or visible (e.g., "until June 25", "through the end of May", "January-June"), set recurrence_until to that date as YYYY-MM-DD.
+- If multiple events are mentioned, extract only the first/primary one.
 ${tzRule}
 - Return ONLY the JSON object, no markdown or explanation.`;
 }
@@ -43,15 +47,11 @@ ${EVENT_JSON_FORMAT}
 
 ${getSharedRules(defaultTimezone)}
 - The transcript may contain filler words, false starts, or informal speech — extract the key event details.
-- If multiple events are mentioned, extract only the first/primary one.
-- If a day of the week is mentioned or implied (e.g., "Thursday night trivia", "Saturday morning farmers market"), set start_time to the NEXT upcoming occurrence of that day.
-- If the event sounds recurring (e.g., "every week", "weekly", a named day implying regularity), mention the recurrence in the description (e.g., "Weekly on Thursdays").
-- If the speaker mentions where to find more info (e.g., "check meetup for details", "it's on eventbrite", "search Facebook for downtown art walk"), construct a plausible search URL for the url field:
+- For the url field: if the speaker says a website URL (e.g., "newworldballet.com", "check out srnow.org"), capture it as a full URL (add https:// if needed). If they mention a platform without a specific URL (e.g., "it's on meetup", "check eventbrite"), construct a search URL:
   - Facebook: https://www.facebook.com/search/top/?q={event+name+city}
   - Meetup: https://www.meetup.com/find/?keywords={event+name}&location={city}
   - Eventbrite: https://www.eventbrite.com/d/{state}--{city}/{event-name}
-  - Generic: https://www.google.com/search?q={event+name+city}
-- If no source is mentioned, leave url as null.`;
+- If no website or platform is mentioned, leave url as null. Don't force it — the user can add it manually.`;
 }
 
 // Append UTC offset to a naive datetime using the IANA timezone from extraction

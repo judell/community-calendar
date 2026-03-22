@@ -847,7 +847,7 @@ let _enrichmentsCache = {};
 // Build RRULE string from UI selections using rrule library
 // For WEEKLY: pass selectedDays (e.g. ['MO','WE'])
 // For MONTHLY: pass ordinal (1-4) and monthDay (e.g. 'TU') for "1st Tuesday"
-function buildRRule(frequency, selectedDays, ordinal, monthDay) {
+function buildRRule(frequency, selectedDays, ordinal, monthDay, until) {
   if (!frequency || frequency === 'none') return null;
 
   // Map day codes to rrule weekday constants
@@ -871,6 +871,14 @@ function buildRRule(frequency, selectedDays, ordinal, monthDay) {
 
   if (frequency === 'MONTHLY' && monthDay && ordinal) {
     options.byweekday = [dayMap[monthDay].nth(ordinal)];
+  }
+
+  if (until) {
+    // Parse yyyy-MM-dd or MM/dd/yyyy format and set to end of day UTC
+    var parts = until.includes('-') ? until.split('-') : null;
+    if (parts && parts.length === 3) {
+      options.until = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 23, 59, 59));
+    }
   }
 
   const rule = new rrule.RRule(options);
@@ -1155,13 +1163,22 @@ function getNextOccurrence(enrichments, eventId, originalStartTime) {
   try {
     var ruleStr = enrichment.rrule.startsWith('RRULE:') ? enrichment.rrule : 'RRULE:' + enrichment.rrule;
     var rule = rrule.RRule.fromString(ruleStr);
-    var dtstart = new Date(enrichment.start_time || originalStartTime);
+    // Use city timezone to convert dtstart to local wall-clock time for rrule.js
+    // rrule.js works in UTC internally, so we pass local time as if it were UTC
+    var tz = getCityTimezone();
+    var srcTime = enrichment.start_time || originalStartTime;
+    var localParts = tz ? utcToLocal(srcTime, tz) : { date: srcTime.substring(0, 10), time: srcTime.substring(11, 16) };
+    var dtstart = new Date(localParts.date + 'T' + (localParts.time || '00:00') + ':00Z');
     var ruleWithStart = new rrule.RRule({
       ...rule.origOptions,
       dtstart: dtstart
     });
-    var now = new Date();
-    var next = ruleWithStart.after(now, true);
+    // Compare against "now" in the same local-as-UTC convention
+    var nowLocal = tz
+      ? new Date(new Date().toLocaleString('en-US', { timeZone: tz }))
+      : new Date();
+    var nowFake = new Date(Date.UTC(nowLocal.getFullYear(), nowLocal.getMonth(), nowLocal.getDate(), nowLocal.getHours(), nowLocal.getMinutes()));
+    var next = ruleWithStart.after(nowFake, true);
     console.log('getNextOccurrence', { eventId: eventId, enrichmentsLen: enrichments.length, rrule: enrichment.rrule, next: next ? next.toISOString() : null, original: originalStartTime });
     return next ? next.toISOString() : originalStartTime;
   } catch (e) {
