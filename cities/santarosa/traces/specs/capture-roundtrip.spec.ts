@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { captureTrace } from './trace-capture';
+import { captureTrace, traceFileUpload } from './trace-capture';
 
 test('capture-roundtrip', async ({ page }) => {
   test.setTimeout(60000);
@@ -31,6 +31,7 @@ test('capture-roundtrip', async ({ page }) => {
     // Upload the fixture audio file
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles('../traces/fixtures/stewarts-point.m4a');
+    await traceFileUpload(page, ['stewarts-point.m4a']);
 
     // Wait for Whisper transcription + extraction — PickEditor opens with "Save Captured Event"
     await expect(page.getByText('Save Captured Event')).toBeVisible({ timeout: 45000 });
