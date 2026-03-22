@@ -5,11 +5,43 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Format date for ICS (YYYYMMDDTHHMMSSZ)
-function formatICSDate(isoString: string): string {
-  // Remove timezone info and format as ICS date
+// Fetch city→timezone mapping from repo (single source of truth: cities.json)
+let _cityTimezones: Record<string, string> | null = null;
+async function getCityTimezones(): Promise<Record<string, string>> {
+  if (_cityTimezones) return _cityTimezones;
+  try {
+    const ghRepo = Deno.env.get("GITHUB_REPO") || "judell/community-calendar";
+    const resp = await fetch(`https://raw.githubusercontent.com/${ghRepo}/main/cities.json`);
+    const cities = await resp.json();
+    _cityTimezones = {};
+    for (const [city, config] of Object.entries(cities as Record<string, any>)) {
+      if (config.timezone) _cityTimezones[city] = config.timezone;
+    }
+  } catch {
+    _cityTimezones = {};
+  }
+  return _cityTimezones;
+}
+
+// Format date for ICS as UTC (YYYYMMDDTHHMMSSZ)
+function formatICSDateUTC(isoString: string): string {
   const d = new Date(isoString);
   return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+}
+
+// Format date for ICS as local time (YYYYMMDDTHHMMSS) for use with TZID
+function formatICSDateLocal(isoString: string, timezone: string): string {
+  const d = new Date(isoString);
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+  const v: Record<string, string> = {};
+  parts.forEach(p => { v[p.type] = p.value; });
+  const hour = v.hour === "24" ? "00" : v.hour;
+  return `${v.year}${v.month}${v.day}T${hour}${v.minute}${v.second}`;
 }
 
 // Escape text for ICS format
@@ -23,7 +55,7 @@ function escapeICS(text: string | null): string {
 }
 
 // Generate ICS content from events
-function generateICS(events: any[], calendarName: string): string {
+function generateICS(events: any[], calendarName: string, cityTimezones: Record<string, string>): string {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -34,12 +66,23 @@ function generateICS(events: any[], calendarName: string): string {
   ];
 
   for (const event of events) {
+    // For recurring events, use TZID so BYDAY expands in the correct timezone
+    const tz = event.rrule && event.city ? cityTimezones[event.city] : null;
+
     lines.push("BEGIN:VEVENT");
     lines.push(`UID:pick-${event.id}@community-calendar`);
-    lines.push(`DTSTAMP:${formatICSDate(new Date().toISOString())}`);
-    lines.push(`DTSTART:${formatICSDate(event.start_time)}`);
+    lines.push(`DTSTAMP:${formatICSDateUTC(new Date().toISOString())}`);
+    if (tz) {
+      lines.push(`DTSTART;TZID=${tz}:${formatICSDateLocal(event.start_time, tz)}`);
+    } else {
+      lines.push(`DTSTART:${formatICSDateUTC(event.start_time)}`);
+    }
     if (event.end_time) {
-      lines.push(`DTEND:${formatICSDate(event.end_time)}`);
+      if (tz) {
+        lines.push(`DTEND;TZID=${tz}:${formatICSDateLocal(event.end_time, tz)}`);
+      } else {
+        lines.push(`DTEND:${formatICSDateUTC(event.end_time)}`);
+      }
     }
     // RRULE for recurring events (from enrichment)
     if (event.rrule) {
@@ -130,7 +173,8 @@ Deno.serve(async (req) => {
           description,
           url,
           source,
-          image_url
+          image_url,
+          city
         )
       `)
       .eq("user_id", userId);
@@ -188,7 +232,8 @@ Deno.serve(async (req) => {
     }
 
     // Generate ICS
-    const ics = generateICS(events, "My Picks - Community Calendar");
+    const cityTimezones = await getCityTimezones();
+    const ics = generateICS(events, "My Picks - Community Calendar", cityTimezones);
 
     // Generate ETag from content hash for cache validation
     const encoder = new TextEncoder();
