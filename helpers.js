@@ -1287,7 +1287,7 @@ if (typeof window !== 'undefined') {
 
   window.defaultDashboardTile = function(city) {
     var id = 'tile-' + Date.now();
-    return { i: id, city: city || window.getCityList()[0] || '', category: '', search: '' };
+    return { i: id, city: city || window.cityFilter || window.getCityList()[0] || '', category: '', search: '' };
   };
 
   window.defaultDashboardLayout = function(tileId) {
