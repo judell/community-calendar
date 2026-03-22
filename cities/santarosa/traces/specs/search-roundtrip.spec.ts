@@ -7,7 +7,7 @@ test('search-roundtrip', async ({ page }) => {
   try {
     // Start at root, pick Santa Rosa
     await page.goto('./');
-    const santaRosaBtn = page.getByText('Santa Rosa', { exact: true });
+    const santaRosaBtn = page.getByText('Santa Rosa Now', { exact: true });
     await expect(santaRosaBtn).toBeVisible({ timeout: 10000 });
     await Promise.all([
       page.waitForResponse(r => r.url().includes('/rest/v1/events') && !r.url().includes('event_enrichments')),
