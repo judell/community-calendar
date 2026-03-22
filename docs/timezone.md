@@ -125,7 +125,23 @@ When a curator adds recurrence to an event via PickEditor, the form shows times 
 
 ### Step 8: My Picks ICS feed
 
-The `my-picks` edge function reads `timestamptz` from PostgreSQL (UTC) and formats as `YYYYMMDDTHHMMSSZ` for ICS output. This is standard RFC 5545 — the subscribing calendar app handles conversion to the user's local timezone.
+The `my-picks` edge function (`supabase/functions/my-picks/index.ts`) generates an ICS feed of a user's bookmarked events.
+
+For **non-recurring events**: outputs UTC times with Z suffix (`DTSTART:20250327T010000Z`). The subscribing calendar app handles conversion to the user's local timezone.
+
+For **recurring events** (those with an RRULE): outputs local times with TZID (`DTSTART;TZID=America/Los_Angeles:20250326T180000`). This is critical because RRULE `BYDAY` expansion happens relative to the DTSTART timezone. A Wednesday 6pm Pacific event stored as Thursday 1am UTC would expand `BYDAY=WE` on the wrong day if the calendar app uses UTC for expansion.
+
+The city timezone comes from `cities.json` fetched at runtime from the repo (via `GITHUB_REPO` env var, same pattern as `load-events`), not hardcoded. The event's `city` column in the database maps to the timezone.
+
+### Step 9: Capture-event day-of-week computation
+
+The `capture-event` edge function (`supabase/functions/capture-event/index.ts`) pre-computes a day-of-week lookup table in the prompt:
+
+```
+Today is Sunday, 2026-03-22. The next 7 days are: Sunday = 2026-03-22, Monday = 2026-03-23, ...
+```
+
+This prevents Claude from doing day-of-week arithmetic (which it gets wrong — e.g., computing "next Wednesday" as Thursday). The model uses the lookup table directly.
 
 ## City timezone configuration
 
