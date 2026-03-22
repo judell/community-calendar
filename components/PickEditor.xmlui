@@ -62,8 +62,9 @@
       submittedData = pickForm.getData();
       if (rruleFrequency !== 'none') {
         const formData = pickForm.getData();
-        const startTime = (formData.date || '') + 'T' + (formData.time || '00:00') + ':00';
-        const endTime = formData.endTime ? (formData.date || '') + 'T' + formData.endTime + ':00' : null;
+        const cityTz = (window._cities && window.cityFilter && window._cities[window.cityFilter]?.timezone) || null;
+        const startTime = window.applyTimezoneOffset((formData.date || '') + 'T' + (formData.time || '00:00') + ':00', cityTz);
+        const endTime = formData.endTime ? window.applyTimezoneOffset((formData.date || '') + 'T' + formData.endTime + ':00', cityTz) : null;
         enrichmentApi.execute({
           event_id: result.event_id,
           curator_id: window.authUser.id,
@@ -140,8 +141,9 @@
           });
           if (rruleFrequency !== 'none') {
             const rruleStr = window.buildRRule(rruleFrequency, rruleDays, rruleOrdinal, rruleMonthDay);
-            const startTime = (formData.date || '') + 'T' + (formData.time || '00:00') + ':00';
-            const endTime = formData.endTime ? (formData.date || '') + 'T' + formData.endTime + ':00' : null;
+            const cityTz2 = (window._cities && window.cityFilter && window._cities[window.cityFilter]?.timezone) || null;
+            const startTime = window.applyTimezoneOffset((formData.date || '') + 'T' + (formData.time || '00:00') + ':00', cityTz2);
+            const endTime = formData.endTime ? window.applyTimezoneOffset((formData.date || '') + 'T' + formData.endTime + ':00', cityTz2) : null;
             enrichmentApi.execute({
               event_id: $props.event.id,
               curator_id: window.authUser.id,

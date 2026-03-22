@@ -386,6 +386,59 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
         if tz_anomalies:
             report['cities'][city]['tz_anomalies'] = tz_anomalies
 
+    # TZID inventory: distinct timezones found in each city's ICS files
+    for city in cities:
+        city_dir = f'cities/{city}'
+        city_tz = get_city_timezone(city)
+        tzid_counts = {}  # tzid → {count, files}
+        for ics_path in sorted(glob.glob(f'{city_dir}/*.ics')):
+            basename = os.path.basename(ics_path)
+            if basename == 'combined.ics':
+                continue
+            try:
+                with open(ics_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+            except Exception:
+                continue
+            for m in re.finditer(r'DTSTART;TZID=([^:;]+)', content):
+                tzid = m.group(1)
+                if tzid not in tzid_counts:
+                    tzid_counts[tzid] = {'count': 0, 'files': set()}
+                tzid_counts[tzid]['count'] += 1
+                tzid_counts[tzid]['files'].add(basename)
+            # Count bare datetimes (no TZID, no Z)
+            bare = len(re.findall(r'^DTSTART:\d{8}T\d{6}$', content, re.MULTILINE))
+            if bare:
+                key = '(bare — assumes city tz)'
+                if key not in tzid_counts:
+                    tzid_counts[key] = {'count': 0, 'files': set()}
+                tzid_counts[key]['count'] += bare
+                tzid_counts[key]['files'].add(basename)
+            # Count UTC datetimes
+            utc = len(re.findall(r'^DTSTART:\d{8}T\d{6}Z$', content, re.MULTILINE))
+            if utc:
+                key = 'UTC (Z suffix)'
+                if key not in tzid_counts:
+                    tzid_counts[key] = {'count': 0, 'files': set()}
+                tzid_counts[key]['count'] += utc
+                tzid_counts[key]['files'].add(basename)
+
+        if tzid_counts:
+            inventory = []
+            for tzid, info in sorted(tzid_counts.items(), key=lambda x: -x[1]['count']):
+                inventory.append({
+                    'tzid': tzid,
+                    'count': info['count'],
+                    'files': len(info['files']),
+                    'matches_city': tzid == city_tz,
+                    'sample_files': sorted(info['files'])[:5]
+                })
+            report['cities'][city]['tzid_inventory'] = {
+                'city_timezone': city_tz,
+                'distinct_tzids': len(inventory),
+                'tzids': inventory
+            }
+
     report['generated'] = now
 
     save_report(report, report_path)

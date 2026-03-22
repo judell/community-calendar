@@ -87,6 +87,25 @@ window.resizeImageFile = function(file, maxBytes) {
   });
 };
 
+// Append UTC offset to a naive datetime string using an IANA timezone.
+// E.g., applyTimezoneOffset("2025-01-15T19:00:00", "America/Los_Angeles") → "2025-01-15T19:00:00-08:00"
+// Returns the string unchanged if it already has an offset or Z suffix.
+window.applyTimezoneOffset = function(naiveDatetime, timezone) {
+  if (!timezone || !naiveDatetime) return naiveDatetime;
+  if (/[+-]\d{2}(:\d{2})?$/.test(naiveDatetime) || naiveDatetime.endsWith('Z')) {
+    return naiveDatetime;
+  }
+  var fakeUtc = new Date(naiveDatetime + 'Z');
+  var inTz = new Date(fakeUtc.toLocaleString('en-US', { timeZone: timezone }));
+  var inUtc = new Date(fakeUtc.toLocaleString('en-US', { timeZone: 'UTC' }));
+  var offsetMin = (inTz.getTime() - inUtc.getTime()) / 60000;
+  var sign = offsetMin >= 0 ? '+' : '-';
+  var abs = Math.abs(offsetMin);
+  var h = String(Math.floor(abs / 60)).padStart(2, '0');
+  var m = String(abs % 60).padStart(2, '0');
+  return naiveDatetime + sign + h + ':' + m;
+};
+
 // Convert a UTC ISO datetime string to local date/time parts using the city timezone
 // Returns { date: 'YYYY-MM-DD', time: 'HH:MM' }
 window.utcToLocal = function(isoString, timezone) {

@@ -31,15 +31,26 @@ def load_city_timezone(city):
 
 
 def parse_ics_datetime(dt_str, local_tz=None):
-    """Parse an ICS datetime string to ISO format string (in the city's local time)."""
+    """Parse an ICS datetime string to ISO format string.
+
+    If the input contains a TZID parameter (e.g. ";TZID=America/New_York:20250115T190000"),
+    that timezone is used instead of local_tz. This ensures events from other timezones
+    are correctly interpreted even when they appear in a different city's calendar.
+    """
     if not dt_str:
         return None
 
     if local_tz is None:
         local_tz = ZoneInfo(DEFAULT_TIMEZONE)
 
-    # Handle property parameters like DTSTART;TZID=America/Los_Angeles:20240101T120000
+    # Extract TZID parameter if present, then strip params to get bare datetime
     if ';' in dt_str:
+        tzid_match = re.search(r'TZID=([^:;]+)', dt_str)
+        if tzid_match:
+            try:
+                local_tz = ZoneInfo(tzid_match.group(1))
+            except (KeyError, ValueError):
+                pass  # Invalid TZID — fall back to city timezone
         dt_str = dt_str.split(':')[-1]
 
     dt_str = dt_str.strip()
@@ -82,6 +93,25 @@ def extract_field(event_content, field_name):
         # Unescape ICS escapes
         value = value.replace('\\n', '\n').replace('\\,', ',').replace('\\;', ';').replace('\\\\', '\\')
         return value.strip()
+    return None
+
+
+def extract_raw_datetime(event_content, field_name):
+    """Extract a raw datetime property line including any TZID parameter.
+
+    Returns the full match (e.g. "DTSTART;TZID=America/New_York:20250115T190000")
+    so parse_ics_datetime can extract and use the TZID.
+    For bare properties (no params), returns just the value (e.g. "20250115T190000").
+    """
+    pattern = rf'^({field_name}(?:;[^:]*)?):([^\r\n]*)'
+    match = re.search(pattern, event_content, re.IGNORECASE | re.MULTILINE)
+    if match:
+        params = match.group(1)  # e.g. "DTSTART;TZID=America/New_York" or "DTSTART"
+        value = match.group(2).strip()
+        if ';' in params:
+            # Has parameters — return full line so parse_ics_datetime can extract TZID
+            return params + ':' + value
+        return value
     return None
 
 
@@ -258,8 +288,8 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
     for event_content in matches:
         # Extract fields
         title = html_unescape(extract_field(event_content, 'SUMMARY') or '')
-        start_time = parse_ics_datetime(extract_field(event_content, 'DTSTART'), local_tz)
-        end_time = parse_ics_datetime(extract_field(event_content, 'DTEND'), local_tz)
+        start_time = parse_ics_datetime(extract_raw_datetime(event_content, 'DTSTART'), local_tz)
+        end_time = parse_ics_datetime(extract_raw_datetime(event_content, 'DTEND'), local_tz)
         location = html_unescape(extract_field(event_content, 'LOCATION') or '')
         description = html_unescape(extract_field(event_content, 'DESCRIPTION') or '')
         url = extract_field(event_content, 'URL')
