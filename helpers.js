@@ -764,6 +764,16 @@ function isEventPicked(mergedIds, picks) {
   return picks.some(p => ids.some(id => p.event_id == id));
 }
 
+// Stamp each event with _picked boolean so List items change when picks change
+function stampPicked(events, picks) {
+  if (!events) return events;
+  return events.map(function(e) {
+    var picked = isEventPicked(e.mergedIds || e.id, picks);
+    if (e._picked === picked) return e;
+    return Object.assign({}, e, { _picked: picked });
+  });
+}
+
 // Build Google Calendar URL for an event
 function buildGoogleCalendarUrl(event) {
   if (!event) return '';

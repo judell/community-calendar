@@ -8,7 +8,6 @@ var showListImages = window.showListImages;
 
 var categoryFilter = window.initialCategory || '';
 var pickEvent = null;
-var picksData = null;
 var enrichmentsData = null;
 var refreshCounter = 0;
 
