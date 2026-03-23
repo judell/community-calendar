@@ -8,6 +8,7 @@ var showListImages = window.showListImages;
 
 var categoryFilter = window.initialCategory || '';
 var pickEvent = null;
+var oneClickPick = window.oneClickPick;
 var picksData = null;
 var enrichmentsData = null;
 var refreshCounter = 0;
@@ -54,6 +55,22 @@ function togglePick(event) {
         headers,
         invalidates: []
       });
+    });
+    refreshCounter = refreshCounter + 1;
+  } else if (oneClickPick && event.id) {
+    // One-click pick: skip the editor and create pick directly
+    Actions.callApi({
+      method: 'post',
+      url: appGlobals.supabaseUrl + '/rest/v1/picks',
+      headers: Object.assign({}, headers, {
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      }),
+      body: {
+        user_id: authUser.id,
+        event_id: event.id
+      },
+      invalidates: []
     });
     refreshCounter = refreshCounter + 1;
   } else {

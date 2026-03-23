@@ -53,6 +53,11 @@
         else { url.searchParams.delete('mode'); }
         window.history.replaceState({}, '', url);
       };
+      window.oneClickPick = localStorage.getItem('oneClickPick') === 'true';
+      window.setOneClickPick = function(val) {
+        window.oneClickPick = val;
+        localStorage.setItem('oneClickPick', val ? 'true' : 'false');
+      };
       window.showListImages = params.get('images') !== 'preview';
       window.setShowListImages = function(val) {
         window.showListImages = val !== 'preview';
