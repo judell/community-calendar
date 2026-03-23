@@ -1,5 +1,12 @@
 #!/bin/bash
 # Regression test runner for community-calendar (Santa Rosa)
+#
+# Note on capture-roundtrip: This test involves file upload, which happens
+# outside the browser (OS file picker). The inspector can only trace in-browser
+# interactions, so the upload step is invisible to it. To update this baseline,
+# use `./test.sh convert capture-roundtrip` (runs the spec, which has the real
+# setInputFiles() call). Do NOT use `./test.sh update capture-roundtrip` — the
+# run trace won't have the upload step and the baseline will break.
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 TRACE_TOOLS="$APP_DIR/trace-tools"
