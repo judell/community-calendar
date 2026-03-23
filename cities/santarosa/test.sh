@@ -5,8 +5,52 @@ APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 TRACE_TOOLS="$APP_DIR/trace-tools"
 REPO_ROOT="$APP_DIR/../.."
 
-# Keep repo root copies in sync with trace-tools
+# Keep repo copies in sync with trace-tools
 cp "$TRACE_TOOLS/xs-trace.js" "$REPO_ROOT/xs-trace.js"
-cp "$TRACE_TOOLS/xs-diff.html" "$REPO_ROOT/xs-diff.html"
+cp "$TRACE_TOOLS/xs-diff.html" "$REPO_ROOT/xmlui/xs-diff.html"
+
+SUPABASE_URL="https://dzpdualvwspgqghrysyz.supabase.co"
+TEST_USER_EMAIL="ci-test@community-calendar.test"
+
+# Clean up test user's picks and event_enrichments before each test run
+reset_fixtures() {
+  if [ -z "$SUPABASE_KEY" ]; then
+    echo "Warning: \$SUPABASE_KEY not set — skipping fixture reset"
+    return
+  fi
+
+  # Look up the test user's ID
+  USER_ID=$(curl -s "${SUPABASE_URL}/auth/v1/admin/users" \
+    -H "Authorization: Bearer ${SUPABASE_KEY}" \
+    -H "apikey: ${SUPABASE_KEY}" \
+    | node -e "
+      const data = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+      const user = data.users.find(u => u.email === '${TEST_USER_EMAIL}');
+      if (user) process.stdout.write(user.id);
+    ")
+
+  if [ -z "$USER_ID" ]; then
+    echo "Warning: test user not found — skipping fixture reset"
+    return
+  fi
+
+  # Delete picks for test user
+  curl -s -o /dev/null -w "" \
+    "${SUPABASE_URL}/rest/v1/picks?user_id=eq.${USER_ID}" \
+    -X DELETE \
+    -H "Authorization: Bearer ${SUPABASE_KEY}" \
+    -H "apikey: ${SUPABASE_KEY}" \
+    -H "Content-Type: application/json"
+
+  # Delete event_enrichments created by test user
+  curl -s -o /dev/null -w "" \
+    "${SUPABASE_URL}/rest/v1/event_enrichments?user_id=eq.${USER_ID}" \
+    -X DELETE \
+    -H "Authorization: Bearer ${SUPABASE_KEY}" \
+    -H "apikey: ${SUPABASE_KEY}" \
+    -H "Content-Type: application/json"
+
+  echo "Fixtures reset for ${TEST_USER_EMAIL}"
+}
 
 source "$TRACE_TOOLS/test-base.sh"

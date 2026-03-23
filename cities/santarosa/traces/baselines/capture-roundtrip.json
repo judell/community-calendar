@@ -6,10 +6,55 @@
         "api": [
           {
             "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/user_settings"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/feed_tokens",
+            "apiResult": {
+              "type": "snapshot",
+              "keys": [
+                "token"
+              ],
+              "values": {
+                "token": "49eca0ba-a159-44af-baae-b6a2a2427edb"
+              }
+            }
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_google_users",
+            "apiResult": {
+              "type": "snapshot",
+              "keys": [
+                "google_email"
+              ],
+              "values": {
+                "google_email": "ci-test@community-calendar.test"
+              }
+            }
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/distinct_cities",
             "apiResult": {
               "type": "rowcount",
               "count": 8,
+              "keys": [
+                "city"
+              ]
+            }
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments",
+            "apiResult": {
+              "type": "rowcount",
+              "count": 2,
               "keys": [
                 "categories",
                 "city",
@@ -32,52 +77,7 @@
           },
           {
             "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/feed_tokens",
-            "apiResult": {
-              "type": "snapshot",
-              "keys": [
-                "token"
-              ],
-              "values": {
-                "token": "49eca0ba-a159-44af-baae-b6a2a2427edb"
-              }
-            }
-          },
-          {
-            "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/user_settings"
-          },
-          {
-            "method": "GET",
             "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_github_users"
-          },
-          {
-            "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/distinct_cities",
-            "apiResult": {
-              "type": "rowcount",
-              "count": 8,
-              "keys": [
-                "city"
-              ]
-            }
-          },
-          {
-            "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_google_users",
-            "apiResult": {
-              "type": "snapshot",
-              "keys": [
-                "google_email"
-              ],
-              "values": {
-                "google_email": "ci-test@community-calendar.test"
-              }
-            }
-          },
-          {
-            "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
           }
         ]
       }
@@ -123,6 +123,7 @@
       "target": {
         "component": "ModalDialog",
         "label": "Capture Event from Audio",
+        "componentId": "dialog",
         "targetTag": "BUTTON",
         "selectorPath": "[data-testid=\"dialog\"] >> text=Select Audio File",
         "ariaRole": "button",
@@ -165,57 +166,47 @@
           }
         ]
       },
-      "valueChanges": [
-        {
-          "component": "FileInput",
-          "files": [
-            {
-              "name": "stewarts-point.m4a"
-            }
-          ]
-        }
-      ],
       "appTraces": {
         "filterEvents": [
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           }
         ]
       }
@@ -225,6 +216,7 @@
       "target": {
         "component": "Form",
         "label": null,
+        "componentId": "pickForm",
         "targetTag": "BUTTON",
         "selectorPath": "[data-testid=\"pickForm\"] >> text=Add to My Picks",
         "ariaRole": "button",
@@ -232,12 +224,12 @@
         "testId": "pickForm",
         "formData": {
           "title": "Stewart's Point Coastal Route",
-          "date": "2027-03-08",
+          "date": "2026-03-08",
           "time": "08:20",
           "endTime": "12:20",
-          "location": "Mate Rio Community Centre, Bohemian Highway and Highway 116",
+          "location": "Monte Rio Community Centre, Bohemian Highway and Highway 116",
           "url": "",
-          "description": "Coastal route event at Stewart's Point."
+          "description": "Stewart's Point Coastal Route event at Monte Rio Community Centre."
         }
       },
       "await": {
@@ -285,51 +277,67 @@
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3375
           }
         ]
-      }
+      },
+      "stateDiffs": [
+        {
+          "path": "picksData",
+          "before": 0,
+          "after": 1,
+          "added": [
+            "4e0ad729-8ad0-4c65-b4da-69f270625a80"
+          ]
+        }
+      ]
     },
     {
       "action": "click",
       "target": {
         "component": "ModalDialog",
         "label": "dialog",
+        "componentId": "dialog",
         "targetTag": "BUTTON",
         "selectorPath": "[data-testid=\"dialog\"] >> text=Done",
         "ariaRole": "button",
@@ -357,52 +365,52 @@
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           }
         ]
       }
@@ -421,7 +429,7 @@
           {
             "term": "",
             "category": "",
-            "resultCount": 3179
+            "resultCount": 3375
           }
         ]
       }
@@ -429,9 +437,9 @@
     {
       "action": "click",
       "target": {
-        "component": "svg",
-        "label": null,
-        "targetTag": "svg",
+        "component": "use",
+        "label": "use",
+        "targetTag": "use",
         "ariaRole": "button",
         "ariaName": "Remove from my picks"
       },
@@ -439,7 +447,7 @@
         "api": [
           {
             "method": "DELETE",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?id=eq.379"
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?id=eq.448"
           },
           {
             "method": "GET",
@@ -455,6 +463,16 @@
           }
         ]
       },
+      "stateDiffs": [
+        {
+          "path": "picksData",
+          "before": 1,
+          "after": 0,
+          "removed": [
+            "4e0ad729-8ad0-4c65-b4da-69f270625a80"
+          ]
+        }
+      ],
       "dataSourceChanges": [
         {
           "source": "DataSource:picks",

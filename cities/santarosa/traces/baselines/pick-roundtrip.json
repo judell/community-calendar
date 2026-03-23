@@ -6,7 +6,7 @@
         "api": [
           {
             "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_github_users"
           },
           {
             "method": "GET",
@@ -40,6 +40,21 @@
           },
           {
             "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/distinct_cities",
+            "apiResult": {
+              "type": "rowcount",
+              "count": 8,
+              "keys": [
+                "city"
+              ]
+            }
+          },
+          {
+            "method": "GET",
             "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments",
             "apiResult": {
               "type": "rowcount",
@@ -61,21 +76,6 @@
                 "title",
                 "updated_at",
                 "url"
-              ]
-            }
-          },
-          {
-            "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/admin_github_users"
-          },
-          {
-            "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/distinct_cities",
-            "apiResult": {
-              "type": "rowcount",
-              "count": 7,
-              "keys": [
-                "city"
               ]
             }
           }
@@ -111,18 +111,17 @@
     {
       "action": "click",
       "target": {
-        "component": "List",
-        "label": "List",
-        "targetTag": "svg",
+        "component": "use",
+        "label": "use",
+        "targetTag": "use",
         "ariaRole": "button",
-        "ariaName": "Add to my picks",
-        "testId": "eventsList"
+        "ariaName": "Add to my picks"
       },
       "await": {
         "api": [
           {
             "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?select=id&user_id=eq.4e0ad729-8ad0-4c65-b4da-69f270625a80&event_id=in.(2594199)"
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?select=id&user_id=eq.4e0ad729-8ad0-4c65-b4da-69f270625a80&event_id=in.(3138215)"
           }
         ]
       }
@@ -132,18 +131,20 @@
       "target": {
         "component": "Form",
         "label": null,
+        "componentId": "pickForm",
         "targetTag": "BUTTON",
         "selectorPath": "[data-testid=\"pickForm\"] >> text=Add to My Picks",
         "ariaRole": "button",
         "ariaName": "Add to My Picks",
         "testId": "pickForm",
         "formData": {
-          "title": "Cardinal Newman Varsity Baseball @ Ukiah",
-          "date": "2026-03-13",
-          "time": "17:30",
-          "endTime": "19:15",
-          "location": "Anton Stadium",
-          "description": "Boys Varsity Baseball\nThe Cardinal Newman varsity baseball team has an away conference game @  Ukiah (CA) today @ 5:30p."
+          "title": "Florece tu Negocio #5",
+          "date": "2026-03-23",
+          "time": "00:00",
+          "endTime": "00:00",
+          "location": "Nuestra Communidad",
+          "url": "https://business.windsorchamber.com/events/details/florece-tu-negocio-5-1816",
+          "description": "Monday Mar 23, 2026 6:00 PM - 8:00 PM PDT"
         }
       },
       "await": {
@@ -155,6 +156,10 @@
           {
             "method": "GET",
             "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
+          },
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/user_settings"
           },
           {
             "method": "GET",
@@ -178,10 +183,6 @@
           },
           {
             "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/user_settings"
-          },
-          {
-            "method": "GET",
             "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments"
           }
         ]
@@ -192,6 +193,7 @@
       "target": {
         "component": "ModalDialog",
         "label": "Add to My Picks",
+        "componentId": "dialog",
         "targetTag": "BUTTON",
         "selectorPath": "[data-testid=\"dialog\"] >> text=Done",
         "ariaRole": "button",
@@ -234,44 +236,16 @@
         "ariaRole": "radio",
         "ariaName": "list"
       },
-      "appTraces": {
-        "filterEvents": [
-          {
-            "term": "",
-            "category": "",
-            "resultCount": 2966
-          },
-          {
-            "term": "",
-            "category": "",
-            "resultCount": 2966
-          }
-        ]
-      }
-    },
-    {
-      "action": "click",
-      "target": {
-        "component": "List",
-        "label": "List",
-        "targetTag": "svg",
-        "ariaRole": "button",
-        "ariaName": "Remove from my picks",
-        "testId": "eventsList"
-      },
       "await": {
         "api": [
           {
+            "method": "DELETE",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments?event_id=eq.3138215&curator_id=eq.4e0ad729-8ad0-4c65-b4da-69f270625a80",
+            "status": 204
+          },
+          {
             "method": "GET",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?select=id&user_id=eq.4e0ad729-8ad0-4c65-b4da-69f270625a80&event_id=in.(2594199)"
-          },
-          {
-            "method": "DELETE",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?id=eq.264"
-          },
-          {
-            "method": "DELETE",
-            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments?event_id=eq.2594199&curator_id=eq.4e0ad729-8ad0-4c65-b4da-69f270625a80"
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks"
           },
           {
             "method": "GET",
@@ -288,37 +262,82 @@
           {
             "term": "",
             "category": "",
-            "resultCount": 2966
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 2966
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 2966
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 2966
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 2966
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 2966
+            "resultCount": 3375
           },
           {
             "term": "",
             "category": "",
-            "resultCount": 2966
+            "resultCount": 3375
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3375
+          },
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3375
+          }
+        ]
+      }
+    },
+    {
+      "action": "click",
+      "target": {
+        "component": "use",
+        "label": "use",
+        "targetTag": "use",
+        "ariaRole": "button",
+        "ariaName": "Remove from my picks"
+      },
+      "await": {
+        "api": [
+          {
+            "method": "GET",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?select=id&user_id=eq.4e0ad729-8ad0-4c65-b4da-69f270625a80&event_id=in.(3138215)"
+          },
+          {
+            "method": "DELETE",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/picks?id=eq.449"
+          },
+          {
+            "method": "DELETE",
+            "endpoint": "https://dzpdualvwspgqghrysyz.supabase.co/rest/v1/event_enrichments?event_id=eq.3138215&curator_id=eq.4e0ad729-8ad0-4c65-b4da-69f270625a80"
+          }
+        ]
+      },
+      "appTraces": {
+        "filterEvents": [
+          {
+            "term": "",
+            "category": "",
+            "resultCount": 3375
           }
         ]
       }
