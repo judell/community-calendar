@@ -8,7 +8,6 @@ var showListImages = window.showListImages;
 
 var categoryFilter = window.initialCategory || '';
 var pickEvent = null;
-var oneClickPick = window.oneClickPick;
 var picksData = null;
 var enrichmentsData = null;
 var refreshCounter = 0;
@@ -57,7 +56,7 @@ function togglePick(event) {
       });
     });
     refreshCounter = refreshCounter + 1;
-  } else if (oneClickPick && event.id) {
+  } else if (userSettingsData && userSettingsData[0] && userSettingsData[0].one_click_pick && event.id) {
     // One-click pick: skip the editor and create pick directly
     Actions.callApi({
       method: 'post',

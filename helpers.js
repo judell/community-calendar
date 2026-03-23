@@ -522,6 +522,33 @@ function toggleSourceAndSave(source, userSettingsData, supabaseUrl, supabaseKey)
   return [{ hidden_sources: updated }];
 }
 
+// Toggle one-click-pick and persist to Supabase. Returns updated userSettingsData.
+function toggleOneClickPickAndSave(userSettingsData, supabaseUrl, supabaseKey) {
+  var current = (userSettingsData && userSettingsData[0] && userSettingsData[0].one_click_pick) || false;
+  var updated = !current;
+
+  fetch(supabaseUrl + '/rest/v1/user_settings?on_conflict=user_id,city', {
+    method: 'POST',
+    headers: {
+      apikey: supabaseKey,
+      Authorization: 'Bearer ' + window.authSession.access_token,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates'
+    },
+    body: JSON.stringify({
+      user_id: window.authUser.id,
+      city: window.cityFilter,
+      one_click_pick: updated,
+      updated_at: new Date().toISOString()
+    })
+  });
+
+  if (userSettingsData && userSettingsData[0]) {
+    return [Object.assign({}, userSettingsData[0], { one_click_pick: updated })];
+  }
+  return [{ one_click_pick: updated }];
+}
+
 // Check if a source is in the hidden sources list
 function isSourceHidden(source, hiddenSources) {
   if (!hiddenSources || !hiddenSources.length) return false;
