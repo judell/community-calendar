@@ -63,6 +63,21 @@
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/rrule@2.8.1/dist/es5/rrule.min.js"></script>
+    <script>
+      // helpers.js expects window._categories to be set (normally loaded in index.html)
+      window._categories = [
+        { name: "Arts / Culture", label: "#9a7d3a", background: "#f6f0e0" },
+        { name: "Music / Concerts", label: "#6b5a9a", background: "#f0ecf6" },
+        { name: "Community / Social", label: "#9a5a5a", background: "#f4e8e8" }
+      ];
+      // helpers.js expects window._cities for getCityTimezone() — set but no cityFilter by default
+      window._cities = {
+        santarosa: { timezone: "America/Los_Angeles" },
+        davis: { timezone: "America/Los_Angeles" },
+        montclair: { timezone: "America/New_York" },
+        utc: { timezone: "UTC" }
+      };
+    </script>
     <script src="helpers.js"></script>
   </head>
   <body>
@@ -116,6 +131,7 @@
           { id: 2, title: 'Art Show', location: 'Gallery', source: 'Museum', description: 'Modern art exhibit' },
           { id: 3, title: 'Food Festival', location: 'Park', source: 'City', description: 'Local cuisine' }
         ];
+        buildSearchIndex(events);
 
         it('returns all events when no search term', () => {
           const result = filterEvents(events, '');
@@ -207,6 +223,9 @@
       });
 
       describe('formatTime', () => {
+        const savedCityFilter = window.cityFilter;
+        window.cityFilter = 'utc'; // Use UTC so test expectations are deterministic
+
         it('returns empty string for null', () => {
           assertEqual(formatTime(null), '');
         });
@@ -234,9 +253,14 @@
           const result = formatTime('2026-02-01T09:05:00Z');
           assertEqual(result, '9:05 AM');
         });
+
+        window.cityFilter = savedCityFilter;
       });
 
       describe('formatDayOfWeek', () => {
+        const savedCityFilter = window.cityFilter;
+        window.cityFilter = 'utc';
+
         it('returns empty string for null', () => {
           assertEqual(formatDayOfWeek(null), '');
         });
@@ -245,9 +269,14 @@
           const result = formatDayOfWeek('2026-02-01T12:00:00Z'); // Sunday
           assertEqual(result, 'Sun');
         });
+
+        window.cityFilter = savedCityFilter;
       });
 
       describe('formatMonthDay', () => {
+        const savedCityFilter = window.cityFilter;
+        window.cityFilter = 'utc';
+
         it('returns empty string for null', () => {
           assertEqual(formatMonthDay(null), '');
         });
@@ -256,6 +285,8 @@
           const result = formatMonthDay('2026-02-15T12:00:00Z');
           assertEqual(result, 'Feb 15');
         });
+
+        window.cityFilter = savedCityFilter;
       });
 
       describe('truncate', () => {
@@ -780,6 +811,9 @@
       });
 
       describe('formatPickDate', () => {
+        const savedCityFilter = window.cityFilter;
+        window.cityFilter = 'utc';
+
         const enrichments = [{
           event_id: 42,
           rrule: 'FREQ=WEEKLY;BYDAY=WE',
@@ -807,6 +841,8 @@
           const result = window.formatPickDate([], 42, null);
           assertEqual(typeof result, 'string');
         });
+
+        window.cityFilter = savedCityFilter;
       });
 
       describe('dedupeEvents - rrule carry-through', () => {
@@ -923,6 +959,32 @@
           assertEqual(result[0].location, 'Cafe');
           assertEqual(result[0].description, 'Fun times');
           assertEqual(result[0].url, 'http://example.com');
+        });
+
+        it('expands on correct local day when UTC day differs (Taco Tuesday bug)', () => {
+          // Tuesday 6 PM Pacific = Wednesday 1 AM UTC
+          // Without UTC→local conversion, rrule.js would expand on Wednesdays
+          const savedCityFilter = window.cityFilter;
+          window.cityFilter = 'santarosa';
+          try {
+            const enrichments = [{
+              id: 99,
+              title: 'Taco Tuesday Ride',
+              start_time: '2026-04-01T01:00:00Z', // Wed 1 AM UTC = Tue 6 PM PDT
+              rrule: 'FREQ=WEEKLY;BYDAY=TU',
+              curator_name: 'test',
+              city: 'santarosa'
+            }];
+            const result = expandEnrichments(enrichments, '2026-03-29T00:00:00Z', '2026-04-12T23:59:59Z');
+            assert(result.length >= 2, 'Should produce at least 2 Tuesdays, got ' + result.length);
+            result.forEach(e => {
+              // The fake-UTC date from rrule.js represents local time — day should be Tuesday (2)
+              const d = new Date(e.start_time);
+              assertEqual(d.getUTCDay(), 2, 'Occurrence should be on Tuesday (UTC day of fake-UTC), got day ' + d.getUTCDay() + ' for ' + e.start_time);
+            });
+          } finally {
+            window.cityFilter = savedCityFilter;
+          }
         });
 
         it('only produces occurrences within date range', () => {
@@ -1068,7 +1130,7 @@
           assert(Array.isArray(counts), 'Should return array');
           assert(counts.length > 0, 'Should have at least one source');
           const totalCount = counts.reduce((sum, c) => sum + c.count, 0);
-          assertEqual(totalCount, events.length);
+          assert(totalCount >= events.length, 'Total count should be >= event count (multi-source events counted per source), got ' + totalCount + ' vs ' + events.length);
         });
 
         test('getSourceCounts sources are sorted by count descending', () => {

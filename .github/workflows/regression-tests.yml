@@ -76,6 +76,27 @@ jobs:
           BASE_URL: http://localhost:8080
         run: node cities/santarosa/traces/mint-session.js
 
+      - name: Run unit tests (test.html)
+        run: |
+          cd cities/santarosa/trace-tools
+          node -e "
+          const { chromium } = require('playwright');
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage();
+            await page.goto('http://localhost:8080/test.html');
+            await page.waitForSelector('.summary', { timeout: 30000 });
+            const summary = await page.textContent('.summary');
+            console.log('Unit tests:', summary);
+            const failed = summary.includes('failed');
+            await browser.close();
+            if (failed) {
+              console.error('Unit tests failed');
+              process.exit(1);
+            }
+          })();
+          "
+
       - name: Run regression tests
         env:
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
