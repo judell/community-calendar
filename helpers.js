@@ -1136,16 +1136,33 @@ function _detectRecurrenceInText(text) {
 function expandEnrichments(enrichments, fromDateStr, toDateStr) {
   if (!enrichments || !enrichments.length) return [];
 
-  const fromDate = new Date(fromDateStr);
-  const toDate = new Date(toDateStr);
+  // Use city timezone to handle UTC→local conversion (same trick as getNextOccurrence)
+  const tz = getCityTimezone();
+
+  // Convert from/to range to local-as-UTC for rrule.js comparison
+  function toLocalFakeUTC(dateStr) {
+    if (tz) {
+      const d = new Date(dateStr);
+      const local = new Date(d.toLocaleString('en-US', { timeZone: tz }));
+      return new Date(Date.UTC(local.getFullYear(), local.getMonth(), local.getDate(), local.getHours(), local.getMinutes()));
+    }
+    return new Date(dateStr);
+  }
+
+  const fromDate = toLocalFakeUTC(fromDateStr);
+  const toDate = toLocalFakeUTC(toDateStr);
   const virtualEvents = [];
 
   enrichments.forEach(enrichment => {
     if (!enrichment.rrule || !enrichment.start_time || !enrichment.title) return;
 
     try {
-      // Parse the original start_time to get time-of-day
-      const dtstart = new Date(enrichment.start_time);
+      // Convert stored UTC time to local wall-clock, then treat as UTC for rrule.js
+      // This ensures day-of-week is correct in the city's timezone
+      const localParts = tz
+        ? utcToLocal(enrichment.start_time, tz)
+        : { date: enrichment.start_time.substring(0, 10), time: enrichment.start_time.substring(11, 16) };
+      const dtstart = new Date(localParts.date + 'T' + (localParts.time || '00:00') + ':00Z');
 
       // Build the full RRULE string with dtstart
       const ruleStr = enrichment.rrule.startsWith('RRULE:') ? enrichment.rrule : 'RRULE:' + enrichment.rrule;
@@ -1161,7 +1178,8 @@ function expandEnrichments(enrichments, fromDateStr, toDateStr) {
       const occurrences = ruleWithStart.between(fromDate, toDate, true);
 
       occurrences.forEach(date => {
-        // Build ISO string preserving the original time-of-day
+        // Convert local-as-UTC back to a display-friendly ISO string
+        // The date from rrule.js is in fake-UTC (actually local time), use as-is for display
         const isoDate = date.toISOString();
 
         virtualEvents.push({
