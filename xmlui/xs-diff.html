@@ -31,11 +31,11 @@
         --color-interaction-bg: #eef2ff;
 
         /* Font sizes */
-        --font-xs: 8px;
-        --font-sm: 10px;
-        --font-md: 11px;
-        --font-base: 12px;
-        --font-lg: 13px;
+        --font-xs: 10px;
+        --font-sm: 12px;
+        --font-md: 13px;
+        --font-base: 14px;
+        --font-lg: 15px;
 
         /* Spacing */
         --space-1: 4px;
@@ -720,7 +720,6 @@
   </head>
   <body>
     <div class="toolbar">
-      <span style="display: flex; align-items: center; gap: var(--space-2);"><label>View:</label><label><input type="radio" name="viewMode" id="viewPretty" checked /> pretty</label><label><input type="radio" name="viewMode" id="viewRaw" /> raw</label></span>
       <input type="text" id="searchInput" placeholder="Search..." style="width: 200px;" />
       <button id="searchPrev" title="Previous match">▲</button>
       <button id="searchNext" title="Next match">▼</button>
@@ -750,10 +749,264 @@
       </div>
     </div>
 
+    <script>
+      // trace-normalize.js — inlined to keep xs-diff.html self-contained (minus xmlui-parser.es.js).
+      // Canonical source: trace-normalize.js (also used by distill-trace.js via require).
+      // ---- BEGIN trace-normalize ----
+      (function() {
+        function isPollingEvent(e) {
+          if (e.kind === 'state:changes' && e.eventName === 'DataSource:serverInfo') return true;
+          if ((e.kind === 'api:start' || e.kind === 'api:complete') &&
+              e.url && (e.url.includes('/status') || e.url.includes('/license'))) return true;
+          if ((e.kind === 'handler:start' || e.kind === 'handler:complete') &&
+              e.eventName === 'loaded' && e.componentLabel === 'serverInfo') return true;
+          if (e.kind === 'state:changes' && e.eventName && e.eventName.startsWith('AppState:')) {
+            return !!(e.diffJson && e.diffJson.every(function(d) {
+              return d.path === 'stats' || (d.path && d.path.startsWith('stats.')) ||
+                     d.path === 'status' || d.path === 'logs' || d.path === 'sessions';
+            }));
+          }
+          return false;
+        }
+        function isUserActionEvent(e) {
+          if (e.kind === 'api:start' || e.kind === 'api:complete' || e.kind === 'api:error') {
+            if (e.url && (e.url.includes('/status') || e.url.includes('/license'))) return false;
+            return true;
+          }
+          if (e.kind === 'state:changes') {
+            if (e.eventName === 'DataSource:serverInfo') return false;
+            if (e.eventName && e.eventName.startsWith('AppState:')) {
+              var isPolling = e.diffJson && e.diffJson.every(function(d) {
+                return d.path === 'stats' || (d.path && d.path.startsWith('stats.')) ||
+                       d.path === 'status' || d.path === 'logs' || d.path === 'sessions';
+              });
+              if (isPolling) return false;
+            }
+            return true;
+          }
+          if (e.kind === 'component:vars:change') {
+            if (e.diff && e.diff.some(function(d) { return d.path === 'serverStatus'; })) return false;
+            return true;
+          }
+          return false;
+        }
+        function isOrphanedPollingEvent(e) {
+          if ((e.kind === 'handler:start' || e.kind === 'handler:complete') && e.eventName === 'loaded') return true;
+          if ((e.kind === 'api:start' || e.kind === 'api:complete') && e.url && e.url.includes('/status')) return true;
+          if (e.kind === 'state:changes' && e.eventName === 'DataSource:serverInfo') return true;
+          if (e.kind === 'state:changes' && e.eventName && e.eventName.startsWith('AppState:')) {
+            return !!(e.diffJson && e.diffJson.every(function(d) {
+              return d.path === 'stats' || (d.path && d.path.startsWith('stats.')) ||
+                     d.path === 'status' || d.path === 'logs' || d.path === 'sessions';
+            }));
+          }
+          return false;
+        }
+        function defaultSortKey(entry) {
+          if (!entry) return 0;
+          if (entry.perfTs !== undefined) return entry.perfTs;
+          return entry.ts || 0;
+        }
+        var _requestIdCounter = 0;
+        function resetRequestIdCounter() { _requestIdCounter = 0; }
+        function matchApiPairs(entries) {
+          var pendingRequests = new Map();
+          entries.forEach(function(e) {
+            if (e.kind === 'api:start') {
+              if (!e._requestId) e._requestId = 'req-' + (++_requestIdCounter);
+              var key = e.instanceId || 'unknown';
+              if (!pendingRequests.has(key)) pendingRequests.set(key, []);
+              pendingRequests.get(key).push({ requestId: e._requestId, perfTs: e.perfTs, method: (e.method || 'GET').toUpperCase(), url: e.url, traceId: e.traceId });
+            }
+          });
+          var completions = entries.filter(function(e) { return (e.kind === 'api:complete' || e.kind === 'api:error') && !e._requestId; }).sort(function(a, b) { return (a.perfTs || 0) - (b.perfTs || 0); });
+          completions.forEach(function(e) {
+            var key = e.instanceId || 'unknown';
+            var queue = pendingRequests.get(key);
+            if (!queue || queue.length === 0) return;
+            var method = (e.method || 'GET').toUpperCase();
+            var completePerfTs = e.perfTs || Infinity;
+            var completeTraceId = e.traceId;
+            var bestIdx = -1, bestTs = -1;
+            queue.forEach(function(r, idx) {
+              if (r.method === method && r.url === e.url) {
+                if (completeTraceId && r.traceId && r.traceId !== completeTraceId) return;
+                if (r.perfTs <= completePerfTs && r.perfTs > bestTs) { bestIdx = idx; bestTs = r.perfTs; }
+              }
+            });
+            if (bestIdx === -1) {
+              var fallbackIdx = -1, fallbackTs = -1;
+              queue.forEach(function(r, idx) {
+                var ok = !completeTraceId || !r.traceId || r.traceId === completeTraceId;
+                if (ok && r.perfTs > fallbackTs) { fallbackIdx = idx; fallbackTs = r.perfTs; }
+              });
+              if (fallbackIdx === -1) fallbackIdx = 0;
+              bestIdx = fallbackIdx;
+            }
+            var matched = queue.splice(bestIdx, 1)[0];
+            e._requestId = matched.requestId;
+            e.traceId = matched.traceId || undefined;
+          });
+        }
+        function groupByTraceId(entries) {
+          var tracesMap = new Map(), orphans = [];
+          entries.forEach(function(entry) {
+            if (entry.traceId) {
+              if (!tracesMap.has(entry.traceId)) tracesMap.set(entry.traceId, []);
+              tracesMap.get(entry.traceId).push(entry);
+            } else { orphans.push(entry); }
+          });
+          return { tracesMap: tracesMap, orphans: orphans };
+        }
+        function findOrCreateStartupTraceId(tracesMap) {
+          var keys = Array.from(tracesMap.keys());
+          for (var i = 0; i < keys.length; i++) { if (keys[i].startsWith('startup-')) return keys[i]; }
+          var id = 'startup-synthetic';
+          tracesMap.set(id, []);
+          return id;
+        }
+        function mergeBootstrapOrphans(tracesMap, orphans, sortKeyFn) {
+          sortKeyFn = sortKeyFn || defaultSortKey;
+          var startupTraceId = findOrCreateStartupTraceId(tracesMap);
+          var startupEntries = tracesMap.get(startupTraceId);
+          var timestamps = startupEntries.map(function(e) { return sortKeyFn(e) || Infinity; });
+          var startupMinTs = Math.min.apply(null, timestamps.length > 0 ? timestamps : [Infinity]);
+          var remaining = [];
+          orphans.forEach(function(e) {
+            var ts = sortKeyFn(e);
+            if (ts === 0 || ts <= startupMinTs + 100) { e._bootstrap = true; startupEntries.push(e); }
+            else { remaining.push(e); }
+          });
+          return remaining;
+        }
+        function mergePollingTraces(tracesMap) {
+          var startupTraceId = findOrCreateStartupTraceId(tracesMap);
+          var startupEntries = tracesMap.get(startupTraceId);
+          var toMerge = [];
+          tracesMap.forEach(function(entries, traceId) {
+            if (traceId === startupTraceId) return;
+            var handlers = entries.filter(function(e) { return e.kind === 'handler:start'; });
+            var hasNative = entries.some(function(e) { return e.kind && e.kind.startsWith('native:'); });
+            var hasInteraction = entries.some(function(e) { return e.kind === 'interaction'; });
+            if (handlers.length > 0 && !hasNative && handlers.every(function(h) { return h.eventName === 'loaded'; })) { toMerge.push(traceId); return; }
+            if (handlers.length === 0 && !hasNative && !hasInteraction && entries.length > 0 && entries.every(function(e) { return e.kind === 'method:call' && e.componentLabel === 'state'; })) { toMerge.push(traceId); return; }
+          });
+          toMerge.forEach(function(traceId) {
+            tracesMap.get(traceId).forEach(function(e) { if (e.kind !== 'interaction') startupEntries.push(e); });
+            tracesMap.delete(traceId);
+          });
+          if (startupTraceId === 'startup-synthetic' && startupEntries.length === 0) tracesMap.delete(startupTraceId);
+        }
+        function mergeChangeListenerOrphans(tracesMap, orphans) {
+          var orphanedApiEvents = orphans.filter(function(e) {
+            return (e.kind === 'api:start' || e.kind === 'api:complete' || e.kind === 'api:error') && e.instanceId && typeof e.perfTs === 'number';
+          });
+          if (orphanedApiEvents.length === 0) return orphans;
+          var orphanedByInstance = new Map();
+          orphanedApiEvents.forEach(function(e) {
+            if (!orphanedByInstance.has(e.instanceId)) orphanedByInstance.set(e.instanceId, []);
+            orphanedByInstance.get(e.instanceId).push(e);
+          });
+          tracesMap.forEach(function(traceEntries, traceId) {
+            if (!traceId.startsWith('t-')) return;
+            var hasChangeListener = traceEntries.some(function(e) { return e.kind === 'handler:start' && e.componentType === 'ChangeListener'; });
+            if (!hasChangeListener) return;
+            var perfTimestamps = traceEntries.filter(function(e) { return typeof e.perfTs === 'number'; }).map(function(e) { return e.perfTs; });
+            var traceMinTs = Math.min.apply(null, perfTimestamps.length > 0 ? perfTimestamps : [Infinity]);
+            if (!isFinite(traceMinTs)) return;
+            orphanedByInstance.forEach(function(apiEvents, instanceId) {
+              var apiComplete = apiEvents.find(function(e) { return e.kind === 'api:complete'; });
+              if (!apiComplete) return;
+              var timeDiff = traceMinTs - apiComplete.perfTs;
+              if (timeDiff >= 0 && timeDiff <= 100) {
+                apiEvents.forEach(function(e) { e._mergedFromOrphan = true; traceEntries.push(e); });
+                orphanedByInstance.delete(instanceId);
+              }
+            });
+          });
+          return orphans.filter(function(e) { return !e._mergedFromOrphan; });
+        }
+        function rehomeByTimeWindow(tracesMap, orphans, opts) {
+          opts = opts || {};
+          var buffer = opts.buffer !== undefined ? opts.buffer : 500;
+          var filter = opts.filter || isUserActionEvent;
+          var sourceTraceId = opts.sourceTraceId || null;
+          var windows = [];
+          tracesMap.forEach(function(entries, traceId) {
+            if (!traceId.startsWith('i-')) return;
+            var starts = entries.filter(function(e) { return e.kind === 'handler:start' && typeof e.perfTs === 'number'; });
+            var completes = entries.filter(function(e) { return e.kind === 'handler:complete' && typeof e.perfTs === 'number'; });
+            if (starts.length === 0 || completes.length === 0) return;
+            windows.push({ traceId: traceId, entries: entries, startTs: Math.min.apply(null, starts.map(function(e) { return e.perfTs; })), endTs: Math.max.apply(null, completes.map(function(e) { return e.perfTs; })) });
+          });
+          if (windows.length === 0) return orphans;
+          if (sourceTraceId && tracesMap.has(sourceTraceId)) {
+            var sourceEntries = tracesMap.get(sourceTraceId);
+            var movedFromSource = [];
+            sourceEntries.forEach(function(e) {
+              if (typeof e.perfTs !== 'number' || !filter(e)) return;
+              for (var i = 0; i < windows.length; i++) {
+                var win = windows[i];
+                if (e.perfTs >= win.startTs && e.perfTs <= win.endTs + buffer) { e._movedFromStartup = true; win.entries.push(e); movedFromSource.push(e); break; }
+              }
+            });
+            if (movedFromSource.length > 0) {
+              var movedSet = new Set(movedFromSource);
+              tracesMap.set(sourceTraceId, sourceEntries.filter(function(e) { return !movedSet.has(e); }));
+            }
+          }
+          var moved = new Set();
+          orphans.forEach(function(e) {
+            if (typeof e.perfTs !== 'number' || !filter(e)) return;
+            for (var i = 0; i < windows.length; i++) {
+              var win = windows[i];
+              if (e.perfTs >= win.startTs && e.perfTs <= win.endTs + buffer) { e._mergedByTimeWindow = true; win.entries.push(e); moved.add(e); break; }
+            }
+          });
+          return orphans.filter(function(e) { return !moved.has(e); });
+        }
+        function mergeOrphanedPollingToStartup(tracesMap, orphans) {
+          var startupTraceId = null;
+          tracesMap.forEach(function(_, tid) { if (tid.startsWith('startup-')) startupTraceId = tid; });
+          if (!startupTraceId || !tracesMap.has(startupTraceId)) return orphans;
+          var startupEntries = tracesMap.get(startupTraceId);
+          var remaining = [];
+          orphans.forEach(function(e) {
+            if (isOrphanedPollingEvent(e)) { e._mergedToStartup = true; startupEntries.push(e); }
+            else { remaining.push(e); }
+          });
+          return remaining;
+        }
+        function filterPollingFromInteractions(tracesMap) {
+          tracesMap.forEach(function(entries, traceId) {
+            if (traceId.startsWith('i-')) tracesMap.set(traceId, entries.filter(function(e) { return !isPollingEvent(e); }));
+          });
+        }
+        function preprocessTraces(entries, sortKeyFn) {
+          sortKeyFn = sortKeyFn || defaultSortKey;
+          matchApiPairs(entries);
+          var grouped = groupByTraceId(entries);
+          var tracesMap = grouped.tracesMap, orphans = grouped.orphans;
+          var startupTraceId = findOrCreateStartupTraceId(tracesMap);
+          orphans = mergeBootstrapOrphans(tracesMap, orphans, sortKeyFn);
+          mergePollingTraces(tracesMap);
+          orphans = mergeChangeListenerOrphans(tracesMap, orphans);
+          var currentStartupId = null;
+          tracesMap.forEach(function(_, tid) { if (tid.startsWith('startup-')) currentStartupId = tid; });
+          orphans = rehomeByTimeWindow(tracesMap, orphans, { buffer: 500, sourceTraceId: currentStartupId });
+          orphans = mergeOrphanedPollingToStartup(tracesMap, orphans);
+          filterPollingFromInteractions(tracesMap);
+          return { tracesMap: tracesMap, orphans: orphans, startupTraceId: currentStartupId };
+        }
+        window.TraceNormalize = { preprocessTraces: preprocessTraces, resetRequestIdCounter: resetRequestIdCounter };
+      })();
+      // ---- END trace-normalize ----
+    </script>
     <script type="module">
       import * as jsondiffpatch from "https://unpkg.com/jsondiffpatch@0.7.3/lib/index.js";
       import * as htmlFormatter from "https://unpkg.com/jsondiffpatch@0.7.3/lib/formatters/html.js";
       import { XmluiSource } from "./xmlui-parser.es.js";
+      const TN = window.TraceNormalize;
 
       // =============================================================================
       // LOCALSTORAGE PERSISTENCE - Survive server restarts
@@ -1787,7 +2040,7 @@
        */
       /**
        * Classify handler code into a category for display.
-       * Shared by renderTraceGroupPretty and renderTraceRaw.
+       * Shared by renderTraceGroupPretty and export functions.
        */
       function parseHandlerCode(code) {
         const trimmed = code.trim();
@@ -1817,7 +2070,7 @@
 
       /**
        * Classify a diff item into a category for rendering.
-       * Shared by pretty and raw views to avoid duplicated if/else chains.
+       * Shared by pretty view and export functions to avoid duplicated if/else chains.
        */
       function classifyDiffItem(d) {
         const before = d.before;
@@ -2180,7 +2433,7 @@
 
       /**
        * Determine whether a trace item has enough content to display.
-       * Shared by groupSimilarTraces, renderPrettyView, and renderRawView.
+       * Shared by groupSimilarTraces and renderPrettyView.
        */
       function shouldIncludeTrace(item) {
         const isStartup = item.traceId && item.traceId.startsWith("startup-");
@@ -2637,10 +2890,21 @@
           let label = "";
           const compName = e.componentLabel || e.component || "";
           const ariaTag = e.ariaName ? ` [${e.ariaName}]` : "";
-          if (compName && e.displayLabel) {
-            label = `${compName}${ariaTag} "${e.displayLabel}"`;
-          } else if (e.displayLabel) {
-            label = `"${e.displayLabel}"`;
+          // Truncate method:call displayLabels that contain full state payloads
+          let displayLabel = e.displayLabel || "";
+          if (e.kind === "method:call" && displayLabel.length > 120) {
+            // Show method name + truncated args: "state.update({status:true,sessions:[],...})"
+            const parenIdx = displayLabel.indexOf("(");
+            if (parenIdx !== -1) {
+              displayLabel = displayLabel.substring(0, Math.min(parenIdx + 80, displayLabel.length)) + "…)";
+            } else {
+              displayLabel = displayLabel.substring(0, 120) + "…";
+            }
+          }
+          if (compName && displayLabel) {
+            label = `${compName}${ariaTag} "${displayLabel}"`;
+          } else if (displayLabel) {
+            label = `"${displayLabel}"`;
           } else if (compName) {
             label = compName + ariaTag;
           }
@@ -2861,403 +3125,17 @@
         return result;
       }
 
-      // Counter for generating unique request IDs
-      let _requestIdCounter = 0;
-
       function processAllEntries(entries) {
-        // NOTE: We intentionally do NOT pre-assign traceIds to orphaned api:complete events.
-        // The old approach used the LAST api:start's traceId for ALL orphans, which caused
-        // wrong matching when a DataSource makes multiple requests over time.
-        // Instead, we rely on timing-based matching below to find the correct api:start,
-        // then inherit its traceId.
-
-        // Assign unique requestId to each API request lifecycle
-        // This disambiguates multiple requests from the same DataSource (instanceId)
-        // Also store traceId so we can correctly group api:complete with its api:start
-        const pendingRequests = new Map(); // instanceId -> queue of {requestId, perfTs, method, url, traceId}
-        entries.forEach((e) => {
-          if (e.kind === "api:start") {
-            // Don't reassign if already has requestId (from previous processing)
-            if (!e._requestId) {
-              e._requestId = `req-${++_requestIdCounter}`;
-            }
-            const requestId = e._requestId;
-            const key = e.instanceId || "unknown";
-            if (!pendingRequests.has(key)) pendingRequests.set(key, []);
-            pendingRequests.get(key).push({
-              requestId,
-              perfTs: e.perfTs,
-              method: (e.method || "GET").toUpperCase(), // Normalize case for matching
-              url: e.url,
-              traceId: e.traceId, // Store traceId for inheritance
-            });
-          }
-        });
-
-        // Match api:complete and api:error to pending requests by method+url+timing+traceId
-        // Also inherit the correct traceId from the matched api:start
-        // IMPORTANT: Process completions in chronological order so earlier completions
-        // get matched to earlier starts (prevents later completion from "stealing" a match)
-        const apiCompletions = entries
-          .filter((e) => (e.kind === "api:complete" || e.kind === "api:error") && !e._requestId)
-          .sort((a, b) => (a.perfTs || 0) - (b.perfTs || 0));
-
-        apiCompletions.forEach((e) => {
-            const key = e.instanceId || "unknown";
-            const queue = pendingRequests.get(key);
-            if (queue && queue.length > 0) {
-              const method = (e.method || "GET").toUpperCase(); // Normalize case for matching
-              const completePerfTs = e.perfTs || Infinity;
-              const completeTraceId = e.traceId; // May be undefined
-
-              // Find the best match: same method+url+traceId, started before completion, most recent start time
-              let bestMatchIdx = -1;
-              let bestMatchPerfTs = -1;
-
-              queue.forEach((r, idx) => {
-                if (r.method === method && r.url === e.url) {
-                  // If completion has traceId, require matching traceId
-                  if (completeTraceId && r.traceId && r.traceId !== completeTraceId) {
-                    return; // Skip - traceId mismatch
-                  }
-                  // Match must have started before (or at same time as) completion
-                  if (r.perfTs <= completePerfTs && r.perfTs > bestMatchPerfTs) {
-                    bestMatchIdx = idx;
-                    bestMatchPerfTs = r.perfTs;
-                  }
-                }
-              });
-
-              if (bestMatchIdx !== -1) {
-                const matched = queue.splice(bestMatchIdx, 1)[0];
-                e._requestId = matched.requestId;
-                // Always use matched api:start's traceId (overrides any pre-pass inheritance)
-                // If matched has no traceId, clear any incorrect one from pre-pass
-                e.traceId = matched.traceId || undefined;
-              } else {
-                // Fallback: take the most recent pending request with matching traceId (if any)
-                let fallbackIdx = -1;
-                let fallbackPerfTs = -1;
-                queue.forEach((r, idx) => {
-                  // Prefer same traceId, or any if no traceId match
-                  const traceMatch = !completeTraceId || !r.traceId || r.traceId === completeTraceId;
-                  if (traceMatch && r.perfTs > fallbackPerfTs) {
-                    fallbackIdx = idx;
-                    fallbackPerfTs = r.perfTs;
-                  }
-                });
-                if (fallbackIdx === -1) fallbackIdx = 0; // Last resort: first in queue
-                const matched = queue.splice(fallbackIdx, 1)[0];
-                e._requestId = matched.requestId;
-                // Always use matched api:start's traceId (overrides any pre-pass inheritance)
-                e.traceId = matched.traceId || undefined;
-              }
-            }
-        });
-
-        const interactions = entries.filter((e) => e.kind === "interaction" && !e.traceId);
+        // Shared preprocessing: API pair matching, trace grouping, orphan re-homing,
+        // polling merge/filter. See trace-normalize.js for the pipeline.
         const nonInteractions = entries.filter((e) => e.kind !== "interaction" || e.traceId);
+        const result = TN.preprocessTraces(nonInteractions, sortKey);
+        const tracesMap = result.tracesMap;
+        let orphans = result.orphans;
+        const startupTraceId = result.startupTraceId;
 
-        const tracesMap = new Map();
-        let orphans = [];
-        nonInteractions.forEach((entry) => {
-          if (entry.traceId) {
-            if (!tracesMap.has(entry.traceId)) tracesMap.set(entry.traceId, []);
-            tracesMap.get(entry.traceId).push(entry);
-          } else {
-            orphans.push(entry);
-          }
-        });
-
-        // Find startup trace and merge bootstrap orphans into it
-        // If no startup trace exists, create a synthetic one to collect orphaned polling events
-        let startupTraceId = Array.from(tracesMap.keys()).find(id => id.startsWith("startup-"));
-        if (!startupTraceId) {
-          // Create synthetic startup trace
-          startupTraceId = "startup-synthetic";
-          tracesMap.set(startupTraceId, []);
-        }
-        {
-          const startupEntries = tracesMap.get(startupTraceId);
-          const startupMinTs = Math.min(...startupEntries.map(e => sortKey(e) || Infinity));
-
-          // Bootstrap orphans: state changes that occurred before or at startup start
-          const bootstrapOrphans = orphans.filter(e => {
-            const ts = sortKey(e);
-            // Include if: no timestamp (init events), or timestamp <= startup start + small buffer
-            return ts === 0 || ts <= startupMinTs + 100;
-          });
-
-          // Mark and add bootstrap events to startup trace
-          bootstrapOrphans.forEach(e => {
-            e._bootstrap = true;
-            startupEntries.push(e);
-          });
-
-          // Remove bootstrap orphans from orphans list
-          orphans = orphans.filter(e => !e._bootstrap);
-
-          // Note: We previously had "incidental interaction" merging here, but it was too aggressive.
-          // A user clicking "Save" should still show as a trace even if the handler is on "settingsForm".
-          // Now we only merge polling-only traces (where ALL handlers are "loaded").
-
-          // Merge "polling-only" traces into Startup
-          // These are traces where the only handlers are "loaded" handlers (from DataSource polling)
-          // and there's no meaningful user-triggered handler
-          const pollingTracesToMerge = [];
-          for (const [traceId, traceEntries] of tracesMap.entries()) {
-            if (traceId === startupTraceId) continue;
-
-            // Get all handler:start events
-            const handlers = traceEntries.filter(e => e.kind === "handler:start");
-            const hasNativeEvents = traceEntries.some(e => e.kind?.startsWith("native:"));
-            if (handlers.length === 0 && !hasNativeEvents) {
-              // Trace with no handlers and no native events - skip (might be interaction-only)
-              continue;
-            }
-
-            // Check if ALL handlers are "loaded" handlers (polling)
-            // But don't merge native-event traces — they represent real user interactions
-            const allAreLoaded = handlers.length > 0 && handlers.every(h => h.eventName === "loaded");
-            if (allAreLoaded && !hasNativeEvents) {
-              pollingTracesToMerge.push(traceId);
-            }
-          }
-
-          // Merge polling traces into Startup
-          pollingTracesToMerge.forEach(traceId => {
-            const entries = tracesMap.get(traceId);
-            entries.forEach(e => {
-              if (e.kind !== "interaction") {
-                startupEntries.push(e);
-              }
-            });
-            tracesMap.delete(traceId);
-          });
-
-          // Remove synthetic startup if it ended up empty
-          if (startupTraceId === "startup-synthetic" && startupEntries.length === 0) {
-            tracesMap.delete(startupTraceId);
-          }
-        }
-
-        // Merge orphaned API events into ChangeListener traces they triggered
-        // When a DataSource refetch (api:start/api:complete without traceId) triggers a ChangeListener,
-        // the ChangeListener gets a t- trace but the API events are orphaned. Merge them together.
-        const orphanedApiEvents = orphans.filter(e =>
-          (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") &&
-          e.instanceId &&
-          typeof e.perfTs === "number"
-        );
-
-        if (orphanedApiEvents.length > 0) {
-          // Group orphaned API events by instanceId
-          const orphanedByInstance = new Map();
-          orphanedApiEvents.forEach(e => {
-            if (!orphanedByInstance.has(e.instanceId)) orphanedByInstance.set(e.instanceId, []);
-            orphanedByInstance.get(e.instanceId).push(e);
-          });
-
-          // For each t- trace with a ChangeListener, check if orphaned API events triggered it
-          for (const [traceId, traceEntries] of tracesMap.entries()) {
-            if (!traceId.startsWith("t-")) continue;
-
-            // Check if this trace has a ChangeListener handler
-            const hasChangeListener = traceEntries.some(e =>
-              e.kind === "handler:start" && e.componentType === "ChangeListener"
-            );
-            if (!hasChangeListener) continue;
-
-            // Find the earliest timestamp in this trace
-            const traceMinTs = Math.min(...traceEntries.filter(e => typeof e.perfTs === "number").map(e => e.perfTs));
-            if (!isFinite(traceMinTs)) continue;
-
-            // Look for orphaned api:complete events that happened within 100ms before the trace started
-            for (const [instanceId, apiEvents] of orphanedByInstance.entries()) {
-              const apiComplete = apiEvents.find(e => e.kind === "api:complete");
-              if (!apiComplete) continue;
-
-              // Check if api:complete happened shortly before this trace started (within 100ms)
-              const timeDiff = traceMinTs - apiComplete.perfTs;
-              if (timeDiff >= 0 && timeDiff <= 100) {
-                // Merge these API events into the trace
-                apiEvents.forEach(e => {
-                  e._mergedFromOrphan = true;
-                  traceEntries.push(e);
-                });
-                // Remove from orphans
-                orphanedByInstance.delete(instanceId);
-              }
-            }
-          }
-
-          // Remove merged orphans from the orphans list
-          orphans = orphans.filter(e => !e._mergedFromOrphan);
-        }
-
-        // Time-based association: Move events from Startup/orphans into interaction traces
-        // when they fall within the handler's time window (between handler:start and handler:complete)
-        // This handles cases like confirm dialogs where the API call happens after user confirms
-        // but gets the startup traceId instead of the interaction traceId
-
-        // Helper to check if an event should be moved to an interaction trace
-        const isUserActionEvent = (e) => {
-          // API events (non-status, non-license polling)
-          if ((e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error")) {
-            if (e.url && (e.url.includes("/status") || e.url.includes("/license"))) return false;
-            return true;
-          }
-          // State changes for user data (not serverInfo/polling)
-          if (e.kind === "state:changes") {
-            if (e.eventName === "DataSource:serverInfo") return false;
-            if (e.eventName?.startsWith("AppState:")) {
-              const isPolling = e.diffJson?.every(d =>
-                d.path === "stats" || d.path?.startsWith("stats.") ||
-                d.path === "status" || d.path === "logs" || d.path === "sessions"
-              );
-              if (isPolling) return false;
-            }
-            return true;
-          }
-          // Component variable changes (e.g., items array in Users component)
-          if (e.kind === "component:vars:change") {
-            // Skip serverStatus changes (polling-driven)
-            if (e.diff?.some(d => d.path === "serverStatus")) return false;
-            return true;
-          }
-          return false;
-        };
-
-        // First pass: collect interaction trace time windows
-        const interactionWindows = [];
-        for (const [traceId, traceEntries] of tracesMap.entries()) {
-          if (!traceId.startsWith("i-")) continue;
-
-          const handlerStarts = traceEntries.filter(e => e.kind === "handler:start" && typeof e.perfTs === "number");
-          const handlerCompletes = traceEntries.filter(e => e.kind === "handler:complete" && typeof e.perfTs === "number");
-
-          if (handlerStarts.length === 0 || handlerCompletes.length === 0) continue;
-
-          const traceStartTs = Math.min(...handlerStarts.map(e => e.perfTs));
-          const traceEndTs = Math.max(...handlerCompletes.map(e => e.perfTs));
-
-          interactionWindows.push({ traceId, traceEntries, traceStartTs, traceEndTs });
-        }
-
-        // Second pass: move events from Startup trace into interaction traces
-        const startupTraceEntries = tracesMap.get(startupTraceId);
-        if (startupTraceEntries && interactionWindows.length > 0) {
-          const eventsToMove = [];
-
-          startupTraceEntries.forEach(e => {
-            if (typeof e.perfTs !== "number") return;
-            if (!isUserActionEvent(e)) return;
-
-            // Find an interaction trace whose window contains this event
-            // Add small buffer after handler:complete for state changes that arrive just after
-            for (const win of interactionWindows) {
-              if (e.perfTs >= win.traceStartTs && e.perfTs <= win.traceEndTs + 500) {
-                eventsToMove.push({ event: e, targetTrace: win.traceEntries });
-                break;
-              }
-            }
-          });
-
-          // Move the events
-          eventsToMove.forEach(({ event, targetTrace }) => {
-            event._movedFromStartup = true;
-            targetTrace.push(event);
-          });
-
-          // Remove moved events from startup
-          if (eventsToMove.length > 0) {
-            const movedSet = new Set(eventsToMove.map(m => m.event));
-            tracesMap.set(startupTraceId, startupTraceEntries.filter(e => !movedSet.has(e)));
-          }
-        }
-
-        // Also check orphans (events with no traceId at all)
-        for (const win of interactionWindows) {
-          const orphansInWindow = orphans.filter(e => {
-            if (typeof e.perfTs !== "number") return false;
-            if (e.perfTs < win.traceStartTs || e.perfTs > win.traceEndTs + 500) return false;
-            return isUserActionEvent(e);
-          });
-
-          orphansInWindow.forEach(e => {
-            e._mergedByTimeWindow = true;
-            win.traceEntries.push(e);
-          });
-        }
-
-        // Remove time-window merged orphans from the orphans list
-        orphans = orphans.filter(e => !e._mergedByTimeWindow);
-
-        // Merge remaining orphaned polling events into Startup
-        // This includes API events, "loaded" handlers, and DataSource state changes
-        const startupEntries = tracesMap.get(startupTraceId);
-        if (startupEntries) {
-          // Only merge orphaned events that look like polling, not user actions
-          // Be selective: only merge "loaded" handlers and status polling, not all DataSource events
-          const pollingOrphans = orphans.filter(e => {
-            // "loaded" handlers (from DataSource polling)
-            if ((e.kind === "handler:start" || e.kind === "handler:complete") && e.eventName === "loaded") {
-              return true;
-            }
-            // Status polling API events
-            if ((e.kind === "api:start" || e.kind === "api:complete") && e.url && e.url.includes("/status")) {
-              return true;
-            }
-            // DataSource:serverInfo state changes (polling)
-            if (e.kind === "state:changes" && e.eventName === "DataSource:serverInfo") {
-              return true;
-            }
-            // AppState changes that are likely from polling (only if diff is stats-related)
-            if (e.kind === "state:changes" && e.eventName && e.eventName.startsWith("AppState:")) {
-              const isPollingChange = e.diffJson?.every(d =>
-                d.path === "stats" || d.path?.startsWith("stats.") ||
-                d.path === "status" || d.path === "logs" || d.path === "sessions"
-              );
-              if (isPollingChange) return true;
-            }
-            return false;
-          });
-          pollingOrphans.forEach(e => {
-            e._mergedToStartup = true;
-            startupEntries.push(e);
-          });
-          orphans = orphans.filter(e => !e._mergedToStartup);
-        }
-
-        // Filter polling events from interaction traces
-        // These get the interaction traceId when they happen during handler execution
-        // (e.g., serverInfo polling while waiting for confirm dialog)
-        const isPollingEvent = (e) => {
-          // serverInfo state changes
-          if (e.kind === "state:changes" && e.eventName === "DataSource:serverInfo") return true;
-          // status API calls
-          if ((e.kind === "api:start" || e.kind === "api:complete") && e.url?.includes("/status")) return true;
-          // loaded handlers for serverInfo
-          if ((e.kind === "handler:start" || e.kind === "handler:complete") &&
-              e.eventName === "loaded" && e.componentLabel === "serverInfo") return true;
-          // AppState polling changes
-          if (e.kind === "state:changes" && e.eventName?.startsWith("AppState:")) {
-            const isPolling = e.diffJson?.every(d =>
-              d.path === "stats" || d.path?.startsWith("stats.") ||
-              d.path === "status" || d.path === "logs" || d.path === "sessions"
-            );
-            if (isPolling) return true;
-          }
-          return false;
-        };
-
-        for (const [traceId, traceEntries] of tracesMap.entries()) {
-          // For interaction traces, filter out polling noise
-          if (traceId.startsWith("i-")) {
-            const filtered = traceEntries.filter(e => !isPollingEvent(e));
-            tracesMap.set(traceId, filtered);
-          }
-        }
+        // Viewer-specific: pull standalone interactions (no traceId) for timeline display
+        const interactions = entries.filter((e) => e.kind === "interaction" && !e.traceId);
 
         const processedTraces = [];
         for (const [traceId, traceEntries] of tracesMap.entries()) {
@@ -3303,7 +3181,7 @@
           otherOrphans: otherOrphans.map((e) => {
             // Build title - include URL for API events
             let title = e.kind;
-            if (e.displayLabel) title += ` ${e.displayLabel}`;
+            if (e.displayLabel) title += ` ${e.displayLabel.length > 120 ? e.displayLabel.substring(0, 120) + "…" : e.displayLabel}`;
             else if (e.eventName) title += ` ${e.eventName}`;
             else if (e.url) title += ` ${normalizeMethod(e.method)} ${normalizeUrl(e.url)}`;
             if (typeof e.offsetX === "number") {
@@ -4088,349 +3966,6 @@
 
         return html;
       }
-
-      // =============================================================================
-      // RAW VIEW RENDERING
-      // =============================================================================
-
-      function renderRawView(processed) {
-        const lines = [];
-
-        lines.push("=== XMLUI Inspector Export ===");
-        lines.push(`Total events: ${processed.totalEvents}`);
-        lines.push("");
-
-        let traceIndex = 0;
-        processed.timelineItems.forEach((item) => {
-          if (item.type === "trace") {
-            if (!shouldIncludeTrace(item)) return;
-            traceIndex++;
-            lines.push(...renderTraceRaw(item, traceIndex));
-            lines.push("");
-          }
-        });
-
-        const standaloneInteractions = processed.timelineItems.filter((item) => item.type === "interaction");
-        if (standaloneInteractions.length) {
-          lines.push("--- Standalone interactions ---");
-          standaloneInteractions.forEach((item) => {
-            lines.push(`    [interaction] ${item.componentText} ${item.entry.interaction}`);
-          });
-          lines.push("");
-        }
-
-        if (processed.groupedDataSources.length) {
-          lines.push("--- DataSource updates (async) ---");
-          processed.groupedDataSources.forEach((group) => {
-            lines.push(`    DataSource "${group.name}"${group.instanceId ? ` (instance: ${group.instanceId})` : ""} updated ${group.updateCount}x${group.isRedundant ? " [REDUNDANT]" : ""}`);
-            group.entries.forEach((item, i) => {
-              const e = item.entry;
-              lines.push(`        Update ${i + 1} @ ${item.relTime}`);
-              if (e.diffJson) {
-                e.diffJson.forEach((d) => {
-                  const classified = classifyDiffItem(d);
-                  switch (classified.type) {
-                    case "keyedArrayDiff": {
-                      const summary = summarizeArrayDiff(classified.before, classified.after);
-                      lines.push(`            ${d.path}:`);
-                      summary.split("\n").forEach((line) => lines.push(`                ${line}`));
-                      break;
-                    }
-                    case "keyedArrayInit":
-                      lines.push(`            ${d.path}: initialized with ${classified.after.length} items`);
-                      break;
-                    case "keyedArrayCleared":
-                      lines.push(`            ${d.path}: ${classified.before.length} items → cleared`);
-                      break;
-                    case "objectDiff": {
-                      const allKeys = new Set([...Object.keys(classified.before), ...Object.keys(classified.after)]);
-                      const changedKeys = [];
-                      allKeys.forEach((key) => {
-                        if (JSON.stringify(classified.before[key]) !== JSON.stringify(classified.after[key])) changedKeys.push(key);
-                      });
-                      if (changedKeys.length === 0) {
-                        lines.push(`            ${d.path}: (no visible change)`);
-                      } else {
-                        lines.push(`            ${d.path}:`);
-                        changedKeys.forEach((key) => {
-                          const bvStr = classified.before[key] === undefined ? "undefined" : JSON.stringify(classified.before[key])?.slice(0, 60) || "null";
-                          const avStr = classified.after[key] === undefined ? "undefined" : JSON.stringify(classified.after[key])?.slice(0, 60) || "null";
-                          lines.push(`                ${key}: ${bvStr} → ${avStr}`);
-                        });
-                      }
-                      break;
-                    }
-                    default:
-                      lines.push(`            ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
-                  }
-                });
-              }
-            });
-          });
-          lines.push("");
-        }
-
-        if (processed.otherOrphans.length) {
-          lines.push("--- Other events (no trace) ---");
-          processed.otherOrphans.forEach((orphan) => {
-            lines.push(`    [${orphan.entry.kind}] ${orphan.entry.eventName || ""} (perfTs: ${orphan.entry.perfTs?.toFixed(1) || "?"})`);
-          });
-          lines.push("");
-        }
-
-        // Notes section disabled for now - collision detection kept in code but not rendered
-        // if (processed.collisions.length) {
-        //   lines.push("--- Notes ---");
-        //   lines.push("1. DataSource identity reused across components. These are independent instances that share the same id/uid.");
-        //   processed.collisions.forEach((c) => {
-        //     lines.push(`    id/uid: ${c.key}`);
-        //     c.entries.forEach((item) => {
-        //       const parts = item.meta.parts.filter((p) => !p.startsWith("perfTs"));
-        //       if (item.meta.hasSource) parts.push(`source: ${item.meta.sourceRange}`);
-        //       lines.push(`        - ${parts.join(", ")}`);
-        //     });
-        //   });
-        //   lines.push("");
-        // }
-
-        if (processed.sourceFiles.length) {
-          lines.push("--- Source files (index → path) ---");
-          processed.sourceFiles.forEach((file, idx) => lines.push(`    [${idx}] ${file}`));
-        }
-
-        return lines.join("\n");
-      }
-
-      function renderTraceRaw(trace, index) {
-        const { summary, events, dedupedCount, traceId } = trace;
-        const lines = [];
-
-        lines.push(`--- Trace ${index}: ${summary.componentText}${summary.totalDuration !== null ? ` (${summary.totalDuration.toFixed(0)}ms)` : ""} ---`);
-        lines.push(`    traceId: ${traceId}`);
-        if (summary.timelineBreakdown.length > 0 && summary.totalDuration) {
-          lines.push(`    timeline:`);
-          const sorted = summary.timelineBreakdown.slice().sort((a, b) => a.order - b.order);
-          sorted.forEach(item => {
-            lines.push(`      ${item.phase.padEnd(40)} ${String(item.duration.toFixed(0) + "ms").padStart(8)}`);
-          });
-          lines.push(`      ${"total".padEnd(40)} ${String(summary.totalDuration.toFixed(0) + "ms").padStart(8)}`);
-        } else if (summary.totalDuration !== null) {
-          lines.push(`    duration: ${summary.totalDuration.toFixed(0)}ms`);
-        }
-
-        events.forEach((evt) => {
-          const e = evt.entry;
-          // Strip HTML tags from meta parts for raw text output
-          const metaParts = evt.meta.parts.map(stripHtml);
-
-          if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
-            const method = normalizeMethod(e.method);
-            const url = normalizeUrl(e.url);
-            const errorSuffix = e.kind === "api:error" && e.error ? ` - ${e.error.message || e.error}` : "";
-            const statusSuffix = e.kind === "api:complete" && e.status ? ` [${e.status}]` : "";
-            const durationSuffix = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
-            const requestIdSuffix = e._requestId ? ` [${e._requestId}]` : "";
-            const dedupCount = e._dedupCount || 1;
-            const dedupSuffix = dedupCount > 1 ? ` ×${dedupCount}` : "";
-            lines.push(`    [${e.kind}]${statusSuffix}${durationSuffix}${dedupSuffix} ${method} ${url}${errorSuffix}${requestIdSuffix}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
-            // Show body expression for api:start
-            if (e.bodyExpression && e.kind === "api:start") {
-              lines.push(`      body: ${e.bodyExpression}`);
-            }
-            // Show request body for api:start
-            if (e.body && e.kind === "api:start") {
-              const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body, null, 2);
-              const truncatedBody = bodyStr.length > 200 ? bodyStr.substring(0, 200) + "..." : bodyStr;
-              lines.push(`      request: ${truncatedBody}`);
-            }
-            // Show response for api:complete
-            if (e.kind === "api:complete" && e.result !== undefined) {
-              const resultStr = typeof e.result === "string" ? e.result : JSON.stringify(e.result, null, 2);
-              const truncatedResult = resultStr.length > 200 ? resultStr.substring(0, 200) + "..." : resultStr;
-              lines.push(`      response: ${truncatedResult}`);
-            }
-            return;
-          }
-          if (e.kind === "app:trace") {
-            const durationStr = typeof e.duration === "number" ? ` (${e.duration.toFixed(1)}ms)` : "";
-            const dataStr = e.data ? " " + Object.entries(e.data).map(([k,v]) => `${k}=${JSON.stringify(v)}`).join(" | ") : "";
-            lines.push(`    [app:trace]${durationStr} ${e.label || "trace"}${dataStr}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
-            return;
-          }
-          if (e.kind === "error:boundary") {
-            lines.push(`    [${e.kind}] ${e.error || "Unknown error"}${e.location ? ` in ${e.location}` : ""}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
-            return;
-          }
-          if (e.kind === "handler:error") {
-            const fileLabel = e.ownerFileId !== undefined ? resolveFileLabel(e.ownerFileId) : null;
-            const fileInfo = fileLabel ? ` in ${fileLabel}` : "";
-            lines.push(`    [${e.kind}] ${e.eventName || ""} - ${e.error?.message || "Unknown error"}${fileInfo}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
-            return;
-          }
-          if (e.kind === "navigate") {
-            lines.push(`    [navigate] ${e.from || "/"} → ${e.to || "?"}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
-            return;
-          }
-          if (e.kind === "modal:show" || e.kind === "modal:confirm" || e.kind === "modal:cancel") {
-            const title = e.title ? ` "${e.title}"` : "";
-            lines.push(`    [${e.kind}]${title}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
-            return;
-          }
-          if (e.kind === "handler:start" || e.kind === "handler:complete") {
-            const handlerDedupCount = e._dedupCount || 1;
-            const handlerDedupSuffix = handlerDedupCount > 1 ? ` ×${handlerDedupCount}` : "";
-            lines.push(`    [${e.kind}]${handlerDedupSuffix}${e.eventName ? ` ${e.eventName}` : ""}${evt.label ? ` ${evt.label}` : ""}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
-            // Show eventArgs if available
-            if (e.kind === "handler:start" && e.eventArgs && e.eventArgs.length > 0) {
-              try {
-                const cleanedArgs = cleanEventArgs(e.eventArgs);
-                const argsStr = safeStringify(cleanedArgs);
-                if (argsStr && argsStr.length < 1000) {
-                  lines.push(`      args: ${argsStr.length < 100 ? argsStr : argsStr.substring(0, 100) + "..."}`);
-                } else {
-                  lines.push(`      args: [${e.eventArgs.length} items]`);
-                }
-              } catch (err) {
-                lines.push(`      args: [${e.eventArgs.length} items, failed to serialize]`);
-              }
-            }
-            // Show handler code if available
-            if (e.handlerCode) {
-              const parsed = parseHandlerCode(e.handlerCode);
-              switch (parsed.type) {
-                case "apiCall":
-                  lines.push(`      APICall: ${parsed.method} ${parsed.url}`);
-                  break;
-                case "xsFunc":
-                  lines.push(`      .xs: ${parsed.funcName}()`);
-                  break;
-                case "windowFunc":
-                  lines.push(`      window: ${parsed.funcName}()`);
-                  break;
-                case "simpleFunc":
-                  lines.push(`      calls: ${parsed.funcName}()`);
-                  break;
-                case "arrow":
-                  lines.push(`      arrow: ${parsed.firstLine.length < 60 ? parsed.firstLine : parsed.firstLine.substring(0, 60) + "..."}`);
-                  break;
-                case "inline":
-                  if (parsed.innerCode.length < 60) {
-                    lines.push(`      inline: ${parsed.innerCode}`);
-                  } else {
-                    lines.push(`      inline: ${parsed.innerCode.substring(0, 60)}...`);
-                  }
-                  break;
-                default:
-                  if (parsed.code.length < 80) {
-                    lines.push(`      code: ${parsed.code}`);
-                  } else {
-                    lines.push(`      code: ${parsed.code.substring(0, 80)}...`);
-                  }
-              }
-            }
-            return;
-          }
-
-          const bootstrapTag = e._bootstrap ? " [bootstrap]" : "";
-          const pollingCount = e._pollingCount || 1;
-          const pollingSuffix = pollingCount > 1 ? ` ×${pollingCount}` : "";
-          lines.push(`    [${e.kind}]${pollingSuffix}${e.eventName ? ` ${e.eventName}` : ""}${evt.label ? ` ${evt.label}` : ""}${bootstrapTag}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
-
-          // Show polling ranges if present
-          if (e._pollingRanges && e._pollingRanges.length > 0) {
-            e._pollingRanges.forEach(r => lines.push(`        ${r}`));
-          }
-
-          if (evt.meta.hasSource) lines.push(`        source ${evt.meta.sourceRange}`);
-
-          // Show component:vars diffs inline with array summaries
-          if ((e.kind === "component:vars:init" || e.kind === "component:vars:change") && e.diff) {
-            const dedupCount = e._dedupCount || 1;
-            if (dedupCount > 1) {
-              lines.push(`        (×${dedupCount} identical instances)`);
-            }
-            // Show file if available
-            if (e.file) {
-              lines.push(`        file: ${e.file}`);
-            }
-            // Summarize each var change
-            e.diff.forEach((d) => {
-              const varName = d.path || "value";
-              const classified = classifyDiffItem(d);
-              switch (classified.type) {
-                case "keyedArrayDiff": {
-                  const summary = summarizeArrayDiff(classified.before, classified.after);
-                  lines.push(`        ${varName}:`);
-                  summary.split("\n").forEach((line) => lines.push(`            ${line}`));
-                  break;
-                }
-                case "keyedArrayInit":
-                  lines.push(`        ${varName}: initialized with ${classified.after.length} items`);
-                  classified.after.slice(0, 5).forEach((item) => lines.push(`            • ${getItemLabel(item)}`));
-                  if (classified.after.length > 5) lines.push(`            … and ${classified.after.length - 5} more`);
-                  break;
-                case "noop":
-                  break;
-                default: {
-                  const beforeStr = d.before === undefined ? "undefined" : JSON.stringify(d.before);
-                  const afterStr = d.after === undefined ? "undefined" : JSON.stringify(d.after);
-                  const maxLen = 80;
-                  const beforeDisplay = beforeStr.length > maxLen ? beforeStr.slice(0, maxLen) + "..." : beforeStr;
-                  const afterDisplay = afterStr.length > maxLen ? afterStr.slice(0, maxLen) + "..." : afterStr;
-                  lines.push(`        ${varName}: ${beforeDisplay} → ${afterDisplay}`);
-                }
-              }
-            });
-          }
-
-          if (e.kind === "state:changes" && e.diffJson) {
-            e.diffJson.forEach((d) => {
-              const classified = classifyDiffItem(d);
-              switch (classified.type) {
-                case "keyedArrayDiff": {
-                  const summary = summarizeArrayDiff(classified.before, classified.after);
-                  lines.push(`        ${d.path}:`);
-                  summary.split("\n").forEach((line) => lines.push(`            ${line}`));
-                  break;
-                }
-                case "keyedArrayInit":
-                  lines.push(`        ${d.path}: initialized with ${classified.after.length} items`);
-                  classified.after.slice(0, 5).forEach((item) => lines.push(`            • ${getItemLabel(item)}`));
-                  if (classified.after.length > 5) lines.push(`            … and ${classified.after.length - 5} more`);
-                  break;
-                case "keyedArrayCleared":
-                  lines.push(`        ${d.path}: ${classified.before.length} items → cleared`);
-                  break;
-                case "objectDiff": {
-                  const allKeys = new Set([...Object.keys(classified.before), ...Object.keys(classified.after)]);
-                  const changedKeys = [];
-                  allKeys.forEach((key) => {
-                    if (JSON.stringify(classified.before[key]) !== JSON.stringify(classified.after[key])) changedKeys.push(key);
-                  });
-                  if (changedKeys.length === 0) {
-                    lines.push(`        ${d.path}: (no visible change)`);
-                  } else {
-                    lines.push(`        ${d.path}:`);
-                    changedKeys.forEach((key) => {
-                      const bvStr = classified.before[key] === undefined ? "undefined" : JSON.stringify(classified.before[key])?.slice(0, 60) || "null";
-                      const avStr = classified.after[key] === undefined ? "undefined" : JSON.stringify(classified.after[key])?.slice(0, 60) || "null";
-                      lines.push(`            ${key}: ${bvStr} → ${avStr}`);
-                    });
-                  }
-                  break;
-                }
-                default:
-                  lines.push(`        ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
-              }
-            });
-          }
-        });
-
-        if (dedupedCount > 0) lines.push(`    [dedupe] ${dedupedCount} repeated state change${dedupedCount > 1 ? "s" : ""} removed`);
-
-        return lines;
-      }
-
       // =============================================================================
       // MAIN RENDER FUNCTION
       // =============================================================================
@@ -4440,7 +3975,6 @@
 
       function render() {
         testViewActive = false; // Reset test mode when normal render is triggered
-        const showRaw = document.getElementById("viewRaw").checked;
         const container = document.getElementById("diff");
 
         // Save expanded state before re-rendering
@@ -4466,10 +4000,7 @@
 
         const processed = processAllEntries(diffEntries);
 
-        if (showRaw) {
-          container.innerHTML = '<div class="trace-group"><div class="trace-body" style="display:block;"><pre>' + renderRawView(processed).replace(/</g, "&lt;") + "</pre></div></div>";
-        } else {
-          container.innerHTML = renderPrettyView(processed);
+        container.innerHTML = renderPrettyView(processed);
           htmlFormatter.hideUnchanged();
 
           // Wire up lazy source loaders
@@ -4908,21 +4439,18 @@
             }
           });
           // Note: We don't restore details[open] state because lazy loaders depend on the toggle event
-        }
       }
 
       // =============================================================================
       // EVENT HANDLERS
       // =============================================================================
 
-      document.getElementById("viewPretty").addEventListener("change", render);
-      document.getElementById("viewRaw").addEventListener("change", render);
 
       document.getElementById("clear").addEventListener("click", () => {
         if (window.parent && window.parent._xsLogs) window.parent._xsLogs.length = 0;
         clearStoredEntries(); // Also clear localStorage
         lastStoredCount = 0; // Reset storage counter
-        _requestIdCounter = 0; // Reset counter for fresh numbering
+        TN.resetRequestIdCounter(); // Reset counter for fresh numbering
         render();
       });
 
@@ -6822,7 +6350,7 @@
         // =========================================================================
         // TEST SUITE: Trace Filtering
         // =========================================================================
-        test("Trace Filtering", "empty trace is hidden in both views", () => {
+        test("Trace Filtering", "empty trace is hidden", () => {
           // Trace with no state changes, no errors, no handlers, no behavioral events
           const traceId = TestFramework.interactionTraceId();
           const entries = [
@@ -6830,9 +6358,7 @@
           ];
           const processed = processAllEntries(entries);
           const pretty = renderPrettyView(processed);
-          const raw = renderRawView(processed);
           assertTrue(!pretty.includes("EmptyButton"), "Empty trace should be hidden in pretty view");
-          assertTrue(!raw.includes("EmptyButton"), "Empty trace should be hidden in raw view");
         });
 
         test("Trace Filtering", "trace with only state changes is shown", () => {
@@ -6845,9 +6371,7 @@
           ];
           const processed = processAllEntries(entries);
           const pretty = renderPrettyView(processed);
-          const raw = renderRawView(processed);
           assertContains(pretty, "SaveBtn", "Trace with changes should appear in pretty view");
-          assertContains(raw, "SaveBtn", "Trace with changes should appear in raw view");
         });
 
         test("Trace Filtering", "trace with only error is shown", () => {
@@ -6859,9 +6383,7 @@
           ];
           const processed = processAllEntries(entries);
           const pretty = renderPrettyView(processed);
-          const raw = renderRawView(processed);
           assertContains(pretty, "ErrorBtn", "Trace with error should appear in pretty view");
-          assertContains(raw, "ErrorBtn", "Trace with error should appear in raw view");
         });
 
         test("Trace Filtering", "trace with only handlers is shown", () => {
@@ -6873,9 +6395,7 @@
           ];
           const processed = processAllEntries(entries);
           const pretty = renderPrettyView(processed);
-          const raw = renderRawView(processed);
           assertContains(pretty, "HandlerBtn", "Trace with handlers should appear in pretty view");
-          assertContains(raw, "HandlerBtn", "Trace with handlers should appear in raw view");
         });
 
         test("Trace Filtering", "trace with only behavioral events is shown", () => {
@@ -6886,9 +6406,7 @@
           ];
           const processed = processAllEntries(entries);
           const pretty = renderPrettyView(processed);
-          const raw = renderRawView(processed);
           assertContains(pretty, "NativeBtn", "Trace with behavioral events should appear in pretty view");
-          assertContains(raw, "NativeBtn", "Trace with behavioral events should appear in raw view");
         });
 
         test("Trace Filtering", "startup trace shown even with no content", () => {
@@ -6899,9 +6417,7 @@
           ];
           const processed = processAllEntries(entries);
           const pretty = renderPrettyView(processed);
-          const raw = renderRawView(processed);
           assertContains(pretty, "Startup", "Empty startup trace should appear in pretty view");
-          assertContains(raw, "Startup", "Empty startup trace should appear in raw view");
         });
 
         // =========================================================================
@@ -6998,66 +6514,6 @@
         });
 
         // =========================================================================
-        // TEST SUITE: Cross-View Consistency
-        // =========================================================================
-        test("Cross-View Consistency", "pretty and raw show same trace count for button click", () => {
-          const events = TestFramework.scenarios.buttonClick();
-          const processed = processAllEntries(events);
-          const pretty = renderPrettyView(processed);
-          const raw = renderRawView(processed);
-          const prettyCount = (pretty.match(/trace-group/g) || []).length;
-          const rawCount = (raw.match(/--- Trace \d+:/g) || []).length;
-          assertEqual(prettyCount, rawCount, "Pretty and raw should show same trace count");
-        });
-
-        test("Cross-View Consistency", "pretty and raw show same trace count for mixed scenario", () => {
-          const traceId1 = TestFramework.interactionTraceId();
-          const traceId2 = TestFramework.interactionTraceId();
-          const traceId3 = TestFramework.interactionTraceId();
-          const entries = [
-            // Trace with handler
-            TestFramework.events.interaction("click", "Save", { traceId: traceId1, perfTs: 100 }),
-            TestFramework.events.handlerStart("click", { traceId: traceId1, componentLabel: "Save", perfTs: 101 }),
-            TestFramework.events.handlerComplete("click", { traceId: traceId1, componentLabel: "Save", perfTs: 110, duration: 9 }),
-            // Trace with native event only
-            TestFramework.events.interaction("click", "Next", { traceId: traceId2, perfTs: 200 }),
-            TestFramework.events.nativeEvent("navigate", { traceId: traceId2, displayLabel: "April 2026", perfTs: 201 }),
-            // Empty trace (should be hidden in both)
-            TestFramework.events.interaction("click", "Empty", { traceId: traceId3, perfTs: 300 }),
-          ];
-          const processed = processAllEntries(entries);
-          const pretty = renderPrettyView(processed);
-          const raw = renderRawView(processed);
-          const prettyCount = (pretty.match(/trace-group/g) || []).length;
-          const rawCount = (raw.match(/--- Trace \d+:/g) || []).length;
-          assertEqual(prettyCount, rawCount, "Pretty and raw should show same trace count for mixed scenario");
-          // Both should show 2 traces (handler + native), not the empty one
-          assertEqual(rawCount, 2, "Should show 2 traces (handler + native event), not empty");
-        });
-
-        test("Cross-View Consistency", "startup trace appears in both views", () => {
-          const events = TestFramework.scenarios.startup();
-          const processed = processAllEntries(events);
-          const pretty = renderPrettyView(processed);
-          const raw = renderRawView(processed);
-          assertContains(pretty, "Startup", "Startup should appear in pretty view");
-          assertContains(raw, "Startup", "Startup should appear in raw view");
-        });
-
-        test("Cross-View Consistency", "native event displayLabel in both view headers", () => {
-          const traceId = TestFramework.interactionTraceId();
-          const entries = [
-            TestFramework.events.interaction("click", "Next", { traceId, perfTs: 100 }),
-            TestFramework.events.nativeEvent("navigate", { traceId, displayLabel: "April 2026", perfTs: 101 }),
-          ];
-          const processed = processAllEntries(entries);
-          const pretty = renderPrettyView(processed);
-          const raw = renderRawView(processed);
-          assertContains(pretty, "April 2026", "Pretty view should show displayLabel");
-          assertContains(raw, "April 2026", "Raw view should show displayLabel");
-        });
-
-        // =========================================================================
         // TEST SUITE: Rendering
         // =========================================================================
         test("Rendering", "renderPrettyView generates HTML", () => {
@@ -7075,20 +6531,6 @@
           assertContains(html, "contextmenu", "Should show contextmenu");
         });
 
-        test("Rendering", "renderRawView generates markdown", () => {
-          const events = TestFramework.scenarios.buttonClick();
-          const processed = processAllEntries(events);
-          const markdown = renderRawView(processed);
-          assertTrue(markdown.length > 0, "Should generate markdown");
-          assertContains(markdown, "Trace", "Should have Trace header");
-        });
-
-        test("Rendering", "renderRawView includes timeline breakdown", () => {
-          const events = TestFramework.scenarios.publishPost();
-          const processed = processAllEntries(events);
-          const markdown = renderRawView(processed);
-          assertContains(markdown, "timeline:", "Should have timeline section");
-        });
 
         // =========================================================================
         // TEST SUITE: Export
