@@ -506,6 +506,10 @@ jobs:
         done
         cp report.json "$ARCHIVE_DIR/" 2>/dev/null || true
 
+        # Clean working tree so we can switch branches
+        git checkout -- . 2>/dev/null || true
+        git clean -fd 2>/dev/null || true
+
         # Fetch or create orphan archive branch
         if git fetch origin archive:archive 2>/dev/null; then
           git checkout archive
