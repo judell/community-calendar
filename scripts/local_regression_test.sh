@@ -85,8 +85,8 @@ cd "$CITY_DIR"
 chmod +x test.sh
 
 if [ $# -eq 0 ]; then
-  # No args: run all baselines (same as CI)
-  ./test.sh run-all
+  # No args: run all specs and baselines (same as CI)
+  ./test.sh test-all
 else
   ./test.sh "$@"
 fi

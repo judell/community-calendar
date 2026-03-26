@@ -1,0 +1,316 @@
+<App
+  name="Community Calendar"
+  codeBehind="Main.xmlui.xs"
+  defaultTheme="community-calendar"
+  var.filterTerm="{window.initialSearch || ''}"
+  var.viewMode="{'all'}"
+  var.displayStartIndex="{0}"
+  var.browseStartIndex="{0}"
+  var.scrollRequest="{0}"
+  global.picksData="{null}"
+  global.userSettingsData="{null}"
+  global.authUser="{authUser}"
+  global.authSession="{authSession}"
+  var.city="{window.cityFilter || null}"
+  global.isAdmin="{false}">
+
+  <!-- DataSources -->
+  <DataSource
+    id="events"
+    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate() + (city ? '&city=eq.' + city : '')}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    }}"
+  />
+
+  <DataSource
+    id="picks"
+    when="{authSession}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/picks?select=*,events(*)'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + authSession?.access_token,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    }}"
+  />
+
+  <DataSource
+    id="userSettings"
+    when="{authSession}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/user_settings?select=*&city=eq.' + city + '&limit=1'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + authSession?.access_token,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    }}"
+  />
+
+  <ChangeListener
+    listenTo="{picks.value}"
+    onDidChange="() => picksData = picks.value"
+  />
+
+  <ChangeListener
+    listenTo="{enrichments.value}"
+    onDidChange="() => enrichmentsData = enrichments.value"
+  />
+
+  <ChangeListener
+    listenTo="{userSettings.value}"
+    onDidChange="() => { if (!userSettingsData) userSettingsData = userSettings.value }"
+  />
+
+  <DataSource
+    id="dashboardSettings"
+    when="{authSession}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/user_settings?select=dashboard&city=eq._dashboard&limit=1'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + authSession?.access_token,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    }}"
+  />
+
+  <ChangeListener
+    listenTo="{dashboardSettings.value}"
+    onDidChange="() => { if (dashboardTiles !== null) return; const d = dashboardSettings.value; if (d && d[0] && d[0].dashboard) { dashboardTiles = d[0].dashboard.tiles || []; dashboardGridLayout = d[0].dashboard.gridLayout || []; } else { dashboardTiles = []; dashboardGridLayout = []; } }"
+  />
+
+  <ChangeListener
+    listenTo="{refreshCounter}"
+    onDidChange="picks.refetch(); events.refetch(); enrichments.refetch()"
+  />
+
+  <!-- filterTerm ChangeListener removed: TextBox onDidChange already sets displayStartIndex -->
+
+
+
+  <ChangeListener
+    listenTo="{scrollRequest}"
+    onDidChange="topAnchor.scrollIntoView()"
+  />
+
+  <DataSource
+    id="feedToken"
+    when="{authSession}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/feed_tokens?select=token&limit=1'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + authSession?.access_token
+    }}"
+  />
+
+  <DataSource
+    id="adminGithubAccess"
+    when="{authSession && authUser?.user_metadata?.user_name}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/admin_github_users?select=github_user&github_user=eq.' + authUser?.user_metadata?.user_name + '&limit=1'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + authSession?.access_token
+    }}"
+  />
+
+  <DataSource
+    id="adminGoogleAccess"
+    when="{authSession && authUser?.email}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/admin_google_users?select=google_email&google_email=eq.' + authUser?.email + '&limit=1'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + authSession?.access_token
+    }}"
+  />
+
+  <DataSource
+    id="enrichments"
+    url="{appGlobals.supabaseUrl + '/rest/v1/event_enrichments?select=*&rrule=not.is.null' + (city ? '&city=eq.' + city : '')}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    }}"
+  />
+
+  <ChangeListener
+    listenTo="{adminGithubAccess.value}"
+    onDidChange="() => isAdmin = (adminGithubAccess.value || []).length > 0 || (adminGoogleAccess.value || []).length > 0"
+  />
+  <ChangeListener
+    listenTo="{adminGoogleAccess.value}"
+    onDidChange="() => isAdmin = (adminGithubAccess.value || []).length > 0 || (adminGoogleAccess.value || []).length > 0"
+  />
+
+  <variable name="hiddenSources" value="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []}" />
+  <variable name="processedEvents" value="{window.buildSearchIndex(window.filterHiddenSources(window.dedupeEvents([...(Array.isArray(events.value) ? events.value : []), ...(Array.isArray(window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())) ? window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate()) : [])]), hiddenSources))}" />
+
+  <!-- Dialogs -->
+  <SignInDialog id="signInDialog" />
+  <SourcesDialog id="sourcesDialog" events="{events.value}" hiddenSources="{hiddenSources}" />
+  <CaptureDialog id="captureDialog" />
+  <AudioCaptureDialog id="audioCaptureDialog" />
+  <PickEditor when="{!!pickEvent}" event="{pickEvent}" onClose="pickEvent = null" onSaved="picks.refetch(); events.refetch(); enrichments.refetch();" />
+
+  <ModalDialog id="settingsDialog" title="Display Settings" maxWidth="400px">
+    <HStack verticalAlignment="start" gap="$space-6">
+      <VStack gap="$space-1">
+        <Text fontWeight="$fontWeight-bold" fontSize="$fontSize-sm">Layout</Text>
+        <RadioGroup initialValue="{layoutMode}" onDidChange="(val) => { window.setLayoutMode(val); layoutMode = val }">
+          <VStack>
+            <Option value="list" label="Single column" fontSize="$fontSize-sm" />
+            <Option value="multicol" label="Multi column" fontSize="$fontSize-sm" />
+            <Option when="{!!authSession}" value="dashboard" label="Dashboard" fontSize="$fontSize-sm" />
+          </VStack>
+        </RadioGroup>
+      </VStack>
+      <VStack gap="$space-1">
+        <Text fontWeight="$fontWeight-bold" fontSize="$fontSize-sm">Images</Text>
+        <RadioGroup initialValue="{showListImages ? 'list' : 'preview'}" onDidChange="(val) => { window.setShowListImages(val); showListImages = (val !== 'preview') }">
+          <VStack>
+            <Option value="list" label="Everywhere" fontSize="$fontSize-sm" />
+            <Option value="preview" label="Only in previews" fontSize="$fontSize-sm" />
+          </VStack>
+        </RadioGroup>
+      </VStack>
+    </HStack>
+    <VStack when="{!!authSession}" gap="$space-1" marginTop="$space-4">
+      <Text fontWeight="$fontWeight-bold" fontSize="$fontSize-sm">Picks</Text>
+      <Checkbox
+        label="One-click pick (skip editor)"
+        initialValue="{userSettingsData && userSettingsData[0] && userSettingsData[0].one_click_pick}"
+        onClick="userSettingsData = window.toggleOneClickPickAndSave(userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey)"
+      />
+    </VStack>
+  </ModalDialog>
+
+  <!-- City list from Supabase (distinct cities with events) -->
+  <DataSource
+    id="cityList"
+    url="{appGlobals.supabaseUrl + '/rest/v1/distinct_cities?select=city'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey
+    }}"
+  />
+
+  <!-- City picker (shown when no city selected and not in dashboard mode) -->
+  <VStack when="{!city && layoutMode !== 'dashboard'}" horizontalAlignment="center" width="100%" padding="$space-8">
+    <H1>Community Calendar</H1>
+    <Spinner when="{!cityList.loaded}" />
+    <VStack when="{cityList.loaded}" gap="$space-4" maxWidth="300px" width="100%">
+      <VStack gap="$space-2">
+        <Items data="{cityList.value}">
+          <Button variant="outlined" width="100%" onClick="window.selectCity($item.city); city = $item.city">{window.toDisplayName($item.city)}</Button>
+        </Items>
+      </VStack>
+    </VStack>
+  </VStack>
+
+  <!-- Main Content -->
+  <HStack when="{!!city && layoutMode !== 'dashboard'}" horizontalAlignment="center" width="100%" overflowX="hidden">
+  <VStack maxWidth="{layoutMode === 'multicol' ? '1200px' : '600px'}" width="100%" overflowX="hidden">
+    <VStack>
+    <VStack gap="$space-2">
+    <Bookmark id="topAnchor">
+      <H1>
+        <HStack width="100%" verticalAlignment="center">
+          <Text overflowMode="ellipsis" maxLines="1" width="*">{window.toDisplayName(city)}</Text>
+          <IncludeMarkup url="components/IconRow.xmlui" />
+        </HStack>
+      </H1>
+    </Bookmark>
+    <HStack verticalAlignment="center" marginBottom="$space-2" gap="$space-2">
+      <HStack verticalAlignment="center" gap="$space-1" width="*">
+        <TextBox
+          id="searchBox"
+          autoFocus="false"
+          placeholder="Search events..."
+          fontSize="$fontSize-sm"
+          initialValue="{window.initialSearch || ''}"
+          onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; window.syncSearchParam(val); }"
+          width="*"
+        />
+        <Icon
+          name="close"
+          width="20px"
+          height="20px"
+          cursor="pointer"
+          color="$color-text-tertiary"
+          opacity="{filterTerm ? 1 : 0}"
+          onClick="searchBox.setValue(''); setCategoryFilter(''); window.syncSearchParam('')"
+        />
+      </HStack>
+      <Select
+        id="categorySelect"
+        placeholder="All categories"
+        clearable="true"
+        fontSize="$fontSize-sm"
+        dropdownHeight="520px"
+        value="{categoryFilter || undefined}"
+        onDidChange="(val) => { categoryFilter = val || ''; window.syncCategoryParam(categoryFilter); }"
+        width="*"
+      >
+        <Items data="{window.getActiveCategories(processedEvents)}">
+          <Option value="{$item.name}" label="{$item.label}" />
+        </Items>
+      </Select>
+    </HStack>
+    <RadioGroup when="{authUser}" initialValue="{viewMode}" onDidChange="(val) => viewMode = val">
+      <HStack>
+        <Option value="all" label="list" />
+        <Option value="picks" label="my picks" />
+      </HStack>
+    </RadioGroup>
+    </VStack>
+    </VStack>
+    <Spinner when="{!events.loaded && viewMode === 'all'}" />
+    <Button
+      when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasPrev}"
+      label="Earlier"
+      variant="outlined"
+      width="100%"
+      marginBottom="$space-2"
+      onClick="const prevIndex = window._morePrevIndex ?? 0; displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
+    />
+    <Masonry when="{events.loaded && viewMode === 'all' && layoutMode === 'multicol'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" columns="3" gap="$space-3" rowGap="0" minColumnWidth="300px">
+      <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+    </Masonry>
+    <List when="{events.loaded && viewMode === 'all' && layoutMode !== 'multicol'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" fixedItemSize="true" limit="{filterTerm ? 10 : 50}">
+      <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
+    </List>
+    <Button
+      when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasMore}"
+      label="Later"
+      variant="outlined"
+      width="100%"
+      marginTop="$space-2"
+      onClick="const nextIndex = window._moreNextIndex || displayStartIndex; displayStartIndex = nextIndex; browseStartIndex = nextIndex; scrollRequest = scrollRequest + 1;"
+    />
+    <VStack when="{viewMode === 'picks'}" gap="$space-2">
+      <Text fontSize="$fontSize-sm" value="{(picks.value || []).length + ' events'}" />
+      <Text fontSize="$fontSize-xs" color="$color-text-secondary">Calendar feed for your picks:</Text>
+      <Text fontSize="$fontSize-xs" overflowMode="flow" value="{feedToken.value && feedToken.value[0] ? appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + feedToken.value[0].token : ''}" />
+      <HStack verticalAlignment="center" gap="$space-1" wrapContent="true" width="100%">
+        <Button
+          size="xs"
+          icon="l-copy"
+          onClick="navigator.clipboard.writeText(appGlobals.supabaseUrl + '/functions/v1/my-picks?token=' + feedToken.value[0].token); toast('Copied', { duration: 1500 })"
+        />
+        <Text fontSize="$fontSize-xs" color="$color-text-secondary" overflowMode="flow">Click to copy link, paste into your calendar app to subscribe.</Text>
+      </HStack>
+      <List data="{picks.value || []}" fixedItemSize="true" limit="100">
+        <PickItem pick="{$item}" />
+      </List>
+    </VStack>
+  </VStack>
+  </HStack>
+
+  <!-- Dashboard mode (gate on settings loaded to avoid flash of default state) -->
+  <Spinner when="{layoutMode === 'dashboard' && authSession && dashboardTiles === null}" />
+  <VStack when="{layoutMode === 'dashboard' && (dashboardTiles !== null)}" width="100%" padding="$space-3">
+    <H1>
+      <HStack width="100%" verticalAlignment="center">
+        <Text overflowMode="ellipsis" maxLines="1" width="*">{window.cityName || 'Community Calendar'}</Text>
+        <IncludeMarkup url="components/IconRow.xmlui" />
+      </HStack>
+    </H1>
+    <DashboardView />
+  </VStack>
+</App>

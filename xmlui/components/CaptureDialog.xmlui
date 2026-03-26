@@ -1,0 +1,58 @@
+<Component
+  name="CaptureDialog"
+  method.open="() => { isExtracting = false; errorMessage = ''; dialog.open(); }"
+  var.isExtracting="{false}"
+  var.errorMessage=""
+>
+
+  <ModalDialog id="dialog" title="Capture Event from Poster" minWidth="400px">
+    <VStack gap="$space-3" padding="$space-2">
+
+      <!-- Select image -->
+      <VStack when="{!isExtracting}" gap="$space-2">
+        <Text>Take a photo of an event poster, or select one from your library.</Text>
+        <FileInput
+          id="imageInput"
+          acceptsFileType="{['image/*']}"
+          buttonLabel="Choose Image"
+          buttonIcon="l-file-up"
+          onDidChange="(files) => {
+            if (!files || files.length === 0) return;
+            isExtracting = true;
+            errorMessage = '';
+            const result = window.resizeAndUpload(files[0], appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
+            isExtracting = false;
+            if (result && result.event) {
+              pickEvent = {
+                title: result.event.title || '',
+                start_time: result.event.start_time || '',
+                end_time: result.event.end_time || '',
+                location: result.event.location || '',
+                description: result.event.description || '',
+                url: result.event.url || '',
+                recurrence_until: result.event.recurrence_until || ''
+              };
+              dialog.close();
+            } else {
+              errorMessage = result?.error || 'Failed to extract event';
+            }
+          }"
+        />
+      </VStack>
+
+      <!-- Extracting spinner -->
+      <VStack when="{isExtracting}" horizontalAlignment="center" gap="$space-2" padding="$space-4">
+        <Spinner />
+        <Text>Extracting event details...</Text>
+      </VStack>
+
+      <!-- Error message -->
+      <Text
+        when="{errorMessage}"
+        value="{errorMessage}"
+        color="$color-danger-500"
+      />
+
+    </VStack>
+  </ModalDialog>
+</Component>

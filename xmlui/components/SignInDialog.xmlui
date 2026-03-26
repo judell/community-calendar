@@ -1,0 +1,25 @@
+<Component name="SignInDialog" method.open="() => dialog.open()" var.magicEmail="" var.magicSent="{false}">
+  <ModalDialog id="dialog" title="Sign In">
+    <VStack gap="$space-3">
+      <Button label="Sign in with GitHub" onClick="window.signIn('github')" />
+      <Button label="Sign in with Google" onClick="window.signIn('google')" />
+      <Text textAlign="center" color="$color-surface-400">— or —</Text>
+      <HStack gap="$space-2" verticalAlignment="center" when="{!magicSent}">
+        <TextBox
+          placeholder="Email address"
+          value="{magicEmail}"
+          onDidChange="(val) => magicEmail = val"
+          width="*"
+        />
+        <Button
+          label="Send me a link"
+          enabled="{magicEmail.includes('@')}"
+          onClick="window.signInWithEmail(magicEmail, () => magicSent = true)"
+        />
+      </HStack>
+      <Text when="{magicSent}" textAlign="center" color="$color-primary-500">
+        Check your email for a sign-in link!
+      </Text>
+    </VStack>
+  </ModalDialog>
+</Component>

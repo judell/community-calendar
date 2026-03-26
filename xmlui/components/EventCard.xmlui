@@ -1,0 +1,140 @@
+<Component name="EventCard">
+
+  <Card
+    padding="0"
+    overflow="hidden"
+    marginBottom="{layoutMode === 'multicol' ? undefined : '0px'}"
+    borderRadius="{layoutMode === 'multicol' ? '$borderRadius' : '0'}"
+    boxShadow="{layoutMode === 'multicol' ? undefined : 'none'}"
+    borderTop="{layoutMode === 'multicol' ? undefined : '1px solid $color-surface-200'}"
+    borderBottom="{layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none'}"
+    borderRight="{layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none'}"
+    border="{layoutMode === 'multicol' ? '1px solid $color-surface-200' : undefined}"
+    borderLeft="{window.clusterBorder($props.event.cluster_id, $props.filterTerm) || (layoutMode === 'multicol' ? '1px solid $color-surface-200' : 'none')}"
+  >
+    <VStack gap="$space-0" padding="{layoutMode === 'multicol' ? '$space-1_5' : '$space-0_5 $space-1_5'}">
+      <Text
+        fontSize="$fontSize-sm"
+        color="$color-text-secondary"
+        value="{window.formatDayOfWeek($props.event.start_time) + ' ' + window.formatMonthDay($props.event.start_time) + (window.formatTime($props.event.start_time) ? ', ' + window.formatTime($props.event.start_time) : '')}"
+      />
+      <Link when="{$props.event.url}" to="{$props.event.url}" target="_blank">
+        <Text fontWeight="600" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
+      </Link>
+      <Text when="{!$props.event.url}" fontWeight="600" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
+      <Text when="{$props.event.location}" fontSize="$fontSize-sm" lineHeight="1.3" color="$color-text-secondary" overflowMode="flow" value="{$props.event.location}" />
+      <Text
+        when="{$props.event.source}"
+        fontSize="$fontSize-sm"
+        color="$color-text-tertiary"
+        overflowMode="flow"
+        value="{$props.event.source}"
+      />
+      <Markdown
+        when="{$props.filterTerm && window.getDescriptionSnippet($props.event.description, $props.filterTerm)}"
+        fontSize="$fontSize-sm"
+        color="$color-text-secondary"
+        padding="0"
+        margin="0"
+        content="{window.getDescriptionSnippet($props.event.description, $props.filterTerm)}"
+      />
+      <Text
+        when="{$props.event.description || $props.event.image_url}"
+        fontSize="$fontSize-sm"
+        lineHeight="1.3"
+        color="$color-text-secondary"
+        overflowMode="flow"
+        cursor="pointer"
+        marginTop="$space-1"
+        onClick="detailDialog.open($props.event)"
+        value="{(window.getSnippet($props.event.description, $props.event.title) || '') + ' \u24d8'}"
+      />
+      <Image when="{showListImages && $props.event.image_url}" src="{$props.event.image_url}" width="100%" maxHeight="160px" fit="cover" marginTop="$space-1" />
+      <HStack verticalAlignment="center" gap="$space-1" marginTop="$space-1_5" paddingTop="$space-1" marginBottom="$space-1">
+        <Badge
+          when="{$props.event.category}"
+          value="{$props.event.category}"
+          variant="pill"
+          fontSize="0.65em"
+          colorMap="{$props.categoryColorMap}"
+          cursor="pointer"
+          onClick="setCategoryFilter($props.event.category)"
+        />
+        <Icon
+          when="{isAdmin && $props.event.category}"
+          name="l-pencil"
+          width="$space-4"
+          height="$space-4"
+          color="$color-surface-400"
+          cursor="pointer"
+          tooltip="Override category"
+          onClick="categoryDialog.open($props.event)"
+        />
+        <Badge
+          when="{!$props.event.category && isAdmin}"
+          value="+ category"
+          variant="pill"
+          fontSize="0.65em"
+          cursor="pointer"
+          onClick="categoryDialog.open($props.event)"
+        />
+        <SpaceFiller />
+        <AddToCalendar event="{$props.event}" />
+        <Icon
+          when="{authUser}"
+          name="l-bookmark-filled"
+          width="$space-4"
+          height="$space-4"
+          tooltip="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData) ? 'Remove from my picks' : 'Add to my picks'}"
+          color="{window.isEventPicked($props.event.mergedIds || $props.event.id, picksData) ? '$color-primary-500' : '$color-surface-300'}"
+          cursor="pointer"
+          onClick="togglePick($props.event)"
+        />
+      </HStack>
+    </VStack>
+  </Card>
+
+  <ModalDialog id="categoryDialog" title="Set Category" var.selectedCategory="{$param.category || ''}">
+    <VStack gap="$space-3">
+      <Text fontSize="$fontSize-sm" fontWeight="bold" value="{$param.title}" />
+      <RadioGroup initialValue="{$param.category || ''}" onDidChange="(val) => selectedCategory = val">
+        <VStack gap="$space-1">
+          <Items data="{$props.categoryList}">
+            <Option value="{$item}" label="{$item}" />
+          </Items>
+        </VStack>
+      </RadioGroup>
+      <HStack gap="$space-2">
+        <Button label="Save" onClick="saveCategoryOverride($param.id, selectedCategory); categoryDialog.close()" />
+        <Button label="Cancel" variant="outlined" onClick="categoryDialog.close()" />
+      </HStack>
+    </VStack>
+  </ModalDialog>
+
+  <ModalDialog id="detailDialog">
+    <VStack gap="$space-0">
+      <Text fontWeight="600" fontSize="$fontSize-lg" value="{$param.title}" />
+      <Text
+        fontSize="$fontSize-sm"
+        color="$color-text-secondary"
+        value="{window.formatDayOfWeek($param.start_time) + ' ' + window.formatMonthDay($param.start_time) + (window.formatTime($param.start_time) ? ', ' + window.formatTime($param.start_time) : '')}"
+      />
+      <Text when="{$param.location}" fontSize="$fontSize-sm" value="{$param.location}" />
+      <Markdown
+        when="{$param.source}"
+        fontSize="$fontSize-sm"
+        fontStyle="italic"
+        color="$color-text-tertiary"
+        overflowMode="flow"
+        breakMode="word"
+        openLinkInNewTab="true"
+        content="{window.formatSourceLinks($param.source, $param.source_urls, (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || [])}"
+      />
+      <Image when="{$param.image_url}" src="{$param.image_url}" width="100%" fit="contain" />
+      <Markdown when="{$param.description}" fontSize="$fontSize-sm" content="{$param.description}" />
+      <Link when="{$param.url}" to="{$param.url}" target="_blank">
+        <Text fontSize="$fontSize-sm" value="Event link" />
+      </Link>
+    </VStack>
+  </ModalDialog>
+</Component>
