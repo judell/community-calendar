@@ -438,71 +438,95 @@ jobs:
       run: |
         python scripts/validate_pipeline.py --cities ${{ steps.locations.outputs.list }}
 
-    - name: Commit and push if changes
+    - name: Upload events to Supabase
+      env:
+        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      run: |
+        TOTAL_INSERTED=0
+        IFS=',' read -ra UPLOAD_CITIES <<< "${{ steps.locations.outputs.list }}"
+        for city in "${UPLOAD_CITIES[@]}"; do
+          city=$(echo "$city" | xargs)
+          if [ -f "cities/$city/events.json" ]; then
+            echo "Uploading $city events..."
+            jq -c --arg city "$city" '{city: $city, events: .}' "cities/$city/events.json" > /tmp/payload_${city}.json
+            RESPONSE=$(curl -sL -X POST "${SUPABASE_URL}/functions/v1/load-events" \
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+              -H 'Content-Type: application/json' \
+              --data-binary @/tmp/payload_${city}.json)
+            echo "$city: $(echo "$RESPONSE" | jq -c '{success, inserted, deleted}')"
+            SUCCESS=$(echo "$RESPONSE" | jq -r '.success // false')
+            if [ "$SUCCESS" != "true" ]; then
+              echo "Failed to upload $city"
+              echo "$RESPONSE" | jq .
+              exit 1
+            fi
+            INSERTED=$(echo "$RESPONSE" | jq -r '.inserted')
+            TOTAL_INSERTED=$((TOTAL_INSERTED + INSERTED))
+            rm -f /tmp/payload_${city}.json
+          fi
+        done
+        echo "Successfully loaded $TOTAL_INSERTED total events into Supabase"
+
+    - name: Commit metadata changes
       env:
         GITHUB_TOKEN: ${{ secrets.COMMUNITY_CALENDAR }}
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
-        
-        # Save generated files before any git operations
-        IFS=',' read -ra SAVE_CITIES <<< "${{ steps.locations.outputs.list }}"
-        for city in "${SAVE_CITIES[@]}"; do
-          city=$(echo "$city" | xargs)
-          if [ -f "cities/$city/events.json" ]; then
-            cp "cities/$city/events.json" "/tmp/${city}_events.json"
-          fi
-        done
-        
-        # Write version tag for cache busting
+
         git describe --tags --always > xmlui/version.txt
 
-        git add .
-        git diff --quiet && git diff --staged --quiet || (
-          git commit -m "Auto-generate calendar"
-          for i in 1 2 3; do
-            git add -A
-            if git pull --rebase --autostash && git push; then
-              break
-            fi
-            echo "Push failed, restoring generated files and retrying..."
-            # Restore generated files that may have been clobbered by rebase
-            for city in "${SAVE_CITIES[@]}"; do
-              city=$(echo "$city" | xargs)
-              if [ -f "/tmp/${city}_events.json" ]; then
-                cp "/tmp/${city}_events.json" "cities/$city/events.json"
-              fi
-            done
-            git add .
-            git diff --staged --quiet || git commit --amend --no-edit
-            sleep 5
-          done
+        git add cities.json xmlui/version.txt report.json report.html
+        git diff --staged --quiet || (
+          git commit -m "Auto-generate calendar metadata"
+          git pull --rebase --autostash && git push
         )
 
-    - name: Trigger Supabase events reload
+    - name: Push build artifacts to archive branch
       env:
-        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        GITHUB_TOKEN: ${{ secrets.COMMUNITY_CALENDAR }}
       run: |
-        echo "Triggering Supabase Edge Function to reload events..."
-        # Build city list JSON array from locations
-        IFS=',' read -ra RELOAD_CITIES <<< "${{ steps.locations.outputs.list }}"
-        CITIES_JSON=$(printf '%s\n' "${RELOAD_CITIES[@]}" | xargs -I{} echo '"{}"' | paste -sd, - | sed 's/^/[/;s/$/]/')
-        RESPONSE=$(curl -sL -X POST "${SUPABASE_URL}/functions/v1/load-events" \
-          -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
-          -H 'Content-Type: application/json' \
-          -d "{\"cities\":${CITIES_JSON}}")
-        echo "$RESPONSE" | jq .
+        git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
 
-        # Check for success
-        SUCCESS=$(echo "$RESPONSE" | jq -r '.success // false')
-        if [ "$SUCCESS" = "true" ]; then
-          INSERTED=$(echo "$RESPONSE" | jq -r '.inserted')
-          echo "Successfully loaded $INSERTED events into Supabase"
+        # Stash generated files before switching branches
+        ARCHIVE_DIR=$(mktemp -d)
+        IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
+        for city in "${CITIES[@]}"; do
+          city=$(echo "$city" | xargs)
+          mkdir -p "$ARCHIVE_DIR/cities/$city"
+          cp cities/$city/events.json "$ARCHIVE_DIR/cities/$city/" 2>/dev/null || true
+          cp cities/$city/combined.ics "$ARCHIVE_DIR/cities/$city/" 2>/dev/null || true
+          for f in cities/$city/*.ics; do
+            [ -f "$f" ] && cp "$f" "$ARCHIVE_DIR/cities/$city/" 2>/dev/null || true
+          done
+        done
+        cp report.json "$ARCHIVE_DIR/" 2>/dev/null || true
+
+        # Fetch or create orphan archive branch
+        if git fetch origin archive:archive 2>/dev/null; then
+          git checkout archive
         else
-          echo "Failed to load events"
-          echo "$RESPONSE"
-          exit 1
+          git checkout --orphan archive
+          git rm -rf . 2>/dev/null || true
+          git clean -fd 2>/dev/null || true
         fi
+
+        # Replace only the cities that were built (preserve others)
+        for city in "${CITIES[@]}"; do
+          city=$(echo "$city" | xargs)
+          git rm -rf "cities/$city" 2>/dev/null || true
+        done
+        git rm -f report.json 2>/dev/null || true
+        cp -r "$ARCHIVE_DIR"/* .
+        rm -rf "$ARCHIVE_DIR"
+
+        git add .
+        TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+        git commit -m "Build artifacts $TIMESTAMP" || echo "No changes to archive"
+        git push origin archive
+
+        # Return to main
+        git checkout main
 
