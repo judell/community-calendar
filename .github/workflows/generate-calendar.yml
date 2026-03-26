@@ -389,13 +389,14 @@ jobs:
       run: |
         IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
         echo "Processing cities: ${CITIES[*]}"
+        # Fetch archive branch for previous categories
+        git fetch origin archive --depth=1 2>/dev/null || true
         for city in "${CITIES[@]}"; do
           city=$(echo "$city" | xargs)
           echo "Checking city: '$city'"
-          # Save previous events.json (with categories) before overwriting
-          if [ -f "cities/$city/events.json" ]; then
-            cp "cities/$city/events.json" "cities/$city/events.prev.json"
-          fi
+          # Get previous events.json (with categories) from archive branch
+          git show origin/archive:cities/$city/events.json > "cities/$city/events.prev.json" 2>/dev/null || rm -f "cities/$city/events.prev.json"
+          [ -s "cities/$city/events.prev.json" ] || rm -f "cities/$city/events.prev.json"
           if [ -f "cities/$city/combined.ics" ]; then
             echo "Running ics_to_json for $city..."
             python scripts/ics_to_json.py "cities/$city/combined.ics" -o "cities/$city/events.json" --city "$city"
