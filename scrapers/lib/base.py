@@ -6,6 +6,7 @@ import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from typing import Any, Optional
+from zoneinfo import ZoneInfo
 
 from icalendar import Calendar, Event
 
@@ -92,12 +93,15 @@ class BaseScraper(ABC):
         
         event = Event()
         event.add('summary', title)
-        # Strip tzinfo and set TZID explicitly as a string to avoid icalendar
-        # serializing ZoneInfo objects (which older versions can't handle)
+        # Convert to target timezone then strip tzinfo, setting TZID explicitly
+        # as a string to avoid icalendar serializing ZoneInfo objects
         if hasattr(dtstart, 'tzinfo') and dtstart.tzinfo is not None:
+            target_tz = ZoneInfo(self.timezone)
+            dtstart = dtstart.astimezone(target_tz)
+            dtend = data.get('dtend') or dtstart
+            dtend = dtend.astimezone(target_tz)
             tz_params = {'TZID': self.timezone}
             event.add('dtstart', dtstart.replace(tzinfo=None), parameters=tz_params)
-            dtend = data.get('dtend') or dtstart
             event.add('dtend', dtend.replace(tzinfo=None), parameters=tz_params)
         else:
             event.add('dtstart', dtstart)
