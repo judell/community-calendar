@@ -123,6 +123,10 @@ When a user captures an event from a photo or audio (`supabase/functions/capture
 
 When a curator adds recurrence to an event via PickEditor, the form shows times in city-local (via `utcToLocal()`). On submit, `applyTimezoneOffset()` in `helpers.js` appends the city timezone offset before sending to the Supabase REST API. This ensures the naive form values like `2025-01-15T19:00:00` become `2025-01-15T19:00:00-08:00` before PostgreSQL sees them.
 
+### Step 7b: Enrichment expansion in the frontend
+
+`expandEnrichments()` in `helpers.js` uses `rrule.js` to expand curator-created recurring events into individual instances for display. `rrule.js` operates in UTC, so a Tuesday 6pm Pacific event (stored as Wednesday 1am UTC) would expand `BYDAY=TU` on the wrong day. The fix applies the same UTC→local "fake-UTC" trick used by `getNextOccurrence()`: convert the stored UTC `start_time` to city-local wall-clock via `utcToLocal()`, then feed that to `rrule.js` as if it were UTC. The from/to date range is similarly converted via `toLocalFakeUTC()` so comparisons are consistent. The resulting occurrence dates are already in local-as-UTC and can be used directly for display.
+
 ### Step 8: My Picks ICS feed
 
 The `my-picks` edge function (`supabase/functions/my-picks/index.ts`) generates an ICS feed of a user's bookmarked events.
