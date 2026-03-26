@@ -481,7 +481,8 @@ jobs:
         git add cities.json xmlui/version.txt report.json report.html
         git diff --staged --quiet || (
           git commit -m "Auto-generate calendar metadata"
-          git pull --rebase --autostash && git push
+          # On conflict, our regenerated files always win
+          git pull --rebase --autostash -X theirs && git push
         )
 
     - name: Push build artifacts to archive branch
