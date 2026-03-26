@@ -682,11 +682,11 @@
 
         async function loadFooter() {
             try {
-                var versionResp = await fetch('version.txt');
+                var versionResp = await fetch('xmlui/version.txt');
                 var appCommit = (await versionResp.text()).trim();
                 var xmluiVersion = window.XMLUI_VERSION || '0.12.6';
                 try {
-                    var script = await fetch('xmlui/xmlui-standalone.umd.js');
+                    var script = await fetch('xmlui/xmlui/xmlui-standalone.umd.js');
                     var text = await script.text();
                     var match = text.match(/"(0\.\d+\.\d+[^"]*)"/);
                     if (match) xmluiVersion = match[1];
