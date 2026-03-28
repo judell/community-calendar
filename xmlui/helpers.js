@@ -522,6 +522,30 @@ function toggleSourceAndSave(source, userSettingsData, supabaseUrl, supabaseKey)
   return [{ hidden_sources: updated }];
 }
 
+// Apply a complete hidden_sources array and persist to Supabase. Returns updated userSettingsData.
+function saveHiddenSources(hiddenArray, userSettingsData, supabaseUrl, supabaseKey) {
+  fetch(supabaseUrl + '/rest/v1/user_settings?on_conflict=user_id,city', {
+    method: 'POST',
+    headers: {
+      apikey: supabaseKey,
+      Authorization: 'Bearer ' + window.authSession.access_token,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates'
+    },
+    body: JSON.stringify({
+      user_id: window.authUser.id,
+      city: window.cityFilter,
+      hidden_sources: hiddenArray,
+      updated_at: new Date().toISOString()
+    })
+  });
+
+  if (userSettingsData && userSettingsData[0]) {
+    return [Object.assign({}, userSettingsData[0], { hidden_sources: hiddenArray })];
+  }
+  return [{ hidden_sources: hiddenArray }];
+}
+
 // Toggle one-click-pick and persist to Supabase. Returns updated userSettingsData.
 function toggleOneClickPickAndSave(userSettingsData, supabaseUrl, supabaseKey) {
   var current = (userSettingsData && userSettingsData[0] && userSettingsData[0].one_click_pick) || false;
@@ -1283,6 +1307,7 @@ if (typeof window !== 'undefined') {
   window.truncate = truncate;
   window.formatSourceLinks = formatSourceLinks;
   window.toggleSourceAndSave = toggleSourceAndSave;
+  window.saveHiddenSources = saveHiddenSources;
   window.isSourceHidden = isSourceHidden;
   window.filterHiddenSources = filterHiddenSources;
   window.getSourceCounts = getSourceCounts;

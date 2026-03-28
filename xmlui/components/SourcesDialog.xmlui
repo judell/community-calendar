@@ -1,6 +1,6 @@
 <Component
   name="SourcesDialog"
-  method.open="() => { suggestName = ''; suggestUrl = ''; suggestFeedType = ''; suggestNotes = ''; suggestSuccess = false; suggestError = ''; showSuggestForm = false; dialog.open(); }"
+  method.open="() => { suggestName = ''; suggestUrl = ''; suggestFeedType = ''; suggestNotes = ''; suggestSuccess = false; suggestError = ''; showSuggestForm = false; localHidden = ($props.hiddenSources || []).slice(); dirty = false; dialog.open(); }"
   var.showSuggestForm="{false}"
   var.suggestName=""
   var.suggestUrl=""
@@ -8,7 +8,9 @@
   var.suggestNotes=""
   var.isSubmitting="{false}"
   var.suggestSuccess="{false}"
-  var.suggestError="">
+  var.suggestError=""
+  var.localHidden="{[]}"
+  var.dirty="{false}">
 
   <APICall
     id="suggestApi"
@@ -30,7 +32,8 @@
     }" />
 
   <Theme maxWidth-ModalDialog="90%">
-  <ModalDialog id="dialog" title="Sources">
+  <ModalDialog id="dialog" title="Sources"
+    onClose="() => { if (dirty) { applyHiddenSources(localHidden); } }">
     <VStack gap="$space-3">
       <Text
         value="{$props.events ? window.dedupeEvents($props.events).length + ' events for the next ' + window.getQueryMonths() + ' months' : 'Loading...'}" />
@@ -43,8 +46,9 @@
           <Checkbox
             when="{window.authUser}"
             width="fit-content"
-            initialValue="{!window.isSourceHidden($item.source, $props.hiddenSources)}"
-            onClick="toggleSourceVisibility($item.source)"
+            aria-label="{$item.source}"
+            initialValue="{!window.isSourceHidden($item.source, localHidden)}"
+            onClick="() => { localHidden = localHidden.indexOf($item.source) >= 0 ? localHidden.filter(function(s) { return s !== $item.source; }) : localHidden.concat([$item.source]); dirty = true; }"
           />
           <Text
             width="40px"

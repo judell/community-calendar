@@ -65,6 +65,16 @@ reset_fixtures() {
     -H "apikey: ${SUPABASE_KEY}" \
     -H "Content-Type: application/json"
 
+  # Ensure user_settings row exists (upsert with clean defaults)
+  curl -s -o /dev/null -w "" \
+    "${SUPABASE_URL}/rest/v1/user_settings?on_conflict=user_id,city" \
+    -X POST \
+    -H "Authorization: Bearer ${SUPABASE_KEY}" \
+    -H "apikey: ${SUPABASE_KEY}" \
+    -H "Content-Type: application/json" \
+    -H "Prefer: resolution=merge-duplicates" \
+    -d "{\"user_id\": \"${USER_ID}\", \"city\": \"santarosa\", \"hidden_sources\": [], \"one_click_pick\": false}"
+
   echo "Fixtures reset for ${TEST_USER_EMAIL}"
 }
 

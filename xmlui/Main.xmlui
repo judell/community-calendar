@@ -1,6 +1,5 @@
 <App
   name="Community Calendar"
-  codeBehind="Main.xmlui.xs"
   defaultTheme="community-calendar"
   var.filterTerm="{window.initialSearch || ''}"
   var.viewMode="{'all'}"
@@ -78,8 +77,13 @@
   />
 
   <ChangeListener
-    listenTo="{refreshCounter}"
-    onDidChange="picks.refetch(); events.refetch(); enrichments.refetch()"
+    listenTo="{picksCounter}"
+    onDidChange="picks.refetch(); enrichments.refetch()"
+  />
+
+  <ChangeListener
+    listenTo="{eventsCounter}"
+    onDidChange="events.refetch()"
   />
 
   <!-- filterTerm ChangeListener removed: TextBox onDidChange already sets displayStartIndex -->
@@ -147,7 +151,7 @@
   <SourcesDialog id="sourcesDialog" events="{events.value}" hiddenSources="{hiddenSources}" />
   <CaptureDialog id="captureDialog" />
   <AudioCaptureDialog id="audioCaptureDialog" />
-  <PickEditor when="{!!pickEvent}" event="{pickEvent}" onClose="pickEvent = null" onSaved="picks.refetch(); events.refetch(); enrichments.refetch();" />
+  <PickEditor when="{!!pickEvent}" event="{pickEvent}" onClose="pickEvent = null" onSaved="picksCounter = picksCounter + 1" />
 
   <ModalDialog id="settingsDialog" title="Display Settings" maxWidth="400px">
     <HStack verticalAlignment="start" gap="$space-6">
