@@ -552,6 +552,9 @@ SOURCE_NAMES = {
     'meetup_mental_health_america_of_lancaster_county': 'Meetup: Mental Health America of Lancaster County',
     'meetup_authors_in_the_making': 'Meetup: Authors in the Making',
     'guildhost_civic_tech': 'Civic Tech Toronto',
+    'wfhb_calendar': 'WFHB Community Calendar',
+    'eventbrite_nerd_nite': 'Nerd Nite Bloomington',
+    'writers_guild': 'Writers Guild at Bloomington',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.

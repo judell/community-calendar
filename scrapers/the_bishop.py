@@ -8,7 +8,10 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 import requests
+import urllib3
 from bs4 import BeautifulSoup
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
 from lib.base import BaseScraper
@@ -57,7 +60,7 @@ class TheBishopScraper(BaseScraper):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         }
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, verify=False)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.text, 'html.parser')

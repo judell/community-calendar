@@ -37,7 +37,7 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | B-Square: Critical Mass | ICS | ~8 | Google Calendar (monthly group bike ride) |
 | B-Square: BPTC Public Meetings | ICS | ~15 | Google Calendar (transit board meetings) |
 | The Comedy Attic | Scraper | ~32 | `comedy_attic.py` |
-| The Bishop | Scraper | ~4 | `the_bishop.py` |
+| The Bishop | Scraper | ~4 | `the_bishop.py` (SSL verify=False, cert expired 2026-03) |
 | BloomingtonOnline: Events | ICS | ~224 | Google Calendar - community events |
 | BloomingtonOnline: Food & Drink | ICS | ~133 | Google Calendar - restaurant/brewery specials |
 | BloomingtonOnline: Shopping | ICS | ~18 | Google Calendar - markets, deals |
@@ -65,6 +65,9 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | Indivisible Central Indiana | Mobilize.us scraper | ~21 | `mobilize.py` — civic/political organizing (added 2026-03) |
 | Let's Go! Bloomington | ICS | — | Google Calendar aggregator — indie venues, shows, art openings (added 2026-03) |
 | Morgenstern Books | Eventbrite scraper | ~9 | Author events, book clubs via Eventbrite organizer page (added 2026-03) |
+| WFHB Community Calendar | Scraper | ~349 | `wfhb_calendar.py` — ai1ec (All-in-One Event Calendar) HTML scraper; curated community events (added 2026-03) |
+| Nerd Nite Bloomington | Eventbrite scraper | ~1 | `eventbrite.py` organizer 95199764993 — quarterly at The Bishop (added 2026-03) |
+| Writers Guild at Bloomington | Scraper | ~7 | `writers_guild.py` — Sugar Calendar scraper; prose, poetry, spoken word (added 2026-03) |
 
 ---
 
@@ -152,7 +155,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
-| **WFHB Community Calendar** | `wfhb.org/calendar/` | BLOCKED | Site blocks scrapers |
+| **WFHB Community Calendar** | `wfhb.org/calendar/` | DONE | `wfhb_calendar.py` — ai1ec HTML scraper (~349 events) |
 
 ### Visit Bloomington
 
@@ -255,7 +258,7 @@ bloomingtononline.com embeds a master Google Calendar with multiple source calen
 | Source | Reason |
 |--------|--------|
 | The Back Door (Tockify) | ICS export disabled on their plan |
-| WFHB Community Calendar | Mod_Security blocks ICS export |
+| ~~WFHB Community Calendar~~ | ~~Mod_Security blocks ICS export~~ — RESOLVED: HTML scraper bypasses WAF with browser UA (2026-03) |
 | Indiana Public Media | Brightspot CMS, no ICS/RSS for events |
 | WCLS 97.7 | Site suspended |
 | IDS Events Calendar | No ICS feed |
@@ -289,7 +292,7 @@ bloomingtononline.com embeds a master Google Calendar with multiple source calen
 - [ ] The Bishop
 - [ ] Comedy Attic
 - [ ] WonderLab Museum
-- [ ] WFHB Community Calendar (JSON endpoint)
+- [x] WFHB Community Calendar (ai1ec HTML scraper)
 
 ### Phase 3: Community / Civic
 - [~] UU Church of Bloomington — LOW PRIORITY: mostly internal events
@@ -405,7 +408,7 @@ These groups have working ICS feeds but no upcoming events as of 2026-02-17:
 | Source | URL | Reason |
 |--------|-----|--------|
 | WonderLab Museum | `wonderlab.org/events/` | Cloudflare challenge |
-| WFHB Community Calendar | `wfhb.org/calendar/` | mod_security blocks |
+| ~~WFHB Community Calendar~~ | `wfhb.org/calendar/` | ~~mod_security blocks~~ RESOLVED: ai1ec HTML scraper with browser UA (2026-03) |
 | Visit Bloomington | `visitbloomington.com/events/` | Simpleview CMS, no API |
 | Winter Farmers' Market | `bloomingtonwinterfarmersmarket.com/` | Wix site, no scraping |
 
@@ -448,15 +451,16 @@ These groups have working ICS feeds but no upcoming events as of 2026-02-17:
 
 ### Current Coverage Summary
 
-**51 sources implemented** (expanded from 27 on 2026-03-02) covering:
+**54 sources implemented** (expanded from 51 on 2026-03-28) covering:
 - University events (IU LiveWhale × 15, LibCal × 2, CampusLabs × 1)
 - City/civic (Parks & Rec, Farmers Market, B-Square × 4, City Gov, Boards & Commissions)
-- Arts/entertainment (Bloomington Arts, Comedy Attic, Bishop, Bluebird, Blockhouse, Brown County Playhouse, Cardinal Spirits)
-- Community (BloomingtonOnline × 3, Library, Boys & Girls Club, First United Church, WonderLab, Community Band, Bloominglabs)
-- Interest groups (4 Meetup groups)
+- Arts/entertainment (Bloomington Arts, Comedy Attic, Bishop, Bluebird, Blockhouse, Brown County Playhouse, Cardinal Spirits, Constellation, Cicada Cinema)
+- Community (BloomingtonOnline × 3, Library, Boys & Girls Club, First United Church, WonderLab, Community Band, Bloominglabs, WFHB)
+- Literary (Writers Guild, Morgenstern Books, Nerd Nite)
+- Interest groups (4 Meetup groups, Indivisible, Let's Go! Bloomington)
 - Beverages (Upland Brewing, Cardinal Spirits)
 
-**Estimated unique future events:** ~5,000+
+**Estimated unique future events:** ~5,500+
 
 ### Phase 2 Topical Search Results: 2026-02-18
 
@@ -486,3 +490,53 @@ Searched across all curator-guide topics: music, theater, comedy, dance, film, a
 - IU LiveWhale feeds already capture most university arts/culture events
 - BloomingtonOnline calendars capture most community events
 - Eskenazi Museum (IU) already covered via LiveWhale
+
+---
+
+## Discovery Run: 2026-03-28
+
+### New Sources Added
+
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| **WFHB Community Calendar** | ai1ec scraper | ~349 | Curated community events — music, theater, trivia, workshops. Covers Orbit Room (Bishop downstairs) events not on Bishop's own site. New platform base: `lib/ai1ec.py` |
+| **Nerd Nite Bloomington** | Eventbrite scraper | ~1 | Quarterly science talks at The Bishop. Organizer ID 95199764993 |
+| **Writers Guild at Bloomington** | Sugar Calendar scraper | ~7 | Prose readings, poetry open mic, spoken word series at Morgenstern Books, Juniper Art Gallery, Backspace Gallery. New platform base: `lib/sugar_calendar.py` |
+
+### Fixes
+
+| Source | Fix |
+|--------|-----|
+| **The Bishop** | SSL cert expired; added `verify=False` to restore 4 events |
+
+### Sources Evaluated — Not Added
+
+| Source | Reason |
+|--------|--------|
+| Windfall Dancers | WordPress, no events feed — class schedules as plain text |
+| Nerd Nite website | WordPress blog, no feed — covered via Eventbrite organizer page |
+| Time & Tide Tattoo | Flash events announced only on Instagram/Facebook — not scrapable |
+
+### Oblique Strategy Wins
+
+- **WFHB covers Bishop Bar's Orbit Room** events (trivia, pinball league, songwriter showcases) that aren't on the Bishop's own website
+- **WFHB covers library-hosted events** like We're Crankie Festival that aren't (yet) on the library's calendar
+- **Earth Day at Switchyard Park** already covered by Parks & Rec Google Calendar feed
+
+### New Platform Scrapers Created
+
+| Platform | File | Used By | Notes |
+|----------|------|---------|-------|
+| All-in-One Event Calendar (ai1ec) | `lib/ai1ec.py` | WFHB | WordPress plugin; HTML agenda view with browser UA bypasses WAF |
+| Sugar Calendar Lite | `lib/sugar_calendar.py` | Writers Guild | WordPress plugin; list page + detail page enrichment for locations |
+
+### Remaining Pending (Tier 2/3)
+
+| Source | Status | Notes |
+|--------|--------|-------|
+| Eskenazi School of Fine Arts | PENDING | HTML scrape needed |
+| FAR Center for Arts | PENDING | Craft CMS, no ICS, would need scraper |
+| Friends Meeting | PENDING | May have calendar |
+| Winter Farmers' Market | BLOCKED | Wix, no scraping |
+| Neighborhood Associations | LOW PRIORITY | Sites appear inactive |
+| Visit Bloomington | BLOCKED | Simpleview CMS, no API |
