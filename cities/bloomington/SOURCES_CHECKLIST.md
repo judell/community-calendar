@@ -72,6 +72,7 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | IU Eskenazi School of Art | ICS | ~94 | LiveWhale `group_id/11` — exhibitions, lectures, MFA shows (added 2026-03) |
 | FAR Center for Contemporary Arts | Scraper | ~4 | `far_center.py` — Craft CMS scraper; gallery openings, film, workshops (added 2026-03) |
 | Redbud Books | ICS | ~348 | Google Calendar — book clubs, author talks, film screenings, community events (added 2026-03) |
+| Habitat for Humanity Monroe County | Scraper | ~4 | `habitat.py` — fundraisers, 5K, build kickoffs, volunteer appreciation (added 2026-03) |
 
 ---
 
@@ -455,7 +456,7 @@ These groups have working ICS feeds but no upcoming events as of 2026-02-17:
 
 ### Current Coverage Summary
 
-**58 sources implemented** (expanded from 51 on 2026-03-28) covering:
+**59 sources implemented** (expanded from 51 on 2026-03-28) covering:
 - University events (IU LiveWhale × 15, LibCal × 2, CampusLabs × 1)
 - City/civic (Parks & Rec, Farmers Market, B-Square × 4, City Gov, Boards & Commissions)
 - Arts/entertainment (Bloomington Arts, Comedy Attic, Bishop, Bluebird, Blockhouse, Brown County Playhouse, Cardinal Spirits, Constellation, Cicada Cinema)

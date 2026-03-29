@@ -558,6 +558,7 @@ SOURCE_NAMES = {
     'eventbrite_nerd_nite': 'Nerd Nite Bloomington',
     'writers_guild': 'Writers Guild at Bloomington',
     'far_center': 'FAR Center for Contemporary Arts',
+    'habitat': 'Habitat for Humanity Monroe County',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
