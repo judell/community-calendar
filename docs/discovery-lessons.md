@@ -50,6 +50,9 @@ Real-world lessons from source discovery across cities. These complement the str
 - [CampusLabs University Calendars](#campuslabs-university-calendars)
 - [TeamUp Calendars](#teamup-calendars)
 - [Mobilize.us for Civic and Political Organizing](#mobilizeus-for-civic-and-political-organizing)
+- [Yelp and Business Directories as Discovery Tools](#yelp-and-business-directories-as-discovery-tools)
+- [Community Radio Stations as Aggregators](#community-radio-stations-as-aggregators)
+- [The Events Calendar (Tribe): ICS Blocked, Tribe API Works](#the-events-calendar-tribe-ics-blocked-tribe-api-works)
 
 ## "Curl-and-Done" Sources: No Scraper Needed
 
@@ -599,3 +602,28 @@ python scrapers/mobilize.py --url "https://www.mobilize.us/indivisiblesonomacoun
 - Event volume can be high: Indivisible Sonoma County yielded 142 future events
 
 **API situation:** Mobilize.us has a public API at `api.mobilize.us/v1/` that lists organizations and events. However, we were unable to find the correct endpoint to query events for a specific organization by slug. The API returned all 289K+ events globally rather than filtering to a specific org. The embedded-data approach is reliable and avoids this issue. If someone discovers the correct API pattern for org-specific queries, it would be preferable — it would support pagination (the embedded data is limited to the first page of ~25 events) and avoid HTML parsing.
+
+## Yelp and Business Directories as Discovery Tools
+
+Don't just search for "events calendar" — search Yelp for **venues and businesses** that might host events. A knitting shop might have classes, a history museum might have lectures, a tourism board might have a full MEC calendar. The strategy:
+
+1. Search Yelp for the area: `yelp.com/search?find_desc=Things+To+Do&find_loc={City},+{ST}`
+2. Also search by category: museums, galleries, art classes, workshops, craft stores, historic sites
+3. For surrounding towns within your radius, search those too
+4. For each interesting venue, check their website for calendar plugins
+
+**Example:** Searching Yelp for T.C. Steele State Historic Site in Nashville, IN led to checking `browncounty.com/events/` — a tourism board using Modern Events Calendar with a working ICS feed. One `?mec-ical-feed=1` URL yielded 94 events (art workshops, open mic nights, festivals, boat cruises) covering an entire neighboring arts community.
+
+**Also check:** Downtown business association member directories. DBI (Downtown Bloomington Inc.) listed 100+ businesses at `/our-members/`. Most didn't have calendars, but this led to discovering Monroe County History Center (EventON, 122 events) which wasn't covered by any aggregator.
+
+**Key insight:** The best discoveries come from treating every business within your radius as a potential event host, not just venues that obviously hold events.
+
+## Community Radio Stations as Aggregators
+
+Community radio stations often maintain volunteer-curated community calendars that aggregate events from dozens of venues. These are high-value sources because they cover small venues, one-off events, and community happenings that don't have their own websites or calendars.
+
+**Example:** WFHB (Bloomington Community Radio) uses the All-in-One Event Calendar WordPress plugin. Their `wfhb.org/calendar/` page had been marked as a dead end (mod_security blocked ICS export), but the HTML agenda view is accessible with a browser User-Agent. The ai1ec scraper (`lib/ai1ec.py`) extracts 349 events — covering Bishop Bar's Orbit Room (trivia, pinball league), library-hosted festivals, and dozens of venues that have no scrapeable calendar of their own.
+
+**How to find:** Search `"{city name}" community radio calendar` or check local radio station websites for event listing pages.
+
+**Watch for:** Community radio calendars are **aggregators**, not first-party sources. Classify them as such. Events may overlap with other sources you already have — deduplication handles this.

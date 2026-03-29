@@ -416,6 +416,14 @@ Example directories that proved valuable for Sonoma County:
 
 Cross-reference directories against existing sources to find gaps. A second topical pass using directories found 26 music venues with regular programming that the initial pass missed — roadhouses, brewpubs, and neighborhood bars that don't use Eventbrite/Meetup/WordPress.
 
+**Use Yelp as a discovery tool.** Search Yelp for businesses in your area that might host events — not just entertainment venues, but craft shops, history museums, galleries, pottery studios. Then check each website for calendar plugins. Also search Yelp for **surrounding towns** within your geo-filter radius; tourism boards for neighboring communities often have rich MEC or Tribe Events calendars.
+
+**Check downtown association member lists.** Downtown business associations (e.g., `downtownbloomington.com/our-members/`) list 100+ businesses. Most won't have calendars, but scanning the list surfaces non-obvious venues like history centers, galleries, and craft shops that host events.
+
+**Check community radio stations.** Community radio stations often maintain volunteer-curated calendars that aggregate events across dozens of venues — including small venues with no web presence. These are high-value aggregator sources. The WFHB Community Calendar in Bloomington covers 349 events across venues that have no scrapeable calendar of their own.
+
+**When ICS is blocked, try the REST API.** WordPress sites using The Events Calendar (Tribe) expose a JSON API at `/wp-json/tribe/events/v1/events/` that often works even when the ICS export at `?ical=1` is blocked by WAFs. The API returns structured data (dates, venues, descriptions) — no HTML parsing needed. See `lib/tribe_events.py`.
+
 **Discovery is iterative.** The first pass catches the obvious venues. Come back later and cross-reference against directories. Each pass finds things the previous one missed.
 
 ### Strategy 3: Meetup ICS Pattern
