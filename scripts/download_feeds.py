@@ -175,11 +175,9 @@ def download_feeds(city: str) -> None:
         filename = slugify(url) + ".ics"
         outfile = os.path.join(output_dir, filename)
 
-        # Meetup requires User-Agent
-        cmd = ["curl", "-sL"]
-        if "meetup.com" in url:
-            cmd += ["-A", "Mozilla/5.0"]
-        cmd += [url, "-o", outfile]
+        cmd = ["curl", "-sL",
+               "-A", "Mozilla/5.0 (compatible; CommunityCalendar/1.0)",
+               url, "-o", outfile]
 
         subprocess.run(cmd)
 
