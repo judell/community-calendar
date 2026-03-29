@@ -36,6 +36,7 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | B-Square: Misc Civic Events | ICS | ~252 | Google Calendar |
 | B-Square: Critical Mass | ICS | ~8 | Google Calendar (monthly group bike ride) |
 | B-Square: BPTC Public Meetings | ICS | ~15 | Google Calendar (transit board meetings) |
+| Buskirk-Chumley Theater | Scraper | ~32 | `buskirk_chumley.py` (added 2026-02) |
 | The Comedy Attic | Scraper | ~32 | `comedy_attic.py` |
 | The Bishop | Scraper | ~4 | `the_bishop.py` (SSL verify=False, cert expired 2026-03) |
 | BloomingtonOnline: Events | ICS | ~224 | Google Calendar - community events |
@@ -65,11 +66,12 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | Indivisible Central Indiana | Mobilize.us scraper | ~21 | `mobilize.py` — civic/political organizing (added 2026-03) |
 | Let's Go! Bloomington | ICS | — | Google Calendar aggregator — indie venues, shows, art openings (added 2026-03) |
 | Morgenstern Books | Eventbrite scraper | ~9 | Author events, book clubs via Eventbrite organizer page (added 2026-03) |
-| WFHB Community Calendar | Scraper | ~349 | `wfhb_calendar.py` — ai1ec (All-in-One Event Calendar) HTML scraper; curated community events (added 2026-03) |
+| WFHB Community Calendar | Scraper | ~349 | `wfhb_calendar.py` — ai1ec scraper; **aggregator** (curated community events across many venues) (added 2026-03) |
 | Nerd Nite Bloomington | Eventbrite scraper | ~1 | `eventbrite.py` organizer 95199764993 — quarterly at The Bishop (added 2026-03) |
 | Writers Guild at Bloomington | Scraper | ~7 | `writers_guild.py` — Sugar Calendar scraper; prose, poetry, spoken word (added 2026-03) |
 | IU Eskenazi School of Art | ICS | ~94 | LiveWhale `group_id/11` — exhibitions, lectures, MFA shows (added 2026-03) |
 | FAR Center for Contemporary Arts | Scraper | ~4 | `far_center.py` — Craft CMS scraper; gallery openings, film, workshops (added 2026-03) |
+| Redbud Books | ICS | ~348 | Google Calendar — book clubs, author talks, film screenings, community events (added 2026-03) |
 
 ---
 
@@ -453,7 +455,7 @@ These groups have working ICS feeds but no upcoming events as of 2026-02-17:
 
 ### Current Coverage Summary
 
-**56 sources implemented** (expanded from 51 on 2026-03-28) covering:
+**58 sources implemented** (expanded from 51 on 2026-03-28) covering:
 - University events (IU LiveWhale × 15, LibCal × 2, CampusLabs × 1)
 - City/civic (Parks & Rec, Farmers Market, B-Square × 4, City Gov, Boards & Commissions)
 - Arts/entertainment (Bloomington Arts, Comedy Attic, Bishop, Bluebird, Blockhouse, Brown County Playhouse, Cardinal Spirits, Constellation, Cicada Cinema)
@@ -518,6 +520,12 @@ Searched across all curator-guide topics: music, theater, comedy, dance, film, a
 | Windfall Dancers | WordPress, no events feed — class schedules as plain text |
 | Nerd Nite website | WordPress blog, no feed — covered via Eventbrite organizer page |
 | Time & Tide Tattoo | Flash events announced only on Instagram/Facebook — not scrapable |
+| Juniper Art Gallery | Shopify, no calendar feed — recurring events as text; some covered by WFHB aggregator |
+| Backspace Gallery | Square site, no events page — some covered by WFHB aggregator |
+| Yoga Mala | Google Calendar page is 404 |
+| Bloomington Yoga Collective | Squarespace + MindBody, class schedules only |
+| Vibe Yoga Studio | Squarespace, class schedules only |
+| Gallery Walk Bloomington | Wix, no feed — recurring first Friday 5-8pm, individual gallery events already covered |
 
 ### Oblique Strategy Wins
 

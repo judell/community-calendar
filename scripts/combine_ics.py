@@ -111,6 +111,7 @@ SOURCE_NAMES = {
     # Bloomington - IU CampusLabs
     'iu_campuslabs': 'IU beINvolved Student Orgs',
     # Bloomington - Community
+    'gcal_c_25e52423b2d0772255c59d0e398b655d5c121833814b7b9fc11f4ddd9cff195c_group_calendar_google_com': 'Redbud Books',
     'wonderlab': 'WonderLab Museum',
     'first_united_church': 'First United Church',
     'community_band': 'Bloomington Community Band',
