@@ -571,6 +571,7 @@ SOURCE_NAMES = {
     'eventbrite_story_inn': 'Story Inn',
     'localist_brown_county_sp': 'Brown County State Park',
     'localist_mccormicks_creek': "McCormick's Creek State Park",
+    'bloomington_arts_today': 'BloomingtonArts.Today',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
