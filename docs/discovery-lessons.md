@@ -376,6 +376,28 @@ If you get JSON back, you can build a scraper around the REST API.
 
 **Example:** Studio Montclair's site blocks all ICS requests with mod_security, but `/wp-json/wp/v2/posts` returns exhibition posts with dates like "Exhibition Dates: January 30 to February 27, 2026" embedded in the HTML content. See `scrapers/studio_montclair.py`.
 
+## The Events Calendar (Tribe): ICS Blocked, Tribe API Works
+
+Sites using The Events Calendar (Tribe) plugin often have ICS export blocked by Cloudflare or mod_security (returning 403), but the plugin's own REST API at `/wp-json/tribe/events/v1/events/` is typically unblocked. Unlike the generic WP REST API, the Tribe API returns **structured event data** — `start_date`, `end_date`, `venue`, `description` — no HTML parsing needed.
+
+**How to detect:** Check the HTTP headers on any events page:
+```bash
+curl -sI "https://example.com/events/" | grep -i x-tec-api
+# x-tec-api-root: https://example.com/wp-json/tribe/events/v1/
+```
+
+If you see `x-tec-api-root`, the Tribe API is available. Test it:
+```bash
+curl -sL "https://example.com/wp-json/tribe/events/v1/events/?per_page=5" \
+  -H "Accept: application/json" | python3 -m json.tool | head -30
+```
+
+**Reusable base:** `scrapers/lib/tribe_events.py` (TribeEventsScraper). Subclass with `api_url` and you're done — structured dates, venues with addresses, descriptions, pagination all handled.
+
+**Example:** NAMI Greater Bloomington's ICS export returns 403 (Cloudflare), but the Tribe API returns 78 events with structured data. See `scrapers/nami_bloomington.py` (10-line subclass, 31 future events).
+
+**Prevalence:** The Events Calendar is one of the most popular WordPress calendar plugins (~800K+ active installs). Many community organizations use it. Always try the Tribe API before giving up on a WordPress site with blocked ICS.
+
 ## Modern Events Calendar (MEC): ICS Broken, REST Works
 
 MEC's ICS feed (`?mec-ical-feed=1`) is unreliable — some sites return HTML instead of ICS, and MEC's own REST API (`/wp-json/mec/v1/events`) sometimes returns 0 events even when events exist. However, MEC stores events as a custom post type (`mec-events`) accessible via the standard WP REST API:

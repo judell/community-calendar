@@ -147,6 +147,12 @@ curl -sL "https://example.com/events/" -A "Mozilla/5.0" | grep -o "wp-content/pl
 curl -sL "https://example.com/events/?ical=1" | head -20              # Tribe Events Calendar
 curl -sL "https://example.com/events/?mec-ical-feed=1" | head -20     # Modern Events Calendar (MEC)
 curl -sL "https://example.com/events/feed/" | head -20
+
+# If ICS is blocked by WAF (403/503), try the Tribe Events REST API
+# The JSON API is often unblocked even when ICS export is firewalled
+curl -sL "https://example.com/wp-json/tribe/events/v1/events/?per_page=5" \
+  -H "Accept: application/json" | python3 -m json.tool | head -30
+# If this returns events, use lib/tribe_events.py (TribeEventsScraper)
 ```
 
 ### MembershipWorks
