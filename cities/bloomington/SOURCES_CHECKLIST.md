@@ -29,15 +29,14 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 Feed URL pattern: `https://events.iu.edu/live/ical/events/group_id/{id}`
 Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.html
 
-### University — Other IU Platforms (3 feeds)
+### University — Other IU Platforms (2 feeds)
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | IU Moving Image Archive | LibCal `cid=5914` | ~151 | |
 | IU Scholars' Commons | LibCal `cid=1228` | ~26 | |
-| IU beINvolved Student Orgs | CampusLabs | ~16900 | `iub.campuslabs.com` |
 
-### City & Civic (8 feeds)
+### City & Civic (4 feeds)
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
@@ -46,9 +45,6 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | City Department Events | Google Calendar | — | |
 | Parks and Recreation | Google Calendar | ~1615 | Concerts, fitness, nature, family events |
 | Bloomington Farmers Market | Google Calendar | ~307 | |
-| B-Square: Government | Google Calendar | ~8887 | Mostly historical, future-filtered |
-| B-Square: Misc Civic Events | Google Calendar | ~252 | |
-| B-Square: BPTC Public Meetings | Google Calendar | ~15 | Transit board |
 
 ### Music & Performing Arts (7 sources)
 
@@ -70,7 +66,6 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | FAR Center for Contemporary Arts | Scraper | ~4 | `far_center.py` — Craft CMS |
 | Cicada Cinema | Scraper | ~6 | Shopify products API — `cicada_cinema.py` |
 | Bloomington Old-Time Music & Dance | Google Calendar | — | |
-| B-Square: Critical Mass | Google Calendar | ~8 | Monthly group bike ride |
 
 ### Literary (4 sources)
 
@@ -128,9 +123,9 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Upland Brewing | ICS | — | WordPress Events Calendar — dormant, populates seasonally |
 | People's Market | Scraper | ~10 | Squarespace — `peoples_market.py` |
 
-### Aggregators (5 sources)
+### Aggregators (10 sources)
 
-These curate events from multiple venues:
+These curate or aggregate events from multiple venues:
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
@@ -139,6 +134,10 @@ These curate events from multiple venues:
 | BloomingtonOnline: Food & Drink | Google Calendar | ~133 | Restaurant/brewery specials |
 | BloomingtonOnline: Shopping | Google Calendar | ~18 | Markets, deals |
 | Let's Go! Bloomington | Google Calendar | — | Indie venues, shows, art openings |
+| BloomingtonArts.Today | Scraper | ~115 | Hand-curated arts calendar; 88% overlap with authoritative feeds |
+| Brown County Events | ICS | ~94 | browncounty.com CVB — aggregates Nashville/Brown County venues |
+| B-Square Bulletin (4 feeds) | Google Calendar | ~9162 | Government, misc civic, Critical Mass, BPTC meetings (mostly historical, future-filtered) |
+| IU beINvolved Student Orgs | ICS | ~16900 | CampusLabs — all student org events campus-wide |
 
 ### Other (3 sources)
 
