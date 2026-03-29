@@ -559,6 +559,7 @@ SOURCE_NAMES = {
     'writers_guild': 'Writers Guild at Bloomington',
     'far_center': 'FAR Center for Contemporary Arts',
     'habitat': 'Habitat for Humanity Monroe County',
+    'nami_bloomington': 'NAMI Greater Bloomington',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.

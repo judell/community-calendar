@@ -2,7 +2,7 @@
 
 Prioritized list of potential event sources for the Bloomington, IN community calendar.
 
-## Currently Implemented (59 sources)
+## Currently Implemented (60 sources)
 
 ### University — IU LiveWhale (17 feeds)
 
@@ -92,6 +92,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Bloomington Community Band | ICS | ~20 | WordPress Events Calendar |
 | Bloominglabs Makerspace | Google Calendar | ~10+ | |
 | Habitat for Humanity Monroe County | Scraper | ~4 | `habitat.py` — fundraisers, 5K, volunteer events |
+| NAMI Greater Bloomington | Scraper | ~31 | `nami_bloomington.py` — Tribe Events API; support groups at library |
 | Bloomington Spinners & Weavers Guild | ICS | — | |
 
 ### Nature & Outdoors (4 sources)
@@ -158,8 +159,8 @@ These curate events from multiple venues:
 | Bloomington Yoga Collective | Squarespace + MindBody | Class schedules only |
 | Vibe Yoga Studio | Squarespace | Class schedules only |
 | Bloomington Volunteer Network | Galaxy Digital | No feed export |
-| NAMI Greater Bloomington | The Events Calendar | WAF blocks ICS export (403); mostly recurring support groups |
-| SIREN Solar | Tribe Events Calendar | ICS export broken (returns HTML) |
+| ~~NAMI Greater Bloomington~~ | ~~The Events Calendar~~ | RESOLVED: Tribe Events REST API works (2026-03) |
+| SIREN Solar | Tribe Events Calendar | ICS broken, API returns 0 events — dead calendar |
 | Pillar Arts | WordPress + TEC | ICS export broken; calendar appears inactive |
 | Monroe County Gov | Indiana state platform | No ICS export |
 | MCCSC School Calendar | ParentSquare | Old URL 404 |
@@ -219,6 +220,7 @@ These curate events from multiple venues:
 | Songkick | `lib/songkick.py` | Bluebird, Blockhouse | Venue event pages |
 | Eventbrite | `scrapers/eventbrite.py` | Morgenstern Books, Nerd Nite | Organizer page → JSON-LD |
 | Mobilize.us | `scrapers/mobilize.py` | Indivisible | Organizer event pages |
+| The Events Calendar (Tribe) | `lib/tribe_events.py` | NAMI | WordPress plugin REST API; bypasses WAF-blocked ICS |
 | JSON-LD | `lib/jsonld.py` | (used by Eventbrite) | Schema.org Event extraction |
 
 ---
