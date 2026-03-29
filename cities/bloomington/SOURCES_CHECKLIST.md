@@ -2,7 +2,7 @@
 
 Prioritized list of potential event sources for the Bloomington, IN community calendar.
 
-## Currently Implemented (60 sources)
+## Currently Implemented (62 sources)
 
 ### University — IU LiveWhale (17 feeds)
 
@@ -119,6 +119,8 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Cardinal Spirits | Scraper | ~5 | Squarespace — `cardinal_spirits.py` |
+| The Tap | Eventbrite scraper | — | Live music, craft beer events |
+| Martinsville Arts Council | Eventbrite scraper | ~6 | Community theater in Martinsville (20 mi) |
 | Upland Brewing | ICS | — | WordPress Events Calendar — dormant, populates seasonally |
 | People's Market | Scraper | ~10 | Squarespace — `peoples_market.py` |
 

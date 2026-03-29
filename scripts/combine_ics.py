@@ -560,6 +560,7 @@ SOURCE_NAMES = {
     'far_center': 'FAR Center for Contemporary Arts',
     'habitat': 'Habitat for Humanity Monroe County',
     'nami_bloomington': 'NAMI Greater Bloomington',
+    'monroe_county_history_center': 'Monroe County History Center',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
