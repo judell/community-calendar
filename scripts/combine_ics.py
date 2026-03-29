@@ -562,6 +562,9 @@ SOURCE_NAMES = {
     'nami_bloomington': 'NAMI Greater Bloomington',
     'monroe_county_history_center': 'Monroe County History Center',
     'browncounty': 'Brown County Events',
+    'gcal_artsanctuaryindiana': 'Art Sanctuary of Indiana',
+    'gcal_90204180d86dfba4a7c6fcd85e2082b5f9414f751c9a42d840016d3333a115f2': 'Rebel Purl Yarn Shop',
+    'events_livewhale_353': 'IU Mathers Museum',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
