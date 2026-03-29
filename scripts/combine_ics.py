@@ -565,6 +565,12 @@ SOURCE_NAMES = {
     'gcal_artsanctuaryindiana': 'Art Sanctuary of Indiana',
     'gcal_90204180d86dfba4a7c6fcd85e2082b5f9414f751c9a42d840016d3333a115f2': 'Rebel Purl Yarn Shop',
     'events_livewhale_353': 'IU Mathers Museum',
+    'hardtruth': 'Hard Truth Distilling Co.',
+    'eventbrite_the_tap': 'The Tap',
+    'eventbrite_martinsville_arts': 'Martinsville Arts Council',
+    'eventbrite_story_inn': 'Story Inn',
+    'localist_brown_county_sp': 'Brown County State Park',
+    'localist_mccormicks_creek': "McCormick's Creek State Park",
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
