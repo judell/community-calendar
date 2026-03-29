@@ -561,6 +561,7 @@ SOURCE_NAMES = {
     'habitat': 'Habitat for Humanity Monroe County',
     'nami_bloomington': 'NAMI Greater Bloomington',
     'monroe_county_history_center': 'Monroe County History Center',
+    'browncounty': 'Brown County Events',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
