@@ -68,6 +68,8 @@ Prioritized list of potential event sources for the Bloomington, IN community ca
 | WFHB Community Calendar | Scraper | ~349 | `wfhb_calendar.py` — ai1ec (All-in-One Event Calendar) HTML scraper; curated community events (added 2026-03) |
 | Nerd Nite Bloomington | Eventbrite scraper | ~1 | `eventbrite.py` organizer 95199764993 — quarterly at The Bishop (added 2026-03) |
 | Writers Guild at Bloomington | Scraper | ~7 | `writers_guild.py` — Sugar Calendar scraper; prose, poetry, spoken word (added 2026-03) |
+| IU Eskenazi School of Art | ICS | ~94 | LiveWhale `group_id/11` — exhibitions, lectures, MFA shows (added 2026-03) |
+| FAR Center for Contemporary Arts | Scraper | ~4 | `far_center.py` — Craft CMS scraper; gallery openings, film, workshops (added 2026-03) |
 
 ---
 
@@ -137,7 +139,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
 | **Eskenazi Museum (public)** | `artmuseum.indiana.edu/news-events/calendar/` | SKIP | Covered by LiveWhale feed |
-| **Eskenazi School** | `eskenazi.indiana.edu/events/` | PENDING | HTML scrape |
+| **Eskenazi School** | `events.iu.edu/soaadiub/` | DONE | LiveWhale `group_id/11` (~94 events) |
 
 ### Family / Kids / Science
 
@@ -202,7 +204,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Source | URL | Status | Notes |
 |--------|-----|--------|-------|
 | **UU Church of Bloomington** | `uubloomington.org/` | LOW PRIORITY | Uses Planning Center/Church Center (no public API); events mostly internal church activities |
-| **Friends Meeting** | `bloomingtonfriendsmeeting.org/calendar` | PENDING | |
+| **Friends Meeting** | `bloomingtonfriendsmeeting.org/` | DEAD END | Squarespace; calendar behind member-only page, no public feed |
 
 ### Alt-Weeklies / Regional
 
@@ -451,7 +453,7 @@ These groups have working ICS feeds but no upcoming events as of 2026-02-17:
 
 ### Current Coverage Summary
 
-**54 sources implemented** (expanded from 51 on 2026-03-28) covering:
+**56 sources implemented** (expanded from 51 on 2026-03-28) covering:
 - University events (IU LiveWhale × 15, LibCal × 2, CampusLabs × 1)
 - City/civic (Parks & Rec, Farmers Market, B-Square × 4, City Gov, Boards & Commissions)
 - Arts/entertainment (Bloomington Arts, Comedy Attic, Bishop, Bluebird, Blockhouse, Brown County Playhouse, Cardinal Spirits, Constellation, Cicada Cinema)
@@ -534,9 +536,9 @@ Searched across all curator-guide topics: music, theater, comedy, dance, film, a
 
 | Source | Status | Notes |
 |--------|--------|-------|
-| Eskenazi School of Fine Arts | PENDING | HTML scrape needed |
-| FAR Center for Arts | PENDING | Craft CMS, no ICS, would need scraper |
-| Friends Meeting | PENDING | May have calendar |
+| ~~Eskenazi School of Art~~ | DONE | LiveWhale `group_id/11` (2026-03-28) |
+| ~~FAR Center for Arts~~ | DONE | Craft CMS scraper (2026-03-28) |
+| Friends Meeting | DEAD END | Squarespace, calendar behind member-only page |
 | Winter Farmers' Market | BLOCKED | Wix, no scraping |
 | Neighborhood Associations | LOW PRIORITY | Sites appear inactive |
 | Visit Bloomington | BLOCKED | Simpleview CMS, no API |

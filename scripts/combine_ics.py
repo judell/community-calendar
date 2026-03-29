@@ -104,6 +104,7 @@ SOURCE_NAMES = {
     'iu_black_film': 'IU Black Film Center & Archive',
     'iu_neal_marshall': 'IU Neal-Marshall Black Culture Center',
     'iu_hamilton_lugar': 'IU Hamilton Lugar School',
+    'events_livewhale_11': 'IU Eskenazi School of Art',
     # Bloomington - IU LibCal
     'iu_libcal_screening_room': 'IU Moving Image Archive',
     'iu_libcal_scholars_commons': 'IU Scholars\' Commons',
@@ -555,6 +556,7 @@ SOURCE_NAMES = {
     'wfhb_calendar': 'WFHB Community Calendar',
     'eventbrite_nerd_nite': 'Nerd Nite Bloomington',
     'writers_guild': 'Writers Guild at Bloomington',
+    'far_center': 'FAR Center for Contemporary Arts',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
