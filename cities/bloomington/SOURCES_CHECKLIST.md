@@ -2,7 +2,7 @@
 
 Prioritized list of potential event sources for the Bloomington, IN community calendar.
 
-## Currently Implemented (62 sources)
+## Currently Implemented (67 sources)
 
 ### University — IU LiveWhale (17 feeds)
 
@@ -95,13 +95,15 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | NAMI Greater Bloomington | Scraper | ~31 | `nami_bloomington.py` — Tribe Events API; support groups at library |
 | Bloomington Spinners & Weavers Guild | ICS | — | |
 
-### Nature & Outdoors (4 sources)
+### Nature & Outdoors (6 sources)
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Sassafras Audubon Society | Scraper | ~31 | Squarespace — `sassafras_audubon.py` |
 | Monroe County Master Gardeners | Scraper | ~62 | Squarespace — `master_gardeners.py` |
 | Sycamore Land Trust | Scraper | ~131 | WordPress — `sycamore_land_trust.py` |
+| McCormick's Creek State Park | Localist scraper | ~44 | `localist.py` — events.in.gov venue 35217665860404 (13 mi) |
+| Brown County State Park | Localist scraper | ~13 | `localist.py` — events.in.gov venue 35217662417669 (17 mi) |
 | Knobstone Hiking Trail Meetup | ICS | ~10 | Meetup group — regional hiking |
 
 ### Interest Groups & Civic (5 sources)
@@ -114,13 +116,15 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Hoosier Fly Fishers | ICS | — | |
 | Indivisible Central Indiana | Scraper | ~21 | `mobilize.py` — civic/political organizing |
 
-### Food & Beverage (3 sources)
+### Food & Beverage (5 sources)
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Cardinal Spirits | Scraper | ~5 | Squarespace — `cardinal_spirits.py` |
 | The Tap | Eventbrite scraper | — | Live music, craft beer events |
 | Martinsville Arts Council | Eventbrite scraper | ~6 | Community theater in Martinsville (20 mi) |
+| Story Inn | Eventbrite scraper | — | Seasonal: wine fairs, comedy, music in Story (17 mi) |
+| Hard Truth Distilling Co. | ICS | ~15 | TEC feed; Nashville, IN (16 mi) |
 | Upland Brewing | ICS | — | WordPress Events Calendar — dormant, populates seasonally |
 | People's Market | Scraper | ~10 | Squarespace — `peoples_market.py` |
 
@@ -223,6 +227,7 @@ These curate events from multiple venues:
 | Eventbrite | `scrapers/eventbrite.py` | Morgenstern Books, Nerd Nite | Organizer page → JSON-LD |
 | Mobilize.us | `scrapers/mobilize.py` | Indivisible | Organizer event pages |
 | The Events Calendar (Tribe) | `lib/tribe_events.py` | NAMI | WordPress plugin REST API; bypasses WAF-blocked ICS |
+| Localist | `scrapers/localist.py` | McCormick's Creek SP, Brown County SP | events.in.gov JSON API; filter by venue_id |
 | JSON-LD | `lib/jsonld.py` | (used by Eventbrite) | Schema.org Event extraction |
 
 ---
