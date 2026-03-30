@@ -90,7 +90,7 @@ The calendar ID is URL-encoded in the iframe src (look for `src=` parameter). De
 2. Add SOURCE_NAMES entry in `scripts/combine_ics.py`
 3. Add SOURCE_URLS fallback entry in `scripts/combine_ics.py`
 4. Update `cities/{city}/SOURCES_CHECKLIST.md`
-5. Run `python scripts/sync_feeds_txt.py` to regenerate `feeds.txt`
+5. `add_scraper.py` and `add_feed.py` update `feeds.txt` automatically
 
 ## Squarespace = `?format=json`
 

@@ -207,7 +207,7 @@ python scripts/add_feed.py URL city "Source Name" --dry-run  # preview without c
 python scripts/add_feed.py URL city "Source Name" --test     # test only, don't add
 ```
 
-The workflow YAML is the source of truth. `feeds.txt` is auto-generated documentation — run `python scripts/sync_feeds_txt.py` to regenerate it.
+`feeds.txt` is both documentation and a runtime input (`download_feeds.py` reads it). It is maintained by `add_scraper.py` and `add_feed.py` — do not edit it by hand or regenerate it.
 
 ---
 

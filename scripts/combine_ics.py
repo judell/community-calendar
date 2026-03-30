@@ -572,6 +572,15 @@ SOURCE_NAMES = {
     'localist_brown_county_sp': 'Brown County State Park',
     'localist_mccormicks_creek': "McCormick's Creek State Park",
     'bloomington_arts_today': 'BloomingtonArts.Today',
+    'pottery_house_studio': 'Pottery House Studio',
+    'tm_musical_arts_center': 'IU Musical Arts Center',
+    'tm_iu_cinema': 'IU Cinema (TM)',
+    'tm_brown_county_music': 'Brown County Music Center',
+    'tm_memorial_stadium': 'IU Memorial Stadium',
+    'tm_ruth_halls': 'Ruth N Halls Theatre',
+    'tm_bill_armstrong': 'Bill Armstrong Stadium',
+    'tm_wells_metz': 'Wells Metz Theatre',
+    'tm_assembly_hall': 'Simon Skjodt Assembly Hall',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.

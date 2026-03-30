@@ -28,6 +28,7 @@ jobs:
     env:
       SCRAPE_MONTHS: ${{ github.event.inputs.months || '2' }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
       #ENABLE_FUZZY_DEDUP: ${{ secrets.ANTHROPIC_API_KEY && 'true' || '' }}
 
     steps:
@@ -186,6 +187,15 @@ jobs:
         python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/31640015525" --name "Gallery at the Vault" -o cities/bloomington/eventbrite_gallery_vault.ics || true
         python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/102507618371" --name "Falun Dafa Club at IU" -o cities/bloomington/eventbrite_falun_dafa.ics || true
         python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/106576693901" --name "Reviving Hope for the Nations" -o cities/bloomington/eventbrite_reviving_hope.ics || true
+        python scrapers/squarespace.py --url "https://www.potteryhousestudio.com/workshops" --name "Pottery House Studio" --output cities/bloomington/pottery_house_studio.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpaoDke --name "IU Musical Arts Center" --output cities/bloomington/tm_musical_arts_center.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAI11nA --name "IU Cinema" --output cities/bloomington/tm_iu_cinema.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZ917AOr1 --name "Brown County Music Center" --output cities/bloomington/tm_brown_county_music.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAFdInA --name "IU Memorial Stadium" --output cities/bloomington/tm_memorial_stadium.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAdE6aA --name "Ruth N Halls Theatre" --output cities/bloomington/tm_ruth_halls.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpaoDQe --name "Bill Armstrong Stadium" --output cities/bloomington/tm_bill_armstrong.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAF7JFA --name "Wells Metz Theatre" --output cities/bloomington/tm_wells_metz.ics || true
+        python scrapers/ticketmaster.py --venue-id KovZpZAFdItA --name "Simon Skjodt Assembly Hall" --output cities/bloomington/tm_assembly_hall.ics || true
       continue-on-error: true
 
 
@@ -243,8 +253,6 @@ jobs:
     # ==========================================
     - name: Scrape Toronto sources
       if: contains(steps.locations.outputs.list, 'toronto') && github.event.inputs.regenerate_only != 'true'
-      env:
-        TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
       run: |
         echo "Scraping Toronto..."
         python scrapers/uoft_events.py -o cities/toronto/uoft_events.ics || true
@@ -291,8 +299,6 @@ jobs:
         # Ticketmaster venues
         python scrapers/ticketmaster.py --venue-id KovZpa2X8e --name "DPAC" -o cities/raleighdurham/dpac.ics || true
         python scrapers/ticketmaster.py --venue-id KovZpZAFF1nA --name "Martin Marietta Center" -o cities/raleighdurham/martin_marietta.ics || true
-      env:
-        TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
       continue-on-error: true
 
 
@@ -328,8 +334,6 @@ jobs:
     # ==========================================
     - name: Scrape Lancaster sources
       if: contains(steps.locations.outputs.list, 'lancaster') && github.event.inputs.regenerate_only != 'true'
-      env:
-        TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
       run: |
         echo "Scraping Lancaster..."
         python scrapers/mobilize.py --url "https://www.mobilize.us/lancastercountydems/" --name "Lancaster County Dems (Mobilize)" --output cities/lancaster/mobilize_lancaster_county_dems.ics || true

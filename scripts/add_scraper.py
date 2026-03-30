@@ -271,6 +271,35 @@ def add_to_combine_ics(scraper_name: str, display_name: str) -> bool:
     return True
 
 
+def add_to_feeds_txt(city: str, scraper_path: Path, extra_args: str,
+                     output_name: str, display_name: str) -> bool:
+    """Append the scraper entry to cities/{city}/feeds.txt."""
+    feeds_path = ROOT / f"cities/{city}/feeds.txt"
+
+    print(f"\n📝 Adding to {feeds_path.relative_to(ROOT)}")
+
+    if not feeds_path.exists():
+        print(f"❌ feeds.txt not found: {feeds_path}")
+        return False
+
+    content = feeds_path.read_text()
+    output_file = f"cities/{city}/{output_name}.ics"
+
+    if output_file in content:
+        print(f"✅ Already in feeds.txt")
+        return True
+
+    extra = f" {extra_args}" if extra_args else ""
+    cmd = f"python {scraper_path.relative_to(ROOT)}{extra}"
+    entry = f"\n# {display_name}\n# cmd: {cmd}\n{output_file}\n"
+
+    with open(feeds_path, 'a') as f:
+        f.write(entry)
+
+    print(f"✅ Added to feeds.txt: {display_name}")
+    return True
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Add a scraper to the calendar pipeline',
@@ -315,6 +344,7 @@ Examples:
         print("\n[DRY RUN] Would perform the following:")
         print(f"  1. Add to workflow: python {scraper_path.relative_to(ROOT)}{extra} --output cities/{args.city}/{ics_name}.ics")
         print(f"  2. Add to SOURCE_NAMES: '{ics_name}': '{args.display_name}'")
+        print(f"  3. Add to feeds.txt: cities/{args.city}/{ics_name}.ics")
         return
     
     # Step 2: Test if requested
@@ -335,7 +365,10 @@ Examples:
     if not args.skip_combine:
         if not add_to_combine_ics(ics_name, args.display_name):
             print("\n⚠️  Failed to add to combine_ics.py automatically")
-    
+
+    # Step 5: Add to feeds.txt
+    add_to_feeds_txt(args.city, scraper_path, args.extra_args, ics_name, args.display_name)
+
     print("\n" + "="*60)
     print("✅ Done! Next steps:")
     print("  1. Review changes: git diff")

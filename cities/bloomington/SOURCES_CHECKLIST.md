@@ -2,7 +2,7 @@
 
 Prioritized list of potential event sources for the Bloomington, IN community calendar.
 
-## Currently Implemented (67 sources)
+## Currently Implemented (76 sources)
 
 ### University — IU LiveWhale (17 feeds)
 
@@ -58,13 +58,14 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Constellation Stage & Screen | Scraper | ~45 | Spektrix API — `constellation.py` |
 | Brown County Playhouse | ICS | ~12 | WordPress Events Calendar |
 
-### Arts & Culture (5 sources)
+### Arts & Culture (6 sources)
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Bloomington Arts | ICS | — | Tockify API feed |
 | FAR Center for Contemporary Arts | Scraper | ~4 | `far_center.py` — Craft CMS |
 | Cicada Cinema | Scraper | ~6 | Shopify products API — `cicada_cinema.py` |
+| Pottery House Studio | Scraper | ~40 | Squarespace — `squarespace.py` workshops |
 | Bloomington Old-Time Music & Dance | Google Calendar | — | |
 
 ### Literary (4 sources)
@@ -138,6 +139,19 @@ These curate or aggregate events from multiple venues:
 | Brown County Events | ICS | ~94 | browncounty.com CVB — aggregates Nashville/Brown County venues |
 | B-Square Bulletin (4 feeds) | Google Calendar | ~9162 | Government, misc civic, Critical Mass, BPTC meetings (mostly historical, future-filtered) |
 | IU beINvolved Student Orgs | ICS | ~16900 | CampusLabs — all student org events campus-wide |
+
+### Ticketmaster Venues (8 sources)
+
+| Source | Venue ID | Events | Notes |
+|--------|----------|--------|-------|
+| IU Musical Arts Center | KovZpaoDke | ~15 | Opera, ballet, orchestral |
+| IU Cinema | KovZpZAI11nA | ~31 | Film screenings |
+| Brown County Music Center | KovZ917AOr1 | ~27 | Nashville, IN (17 mi) |
+| IU Memorial Stadium | KovZpZAFdInA | ~4 | Football, concerts |
+| Ruth N Halls Theatre | KovZpZAdE6aA | ~8 | Theatre, dance |
+| Bill Armstrong Stadium | KovZpaoDQe | ~5 | Soccer, events |
+| Wells Metz Theatre | KovZpZAF7JFA | ~4 | Theatre |
+| Simon Skjodt Assembly Hall | KovZpZAFdItA | ~2 | Basketball, concerts |
 
 ### Other (3 sources)
 
