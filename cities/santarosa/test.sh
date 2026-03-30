@@ -73,7 +73,7 @@ reset_fixtures() {
     -H "apikey: ${SUPABASE_KEY}" \
     -H "Content-Type: application/json" \
     -H "Prefer: resolution=merge-duplicates" \
-    -d "{\"user_id\": \"${USER_ID}\", \"city\": \"santarosa\", \"hidden_sources\": [], \"one_click_pick\": false}"
+    -d "{\"user_id\": \"${USER_ID}\", \"city\": \"santarosa\", \"hidden_sources\": [], \"one_click_pick\": false, \"layout_mode\": \"list\", \"image_mode\": \"everywhere\"}"
 
   echo "Fixtures reset for ${TEST_USER_EMAIL}"
 }

@@ -5,6 +5,7 @@ var categoryColorMap = window.categoryColorMap;
 
 var layoutMode = window.layoutMode;
 var showListImages = window.showListImages;
+var oneClickPick = false;
 
 var categoryFilter = window.initialCategory || '';
 var pickEvent = null;
@@ -56,7 +57,7 @@ function togglePick(event) {
       });
     });
     picksCounter = picksCounter + 1;
-  } else if (userSettingsData && userSettingsData[0] && userSettingsData[0].one_click_pick && event.id) {
+  } else if (oneClickPick && event.id) {
     // One-click pick: skip the editor and create pick directly
     Actions.callApi({
       method: 'post',

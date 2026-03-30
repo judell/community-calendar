@@ -57,7 +57,7 @@
 
   <ChangeListener
     listenTo="{userSettings.value}"
-    onDidChange="() => { if (!userSettingsData) { userSettingsData = userSettings.value; const s = userSettingsData && userSettingsData[0]; if (s) { if (s.layout_mode) { window.setLayoutMode(s.layout_mode); layoutMode = s.layout_mode } if (s.image_mode) { window.setShowListImages(s.image_mode === 'everywhere' ? 'list' : 'preview'); showListImages = (s.image_mode !== 'preview') } } } }"
+    onDidChange="() => { if (!userSettingsData) { userSettingsData = userSettings.value; const s = userSettingsData && userSettingsData[0]; if (s) { if (s.layout_mode) { window.setLayoutMode(s.layout_mode); layoutMode = s.layout_mode } if (s.image_mode) { window.setShowListImages(s.image_mode === 'everywhere' ? 'list' : 'preview'); showListImages = (s.image_mode !== 'preview') } oneClickPick = !!s.one_click_pick } } }"
   />
 
   <DataSource
@@ -179,8 +179,8 @@
       <Text fontWeight="$fontWeight-bold" fontSize="$fontSize-sm">Picks</Text>
       <Checkbox
         label="One-click pick (skip editor)"
-        initialValue="{userSettingsData && userSettingsData[0] && userSettingsData[0].one_click_pick}"
-        onClick="userSettingsData = window.toggleOneClickPickAndSave(userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey)"
+        initialValue="{oneClickPick}"
+        onClick="oneClickPick = !oneClickPick; window.saveUserSetting({ one_click_pick: oneClickPick }, userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey)"
       />
     </VStack>
   </ModalDialog>
