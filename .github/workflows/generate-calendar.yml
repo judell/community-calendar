@@ -177,6 +177,8 @@ jobs:
         python scrapers/localist.py --base-url "https://events.in.gov" --venue-id 35217665860404 --name "McCormick's Creek State Park" --output cities/bloomington/localist_mccormicks_creek.ics || true
         python scrapers/localist.py --base-url "https://events.in.gov" --venue-id 35217662417669 --name "Brown County State Park" --output cities/bloomington/localist_brown_county_sp.ics || true
         python scrapers/bloomington_arts_today.py --output cities/bloomington/bloomington_arts_today.ics || true
+        # College athletics (Sidearm v3 Calendar API)
+        python scrapers/sidearm.py --base-url "https://iuhoosiers.com" --name "IU Athletics" --timezone America/Indiana/Indianapolis --home-only -o cities/bloomington/iu_athletics.ics || true
       continue-on-error: true
 
 
@@ -347,8 +349,8 @@ jobs:
         python scrapers/ticketmaster.py --venue-id KovZpZAa1t1A --name "Chameleon Club" -o cities/lancaster/tm_chameleon.ics || true
         # Drupal (library calendar JSON feed)
         python scrapers/drupal_events.py --url "https://calendar.lancasterlibraries.org/events/feed/json" --name "Lancaster Libraries" -o cities/lancaster/lancaster_libraries.ics || true
-        # College athletics (Sidearm JSON-LD)
-        python scrapers/sidearm.py --url "https://godiplomats.com" --name "F&M Athletics" -o cities/lancaster/fandm_athletics.ics || true
+        # College athletics (Sidearm v3 Calendar API)
+        python scrapers/sidearm.py --base-url "https://godiplomats.com" --name "F&M Athletics" --home-only -o cities/lancaster/fandm_athletics.ics || true
         # High school athletics (MaxPreps)
         python scrapers/maxpreps.py --url "https://www.maxpreps.com/pa/lancaster/lancaster-catholic-crusaders/events/" --name "Lancaster Catholic" --timezone America/New_York --output cities/lancaster/maxpreps_lancaster_catholic.ics || true
         python scrapers/maxpreps.py --url "https://www.maxpreps.com/pa/lancaster/lancaster-mennonite-blazers/events/" --name "Lancaster Mennonite" --timezone America/New_York --output cities/lancaster/maxpreps_lancaster_mennonite.ics || true
