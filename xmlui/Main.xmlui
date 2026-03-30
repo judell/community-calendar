@@ -57,7 +57,7 @@
 
   <ChangeListener
     listenTo="{userSettings.value}"
-    onDidChange="() => { if (!userSettingsData) userSettingsData = userSettings.value }"
+    onDidChange="() => { if (!userSettingsData) { userSettingsData = userSettings.value; var s = userSettingsData && userSettingsData[0]; if (s) { if (s.layout_mode) { window.setLayoutMode(s.layout_mode); layoutMode = s.layout_mode } if (s.image_mode) { window.setShowListImages(s.image_mode === 'everywhere' ? 'list' : 'preview'); showListImages = (s.image_mode !== 'preview') } } } }"
   />
 
   <DataSource
@@ -157,7 +157,7 @@
     <HStack verticalAlignment="start" gap="$space-6">
       <VStack gap="$space-1">
         <Text fontWeight="$fontWeight-bold" fontSize="$fontSize-sm">Layout</Text>
-        <RadioGroup initialValue="{layoutMode}" onDidChange="(val) => { window.setLayoutMode(val); layoutMode = val }">
+        <RadioGroup initialValue="{layoutMode}" onDidChange="(val) => { window.setLayoutMode(val); layoutMode = val; if (authSession) { userSettingsData = window.saveUserSetting({ layout_mode: val }, userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey) } }">
           <VStack>
             <Option value="list" label="Single column" fontSize="$fontSize-sm" />
             <Option value="multicol" label="Multi column" fontSize="$fontSize-sm" />
@@ -167,7 +167,7 @@
       </VStack>
       <VStack gap="$space-1">
         <Text fontWeight="$fontWeight-bold" fontSize="$fontSize-sm">Images</Text>
-        <RadioGroup initialValue="{showListImages ? 'list' : 'preview'}" onDidChange="(val) => { window.setShowListImages(val); showListImages = (val !== 'preview') }">
+        <RadioGroup initialValue="{showListImages ? 'list' : 'preview'}" onDidChange="(val) => { window.setShowListImages(val); showListImages = (val !== 'preview'); if (authSession) { userSettingsData = window.saveUserSetting({ image_mode: val === 'preview' ? 'preview' : 'everywhere' }, userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey) } }">
           <VStack>
             <Option value="list" label="Everywhere" fontSize="$fontSize-sm" />
             <Option value="preview" label="Only in previews" fontSize="$fontSize-sm" />

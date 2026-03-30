@@ -490,87 +490,48 @@ function truncate(text, maxLen) {
   return text.substring(0, maxLen).trim() + '...';
 }
 
-// Toggle a source's visibility and persist to Supabase. Returns updated userSettingsData.
+// Save user setting fields to Supabase (fire-and-forget). Returns updated userSettingsData.
+function saveUserSetting(fields, userSettingsData, supabaseUrl, supabaseKey) {
+  fetch(supabaseUrl + '/rest/v1/user_settings?on_conflict=user_id,city', {
+    method: 'POST',
+    headers: {
+      apikey: supabaseKey,
+      Authorization: 'Bearer ' + window.authSession.access_token,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates'
+    },
+    body: JSON.stringify(Object.assign({
+      user_id: window.authUser.id,
+      city: window.cityFilter,
+      updated_at: new Date().toISOString()
+    }, fields))
+  });
+
+  if (userSettingsData && userSettingsData[0]) {
+    return [Object.assign({}, userSettingsData[0], fields)];
+  }
+  return [fields];
+}
+
+// Toggle a source's visibility and persist. Returns updated userSettingsData.
 function toggleSourceAndSave(source, userSettingsData, supabaseUrl, supabaseKey) {
   var current = (userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || [];
   var idx = current.indexOf(source);
   var updated = idx >= 0
     ? current.filter(function(s) { return s !== source; })
     : current.concat([source]);
-
-  // Persist to Supabase (fire-and-forget)
-  fetch(supabaseUrl + '/rest/v1/user_settings?on_conflict=user_id,city', {
-    method: 'POST',
-    headers: {
-      apikey: supabaseKey,
-      Authorization: 'Bearer ' + window.authSession.access_token,
-      'Content-Type': 'application/json',
-      'Prefer': 'resolution=merge-duplicates'
-    },
-    body: JSON.stringify({
-      user_id: window.authUser.id,
-      city: window.cityFilter,
-      hidden_sources: updated,
-      updated_at: new Date().toISOString()
-    })
-  });
-
-  // Return optimistic update
-  if (userSettingsData && userSettingsData[0]) {
-    return [Object.assign({}, userSettingsData[0], { hidden_sources: updated })];
-  }
-  return [{ hidden_sources: updated }];
+  return saveUserSetting({ hidden_sources: updated }, userSettingsData, supabaseUrl, supabaseKey);
 }
 
-// Apply a complete hidden_sources array and persist to Supabase. Returns updated userSettingsData.
+// Apply a complete hidden_sources array and persist. Returns updated userSettingsData.
 function saveHiddenSources(hiddenArray, userSettingsData, supabaseUrl, supabaseKey) {
-  fetch(supabaseUrl + '/rest/v1/user_settings?on_conflict=user_id,city', {
-    method: 'POST',
-    headers: {
-      apikey: supabaseKey,
-      Authorization: 'Bearer ' + window.authSession.access_token,
-      'Content-Type': 'application/json',
-      'Prefer': 'resolution=merge-duplicates'
-    },
-    body: JSON.stringify({
-      user_id: window.authUser.id,
-      city: window.cityFilter,
-      hidden_sources: hiddenArray,
-      updated_at: new Date().toISOString()
-    })
-  });
-
-  if (userSettingsData && userSettingsData[0]) {
-    return [Object.assign({}, userSettingsData[0], { hidden_sources: hiddenArray })];
-  }
-  return [{ hidden_sources: hiddenArray }];
+  return saveUserSetting({ hidden_sources: hiddenArray }, userSettingsData, supabaseUrl, supabaseKey);
 }
 
-// Toggle one-click-pick and persist to Supabase. Returns updated userSettingsData.
+// Toggle one-click-pick and persist. Returns updated userSettingsData.
 function toggleOneClickPickAndSave(userSettingsData, supabaseUrl, supabaseKey) {
   var current = (userSettingsData && userSettingsData[0] && userSettingsData[0].one_click_pick) || false;
-  var updated = !current;
-
-  fetch(supabaseUrl + '/rest/v1/user_settings?on_conflict=user_id,city', {
-    method: 'POST',
-    headers: {
-      apikey: supabaseKey,
-      Authorization: 'Bearer ' + window.authSession.access_token,
-      'Content-Type': 'application/json',
-      'Prefer': 'resolution=merge-duplicates'
-    },
-    body: JSON.stringify({
-      user_id: window.authUser.id,
-      city: window.cityFilter,
-      one_click_pick: updated,
-      updated_at: new Date().toISOString()
-    })
-  });
-
-  if (userSettingsData && userSettingsData[0]) {
-    return [Object.assign({}, userSettingsData[0], { one_click_pick: updated })];
-  }
-  return [{ one_click_pick: updated }];
+  return saveUserSetting({ one_click_pick: !current }, userSettingsData, supabaseUrl, supabaseKey);
 }
 
 // Check if a source is in the hidden sources list
@@ -1306,6 +1267,7 @@ if (typeof window !== 'undefined') {
   window.getSnippet = getSnippet;
   window.truncate = truncate;
   window.formatSourceLinks = formatSourceLinks;
+  window.saveUserSetting = saveUserSetting;
   window.toggleSourceAndSave = toggleSourceAndSave;
   window.saveHiddenSources = saveHiddenSources;
   window.isSourceHidden = isSourceHidden;
