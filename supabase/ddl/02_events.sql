@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS events (
   category text,            -- auto-classified bucket (e.g., 'Music & Concerts', 'Arts & Culture')
   ics_categories text[],    -- CATEGORIES values from ICS source
   image_url text,           -- event image URL from ICS ATTACH or scraper
+  all_day boolean DEFAULT false,  -- true for all-day events (VALUE=DATE in ICS)
   created_at timestamptz DEFAULT now()
 );
 

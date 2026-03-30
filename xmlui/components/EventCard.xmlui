@@ -16,7 +16,7 @@
       <Text
         fontSize="$fontSize-sm"
         color="$color-text-secondary"
-        value="{window.formatDayOfWeek($props.event.start_time) + ' ' + window.formatMonthDay($props.event.start_time) + (window.formatTime($props.event.start_time) ? ', ' + window.formatTime($props.event.start_time) : '')}"
+        value="{window.formatDayOfWeek($props.event.start_time) + ' ' + window.formatMonthDay($props.event.start_time) + ($props.event.all_day ? ', All Day' : (window.formatTime($props.event.start_time) ? ', ' + window.formatTime($props.event.start_time) : ''))}"
       />
       <Link when="{$props.event.url}" to="{$props.event.url}" target="_blank">
         <Text fontWeight="600" fontSize="$fontSize-sm" overflowMode="flow" value="{$props.event.title}" />
@@ -117,7 +117,7 @@
       <Text
         fontSize="$fontSize-sm"
         color="$color-text-secondary"
-        value="{window.formatDayOfWeek($param.start_time) + ' ' + window.formatMonthDay($param.start_time) + (window.formatTime($param.start_time) ? ', ' + window.formatTime($param.start_time) : '')}"
+        value="{window.formatDayOfWeek($param.start_time) + ' ' + window.formatMonthDay($param.start_time) + ($param.all_day ? ', All Day' : (window.formatTime($param.start_time) ? ', ' + window.formatTime($param.start_time) : ''))}"
       />
       <Text when="{$param.location}" fontSize="$fontSize-sm" value="{$param.location}" />
       <Markdown

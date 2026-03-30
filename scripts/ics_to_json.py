@@ -75,6 +75,18 @@ def parse_ics_datetime(dt_str, local_tz=None):
         return None
 
 
+def is_all_day_event(raw_dt_str):
+    """Check if a DTSTART string represents an all-day event (VALUE=DATE, no time component)."""
+    if not raw_dt_str:
+        return False
+    # VALUE=DATE parameter means all-day
+    if 'VALUE=DATE' in raw_dt_str.upper() and 'VALUE=DATE-TIME' not in raw_dt_str.upper():
+        return True
+    # No T in the value portion means date-only
+    value = raw_dt_str.split(':')[-1].strip()
+    return 'T' not in value and len(value) == 8 and value.isdigit()
+
+
 def unfold_ics_lines(content):
     """Unfold ICS continuation lines (lines starting with space or tab)."""
     # ICS spec: long lines are folded by inserting CRLF + space/tab
@@ -288,8 +300,10 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
     for event_content in matches:
         # Extract fields
         title = html_unescape(extract_field(event_content, 'SUMMARY') or '')
-        start_time = parse_ics_datetime(extract_raw_datetime(event_content, 'DTSTART'), local_tz)
+        raw_dtstart = extract_raw_datetime(event_content, 'DTSTART')
+        start_time = parse_ics_datetime(raw_dtstart, local_tz)
         end_time = parse_ics_datetime(extract_raw_datetime(event_content, 'DTEND'), local_tz)
+        all_day = is_all_day_event(raw_dtstart)
         location = html_unescape(extract_field(event_content, 'LOCATION') or '')
         description = html_unescape(extract_field(event_content, 'DESCRIPTION') or '')
         url = extract_field(event_content, 'URL')
@@ -342,7 +356,8 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
             'source_urls': source_urls if source_urls else None,
             'cluster_id': None,
             'ics_categories': ics_categories if ics_categories else None,
-            'image_url': image_url
+            'image_url': image_url,
+            'all_day': all_day
         }
         events.append(event)
 
