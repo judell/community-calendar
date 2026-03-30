@@ -387,8 +387,10 @@ jobs:
         for city in "${CITIES[@]}"; do
           city=$(echo "$city" | xargs)
           if [ -f "cities/$city/feeds.txt" ]; then
+            START=$(date +%s)
             echo "Downloading feeds for $city..."
             python scripts/download_feeds.py "$city"
+            echo "⏱ $city feeds: $(( $(date +%s) - START ))s"
           fi
         done
 
@@ -400,8 +402,10 @@ jobs:
           # Title-case the city name for the calendar name
           display=$(echo "$city" | sed 's/-/ /g;s/\b\(.\)/\u\1/g')
           if [ -d "cities/$city" ]; then
+            START=$(date +%s)
             echo "Combining ICS for $city..."
             python scripts/combine_ics.py --input-dir "cities/$city" --output "cities/$city/combined.ics" --name "$display Community Calendar"
+            echo "⏱ $city combine: $(( $(date +%s) - START ))s"
           fi
         done
 
@@ -424,6 +428,7 @@ jobs:
           git show origin/archive:cities/$city/events.json > "cities/$city/events.prev.json" 2>/dev/null || rm -f "cities/$city/events.prev.json"
           [ -s "cities/$city/events.prev.json" ] || rm -f "cities/$city/events.prev.json"
           if [ -f "cities/$city/combined.ics" ]; then
+            START=$(date +%s)
             echo "Running ics_to_json for $city..."
             python scripts/ics_to_json.py "cities/$city/combined.ics" -o "cities/$city/events.json" --city "$city"
             echo "$city: Converted $(cat cities/$city/events.json | python -c 'import json,sys; print(len(json.load(sys.stdin)))') events to JSON"
@@ -432,6 +437,7 @@ jobs:
               python scripts/merge_categories.py "cities/$city/events.prev.json" "cities/$city/events.json"
               rm "cities/$city/events.prev.json"
             fi
+            echo "⏱ $city convert: $(( $(date +%s) - START ))s"
           else
             echo "WARNING: cities/$city/combined.ics not found!"
             # Clean up prev file if no combined.ics
@@ -475,6 +481,7 @@ jobs:
         for city in "${UPLOAD_CITIES[@]}"; do
           city=$(echo "$city" | xargs)
           if [ -f "cities/$city/events.json" ]; then
+            START=$(date +%s)
             echo "Uploading $city events..."
             jq -c --arg city "$city" '{city: $city, events: .}' "cities/$city/events.json" > /tmp/payload_${city}.json
             RESPONSE=$(curl -sL -X POST "${SUPABASE_URL}/functions/v1/load-events" \
@@ -490,6 +497,7 @@ jobs:
             fi
             INSERTED=$(echo "$RESPONSE" | jq -r '.inserted')
             TOTAL_INSERTED=$((TOTAL_INSERTED + INSERTED))
+            echo "⏱ $city upload: $(( $(date +%s) - START ))s"
             rm -f /tmp/payload_${city}.json
           fi
         done
