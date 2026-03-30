@@ -1,0 +1,64 @@
+<Component
+  name="ChatDialog"
+  method.open="() => { messages = [{ role: 'assistant', content: 'What kind of events are you looking for?' }]; dialog.open(); }"
+  var.messages="{[]}"
+  var.inputText=""
+  var.isLoading="{false}"
+>
+  <APICall
+    id="chatApi"
+    method="post"
+    url="{appGlobals.supabaseUrl + '/functions/v1/chat-events'}"
+    headers="{{ apikey: appGlobals.supabasePublishableKey, 'Content-Type': 'application/json' }}"
+    body="{{ messages: messages, city: window.cityFilter }}"
+    onSuccess="(result) => {
+      messages = [...messages, { role: 'assistant', content: result.reply, events: result.events || [] }];
+      isLoading = false;
+      messageArea.scrollToBottom();
+    }"
+    onError="(err) => {
+      messages = [...messages, { role: 'assistant', content: 'Sorry, something went wrong.' }];
+      isLoading = false;
+    }"
+  />
+  <ModalDialog id="dialog" title="Event Concierge" minWidth="400px">
+    <VStack id="messageArea" height="400px" overflowY="scroll">
+      <Items data="{messages}">
+        <Text
+          when="{$item.role === 'user'}"
+          value="{$item.content}"
+          fontStyle="italic"
+        />
+        <Markdown
+          when="{$item.role === 'assistant'}"
+          content="{$item.content}"
+        />
+        <Items when="{$item.events && $item.events.length > 0}" data="{$item.events}">
+          <EventCard event="{$item}" />
+        </Items>
+      </Items>
+      <Spinner when="{isLoading}" />
+    </VStack>
+    <HStack gap="$space-2">
+      <TextBox
+        id="chatInput"
+        placeholder="Tell me what you're interested in..."
+        initialValue="{inputText}"
+        onDidChange="(val) => inputText = val"
+        width="*"
+      />
+      <Button
+        label="Send"
+        enabled="{!isLoading}"
+        onClick="
+          if (!inputText) return;
+          messages = [...messages, { role: 'user', content: inputText }];
+          inputText = '';
+          chatInput.setValue('');
+          isLoading = true;
+          chatApi.execute();
+        "
+      />
+    </HStack>
+  </ModalDialog>
+</Component>
