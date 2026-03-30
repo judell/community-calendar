@@ -95,9 +95,10 @@ def parse_allowed_cities_file(filepath):
         'center': None,
         'radius': None,
         'state': 'CA',
+        'timezone': None,
         'cities': []
     }
-    
+
     for line in filepath.read_text().splitlines():
         line = line.strip()
         if not line:
@@ -109,6 +110,8 @@ def parse_allowed_cities_file(filepath):
             config['radius'] = float(line.split(':', 1)[1].strip())
         elif line.startswith('# state:'):
             config['state'] = line.split(':', 1)[1].strip()
+        elif line.startswith('# timezone:'):
+            config['timezone'] = line.split(':', 1)[1].strip()
         elif not line.startswith('#'):
             # Strip trailing comment from city name
             city = line.split('#')[0].strip()
@@ -120,7 +123,10 @@ def parse_allowed_cities_file(filepath):
 
 def write_allowed_cities_file(filepath, config, city_coords):
     """Write city.conf with config header."""
-    lines = [
+    lines = []
+    if config.get('timezone'):
+        lines.append(f"# timezone: {config['timezone']}")
+    lines += [
         f"# center: {config['center'][0]}, {config['center'][1]}",
         f"# radius: {config['radius']}",
         f"# state: {config['state']}",
