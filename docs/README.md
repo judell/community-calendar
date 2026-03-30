@@ -33,9 +33,7 @@
 - [snippet-eval-prompt.md](snippet-eval-prompt.md) — LLM prompt for snippet quality evaluation
 
 ## Planning & Notes
-- [engagement-strategy.md](engagement-strategy.md) — Bloomington and Toronto engagement plan
 - [barrel-proof-investigation.md](barrel-proof-investigation.md) — Data quality investigation (blog material)
-- [notes-for-blog-posts.md](notes-for-blog-posts.md) — Blog post ideas and findings
 - [ui-puzzles.md](ui-puzzles.md) — Open UI design problems
 
 ## Superseded
