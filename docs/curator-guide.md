@@ -86,7 +86,8 @@ Some platforms host event data for community organizations but don't expose publ
 1. Note it in the city's `SOURCES_CHECKLIST.md` as blocked
 2. Check if the organization cross-posts events to a platform we *can* reach (Google Calendar, Eventbrite, their own website)
 3. If the organization is high-value, consider reaching out to ask them to publish an ICS feed or share API credentials
-4. As a last resort, the organization could use the [My Picks capture feature](#my-picks-as-an-event-submission-system) to self-publish events
+4. **If the site is Cloudflare-protected WordPress**, ask the organization's web admin to add a Cloudflare WAF exception rule for our calendar bot. Our feed downloader identifies itself with User-Agent `CommunityCalendar/1.0`. The Cloudflare rule they need: **Security → WAF → Custom Rules → Add Rule** — match on `(http.user_agent contains "CommunityCalendar")` and `(http.request.uri.path contains "/events/")`, action **Skip** (skip all remaining custom rules). This lets our daily build fetch their ICS feed (`/events/?ical=1`) or REST API (`/wp-json/tribe/events/v1/events/`) without triggering the bot challenge.
+5. As a last resort, the organization could use the [My Picks capture feature](#my-picks-as-an-event-submission-system) to self-publish events
 
 If you discover other widely-used platforms that block public access, add them to this table.
 

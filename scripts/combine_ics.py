@@ -581,6 +581,7 @@ SOURCE_NAMES = {
     'tm_bill_armstrong': 'Bill Armstrong Stadium',
     'tm_wells_metz': 'Wells Metz Theatre',
     'tm_assembly_hall': 'Simon Skjodt Assembly Hall',
+    'cityspark/limestone_post': 'Limestone Post',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.

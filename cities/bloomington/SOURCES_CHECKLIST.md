@@ -139,6 +139,7 @@ These curate or aggregate events from multiple venues:
 | Brown County Events | ICS | ~94 | browncounty.com CVB — aggregates Nashville/Brown County venues |
 | B-Square Bulletin (4 feeds) | Google Calendar | ~9162 | Government, misc civic, Critical Mass, BPTC meetings (mostly historical, future-filtered) |
 | IU beINvolved Student Orgs | ICS | ~16900 | CampusLabs — all student org events campus-wide |
+| Limestone Post | CitySpark scraper | ~488 | Community aggregator; 29% overlap with existing, 344 unique events (sports, trivia, gallery, faith) |
 
 ### Ticketmaster Venues (8 sources)
 
@@ -169,6 +170,7 @@ These curate or aggregate events from multiple venues:
 
 | Source | Platform | Reason |
 |--------|----------|--------|
+| Amplify Bloomington | WordPress + Cloudflare | Cloudflare blocks all endpoints (ICS, REST API, RSS); request whitelisting of `?ical=1` |
 | Visit Bloomington | Simpleview CMS | No public API |
 | Winter Farmers' Market | Wix | No ICS export |
 | Gallery Walk Bloomington | Wix | No feed; recurring first Friday 5-8pm |
@@ -201,7 +203,6 @@ These curate or aggregate events from multiple venues:
 | Source | Reason |
 |--------|--------|
 | Bandsintown Bloomington | Derivative, duplicate-heavy |
-| Limestone Post Magazine | CitySpark-powered aggregator |
 | Herald-Times Events | Derivative aggregator |
 | Indiana Daily Student Events | No ICS feed; derivative |
 
