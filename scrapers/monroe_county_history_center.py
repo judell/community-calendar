@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Scraper for Monroe County History Center events (EventON via WP REST API)."""
+"""Scraper for Monroe County History Center events (EventON via WP REST API).
+
+Parses dates from the listing API content field instead of fetching
+individual detail pages — reduces ~250 HTTP requests to ~5.
+"""
 
 import re
-import sys
 from datetime import datetime, timedelta
 from typing import Any, Optional
 from zoneinfo import ZoneInfo
@@ -10,7 +13,6 @@ from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
 
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
 from lib.base import BaseScraper
 
 HEADERS = {
@@ -19,9 +21,44 @@ HEADERS = {
 }
 
 MONTHS = {
-    'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
-    'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
+    'january': 1, 'february': 2, 'march': 3, 'april': 4,
+    'may': 5, 'june': 6, 'july': 7, 'august': 8,
+    'september': 9, 'october': 10, 'november': 11, 'december': 12,
+    'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
+    'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9,
+    'oct': 10, 'nov': 11, 'dec': 12,
 }
+
+# Pattern for structured eelisttime: "Thursday, July 16: 5:30pm – 6:30pm"
+STRUCTURED_DATE = re.compile(
+    r'(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday),?\s+'
+    r'(\w+)\s+(\d{1,2}):\s*'
+    r'(\d{1,2}:\d{2}\s*[ap]m)\s*'
+    r'(?:–|-)\s*'
+    r'(\d{1,2}:\d{2}\s*[ap]m)',
+    re.IGNORECASE
+)
+
+# Pattern for inline prose dates: "on April 25th" or "on March 28th"
+PROSE_DATE = re.compile(
+    r'(?:on|from)\s+(\w+)\s+(\d{1,2})(?:st|nd|rd|th)?\b',
+    re.IGNORECASE
+)
+
+# Pattern for "Month Day, Time" in plain text
+PLAIN_DATE = re.compile(
+    r'(\w+)\s+(\d{1,2})(?:st|nd|rd|th)?\s*(?:,\s*\d{4})?\s*'
+    r'(?:from\s+)?(\d{1,2}(?::\d{2})?\s*[ap]m)',
+    re.IGNORECASE
+)
+
+# Inline EventON format from old scraper: "28mar1:00 pm2:30 pm"
+EVENTON_INLINE = re.compile(
+    r'(\d{1,2})(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)'
+    r'(\d{1,2}:\d{2}\s*[ap]m)'
+    r'(\d{1,2}:\d{2}\s*[ap]m)',
+    re.IGNORECASE
+)
 
 
 class HistoryCenterScraper(BaseScraper):
@@ -33,7 +70,7 @@ class HistoryCenterScraper(BaseScraper):
     timezone = "America/Indiana/Indianapolis"
 
     def fetch_events(self) -> list[dict[str, Any]]:
-        """Fetch events via WP REST API, then scrape detail pages for dates."""
+        """Fetch events via WP REST API, parsing dates from content field."""
         self.logger.info(f"Fetching event list from {self.api_url}")
         tz = ZoneInfo(self.timezone)
         events = []
@@ -56,12 +93,13 @@ class HistoryCenterScraper(BaseScraper):
                     continue
                 seen_slugs.add(slug)
 
-                url = item.get('link', '')
                 title = item.get('title', {}).get('rendered', '')
+                url = item.get('link', '')
                 if not title or not url:
                     continue
 
-                parsed = self._fetch_detail(url, title, tz)
+                content = item.get('content', {}).get('rendered', '')
+                parsed = self._parse_from_content(content, title, url, tz)
                 if parsed:
                     events.append(parsed)
 
@@ -72,75 +110,106 @@ class HistoryCenterScraper(BaseScraper):
         self.logger.info(f"Found {len(events)} events")
         return events
 
-    def _fetch_detail(self, url: str, title: str, tz: ZoneInfo) -> Optional[dict[str, Any]]:
-        """Fetch an event detail page and parse the EventON inline date."""
-        try:
-            r = requests.get(url, headers={
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-            }, timeout=15)
-            r.raise_for_status()
-        except Exception as e:
-            self.logger.debug(f"Could not fetch {url}: {e}")
-            return None
+    def _parse_from_content(self, content: str, title: str, url: str,
+                            tz: ZoneInfo) -> Optional[dict[str, Any]]:
+        """Parse event date/time/location from API content field."""
+        soup = BeautifulSoup(content, 'html.parser')
+        text = soup.get_text(' ', strip=True)
 
-        soup = BeautifulSoup(r.text, 'html.parser')
+        dtstart = None
+        dtend = None
+        now = datetime.now(tz)
 
-        # Find the date string: "28mar1:00 pm2:30 pmTitle..."
-        for p in soup.select('p'):
-            text = p.get_text(strip=True)
-            m = re.match(
-                r'(\d{1,2})(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)'
-                r'(\d{1,2}:\d{2}\s*[ap]m)'
-                r'(\d{1,2}:\d{2}\s*[ap]m)',
-                text, re.IGNORECASE
-            )
+        # Try structured eelisttime div first
+        time_div = soup.select_one('.eelisttime')
+        if time_div:
+            time_text = time_div.get_text(strip=True)
+            m = STRUCTURED_DATE.search(time_text)
+            if m:
+                month = MONTHS.get(m.group(1).lower())
+                day = int(m.group(2))
+                if month:
+                    year = self._infer_year(month, day, now)
+                    dtstart = self._make_dt(year, month, day, m.group(3), tz)
+                    dtend = self._make_dt(year, month, day, m.group(4), tz)
+
+        # Try EventON inline format: "28mar1:00 pm2:30 pm"
+        if not dtstart:
+            m = EVENTON_INLINE.search(text)
             if m:
                 day = int(m.group(1))
-                month = MONTHS[m.group(2).lower()]
-                start_time = m.group(3).strip()
-                end_time = m.group(4).strip()
+                month = MONTHS.get(m.group(2).lower())
+                if month:
+                    year = self._infer_year(month, day, now)
+                    dtstart = self._make_dt(year, month, day, m.group(3), tz)
+                    dtend = self._make_dt(year, month, day, m.group(4), tz)
 
-                now = datetime.now(tz)
-                year = now.year
-                if month < now.month or (month == now.month and day < now.day):
-                    year += 1
+        # Try plain date with time: "January 31st from 10 am"
+        if not dtstart:
+            m = PLAIN_DATE.search(text)
+            if m:
+                month = MONTHS.get(m.group(1).lower())
+                day = int(m.group(2))
+                if month:
+                    year = self._infer_year(month, day, now)
+                    dtstart = self._make_dt(year, month, day, m.group(3), tz)
 
-                dtstart = self._make_dt(year, month, day, start_time, tz)
-                dtend = self._make_dt(year, month, day, end_time, tz)
+        # Try prose date without time: "on April 25th"
+        if not dtstart:
+            m = PROSE_DATE.search(text)
+            if m:
+                month = MONTHS.get(m.group(1).lower())
+                day = int(m.group(2))
+                if month:
+                    year = self._infer_year(month, day, now)
+                    dtstart = datetime(year, month, day, 17, 0, tzinfo=tz)
 
-                if not dtstart:
-                    continue
+        if not dtstart:
+            return None
 
-                # Get description from content
-                desc = ''
-                for dp in soup.select('p'):
-                    dt = dp.get_text(strip=True)
-                    if len(dt) > 30 and not re.match(r'\d{1,2}(jan|feb|mar|apr)', dt, re.I):
-                        desc = dt[:300]
-                        break
+        # Location
+        loc_div = soup.select_one('.eelocation')
+        location = loc_div.get_text(strip=True) if loc_div else 'Monroe County History Center, 202 E 6th St, Bloomington, IN'
 
-                slug = re.sub(r'[^a-z0-9]+', '-', title.lower())[:40]
-                uid = f"mchc-{year}{month:02d}{day:02d}-{slug}@monroehistory.org"
+        # Description
+        desc_div = soup.select_one('.eelistdesc')
+        desc = desc_div.get_text(strip=True)[:300] if desc_div else ''
+        if not desc:
+            # Fall back to first substantial paragraph
+            for p in soup.select('p'):
+                pt = p.get_text(strip=True)
+                if len(pt) > 30:
+                    desc = pt[:300]
+                    break
 
-                return {
-                    'title': title,
-                    'dtstart': dtstart,
-                    'dtend': dtend or dtstart + timedelta(hours=2),
-                    'url': url,
-                    'location': 'Monroe County History Center, 202 E 6th St, Bloomington, IN',
-                    'description': desc,
-                    'uid': uid,
-                }
-        return None
+        slug = re.sub(r'[^a-z0-9]+', '-', title.lower())[:40]
+        uid = f"mchc-{dtstart.strftime('%Y%m%d')}-{slug}@monroehistory.org"
+
+        return {
+            'title': title,
+            'dtstart': dtstart,
+            'dtend': dtend or dtstart + timedelta(hours=2),
+            'url': url,
+            'location': location,
+            'description': desc,
+            'uid': uid,
+        }
+
+    @staticmethod
+    def _infer_year(month: int, day: int, now: datetime) -> int:
+        if month < now.month or (month == now.month and day < now.day):
+            return now.year + 1
+        return now.year
 
     @staticmethod
     def _make_dt(year, month, day, time_str, tz):
         time_str = time_str.strip().lower()
-        m = re.match(r'(\d{1,2}):(\d{2})\s*(am|pm)', time_str)
+        # Handle "10 am" (no colon) and "1:30pm"
+        m = re.match(r'(\d{1,2})(?::(\d{2}))?\s*(am|pm)', time_str)
         if not m:
             return None
         hour = int(m.group(1))
-        minute = int(m.group(2))
+        minute = int(m.group(2) or 0)
         if m.group(3) == 'pm' and hour != 12:
             hour += 12
         elif m.group(3) == 'am' and hour == 12:
