@@ -358,7 +358,7 @@ HTML classes: `.title a`, `.date`, `.see-showtime`, `.see-doortime`, `.genre`, `
 Example: `scrapers/mystic_theatre.py`
 
 ### Wix Events
-Complex - cross-origin iframes from `geteventviewer.com`. Often easier to check if venue is on Eventbrite.
+Wix event pages vary. Some use cross-origin iframes from `geteventviewer.com` (not scrapeable). But others server-render events in a **Wix Repeater component** with structured HTML — these are scrapeable (see `scrapers/cafefrida.py` for an example). Check the page source before writing off a Wix site. If the events are in the HTML (look for `data-hook` attributes and repeater items), a scraper can extract them. If it's an iframe to `geteventviewer.com`, check if the venue is on Eventbrite instead.
 
 ---
 
