@@ -1062,6 +1062,15 @@ AGGREGATORS = {
     'BloomingtonOnline Events',
     'BloomingtonOnline Food & Drink',
     'BloomingtonOnline Shopping',
+    'BloomingtonArts.Today',
+    'Bloomington Arts',
+    'WFHB Community Calendar',
+    'Limestone Post',
+    'B-Square: Government',
+    'B-Square: Misc Civic Events',
+    'B-Square: Critical Mass',
+    'B-Square: BPTC Public Meetings',
+    'Brown County Events',
 }
 
 
@@ -1161,9 +1170,11 @@ def dedupe_cross_source(events, input_dir):
                         if s and evt_url:
                             source_urls[s] = evt_url
 
-            # Update X-SOURCE to combined value
+            # Update X-SOURCE to combined value (primary sources first, then aggregators)
             if len(all_sources) > 1:
-                merged_source = ', '.join(sorted(all_sources))
+                primary = sorted(s for s in all_sources if not is_aggregator(s))
+                agg = sorted(s for s in all_sources if is_aggregator(s))
+                merged_source = ', '.join(primary + agg)
                 kept['content'] = re.sub(
                     r'^X-SOURCE:[^\r\n]+',
                     f'X-SOURCE:{merged_source}',
@@ -1331,9 +1342,11 @@ JSON:"""
                     events_to_remove.add(orig_idx)
                     fuzzy_deduped += 1
 
-                # Merge sources into kept event
+                # Merge sources into kept event (primary sources first, then aggregators)
                 if len(all_sources) > 1:
-                    merged_source = ', '.join(sorted(all_sources))
+                    primary = sorted(s for s in all_sources if not is_aggregator(s))
+                    agg = sorted(s for s in all_sources if is_aggregator(s))
+                    merged_source = ', '.join(primary + agg)
                     kept_event['content'] = re.sub(
                         r'^X-SOURCE:[^\r\n]+',
                         f'X-SOURCE:{merged_source}',
