@@ -520,6 +520,20 @@ Both classifiers respect the `category_overrides` table in Supabase. When a cura
 
 ---
 
+## Minimizing Per-Event Fetches
+
+When a scraper must visit individual event pages (listing + detail pattern), minimize HTTP requests by filtering at the listing stage. Every fetch we can skip makes the build faster and reduces load on source sites.
+
+**Strategies, in order of preference:**
+1. **Use an API that returns dates in the listing** — no detail fetch needed at all (e.g., Squarespace `?format=json`, CitySpark API, Tribe Events REST API, Localist JSON API)
+2. **Filter by date signal in the listing** — if the listing includes publish dates, event dates, or date-bearing URLs, skip items that are certainly past before fetching detail pages (e.g., Sweetwater skips RSS items with `pubDate` > 60 days old)
+3. **Filter by URL pattern** — some sites encode dates in event URLs (e.g., `/events/2026-04-01/concert`), allowing date filtering without any fetch
+4. **Cap pagination** — limit to N pages of results to bound the worst case (e.g., Monroe County History Center caps at 5 pages / 250 items)
+
+The goal is to get sources to publish ICS feeds so scrapers become unnecessary. Until then, be a good citizen — fetch only what you need.
+
+---
+
 ## Pipeline Validation
 
 ### Validation Script
