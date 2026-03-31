@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Scraper for Monroe County History Center events (EventON via WP REST API).
 
-Parses dates from the listing API content field instead of fetching
-individual detail pages — reduces ~250 HTTP requests to ~5.
+Hybrid approach: parses dates from the listing API content field when
+possible, falls back to detail page fetch only for items without
+parseable dates. Typically saves ~70% of HTTP requests.
 """
 
 import re
@@ -73,6 +74,7 @@ class HistoryCenterScraper(BaseScraper):
         """Fetch events via WP REST API, parsing dates from content field."""
         self.logger.info(f"Fetching event list from {self.api_url}")
         tz = ZoneInfo(self.timezone)
+        now = datetime.now(tz)
         events = []
         seen_slugs = set()
 
@@ -102,6 +104,17 @@ class HistoryCenterScraper(BaseScraper):
                 parsed = self._parse_from_content(content, title, url, tz)
                 if parsed:
                     events.append(parsed)
+                else:
+                    # Fall back to detail page fetch, but only for recent posts
+                    # (old posts are almost certainly past events)
+                    pub_date = item.get('date', '')
+                    if pub_date:
+                        pub = datetime.fromisoformat(pub_date)
+                        if pub < (now - timedelta(days=365)).replace(tzinfo=None):
+                            continue
+                    parsed = self._fetch_detail(url, title, tz)
+                    if parsed:
+                        events.append(parsed)
 
             page += 1
             if page > 5:
@@ -194,6 +207,44 @@ class HistoryCenterScraper(BaseScraper):
             'description': desc,
             'uid': uid,
         }
+
+    def _fetch_detail(self, url: str, title: str, tz: ZoneInfo) -> Optional[dict[str, Any]]:
+        """Fetch an event detail page and parse the EventON inline date."""
+        try:
+            r = requests.get(url, headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+            }, timeout=15)
+            r.raise_for_status()
+        except Exception as e:
+            self.logger.debug(f"Could not fetch {url}: {e}")
+            return None
+
+        soup = BeautifulSoup(r.text, 'html.parser')
+        now = datetime.now(tz)
+
+        for p in soup.select('p'):
+            text = p.get_text(strip=True)
+            m = EVENTON_INLINE.search(text)
+            if m:
+                day = int(m.group(1))
+                month = MONTHS.get(m.group(2).lower())
+                if month:
+                    year = self._infer_year(month, day, now)
+                    dtstart = self._make_dt(year, month, day, m.group(3), tz)
+                    dtend = self._make_dt(year, month, day, m.group(4), tz)
+                    if dtstart:
+                        slug = re.sub(r'[^a-z0-9]+', '-', title.lower())[:40]
+                        uid = f"mchc-{dtstart.strftime('%Y%m%d')}-{slug}@monroehistory.org"
+                        return {
+                            'title': title,
+                            'dtstart': dtstart,
+                            'dtend': dtend or dtstart + timedelta(hours=2),
+                            'url': url,
+                            'location': 'Monroe County History Center, 202 E 6th St, Bloomington, IN',
+                            'description': '',
+                            'uid': uid,
+                        }
+        return None
 
     @staticmethod
     def _infer_year(month: int, day: int, now: datetime) -> int:
