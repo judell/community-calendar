@@ -1079,6 +1079,28 @@ def is_aggregator(source_name):
     return source_name in AGGREGATORS
 
 
+_URL_DATE_RE = re.compile(r'/(\d{4})/(\d{2})/')
+
+
+def _url_predates_window(event_content, now):
+    """Return True if the event URL contains a /YYYY/MM/ path before the current month.
+
+    Scrapers that infer year from month+day can project old WordPress posts
+    into the future. The URL's embedded date catches these false futures.
+    """
+    url_match = re.search(r'^URL:([^\r\n]+)', event_content, re.MULTILINE)
+    if not url_match:
+        return False
+    url = url_match.group(1)
+    m = _URL_DATE_RE.search(url)
+    if not m:
+        return False
+    url_year = int(m.group(1))
+    url_month = int(m.group(2))
+    # Stale if the URL's year-month is before the start of the current month
+    return (url_year, url_month) < (now.year, now.month)
+
+
 def dedupe_cross_source(events, input_dir):
     """Deduplicate events across sources using title+date matching.
 
@@ -1478,7 +1500,16 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar",
             
             # Filter to future events only
             future_events = [e for e in events if e['dtstart'].replace(tzinfo=timezone.utc) >= now]
-            
+
+            # Filter out events whose URL contains a /YYYY/MM/ path predating the build window.
+            # Scrapers that infer year from month/day can project old posts into the future;
+            # the URL's embedded date is a reliable signal that the event is stale.
+            before_filter = len(future_events)
+            future_events = [e for e in future_events if not _url_predates_window(e['content'], now)]
+            url_date_filtered = before_filter - len(future_events)
+            if url_date_filtered:
+                print(f"    Filtered {url_date_filtered} events with stale URL dates from {ics_file.name}")
+
             # Apply geo filter if configured
             if allowed_cities:
                 filtered_events = []
