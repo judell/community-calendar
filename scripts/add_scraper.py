@@ -120,7 +120,7 @@ def add_to_workflow(scraper_name: str, city: str, scraper_path: Path,
 
     # Determine the scraper command path relative to repo root
     rel_path = scraper_path.relative_to(ROOT)
-    ics_name = output_name or scraper_name
+    ics_name = output_name or Path(scraper_name).name
     output_path = f"cities/{city}/{ics_name}.ics"
     extra = f" {extra_args}" if extra_args else ""
     scraper_line = f"        python {rel_path}{extra} --output {output_path} || true"
@@ -337,7 +337,7 @@ Examples:
     
     print(f"\n✅ Found scraper: {scraper_path}")
     
-    ics_name = args.output_name or args.scraper
+    ics_name = args.output_name or Path(args.scraper).name
     extra = f" {args.extra_args}" if args.extra_args else ""
 
     if args.dry_run:
