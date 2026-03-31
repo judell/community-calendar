@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
 
     const { data: events } = await supabase
       .from("events")
-      .select("title, start_time, end_time, location, category, source")
+      .select("title, start_time, end_time, location, category, source, url")
       .eq("city", city)
       .gte("start_time", now.toISOString())
       .lte("start_time", thirtyDaysOut.toISOString())
@@ -63,18 +63,20 @@ Date guidance:
 - "Next week" means Monday through Sunday of the following week.
 - Be strict about date boundaries — do not include events outside the requested range.
 
-Be conversational and concise. When you know enough, recommend specific events.
+Be conversational and concise. Recommend events eagerly — don't over-ask. If the user gives you enough to work with (e.g. a category, a timeframe, or a vibe), recommend matching events right away. You can always refine in follow-up turns. When the user says something doesn't work (too far, wrong vibe), pivot immediately with alternatives.
 
 IMPORTANT: Always respond with valid JSON in this exact format:
 {"reply": "your conversational response here", "recommended_titles": ["Exact Event Title 1", "Exact Event Title 2"]}
 
 Rules for the reply and recommended_titles:
-- Do NOT describe or list event details (title, date, time, location) in the "reply" text. The events will be displayed as cards automatically. Your reply should only contain conversational context like "Here are some intimate jazz events this week:" or follow-up questions.
+- Do NOT describe or list event details (title, date, time, location) in the "reply" text. The events will be displayed as cards automatically. Your reply should only contain brief conversational context like "Here are some intimate jazz events this week:" or follow-up questions.
 - Put ALL events you want to recommend in the "recommended_titles" array using the EXACT title from the event list above. Every event you mention must be in this array.
-- If you are not yet recommending specific events (e.g. still asking questions), use an empty array [].`;
+- If you are not yet recommending specific events (e.g. still asking questions), use an empty array []. But prefer recommending over asking.`;
 
     const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
     if (!anthropicKey) throw new Error("ANTHROPIC_API_KEY not configured");
+
+    const cleanMessages = messages.map(({ role, content }: any) => ({ role, content }));
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -84,10 +86,10 @@ Rules for the reply and recommended_titles:
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 1024,
         system: systemPrompt,
-        messages,
+        messages: cleanMessages,
       }),
     });
 
@@ -105,8 +107,14 @@ Rules for the reply and recommended_titles:
     let reply = rawText;
     let matchedEvents: any[] = [];
 
+    // Try to parse JSON, stripping markdown code fences if present
+    let jsonText = rawText.trim();
+    if (jsonText.startsWith("```")) {
+      jsonText = jsonText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+    }
+
     try {
-      const parsed = JSON.parse(rawText);
+      const parsed = JSON.parse(jsonText);
       if (parsed.reply) {
         reply = parsed.reply;
         const titles = parsed.recommended_titles || [];
@@ -118,7 +126,25 @@ Rules for the reply and recommended_titles:
         }
       }
     } catch {
-      // Claude didn't return valid JSON, use raw text as reply
+      // Try to extract JSON from the response
+      const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed.reply) {
+            reply = parsed.reply;
+            const titles = parsed.recommended_titles || [];
+            if (titles.length > 0 && events) {
+              const titleSet = new Set(titles.map((t: string) => t.toLowerCase()));
+              matchedEvents = events.filter((e) =>
+                titleSet.has(e.title.toLowerCase())
+              );
+            }
+          }
+        } catch {
+          // Truly unparseable, use raw text
+        }
+      }
     }
 
     return new Response(JSON.stringify({ reply, events: matchedEvents }), {

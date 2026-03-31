@@ -15,6 +15,7 @@
       messages = [...messages, { role: 'assistant', content: result.reply, events: result.events || [] }];
       isLoading = false;
       messageArea.scrollToBottom();
+      window.traceChatConcierge(result.events || []);
     }"
     onError="(err) => {
       messages = [...messages, { role: 'assistant', content: 'Sorry, something went wrong.' }];
@@ -39,7 +40,7 @@
       </Items>
       <Spinner when="{isLoading}" />
     </VStack>
-    <HStack gap="$space-2">
+    <HStack gap="$space-2" verticalAlignment="center">
       <TextBox
         id="chatInput"
         placeholder="Tell me what you're interested in..."

@@ -132,6 +132,15 @@
         else if (onSuccess) onSuccess();
       };
 
+      window.traceChatConcierge = function(events) {
+        if (window.xsTraceEvent) {
+          window.xsTraceEvent('chatConcierge', {
+            eventCount: events.length,
+            titles: events.map(function(e) { return e.title })
+          });
+        }
+      };
+
       window.signOut = function() {
         console.log('signOut called');
         localStorage.removeItem('sb-dzpdualvwspgqghrysyz-auth-token');
