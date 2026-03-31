@@ -44,6 +44,10 @@ A **curator** builds and maintains the calendar for their community. You don't c
 - **Event capture** — Photograph a poster or speak event details. [docs/audio-capture.md](docs/audio-capture.md)
 - **Recurrence enrichment** — Curators attach recurrence rules visible to all users. [docs/recurrence.md](docs/recurrence.md)
 
+## Add an Event Source
+
+Know of a local calendar that should be included? [Open an issue](https://github.com/judell/community-calendar/issues/new?template=add-feed.md) with the feed URL and a link to the events page. If you're comfortable with pull requests, you can also add the feed directly to `cities/{city}/feeds.txt` — see the [issue template](https://github.com/judell/community-calendar/issues/new?template=add-feed.md) for the format.
+
 ## Development
 
 - **App architecture**: [docs/app-architecture.md](docs/app-architecture.md) — XMLUI components, local dev setup, resources
