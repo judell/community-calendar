@@ -307,6 +307,8 @@ def ics_to_json(ics_file, output_file=None, future_only=True, city=None):
         location = html_unescape(extract_field(event_content, 'LOCATION') or '')
         description = html_unescape(extract_field(event_content, 'DESCRIPTION') or '')
         url = extract_field(event_content, 'URL')
+        if not url:
+            url = extract_field(event_content, 'X-SOURCE-URL')
         source = extract_field(event_content, 'X-SOURCE')
         source_id = extract_field(event_content, 'X-SOURCE-ID')
         source_urls_raw = extract_field(event_content, 'X-SOURCE-URLS')
