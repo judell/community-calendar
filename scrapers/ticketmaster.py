@@ -155,6 +155,7 @@ def main():
     parser.add_argument('--api-key', default=os.environ.get('TICKETMASTER_API_KEY'),
                         help='API key (default: TICKETMASTER_API_KEY env var)')
     parser.add_argument('--timezone', default='America/New_York', help='Timezone')
+    parser.add_argument('--default-url', help='Fallback URL when events have no per-event URL')
     parser.add_argument('--debug', action='store_true')
     args = parser.parse_args()
 
@@ -171,6 +172,8 @@ def main():
         source_name=args.name,
         tz=args.timezone,
     )
+    if args.default_url:
+        scraper.default_url = args.default_url
     scraper.run(args.output)
 
 

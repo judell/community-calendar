@@ -96,6 +96,7 @@ def main():
     parser.add_argument('--base-url', required=True, help='Spektrix base URL (e.g. https://tickets.example.org/org)')
     parser.add_argument('--name', required=True, help='Source name')
     parser.add_argument('--output', '-o', help='Output ICS file')
+    parser.add_argument('--default-url', help='Fallback URL when events have no per-event URL')
     parser.add_argument('--debug', action='store_true')
     args = parser.parse_args()
 
@@ -103,6 +104,8 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
 
     scraper = SpektrixScraper(args.base_url, args.name)
+    if args.default_url:
+        scraper.default_url = args.default_url
     scraper.run(args.output)
 
 
