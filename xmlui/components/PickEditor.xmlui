@@ -65,8 +65,8 @@
       if (rruleFrequency !== 'none') {
         const formData = lastFormData || {};
         const cityTz = (window._cities && window.cityFilter && window._cities[window.cityFilter]?.timezone) || null;
-        const startTime = window.applyTimezoneOffset((formData.date || '') + 'T' + (formData.time || '00:00') + ':00', cityTz);
-        const endTime = formData.endTime ? window.applyTimezoneOffset((formData.date || '') + 'T' + formData.endTime + ':00', cityTz) : null;
+        const startTime = window.applyTimezoneOffset((formData.date || '').substring(0, 10) + 'T' + (formData.time || '00:00').substring(0, 5) + ':00', cityTz);
+        const endTime = formData.endTime ? window.applyTimezoneOffset((formData.date || '').substring(0, 10) + 'T' + formData.endTime.substring(0, 5) + ':00', cityTz) : null;
         enrichmentApi.execute({
           event_id: result.event_id,
           curator_id: window.authUser.id,
@@ -146,8 +146,8 @@
           if (rruleFrequency !== 'none') {
             const rruleStr = window.buildRRule(rruleFrequency, rruleDays, rruleOrdinal, rruleMonthDay, rruleUntil);
             const cityTz2 = (window._cities && window.cityFilter && window._cities[window.cityFilter]?.timezone) || null;
-            const startTime = window.applyTimezoneOffset((formData.date || '') + 'T' + (formData.time || '00:00') + ':00', cityTz2);
-            const endTime = formData.endTime ? window.applyTimezoneOffset((formData.date || '') + 'T' + formData.endTime + ':00', cityTz2) : null;
+            const startTime = window.applyTimezoneOffset((formData.date || '').substring(0, 10) + 'T' + (formData.time || '00:00').substring(0, 5) + ':00', cityTz2);
+            const endTime = formData.endTime ? window.applyTimezoneOffset((formData.date || '').substring(0, 10) + 'T' + formData.endTime.substring(0, 5) + ':00', cityTz2) : null;
             enrichmentApi.execute({
               event_id: $props.event.id,
               curator_id: window.authUser.id,
@@ -162,8 +162,11 @@
             });
           }
         } else {
-          const startTime = (formData.date || '') + 'T' + (formData.time || '00:00') + ':00';
-          const endTime = formData.endTime ? (formData.date || '') + 'T' + formData.endTime + ':00' : null;
+          const dateStr = (formData.date || '').substring(0, 10);
+          const rawStart = (formData.time || '00:00').substring(0, 5);
+          const startTime = dateStr + 'T' + rawStart + ':00';
+          const rawEnd = formData.endTime ? formData.endTime.substring(0, 5) : null;
+          const endTime = rawEnd ? dateStr + 'T' + rawEnd + ':00' : null;
           captureApi.execute({
             mode: 'commit',
             event: {
@@ -206,6 +209,7 @@
           >
             <TimeInput
               id="startTimeInput"
+              aria-label="Start time"
               initialValue="{$value}"
               hour24="false"
               onDidChange="() => $setValue(startTimeInput.isoValue())"
@@ -219,6 +223,7 @@
           >
             <TimeInput
               id="endTimeInput"
+              aria-label="End time"
               initialValue="{$value}"
               hour24="false"
               onDidChange="() => $setValue(endTimeInput.isoValue())"
