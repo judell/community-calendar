@@ -27,16 +27,6 @@ Deno.serve(async (req) => {
         event.city = event.city || city;
       }
 
-      const { count, error: delError } = await supabase
-        .from("events")
-        .delete({ count: "exact" })
-        .eq("city", city);
-      if (delError) {
-        console.error(`Delete ${city} error:`, delError);
-      } else {
-        console.log(`Deleted ${count} existing events for ${city}`);
-      }
-
       const uniqueEvents = new Map();
       for (const event of events) {
         if (event.source_uid && !uniqueEvents.has(event.source_uid)) {
@@ -63,7 +53,27 @@ Deno.serve(async (req) => {
         }
       }
 
-      const result = { success: errors === 0, city, fetched: events.length, unique: uniqueEvents.size, deleted: count || 0, inserted, errors };
+      // Remove stale events for this city that are no longer in the feed
+      // Use RPC to avoid URL length limits with large IN lists
+      const newSourceUids = Array.from(uniqueEvents.keys());
+      let deleted = 0;
+      if (newSourceUids.length > 0) {
+        const { count, error: delError } = await supabase
+          .from("events")
+          .delete({ count: "exact" })
+          .eq("city", city)
+          .not("source_uid", "in", `(${newSourceUids.join(",")})`);
+        if (delError) {
+          console.error(`Cleanup ${city} error:`, delError);
+        } else {
+          deleted = count || 0;
+        }
+      }
+      if (deleted > 0) {
+        console.log(`Cleaned up ${deleted} stale events for ${city}`);
+      }
+
+      const result = { success: errors === 0, city, fetched: events.length, unique: uniqueEvents.size, deleted, inserted, errors };
       console.log("Result:", result);
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -101,8 +111,9 @@ Deno.serve(async (req) => {
 
     console.log(`Processing cities: ${cities.join(", ")}`);
 
+    // Collect events per city for stale cleanup after upsert
     const allEvents: any[] = [];
-    let deleted = 0;
+    const eventsByCity = new Map<string, string[]>(); // city -> source_uids
     for (const city of cities) {
       const url = `${RAW_BASE}/${city}/events.json`;
       console.log(`Fetching events from ${city}:`, url);
@@ -113,19 +124,12 @@ Deno.serve(async (req) => {
           continue;
         }
         const events = await response.json();
+        const cityUids: string[] = [];
         for (const event of events) {
           event.city = event.city || city;
+          if (event.source_uid) cityUids.push(event.source_uid);
         }
-        const { count, error: delError } = await supabase
-          .from("events")
-          .delete({ count: "exact" })
-          .eq("city", city);
-        if (delError) {
-          console.error(`Delete ${city} error:`, delError);
-        } else {
-          deleted += count || 0;
-          console.log(`Deleted ${count} existing events for ${city}`);
-        }
+        eventsByCity.set(city, cityUids);
         allEvents.push(...events);
         console.log(`Fetched ${events.length} events from ${city}`);
       } catch (e) {
@@ -158,6 +162,26 @@ Deno.serve(async (req) => {
       } else {
         inserted += batch.length;
       }
+    }
+
+    // Remove stale events per city that are no longer in the feed
+    let deleted = 0;
+    for (const [city, uids] of eventsByCity) {
+      if (uids.length > 0) {
+        const { count, error: delError } = await supabase
+          .from("events")
+          .delete({ count: "exact" })
+          .eq("city", city)
+          .not("source_uid", "in", `(${uids.join(",")})`);
+        if (delError) {
+          console.error(`Cleanup ${city} error:`, delError);
+        } else {
+          deleted += count || 0;
+        }
+      }
+    }
+    if (deleted > 0) {
+      console.log(`Cleaned up ${deleted} stale events`);
     }
 
     const result = { success: errors === 0, fetched: allEvents.length, unique: uniqueEvents.size, deleted, inserted, errors };
