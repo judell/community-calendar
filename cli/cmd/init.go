@@ -757,7 +757,7 @@ func findRepoRoot() (string, error) {
 		return "", err
 	}
 	for {
-		if _, err := os.Stat(filepath.Join(dir, "config.json")); err == nil {
+		if _, err := os.Stat(filepath.Join(dir, "cities")); err == nil {
 			if _, err := os.Stat(filepath.Join(dir, "supabase", "ddl")); err == nil {
 				return dir, nil
 			}

@@ -9,7 +9,7 @@ import (
 
 // UpdateConfigJSON writes the Supabase URL and publishable key into config.json.
 func UpdateConfigJSON(repoRoot, supabaseURL, publishableKey string) error {
-	path := filepath.Join(repoRoot, "config.json")
+	path := filepath.Join(repoRoot, "xmlui", "config.json")
 	return replaceInFile(path, map[string]string{
 		"https://dzpdualvwspgqghrysyz.supabase.co":    supabaseURL,
 		"sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5": publishableKey,
@@ -18,7 +18,11 @@ func UpdateConfigJSON(repoRoot, supabaseURL, publishableKey string) error {
 
 // UpdateHTMLFiles updates Supabase credentials in all HTML files.
 func UpdateHTMLFiles(repoRoot, supabaseURL, publishableKey, projectRef string) error {
-	files := []string{"index.html", "report.html", "test.html", "embed.html"}
+	files := []string{
+		filepath.Join("xmlui", "index.html"),
+		filepath.Join("xmlui", "test.html"),
+		"report.html",
+	}
 	replacements := map[string]string{
 		"https://dzpdualvwspgqghrysyz.supabase.co":        supabaseURL,
 		"sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5":     publishableKey,
