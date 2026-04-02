@@ -62,7 +62,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
-| Bloomington Arts | ICS | — | Tockify API feed |
+| Pillar Arts Community Calendar | ICS | ~62 | Tockify API feed; includes Pillar Arts Alliance Center + Pillar Arts By Hand events |
 | FAR Center for Contemporary Arts | Scraper | ~4 | `far_center.py` — Craft CMS |
 | Cicada Cinema | Scraper | ~6 | Shopify products API — `cicada_cinema.py` |
 | Pottery House Studio | Scraper | ~40 | Squarespace — `squarespace.py` workshops |
@@ -182,7 +182,7 @@ These curate or aggregate events from multiple venues:
 | Bloomington Volunteer Network | Galaxy Digital | No feed export |
 | ~~NAMI Greater Bloomington~~ | ~~The Events Calendar~~ | RESOLVED: Tribe Events REST API works (2026-03) |
 | SIREN Solar | Tribe Events Calendar | ICS broken, API returns 0 events — dead calendar |
-| Pillar Arts | WordPress + TEC | ICS export broken; calendar appears inactive |
+| ~~Pillar Arts~~ | ~~WordPress + TEC~~ | RESOLVED: events published via Pillar Arts Community Calendar Tockify feed (bloomington.arts.calendar) |
 | Monroe County Gov | Indiana state platform | No ICS export |
 | MCCSC School Calendar | ParentSquare | Old URL 404 |
 
