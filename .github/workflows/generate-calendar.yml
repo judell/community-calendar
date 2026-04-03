@@ -504,6 +504,23 @@ jobs:
         done
         echo "Successfully loaded $TOTAL_INSERTED total events into Supabase"
 
+    - name: Refresh source names
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      run: |
+        IFS=',' read -ra UPLOAD_CITIES <<< "${{ steps.locations.outputs.list }}"
+        for city in "${UPLOAD_CITIES[@]}"; do
+          city=$(echo "$city" | xargs)
+          echo "Refreshing source names for $city..."
+          curl -sL -X POST "${SUPABASE_URL}/rest/v1/rpc/refresh_source_names" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"target_city\": \"$city\"}"
+          echo " done"
+        done
+
     - name: Commit metadata changes
       env:
         GITHUB_TOKEN: ${{ secrets.COMMUNITY_CALENDAR }}

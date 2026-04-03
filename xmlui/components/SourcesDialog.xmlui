@@ -31,31 +31,30 @@
       suggestError = 'Failed to submit suggestion. Please try again.';
     }" />
 
+  <DataSource
+    id="sourceNames"
+    url="{appGlobals.supabaseUrl + '/rest/v1/source_names?select=name,event_count&city=eq.' + (window.cityFilter || 'bloomington') + '&order=name.asc'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey
+    }}"
+  />
+
   <Theme maxWidth-ModalDialog="90%">
   <ModalDialog id="dialog" title="Sources"
     onClose="() => { if (dirty) { applyHiddenSources(localHidden); } }">
     <VStack gap="$space-3">
       <Text
         value="{$props.events ? window.dedupeEvents($props.events).length + ' events for the next ' + window.getQueryMonths() + ' months' : 'Loading...'}" />
-      <Text
-        fontSize="$fontSize-xs"
-        color="$color-text-secondary"
-        value="Per-source counts reflect overlap between sources" />
-      <Items data="{window.getSourceCounts(window.dedupeEvents($props.events))}">
+      <Items data="{sourceNames.value || []}">
         <HStack gap="$space-2" paddingVertical="$space-1" verticalAlignment="center">
           <Checkbox
             when="{window.authUser}"
             width="fit-content"
-            aria-label="{$item.source}"
-            initialValue="{!window.isSourceHidden($item.source, localHidden)}"
-            onClick="() => { localHidden = localHidden.indexOf($item.source) >= 0 ? localHidden.filter(function(s) { return s !== $item.source; }) : localHidden.concat([$item.source]); dirty = true; }"
+            aria-label="{$item.name}"
+            initialValue="{!window.isSourceHidden($item.name, localHidden)}"
+            onClick="() => { localHidden = localHidden.indexOf($item.name) >= 0 ? localHidden.filter(function(s) { return s !== $item.name; }) : localHidden.concat([$item.name]); dirty = true; }"
           />
-          <Text
-            width="40px"
-            textAlign="right"
-            fontWeight="bold"
-            value="{$item.count}" />
-          <Text value="{$item.source}" breakMode="word" />
+          <Text value="{$item.name + ' (' + $item.event_count + ')'}" breakMode="word" />
         </HStack>
       </Items>
 
