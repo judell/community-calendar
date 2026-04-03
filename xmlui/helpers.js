@@ -1272,6 +1272,19 @@ if (typeof window !== 'undefined') {
   window.saveHiddenSources = saveHiddenSources;
   window.isSourceHidden = isSourceHidden;
   window.filterHiddenSources = filterHiddenSources;
+  window.filterExternalExclusions = function(events) {
+    var exc = window.externalExclusions;
+    if (!exc) return events;
+    if (!events) return [];
+    var exSources = exc.excludedSources || [];
+    var rejSet = {};
+    (exc.rejectedEvents || []).forEach(function(uid) { rejSet[uid] = true; });
+    return events.filter(function(e) {
+      if (exSources.indexOf(e.source) >= 0) return false;
+      if (e.source_uid && rejSet[e.source_uid]) return false;
+      return true;
+    });
+  };
   window.getSourceCounts = getSourceCounts;
   var _dedupeEvents = dedupeEvents;
   window.dedupeEvents = function(events) {

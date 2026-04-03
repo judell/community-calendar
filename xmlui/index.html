@@ -46,6 +46,20 @@
       const params = new URLSearchParams(window.location.search);
       const cityParam = params.get('city');
       window.embed = params.get('embed') === 'true';
+      // External exclusions (e.g. ?exclude=https://raw.githubusercontent.com/judell/wfhb/main/excluded.json)
+      window.externalExclusions = null;
+      window.filterExternalExclusions = function(events) { return events; };
+      const excludeUrl = params.get('exclude');
+      if (excludeUrl) {
+        try {
+          var exhr = new XMLHttpRequest();
+          exhr.open('GET', excludeUrl, false);
+          exhr.send();
+          if (exhr.status === 200) {
+            window.externalExclusions = JSON.parse(exhr.responseText);
+          }
+        } catch(e) {}
+      }
       window.layoutMode = params.get('mode') || 'list';
       window.setLayoutMode = function(val) {
         window.layoutMode = val;
