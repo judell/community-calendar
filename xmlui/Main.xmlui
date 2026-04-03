@@ -57,7 +57,7 @@
 
   <ChangeListener
     listenTo="{userSettings.value}"
-    onDidChange="() => { if (!userSettingsData) { userSettingsData = userSettings.value; const s = userSettingsData && userSettingsData[0]; if (s) { if (s.layout_mode) { window.setLayoutMode(s.layout_mode); layoutMode = s.layout_mode } if (s.image_mode) { window.setShowListImages(s.image_mode === 'everywhere' ? 'list' : 'preview'); showListImages = (s.image_mode !== 'preview') } oneClickPick = !!s.one_click_pick } } }"
+    onDidChange="() => { if (!userSettingsData) { userSettingsData = userSettings.value; const s = userSettingsData && userSettingsData[0]; if (s) { if (s.layout_mode && !window.embed) { window.setLayoutMode(s.layout_mode); layoutMode = s.layout_mode } if (s.image_mode) { window.setShowListImages(s.image_mode === 'everywhere' ? 'list' : 'preview'); showListImages = (s.image_mode !== 'preview') } oneClickPick = !!s.one_click_pick } } }"
   />
 
   <DataSource
@@ -216,7 +216,7 @@
       <H1>
         <HStack width="100%" verticalAlignment="center">
           <Text overflowMode="ellipsis" maxLines="1" width="*">{window.toDisplayName(city)}</Text>
-          <IncludeMarkup url="components/IconRow.xmlui" />
+          <IncludeMarkup when="{!window.embed}" url="components/IconRow.xmlui" />
         </HStack>
       </H1>
     </Bookmark>
@@ -312,7 +312,7 @@
     <H1>
       <HStack width="100%" verticalAlignment="center">
         <Text overflowMode="ellipsis" maxLines="1" width="*">{window.cityName || 'Community Calendar'}</Text>
-        <IncludeMarkup url="components/IconRow.xmlui" />
+        <IncludeMarkup when="{!window.embed}" url="components/IconRow.xmlui" />
       </HStack>
     </H1>
     <DashboardView />
