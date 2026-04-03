@@ -1280,7 +1280,12 @@ if (typeof window !== 'undefined') {
     var rejSet = {};
     (exc.rejectedEvents || []).forEach(function(uid) { rejSet[uid] = true; });
     return events.filter(function(e) {
-      if (exSources.indexOf(e.source) >= 0) return false;
+      if (e.source) {
+        var parts = e.source.split(', ');
+        for (var i = 0; i < parts.length; i++) {
+          if (exSources.indexOf(parts[i]) >= 0) return false;
+        }
+      }
       if (e.source_uid && rejSet[e.source_uid]) return false;
       return true;
     });
