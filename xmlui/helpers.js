@@ -1279,6 +1279,8 @@ if (typeof window !== 'undefined') {
     var exSources = exc.excludedSources || [];
     var rejSet = {};
     (exc.rejectedEvents || []).forEach(function(uid) { rejSet[uid] = true; });
+    var requireApproval = exc.requireApproval && exc.lastReviewed;
+    var lastReviewed = exc.lastReviewed || null;
     return events.filter(function(e) {
       if (e.source) {
         var parts = e.source.split(', ');
@@ -1287,6 +1289,7 @@ if (typeof window !== 'undefined') {
         }
       }
       if (e.source_uid && rejSet[e.source_uid]) return false;
+      if (requireApproval && (e.created_at || e.start_time) > lastReviewed) return false;
       return true;
     });
   };
