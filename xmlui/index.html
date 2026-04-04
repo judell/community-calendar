@@ -46,16 +46,25 @@
       const params = new URLSearchParams(window.location.search);
       const cityParam = params.get('city');
       window.embed = params.get('embed') === 'true';
-      // External exclusions (e.g. ?exclude=https://raw.githubusercontent.com/judell/wfhb/main/excluded.json)
+      // External exclusions (e.g. ?exclude=https://api.github.com/repos/OWNER/REPO/contents/excluded.json)
       window.externalExclusions = null;
       const excludeUrl = params.get('exclude');
       if (excludeUrl) {
         try {
           var exhr = new XMLHttpRequest();
           exhr.open('GET', excludeUrl, false);
+          if (excludeUrl.indexOf('api.github.com') !== -1) {
+            exhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+          }
           exhr.send();
           if (exhr.status === 200) {
-            window.externalExclusions = JSON.parse(exhr.responseText);
+            var resp = JSON.parse(exhr.responseText);
+            // GitHub API returns base64-encoded content; raw URLs return JSON directly
+            if (resp.content && resp.encoding === 'base64') {
+              window.externalExclusions = JSON.parse(decodeURIComponent(escape(atob(resp.content))));
+            } else {
+              window.externalExclusions = resp;
+            }
           }
         } catch(e) {}
       }
