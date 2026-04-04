@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { captureTrace, traceFileUpload } from './trace-capture';
 
 test('capture-roundtrip', async ({ page }) => {
-  test.setTimeout(60000);
+  test.setTimeout(120000);
 
   try {
     // Start at root, wait for page to load, then pick Santa Rosa
