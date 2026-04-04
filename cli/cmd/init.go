@@ -98,7 +98,8 @@ func Init() error {
 	// --- Step 1: Supabase token + org ---
 	if s.Step < 1 {
 		fmt.Println("Step 1: Supabase")
-		fmt.Println("  Get a token at: https://supabase.com/dashboard/account/tokens")
+		fmt.Println("  If you don't have a Supabase account, create one at: https://supabase.com")
+		fmt.Println("  Then create an access token at: https://supabase.com/dashboard/account/tokens")
 		s.Token, err = prompt.AskRequired("Access token")
 		if err != nil {
 			return err
@@ -156,12 +157,12 @@ func Init() error {
 		}
 
 		fmt.Println("\nStep 3: API keys")
-		s.AnthropicKey, err = prompt.AskRequired("Anthropic API key (https://console.anthropic.com)")
+		s.AnthropicKey, err = prompt.AskRequired("Anthropic API key (https://console.anthropic.com — individual account is fine)")
 		if err != nil {
 			return err
 		}
 
-		s.OpenAIKey, err = prompt.AskOptional("OpenAI API key (https://platform.openai.com)")
+		s.OpenAIKey, err = prompt.AskOptional("OpenAI API key (https://platform.openai.com/api-keys — for audio event capture via Whisper, skip if not needed)")
 		if err != nil {
 			return err
 		}
@@ -251,17 +252,23 @@ func Init() error {
 		fmt.Println("\nStep 4: Create OAuth apps")
 		fmt.Println("  Your Supabase project is ready. Create OAuth apps using these URLs:")
 		fmt.Println()
-		fmt.Println("  GitHub OAuth App → https://github.com/settings/developers")
-		fmt.Println("    Click 'New OAuth App' (not GitHub App)")
-		fmt.Printf("    Homepage URL:     %s\n", siteURL)
-		fmt.Printf("    Callback URL:     %s\n", callbackURL)
-		fmt.Println("    ⚠ Copy the callback URL exactly — it must include .supabase.co")
-		fmt.Println("    Leave 'Enable Device Flow' unchecked")
+		fmt.Println("  GitHub OAuth App:")
+		fmt.Println("    1. Go to https://github.com/settings/developers")
+		fmt.Println("    2. Click 'New OAuth App' (not 'New GitHub App')")
+		fmt.Println("    3. Fill in the form:")
+		fmt.Println("       Application name: Community Calendar (or anything you like)")
+		fmt.Printf("       Homepage URL:     %s\n", siteURL)
+		fmt.Printf("       Authorization callback URL: %s\n", callbackURL)
+		fmt.Println("       ⚠ Copy the callback URL exactly — it must include .supabase.co")
+		fmt.Println("       Leave 'Enable Device Flow' unchecked")
+		fmt.Println("    4. Click 'Register application'")
+		fmt.Println("    5. The Client ID is shown at the top of the app page")
 		s.GHOAuthID, err = prompt.AskRequired("Client ID")
 		if err != nil {
 			return err
 		}
-		s.GHOAuthSecret, err = prompt.AskRequired("Client Secret (click 'Generate a new client secret')")
+		fmt.Println("    6. Click 'Generate a new client secret' — copy it now, it won't be shown again")
+		s.GHOAuthSecret, err = prompt.AskRequired("Client Secret")
 		if err != nil {
 			return err
 		}
@@ -274,18 +281,20 @@ func Init() error {
 		fmt.Println("      3. App name: e.g. 'Community Calendar', email: yours → Next")
 		fmt.Println("      4. Audience: External → Next")
 		fmt.Println("      5. Contact email: yours → Next")
-		fmt.Println("      6. Check the policy box → click 'Continue', then 'Create'")
+		fmt.Println("      6. Check the policy box if shown → click 'Continue', then 'Create'")
 		fmt.Println("    Then create credentials:")
-		fmt.Println("      7. Go to Credentials (left sidebar) → '+ Create credentials' → 'OAuth client ID'")
+		fmt.Println("      7. Go to Menu (☰) → 'APIs & Services' → 'Credentials' → '+ Create credentials' → 'OAuth client ID'")
 		fmt.Println("      8. Application type: Web application")
-		fmt.Println("      9. Authorized redirect URIs: add the callback URL below")
+		fmt.Println("      9. Skip 'Authorized JavaScript origins' — scroll down to 'Authorized redirect URIs' and add:")
 		fmt.Printf("    Callback URL: %s\n", callbackURL)
-		fmt.Println("    ⚠ Copy the callback URL exactly — it must include .supabase.co")
-		s.GoogleOAuthID, err = prompt.AskRequired("Client ID")
+		fmt.Println("       ⚠ Copy the callback URL exactly — it must include .supabase.co")
+		fmt.Println("     10. Click 'Create'")
+		fmt.Println("     A dialog will show your Client ID and Client Secret — copy both now")
+		s.GoogleOAuthID, err = prompt.AskRequired("Google Client ID")
 		if err != nil {
 			return err
 		}
-		s.GoogleOAuthSecret, err = prompt.AskRequired("Client Secret")
+		s.GoogleOAuthSecret, err = prompt.AskRequired("Google Client Secret")
 		if err != nil {
 			return err
 		}
@@ -562,8 +571,8 @@ func Init() error {
 	fmt.Println("  (You can also reset it in Supabase Dashboard → Settings → Database)")
 	fmt.Println()
 	fmt.Println("Next steps:")
-	fmt.Printf("  1. Enable workflows: visit https://github.com/%s/actions and click\n", repo)
-	fmt.Println("     \"I understand my workflows, go ahead and enable them\"")
+	fmt.Printf("  1. If workflows aren't already enabled: visit https://github.com/%s/actions\n", repo)
+	fmt.Println("     and click \"I understand my workflows, go ahead and enable them\"")
 	fmt.Println("  2. Trigger the first build: cc-cli build")
 	fmt.Println("  3. Check build status: cc-cli status")
 

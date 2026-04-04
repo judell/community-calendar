@@ -55,3 +55,39 @@ Worktrees are even worse — they share `.git` state with the parent, so remotes
 - `findRepoRoot()`: now checks for `cities/` + `supabase/ddl/` (stable root markers)
 - `UpdateConfigJSON()`: now targets `xmlui/config.json`
 - `UpdateHTMLFiles()`: updated to `xmlui/index.html`, `xmlui/test.html`, `report.html` (removed nonexistent `embed.html`)
+
+## UX improvements to init prompts (2026-04-02)
+
+Issues found during Josh's walkthrough, all fixed in `init.go`:
+
+- **Supabase step:** No mention of creating an account first. Added "create one at https://supabase.com" before the token link.
+- **Anthropic step:** User asked "individual or org?" at console. Added hint: "individual account is fine."
+- **OpenAI step:** Unclear why it's optional. Added: "for audio event capture via Whisper, skip if not needed." Fixed URL to link directly to https://platform.openai.com/api-keys.
+- **GitHub OAuth:** Instructions jumped to form fields without saying to create an app. Restructured as numbered steps: go to page → click New OAuth App → fill form → register → copy Client ID → generate secret.
+- **Google OAuth:** "Left sidebar" doesn't exist — Google Cloud uses a hamburger menu. Updated path. Added "Skip Authorized JavaScript origins — scroll down to Authorized redirect URIs." Added missing "Click Create" step. Prefixed prompts with "Google" for clarity. Softened "check the policy box" to "if shown" (UI may have changed).
+- **Enable workflows:** Conditional now — "If workflows aren't already enabled" since active forks already have them.
+
+## Anthropic API 400 on classify (2026-04-02)
+
+**Problem:** First build succeeded through feed download but failed on `classify_events_json.py` with `HTTP Error 400: Bad Request`.
+
+**Cause:** Brand new Anthropic account — likely no credits loaded. The classify script uses `claude-haiku-4-5-20251001`.
+
+**Diagnosis:** The Python script doesn't print the response body on error. Test the key directly:
+```bash
+curl https://api.anthropic.com/v1/messages \
+  -H "x-api-key: YOUR_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "content-type: application/json" \
+  -d '{"model":"claude-haiku-4-5-20251001","max_tokens":10,"messages":[{"role":"user","content":"hi"}]}'
+```
+
+**Fix:** Add payment method / credits at https://console.anthropic.com.
+
+## OpenAI Whisper 429 on audio capture (2026-04-02)
+
+**Problem:** Audio event capture failed with `Whisper API error: 429` (visible in XMLUI Inspector trace).
+
+**Cause:** New OpenAI account on free tier — rate limits too low for Whisper API.
+
+**Fix:** Add payment method / credits at https://platform.openai.com/settings/organization/billing/overview. Audio capture is optional — the rest of the app works without it.
