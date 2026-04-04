@@ -4,7 +4,7 @@ Public events are trapped in information silos. The library posts to their websi
 
 Existing local aggregators typically expect event producers to "submit" events via a web form. This means producers must submit to several aggregators to reach their audience — tedious and error-prone. Worse, if event details change, producers must update each aggregator separately.
 
-This project takes a different approach: **event producers are the authoritative sources for their own events**. They publish once to their own calendar, and individuals and aggregators pull from those sources. When details change, the change propagates automatically. This is how RSS transformed blogging, and iCalendar can do the same for events.
+This project takes a different approach: **event producers are the authoritative sources for their own events**. They publish once to their own calendar, and individuals and aggregators pull from those sources. When details change, the change propagates automatically. This is how RSS feeds work for blogs,iCalendar can do the same for events.
 
 The gold standard is **iCalendar (ICS) feeds** — a format that machines can read, merge, and republish. If you're an event producer and your platform can publish an ICS feed, that's great. But ICS isn't the only way. The real requirement is to **embrace the open web**. A clean HTML page with well-structured event data works. What doesn't work: events locked in Facebook or behind login walls.
 
