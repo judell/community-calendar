@@ -1293,8 +1293,9 @@ if (typeof window !== 'undefined') {
     if (!exc) return events;
     if (!events) return [];
     var exSources = exc.excludedSources || [];
+    var exCategories = exc.excludedCategories || [];
     var rejSet = {};
-    (exc.rejectedEvents || []).forEach(function(uid) { rejSet[uid] = true; });
+    (exc.excludedEvents || []).forEach(function(uid) { rejSet[uid] = true; });
     var requireApproval = exc.requireApproval && exc.lastReviewed;
     var lastReviewed = exc.lastReviewed || null;
     return events.filter(function(e) {
@@ -1304,6 +1305,7 @@ if (typeof window !== 'undefined') {
           if (exSources.indexOf(parts[i]) >= 0) return false;
         }
       }
+      if (e.category && exCategories.indexOf(e.category) >= 0) return false;
       if (e.source_uid && rejSet[e.source_uid]) return false;
       if (requireApproval && (e.created_at || e.start_time) > lastReviewed) return false;
       return true;

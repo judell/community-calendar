@@ -582,6 +582,8 @@ SOURCE_NAMES = {
     'tm_wells_metz': 'Wells Metz Theatre',
     'tm_assembly_hall': 'Simon Skjodt Assembly Hall',
     'limestone_post': 'Limestone Post',
+    'bloomington_rotary': 'Bloomington Rotary Club',
+    'bloomington_sunrise_rotary': 'Bloomington Sunrise Rotary',
 }
 
 # Fallback URLs for sources whose ICS events lack a URL property.
