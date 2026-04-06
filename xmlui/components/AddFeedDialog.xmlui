@@ -1,0 +1,106 @@
+<Component
+  name="AddFeedDialog"
+  method.open="() => { feedUrl = ''; feedName = ''; previewEvents = null; validating = false; validationError = ''; submitted = false; dialog.open(); }"
+  var.feedUrl=""
+  var.feedName=""
+  var.previewEvents="{null}"
+  var.validating="{false}"
+  var.validationError=""
+  var.submitted="{false}">
+
+  <APICall
+    id="validateApi"
+    method="post"
+    url="{appGlobals.supabaseUrl + '/functions/v1/validate-feed'}"
+    headers="{{
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + window.authSession?.access_token
+    }}"
+    body="{$param}"
+    onSuccess="(result) => {
+      validating = false;
+      if (result.valid) {
+        previewEvents = result.events;
+        if (result.futureEvents === 0) {
+          validationError = 'Feed is valid ICS but has no future events (' + result.totalEvents + ' total).';
+        }
+      } else {
+        validationError = result.error || 'Invalid feed';
+      }
+    }"
+    onError="(err) => {
+      validating = false;
+      validationError = err?.message || 'Failed to validate feed';
+    }" />
+
+  <APICall
+    id="saveFeedApi"
+    method="post"
+    url="{appGlobals.supabaseUrl + '/rest/v1/pending_feeds'}"
+    headers="{{
+      'Content-Type': 'application/json',
+      'apikey': appGlobals.supabasePublishableKey,
+      'Authorization': 'Bearer ' + authSession?.access_token,
+      'Prefer': 'return=minimal'
+    }}"
+    body="{$param}"
+    onSuccess="() => { submitted = true; }"
+    onError="(err) => { validationError = 'Failed to save feed: ' + err; }" />
+
+  <ModalDialog id="dialog" title="Add Feed" size="lg">
+    <VStack gap="$space-3">
+
+      <!-- Input form (hidden after preview loads) -->
+      <VStack gap="$space-2" when="{!previewEvents && !submitted}">
+        <TextBox
+          placeholder="Feed URL (https://...)"
+          value="{feedUrl}"
+          onDidChange="(val) => feedUrl = val"
+        />
+        <TextBox
+          placeholder="Source name (e.g. Brown County Events)"
+          value="{feedName}"
+          onDidChange="(val) => feedName = val"
+        />
+        <Button
+          label="{validating ? 'Validating...' : 'Validate Feed'}"
+          enabled="{feedUrl.startsWith('https://') && feedName.length > 0 && !validating}"
+          onClick="() => { validating = true; validationError = ''; validateApi.execute({ url: feedUrl }); }"
+        />
+        <Text when="{validationError}" color="$color-danger-500" value="{validationError}" />
+      </VStack>
+
+      <!-- Preview -->
+      <VStack when="{previewEvents && !submitted}" gap="$space-2">
+        <Text fontWeight="bold" value="{'Preview: ' + previewEvents.length + ' upcoming events from ' + feedName}" />
+        <ScrollViewer height="400px">
+          <VStack gap="$space-1">
+            <List data="{previewEvents}" itemKey="start_time">
+              <EventCard event="{$item}" filterTerm="" />
+            </List>
+          </VStack>
+        </ScrollViewer>
+        <HStack gap="$space-2" horizontalAlignment="end">
+          <Button
+            label="Back"
+            variant="ghost"
+            onClick="() => { previewEvents = null; validationError = ''; }"
+          />
+          <Button
+            label="Add Feed"
+            onClick="() => saveFeedApi.execute({ city: window.cityFilter || 'bloomington', url: feedUrl, name: feedName, added_by: authUser?.id })"
+          />
+        </HStack>
+      </VStack>
+
+      <!-- Confirmation -->
+      <VStack when="{submitted}" gap="$space-2">
+        <Text value="{'Feed saved as pending. It will be included in the next build at ' + window.nextBuildLocalTime() + '.'}" />
+        <Text>
+          <Link to="https://github.com/judell/community-calendar/actions/workflows/generate-calendar.yml" target="_blank" label="View build status" />
+        </Text>
+      </VStack>
+
+    </VStack>
+  </ModalDialog>
+</Component>

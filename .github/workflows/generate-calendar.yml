@@ -382,6 +382,19 @@ jobs:
     # ==========================================
     # Download feeds + Combine ICS (all cities)
     # ==========================================
+    - name: Fetch pending feeds from DB
+      env:
+        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      run: |
+        IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
+        for city in "${CITIES[@]}"; do
+          city=$(echo "$city" | xargs)
+          if [ -f "cities/$city/feeds.txt" ]; then
+            python scripts/fetch_pending_feeds.py "$city"
+          fi
+        done
+
     - name: Download live feeds
       run: |
         IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
@@ -531,7 +544,7 @@ jobs:
 
         git describe --tags --always > xmlui/version.txt
 
-        git add cities.json xmlui/version.txt report.json report.html
+        git add cities.json xmlui/version.txt report.json report.html cities/*/feeds.txt
         git diff --staged --quiet || (
           git commit -m "Auto-generate calendar metadata"
           # On conflict, our regenerated files always win

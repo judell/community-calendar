@@ -312,6 +312,22 @@ function getCityTimezone() {
   return undefined; // fall back to browser default
 }
 
+// Next scheduled build time in the city's local timezone
+// Build runs daily at midnight UTC (cron: 0 0 * * *)
+window.nextBuildLocalTime = function() {
+  var now = new Date();
+  var next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+  if (now.getUTCHours() === 0 && now.getUTCMinutes() < 10) {
+    next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0));
+  }
+  var tz = getCityTimezone();
+  return next.toLocaleString('en-US', {
+    timeZone: tz,
+    weekday: 'short', month: 'short', day: 'numeric',
+    hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+  });
+};
+
 // Format day of week
 function formatDayOfWeek(isoString) {
   if (!isoString) return '';

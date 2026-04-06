@@ -495,8 +495,9 @@ func Init() error {
 	if s.Step < 10 {
 		fmt.Printf("Setting GitHub Actions secrets...")
 		ghSecrets := map[string]string{
-			"SUPABASE_ANON_KEY": s.AnonKey,
-			"ANTHROPIC_API_KEY": s.AnthropicKey,
+			"SUPABASE_ANON_KEY":    s.AnonKey,
+			"SUPABASE_SERVICE_KEY": s.ServiceRoleKey,
+			"ANTHROPIC_API_KEY":    s.AnthropicKey,
 		}
 		if s.TicketmasterKey != "" {
 			ghSecrets["TICKETMASTER_API_KEY"] = s.TicketmasterKey

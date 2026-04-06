@@ -16,7 +16,7 @@
   <!-- DataSources -->
   <DataSource
     id="events"
-    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate() + (city ? '&city=eq.' + city : '')}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&source=neq.poster_capture&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate() + (city ? '&city=eq.' + city : '')}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       'Cache-Control': 'no-cache, no-store, must-revalidate'
@@ -106,19 +106,9 @@
   />
 
   <DataSource
-    id="adminGithubAccess"
-    when="{authSession && authUser?.user_metadata?.user_name}"
-    url="{appGlobals.supabaseUrl + '/rest/v1/admin_github_users?select=github_user&github_user=eq.' + authUser?.user_metadata?.user_name + '&limit=1'}"
-    headers="{{
-      apikey: appGlobals.supabasePublishableKey,
-      Authorization: 'Bearer ' + authSession?.access_token
-    }}"
-  />
-
-  <DataSource
-    id="adminGoogleAccess"
-    when="{authSession && authUser?.email}"
-    url="{appGlobals.supabaseUrl + '/rest/v1/admin_google_users?select=google_email&google_email=eq.' + authUser?.email + '&limit=1'}"
+    id="adminAccess"
+    when="{authSession}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/admin_users?select=user_id&user_id=eq.' + authUser?.id + '&limit=1'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       Authorization: 'Bearer ' + authSession?.access_token
@@ -135,12 +125,8 @@
   />
 
   <ChangeListener
-    listenTo="{adminGithubAccess.value}"
-    onDidChange="() => isAdmin = (adminGithubAccess.value || []).length > 0 || (adminGoogleAccess.value || []).length > 0"
-  />
-  <ChangeListener
-    listenTo="{adminGoogleAccess.value}"
-    onDidChange="() => isAdmin = (adminGithubAccess.value || []).length > 0 || (adminGoogleAccess.value || []).length > 0"
+    listenTo="{adminAccess.value}"
+    onDidChange="() => isAdmin = (adminAccess.value || []).length > 0"
   />
 
   <variable name="hiddenSources" value="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || []}" />
@@ -151,6 +137,7 @@
   <SourcesDialog id="sourcesDialog" events="{events.value}" hiddenSources="{hiddenSources}" />
   <CaptureDialog id="captureDialog" />
   <AudioCaptureDialog id="audioCaptureDialog" />
+  <AddFeedDialog id="addFeedDialog" />
   <PickEditor when="{!!pickEvent}" event="{pickEvent}" onClose="pickEvent = null" onSaved="picksCounter = picksCounter + 1" />
 
   <ModalDialog id="settingsDialog" title="Display Settings" maxWidth="400px">
