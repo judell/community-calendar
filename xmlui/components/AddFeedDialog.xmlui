@@ -12,10 +12,13 @@
 
   <DataSource
     id="sourceNames"
-    url="{appGlobals.supabaseUrl + '/rest/v1/source_names?select=name,event_count&city=eq.' + (window.cityFilter || 'bloomington') + '&order=name.asc'}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/rpc/get_source_counts'}"
+    method="post"
     headers="{{
+      'Content-Type': 'application/json',
       apikey: appGlobals.supabasePublishableKey
     }}"
+    body="{{'target_city': window.cityFilter || 'bloomington'}}"
   />
 
   <APICall
