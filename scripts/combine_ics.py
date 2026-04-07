@@ -1015,7 +1015,9 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar",
             all_events.extend(future_events)
             
             if future_events:
-                print(f"  {len(future_events):4d} future events from {ics_file.name} ({source_name})")
+                # Use actual X-SOURCE from first event if available (may differ from get_source_name for live feeds)
+                actual_source = extract_field(future_events[0]['content'], 'X-SOURCE') or source_name
+                print(f"  {len(future_events):4d} future events from {ics_file.name} ({actual_source})")
         except Exception as e:
             print(f"  Error processing {ics_file.name}: {e}")
     
