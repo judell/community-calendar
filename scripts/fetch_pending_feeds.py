@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Fetch pending feeds from Supabase and append them to feeds.txt.
+"""Sync pending_feeds table with feeds.txt.
 
 Usage: python scripts/fetch_pending_feeds.py <city>
 
-Queries the pending_feeds table for feeds with status='pending' for the given city.
-For each one:
-  1. Appends the entry to cities/<city>/feeds.txt (if not already present)
-  2. Updates status to 'active' in the DB
+Two passes:
+  1. Pending: queries status='pending', appends to feeds.txt, marks 'active'
+  2. Removed: queries status='removed', removes from feeds.txt, deletes row
 
 Requires SUPABASE_URL and SUPABASE_SERVICE_KEY environment variables.
 """
@@ -104,6 +103,63 @@ def fetch_pending_feeds(city: str) -> None:
             print(f"  ⚠️  Failed to mark active: {name}: {e}")
 
     print(f"  Processed {len(feeds)} pending feed(s) for {city} ({appended} new)")
+
+    # Remove feeds marked as 'removed'
+    remove_url = (
+        f"{supabase_url}/rest/v1/pending_feeds"
+        f"?select=id,url,name"
+        f"&city=eq.{city}"
+        f"&status=eq.removed"
+    )
+    req = urllib.request.Request(remove_url, headers=headers)
+    try:
+        with urllib.request.urlopen(req) as resp:
+            removed_feeds = json.loads(resp.read().decode())
+    except urllib.error.URLError as e:
+        print(f"  ⚠️  Failed to query removed feeds: {e}")
+        return
+
+    if not removed_feeds:
+        return
+
+    # Read feeds.txt and remove matching URLs
+    if os.path.exists(feeds_file):
+        removed_urls = {"".join(f["url"].split()) for f in removed_feeds}
+        lines = open(feeds_file).readlines()
+        new_lines = []
+        skip_next = False
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if stripped in removed_urls:
+                # Remove this URL line and the comment line above it
+                if new_lines and new_lines[-1].strip().startswith('#'):
+                    new_lines.pop()
+                skip_next = False
+                continue
+            new_lines.append(line)
+        with open(feeds_file, 'w') as f:
+            f.writelines(new_lines)
+
+    for feed in removed_feeds:
+        feed_id = feed["id"]
+        name = feed["name"]
+        # Delete the row now that feeds.txt is cleaned up
+        del_url = (
+            f"{supabase_url}/rest/v1/pending_feeds"
+            f"?id=eq.{feed_id}"
+        )
+        del_req = urllib.request.Request(
+            del_url,
+            headers={**headers, "Prefer": "return=minimal"},
+            method="DELETE",
+        )
+        try:
+            urllib.request.urlopen(del_req)
+            print(f"  🗑️  Removed from feeds.txt and DB: {name}")
+        except urllib.error.URLError as e:
+            print(f"  ⚠️  Failed to delete removed feed: {name}: {e}")
+
+    print(f"  Removed {len(removed_feeds)} feed(s) for {city}")
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@
 
   <DataSource
     id="existingFeeds"
-    url="{appGlobals.supabaseUrl + '/rest/v1/pending_feeds?select=id,name,url,status&city=eq.' + (window.cityFilter || 'bloomington') + '&order=name.asc'}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/pending_feeds?select=id,name,url,status&city=eq.' + (window.cityFilter || 'bloomington') + '&status=neq.removed&order=name.asc'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       Authorization: 'Bearer ' + window.authSession?.access_token
@@ -73,12 +73,14 @@
 
   <APICall
     id="deleteFeedApi"
-    method="delete"
+    method="patch"
     url="{appGlobals.supabaseUrl + '/rest/v1/pending_feeds?id=eq.' + $param.id}"
     headers="{{
+      'Content-Type': 'application/json',
       'apikey': appGlobals.supabasePublishableKey,
       'Authorization': 'Bearer ' + authSession?.access_token
     }}"
+    body="{{'status': 'removed'}}"
     onSuccess="() => { deleteError = ''; existingFeeds.invalidate(); }"
     onError="(err) => { deleteError = 'Failed to delete feed: ' + (err.message || err); }" />
 
