@@ -1,25 +1,20 @@
 #!/usr/bin/env python3
-"""Download all live ICS feeds listed in a city's feeds.txt.
+"""Download all live ICS feeds for a city.
 
 Usage: python scripts/download_feeds.py <city>
 
-Reads cities/<city>/feeds.txt, downloads each https:// URL to an auto-named
-.ics file in cities/<city>/. Parses structured comments above each URL to
-get the friendly source name and optional fallback URL, then injects
-X-SOURCE (and X-SOURCE-URL) headers into each downloaded VEVENT.
-
-feeds.txt format:
-    # Friendly Name | https://fallback-url/
-    https://actual-feed-url/ical/
-
-    # Friendly Name
-    https://another-feed-url/ical/
+Queries the feeds table in Supabase for active ics_url/curator feeds,
+downloads each to an auto-named .ics file in cities/<city>/, and injects
+X-SOURCE headers. Falls back to feeds.txt if SUPABASE_URL is not set.
 """
 
+import json
 import os
 import re
 import subprocess
 import sys
+import urllib.request
+import urllib.error
 from urllib.parse import urlparse
 
 
@@ -162,16 +157,55 @@ def inject_source_headers(filepath: str, friendly_name: str, fallback_url: str |
         f.write(marker.join(result))
 
 
-def download_feeds(city: str) -> None:
-    feeds_file = os.path.join("cities", city, "feeds.txt")
-    output_dir = os.path.join("cities", city)
+def fetch_feeds_from_db(city: str):
+    """Query the feeds table for active ics_url and curator feeds.
+    Returns list of (url, name, fallback_url) tuples, or None if DB not available."""
+    supabase_url = os.environ.get("SUPABASE_URL")
+    service_key = os.environ.get("SUPABASE_SERVICE_KEY")
+    if not supabase_url or not service_key:
+        return None
 
-    if not os.path.exists(feeds_file):
-        print(f"No feeds.txt found for {city}")
-        return
+    query_url = (
+        f"{supabase_url}/rest/v1/feeds"
+        f"?select=url,name"
+        f"&city=eq.{city}"
+        f"&status=eq.active"
+        f"&feed_type=in.(ics_url,curator)"
+        f"&order=name.asc"
+    )
+    headers = {
+        "apikey": service_key,
+        "Authorization": f"Bearer {service_key}",
+    }
+    req = urllib.request.Request(query_url, headers=headers)
+    try:
+        with urllib.request.urlopen(req) as resp:
+            feeds = json.loads(resp.read().decode())
+    except urllib.error.URLError as e:
+        print(f"  ⚠️  Failed to query feeds table: {e}")
+        return None
+
+    return [(f["url"], f["name"], None) for f in feeds]
+
+
+def download_feeds(city: str) -> None:
+    output_dir = os.path.join("cities", city)
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Try DB first, fall back to feeds.txt
+    feed_list = fetch_feeds_from_db(city)
+    if feed_list is not None:
+        print(f"  Using feeds table ({len(feed_list)} feeds)")
+    else:
+        feeds_file = os.path.join("cities", city, "feeds.txt")
+        if not os.path.exists(feeds_file):
+            print(f"No feeds.txt found for {city}")
+            return
+        feed_list = list(parse_feeds_txt(feeds_file))
+        print(f"  Using feeds.txt ({len(feed_list)} feeds)")
 
     count = 0
-    for url, friendly_name, fallback_url in parse_feeds_txt(feeds_file):
+    for url, friendly_name, fallback_url in feed_list:
         filename = slugify(url) + ".ics"
         outfile = os.path.join(output_dir, filename)
 

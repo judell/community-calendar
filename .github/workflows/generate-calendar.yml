@@ -397,16 +397,17 @@ jobs:
         done
 
     - name: Download live feeds
+      env:
+        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
       run: |
         IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
         for city in "${CITIES[@]}"; do
           city=$(echo "$city" | xargs)
-          if [ -f "cities/$city/feeds.txt" ]; then
-            START=$(date +%s)
-            echo "Downloading feeds for $city..."
-            python scripts/download_feeds.py "$city"
-            echo "⏱ $city feeds: $(( $(date +%s) - START ))s"
-          fi
+          START=$(date +%s)
+          echo "Downloading feeds for $city..."
+          python scripts/download_feeds.py "$city"
+          echo "⏱ $city feeds: $(( $(date +%s) - START ))s"
         done
 
     - name: Combine ICS files
