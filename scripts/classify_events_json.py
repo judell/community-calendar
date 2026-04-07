@@ -46,8 +46,13 @@ def anthropic_call(api_key, model, prompt):
         "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
     })
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        result = json.loads(resp.read())
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            result = json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8", errors="replace")
+        print(f"API error {e.code}: {error_body}", file=sys.stderr)
+        raise
     return result["content"][0]["text"].strip()
 
 
