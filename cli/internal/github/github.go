@@ -53,17 +53,22 @@ func GetCurrentRepo() (string, error) {
 	return "", fmt.Errorf("could not parse GitHub repo from origin URL: %s", url)
 }
 
-// CheckExistingFork checks if the authenticated user already has a fork of the upstream repo.
+// CheckExistingFork checks if the authenticated user (or org) already has a fork of the upstream repo.
+// If org is non-empty, checks under the org instead of the user's account.
 // Returns the fork's full name (e.g. "user/repo") if it exists, or "" if not.
-func CheckExistingFork(upstream string) (string, error) {
-	user, err := GetCurrentUser()
-	if err != nil {
-		return "", err
+func CheckExistingFork(upstream, org string) (string, error) {
+	owner := org
+	if owner == "" {
+		var err error
+		owner, err = GetCurrentUser()
+		if err != nil {
+			return "", err
+		}
 	}
 	// Extract repo name from "owner/repo"
 	parts := strings.Split(upstream, "/")
 	repoName := parts[len(parts)-1]
-	forkRepo := user + "/" + repoName
+	forkRepo := owner + "/" + repoName
 	// Check if the repo exists and is a fork
 	out, err := RunGH("api", fmt.Sprintf("repos/%s", forkRepo), "--jq", ".fork")
 	if err != nil {
@@ -76,9 +81,14 @@ func CheckExistingFork(upstream string) (string, error) {
 }
 
 // ForkAndClone forks the upstream repo and clones the fork into the current directory.
+// If org is non-empty, the fork is created under that GitHub organization.
 // Returns the path to the cloned directory.
-func ForkAndClone(upstream string) (string, error) {
-	_, err := RunGH("repo", "fork", upstream, "--clone")
+func ForkAndClone(upstream, org string) (string, error) {
+	args := []string{"repo", "fork", upstream, "--clone"}
+	if org != "" {
+		args = append(args, "--org", org)
+	}
+	_, err := RunGH(args...)
 	if err != nil {
 		return "", err
 	}

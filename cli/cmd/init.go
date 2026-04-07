@@ -47,8 +47,14 @@ func Init() error {
 	// If not in a community-calendar repo, fork and clone
 	repoRoot, err := findRepoRoot()
 	if err != nil {
+		// Ask if user wants to fork into an org
+		forkOrg, err := prompt.AskOptional("GitHub org to fork into (Enter to fork to your personal account)")
+		if err != nil {
+			return err
+		}
+
 		// Check if user already has a fork
-		existingFork, err := github.CheckExistingFork(upstreamRepo)
+		existingFork, err := github.CheckExistingFork(upstreamRepo, forkOrg)
 		if err != nil {
 			return fmt.Errorf("checking for existing fork: %w", err)
 		}
@@ -66,7 +72,7 @@ func Init() error {
 			}
 		}
 		fmt.Println("Forking and cloning...")
-		dirName, err := github.ForkAndClone(upstreamRepo)
+		dirName, err := github.ForkAndClone(upstreamRepo, forkOrg)
 		if err != nil {
 			return fmt.Errorf("fork and clone: %w", err)
 		}
