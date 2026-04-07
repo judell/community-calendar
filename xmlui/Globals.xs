@@ -3,6 +3,12 @@
 
 var categoryColorMap = window.categoryColorMap;
 
+// Seed hidden sources from localStorage for unauthenticated users
+try {
+  const stored = localStorage.getItem('hidden_sources');
+  if (stored) { window._localHiddenSources = JSON.parse(stored); }
+} catch(e) {}
+
 var layoutMode = window.layoutMode;
 var showListImages = window.showListImages;
 var oneClickPick = false;
@@ -85,8 +91,12 @@ function toggleSourceVisibility(source) {
 }
 
 function applyHiddenSources(hiddenArray) {
-  if (!authSession) return;
-  userSettingsData = window.saveHiddenSources(hiddenArray, userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
+  if (authSession) {
+    userSettingsData = window.saveHiddenSources(hiddenArray, userSettingsData, appGlobals.supabaseUrl, appGlobals.supabasePublishableKey);
+  } else {
+    localStorage.setItem('hidden_sources', JSON.stringify(hiddenArray));
+    userSettingsData = [{ hidden_sources: hiddenArray }];
+  }
 }
 
 function saveCategoryOverride(eventId, category) {
