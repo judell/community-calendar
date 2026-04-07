@@ -6,7 +6,7 @@ CREATE TABLE pending_feeds (
   name text NOT NULL,
   fallback_url text,
   added_by uuid REFERENCES auth.users(id),
-  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'rejected')),
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'rejected', 'removed')),
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
