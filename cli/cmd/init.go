@@ -47,7 +47,25 @@ func Init() error {
 	// If not in a community-calendar repo, fork and clone
 	repoRoot, err := findRepoRoot()
 	if err != nil {
-		fmt.Println("Not in a community-calendar repo. Forking and cloning...")
+		// Check if user already has a fork
+		existingFork, err := github.CheckExistingFork(upstreamRepo)
+		if err != nil {
+			return fmt.Errorf("checking for existing fork: %w", err)
+		}
+		if existingFork != "" {
+			fmt.Printf("⚠️  You already have a fork: %s\n", existingFork)
+			fmt.Println("   This may contain state from a previous setup.")
+			fmt.Println("   To start fresh, delete the fork on GitHub first:")
+			fmt.Printf("     gh repo delete %s --yes\n", existingFork)
+			proceed, err := prompt.Confirm("Continue with existing fork?")
+			if err != nil {
+				return err
+			}
+			if !proceed {
+				return fmt.Errorf("aborted — delete the existing fork and try again")
+			}
+		}
+		fmt.Println("Forking and cloning...")
 		dirName, err := github.ForkAndClone(upstreamRepo)
 		if err != nil {
 			return fmt.Errorf("fork and clone: %w", err)

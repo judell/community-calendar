@@ -53,6 +53,28 @@ func GetCurrentRepo() (string, error) {
 	return "", fmt.Errorf("could not parse GitHub repo from origin URL: %s", url)
 }
 
+// CheckExistingFork checks if the authenticated user already has a fork of the upstream repo.
+// Returns the fork's full name (e.g. "user/repo") if it exists, or "" if not.
+func CheckExistingFork(upstream string) (string, error) {
+	user, err := GetCurrentUser()
+	if err != nil {
+		return "", err
+	}
+	// Extract repo name from "owner/repo"
+	parts := strings.Split(upstream, "/")
+	repoName := parts[len(parts)-1]
+	forkRepo := user + "/" + repoName
+	// Check if the repo exists and is a fork
+	out, err := RunGH("api", fmt.Sprintf("repos/%s", forkRepo), "--jq", ".fork")
+	if err != nil {
+		return "", nil // repo doesn't exist
+	}
+	if strings.TrimSpace(out) == "true" {
+		return forkRepo, nil
+	}
+	return "", nil
+}
+
 // ForkAndClone forks the upstream repo and clones the fork into the current directory.
 // Returns the path to the cloned directory.
 func ForkAndClone(upstream string) (string, error) {
