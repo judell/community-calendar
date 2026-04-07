@@ -7,7 +7,7 @@
   var.browseStartIndex="{0}"
   var.scrollRequest="{0}"
   global.picksData="{null}"
-  global.userSettingsData="{null}"
+  global.userSettingsData="{window._localHiddenSources ? [{ hidden_sources: window._localHiddenSources }] : null}"
   global.authUser="{authUser}"
   global.authSession="{authSession}"
   var.city="{window.cityFilter || null}"
@@ -57,7 +57,7 @@
 
   <ChangeListener
     listenTo="{userSettings.value}"
-    onDidChange="() => { if (!userSettingsData) { userSettingsData = userSettings.value; const s = userSettingsData && userSettingsData[0]; if (s) { if (s.layout_mode && !window.embed) { window.setLayoutMode(s.layout_mode); layoutMode = s.layout_mode } if (s.image_mode) { window.setShowListImages(s.image_mode === 'everywhere' ? 'list' : 'preview'); showListImages = (s.image_mode !== 'preview') } oneClickPick = !!s.one_click_pick } } }"
+    onDidChange="() => { if (userSettings.value && userSettings.value.length) { userSettingsData = userSettings.value; const s = userSettingsData[0]; if (s) { if (s.layout_mode && !window.embed) { window.setLayoutMode(s.layout_mode); layoutMode = s.layout_mode } if (s.image_mode) { window.setShowListImages(s.image_mode === 'everywhere' ? 'list' : 'preview'); showListImages = (s.image_mode !== 'preview') } oneClickPick = !!s.one_click_pick } } }"
   />
 
   <DataSource
@@ -204,6 +204,9 @@
         <HStack width="100%" verticalAlignment="center">
           <Text overflowMode="ellipsis" maxLines="1" width="*">{window.toDisplayName(city)}</Text>
           <IncludeMarkup when="{!window.embed}" url="components/IconRow.xmlui" />
+          <HStack when="{window.embed}" gap="$space-1" verticalAlignment="center">
+            <Icon name="l-rss" tooltip="Sources" width="20px" height="20px" color="$color-surface-500" onClick="sourcesDialog.open()" />
+          </HStack>
         </HStack>
       </H1>
     </Bookmark>
@@ -300,6 +303,9 @@
       <HStack width="100%" verticalAlignment="center">
         <Text overflowMode="ellipsis" maxLines="1" width="*">{window.cityName || 'Community Calendar'}</Text>
         <IncludeMarkup when="{!window.embed}" url="components/IconRow.xmlui" />
+        <HStack when="{window.embed}" gap="$space-1" verticalAlignment="center">
+          <Icon name="l-rss" tooltip="Sources" width="20px" height="20px" color="$color-surface-500" onClick="sourcesDialog.open()" />
+        </HStack>
       </HStack>
     </H1>
     <DashboardView />

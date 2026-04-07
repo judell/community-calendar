@@ -1288,6 +1288,12 @@ if (typeof window !== 'undefined') {
   window.saveHiddenSources = saveHiddenSources;
   window.isSourceHidden = isSourceHidden;
   window.filterHiddenSources = filterHiddenSources;
+
+  // Seed hidden sources from localStorage for unauthenticated users
+  try {
+    var stored = localStorage.getItem('hidden_sources');
+    if (stored) { window._localHiddenSources = JSON.parse(stored); }
+  } catch(e) {}
   window.filterExternalExclusions = function(events) {
     var exc = window.externalExclusions;
     if (!exc) return events;

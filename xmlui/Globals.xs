@@ -3,11 +3,6 @@
 
 var categoryColorMap = window.categoryColorMap;
 
-// Seed hidden sources from localStorage for unauthenticated users
-try {
-  const stored = localStorage.getItem('hidden_sources');
-  if (stored) { window._localHiddenSources = JSON.parse(stored); }
-} catch(e) {}
 
 var layoutMode = window.layoutMode;
 var showListImages = window.showListImages;
