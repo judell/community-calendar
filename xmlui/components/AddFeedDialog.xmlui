@@ -66,20 +66,20 @@
       'Authorization': 'Bearer ' + window.authSession?.access_token
     }}"
     onSuccess="() => {
-      markRemovedApi.execute({ id: deletingId });
+      markRemovedApi.execute({ feed_id: deletingId });
     }"
     onError="(err) => { deleteError = 'Failed to delete events: ' + (err.message || err); }" />
 
   <APICall
     id="markRemovedApi"
-    method="patch"
-    url="{appGlobals.supabaseUrl + '/rest/v1/feeds?id=eq.' + $param.id}"
+    method="post"
+    url="{appGlobals.supabaseUrl + '/rest/v1/rpc/remove_feed'}"
     headers="{{
       'Content-Type': 'application/json',
       'apikey': appGlobals.supabasePublishableKey,
       'Authorization': 'Bearer ' + window.authSession?.access_token
     }}"
-    body="{{'status': 'removed'}}"
+    body="{$param}"
     onSuccess="() => { deleteError = ''; feedsList.invalidate(); }"
     onError="(err) => { deleteError = 'Failed to mark feed as removed: ' + (err.message || err); }" />
 
