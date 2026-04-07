@@ -727,12 +727,7 @@
       <input type="text" id="filterInput" placeholder="Hide..." style="flex: 1; min-width: 100px;" />
       <button id="clear">Clear</button>
       <button id="test">Test</button>
-      <select id="exportFormat">
-        <option value="">Export...</option>
-        <option value="html">Download HTML</option>
-        <option value="md">Download Markdown</option>
-        <option value="json">Download JSON (for Playwright)</option>
-      </select>
+      <button id="exportJson">Export</button>
     </div>
     <div id="diff"></div>
 
@@ -2896,16 +2891,14 @@
           let label = "";
           const compName = e.componentLabel || e.component || "";
           const ariaTag = e.ariaName ? ` [${e.ariaName}]` : "";
-          // Truncate method:call displayLabels that contain full state payloads
+          // For method:call, show just the method name in the header;
+          // full payload goes in an expandable detail block.
           let displayLabel = e.displayLabel || "";
-          if (e.kind === "method:call" && displayLabel.length > 120) {
-            // Show method name + truncated args: "state.update({status:true,sessions:[],...})"
+          let methodCallFullLabel = "";
+          if (e.kind === "method:call" && displayLabel.length > 60) {
+            methodCallFullLabel = displayLabel;
             const parenIdx = displayLabel.indexOf("(");
-            if (parenIdx !== -1) {
-              displayLabel = displayLabel.substring(0, Math.min(parenIdx + 80, displayLabel.length)) + "…)";
-            } else {
-              displayLabel = displayLabel.substring(0, 120) + "…";
-            }
+            displayLabel = parenIdx !== -1 ? displayLabel.substring(0, parenIdx) + "(…)" : displayLabel.substring(0, 60) + "…";
           }
           if (compName && displayLabel) {
             label = `${compName}${ariaTag} "${displayLabel}"`;
@@ -2923,6 +2916,7 @@
             entry: e, meta,
             eventTitle,
             label,
+            methodCallFullLabel,
           });
         });
 
@@ -3760,6 +3754,11 @@
             const dedupCount = e._dedupCount || 1;
             const dedupInfo = dedupCount > 1 ? ` <span class="badge-muted">\u00d7${dedupCount}</span>` : "";
             bodyHtml += `<div class="trace-event-header">${evt.eventTitle}${dedupInfo}${evt.label ? ` ${evt.label}` : ""}${bootstrapBadge}${metaInline}</div>`;
+
+            // Show method:call full payload in expandable detail
+            if (evt.methodCallFullLabel) {
+              bodyHtml += `<details><summary>Full call</summary><pre class="source-code">${evt.methodCallFullLabel.replace(/</g, "&lt;")}</pre></details>`;
+            }
 
             // Show XMLUI source expander for events that carry source info
             if (evt.meta.hasSource && evt.meta.resolvedFile) {
@@ -6539,25 +6538,6 @@
 
 
         // =========================================================================
-        // TEST SUITE: Export
-        // =========================================================================
-        test("Export", "generateMarkdownExport produces valid markdown", () => {
-          const events = TestFramework.scenarios.apiRequest();
-          const processed = processAllEntries(events);
-          const md = generateMarkdownExport(processed);
-          assertContains(md, "# XMLUI Inspector Export", "Should have title");
-          assertContains(md, "Total events:", "Should have event count");
-        });
-
-        test("Export", "generateMarkdownExport includes API events", () => {
-          const events = TestFramework.scenarios.apiRequest("POST", "/api/submit");
-          const processed = processAllEntries(events);
-          const md = generateMarkdownExport(processed);
-          assertContains(md, "POST", "Should include method");
-          assertContains(md, "/api/submit", "Should include URL");
-        });
-
-        // =========================================================================
         // TEST SUITE: Complex Scenarios
         // =========================================================================
         test("Complex Scenarios", "handles full publish post flow", () => {
@@ -7044,190 +7024,30 @@
         URL.revokeObjectURL(url);
       }
 
-      function generateMarkdownExport(processed) {
-        const lines = [];
-        lines.push("# XMLUI Inspector Export");
-        lines.push("");
-        lines.push(`**Generated:** ${new Date().toISOString()}`);
-        lines.push(`**Total events:** ${processed.totalEvents}`);
-        lines.push("");
-
-        processed.timelineItems.forEach((item, idx) => {
-          if (item.type === "trace") {
-            const { summary, events, traceId } = item;
-            lines.push(`## Trace ${idx + 1}: ${summary.componentText}${summary.totalDuration !== null ? ` (${summary.totalDuration.toFixed(0)}ms)` : ""}`);
-            lines.push("");
-            lines.push(`- **traceId:** \`${traceId}\``);
-            if (summary.timelineBreakdown.length > 0 && summary.totalDuration) {
-              lines.push("");
-              lines.push("| Phase | Duration |");
-              lines.push("|-------|----------|");
-              const sorted = summary.timelineBreakdown.slice().sort((a, b) => a.order - b.order);
-              sorted.forEach(item => {
-                lines.push(`| ${item.phase} | ${item.duration.toFixed(0)}ms |`);
-              });
-              lines.push(`| **total** | **${summary.totalDuration.toFixed(0)}ms** |`);
-            } else if (summary.totalDuration !== null) {
-              lines.push(`- **duration:** ${summary.totalDuration.toFixed(0)}ms`);
+      document.getElementById("exportJson").addEventListener("click", () => {
+        const rawLogs = ((window.parent && window.parent._xsLogs) || []).slice().sort((a, b) => (a.perfTs || a.ts || 0) - (b.perfTs || b.ts || 0));
+        if (rawLogs.length === 0) {
+          alert("No logs found.");
+          return;
+        }
+        const skipKeys = new Set(['_targetInst', '_debugOwner', '_debugSource', 'stateNode', 'nativeEvent', 'view', 'target', 'currentTarget', 'relatedTarget', '__reactFiber$', '__reactProps$']);
+        const jsonEntries = rawLogs.map(entry => {
+          const seen = new WeakSet();
+          return JSON.stringify(entry, (key, value) => {
+            if (value instanceof Node || value instanceof Window) return undefined;
+            if (typeof value === 'function') return undefined;
+            if (skipKeys.has(key)) return undefined;
+            if (key.startsWith('__react')) return undefined;
+            if (typeof value === 'object' && value !== null) {
+              if (seen.has(value)) return '[circular]';
+              seen.add(value);
             }
-            lines.push("");
-
-            events.forEach((evt) => {
-              const e = evt.entry;
-              // Strip HTML tags from meta parts for markdown export
-              const metaParts = evt.meta.parts.map(stripHtml);
-              const meta = metaParts.length ? ` _(${metaParts.join(" | ")})_` : "";
-
-              if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
-                const durationSuffix = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
-                const requestIdSuffix = e._requestId ? ` \`[${e._requestId}]\`` : "";
-                lines.push(`- \`[${e.kind}]\`${durationSuffix} **${normalizeMethod(e.method)}** ${normalizeUrl(e.url)}${requestIdSuffix}${meta}`);
-                if (e.body) {
-                  const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body);
-                  const truncatedBody = bodyStr.length > 100 ? bodyStr.substring(0, 100) + "..." : bodyStr;
-                  lines.push(`  - body: \`${truncatedBody}\``);
-                }
-              } else if (e.kind === "navigate") {
-                lines.push(`- \`[navigate]\` **${e.from || "/"}** → **${e.to || "?"}**${meta}`);
-              } else if (e.kind === "modal:show" || e.kind === "modal:confirm" || e.kind === "modal:cancel") {
-                const title = e.title ? ` "${e.title}"` : "";
-                lines.push(`- \`[${e.kind}]\`${title}${meta}`);
-              } else if (e.kind === "state:changes") {
-                lines.push(`- \`[${e.kind}]\` ${e.eventName || ""}${meta}`);
-                if (e.diffJson) {
-                  e.diffJson.forEach((d) => {
-                    if (d.before && d.after && typeof d.before === "object" && typeof d.after === "object" && !Array.isArray(d.before) && !Array.isArray(d.after)) {
-                      // Object diff
-                      const allKeys = new Set([...Object.keys(d.before), ...Object.keys(d.after)]);
-                      const changedKeys = [];
-                      allKeys.forEach((key) => {
-                        if (JSON.stringify(d.before[key]) !== JSON.stringify(d.after[key])) changedKeys.push(key);
-                      });
-                      if (changedKeys.length === 0) {
-                        lines.push(`  - \`${d.path}\`: (no visible change)`);
-                      } else {
-                        lines.push(`  - \`${d.path}\`:`);
-                        changedKeys.forEach((key) => {
-                          lines.push(`    - \`${key}\`: ${JSON.stringify(d.before[key])?.slice(0, 60) || "undefined"} → ${JSON.stringify(d.after[key])?.slice(0, 60) || "undefined"}`);
-                        });
-                      }
-                    } else {
-                      lines.push(`  - \`${d.path}\`: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
-                    }
-                  });
-                }
-              } else {
-                lines.push(`- \`[${e.kind}]\` ${e.eventName || ""}${evt.label ? ` ${evt.label}` : ""}${meta}`);
-              }
-            });
-            lines.push("");
-          }
+            return value;
+          });
         });
-
-        if (processed.sourceFiles.length) {
-          lines.push("## Source Files");
-          lines.push("");
-          processed.sourceFiles.forEach((file, idx) => {
-            lines.push(`${idx}. \`${file}\``);
-          });
-        }
-
-        return lines.join("\n");
-      }
-
-      function generateHtmlExport(processed) {
-        // Static HTML snapshot - captures current rendered state
-        const styles = document.querySelector("style").textContent;
-        const diffContent = document.getElementById("diff").innerHTML;
-
-        return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>XMLUI Inspector Export - ${new Date().toISOString()}</title>
-  <link rel="stylesheet" href="https://unpkg.com/jsondiffpatch@0.7.3/lib/formatters/styles/html.css" />
-  <style>${styles}</style>
-  <style>
-    /* Export-specific: expand all trace groups by default */
-    .trace-group { }
-    .trace-group .trace-body { display: block; }
-    .trace-group .trace-header .arrow { transform: rotate(90deg); }
-  </style>
-</head>
-<body>
-  <h1>XMLUI Inspector</h1>
-  <p style="color: var(--color-text-muted); font-size: var(--font-sm);">
-    Exported: ${new Date().toISOString()} | Events: ${processed.totalEvents}
-  </p>
-  <div id="diff">${diffContent}</div>
-  <script>
-    // Simple interactivity for exported file
-    document.querySelectorAll(".trace-header").forEach(header => {
-      header.addEventListener("click", () => {
-        header.parentElement.classList.toggle("expanded");
-        header.classList.toggle("expanded");
-      });
-    });
-  <` + `/script>
-</body>
-</html>`;
-      }
-
-      document.getElementById("exportFormat").addEventListener("change", (e) => {
-        const format = e.target.value;
-        if (!format) return;
-        e.target.value = ""; // Reset select
-
-        const allEntries = getAllEntries();
-        const filtered = allEntries.filter((entry) => entryMatches(entry, ""));
-        if (!filtered.length) { alert("No entries to export"); return; }
-
-        const processed = processAllEntries(filtered);
+        const jsonContent = '[\n  ' + jsonEntries.join(',\n  ') + '\n]';
         const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, "");
-
-        if (format === "md") {
-          downloadFile(`xs-diff-${timestamp}.md`, generateMarkdownExport(processed), "text/markdown");
-        } else if (format === "html") {
-          downloadFile(`xs-diff-${timestamp}.html`, generateHtmlExport(processed), "text/html");
-        } else if (format === "json") {
-          // Export live _xsLogs only (not localStorage) for Playwright test generation.
-          // The engine's splicePreservingInteractions() already preserves interaction and
-          // API events from buffer eviction, so localStorage merge is unnecessary and
-          // would contaminate exports with stale events from previous sessions.
-          const rawLogs = ((window.parent && window.parent._xsLogs) || []).slice().sort((a, b) => (a.perfTs || a.ts || 0) - (b.perfTs || b.ts || 0));
-          console.log(`Exporting ${rawLogs.length} entries as JSON for Playwright`);
-          console.log(`Interaction entries: ${rawLogs.filter(e=>e.kind === 'interaction').length}`);
-          if (rawLogs.length === 0) {
-            alert("No logs found. Try running this in the app console:\ncopy(JSON.stringify(window._xsLogs, (k,v) => v instanceof Node || v instanceof Window || typeof v === 'function' ? undefined : v))");
-            return;
-          }
-          // Stringify each entry separately to avoid cross-entry circular tracking
-          const skipKeys = new Set(['_targetInst', '_debugOwner', '_debugSource', 'stateNode', 'nativeEvent', 'view', 'target', 'currentTarget', 'relatedTarget', '__reactFiber$', '__reactProps$']);
-          const jsonEntries = rawLogs.map(entry => {
-            const seen = new WeakSet();
-            return JSON.stringify(entry, (key, value) => {
-              if (value instanceof Node || value instanceof Window) return undefined;
-              if (typeof value === 'function') return undefined;
-              // Skip React internals and DOM-heavy fields that bloat the output
-              if (skipKeys.has(key)) return undefined;
-              if (key.startsWith('__react')) return undefined;
-              if (typeof value === 'object' && value !== null) {
-                if (seen.has(value)) return '[circular]';
-                seen.add(value);
-              }
-              return value;
-            });
-          });
-          const jsonContent = '[\n  ' + jsonEntries.join(',\n  ') + '\n]';
-          console.log(`JSON size: ${jsonContent.length} bytes`);
-          const defaultName = `xs-trace-${timestamp}`;
-          const filename = prompt("Save trace as:", defaultName);
-          if (filename) {
-            const finalName = filename.endsWith('.json') ? filename : `${filename}.json`;
-            downloadFile(finalName, jsonContent, "application/json");
-          }
-        }
+        downloadFile(`xs-trace-${timestamp}.json`, jsonContent, "application/json");
       });
 
       // Handle hash navigation - expand parent trace-group and highlight target
