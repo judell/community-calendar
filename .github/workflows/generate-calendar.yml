@@ -410,6 +410,17 @@ jobs:
           echo "⏱ $city feeds: $(( $(date +%s) - START ))s"
         done
 
+    - name: Export feeds.txt from DB
+      env:
+        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      run: |
+        IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
+        for city in "${CITIES[@]}"; do
+          city=$(echo "$city" | xargs)
+          python scripts/export_feeds_txt.py "$city"
+        done
+
     - name: Combine ICS files
       run: |
         IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
