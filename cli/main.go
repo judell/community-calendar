@@ -22,7 +22,7 @@ func main() {
 	case "status":
 		err = cmd.Status()
 	case "version":
-		fmt.Println("cc-cli v0.1.0")
+		fmt.Println("cc-cli v0.1.3")
 	case "help", "--help", "-h":
 		printUsage()
 	default:
