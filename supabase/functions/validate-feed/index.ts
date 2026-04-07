@@ -167,12 +167,12 @@ Deno.serve(async (req) => {
 
     const allEvents = parseICS(icsText);
 
-    // Filter to future events, sort by start_time, take first 20
+    // Filter to future events, sort by start_time, take first 10
     const now = new Date().toISOString();
     const futureEvents = allEvents
       .filter((e) => e.start_time >= now)
       .sort((a, b) => a.start_time.localeCompare(b.start_time))
-      .slice(0, 20);
+      .slice(0, 10);
 
     return new Response(
       JSON.stringify({
