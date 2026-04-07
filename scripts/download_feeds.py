@@ -167,9 +167,9 @@ def fetch_feeds_from_db(city: str):
 
     query_url = (
         f"{supabase_url}/rest/v1/feeds"
-        f"?select=url,name"
+        f"?select=id,url,name,status"
         f"&city=eq.{city}"
-        f"&status=eq.active"
+        f"&status=in.(active,pending)"
         f"&feed_type=in.(ics_url,curator)"
         f"&order=name.asc"
     )
@@ -185,7 +185,30 @@ def fetch_feeds_from_db(city: str):
         print(f"  ⚠️  Failed to query feeds table: {e}")
         return None
 
-    return [(f["url"], f["name"], None) for f in feeds]
+    return feeds  # list of dicts with id, url, name, status
+
+
+def mark_feeds_active(feeds_to_activate):
+    """Mark pending feeds as active after successful download."""
+    supabase_url = os.environ.get("SUPABASE_URL")
+    service_key = os.environ.get("SUPABASE_SERVICE_KEY")
+    if not supabase_url or not service_key:
+        return
+    headers = {
+        "apikey": service_key,
+        "Authorization": f"Bearer {service_key}",
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal",
+    }
+    for feed in feeds_to_activate:
+        patch_url = f"{supabase_url}/rest/v1/feeds?id=eq.{feed['id']}"
+        data = json.dumps({"status": "active"}).encode()
+        req = urllib.request.Request(patch_url, data=data, headers=headers, method="PATCH")
+        try:
+            urllib.request.urlopen(req)
+            print(f"  ✅ Marked active: {feed['name']}")
+        except urllib.error.URLError as e:
+            print(f"  ⚠️  Failed to mark active: {feed['name']}: {e}")
 
 
 def download_feeds(city: str) -> None:
@@ -193,15 +216,18 @@ def download_feeds(city: str) -> None:
     os.makedirs(output_dir, exist_ok=True)
 
     # Try DB first, fall back to feeds.txt
-    feed_list = fetch_feeds_from_db(city)
-    if feed_list is not None:
-        print(f"  Using feeds table ({len(feed_list)} feeds)")
+    db_feeds = fetch_feeds_from_db(city)
+    if db_feeds is not None:
+        print(f"  Using feeds table ({len(db_feeds)} feeds)")
+        feed_list = [(f["url"], f["name"], None) for f in db_feeds]
+        pending_feeds = [f for f in db_feeds if f.get("status") == "pending"]
     else:
         feeds_file = os.path.join("cities", city, "feeds.txt")
         if not os.path.exists(feeds_file):
             print(f"No feeds.txt found for {city}")
             return
         feed_list = list(parse_feeds_txt(feeds_file))
+        pending_feeds = []
         print(f"  Using feeds.txt ({len(feed_list)} feeds)")
 
     count = 0
@@ -235,6 +261,10 @@ def download_feeds(city: str) -> None:
         count += 1
 
     print(f"Downloaded {count} feeds for {city}")
+
+    # Mark pending feeds as active
+    if pending_feeds:
+        mark_feeds_active(pending_feeds)
 
 
 if __name__ == "__main__":
