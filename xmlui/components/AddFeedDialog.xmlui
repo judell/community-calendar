@@ -158,8 +158,8 @@
                   variant="ghost"
                   themeColor="danger"
                   size="sm"
-                  confirmMessage="{'Delete ' + $item.name + ' and all its ' + $item.event_count + ' events?'}"
                   onClick="() => {
+                    if (!confirm('Delete ' + $item.name + ' and all its ' + $item.event_count + ' events?')) return;
                     deletingName = $item.name;
                     deleteError = '';
                     deleteEventsApi.execute({ name: $item.name });
