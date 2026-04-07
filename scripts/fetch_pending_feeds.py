@@ -122,21 +122,33 @@ def fetch_pending_feeds(city: str) -> None:
     if not removed_feeds:
         return
 
-    # Read feeds.txt and remove matching URLs
+    # Read feeds.txt and remove matching entries by name
+    # Entry formats:
+    #   # Name\n https://...\n                    (live feed)
+    #   # Name\n # cmd: ...\n cities/x/y.ics\n   (scraper)
     if os.path.exists(feeds_file):
-        removed_urls = {"".join(f["url"].split()) for f in removed_feeds}
+        removed_names = {f["name"] for f in removed_feeds}
         lines = open(feeds_file).readlines()
         new_lines = []
-        skip_next = False
-        for i, line in enumerate(lines):
-            stripped = line.strip()
-            if stripped in removed_urls:
-                # Remove this URL line and the comment line above it
-                if new_lines and new_lines[-1].strip().startswith('#'):
-                    new_lines.pop()
-                skip_next = False
-                continue
-            new_lines.append(line)
+        i = 0
+        while i < len(lines):
+            stripped = lines[i].strip()
+            if (stripped.startswith('#')
+                and not stripped.startswith('# ---')
+                and not stripped.startswith('# cmd:')):
+                name = stripped.lstrip('# ').split(' | ')[0].strip()
+                if name in removed_names:
+                    # Skip this line plus subsequent cmd/url/file lines
+                    i += 1
+                    while i < len(lines):
+                        s = lines[i].strip()
+                        if s.startswith('# cmd:') or s.startswith('https://') or s.startswith('cities/'):
+                            i += 1
+                        else:
+                            break
+                    continue
+            new_lines.append(lines[i])
+            i += 1
         with open(feeds_file, 'w') as f:
             f.writelines(new_lines)
 
