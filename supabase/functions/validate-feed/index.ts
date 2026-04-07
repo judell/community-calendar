@@ -166,6 +166,7 @@ Deno.serve(async (req) => {
     }
 
     const allEvents = parseICS(icsText);
+    const hasRecurrence = icsText.includes("RRULE:");
 
     // Filter to future events, sort by start_time, take first 10
     const now = new Date().toISOString();
@@ -179,6 +180,7 @@ Deno.serve(async (req) => {
         valid: true,
         totalEvents: allEvents.length,
         futureEvents: futureEvents.length,
+        hasRecurrence,
         events: futureEvents,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

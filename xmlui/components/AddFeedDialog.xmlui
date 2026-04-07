@@ -7,6 +7,7 @@
   var.validating="{false}"
   var.validationError=""
   var.submitted="{false}"
+  var.hasRecurrence="{false}"
   var.deleteError=""
   var.deletingId="">
 
@@ -31,7 +32,8 @@
       validating = false;
       if (result.valid) {
         previewEvents = result.events;
-        if (result.futureEvents === 0) {
+        hasRecurrence = result.hasRecurrence || false;
+        if (result.futureEvents === 0 && !result.hasRecurrence) {
           validationError = 'Feed is valid ICS but has no future events (' + result.totalEvents + ' total).';
         }
       } else {
@@ -121,6 +123,7 @@
       <!-- Preview -->
       <VStack when="{previewEvents && !submitted}" gap="$space-2">
         <Text fontWeight="bold" value="{'Preview: ' + previewEvents.length + ' upcoming events from ' + feedName}" />
+        <Text when="{hasRecurrence}" fontSize="$fontSize-sm" color="$color-text-secondary" value="This feed has recurring events. The build will expand them — expect more events than shown here." />
         <ScrollViewer height="300px">
           <VStack gap="$space-1">
             <List data="{previewEvents}" itemKey="start_time">
