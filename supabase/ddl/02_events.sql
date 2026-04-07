@@ -43,3 +43,8 @@ CREATE POLICY "Anyone can read events"
 CREATE POLICY "Service function can insert events"
   ON events FOR INSERT
   WITH CHECK (true);
+
+-- Allow admin users to delete events
+CREATE POLICY "Admin users can delete events"
+  ON events FOR DELETE
+  USING (auth.uid() IN (SELECT user_id FROM admin_users));

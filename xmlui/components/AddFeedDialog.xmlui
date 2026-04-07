@@ -1,12 +1,23 @@
 <Component
   name="AddFeedDialog"
-  method.open="() => { feedUrl = ''; feedName = ''; previewEvents = null; validating = false; validationError = ''; submitted = false; dialog.open(); }"
+  method.open="() => { feedUrl = ''; feedName = ''; previewEvents = null; validating = false; validationError = ''; submitted = false; deleteError = ''; existingFeeds.invalidate(); dialog.open(); }"
   var.feedUrl=""
   var.feedName=""
   var.previewEvents="{null}"
   var.validating="{false}"
   var.validationError=""
-  var.submitted="{false}">
+  var.submitted="{false}"
+  var.deleteError=""
+  var.deletingId="">
+
+  <DataSource
+    id="existingFeeds"
+    url="{appGlobals.supabaseUrl + '/rest/v1/pending_feeds?select=id,name,url,status&city=eq.' + (window.cityFilter || 'bloomington') + '&order=name.asc'}"
+    headers="{{
+      apikey: appGlobals.supabasePublishableKey,
+      Authorization: 'Bearer ' + window.authSession?.access_token
+    }}"
+  />
 
   <APICall
     id="validateApi"
@@ -44,14 +55,65 @@
       'Prefer': 'return=minimal'
     }}"
     body="{$param}"
-    onSuccess="() => { submitted = true; }"
+    onSuccess="() => { submitted = true; existingFeeds.invalidate(); }"
     onError="(err) => { validationError = 'Failed to save feed: ' + err; }" />
 
-  <ModalDialog id="dialog" title="Add Feed" size="lg">
-    <VStack gap="$space-3">
+  <APICall
+    id="deleteEventsApi"
+    method="delete"
+    url="{appGlobals.supabaseUrl + '/rest/v1/events?source=eq.' + encodeURIComponent($param.name) + '&city=eq.' + encodeURIComponent(window.cityFilter || 'bloomington')}"
+    headers="{{
+      'apikey': appGlobals.supabasePublishableKey,
+      'Authorization': 'Bearer ' + authSession?.access_token
+    }}"
+    onSuccess="() => {
+      deleteFeedApi.execute({ id: deletingId });
+    }"
+    onError="(err) => { deleteError = 'Failed to delete events: ' + (err.message || err); }" />
 
-      <!-- Input form (hidden after preview loads) -->
+  <APICall
+    id="deleteFeedApi"
+    method="delete"
+    url="{appGlobals.supabaseUrl + '/rest/v1/pending_feeds?id=eq.' + $param.id}"
+    headers="{{
+      'apikey': appGlobals.supabasePublishableKey,
+      'Authorization': 'Bearer ' + authSession?.access_token
+    }}"
+    onSuccess="() => { deleteError = ''; existingFeeds.invalidate(); }"
+    onError="(err) => { deleteError = 'Failed to delete feed: ' + (err.message || err); }" />
+
+  <ModalDialog id="dialog" title="Manage Feeds" size="lg">
+    <VStack gap="$space-4">
+
+      <!-- Existing feeds -->
+      <VStack when="{existingFeeds.value && existingFeeds.value.length > 0}" gap="$space-2">
+        <Text fontWeight="bold" value="{'Active feeds (' + existingFeeds.value.length + ')'}" />
+        <Items data="{existingFeeds.value}">
+          <HStack gap="$space-2" verticalAlignment="center" paddingVertical="$space-1">
+            <Text value="{$item.name}" flexGrow="1" />
+            <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.status}" />
+            <Button
+              label="Delete"
+              variant="ghost"
+              themeColor="danger"
+              size="sm"
+              confirmMessage="{'Delete ' + $item.name + ' and all its events?'}"
+              onClick="() => {
+                deletingId = $item.id;
+                deleteError = '';
+                deleteEventsApi.execute({ name: $item.name });
+              }"
+            />
+          </HStack>
+        </Items>
+        <Text when="{deleteError}" color="$color-danger-500" value="{deleteError}" />
+      </VStack>
+
+      <Divider when="{existingFeeds.value && existingFeeds.value.length > 0}" />
+
+      <!-- Add feed form (hidden after preview loads) -->
       <VStack gap="$space-2" when="{!previewEvents && !submitted}">
+        <Text fontWeight="bold" value="Add a feed" />
         <TextBox
           placeholder="Feed URL (https://...)"
           value="{feedUrl}"
