@@ -65,7 +65,7 @@
         <Button
           label="{validating ? 'Validating...' : 'Validate Feed'}"
           enabled="{feedUrl.startsWith('https://') && feedName.length > 0 && !validating}"
-          onClick="() => { validating = true; validationError = ''; validateApi.execute({ url: feedUrl }); }"
+          onClick="() => { feedUrl = feedUrl.replace(/\s+/g, ''); validating = true; validationError = ''; validateApi.execute({ url: feedUrl }); }"
         />
         <Text when="{validationError}" color="$color-danger-500" value="{validationError}" />
       </VStack>

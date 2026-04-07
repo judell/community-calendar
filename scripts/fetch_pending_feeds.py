@@ -64,7 +64,7 @@ def fetch_pending_feeds(city: str) -> None:
     appended = 0
     for feed in feeds:
         feed_id = feed["id"]
-        url = feed["url"]
+        url = "".join(feed["url"].split())
         name = feed["name"]
         fallback_url = feed.get("fallback_url")
 
