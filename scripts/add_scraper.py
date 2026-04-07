@@ -23,7 +23,6 @@ import shutil
 # Repository root
 ROOT = Path(__file__).parent.parent
 WORKFLOW_PATH = ROOT / ".github/workflows/generate-calendar.yml"
-COMBINE_ICS_PATH = ROOT / "scripts/combine_ics.py"
 SCRAPERS_DIR = ROOT / "scrapers"
 
 
@@ -201,76 +200,6 @@ def add_to_workflow(scraper_name: str, city: str, scraper_path: Path,
     return True
 
 
-def add_to_combine_ics(scraper_name: str, display_name: str) -> bool:
-    """Add the source name to combine_ics.py."""
-    print(f"\n📝 Adding source name to combine_ics.py")
-    
-    content = COMBINE_ICS_PATH.read_text()
-    
-    # Check if already present
-    if f"'{scraper_name}':" in content:
-        print(f"✅ Already in SOURCE_NAMES: '{scraper_name}'")
-        return True
-    
-    # Find the SOURCE_NAMES dict and add entry
-    # Look for the last entry before the closing brace
-    # Pattern: find a line with 'something': 'Something', and add after it
-    
-    lines = content.split('\n')
-    new_lines = []
-    added = False
-    in_source_names = False
-    
-    for i, line in enumerate(lines):
-        new_lines.append(line)
-        
-        if 'SOURCE_NAMES = {' in line:
-            in_source_names = True
-            continue
-        
-        if in_source_names and not added:
-            # Look for a line that looks like an entry and the next line closes or continues
-            if re.match(r"\s+'[^']+': '[^']+',$", line):
-                # Check if next line closes the dict or is another entry
-                if i + 1 < len(lines):
-                    next_line = lines[i + 1]
-                    if '}' in next_line or re.match(r"\s+'[^']+': '[^']+',$", next_line):
-                        # This is a good place to add, but let's find the last entry
-                        pass
-            
-            # If we see the closing brace, add before it
-            if line.strip() == '}' or ('}' in line and '=' not in line and ':' not in line):
-                # Insert before this line
-                new_lines.pop()  # Remove the } line we just added
-                indent = '    '  # Standard indent
-                new_lines.append(f"{indent}'{scraper_name}': '{display_name}',")
-                new_lines.append(line)  # Add the } back
-                added = True
-                in_source_names = False
-    
-    if not added:
-        # Fallback: try to find and add after a specific known entry
-        content = COMBINE_ICS_PATH.read_text()
-        # Add after barrel_proof or last entry
-        if "'barrel_proof':" in content:
-            content = content.replace(
-                "'barrel_proof': 'Barrel Proof Lounge',",
-                f"'barrel_proof': 'Barrel Proof Lounge',\n    '{scraper_name}': '{display_name}',"
-            )
-            COMBINE_ICS_PATH.write_text(content)
-            added = True
-        else:
-            print("❌ Could not find where to add SOURCE_NAMES entry")
-            print(f"   Please manually add to {COMBINE_ICS_PATH}:")
-            print(f"   '{scraper_name}': '{display_name}',")
-            return False
-    else:
-        COMBINE_ICS_PATH.write_text('\n'.join(new_lines))
-    
-    print(f"✅ Added to SOURCE_NAMES: '{scraper_name}': '{display_name}'")
-    return True
-
-
 def add_to_feeds_txt(city: str, scraper_path: Path, extra_args: str,
                      output_name: str, display_name: str) -> bool:
     """Append the scraper entry to cities/{city}/feeds.txt."""
@@ -320,7 +249,6 @@ Examples:
     parser.add_argument('--extra-args', default='', help='Extra arguments inserted before --output (e.g. \'--url "https://..." --name "My Source"\')')
     parser.add_argument('--output-name', default='', help='Override the output .ics filename (without .ics extension, default: scraper name)')
     parser.add_argument('--skip-workflow', action='store_true', help='Skip adding to workflow')
-    parser.add_argument('--skip-combine', action='store_true', help='Skip adding to combine_ics.py')
     
     args = parser.parse_args()
     
@@ -343,8 +271,7 @@ Examples:
     if args.dry_run:
         print("\n[DRY RUN] Would perform the following:")
         print(f"  1. Add to workflow: python {scraper_path.relative_to(ROOT)}{extra} --output cities/{args.city}/{ics_name}.ics")
-        print(f"  2. Add to SOURCE_NAMES: '{ics_name}': '{args.display_name}'")
-        print(f"  3. Add to feeds.txt: cities/{args.city}/{ics_name}.ics")
+        print(f"  2. Add to feeds.txt: cities/{args.city}/{ics_name}.ics")
         return
     
     # Step 2: Test if requested
@@ -361,12 +288,7 @@ Examples:
                                extra_args=args.extra_args, output_name=args.output_name):
             print("\n⚠️  Failed to add to workflow automatically")
     
-    # Step 4: Add to combine_ics.py
-    if not args.skip_combine:
-        if not add_to_combine_ics(ics_name, args.display_name):
-            print("\n⚠️  Failed to add to combine_ics.py automatically")
-
-    # Step 5: Add to feeds.txt
+    # Step 4: Add to feeds.txt
     add_to_feeds_txt(args.city, scraper_path, args.extra_args, ics_name, args.display_name)
 
     print("\n" + "="*60)
