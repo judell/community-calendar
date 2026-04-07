@@ -14,136 +14,99 @@
 
 ### Source Types
 
-**ICS feeds are preferred** when available. Many venues and organizations publish standard iCalendar feeds that we consume directly:
-- Luther Burbank Center
-- Schulz Museum
-- GoLocal Coop
-- Sonoma County AA
-- City calendars (Google Calendar)
-- And more...
+**ICS feeds** (type `ics_url`) are preferred when available. Many venues and organizations publish standard iCalendar feeds.
 
-**Scraping is a fallback** for sources that don't provide ICS feeds:
-- Sonoma County Library (via API interception)
-- Cal Theatre
-- Copperfield's Books
-
-**Generic/reusable scrapers** work across multiple sites:
-- `maxpreps.py` - High school athletics (any school)
+**Scrapers** (type `scraper`) are a fallback for sources that don't provide ICS feeds. Generic/reusable scrapers work across multiple sites:
+- `maxpreps.py` - High school athletics
 - `growthzone.py` - Chamber of Commerce sites
+- `squarespace.py` - Squarespace event pages
+- `songkick.py` - Music venue calendars
+- `ticketmaster.py` - Ticketmaster venues
+- `eventbrite.py` - Eventbrite organizers
 
-Scrapers are in `scrapers/` and per-city data lives in `cities/<name>/`.
+**Curator feeds** (type `curator`) are curated picks from community members via the `my-picks` edge function.
 
-## ICS Combination
+### The `feeds` Table
 
-**`scripts/combine_ics.py`** - Combines multiple ICS files into a single subscribable feed:
+All sources are stored in the Supabase `feeds` table — the single source of truth. Columns:
+- `city`, `url`, `name`, `status` (active/pending/removed), `feed_type` (ics_url/scraper/curator), `scraper_cmd`
+
+The Manage Feeds dialog (admin-only) reads and writes this table for ICS URL feeds. Scrapers are added via `add_scraper.py` and the workflow YAML.
+
+`feeds.txt` files are **generated** from the `feeds` table during each build (by `export_feeds_txt.py`) for fork compatibility. Do not edit feeds.txt manually.
+
+## Adding a Feed (ICS URL)
+
+Use the **Manage Feeds** dialog in the app (admin calendar icon):
+
+1. Enter the feed URL and source name
+2. Click **Validate Feed** — checks for valid ICS, URL overlap with existing feeds, previews events
+3. Click **Add Feed** — saves to `feeds` table with `status=pending`
+4. Next build picks it up, downloads it, marks it `active`
+
+Feeds with recurring events (RRULE) show a note that the build will expand them.
+
+## Deleting a Feed
+
+Use the **Manage Feeds** dialog:
+
+1. Find the feed in the scrollable list
+2. Click **Delete** — confirms, then deletes events from DB and removes the `feeds` row
+3. Next build will not include it; `feeds.txt` will be regenerated without it
+
+## Adding a Scraper
+
+Use the `add_scraper.py` script:
 
 ```bash
-python scripts/combine_ics.py -i cities/santarosa -o cities/santarosa/combined.ics --name "Santa Rosa Community Calendar"
+python scripts/add_scraper.py myscraper santarosa "My Source Name"
 ```
 
-## Deduplication and Source Attribution
+This adds the scraper to the workflow YAML, adds a display name comment to `feeds.txt`, and adds an entry to the `feeds` table. The `feeds.txt` entry provides the display name that `combine_ics.py` uses for the `X-SOURCE` header.
 
-The pipeline performs two rounds of deduplication:
+## Build Pipeline
 
-1. **Cross-source dedup** — Events with identical title + date from different sources are merged. The non-aggregator version is kept (better URL/description), and `X-SOURCE` headers are merged alphabetically (e.g., "North Bay Bohemian, Press Democrat").
+The workflow in `.github/workflows/generate-calendar.yml` runs daily or on manual trigger.
 
-2. **Fuzzy dedup** — `scripts/ics_to_json.py` clusters events within the same timeslot using token-set string similarity (`difflib.SequenceMatcher`, threshold 0.85). Events at different locations are never clustered. Uses union-find to assign a shared `cluster_id` to similar titles — no events are removed; all are kept and tagged for the front-end to group visually.
+**Per-city steps:**
 
-Source attribution flows through the pipeline as `X-SOURCE` ICS headers, which become the `source` column in the database. Display names are mapped from filenames via `SOURCE_NAMES` in `combine_ics.py`.
+1. **Run scrapers** — hardcoded commands in the workflow YAML
+2. **Download live feeds** — `download_feeds.py` queries the `feeds` table for active+pending `ics_url`/`curator` feeds, downloads each, injects `X-SOURCE` headers. Falls back to `feeds.txt` if DB not available (forks). Marks pending feeds as `active` after download.
+3. **Export feeds.txt** — `export_feeds_txt.py` regenerates `feeds.txt` from the `feeds` table for fork compatibility
+4. **Combine ICS** — `combine_ics.py` merges all `.ics` files, deduplicates, applies geo filtering. Display names come from `feeds.txt` (parsed at runtime) for scrapers, and from `X-SOURCE` headers (injected by `download_feeds.py`) for live feeds.
+5. **Convert to JSON** — `ics_to_json.py` converts combined ICS to JSON with fuzzy title clustering
+6. **Classify events** — `classify_events_anthropic.py` categorizes uncategorized events via Claude Haiku
+7. **Upload to Supabase** — `load-events` edge function upserts events
+8. **Refresh source names** — `refresh_source_names()` RPC updates the `source_names` cache (legacy, being replaced by `get_source_counts()` RPC)
+9. **Commit metadata** — auto-commits `feeds.txt`, `cities.json`, version info
 
-## ICS to JSON Conversion
+## Source Attribution
 
-**`scripts/ics_to_json.py`** - Converts ICS to JSON format for Supabase ingestion:
+Source names flow through the pipeline as `X-SOURCE` ICS headers → `source` column in the events table → displayed by EventCard in the app.
 
-```bash
-python scripts/ics_to_json.py cities/santarosa/combined.ics -o cities/santarosa/events.json
-```
+Display names are determined by:
+- **Scrapers with `--name` arg**: scraper sets `X-SOURCE` directly
+- **Scrapers without `--name`**: `combine_ics.py` parses `feeds.txt` for the `# Display Name` comment above the `.ics` file entry
+- **Live feeds**: `download_feeds.py` injects `X-SOURCE` from the `feeds` table `name` column
+- **Legistar scrapers**: `--source` arg sets `X-SOURCE` directly
 
-### Title Clustering
+The old `SOURCE_NAMES` dict in `combine_ics.py` has been removed. `feeds.txt` (generated from the `feeds` table) is the source of truth for display names.
 
-Events within the same timeslot are clustered by title similarity so the UI can visually group them with colored borders. Uses token-set similarity (word overlap) with a threshold of 0.85, plus location awareness — events at different locations are never clustered even if titles match.
+## Deduplication
 
-Good clusters (score 0.98-1.0): "Tech Help" / "One-On-One Tech Help" at the same library.
-Rejected (score < 0.85): "Community Yoga" / "Community Coffee Tasting" — different events sharing a common word. See the `cluster_by_title_similarity` docstring for tuning details.
+Two rounds:
 
-Output format:
-```json
-{
-  "title": "Event Name",
-  "start_time": "2026-02-01T14:00:00",
-  "end_time": "2026-02-01T16:00:00",
-  "location": "Venue, Address",
-  "description": "Event description",
-  "url": "https://...",
-  "source": "Source Name",
-  "source_uid": "unique-id@source.com",
-  "cluster_id": 0
-}
-```
+1. **Cross-source dedup** — Events with identical title + date from different sources are merged. The non-aggregator version is kept, and `X-SOURCE` headers are merged (e.g., "North Bay Bohemian, Press Democrat").
 
-## Event Classification
+2. **Fuzzy dedup** — Clusters events within the same timeslot using token-set string similarity (threshold 0.85). Events at different locations are never clustered. Uses union-find to assign a shared `cluster_id`.
 
-Events are automatically classified into 10 categories (Music & Concerts, Sports & Fitness, Arts & Culture, etc.) by `scripts/classify_events_anthropic.py`, which runs in CI after each build. The script uses the Anthropic API (Claude Haiku) with batch classification — ~20 events per API call — to categorize all uncategorized future events. It pulls curator overrides from the `category_overrides` table as examples to improve accuracy over time.
+## Cities
 
-Curators can correct misclassified events via the UI. See [curator-guide.md](curator-guide.md#event-categories) for details on categories and the override workflow.
-
-## GitHub Actions Workflow
-
-The workflow in `.github/workflows/generate-calendar.yml` runs automatically.
-
-**Schedule**: Daily at midnight UTC (`0 0 * * *`)
-
-**Cities processed**:
 - `santarosa` - Santa Rosa, CA (America/Los_Angeles)
 - `bloomington` - Bloomington, IN (America/Indiana/Indianapolis)
 - `davis` - Davis, CA (America/Los_Angeles)
 - `petaluma` - Petaluma, CA (America/Los_Angeles)
 - `toronto` - Toronto, ON (America/Toronto)
-
-**Time range**: Current month + next 2 months
-
-**Per-city workflow**:
-1. Run scrapers for sources without ICS feeds
-2. Download live ICS feeds from venues that provide them
-3. Combine all ICS files into `combined.ics`
-4. Commit and push changes
-
-**Manual trigger**: Can also be triggered manually via GitHub Actions UI with options:
-- `locations`: Comma-separated list (e.g., `santarosa,bloomington`) or `all`
-- `regenerate_only`: Skip scraping, just regenerate from existing ICS files
-
-## Adding a New Scraper
-
-Use the `add_scraper.py` script to integrate a new scraper into the pipeline:
-
-```bash
-python scripts/add_scraper.py myscraper santarosa "My Source Name"
-
-# Options:
-#   --test      Run the scraper first to verify it works
-#   --dry-run   Preview changes without applying them
-```
-
-This automatically verifies the scraper exists, adds it to the GitHub Actions workflow, and adds the source name to `scripts/combine_ics.py`. **All three steps are required** — if you skip the workflow or source name, events won't appear in the calendar.
-
-## Manual Pipeline Run
-
-```bash
-# 1. Run scrapers (produces individual ICS files)
-# (varies by scraper)
-
-# 2. Combine ICS files
-python scripts/combine_ics.py -i cities/santarosa -o cities/santarosa/combined.ics
-
-# 3. Convert to JSON
-python scripts/ics_to_json.py cities/santarosa/combined.ics -o cities/santarosa/events.json
-
-# 4. Commit and push
-git add cities/santarosa/events.json cities/santarosa/combined.ics
-git commit -m "Update events"
-git push
-
-# 5. Trigger Supabase ingestion
-curl -L -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
-  -H 'Authorization: Bearer <LEGACY_ANON_KEY>'
-```
+- `raleighdurham` - Raleigh-Durham, NC (America/New_York)
+- `montclair` - Montclair, NJ (America/New_York)
+- `lancaster` - Lancaster, PA (America/New_York)

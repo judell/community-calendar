@@ -8,12 +8,16 @@ This project uses both Postgres functions (PL/pgSQL or SQL, running inside the d
 - `get_my_google_email()` — SECURITY DEFINER, resolves current user's Google email from auth.users
 - `get_curator_name(uuid)` — SECURITY DEFINER, resolves a curator's GitHub username by user ID
 - `apply_category_override()` — trigger function, stores original category then propagates override to events table
+- `get_source_counts(target_city)` — returns source names + event counts by querying events table directly (replaces cached `source_names` table)
+- `remove_feed(feed_id)` — SECURITY DEFINER, deletes a feed row (used by Manage Feeds dialog to avoid CORS issues with PATCH)
+- `refresh_source_names(target_city)` — legacy, refreshes the `source_names` cache table
 
 ## Edge Functions in This Project
 
-- `load-events` — fetches events JSON from GitHub Pages, upserts into Supabase
-- `capture-event` — calls Claude API to extract event data from images or audio
-- `my-picks` — generates ICS/JSON feed of a user's bookmarked events
+- `load-events` — accepts direct POST from CI or fetches from GitHub (fallback); upserts events into Supabase
+- `capture-event` — calls Claude API to extract event data from images or audio; supports Whisper transcription for audio
+- `my-picks` — generates ICS/JSON feed of a user's bookmarked events (token-based auth)
+- `validate-feed` — validates an ICS feed URL, returns preview of future events, detects RRULE recurrence
 
 ## When to Use Which
 
