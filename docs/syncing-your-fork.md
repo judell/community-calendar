@@ -150,16 +150,15 @@ $$;
 
 ### Step 4: Seed the feeds table from your feeds.txt
 
-If you already have feeds in `feeds.txt`, seed the table so the Manage Feeds dialog shows them. For each ICS URL in your feeds.txt, insert a row. For example:
+If you already have feeds in `feeds.txt`, run the seed script to populate the table so the Manage Feeds dialog shows them:
 
-```sql
-INSERT INTO feeds (city, url, name, feed_type, status) VALUES
-  ('yourcity', 'https://www.meetup.com/some-group/events/ical/', 'Some Meetup Group', 'ics_url', 'active'),
-  ('yourcity', 'https://example.com/events/?ical=1', 'Example Events', 'ics_url', 'active')
-ON CONFLICT (city, url) DO NOTHING;
+```bash
+SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co \
+SUPABASE_SERVICE_KEY=your-service-role-key \
+python scripts/seed_feeds_from_txt.py yourcity
 ```
 
-Use the comment line above each URL in feeds.txt as the name. If you have many feeds, you only need to seed the ones you want to manage through the UI — the build pipeline falls back to feeds.txt for any feeds not in the table.
+This parses `cities/yourcity/feeds.txt`, extracts feed names from the comment lines above each URL, and inserts them into the `feeds` table. Duplicates are skipped automatically.
 
 ### Step 5: Deploy the validate-feed edge function
 
