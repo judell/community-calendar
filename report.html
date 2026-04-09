@@ -210,6 +210,7 @@
         </div>
     </div>
 
+    <script src="xmlui/config.local.js"></script>
     <script>
         async function loadReport() {
             try {
@@ -601,17 +602,15 @@
         }
 
         async function loadOverrides() {
-            var SUPABASE_URL = 'https://dzpdualvwspgqghrysyz.supabase.co';
-            var SUPABASE_KEY = 'sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5';
             try {
                 var [ovResp, viewResp] = await Promise.all([
                     fetch(
-                        SUPABASE_URL + '/rest/v1/category_overrides?select=id,category,original_category,created_at,event_id,events(id,title,location,city,start_time,description,source,url,category)&order=created_at.desc',
-                        { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } }
+                        window.SUPABASE_URL + '/rest/v1/category_overrides?select=id,category,original_category,created_at,event_id,events(id,title,location,city,start_time,description,source,url,category)&order=created_at.desc',
+                        { headers: { apikey: window.SUPABASE_KEY, Authorization: 'Bearer ' + window.SUPABASE_KEY } }
                     ),
                     fetch(
-                        SUPABASE_URL + '/rest/v1/category_overrides_view?select=id,curator_name&order=id.desc',
-                        { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } }
+                        window.SUPABASE_URL + '/rest/v1/category_overrides_view?select=id,curator_name&order=id.desc',
+                        { headers: { apikey: window.SUPABASE_KEY, Authorization: 'Bearer ' + window.SUPABASE_KEY } }
                     )
                 ]);
                 if (!ovResp.ok) return;
@@ -646,12 +645,10 @@
         }
 
         async function loadSuggestions() {
-            var SUPABASE_URL = 'https://dzpdualvwspgqghrysyz.supabase.co';
-            var SUPABASE_KEY = 'sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5';
             try {
                 var resp = await fetch(
-                    SUPABASE_URL + '/rest/v1/source_suggestions?select=*&order=created_at.desc',
-                    { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } }
+                    window.SUPABASE_URL + '/rest/v1/source_suggestions?select=*&order=created_at.desc',
+                    { headers: { apikey: window.SUPABASE_KEY, Authorization: 'Bearer ' + window.SUPABASE_KEY } }
                 );
                 if (!resp.ok) return;
                 var suggestions = await resp.json();

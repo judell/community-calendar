@@ -474,6 +474,9 @@ jobs:
 
     - name: Classify events in JSON files
       if: env.ANTHROPIC_API_KEY
+      env:
+        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ vars.SUPABASE_KEY }}
       run: |
         IFS=',' read -ra CITIES <<< "${{ steps.locations.outputs.list }}"
         FILES=""

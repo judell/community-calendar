@@ -11,6 +11,7 @@
       }
 
     </style>
+    <script src="config.local.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/rrule@2.8.1/dist/es5/rrule.min.js"></script>
     <script>console.log = function(){};</script>
@@ -111,12 +112,9 @@
         document.title = window.cityName + ' Community Calendar';
       };
 
-      // Supabase auth setup (credentials loaded from config.json by XMLUI)
-      // We need to hardcode these here since this runs before XMLUI loads config
-      const SUPABASE_URL = 'https://dzpdualvwspgqghrysyz.supabase.co';
-      const SUPABASE_KEY = 'sb_publishable_NnzobdoFNU39fjs84UNq8Q_X45oiMG5';
-      window.SUPABASE_URL = SUPABASE_URL;
-      window.SUPABASE_KEY = SUPABASE_KEY;
+      // Supabase auth setup — credentials loaded from config.local.js (gitignored)
+      const SUPABASE_URL = window.SUPABASE_URL;
+      const SUPABASE_KEY = window.SUPABASE_KEY;
       const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
       // Pre-populate auth from localStorage so XMLUI sees it at first render
