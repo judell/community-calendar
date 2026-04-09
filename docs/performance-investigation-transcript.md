@@ -146,9 +146,7 @@ The second dedupeEvents call hits the cache and returns instantly.
 
 **Jon:** Now is a good stopping point. Commit and push, write up an issue, explain what we tested and how, what we improved, and what is the next thing to improve.
 
-**Claude:** *(pauses)* We should remove the xs-trace wrappers first, right?
-
-**Jon:** Hmm. We will now remove xs-trace wrappers right? Will put back for next phase of tuning but don't want the overhead in production. The basic trace-tools are zero impact unless xsVerbose is on.
+**Jon:** Hmm. We should remove xs-trace wrappers right? Will put back for next phase of tuning but don't want the overhead in production. The basic trace-tools are zero impact unless xsVerbose is on.
 
 **Claude:** Good call. *(reverts the xs-trace wrappers and `_xsLogs` bootstrap from index.html, keeps only the dedup cache fix and expression split)*
 
