@@ -586,16 +586,26 @@ function getSourceCounts(events) {
 // Cache variables (module-level for browser, will be on window)
 let _dedupedEventsCache = null;
 let _dedupedEventsLastInput = null;
+let _dedupedEventsLastLen = 0;
+let _dedupedEventsLastFirst = null;
+let _dedupedEventsLastLast = null;
 
 function dedupeEvents(events) {
   if (!events || !events.length) return [];
 
-  // Use cache if events array reference hasn't changed
-  // (refetch returns a new array, so reference check busts cache correctly)
-  if (events === _dedupedEventsLastInput && _dedupedEventsCache) {
+  // Use cache if the data is unchanged.
+  // The combined array is always a new reference (spread), so check
+  // length + first/last element identity as a fast proxy.
+  if (_dedupedEventsCache &&
+      events.length === _dedupedEventsLastLen &&
+      events[0] === _dedupedEventsLastFirst &&
+      events[events.length - 1] === _dedupedEventsLastLast) {
     return _dedupedEventsCache;
   }
   _dedupedEventsLastInput = events;
+  _dedupedEventsLastLen = events.length;
+  _dedupedEventsLastFirst = events[0];
+  _dedupedEventsLastLast = events[events.length - 1];
 
   const groups = {};
   events.forEach(e => {

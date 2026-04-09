@@ -130,7 +130,9 @@
   />
 
   <variable name="hiddenSources" value="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || window._localHiddenSources || []}" />
-  <variable name="processedEvents" value="{window.buildSearchIndex(window.filterHiddenSources(window.dedupeEvents(window.filterExternalExclusions([...(Array.isArray(events.value) ? events.value : []), ...(Array.isArray(window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate())) ? window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate()) : [])])), hiddenSources))}" />
+  <variable name="expandedEnrichments" value="{window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate()) || []}" />
+  <variable name="combinedEvents" value="{[...(Array.isArray(events.value) ? events.value : []), ...(Array.isArray(expandedEnrichments) ? expandedEnrichments : [])]}" />
+  <variable name="processedEvents" value="{window.buildSearchIndex(window.filterHiddenSources(window.dedupeEvents(window.filterExternalExclusions(combinedEvents)), hiddenSources))}" />
 
   <!-- Dialogs -->
   <SignInDialog id="signInDialog" />
