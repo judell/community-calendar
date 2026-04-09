@@ -550,6 +550,28 @@ jobs:
           echo " done"
         done
 
+    - name: Generate instance config files
+      env:
+        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ vars.SUPABASE_KEY }}
+      run: |
+        cat > xmlui/config.local.js <<JSEOF
+        window.SUPABASE_URL = '${SUPABASE_URL}';
+        window.SUPABASE_KEY = '${SUPABASE_KEY}';
+        JSEOF
+
+        # Inject instance credentials into config.json
+        python -c "
+        import json
+        with open('xmlui/config.json') as f:
+            config = json.load(f)
+        config['appGlobals']['supabaseUrl'] = '${SUPABASE_URL}'
+        config['appGlobals']['supabasePublishableKey'] = '${SUPABASE_KEY}'
+        with open('xmlui/config.json', 'w') as f:
+            json.dump(config, f, indent=2)
+            f.write('\n')
+        "
+
     - name: Commit metadata changes
       env:
         GITHUB_TOKEN: ${{ secrets.COMMUNITY_CALENDAR }}
@@ -560,6 +582,7 @@ jobs:
 
         git describe --tags --always > xmlui/version.txt
 
+        git add -f xmlui/config.local.js xmlui/config.json
         git add cities.json xmlui/version.txt report.json report.html cities/*/feeds.txt
         git diff --staged --quiet || (
           git commit -m "Auto-generate calendar metadata"
