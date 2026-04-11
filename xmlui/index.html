@@ -270,6 +270,34 @@
         return Math.round((to - from) / (30 * 24 * 60 * 60 * 1000));
       };
     </script>
+    <script>
+      // Iframe auto-height support. Opt-in via ?autoheight=true.
+      // - Sets window.ccAutoHeight so Main.xmlui can gate <App fitContent=".."/>
+      //   which makes XMLUI size to content instead of filling its viewport.
+      // - Posts document scrollHeight to the parent on resize so the parent
+      //   can resize the iframe to match. Non-embedded usage is unaffected.
+      window.ccAutoHeight = new URLSearchParams(location.search).get('autoheight') === 'true';
+      if (window.ccAutoHeight && window.parent !== window) {
+        (function () {
+          var lastH = 0;
+          function sendHeight() {
+            var h = document.documentElement.scrollHeight;
+            if (h === lastH) return;
+            lastH = h;
+            window.parent.postMessage({ type: 'cc-embed-resize', height: h }, '*');
+          }
+          // ResizeObserver on documentElement won't fire when scrollHeight
+          // grows but the viewport stays the same size. So we poll briefly
+          // to catch XMLUI's async DataSource renders, then stop.
+          window.addEventListener('load', sendHeight);
+          var ticks = 0;
+          var iv = setInterval(function () {
+            sendHeight();
+            if (++ticks > 40) clearInterval(iv);
+          }, 250);
+        })();
+      }
+    </script>
   </head>
   <body>
   </body>
