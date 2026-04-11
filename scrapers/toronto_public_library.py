@@ -13,12 +13,11 @@ class TorontoPublicLibraryScraper(BibliocommonsEventsScraper):
     timezone = "America/Toronto"
     library_slug = "tpl"
 
-    # Kids/family topical scope:
-    # School Age Children (6-12), Teens (13-17)
-    audience_ids = [
-        "6894f7dab7a97e36001ab2b9",
-        "67eab59153f2873000a90aa8",
-    ]
+    # No audience filter — accept all 6 TPL audience buckets
+    # (Preschool 0-5, School Age 6-12, Teens 13-17, Younger Adults 18-24,
+    #  Adults 18+, Older Adults) plus any events with no audience tag.
+    # No type filter either — all 19 event types pass through.
+    audience_ids: list[str] = []
 
     # Keep bounded runtime for CI while still covering broad upcoming set.
     page_limit = 100
