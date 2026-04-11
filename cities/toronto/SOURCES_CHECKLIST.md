@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (97 sources)
+## Currently Implemented (111 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -84,6 +84,24 @@
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Ontario Nature | WordPress Tribe ICS | 11 | Birding trips, nature talks, conservation |
+
+### Literary & Bookstores
+| Source | Type | Events | Notes |
+|--------|------|--------|-------|
+| Another Story Bookshop | Eventbrite organizer (eb-to-ical) | 16 upcoming | Roncesvalles social-justice/diversity focus; very active |
+| Ben McNally Books | Eventbrite organizer (eb-to-ical) | active | Downtown indie; Fresh Off The Press book club + open mic + launches |
+| Glad Day Bookshop | Eventbrite organizer (eb-to-ical) | active | World's oldest LGBTQ+ bookstore; drag brunches, readings, fundraisers |
+| Hopeless Romantic Books | Eventbrite organizer (eb-to-ical) | active | Romance specialty; monthly hybrid book club |
+| Queen Books | Eventbrite organizer (eb-to-ical) | currently dormant | Leslieville general indie; live source is Bookmanager scraper below |
+| Book*hug Press | Publisher Eventbrite organizer | 8 | Literary press; launches across Toronto venues |
+| Coach House Books | Publisher Eventbrite organizer | 74 | Literary press (60 yrs); seasonal launches at Society Clubhouse |
+| Cormorant Books | Publisher Eventbrite organizer | 38 | Literary press; events at Ben McNally, Sleuth, etc. |
+| Penguin Random House Canada | Publisher Eventbrite organizer | 96 | Big-five Canadian arm; geo-filter trims to Toronto-only |
+| Bakka Phoenix Books | Bookmanager scraper | 1 | SF/F specialty (since 1972); `scrapers/bookmanager.py --san 1684035` |
+| Flying Books | Bookmanager scraper | 12 | College St + Neverland; biggest Bookmanager haul; book clubs + launches |
+| Ben McNally Books (Bookmanager) | Bookmanager scraper | 9 | Complements Eventbrite feed: BMB Book Club + publisher launches |
+| Queen Books (Bookmanager) | Bookmanager scraper | 8 | Currently the live source for Queen Books events |
+| A Different Booklist | Bookmanager scraper | 4 | Black-owned, Annex; covers events not on a Bookstore organizer page |
 
 ### Meetup Groups (49 groups)
 | Group | Events | Category |
@@ -261,13 +279,13 @@ Track progress on topical searches to find long-tail community sources.
 | Kids/family | 2025-02-15 | Toronto Dads, Little Sunbeams, Mini+Me Meetups, TPL scraper | Bibliocommons base |
 | History/heritage | 2025-02-15 | Ontario Historical Society, Toronto History Walks, Medieval SCA | 25 events |
 | Science/education | 2026-02-15 | CITA Local Events, CITA Seminars, CITA Special Events | 3 public Google ICS feeds from CITA calendar page |
+| Literary / bookstores | 2026-04-11 | 5 store organizers (Another Story, Ben McNally, Glad Day, Hopeless Romantic, Queen Books) + 4 publisher organizers (Coach House, Cormorant, Book*hug, Penguin Random House Canada) | Deep-dive into Toronto's indie bookstore scene; see dedicated section below |
 
 ### Not Yet Done
 
 - Food & drink (cooking classes, tastings, farmers markets)
 - Faith / spiritual
 - Seniors
-- Literary (readings, poetry, writing workshops)
 - LGBTQ+ community
 - Comedy (standup, open mics)
 - Music participation (choirs, jam sessions, open mics)
@@ -460,6 +478,130 @@ Track progress on topical searches to find long-tail community sources.
 - Food & Drink (no feeds found - mostly Eventbrite)
 - Comedy/Open Mic (no feeds found - mostly Facebook/Eventbrite)
 - Gardening/Urban Farming (no feeds found)
-- Literary/Poetry (no feeds found)
+- Literary/Poetry (✅ deep dive 2026-04-11; see "Topical Search: Literary / Bookstores" section)
 - Startup/Tech (mostly Meetup already covered)
 - Museums (scraper opportunities: ROM, Toronto Zoo)
+
+---
+
+## Topical Search: Literary / Bookstores (2026-04-11)
+
+Vertical deep-dive into Toronto's indie bookstore scene. Goal: capture author readings, book launches, signings, book clubs.
+
+### Aggregator-based discovery
+
+Three independent sources cross-referenced to build a complete venue inventory:
+
+| Aggregator | URL | Toronto stores found | Method |
+|------------|-----|----------------------|--------|
+| indiebookstores.ca (CIBA public face) | `indiebookstores.ca/locations/` | 30 | WordPress paginated; Cloudflare 403 on default UA, works with browser UA. 28 pages × ~12 stores each = 332 Canada-wide |
+| NewPages Ontario | `newpages.com/independent-bookstores/ontario-independent-bookstores/` | 33 | Plain HTML directory, structured by `City:` field |
+| Bookmanager `nearbyStores/get` API | `api.bookmanager.com/customer/nearbyStores/get` | 30 (deduped) | **🎯 Free public API** — see API section below. Returns lat/long + per-store URL |
+
+**Combined unique Toronto bookstore inventory: ~50 stores** (overlap is heavy; each aggregator catches some the others miss).
+
+### Eventbrite organizer sweep
+
+Per-store Eventbrite searches across all 50 stores looking for `/o/{name}-{ID}/` organizer pages.
+
+#### ✅ Confirmed organizer pages → wired into pipeline
+
+| Store | Organizer ID | Notes |
+|---|---|---|
+| Another Story Bookshop | `32458688399` | 16 upcoming events at sweep time |
+| Ben McNally Books | `13414493715` | Active book club + open mic + launches |
+| Glad Day Bookshop | `12026081388` | Active; not in indiebookstores.ca, found via Eventbrite browse |
+| Hopeless Romantic Books | `98641543971` | Monthly hybrid book club |
+| Queen Books | `64558396403` | Currently dormant (0 upcoming, 26 past) |
+
+#### ✅ Publisher organizer pages → wired into pipeline
+
+Discovery: many bookstore events are hosted by **publishers**, not the venues themselves. Wiring publisher organizers captures events at multiple stores in one feed.
+
+| Publisher | Organizer ID | Events in feed | Toronto venues used |
+|---|---|---|---|
+| Coach House Books | `6007837525` | 74 | Society Clubhouse, Coach House HQ |
+| Cormorant Books | `31280011011` | 38 | Ben McNally, Sleuth of Baker Street |
+| Book*hug Press | `30975200167` | 8 | Another Story, Type Books |
+| Penguin Random House Canada | `13112142972` | 96 | Various; geo-filter trims to Toronto |
+
+Pipeline geo-filter (`city.conf`) drops non-Toronto events from publisher feeds automatically.
+
+#### ⚠️ Has Eventbrite events as venue, no own organizer page
+
+These stores host events on Eventbrite but don't maintain a store organizer profile. Events route through individual authors or publisher organizer pages instead. Already partially captured via the publisher feeds above.
+
+- **A Different Booklist** — events organized by authors / co-presenting orgs
+- **Caversham Booksellers** — psych/social-science specialty; events co-hosted with publishers
+- **Flying Books / Flying Books at Neverland** — Neverland Book Club series; event-by-event organizers
+- **Little Ghosts Books** — author-organized launches (e.g., Mark Sampson `109211559751` for Lowfield Launch)
+- **Manifest Bookstore** — past Black Literacy Book Fair (one-off organizers)
+- **Swipe Design \| Books + Objects** — design book launches
+- **The Beguiling Books & Art** — comics; main programming is via TCAF (Toronto Comic Arts Festival), separate organization
+- **Type Books** (3 locations: Forest Hill, Junction, Queen West) — launches hosted by publishers (Book*hug, PRH already captured)
+
+#### ❌ No Eventbrite presence at all
+
+Bookmanager-hosted, used/rare, university, or specialty stores that don't use Eventbrite. Mostly captured at the venue level via publisher feeds when authors visit.
+
+- **Bakka Phoenix Books** — sci-fi/fantasy specialty; manual-curation venue (see below)
+- **BMV Books** (3 locations) — used + remainder chain
+- **Book City** (4 locations: Bloor West, Danforth, Yonge & St. Clair, In the Beach)
+- **Anansi Bookshop** — House of Anansi storefront; events on Henderson Brewing not Eventbrite
+- **Spacing Store** — urban-themed, runs own programming off-platform
+- **Inhabit Books** — Inuit publishing storefront
+- **Sleuth of Baker Street** — mystery specialty; Cormorant publisher events captured
+- **Book Bar** (Bookmanager-hosted) — events-friendly venue; possibly own platform
+- **A Good Read**, **Acadia Art & Rare Books**, **Balfour Books**, **Contact Editions**, **David Mason Books**, **Doug Miller Books**, **Re: Reading**, **The Monkey's Paw**, **Seekers Books**, **Thunderstruck Bookstore**, **Zoinks Music & Books**, **Cornerstone Bookshop** (Christian), **Fa Yuan Bookstore** (Chinese), **Multilingual / Mosaique**, **Tyndale Campus Store**, **UofT Bookstore**, **Ella Minnow**, **Mabel's Fables**, **Good Egg**
+
+### Bookmanager platform investigation → reusable scraper
+
+13 of the 50 Toronto indies are hosted on Bookmanager's React SPA platform (URL pattern: `{store}.com/item/_Qr...`). Reverse-engineered the platform's free public API:
+
+```
+POST https://api.bookmanager.com/customer/{endpoint}?_cb={san}
+Origin: https://{store-domain}
+FormData: store_id, session_id, webstore_name=<san>, ...
+```
+
+**Bootstrap sequence:** `store/getSettings` → `session/get` → `event/v2/list`.
+
+**Useful endpoints found:**
+- `nearbyStores/get` — list all Bookmanager stores near lat/long (used for the inventory walk above; reusable for any city)
+- `event/v2/list` — store's events feed; rows include id, title, description, date/time, location_text, category, image_url, books[], tickets[]
+- `store/getSettings` — store metadata including `san`, `id`, `address`, `lat/long`
+- `event/v2/getRsvpInfo` — RSVP/waitlist counts per event
+
+**Cautionary tale.** Initial survey hit `event/getList` (a v1 endpoint found in the JS bundle) and got 0 rows from all 7 stores I tested, leading to the **false** conclusion that "Bookmanager events feature is not used by any Toronto store" and that Bakka Phoenix should be parked as manual-curation. Verifying with playwright (rendering the actual /events page and capturing API calls) revealed the SPA calls **`event/v2/list`** instead — and several stores have populated event databases. The lesson: when an API call returns empty, render the actual UI to verify before concluding the feature is unused.
+
+**Confirmed via v2 endpoint** (5 of 13 Toronto Bookmanager stores actively use events):
+
+| Store | Events | Notes |
+|---|---|---|
+| Flying Books | 12 | Biggest haul; book clubs + launches at Neverland |
+| Ben McNally Books | 9 | Complements Eventbrite feed (different event series) |
+| Queen Books | 8 | Bookmanager is the live source; Eventbrite dormant |
+| A Different Booklist | 4 | Closes "ambiguous bucket" gap |
+| Bakka Phoenix Books | 1 | Unparks from manual-curation status |
+| Another Story, Book Bar, Book City, Ella Minnow, Mabel's Fables, Sleuth, The Beguiling | 0 | On platform but don't populate events; route through Eventbrite or social |
+
+**Implementation:**
+- `scrapers/lib/bookmanager.py` — `BookmanagerEventsScraper` reusable base class (parallel to `BibliocommonsEventsScraper`)
+- `scrapers/bookmanager.py` — parameterized CLI: `--san --domain --name`
+- 5 workflow invocations in `.github/workflows/generate-calendar.yml`
+- Each store's SAN is extracted from `var san="..."` in the store's `/events` page HTML
+
+**Bakka Phoenix:** No longer parked as manual-curation. Now wired via the Bookmanager scraper. The earlier "manual curation" verdict was based on the v1-endpoint mistake.
+
+### Aggregators not used (but worth noting)
+
+| Aggregator | Status | Notes |
+|---|---|---|
+| CIBA `cibabooks.ca/member-directory` | JS-rendered, no data on initial fetch | Public face is indiebookstores.ca |
+| All Lit Up (`alllitup.ca`) | Has bookstore map on the site but not at the URL searched | Literary Press Group; could re-check |
+| Penguin Random House Canada `/canadian-independent-bookstores` | Returned page chrome only, no list visible in initial fetch | Could be JS-rendered |
+| Retail Council bookstore map | 403 (Cloudflare) | Skipped |
+
+### eb-to-ical infrastructure note
+
+All 9 wired feeds use the third-party `eb-to-ical.daylightpirates.org` service to convert Eventbrite organizer pages to ICS. **Single point of failure** — if it goes dark, all 9 feeds break simultaneously. Documented in `discovery-lessons.md:467`. Fallback: scrape Eventbrite JSON-LD via existing `scrapers/lib/jsonld.py`.
