@@ -1,6 +1,6 @@
 # Toronto Calendar Source Checklist
 
-## Currently Implemented (111 sources)
+## Currently Implemented (115 sources)
 
 ### Aggregators
 | Source | Type | Events | Notes |
@@ -93,10 +93,14 @@
 | Glad Day Bookshop | Eventbrite organizer (eb-to-ical) | active | World's oldest LGBTQ+ bookstore; drag brunches, readings, fundraisers |
 | Hopeless Romantic Books | Eventbrite organizer (eb-to-ical) | active | Romance specialty; monthly hybrid book club |
 | Queen Books | Eventbrite organizer (eb-to-ical) | currently dormant | Leslieville general indie; live source is Bookmanager scraper below |
-| Book*hug Press | Publisher Eventbrite organizer | 8 | Literary press; launches across Toronto venues |
-| Coach House Books | Publisher Eventbrite organizer | 74 | Literary press (60 yrs); seasonal launches at Society Clubhouse |
-| Cormorant Books | Publisher Eventbrite organizer | 38 | Literary press; events at Ben McNally, Sleuth, etc. |
-| Penguin Random House Canada | Publisher Eventbrite organizer | 96 | Big-five Canadian arm; geo-filter trims to Toronto-only |
+| Book*hug Press | Eventbrite (filtered) | 7 | Literary press; launches across Toronto venues |
+| Coach House Books | Eventbrite (filtered) | 63 | Literary press (60 yrs); launches at Society Clubhouse |
+| Cormorant Books | Eventbrite (filtered) | 31 | Literary press; events at Ben McNally, Sleuth, etc. |
+| Penguin Random House Canada | Eventbrite (filtered) | 70 | Big-five Canadian arm |
+| HarperCollins Canada | Eventbrite (filtered) | 37 | Big-five publisher |
+| Simon & Schuster Canada | Eventbrite (filtered) | 13 | Big-five publisher |
+| Diaspora Dialogues | Eventbrite (filtered) | 113 | Toronto literary org; reading series, mentorship |
+| House of Anansi | Eventbrite (filtered) | 5 | Toronto literary press; Poetry Bash series at Henderson Brewing |
 | Bakka Phoenix Books | Bookmanager scraper | 1 | SF/F specialty (since 1972); `scrapers/bookmanager.py --san 1684035` |
 | Flying Books | Bookmanager scraper | 12 | College St + Neverland; biggest Bookmanager haul; book clubs + launches |
 | Ben McNally Books (Bookmanager) | Bookmanager scraper | 9 | Complements Eventbrite feed: BMB Book Club + publisher launches |
@@ -159,7 +163,7 @@
 ## Needs Further Assessment
 
 - **Toronto Public Library** — now implemented as kids/family-scoped scraper (`scrapers/toronto_public_library.py`) on reusable Bibliocommons base (`scrapers/lib/bibliocommons.py`). Monitor ongoing signal/noise and adjust filters if needed.
-- **BlogTO** — Highest volume Toronto source (215+ events) but needs custom scraper. JSON embedded in event pages (`var event = {...}`).
+- ~~**BlogTO**~~ — Implemented as `scrapers/blogto.py`. Uses public `/api/v2/events/?date=YYYY-MM-DD&bundle_type=medium` listing endpoint (no per-event fetch). Walks day-by-day, dedupes by event id, stops after 7 empty days.
 - **Explore Kids Ontario Adventures** — Tockify feed (`ekoad`) has 822 events but covers broader GTA/Ontario, not just Toronto. May need geo-filtering.
 - **Toronto Bicycling Network** — Wild Apricot RSS at `tbn.ca/events/RSS` has 55 events (hiking, cycling, walks, skating, skiing). Richest outdoor recreation club. Needs RSS-to-ICS conversion.
 
@@ -553,6 +557,37 @@ Bookmanager-hosted, used/rare, university, or specialty stores that don't use Ev
 - **Sleuth of Baker Street** — mystery specialty; Cormorant publisher events captured
 - **Book Bar** (Bookmanager-hosted) — events-friendly venue; possibly own platform
 - **A Good Read**, **Acadia Art & Rare Books**, **Balfour Books**, **Contact Editions**, **David Mason Books**, **Doug Miller Books**, **Re: Reading**, **The Monkey's Paw**, **Seekers Books**, **Thunderstruck Bookstore**, **Zoinks Music & Books**, **Cornerstone Bookshop** (Christian), **Fa Yuan Bookstore** (Chinese), **Multilingual / Mosaique**, **Tyndale Campus Store**, **UofT Bookstore**, **Ella Minnow**, **Mabel's Fables**, **Good Egg**
+
+### Discovered via publisher-feed triangulation (after the original 50-store walk)
+
+While building the publisher-feed venue filter (`scrapers/eventbrite_filtered.py`), the Penguin Random House Canada feed surfaced a Toronto bookstore that wasn't in indiebookstores.ca, NewPages, or the Bookmanager nearby API:
+
+- **Moonbeam Books** — 335 Jane Street (Bloor West Village). Children's & YA indie founded 2017. Squarespace-hosted (DNS 198.185.159.144). Listed on blogTO and NewPages but not in CIBA's directory and not on Bookmanager. Site blocks `curl` (likely Squarespace bot detection); has some Eventbrite venue presence ("Holiday Happy Hour @ Moonbeam Books") but no organizer page. Status: in inventory, no event source wired yet — needs Squarespace `?format=json` probe via WebFetch and manual organizer ID lookup.
+
+This is the triangulation working as intended: publisher feeds are filtered for known venues *and* surface new ones.
+
+### Publisher-feed venue filter (`scrapers/eventbrite_filtered.py`)
+
+The 8 publisher organizer feeds (Coach House, Cormorant, Book*hug, PRH Canada, HarperCollins Canada, Simon & Schuster Canada, Diaspora Dialogues, House of Anansi) used to be wired as raw `eb-to-ical` URLs. That dumped Vancouver, Montreal, Halifax, and Calgary launches into the Toronto feed. Replaced with a parameterized filter scraper that applies two rules:
+
+- **Denylist** (`cities/toronto/bookstore_venue_denylist.txt`) — drop events at Indigo / Chapters chain stores. Currently catches 0 events; serves as a safeguard for the future.
+- **Geo allowlist** (`cities/toronto/geo_allowlist.txt`) — require LOCATION to contain "Toronto" or one of the 5 inner boroughs (North York, Scarborough, Etobicoke, East York, York). Events with no location at all pass (online events from Toronto orgs).
+
+Filtered counts (April 2026):
+
+| Publisher | Raw | Toronto-only | Trimmed |
+|---|---|---|---|
+| Penguin Random House Canada | 96 | 70 | 26 |
+| HarperCollins Canada | 47 | 37 | 10 |
+| Simon & Schuster Canada | 19 | 13 | 6 |
+| Diaspora Dialogues | 136 | 113 | 23 |
+| House of Anansi | 5 | 5 | 0 |
+| Coach House Books | 74 | 63 | 11 |
+| Cormorant Books | 38 | 31 | 7 |
+| Book*hug Press | 8 | 7 | 1 |
+| **Total** | **423** | **339** | **84 (~20%)** |
+
+The `--report` flag prints the denied + out-of-area + passed venue lists, which is useful both for tuning the filters and for discovering new Toronto literary-event venues we might want to investigate (Henderson Brewing, Society Clubhouse, MaRS Discovery District, Heliconian Hall, MOCA Toronto, etc.).
 
 ### Bookmanager platform investigation → reusable scraper
 
