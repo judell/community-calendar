@@ -279,22 +279,36 @@
       window.ccAutoHeight = new URLSearchParams(location.search).get('autoheight') === 'true';
       if (window.ccAutoHeight && window.parent !== window) {
         (function () {
+          // Measure the actual XMLUI App container (which becomes height:auto
+          // under fitContent), not document.documentElement. documentElement's
+          // scrollHeight is bounded below by the iframe viewport, so it can't
+          // shrink when content shrinks (e.g. after a search filter). The
+          // appContainer with fitContent IS the content's natural height, in
+          // either direction.
           var lastH = 0;
-          function sendHeight() {
-            var h = document.documentElement.scrollHeight;
-            if (h === lastH) return;
+          var observer = null;
+          function report(el) {
+            var h = Math.ceil(el.getBoundingClientRect().height);
+            if (h === lastH || h === 0) return;
             lastH = h;
             window.parent.postMessage({ type: 'cc-embed-resize', height: h }, '*');
           }
-          // ResizeObserver on documentElement won't fire when scrollHeight
-          // grows but the viewport stays the same size. So we poll briefly
-          // to catch XMLUI's async DataSource renders, then stop.
-          window.addEventListener('load', sendHeight);
-          var ticks = 0;
-          var iv = setInterval(function () {
-            sendHeight();
-            if (++ticks > 40) clearInterval(iv);
-          }, 250);
+          function findAndObserve() {
+            var el = document.querySelector('[data-xmlui-app-fit-content]');
+            if (!el) return false;
+            if ('ResizeObserver' in window) {
+              observer = new ResizeObserver(function () { report(el); });
+              observer.observe(el);
+            }
+            report(el);
+            return true;
+          }
+          // XMLUI mounts asynchronously; poll briefly until the appContainer
+          // appears, then hand off to ResizeObserver for continuous tracking.
+          var tries = 0;
+          var findIv = setInterval(function () {
+            if (findAndObserve() || ++tries > 80) clearInterval(findIv);
+          }, 50);
         })();
       }
     </script>

@@ -31,10 +31,11 @@
     iframe {
       display: block;
       width: 100%;
-      /* Initial height before postMessage updates arrive — avoids a flash
-         of a tiny iframe while XMLUI mounts. The parent listener resizes
-         this to actual content height once the embedded app reports it. */
-      height: 800px;
+      /* Hidden until the embedded app reports its actual content height
+         on first paint. Avoids both a tiny-iframe flash and an empty-space
+         floor on quiet days. */
+      visibility: hidden;
+      height: 0;
       border: 0;
       background: #fff;
     }
@@ -95,12 +96,17 @@
 
   <footer>
     <p><strong>How it works</strong> (once productized):</p>
-    <pre>&lt;iframe id="cc" src="https://judell.github.io/community-calendar/xmlui/index.html?city=CITY&amp;embed=true&amp;autoheight=true" style="width:100%;height:800px;border:0;" scrolling="no"&gt;&lt;/iframe&gt;
+    <pre>&lt;iframe id="cc"
+        src="https://judell.github.io/community-calendar/xmlui/index.html?city=CITY&amp;embed=true&amp;autoheight=true"
+        style="display:block;width:100%;height:0;border:0;visibility:hidden;"
+        scrolling="no"&gt;&lt;/iframe&gt;
 &lt;script&gt;
-addEventListener('message', function(e) {
+addEventListener('message', function (e) {
   if (e.origin !== 'https://judell.github.io') return;
   if (e.data &amp;&amp; e.data.type === 'cc-embed-resize') {
-    document.getElementById('cc').style.height = e.data.height + 'px';
+    var f = document.getElementById('cc');
+    f.style.height = e.data.height + 'px';
+    f.style.visibility = 'visible';
   }
 });
 &lt;/script&gt;</pre>
@@ -109,13 +115,15 @@ addEventListener('message', function(e) {
   <script>
     // Parent-side: the only code an embedding site needs.
     // The sender lives inside xmlui/index.html (gated on ?autoheight=true)
-    // and posts height updates via postMessage; we resize the iframe to match.
+    // and posts height updates via postMessage; we resize the iframe to match
+    // and reveal it on first message so users never see a flash or empty space.
     (function () {
       var iframe = document.getElementById('cc-frame');
       window.addEventListener('message', function (e) {
         // In production, add: if (e.origin !== 'https://judell.github.io') return;
         if (e.data && e.data.type === 'cc-embed-resize' && iframe) {
           iframe.style.height = e.data.height + 'px';
+          iframe.style.visibility = 'visible';
         }
       });
     })();
