@@ -147,7 +147,7 @@ def write_allowed_cities_file(filepath, config, city_coords):
         else:
             lines.append(f"{city}  # (coordinates unknown)")
     
-    filepath.write_text('\n'.join(lines) + '\n')
+    filepath.write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
 
 def main():

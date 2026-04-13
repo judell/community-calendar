@@ -381,6 +381,20 @@ jobs:
 
 
     # ==========================================
+    # Asheville
+    # ==========================================
+    - name: Scrape Asheville sources
+      if: contains(steps.locations.outputs.list, 'asheville') && github.event.inputs.regenerate_only != 'true'
+      run: |
+        echo "Scraping Asheville..."
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/107138-asheville-music-hall" --name "Asheville Music Hall" --output cities/asheville/asheville_music_hall.ics || true
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/4591672-asheville-yards" --name "Asheville Yards" --output cities/asheville/asheville_yards.ics || true
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/832601-static-age-records" --name "Static Age Records" --output cities/asheville/static_age_records.ics || true
+        python scrapers/songkick.py --url "https://www.songkick.com/venues/39035-grey-eagle" --name "The Grey Eagle" --output cities/asheville/grey_eagle_songkick.ics || true
+      continue-on-error: true
+
+
+    # ==========================================
     # Download feeds + Combine ICS (all cities)
     # ==========================================
     - name: Fetch pending feeds from DB
