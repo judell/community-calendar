@@ -11,10 +11,11 @@
       }
 
     </style>
+    <script>window._xsLogs = [];</script>
     <script src="config.local.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/rrule@2.8.1/dist/es5/rrule.min.js"></script>
-    <script>console.log = function(){};</script>
+    <!-- <script>console.log = function(){};</script> -->
     <script>
       var vxhr = new XMLHttpRequest();
       vxhr.open('GET', 'version.txt', false);
@@ -269,6 +270,48 @@
         var to = new Date(window.toDate);
         return Math.round((to - from) / (30 * 24 * 60 * 60 * 1000));
       };
+    </script>
+    <script>
+      // Iframe auto-height support. Opt-in via ?autoheight=true.
+      // - Sets window.ccAutoHeight so Main.xmlui can gate <App fitContent=".."/>
+      //   which makes XMLUI size to content instead of filling its viewport.
+      // - Posts document scrollHeight to the parent on resize so the parent
+      //   can resize the iframe to match. Non-embedded usage is unaffected.
+      window.ccAutoHeight = new URLSearchParams(location.search).get('autoheight') === 'true';
+      if (window.ccAutoHeight && window.parent !== window) {
+        (function () {
+          // Measure the actual XMLUI App container (which becomes height:auto
+          // under fitContent), not document.documentElement. documentElement's
+          // scrollHeight is bounded below by the iframe viewport, so it can't
+          // shrink when content shrinks (e.g. after a search filter). The
+          // appContainer with fitContent IS the content's natural height, in
+          // either direction.
+          var lastH = 0;
+          var observer = null;
+          function report(el) {
+            var h = Math.ceil(el.getBoundingClientRect().height);
+            if (h === lastH || h === 0) return;
+            lastH = h;
+            window.parent.postMessage({ type: 'cc-embed-resize', height: h }, '*');
+          }
+          function findAndObserve() {
+            var el = document.querySelector('[data-xmlui-app-fit-content]');
+            if (!el) return false;
+            if ('ResizeObserver' in window) {
+              observer = new ResizeObserver(function () { report(el); });
+              observer.observe(el);
+            }
+            report(el);
+            return true;
+          }
+          // XMLUI mounts asynchronously; poll briefly until the appContainer
+          // appears, then hand off to ResizeObserver for continuous tracking.
+          var tries = 0;
+          var findIv = setInterval(function () {
+            if (findAndObserve() || ++tries > 80) clearInterval(findIv);
+          }, 50);
+        })();
+      }
     </script>
   </head>
   <body>

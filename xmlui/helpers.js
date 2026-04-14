@@ -212,15 +212,20 @@ var _prevTerm = '';
 var _prevCategory = '';
 var _prevFiltered = null;
 
+var _prevEventsLen = 0;
+var _prevEventsFirst = null;
 function filterEvents(events, term, category) {
   if (!events) return events || [];
   var t0 = performance.now();
   var base = category ? events.filter(function(e) { return e.category === category; }) : events;
-  if (!term) { _prevTerm = ''; _prevCategory = ''; _prevFiltered = null; return base; }
+  if (!term) { _prevTerm = ''; _prevCategory = ''; _prevFiltered = null; _prevEventsLen = 0; _prevEventsFirst = null; return base; }
   var lower = term.toLowerCase();
-  // Progressive narrowing: reuse previous result if extending the same search within same category
-  var narrowing = (_prevTerm && lower.startsWith(_prevTerm) && category === _prevCategory && _prevFiltered);
+  // Progressive narrowing: reuse previous result if extending the same search within same category AND same input
+  var sameInput = (events.length === _prevEventsLen && events[0] === _prevEventsFirst);
+  var narrowing = (sameInput && _prevTerm && lower.startsWith(_prevTerm) && category === _prevCategory && _prevFiltered);
   var source = narrowing ? _prevFiltered : base;
+  _prevEventsLen = events.length;
+  _prevEventsFirst = events[0];
   var result = source.filter(function(e) { return e._search && e._search.includes(lower); });
   var t1 = performance.now();
   if (!window._filterLog) window._filterLog = [];
@@ -687,7 +692,23 @@ function dedupeEvents(events) {
 // This reduces clutter while keeping events visible throughout their run.
 // Weeks are anchored to "today" so the first occurrence shown is today or later,
 // then subsequent occurrences appear ~7 days apart.
+var _collapseCache = null;
+var _collapseLastLen = 0;
+var _collapseLastFirst = null;
+var _collapseLastLast = null;
+
 function collapseLongRunningEvents(events) {
+  if (!events || !events.length) return [];
+  if (_collapseCache &&
+      events.length === _collapseLastLen &&
+      events[0] === _collapseLastFirst &&
+      events[events.length - 1] === _collapseLastLast) {
+    return _collapseCache;
+  }
+  _collapseLastLen = events.length;
+  _collapseLastFirst = events[0];
+  _collapseLastLast = events[events.length - 1];
+
   const MIN_OCCURRENCES = 5;  // Need at least this many to consider "long-running"
   const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -703,13 +724,17 @@ function collapseLongRunningEvents(events) {
     return Math.floor(daysDiff / 7);
   }
 
-  // Get time-of-day string in city timezone
+  // Get time-of-day string in city timezone (cached to avoid expensive toLocaleString calls)
   const tz = getCityTimezone();
+  var _todCache = {};
   function getTimeOfDay(dateStr) {
+    if (_todCache[dateStr]) return _todCache[dateStr];
     const d = new Date(dateStr);
     const h = String(parseInt(d.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: tz }))).padStart(2, '0');
     const m = String(parseInt(d.toLocaleString('en-US', { minute: 'numeric', timeZone: tz }))).padStart(2, '0');
-    return h + ':' + m;
+    var result = h + ':' + m;
+    _todCache[dateStr] = result;
+    return result;
   }
 
   // Group by title + location + time-of-day to identify long-running events
@@ -757,7 +782,40 @@ function collapseLongRunningEvents(events) {
     }
   });
 
-  return result.sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+  _collapseCache = result.sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+  return _collapseCache;
+}
+
+var AGGREGATORS = new Set([
+  'North Bay Bohemian', 'Press Democrat', 'Creative Sonoma', 'GoLocal Cooperative',
+  'NOW Toronto', 'Toronto Events (Tockify)', 'Montclair Local News',
+  'LancasterPA.com', "Let's Go! Bloomington", 'BloomingtonOnline Events',
+  'BloomingtonOnline Food & Drink', 'BloomingtonOnline Shopping',
+  'Show Up Toronto'
+]);
+
+function sortSourcesForDisplay(events) {
+  if (!events) return [];
+  return events.map(function(e) {
+    if (!e.source) return e;
+    var sourcesArr = e.source.split(', ').filter(Boolean);
+    if (sourcesArr.length <= 1) return e;
+    sourcesArr.sort(function(a, b) {
+      var aAgg = AGGREGATORS.has(a) ? 1 : 0;
+      var bAgg = AGGREGATORS.has(b) ? 1 : 0;
+      if (aAgg !== bAgg) return aAgg - bAgg;
+      return a.localeCompare(b);
+    });
+    var loc = (e.location || '').toLowerCase();
+    if (loc) {
+      var authIdx = sourcesArr.findIndex(function(s) { return !AGGREGATORS.has(s) && loc.includes(s.toLowerCase()); });
+      if (authIdx > 0) {
+        var auth = sourcesArr.splice(authIdx, 1)[0];
+        sourcesArr.unshift(auth);
+      }
+    }
+    return Object.assign({}, e, { source: sourcesArr.join(', ') });
+  });
 }
 
 // Clear dedupe cache (useful for testing)
@@ -1283,7 +1341,13 @@ if (typeof window !== 'undefined') {
           function(result) { return { term: term || '', category: category || '', resultCount: result.length }; })
       : _filterEvents(events, term, category);
   };
-  window.buildSearchIndex = buildSearchIndex;
+  var _buildSearchIndex = buildSearchIndex;
+  window.buildSearchIndex = function(events) {
+    return window.xsTraceWith
+      ? window.xsTraceWith("buildSearchIndex", function() { return _buildSearchIndex(events); },
+          function(result) { return { count: result.length }; })
+      : _buildSearchIndex(events);
+  };
   window.getPagedEvents = getPagedEvents;
   window.getDescriptionSnippet = getDescriptionSnippet;
   window.formatDayOfWeek = formatDayOfWeek;
@@ -1297,14 +1361,62 @@ if (typeof window !== 'undefined') {
   window.toggleSourceAndSave = toggleSourceAndSave;
   window.saveHiddenSources = saveHiddenSources;
   window.isSourceHidden = isSourceHidden;
-  window.filterHiddenSources = filterHiddenSources;
+  var _filterHiddenSources = filterHiddenSources;
+  window.filterHiddenSources = function(events, hidden) {
+    return window.xsTraceWith
+      ? window.xsTraceWith("filterHiddenSources", function() { return _filterHiddenSources(events, hidden); },
+          function(result) { return { inputCount: (events || []).length, outputCount: result.length }; })
+      : _filterHiddenSources(events, hidden);
+  };
 
   // Seed hidden sources from localStorage for unauthenticated users
   try {
     var stored = localStorage.getItem('hidden_sources');
     if (stored) { window._localHiddenSources = JSON.parse(stored); }
   } catch(e) {}
-  window.filterExternalExclusions = function(events) {
+  // Date range slider helpers
+  window._dateRangeBase = new Date();
+  window._dateRangeBase.setHours(0, 0, 0, 0);
+
+  window.dayOffsetToISO = function(dayOffset) {
+    var d = new Date(window._dateRangeBase.getTime() + dayOffset * 24 * 60 * 60 * 1000);
+    return d.toISOString();
+  };
+
+  window.formatDayOffset = function(dayOffset) {
+    var d = new Date(window._dateRangeBase.getTime() + dayOffset * 24 * 60 * 60 * 1000);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getMonth()] + ' ' + d.getDate();
+  };
+
+  window.getEventDayRange = function(events) {
+    if (!events || !events.length) return [0, 90];
+    var base = window._dateRangeBase.getTime();
+    var msPerDay = 24 * 60 * 60 * 1000;
+    var minOffset = Infinity, maxOffset = -Infinity;
+    for (var i = 0; i < events.length; i++) {
+      var d = new Date(events[i].start_time);
+      d.setHours(0, 0, 0, 0);
+      var offset = Math.round((d.getTime() - base) / msPerDay);
+      if (offset < minOffset) minOffset = offset;
+      if (offset > maxOffset) maxOffset = offset;
+    }
+    return [minOffset, maxOffset];
+  };
+
+  window.filterByDayRange = function(events, range) {
+    if (!range || !events) return events;
+    var fromMs = window._dateRangeBase.getTime() + range[0] * 24 * 60 * 60 * 1000;
+    var toMs = window._dateRangeBase.getTime() + (range[1] + 1) * 24 * 60 * 60 * 1000;
+    var result = events.filter(function(e) {
+      var t = new Date(e.start_time).getTime();
+      return t >= fromMs && t < toMs;
+    });
+    console.log('filterByDayRange', range, 'in:', events.length, 'out:', result.length);
+    return result;
+  };
+
+  var _filterExternalExclusions = function(events) {
     var exc = window.externalExclusions;
     if (!exc) return events;
     if (!events) return [];
@@ -1327,6 +1439,12 @@ if (typeof window !== 'undefined') {
       return true;
     });
   };
+  window.filterExternalExclusions = function(events) {
+    return window.xsTraceWith
+      ? window.xsTraceWith("filterExternalExclusions", function() { return _filterExternalExclusions(events); },
+          function(result) { return { inputCount: (events || []).length, outputCount: result.length }; })
+      : _filterExternalExclusions(events);
+  };
   window.getSourceCounts = getSourceCounts;
   var _dedupeEvents = dedupeEvents;
   window.dedupeEvents = function(events) {
@@ -1335,7 +1453,20 @@ if (typeof window !== 'undefined') {
           function(result) { return { inputCount: (events || []).length, outputCount: result.length }; })
       : _dedupeEvents(events);
   };
-  window.collapseLongRunningEvents = collapseLongRunningEvents;
+  var _collapseLongRunning = collapseLongRunningEvents;
+  window.collapseLongRunningEvents = function(events) {
+    return window.xsTraceWith
+      ? window.xsTraceWith("collapseLongRunningEvents", function() { return _collapseLongRunning(events); },
+          function(result) { return { inputCount: (events || []).length, outputCount: result.length }; })
+      : _collapseLongRunning(events);
+  };
+  var _sortSourcesForDisplay = sortSourcesForDisplay;
+  window.sortSourcesForDisplay = function(events) {
+    return window.xsTraceWith
+      ? window.xsTraceWith("sortSourcesForDisplay", function() { return _sortSourcesForDisplay(events); },
+          function(result) { return { count: result.length }; })
+      : _sortSourcesForDisplay(events);
+  };
   window.clearDedupeCache = clearDedupeCache;
   window.isEventPicked = isEventPicked;
   window.buildGoogleCalendarUrl = buildGoogleCalendarUrl;

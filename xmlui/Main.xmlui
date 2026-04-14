@@ -1,6 +1,7 @@
 <App
   name="Community Calendar"
   defaultTheme="community-calendar"
+  fitContent="{window.ccAutoHeight}"
   var.filterTerm="{window.initialSearch || ''}"
   var.viewMode="{'all'}"
   var.displayStartIndex="{0}"
@@ -11,12 +12,16 @@
   global.authUser="{authUser}"
   global.authSession="{authSession}"
   var.city="{window.cityFilter || null}"
-  global.isAdmin="{false}">
+  global.isAdmin="{false}"
+  var.eventDayRange="{null}"
+  var.sliderRange="{false}"
+  var.sliderStart="{null}"
+  var.sliderEnd="{null}">
 
   <!-- DataSources -->
   <DataSource
     id="events"
-    url="{appGlobals.supabaseUrl + '/rest/v1/events?select=*&order=start_time.asc&limit=5000&source=neq.poster_capture&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate() + (city ? '&city=eq.' + city : '')}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/deduplicated_events?select=*&order=start_time.asc&limit=5000&start_time=gte.' + window.getFromDate() + '&start_time=lte.' + window.getToDate() + (city ? '&city=eq.' + city : '')}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey,
       'Cache-Control': 'no-cache, no-store, must-revalidate'
@@ -132,7 +137,13 @@
   <variable name="hiddenSources" value="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || window._localHiddenSources || []}" />
   <variable name="expandedEnrichments" value="{window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate()) || []}" />
   <variable name="combinedEvents" value="{[...(Array.isArray(events.value) ? events.value : []), ...(Array.isArray(expandedEnrichments) ? expandedEnrichments : [])]}" />
-  <variable name="processedEvents" value="{window.buildSearchIndex(window.filterHiddenSources(window.dedupeEvents(window.filterExternalExclusions(combinedEvents)), hiddenSources))}" />
+  <variable name="processedEvents" value="{window.buildSearchIndex(window.filterHiddenSources(window.collapseLongRunningEvents(window.sortSourcesForDisplay(window.filterExternalExclusions(combinedEvents))), hiddenSources))}" />
+  <variable name="displayEvents" value="{sliderStart !== null ? processedEvents.filter(e => { const t = new Date(e.start_time).getTime(); const base = window._dateRangeBase.getTime(); return t >= base + sliderStart * 86400000 && t < base + (sliderEnd + 1) * 86400000 }) : processedEvents}" />
+
+  <ChangeListener
+    listenTo="{processedEvents}"
+    onDidChange="() => { if (!sliderRange && processedEvents && processedEvents.length > 100) { eventDayRange = window.getEventDayRange(processedEvents) } }"
+  />
 
   <!-- Dialogs -->
   <SignInDialog id="signInDialog" />
@@ -208,6 +219,7 @@
           <IncludeMarkup when="{!window.embed}" url="components/IconRow.xmlui" />
           <HStack when="{window.embed}" gap="$space-1" verticalAlignment="center">
             <Icon name="l-rss" tooltip="Sources" width="20px" height="20px" color="$color-surface-500" onClick="sourcesDialog.open()" />
+            <Inspector src="{'xmlui/xs-diff.html?v=' + window.APP_VERSION}" />
           </HStack>
         </HStack>
       </H1>
@@ -230,7 +242,7 @@
           cursor="pointer"
           color="$color-text-tertiary"
           opacity="{filterTerm ? 1 : 0}"
-          onClick="searchBox.setValue(''); setCategoryFilter(''); window.syncSearchParam('')"
+          onClick="searchBox.setValue(''); setCategoryFilter(''); window.syncSearchParam(''); displayStartIndex = 0; browseStartIndex = 0; scrollRequest = scrollRequest + 1"
         />
       </HStack>
       <Select
@@ -254,30 +266,46 @@
         <Option value="picks" label="my picks" />
       </HStack>
     </RadioGroup>
+    <VStack when="{eventDayRange && events.loaded && viewMode === 'all'}" gap="$space-0">
+      <HStack>
+        <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{window.formatDayOffset(sliderRange ? sliderRange[0] : eventDayRange[0])}" />
+        <SpaceFiller />
+        <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{window.formatDayOffset(sliderRange ? sliderRange[1] : eventDayRange[1])}" />
+      </HStack>
+      <Slider
+        id="dateSlider"
+        initialValue="{eventDayRange}"
+        minValue="{eventDayRange[0]}"
+        maxValue="{eventDayRange[1]}"
+        step="{1}"
+        showValues="false"
+        onDidChange="(val) => { sliderRange = Array.isArray(val) ? [val[0], val[1]] : val; sliderStart = val[0]; sliderEnd = val[1]; displayStartIndex = 0; browseStartIndex = 0; scrollRequest = scrollRequest + 1 }"
+      />
+    </VStack>
     </VStack>
     </VStack>
     <Spinner when="{!events.loaded && viewMode === 'all'}" />
     <Button
-      when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasPrev}"
+      when="{events.loaded && viewMode === 'all' && !filterTerm && moreHasPrev}"
       label="Earlier"
       variant="outlined"
       width="100%"
       marginBottom="$space-2"
-      onClick="const prevIndex = window._morePrevIndex ?? 0; displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
+      onClick="const prevIndex = morePrevIndex ?? 0; displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
     />
-    <Masonry when="{events.loaded && viewMode === 'all' && layoutMode === 'multicol'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" columns="3" gap="$space-3" rowGap="0" minColumnWidth="300px">
+    <Masonry when="{events.loaded && viewMode === 'all' && layoutMode === 'multicol'}" data="{getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter, sliderStart, sliderEnd)}" columns="3" gap="$space-3" rowGap="0" minColumnWidth="300px">
       <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
     </Masonry>
-    <List when="{events.loaded && viewMode === 'all' && layoutMode !== 'multicol'}" data="{window.getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter)}" fixedItemSize="true" limit="{filterTerm ? 10 : 50}">
+    <List when="{events.loaded && viewMode === 'all' && layoutMode !== 'multicol'}" data="{getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter, sliderStart, sliderEnd)}" fixedItemSize="true" limit="{filterTerm ? 10 : 50}">
       <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
     </List>
     <Button
-      when="{events.loaded && viewMode === 'all' && !filterTerm && window._moreHasMore}"
+      when="{events.loaded && viewMode === 'all' && !filterTerm && moreHasMore}"
       label="Later"
       variant="outlined"
       width="100%"
       marginTop="$space-2"
-      onClick="const nextIndex = window._moreNextIndex || displayStartIndex; displayStartIndex = nextIndex; browseStartIndex = nextIndex; scrollRequest = scrollRequest + 1;"
+      onClick="const nextIndex = moreNextIndex || displayStartIndex; displayStartIndex = nextIndex; browseStartIndex = nextIndex; scrollRequest = scrollRequest + 1;"
     />
     <VStack when="{viewMode === 'picks'}" gap="$space-2">
       <Text fontSize="$fontSize-sm" value="{(picks.value || []).length + ' events'}" />
@@ -307,6 +335,7 @@
         <IncludeMarkup when="{!window.embed}" url="components/IconRow.xmlui" />
         <HStack when="{window.embed}" gap="$space-1" verticalAlignment="center">
           <Icon name="l-rss" tooltip="Sources" width="20px" height="20px" color="$color-surface-500" onClick="sourcesDialog.open()" />
+          <Inspector src="{'xmlui/xs-diff.html?v=' + window.APP_VERSION}" />
         </HStack>
       </HStack>
     </H1>
