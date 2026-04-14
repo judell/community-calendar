@@ -69,7 +69,14 @@ def slugify(url: str) -> str:
         match = re.search(r'/ics/([^/]+)', url)
         if match:
             return f"tockify_{match.group(1)}"
-    
+
+    # CivicPlus (city/county sites): include catID to avoid collisions
+    if '/iCalendar/iCalendar.aspx' in parsed.path:
+        domain = parsed.netloc.replace('www.', '').split('.')[0]
+        cat_match = re.search(r'catID=(\d+)', parsed.query)
+        cat_id = f"_{cat_match.group(1)}" if cat_match else ''
+        return f"civicplus_{domain}{cat_id}"
+
     # General case: use domain + path
     domain = parsed.netloc.replace('www.', '').split('.')[0]
     path_parts = [p for p in parsed.path.split('/') if p and p not in ('events', 'ical', 'feed', 'calendar')]
