@@ -15,7 +15,9 @@ import subprocess
 import sys
 import urllib.request
 import urllib.error
+from datetime import datetime
 from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
 
 
 def slugify(url: str) -> str:
@@ -211,6 +213,48 @@ def mark_feeds_active(feeds_to_activate):
             print(f"  ⚠️  Failed to mark active: {feed['name']}: {e}")
 
 
+# HACK: browncounty.com's MEC v7.25.0 exports UTC values but labels them with
+# TZID=America/Indiana/Indianapolis, making every event 4 hours early (EDT).
+# Fix: parse as stated TZ → convert to UTC → use that UTC value as local time.
+# Other MEC feeds (e.g. York University v7.17.1) use proper UTC "Z" format and
+# are NOT affected — but watch for this bug if we add more MEC feeds with TZID.
+_MEC_TZ_FIX_URLS = {
+    'browncounty.com',
+}
+
+
+def _needs_mec_tz_fix(url: str) -> bool:
+    return any(domain in url for domain in _MEC_TZ_FIX_URLS)
+
+
+def fix_mec_timezone(filepath: str) -> None:
+    """Rewrite DTSTART/DTEND in an ICS file to undo MEC's double timezone conversion."""
+    with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+        content = f.read()
+
+    def fix_dt_line(match):
+        field = match.group(1)   # DTSTART or DTEND
+        tzid = match.group(2)    # e.g. America/Indiana/Indianapolis
+        timestr = match.group(3) # e.g. 20260404T080000
+        try:
+            tz = ZoneInfo(tzid)
+            dt = datetime.strptime(timestr, '%Y%m%dT%H%M%S').replace(tzinfo=tz)
+            # The UTC value is what the local time should actually be
+            corrected = dt.astimezone(ZoneInfo('UTC')).strftime('%Y%m%dT%H%M%S')
+            return f'{field};TZID={tzid}:{corrected}'
+        except Exception:
+            return match.group(0)
+
+    fixed = re.sub(
+        r'(DTSTART|DTEND);TZID=([^:]+):(\d{8}T\d{6})',
+        fix_dt_line,
+        content
+    )
+
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write(fixed)
+
+
 def download_feeds(city: str) -> None:
     output_dir = os.path.join("cities", city)
     os.makedirs(output_dir, exist_ok=True)
@@ -252,6 +296,11 @@ def download_feeds(city: str) -> None:
             # Inject source headers from feeds.txt metadata
             if friendly_name:
                 inject_source_headers(outfile, friendly_name, fallback_url)
+
+            # Fix MEC timezone bug for known-affected feeds
+            if _needs_mec_tz_fix(url):
+                fix_mec_timezone(outfile)
+                print(f"  🔧 Applied MEC timezone fix to {filename}")
 
             print(f"  ✅ {filename}: {events} events"
                   f"{' (source: ' + friendly_name + ')' if friendly_name else ''}")
