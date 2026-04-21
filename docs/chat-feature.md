@@ -255,14 +255,75 @@ RAG may also later inform which structured concepts are worth keeping, but the i
      - the model supplies the wording
      - no manual event-domain synonym table is required
 
-## Short Take
+## Review: April 2026
 
-At the end of tonight:
+Stepped back and honestly assessed all three approaches tried across both branches.
 
-- the timeout issue was fixed
-- the app is responsive again
-- the RAG toggle is wired locally
-- Bloomington has enough embeddings for meaningful RAG testing
-- retrieval probing shows the main issue is query rewriting, not the vector layer
+### Branches
 
-That is the right place to resume next time.
+- `event-concierge-chat` — the original context-stuffing approach (v1)
+- `chat-search` — facet/SQL path + RAG path (v2/v3)
+
+### What was tried and what failed
+
+**1. Context stuffing** (`event-concierge-chat`)
+- Compact event summaries (title | start_time | location | category) sent to model in system prompt
+- Tried both Haiku and Sonnet
+- Haiku: poor relevance ("hiking" returned boat cruises)
+- Sonnet: better relevance but 9-13s latency, still not good enough, and expensive
+- Architecture is the simplest and most domain-independent — just not fast/cheap/good enough yet
+
+**2. Facet/SQL path** (`chat-search`, `chat-events` edge function)
+- Hand-built taxonomy: ~220 lines of synonym dictionaries, fixed enum sets for participation modes, format tags, audience tags, activity tags, cost tags
+- Bloomington-specific few-shot examples
+- Produced good matches when it worked, but fundamentally bespoke
+- Every new query failure requires a new heuristic — whack-a-mole
+- Doesn't scale to new cities without reviewing all tag sets
+
+**3. RAG/embeddings path** (`chat-search`, `chat-events-rag` edge function)
+- Hybrid retrieval: FTS + OpenAI embeddings + RRF fusion
+- Domain-independent in principle
+- But embeddings on short event text aren't strong enough: "cycling for kids" doesn't find "tricycle race for students"
+- The bottleneck is query rewriting, not the vector layer
+- Multi-query rewriting (verbatim + paraphrase + broadened) proposed but still asks the model to guess organizer vocabulary
+
+### Why this is hard
+
+The core problem: ~2000 events in a 30-day window, short idiosyncratic descriptions, users who speak different vocabulary than event organizers. Every approach either requires the model to find needles in a haystack (context stuffing) or requires bespoke infrastructure to pre-narrow the haystack (facets, RAG).
+
+Key numbers for Bloomington (30-day window):
+- ~2100 events, ~1MB full text (~250k tokens) — too much for cheap single-call context stuffing
+- ~68k tokens as compact summaries (id + title + category + location + start_time) — fits in context, but model matching quality wasn't good enough
+- Individual category slices: 50-350 events each
+- A typical weekend: ~230 events, ~97k chars
+
+### The "outsource it" option
+
+Discussed: express events as HTML pages, let ChatGPT browse/index them, let it reason over the data. This would work because general-purpose AI with web browsing can handle the vocabulary-bridging problem — it's just reading comprehension over a large corpus.
+
+Downsides: depends on successful SEO/crawl indexing (unreliable, opaque, no recourse when it doesn't work), cedes UX control entirely, daily-changing calendar content vs unknown crawl schedules.
+
+### Possible path forward: semi-automated vocabulary convergence
+
+The domain is genuinely finite — events cluster around similar semantics in every city (music, outdoors, kids, food, sports, arts, civic). A "good enough" taxonomy probably has 200-300 terms and covers 90% of queries.
+
+A hybrid facet/SQL + RAG approach could converge on that vocabulary through an iterative eval loop:
+
+1. Run test queries against current retrieval
+2. Measure: which queries miss, and why
+3. Diagnose: vocabulary gap? missing tag? query parser failure?
+4. Fix: add terms, re-classify affected events
+5. Re-measure
+
+Steps 1-2 are automatable. Step 3 (deciding what kind of fix a miss needs) is the hard part — it requires judgment about whether a miss is a missing synonym, a missing tag, or a fundamentally new concept. A model could potentially do this diagnosis too, but it needs to reason over the event corpus to know what's missing — which is the same reading comprehension problem that makes context stuffing hard.
+
+**The honest assessment:** This loop is feasible but needs a human-curated eval set as its anchor. The automation handles: running queries, measuring recall, proposing vocabulary additions, re-classifying events, re-measuring. The human work: periodically review proposed additions, and add new query/expected-result pairs when users report misses. Not zero babysitting, but not a ton.
+
+**The wait-and-see factor:** The context-stuffing approach (#1) is the simplest and most domain-independent. Its failure is purely a cost/speed/quality constraint that gets cheaper every few months. What was 9-13s with Sonnet in early 2026 may be 2s at the same quality soon. It may be worth revisiting periodically rather than building complex retrieval infrastructure that a better model would obviate.
+
+### Open questions
+
+- Is the semi-automated vocabulary loop worth building, or will model improvements make context stuffing viable before the loop converges?
+- If building the loop, what's the minimum viable eval set? The existing `bloomington-concierge-eval-queries.json` has 82 queries — is that enough?
+- Could enrichment at index time (model-generated free-text search keywords per event, not fixed taxonomy) split the difference? Less bespoke than facets, more targeted than embeddings.
+- Is there a way to get the benefits of the "outsource to ChatGPT" approach without depending on crawl indexing? (Custom GPTs with file upload? Claude Projects with daily snapshots?)
