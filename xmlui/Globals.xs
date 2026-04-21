@@ -109,6 +109,9 @@ function getInlinePanelHostMinHeight(name) {
   if (name === 'sources') {
     return '520px';
   }
+  if (name === 'chat') {
+    return '620px';
+  }
   if (name === 'feeds') {
     return '560px';
   }

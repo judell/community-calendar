@@ -49,6 +49,8 @@ SET statement_timeout TO '120s'
 AS $function$
 BEGIN
   REFRESH MATERIALIZED VIEW deduplicated_events;
+  REFRESH MATERIALIZED VIEW deduplicated_chat_events;
+  PERFORM public.refresh_chat_event_documents();
 END;
 $function$;
 

@@ -1,0 +1,176 @@
+<Component
+  name="ChatEventsPanel"
+  method.open="() => { activePanel = 'chat'; }"
+  method.close="() => { if (activePanel === 'chat') activePanel = ''; }"
+  method.clear="() => { messages = []; inputText = ''; isLoading = false; chatInput.setValue(''); }"
+  method.toggle="() => { if (activePanel === 'chat') { activePanel = ''; } else { activePanel = 'chat'; } }"
+  var.messages="{[]}"
+  var.lastCity="{''}"
+  var.inputText=""
+  var.chatBackend="{window.localStorage.getItem('chatBackendMode') === 'chat-events-rag' ? 'chat-events-rag' : 'chat-events'}"
+  var.isLoading="{false}">
+
+  <ChangeListener
+    listenTo="{$props.city}"
+    onDidChange="if (lastCity !== $props.city) { messages = []; inputText = ''; isLoading = false; chatInput.setValue(''); lastCity = $props.city; }" />
+
+  <APICall
+    id="chatApi"
+    method="post"
+    url="{appGlobals.supabaseUrl + '/functions/v1/' + chatBackend}"
+    headers="{{
+      'Content-Type': 'application/json',
+      'apikey': appGlobals.supabasePublishableKey,
+      'Authorization': 'Bearer ' + window.authSession?.access_token
+    }}"
+    body="{$param}"
+    onSuccess="(result) => {
+      messages = [...messages, {
+        role: 'assistant',
+        content: result.reply || 'I could not find a useful answer.',
+        events: result.events || [],
+        pivotSuggestions: result.pivot_suggestions || []
+      }];
+      isLoading = false;
+    }"
+    onError="(err) => {
+      const msg = (err && (err.message || err.error || err.statusText)) || err || 'Unknown error';
+      messages = [...messages, { role: 'assistant', content: 'Sorry, something went wrong: ' + msg }];
+      isLoading = false;
+    }" />
+
+  <ChangeListener
+    listenTo="{messages}"
+    onDidChange="chatMessageArea.scrollToBottom('smooth')" />
+
+  <Card
+    when="{activePanel === 'chat'}"
+    width="100%"
+    marginTop="$space-3"
+    marginBottom="$space-3"
+    padding="$space-3"
+    gap="$space-3">
+    <HStack verticalAlignment="start" gap="$space-2">
+      <VStack width="*" gap="$space-0">
+        <H3>Event Concierge</H3>
+        <HStack gap="$space-1" marginTop="$space-1">
+          <Button
+            label="Current"
+            size="sm"
+            variant="{chatBackend === 'chat-events' ? 'solid' : 'outlined'}"
+            onClick="
+              if (chatBackend !== 'chat-events') {
+                chatBackend = 'chat-events';
+                window.localStorage.setItem('chatBackendMode', 'chat-events');
+                messages = [{ role: 'assistant', content: 'Using the current SQL/facet concierge.' }];
+                inputText = '';
+                isLoading = false;
+                chatInput.setValue('');
+              }
+            " />
+          <Button
+            label="RAG"
+            size="sm"
+            variant="{chatBackend === 'chat-events-rag' ? 'solid' : 'outlined'}"
+            onClick="
+              if (chatBackend !== 'chat-events-rag') {
+                chatBackend = 'chat-events-rag';
+                window.localStorage.setItem('chatBackendMode', 'chat-events-rag');
+                messages = [{ role: 'assistant', content: 'Using the RAG prototype for retrieval.' }];
+                inputText = '';
+                isLoading = false;
+                chatInput.setValue('');
+              }
+            " />
+        </HStack>
+        <Text
+          fontSize="$fontSize-xs"
+          color="$color-text-secondary"
+          marginTop="$space-1"
+          value="{chatBackend === 'chat-events-rag' ? 'Active backend: RAG prototype' : 'Active backend: Current SQL/facet concierge'}" />
+      </VStack>
+      <Button
+        label="Clear"
+        size="sm"
+        variant="outlined"
+        onClick="messages = []; inputText = ''; isLoading = false; chatInput.setValue('');" />
+      <Icon
+        name="close"
+        tooltip="Hide concierge"
+        width="20px"
+        height="20px"
+        color="$color-text-secondary"
+        onClick="activePanel = ''" />
+    </HStack>
+
+    <VStack id="chatMessageArea" height="420px" overflowY="scroll" gap="$space-3">
+      <Items data="{messages}">
+        <Card
+          padding="$space-2"
+          backgroundColor="{$item.role === 'user' ? '$color-surface-100' : '$color-surface-50'}"
+          border="1px solid $color-surface-200">
+          <Text
+            when="{$item.role === 'user'}"
+            fontSize="$fontSize-sm"
+            value="{$item.content}" />
+          <Markdown
+            when="{$item.role === 'assistant'}"
+            fontSize="$fontSize-sm"
+            content="{$item.content}" />
+        </Card>
+        <VStack when="{$item.events && $item.events.length > 0}" gap="$space-2">
+          <Items data="{$item.events}">
+            <EventCard
+              event="{$item}"
+              filterTerm=""
+              categoryColorMap="{window.categoryColorMap}"
+              categoryList="{window.categoryList}" />
+          </Items>
+        </VStack>
+        <VStack when="{$item.pivotSuggestions && $item.pivotSuggestions.length > 0}" gap="$space-2">
+          <Text
+            fontSize="$fontSize-sm"
+            color="$color-text-secondary"
+            value="Try widening the search:" />
+          <Items data="{$item.pivotSuggestions}">
+            <Button
+              label="{$item}"
+              variant="outlined"
+              onClick="
+                const pivotText = $item;
+                const updatedMsgs = [...messages, { role: 'user', content: pivotText }];
+                messages = updatedMsgs;
+                inputText = '';
+                chatInput.setValue('');
+                isLoading = true;
+                chatApi.execute({ messages: updatedMsgs, city: $props.city });
+              " />
+          </Items>
+        </VStack>
+      </Items>
+      <Spinner when="{isLoading}" />
+    </VStack>
+
+    <HStack gap="$space-2" verticalAlignment="center" width="100%">
+      <TextBox
+        id="chatInput"
+        initialValue="{inputText}"
+        placeholder="Jazz this weekend, family events after school, free talks downtown..."
+        width="*"
+        onDidChange="(val) => inputText = val" />
+      <Button
+        label="Send"
+        width="96px"
+        enabled="{!isLoading && inputText}"
+        onClick="
+          if (!inputText) return;
+          const updatedMsgs = [...messages, { role: 'user', content: inputText }];
+          messages = updatedMsgs;
+          inputText = '';
+          chatInput.setValue('');
+          isLoading = true;
+          chatApi.execute({ messages: updatedMsgs, city: $props.city });
+        " />
+    </HStack>
+  </Card>
+</Component>

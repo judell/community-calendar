@@ -5,3 +5,6 @@ CREATE EXTENSION IF NOT EXISTS pg_net;
 
 -- Scheduled jobs
 CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- Vector search
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;
