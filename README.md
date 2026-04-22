@@ -16,20 +16,11 @@ The gold standard is **iCalendar (ICS) feeds** — a format that machines can re
 
 ## Architecture
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Scrapers      │────▶│   ICS Files     │────▶│  combined.ics   │
-│ (various sites) │     │ (per source)    │     │                 │
-└─────────────────┘     └─────────────────┘     └────────┬────────┘
-                                                         │
-                                                         ▼
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   XMLUI App     │◀────│    Supabase     │◀────│  events.json    │
-│  (GitHub Pages) │     │   (database)    │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-```
+**[Interactive architecture explainer](https://judell.github.io/cc-architecture/)** — click through the 7 pipeline phases to see how data flows from sources to the frontend.
 
-Scrapers and ICS feed downloads run daily in GitHub Actions. Individual ICS files are combined into a single feed per city, converted to JSON, and posted to Supabase. The XMLUI frontend queries Supabase and renders events. See [docs/pipeline.md](docs/pipeline.md) for the full pipeline details.
+<!-- Drag cc-architecture.mp4 into the GitHub editor to embed the video here -->
+
+ICS feeds, web scrapers, and curator picks are collected daily by GitHub Actions, combined and deduplicated per city, converted to JSON, classified by Claude AI, and loaded into Supabase. The XMLUI frontend queries the deduplicated materialized view and renders events. See [docs/pipeline.md](docs/pipeline.md) for the full pipeline details.
 
 ## The Curator Role
 
