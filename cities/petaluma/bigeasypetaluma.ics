@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-57MZHWB16C"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-57MZHWB16C");
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#2a2622" />
@@ -17,10 +28,69 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=UnifrakturMaguntia&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="/assets/index-CnQCZ3oI.js"></script>
+    <script>
+      (function () {
+        var TAG = "[BIGEASY DEBUG INLINE]";
+        function log() {
+          try {
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift(TAG);
+            console.log.apply(console, args);
+          } catch (e) {}
+        }
+        function warn() {
+          try {
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift(TAG);
+            console.warn.apply(console, args);
+          } catch (e) {}
+        }
+        try {
+          log("href", location.href);
+          log("origin", location.origin);
+        } catch (e) {}
+        window.addEventListener("error", function (ev) {
+          warn("window.error", ev.message, ev.filename, ev.lineno);
+        });
+        window.addEventListener("unhandledrejection", function (ev) {
+          warn("window.unhandledrejection", ev.reason);
+        });
+        try {
+          var modules = document.querySelectorAll('script[type="module"]');
+          for (var i = 0; i < modules.length; i++) {
+            (function (m) {
+              m.addEventListener("error", function (e) {
+                warn("module-script error", m.src, e);
+                fetch(m.src, { method: "GET", cache: "no-store", credentials: "omit" })
+                  .then(function (r) {
+                    log(
+                      "asset-recheck",
+                      m.src,
+                      "status",
+                      r.status,
+                      "ct",
+                      r.headers.get("content-type"),
+                      "vercel-cache",
+                      r.headers.get("x-vercel-cache"),
+                      "cf-cache",
+                      r.headers.get("cf-cache-status")
+                    );
+                  })
+                  .catch(function (er) {
+                    warn("asset-recheck-failed", m.src, er);
+                  });
+              });
+            })(modules[i]);
+          }
+        } catch (e) {
+          warn("module-script wiring failed", e);
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-BU_l37Jr.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/react-vendor-BTkMwJiv.js">
-    <link rel="modulepreload" crossorigin href="/assets/firebase-vendor-BJkvzrHC.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-CiKok4FO.css">
+    <link rel="modulepreload" crossorigin href="/assets/firebase-vendor-ep0K-bxZ.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-Bp7VRRog.css">
   </head>
   <body>
     <div id="root"></div>
