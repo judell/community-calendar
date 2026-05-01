@@ -14,7 +14,18 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#2a2622" />
+    <meta name="theme-color" content="#0c0a08" />
+    <style>
+      html,
+      body {
+        background: #0c0a08;
+        color: #e7d6a6;
+        margin: 0;
+      }
+      #root {
+        background: #0c0a08;
+      }
+    </style>
     <link rel="icon" href="/bigeasypetaluma.com-favicon.ico" type="image/x-icon" sizes="any" />
     <link rel="apple-touch-icon" href="/bigeasypetaluma.com-favicon.ico" />
     <link rel="manifest" href="/manifest.json" />
@@ -28,6 +39,77 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=UnifrakturMaguntia&display=swap"
       rel="stylesheet"
     />
+    <style>
+      #bigeasy-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.1rem;
+        padding: 2rem;
+        background: radial-gradient(ellipse at center, #1a130c 0%, #0c0a08 70%);
+        color: #e7d6a6;
+        font-family: "Crimson Pro", Georgia, serif;
+        text-align: center;
+        opacity: 1;
+        transition: opacity 600ms ease;
+      }
+      #bigeasy-splash.is-hiding {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #bigeasy-splash img.bigeasy-splash-logo {
+        width: clamp(160px, 26vw, 240px);
+        height: auto;
+        filter: drop-shadow(0 0 22px rgba(201, 162, 39, 0.28));
+        animation: bigeasy-splash-logo-in 900ms ease-out both;
+      }
+      @keyframes bigeasy-splash-logo-in {
+        0% { opacity: 0; transform: translateY(8px) scale(0.985); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      #bigeasy-splash .bigeasy-splash-bulbs {
+        display: flex;
+        gap: 0.6rem;
+      }
+      #bigeasy-splash .bigeasy-splash-bulbs span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #c9a227;
+        box-shadow: 0 0 10px #c9a227, 0 0 22px rgba(201, 162, 39, 0.55);
+        animation: bigeasy-splash-bulb 1.4s infinite ease-in-out;
+      }
+      #bigeasy-splash .bigeasy-splash-bulbs span:nth-child(2) { animation-delay: 0.18s; }
+      #bigeasy-splash .bigeasy-splash-bulbs span:nth-child(3) { animation-delay: 0.36s; }
+      #bigeasy-splash .bigeasy-splash-bulbs span:nth-child(4) { animation-delay: 0.54s; }
+      #bigeasy-splash .bigeasy-splash-bulbs span:nth-child(5) { animation-delay: 0.72s; }
+      @keyframes bigeasy-splash-bulb {
+        0%, 100% { opacity: 0.32; }
+        50% { opacity: 1; }
+      }
+      #bigeasy-splash .bigeasy-splash-line {
+        font-size: clamp(0.95rem, 1.6vw, 1.05rem);
+        letter-spacing: 0.04em;
+        opacity: 0.9;
+        transition: opacity 250ms ease;
+      }
+      #bigeasy-splash .bigeasy-splash-sub {
+        font-size: 0.72rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        opacity: 0.5;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #bigeasy-splash img.bigeasy-splash-logo,
+        #bigeasy-splash .bigeasy-splash-bulbs span {
+          animation: none;
+        }
+      }
+    </style>
     <script>
       (function () {
         var TAG = "[BIGEASY DEBUG INLINE]";
@@ -87,12 +169,88 @@
         }
       })();
     </script>
-    <script type="module" crossorigin src="/assets/index-BU_l37Jr.js"></script>
+    <script type="module" crossorigin src="/assets/index-B2o6BkXG.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/react-vendor-BTkMwJiv.js">
     <link rel="modulepreload" crossorigin href="/assets/firebase-vendor-ep0K-bxZ.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-Bp7VRRog.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-BNyUR18x.css">
   </head>
   <body>
+    <div id="bigeasy-splash" role="status" aria-live="polite">
+      <img class="bigeasy-splash-logo" src="/logo-big-easy.png" alt="The Big Easy" />
+      <div class="bigeasy-splash-line" id="bigeasy-splash-line">Pulling back the curtain…</div>
+      <div class="bigeasy-splash-bulbs" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="bigeasy-splash-sub">A speakeasy below American Alley</div>
+    </div>
+    <script>
+      (function () {
+        var splash = document.getElementById("bigeasy-splash");
+        if (!splash) return;
+        var KEY = "bigeasy.splash.lastSeen";
+        var SKIP_MS = 7 * 24 * 60 * 60 * 1000;
+        var MIN_MS = 1200;
+        var MAX_MS = 2600;
+
+        function removeSplash() {
+          if (!splash || !splash.parentNode) return;
+          splash.parentNode.removeChild(splash);
+          splash = null;
+        }
+
+        try {
+          var last = parseInt(localStorage.getItem(KEY) || "0", 10);
+          if (last && Date.now() - last < SKIP_MS) {
+            removeSplash();
+            return;
+          }
+        } catch (e) {}
+
+        var lines = [
+          "Pulling back the curtain…",
+          "Lighting the marquee…",
+          "Tuning the upright…",
+          "Polishing the brass…",
+          "Pouring something dark and cold…"
+        ];
+        var ix = 0;
+        var lineEl = document.getElementById("bigeasy-splash-line");
+        var rotate = setInterval(function () {
+          ix = (ix + 1) % lines.length;
+          if (lineEl) {
+            lineEl.style.opacity = "0";
+            setTimeout(function () {
+              if (lineEl) {
+                lineEl.textContent = lines[ix];
+                lineEl.style.opacity = "0.9";
+              }
+            }, 220);
+          }
+        }, 1100);
+
+        var shownAt = Date.now();
+        var hidden = false;
+
+        function hide() {
+          if (hidden || !splash) return;
+          hidden = true;
+          var elapsed = Date.now() - shownAt;
+          var wait = Math.max(0, MIN_MS - elapsed);
+          setTimeout(function () {
+            clearInterval(rotate);
+            if (!splash) return;
+            splash.classList.add("is-hiding");
+            setTimeout(removeSplash, 700);
+            try {
+              localStorage.setItem(KEY, String(Date.now()));
+            } catch (e) {}
+          }, wait);
+        }
+
+        window.addEventListener("bigeasy:app-ready", hide, { once: true });
+        setTimeout(hide, MAX_MS);
+      })();
+    </script>
     <div id="root"></div>
   </body>
 </html>
