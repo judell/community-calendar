@@ -1,161 +1,105 @@
-# DC Music — pending feeds (one URL per line)
-# Format: ICS URL or `# cmd: <scraper invocation>` followed by output path
-# Generated 2026-05-02 (judell/dc-music-discovery), revised after pass-2 + pass-3.
-# Review before merging to main. See STRATEGIES_REVIEW.md for the verification log.
+# DC Music — pending feeds
+# Generated 2026-05-02 (judell/dc-music-discovery). See STRATEGIES_REVIEW.md
+# and RUN_SUMMARY.md for verification details, run-time event counts, and
+# strategy notes. The "# Source Name" comment becomes the DB feed.name.
 
-# ===========================================================================
-# City-level aggregators (one source covers many venues)
-# ===========================================================================
+# --- City-level aggregators ---
 
-# dc.events Concerts — DC's WordPress-based aggregator. Single fetch returns
-# ~25 MusicEvent JSON-LD blocks; geo-filter drops MD/VA spillover at ingest.
-# Verified 2026-05-03: 25 events extracted, valid ICS produced.
+# dc.events Concerts
 # cmd: python scrapers/dc_events_concerts.py --output cities/dc-music/dc_events_concerts.ics
 cities/dc-music/dc_events_concerts.ics
 
-# Eventbrite DC Music — uses existing scrapers/eventbrite.py against the DC
-# music search URL (the scraper's regex extracts /e/ event URLs and follows
-# each for JSON-LD). Catches embassies, pop-up venues, and other long-tail
-# events not tied to seed venues. Verified 2026-05-03: 8 events written
-# (BERHTA, Decades DC, Zebbie's Garden, Embassy of France, Alethia Tanner
-# Park; geo-filter drops MD/VA spillover at ingest).
+# Eventbrite DC Music
 # cmd: python scrapers/eventbrite.py --url "https://www.eventbrite.com/d/dc--washington/music--events/" --name "Eventbrite DC Music"
 cities/dc-music/eventbrite_dc_music.ics
 
-# ===========================================================================
-# Direct ICS feeds
-# ===========================================================================
+# --- Direct ICS feeds ---
 
-# 6th & I Historic Synagogue | https://www.sixthandi.org/
-# 30 events confirmed at probe time
+# 6th & I Historic Synagogue
 https://www.sixthandi.org/?ical=1
 
-# ===========================================================================
-# DICE-link-harvest scrapers (lib/dice.py)
-# Two-stage: fetch venue events page, extract link.dice.fm URLs, follow each
-# to a DICE event page and parse MusicEvent JSON-LD.
-# ===========================================================================
+# --- DICE-link harvest (lib/dice.py) ---
 
-# Songbyrd Music House — DICE-ticketed indie venue. Songkick had 2 events;
-# DICE harvest gets ~75. Verified 2026-05-03: 72 events written to ICS.
+# Songbyrd Music House
 # cmd: python scrapers/songbyrd.py --output cities/dc-music/songbyrd.ics
 cities/dc-music/songbyrd.ics
 
-# ===========================================================================
-# Ticketmaster Discovery API (per-venue)
-# Requires TICKETMASTER_API_KEY (or TICKETMASTER_KEY) env var. Free key at
-# developer.ticketmaster.com. Rate limit: 5 req/sec, 5,000/day.
-#
-# Note: TM's API serves mojibaked text (literal '?' chars where UTF-8 should
-# be, e.g. "Ren??e Fleming???s") — upstream data quality issue we can't fix.
-# Events are still usable but artist names look ugly in the calendar.
-#
-# For DC, TM mostly duplicates Songkick at I.M.P./flagship venues, so it's
-# only worth running where Songkick coverage is weak. Kennedy Center is the
-# clearest case: Songkick had 0 events; TM has 5 NSO concerts.
-# ===========================================================================
+# --- Ticketmaster (per-venue, requires TICKETMASTER_API_KEY) ---
 
-# Kennedy Center (Trump Kennedy Center - Concert Hall) — 5 NSO/classical
-# concerts at run time; Songkick coverage was 0 for this venue.
+# Kennedy Center
 # cmd: python scrapers/ticketmaster.py --venue-id ZFr9jZak17 --name "Kennedy Center"
 cities/dc-music/ticketmaster_kennedy.ics
 
-# ===========================================================================
-# Songkick scraper invocations — verified ≥10 upcoming events at run time
-# scrapers/songkick.py — single fetch per venue, JSON-LD MusicEvent
-# ===========================================================================
+# --- Songkick (scrapers/songkick.py, JSON-LD MusicEvent) ---
 
-# 9:30 Club (84 upcoming)
+# 9:30 Club
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/922-930-club" --name "9:30 Club"
 cities/dc-music/songkick_930club.ics
 
-# The Anthem (49 upcoming)
+# The Anthem
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/3552789-anthem" --name "The Anthem"
 cities/dc-music/songkick_anthem.ics
 
-# Lincoln Theatre (23 upcoming)
+# Lincoln Theatre
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/2826-lincoln-theatre" --name "Lincoln Theatre"
 cities/dc-music/songkick_lincoln.ics
 
-# Black Cat (26 upcoming)
+# Black Cat
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/1038-black-cat" --name "Black Cat"
 cities/dc-music/songkick_blackcat.ics
 
-# DC9 Nightclub (37 upcoming) — Songkick covers touring acts; consider DICE-harvest
-# scraper as a supplement for local programming (DC9 also uses DICE).
+# DC9
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/20843-dc9-nightclub" --name "DC9"
 cities/dc-music/songkick_dc9.ics
 
-# Pearl Street Warehouse (17 upcoming)
+# Pearl Street Warehouse
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/3637839-pearl-street-warehouse" --name "Pearl Street Warehouse"
 cities/dc-music/songkick_pearlst.ics
 
-# Union Stage (25 upcoming)
+# Union Stage
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/3623159-union-stage" --name "Union Stage"
 cities/dc-music/songkick_unionstage.ics
 
-# The Atlantis (58 upcoming)
+# The Atlantis
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/4498657-atlantis" --name "The Atlantis"
 cities/dc-music/songkick_atlantis.ics
 
-# The Hamilton Live (29 upcoming)
+# The Hamilton
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/1611908-hamilton-live" --name "The Hamilton"
 cities/dc-music/songkick_hamilton.ics
 
-# Howard Theatre (27 upcoming)
+# Howard Theatre
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/74872-howard-theatre" --name "Howard Theatre"
 cities/dc-music/songkick_howard.ics
 
-# Echostage (13 upcoming)
+# Echostage
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/1864683-echostage" --name "Echostage"
 cities/dc-music/songkick_echostage.ics
 
-# Warner Theatre (24 upcoming)
+# Warner Theatre
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/647-warner-theatre" --name "Warner Theatre"
 cities/dc-music/songkick_warner.ics
 
-# Capital One Arena (13 upcoming)
+# Capital One Arena
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/3640349-capital-one-arena" --name "Capital One Arena"
 cities/dc-music/songkick_capitalonearena.ics
 
-# Pie Shop (16 upcoming)
+# Pie Shop
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/3998914-pie-shop" --name "Pie Shop"
 cities/dc-music/songkick_pieshop.ics
 
-# ===========================================================================
-# Songkick — marginal coverage (5–9 upcoming at run time). Keep but flag.
-# ===========================================================================
-
-# Blues Alley (9 upcoming, jazz)
+# Blues Alley
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/10881-blues-alley" --name "Blues Alley"
 cities/dc-music/songkick_bluesalley.ics
 
-# Comet Ping Pong (6 upcoming)
+# Comet Ping Pong
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/148048-comet-ping-pong" --name "Comet Ping Pong"
 cities/dc-music/songkick_comet.ics
 
-# Rhizome DC (6 upcoming, DIY)
+# Rhizome DC
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/3342239-rhizome-dc" --name "Rhizome DC"
 cities/dc-music/songkick_rhizome.ics
 
-# DAR Constitution Hall (6 upcoming)
+# DAR Constitution Hall
 # cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/1095-dar-constitution-hall" --name "DAR Constitution Hall"
 cities/dc-music/songkick_darhall.ics
-
-# ===========================================================================
-# DROPPED — Songkick page exists but has 0–2 upcoming events at run time.
-# These venues are active locally but their booking doesn't surface to
-# Songkick (artists don't push tour dates for local-only gigs). Each needs
-# a different strategy (see STRATEGIES_REVIEW.md). Listed here for reviewer
-# context only — uncomment only if a fallback strategy is wired up.
-# ===========================================================================
-
-# Songbyrd — replaced; covered by scrapers/songbyrd.py (DICE harvest, ~72 events)
-# Lisner Auditorium (1 upcoming) — university programming, low Songkick yield
-# Atlas Performing Arts (0) — Tessitura CRM; no public endpoint
-# JoJo Restaurant (0) — local jazz; no Songkick coverage
-# Madam's Organ (0) — nightly local blues; no Songkick coverage
-# Takoma Station Tavern (0) — local jazz; no Songkick coverage
-# Bossa Bistro (0) — neighborhood live music; no Songkick coverage
-# Kennedy Center — replaced; covered via Ticketmaster venue ID ZFr9jZak17
-#                  (5 NSO/classical concerts at run time)

@@ -128,7 +128,11 @@ TEMPLATE = """\
 # to the template below. export_feeds_txt.py then regenerates feeds.txt
 # from the DB. Do not edit feeds.txt manually.
 #
-# The "# Source Name" comment becomes the display name in the calendar.
+# The "# Source Name" comment becomes the display name in the calendar
+# (user-visible source attribution under each event card). Use the bare
+# canonical venue/source name only — no parenthetical context, no event
+# counts, no strategy notes. Put verification/discovery notes in
+# SOURCES_CHECKLIST.md, not here.
 #
 # --- ICS feed URLs ---
 # Just add the name and URL. The build handles everything else.

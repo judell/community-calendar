@@ -16,7 +16,11 @@ https://example.com/events/?ical=1
 https://www.meetup.com/some-group/events/ical/
 ```
 
-Each feed is a comment line with the display name, followed by the URL. You can test a URL before adding it:
+Each feed is a comment line with the display name, followed by the URL.
+
+**Naming rule:** the `# Display Name` comment is the user-visible source attribution under each event card in the calendar UI. Use the bare canonical venue/source name only — no parenthetical context, no event counts, no strategy notes. Verification details, run-time counts, and discovery notes belong in `cities/<city>/SOURCES_CHECKLIST.md` (or a city-local `STRATEGIES_REVIEW.md`), not here.
+
+You can test a URL before adding it:
 
 ```bash
 python scripts/add_feed.py URL city "Source Name" --test
