@@ -22,6 +22,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent))
+from process_pending_feeds import parse_pending_feeds as _parse_pending_feeds
+
 ROOT = Path(__file__).parent.parent
 WORKFLOW_PATH = ROOT / ".github/workflows/generate-calendar.yml"
 
@@ -54,42 +57,11 @@ def is_relevant(changed_files: list[str]) -> bool:
 
 
 def parse_pending_feeds(path: Path) -> list[dict]:
-    """Parse pending_feeds.txt into feed dicts. Same logic as process_pending_feeds.py."""
+    """Parse pending_feeds.txt — delegates to process_pending_feeds.parse_pending_feeds
+    so the two scripts can't drift."""
     if not path.exists():
         return []
-    feeds = []
-    name = None
-    scraper_cmd = None
-    for line in path.read_text().splitlines():
-        stripped = line.strip()
-        if not stripped:
-            continue
-        if stripped.startswith("#"):
-            comment = stripped[1:].strip()
-            if comment.startswith("cmd:"):
-                scraper_cmd = comment[4:].strip()
-            elif comment and not any(comment.startswith(p) for p in
-                                     ("Format:", "---", "Add ", "Pipeline:",
-                                      "The ", "Just ", "Or for", "Test ",
-                                      "See ", "inserts", "entry is")):
-                name = comment
-            continue
-        url = stripped
-        if url.startswith("https://") or url.startswith("http://"):
-            feed_type = "ics_url"
-        elif url.startswith("cities/") or url.endswith(".ics"):
-            feed_type = "scraper"
-        else:
-            continue
-        feeds.append({
-            "name": name or url,
-            "url": url,
-            "feed_type": feed_type,
-            "scraper_cmd": scraper_cmd,
-        })
-        name = None
-        scraper_cmd = None
-    return feeds
+    return _parse_pending_feeds(str(path))
 
 
 def get_workflow_scraper_outputs(workflow_text: str) -> set[str]:
