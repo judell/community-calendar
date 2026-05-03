@@ -152,8 +152,10 @@ def main():
     parser.add_argument('--venue-id', required=True, help='Ticketmaster venue ID')
     parser.add_argument('--name', default='Ticketmaster', help='Source name')
     parser.add_argument('--output', '-o', help='Output ICS file')
-    parser.add_argument('--api-key', default=os.environ.get('TICKETMASTER_API_KEY'),
-                        help='API key (default: TICKETMASTER_API_KEY env var)')
+    parser.add_argument('--api-key',
+                        default=os.environ.get('TICKETMASTER_API_KEY')
+                                or os.environ.get('TICKETMASTER_KEY'),
+                        help='API key (default: TICKETMASTER_API_KEY or TICKETMASTER_KEY env var)')
     parser.add_argument('--timezone', default='America/New_York', help='Timezone')
     parser.add_argument('--default-url', help='Fallback URL when events have no per-event URL')
     parser.add_argument('--debug', action='store_true')
