@@ -1,10 +1,11 @@
 <Component
   name="AddFeedDialog"
-  method.open="() => { feedUrl = ''; feedName = ''; previewEvents = null; validating = false; validationError = ''; submitted = false; deleteError = ''; showInfo = false; activePanel = 'feeds'; feedsList.refetch(); }"
+  method.open="() => { feedUrl = ''; feedName = ''; fallbackUrl = ''; previewEvents = null; validating = false; validationError = ''; submitted = false; deleteError = ''; showInfo = false; activePanel = 'feeds'; feedsList.refetch(); }"
   method.close="() => { if (activePanel === 'feeds') activePanel = ''; }"
-  method.toggle="() => { if (activePanel === 'feeds') { activePanel = ''; } else { feedUrl = ''; feedName = ''; previewEvents = null; validating = false; validationError = ''; submitted = false; deleteError = ''; showInfo = false; activePanel = 'feeds'; feedsList.refetch(); } }"
+  method.toggle="() => { if (activePanel === 'feeds') { activePanel = ''; } else { feedUrl = ''; feedName = ''; fallbackUrl = ''; previewEvents = null; validating = false; validationError = ''; submitted = false; deleteError = ''; showInfo = false; activePanel = 'feeds'; feedsList.refetch(); } }"
   var.feedUrl=""
   var.feedName=""
+  var.fallbackUrl=""
   var.previewEvents="{null}"
   var.validating="{false}"
   var.validationError=""
@@ -20,7 +21,7 @@
   <DataSource
     id="feedsList"
     when="{activePanel === 'feeds'}"
-    url="{appGlobals.supabaseUrl + '/rest/v1/feeds?select=id,name,url,status&city=eq.' + (window.cityFilter || 'bloomington') + '&status=in.(active,pending)&feed_type=in.(ics_url,curator)&order=name.asc'}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/feeds?select=id,name,url,status,fallback_url&city=eq.' + (window.cityFilter || 'bloomington') + '&status=in.(active,pending)&feed_type=in.(ics_url,curator)&order=name.asc'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey
     }}"
@@ -154,6 +155,11 @@
           value="{feedName}"
           onDidChange="(val) => feedName = val"
         />
+        <TextBox
+          placeholder="Source page URL (optional, e.g. https://luma.com/toronto)"
+          value="{fallbackUrl}"
+          onDidChange="(val) => fallbackUrl = val"
+        />
         <Button
           label="{validating ? 'Validating...' : 'Validate Feed'}"
           enabled="{feedUrl.startsWith('https://') && feedName.length > 0 && !validating}"
@@ -198,7 +204,7 @@
             />
             <Button
               label="Add Feed"
-              onClick="() => saveFeedApi.execute({ city: window.cityFilter || 'bloomington', url: feedUrl, name: feedName, feed_type: 'ics_url', status: 'pending' })"
+              onClick="() => saveFeedApi.execute({ city: window.cityFilter || 'bloomington', url: feedUrl, name: feedName, fallback_url: fallbackUrl.trim() || null, feed_type: 'ics_url', status: 'pending' })"
             />
           </HStack>
         </Stack>
@@ -245,6 +251,7 @@
                     />
                   </HStack>
                   <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.url}" breakMode="word" />
+                  <Text when="{$item.fallback_url}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="{'Source page: ' + $item.fallback_url}" breakMode="word" />
                 </VStack>
               </Items>
             </VStack>
@@ -268,6 +275,7 @@
                     />
                   </HStack>
                   <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.url}" breakMode="word" />
+                  <Text when="{$item.fallback_url}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="{'Source page: ' + $item.fallback_url}" breakMode="word" />
                 </VStack>
               </Items>
             </VStack>

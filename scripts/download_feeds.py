@@ -176,7 +176,7 @@ def fetch_feeds_from_db(city: str):
 
     query_url = (
         f"{supabase_url}/rest/v1/feeds"
-        f"?select=id,url,name,status"
+        f"?select=id,url,name,status,fallback_url"
         f"&city=eq.{city}"
         f"&status=in.(active,pending)"
         f"&feed_type=in.(ics_url,curator)"
@@ -270,7 +270,7 @@ def download_feeds(city: str) -> None:
     db_feeds = fetch_feeds_from_db(city)
     if db_feeds is not None:
         print(f"  Using feeds table ({len(db_feeds)} feeds)")
-        feed_list = [(f["url"], f["name"], None) for f in db_feeds]
+        feed_list = [(f["url"], f["name"], f.get("fallback_url")) for f in db_feeds]
         pending_feeds = [f for f in db_feeds if f.get("status") == "pending"]
     else:
         feeds_file = os.path.join("cities", city, "feeds.txt")
