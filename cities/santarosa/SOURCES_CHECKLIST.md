@@ -14,6 +14,7 @@
 | DSA Sonoma County | Google Calendar | Political org |
 | Sonoma Community Center | `sonomacommunitycenter.org/events/?ical=1` | Tribe Events; tai chi, dancing, printmaking, bluegrass, sewing (30 events) |
 | Santa Rosa Symphony | `srsymphony.org/events/?ical=1` | Tribe Events; concerts and youth ensembles |
+| California Bluegrass Association | Filtered Tribe Events ICS | Sonoma-area bluegrass/jam/live performance feed (30 events as of 2026-05-10) |
 
 ### Scraped Sources
 | Source | Scraper | Notes |
