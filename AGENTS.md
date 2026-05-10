@@ -1,5 +1,11 @@
 # Agent Strategies for Calendar Source Discovery
 
+## Required External Guidance
+
+Required: at the start of every session, and before analysis or edits, read
+`.claude/xmlui-desktop-conventions.md`. Treat it as binding repo guidance
+for all work in this repository.
+
 ## Table of Contents
 
 - [Discovery Philosophy](#discovery-philosophy)
