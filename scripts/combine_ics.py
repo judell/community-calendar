@@ -527,35 +527,10 @@ def get_dedup_key(event):
 # Known aggregators - these get lowest priority in deduplication.
 # When the same event appears in an aggregator AND a primary source,
 # we keep the primary source version.
-AGGREGATORS = {
-    'North Bay Bohemian',
-    'Press Democrat',
-    'Creative Sonoma',
-    'GoLocal Cooperative',
-    'NOW Toronto',
-    'Toronto Events (Tockify)',
-    'YOHOMO',
-    'Montclair Local News',
-    'LancasterPA.com',
-    'Let\'s Go! Bloomington',
-    'BloomingtonOnline Events',
-    'BloomingtonOnline Food & Drink',
-    'BloomingtonOnline Shopping',
-    'BloomingtonArts.Today',
-    'Bloomington Arts',
-    'WFHB Community Calendar',
-    'Limestone Post',
-    'B-Square: Government',
-    'B-Square: Misc Civic Events',
-    'B-Square: Critical Mass',
-    'B-Square: BPTC Public Meetings',
-    'Brown County Events',
-    # DC music aggregators (multi-venue at the X-SOURCE level).
-    'dcmusic.live',
-    'openmikes.org DC',
-    'Ticketmaster DC Music',
-    'dc.events Concerts',
-}
+# Source of truth: source_priority.json at repo root, also read by xmlui/helpers.js.
+_SOURCE_PRIORITY_PATH = Path(__file__).resolve().parent.parent / 'source_priority.json'
+with _SOURCE_PRIORITY_PATH.open() as _f:
+    AGGREGATORS = set(json.load(_f)['aggregators'])
 
 
 def is_aggregator(source_name):
