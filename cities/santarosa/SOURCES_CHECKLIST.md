@@ -34,6 +34,7 @@
 | Creative Sonoma | `creative_sonoma.py` | County arts agency aggregator (55 events) |
 | Cinnabar Theater | `cinnabar.py` | Petaluma community theater (5 shows/season) |
 | Green Music Center | `green_music_center.py` | Sonoma State performing arts venue (10 events) |
+| Occidental Center for the Arts | `occidental_arts.py` | Occidental performing arts venue and studio classes (42 future events as of 2026-05-10) |
 | Elephant in the Room (Songkick) | `songkick.py` | Healdsburg music pub — artist-sourced tour dates |
 | Elephant in the Room (Eventbrite) | `eventbrite.py` | Healdsburg music pub — ticketed events |
 | Rancho Nicasio | iCal feed | Nicasio roadhouse — WordPress Tribe Events (30 events) |
@@ -191,6 +192,17 @@ The Bohemian, Press Democrat, and NorCal Public Media calendars all use **CitySp
 - Arts scene centered around downtown Santa Rosa
 
 ## Direct Scraper Sources (Added 2026-02-13)
+
+### Occidental Center for the Arts
+| Field | Value |
+|-------|-------|
+| URL | https://www.occidentalcenterforthearts.org/upcoming-events |
+| Platform | Squarespace events with per-event `?format=ical` exports |
+| Scraper | `scrapers/occidental_arts.py` |
+| Output | `cities/santarosa/occidental_arts.ics` |
+| Events Found | 42 future events (as of 2026-05-10) |
+
+**Note:** Direct source added because indirect coverage from regional aggregators was incomplete. The scraper now uses the Squarespace ICS export for canonical start/end times and location, and falls back to the listing-card description when the ICS payload is sparse.
 
 ### Sebastopol Center for the Arts (SebArts)
 | Field | Value |
