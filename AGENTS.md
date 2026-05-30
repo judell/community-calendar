@@ -1,5 +1,11 @@
 # Agent Strategies for Calendar Source Discovery
 
+## Required External Guidance
+
+Required: at the start of every session, and before analysis or edits, read
+`.claude/xmlui-desktop-conventions.md`. Treat it as binding repo guidance
+for all work in this repository.
+
 ## Table of Contents
 
 - [Discovery Philosophy](#discovery-philosophy)
@@ -142,6 +148,11 @@ When creating a new scraper for an existing city:
 
 **Always use `add_scraper.py`.** If you skip it and add the workflow line manually, the scraper will run but have no display name in the database. If you only add to `pending_feeds.txt`, the metadata will be in the DB but the scraper will never execute. Both pieces are required.
 
+Think of the pieces this way:
+- The workflow line is **execution**. It is what actually runs the scraper and produces `cities/{city}/*.ics`.
+- `pending_feeds.txt` is **registration staging**. It is a temporary inbox that tells the build to insert the scraper's name, command, and output path into the Supabase `feeds` table.
+- The `feeds` table is the **source of truth**. After successful processing, the build clears `pending_feeds.txt` back to its template and regenerates `feeds.txt` from the database.
+
 ### Verification Checklist
 
 Before considering a scraper "done", verify:
@@ -160,7 +171,7 @@ After creating the scraper in `scrapers/`, use `add_scraper.py` to wire it into 
 
 1. **Finds the scraper** in `scrapers/` (including subdirectories)
 2. **Adds it to the workflow** — inserts a `python scrapers/<name>.py --output cities/<city>/<name>.ics || true` line into the city's "Scrape" section in `.github/workflows/generate-calendar.yml`
-3. **Stages scraper metadata** — appends a `# cmd:` entry to `cities/<city>/pending_feeds.txt`, which the workflow moves into the `feeds` table and re-exports into `feeds.txt`
+3. **Stages scraper metadata** — appends a `# cmd:` entry to `cities/<city>/pending_feeds.txt`, which the workflow moves into the `feeds` table and re-exports into `feeds.txt`. This does not run the scraper; it only registers it.
 
 With `--test`, it also runs the scraper first and checks that it produces a valid .ics file with events.
 

@@ -156,6 +156,7 @@ def generate_sql(tables, columns, functions, indexes, views, matviews, extension
     key_columns = [
         ('events', 'city'), ('events', 'all_day'), ('events', 'source_uid'),
         ('events', 'image_url'), ('events', 'category'), ('events', 'transcript'),
+        ('feeds', 'fallback_url'),
     ]
     checks.append(("'── KEY COLUMNS ──'", "''"))
     for table, col in key_columns:

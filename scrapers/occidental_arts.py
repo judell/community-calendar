@@ -1,126 +1,133 @@
 #!/usr/bin/env python3
-"""
-Scraper for Occidental Center for the Arts events
-https://www.occidentalcenterforthearts.org/upcoming-events
-"""
+"""Scraper for Occidental Center for the Arts events."""
 
 import sys
 sys.path.insert(0, str(__file__).rsplit('/', 1)[0])
 
 import time
-from datetime import datetime, timedelta
+from datetime import date, datetime
 from typing import Any
 from urllib.parse import urljoin
+from zoneinfo import ZoneInfo
 
 from bs4 import BeautifulSoup
+from icalendar import Calendar
 
 from lib.base import BaseScraper
-from lib.utils import fetch_with_retry
 
 
 class OccidentalArtsScraper(BaseScraper):
     """Scraper for Occidental Center for the Arts events."""
 
-    name = "Occidental Arts"
+    name = "Occidental Center for the Arts"
     domain = "occidentalcenterforthearts.org"
 
-    BASE_URL = 'https://www.occidentalcenterforthearts.org'
-    EVENTS_URL = f'{BASE_URL}/upcoming-events'
+    BASE_URL = "https://www.occidentalcenterforthearts.org"
+    EVENTS_URL = f"{BASE_URL}/upcoming-events"
+    DEFAULT_LOCATION = "Occidental Center for the Arts, 3850 Doris Murphy Court, Occidental, CA 95465"
 
     def fetch_events(self) -> list[dict[str, Any]]:
-        """Fetch and parse events from the events page."""
+        """Fetch and parse events from the upcoming-events listing."""
         self.logger.info(f"Fetching {self.EVENTS_URL}")
-        main_page = fetch_with_retry(self.EVENTS_URL)
+        main_page = self.fetch_text_with_curl(self.EVENTS_URL)
 
-        soup = BeautifulSoup(main_page, 'html.parser')
+        soup = BeautifulSoup(main_page, "html.parser")
         events = []
 
-        for event_elem in soup.find_all('article', class_='eventlist-event'):
+        for event_elem in soup.find_all("article", class_="eventlist-event"):
             try:
                 event = self._parse_event(event_elem)
                 if event:
-                    # Fetch description from iCal link if available
-                    if event.get('ical_link'):
-                        try:
-                            ical_content = fetch_with_retry(event['ical_link'])
-                            event['description'] = self._parse_ical_description(ical_content)
-                        except Exception:
-                            pass
-                        del event['ical_link']
-
+                    if self._is_past_event(event):
+                        continue
                     events.append(event)
                     self.logger.info(f"Found event: {event['title']} on {event['dtstart']}")
 
-                time.sleep(1)  # Rate limiting
+                time.sleep(0.25)
             except Exception as e:
                 self.logger.warning(f"Error parsing event: {e}")
 
         return events
 
     def _parse_event(self, event_elem) -> dict[str, Any] | None:
-        """Parse a single event from the listing."""
-        title_link = event_elem.find('a', class_='eventlist-title-link')
+        """Parse a single event from the listing and its ICS export."""
+        title_link = event_elem.find("a", class_="eventlist-title-link")
         if not title_link:
             return None
 
         title = title_link.text.strip()
-        url = urljoin(self.BASE_URL, title_link['href'])
+        url = urljoin(self.BASE_URL, title_link["href"])
+        description = self._extract_description(event_elem)
+        ical_url = f"{url}?format=ical"
 
-        date_elem = event_elem.find('time', class_='event-date')
-        if not date_elem or 'datetime' not in date_elem.attrs:
-            self.logger.warning(f"Skipping event {title} due to missing date")
-            return None
+        ical_content = self.fetch_text_with_curl(
+            ical_url,
+            accept="text/calendar,*/*;q=0.9",
+            referer=self.EVENTS_URL,
+        )
+        cal = Calendar.from_ical(ical_content)
 
-        event_date = datetime.strptime(date_elem['datetime'], '%Y-%m-%d')
+        for component in cal.walk():
+            if component.name != "VEVENT":
+                continue
 
-        # Parse times
-        time_start = event_elem.find('time', class_='event-time-localized-start')
-        time_end = event_elem.find('time', class_='event-time-localized-end')
+            dtstart = component.get("dtstart")
+            if not dtstart:
+                return None
 
-        dt_start = event_date
-        dt_end = event_date + timedelta(days=1)
+            summary = str(component.get("summary", "")).strip() or title
+            location = str(component.get("location", "")).strip() or self.DEFAULT_LOCATION
+            ics_description = str(component.get("description", "")).strip()
+            uid = str(component.get("uid", "")).strip()
+            dtend = component.get("dtend")
 
-        if time_start and time_end:
-            start_time = time_start.text.strip()
-            end_time = time_end.text.strip()
+            return {
+                "title": summary,
+                "dtstart": dtstart.dt,
+                "dtend": dtend.dt if dtend else None,
+                "url": url,
+                "location": location,
+                "description": ics_description or description,
+                "uid": uid,
+            }
 
-            try:
-                hour, minute = map(int, start_time.replace('AM', '').replace('PM', '').strip().split(':'))
-                dt_start = event_date.replace(
-                    hour=hour % 12 + (12 if 'PM' in start_time else 0),
-                    minute=minute
-                )
-            except ValueError:
-                pass
+        self.logger.warning(f"No VEVENT found in ICS for {title}")
+        return None
 
-            try:
-                hour, minute = map(int, end_time.replace('AM', '').replace('PM', '').strip().split(':'))
-                dt_end = event_date.replace(
-                    hour=hour % 12 + (12 if 'PM' in end_time else 0),
-                    minute=minute
-                )
-            except ValueError:
-                pass
+    def _extract_description(self, event_elem) -> str:
+        """Extract human-readable description from the listing card."""
+        desc_elem = event_elem.find("div", class_="eventlist-description")
+        if not desc_elem:
+            return ""
 
-        ical_link_elem = event_elem.find('a', class_='eventlist-meta-export-ical')
-        ical_link = urljoin(self.BASE_URL, ical_link_elem['href']) if ical_link_elem else None
+        lines = []
+        last_line = None
+        for raw_line in desc_elem.get_text("\n", strip=True).splitlines():
+            line = " ".join(raw_line.split())
+            if not line or line == last_line:
+                continue
+            lines.append(line)
+            last_line = line
+        return "\n".join(lines)
 
-        return {
-            'title': title,
-            'url': url,
-            'dtstart': dt_start,
-            'dtend': dt_end,
-            'description': '',
-            'location': 'Occidental Center for the Arts, 3550 Bohemian Hwy, Occidental, CA 95465',
-            'ical_link': ical_link
-        }
+    def _is_past_event(self, event: dict[str, Any]) -> bool:
+        """Skip events that have already ended."""
+        dt = event.get("dtend") or event.get("dtstart")
+        if dt is None:
+            return False
 
-    def _parse_ical_description(self, ical_content: str) -> str:
-        """Extract description from iCal content."""
-        for line in ical_content.split('\n'):
-            if line.startswith('DESCRIPTION:'):
-                return line.split(':', 1)[1]
-        return ""
+        now = datetime.now(ZoneInfo(self.timezone))
+        if isinstance(dt, datetime):
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=ZoneInfo(self.timezone))
+            else:
+                dt = dt.astimezone(ZoneInfo(self.timezone))
+            return dt < now
+
+        if isinstance(dt, date):
+            return dt < now.date()
+
+        return False
 
 
 if __name__ == '__main__':

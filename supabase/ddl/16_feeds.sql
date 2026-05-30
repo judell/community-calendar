@@ -10,6 +10,7 @@ CREATE TABLE feeds (
   status text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending', 'removed')),
   feed_type text NOT NULL CHECK (feed_type IN ('ics_url', 'scraper', 'curator')),
   scraper_cmd text,
+  fallback_url text,
   created_at timestamptz DEFAULT now(),
   UNIQUE(city, url)
 );

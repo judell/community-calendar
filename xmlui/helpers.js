@@ -15,32 +15,9 @@ window.getActiveCategories = function(events) {
   return window.categoryList.filter(function(c) { return counts[c]; }).map(function(c) { return { name: c, label: c + ' (' + counts[c] + ')' }; });
 };
 
-// Keep browser-side source ordering aligned with scripts/combine_ics.py.
-var AGGREGATOR_SOURCES = new Set([
-  'North Bay Bohemian',
-  'Press Democrat',
-  'Creative Sonoma',
-  'GoLocal Cooperative',
-  'NOW Toronto',
-  'Toronto Events (Tockify)',
-  'YOHOMO',
-  'Montclair Local News',
-  'LancasterPA.com',
-  "Let's Go! Bloomington",
-  'BloomingtonOnline Events',
-  'BloomingtonOnline Food & Drink',
-  'BloomingtonOnline Shopping',
-  'BloomingtonArts.Today',
-  'Bloomington Arts',
-  'WFHB Community Calendar',
-  'Limestone Post',
-  'B-Square: Government',
-  'B-Square: Misc Civic Events',
-  'B-Square: Critical Mass',
-  'B-Square: BPTC Public Meetings',
-  'Brown County Events',
-  'Show Up Toronto'
-]);
+// Aggregator list comes from source_priority.json (loaded by shell.js).
+// Pipeline reads the same file in scripts/combine_ics.py.
+var AGGREGATOR_SOURCES = new Set((window._sourcePriority && window._sourcePriority.aggregators) || []);
 
 function normalizeVenueToken(value) {
   return (value || '')

@@ -4,6 +4,10 @@
 Contributors add ICS feed URLs to cities/<city>/pending_feeds.txt in their PRs.
 After merging, the build runs this script to move them into the database.
 
+For scraper entries, this script registers source metadata only. It does not
+run the scraper. Actual scraper execution still comes from the matching line in
+.github/workflows/generate-calendar.yml.
+
 Format of pending_feeds.txt:
 
     # Display Name
@@ -127,6 +131,8 @@ TEMPLATE = """\
 # inserts rows into the Supabase `feeds` table, then resets this file
 # to the template below. export_feeds_txt.py then regenerates feeds.txt
 # from the DB. Do not edit feeds.txt manually.
+# Think of this file as a temporary inbox for new sources, not as a
+# long-term source inventory.
 #
 # The "# Source Name" comment becomes the display name in the calendar
 # (user-visible source attribution under each event card). Use the bare
@@ -144,7 +150,8 @@ TEMPLATE = """\
 # Add the name, cmd, and output path here. But scrapers ALSO need a
 # line added to .github/workflows/generate-calendar.yml (in the city's
 # scrape step). This file only handles the DB insert; the workflow
-# entry is what actually runs the scraper.
+# entry is what actually runs the scraper. In other words: workflow =
+# execution, pending_feeds.txt = registration staging.
 #
 #   # Source Name
 #   # cmd: python scrapers/example.py --name "Source Name"
