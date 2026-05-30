@@ -6,15 +6,16 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <title>Community Calendar</title>
     <script>
-      if (location.hostname === '127.0.0.1' && location.port !== '8080') {
-        var devQuery = location.search || '?city=bloomington&images=preview';
-        location.replace('http://localhost:8080' + location.pathname + devQuery + location.hash);
-      }
+      // Cache-bust shell.js and shell.css. APP_VERSION isn't available yet
+      // (shell.js sets it), so use Date.now() — these files are small.
+      var _ccCacheBust = '?_=' + Date.now();
+      document.write('<link rel="stylesheet" href="shell.css' + _ccCacheBust + '">');
     </script>
-    <link rel="stylesheet" href="shell.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/rrule@2.8.1/dist/es5/rrule.min.js"></script>
-    <script src="shell.js"></script>
+    <script>
+      document.write('<script src="shell.js' + _ccCacheBust + '"><\/script>');
+    </script>
   </head>
   <body>
   </body>

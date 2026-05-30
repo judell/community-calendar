@@ -82,6 +82,11 @@ window._xsLogs = [];
   cxhr.send();
   window._cities = JSON.parse(cxhr.responseText);
 
+  var spxhr = new XMLHttpRequest();
+  spxhr.open('GET', '../source_priority.json?v=' + window.APP_VERSION, false);
+  spxhr.send();
+  window._sourcePriority = JSON.parse(spxhr.responseText);
+
   document.write('<script src="helpers.js?v=' + window.APP_VERSION + '"><\/script>');
   document.write('<script src="xs-trace.js?v=' + window.APP_VERSION + '"><\/script>');
 
