@@ -623,3 +623,17 @@ python scripts/validate_pipeline.py --cities santarosa --strict
 | **Bandsintown** | Website behind Cloudflare (403 on curl). REST API requires written approval from Bandsintown. Even with API access, no venue endpoint — only `/artists/{name}/events`. Not viable. |
 | **SeeTickets / Eventim US** | SeeTickets US rebranded as Eventim in March 2025 (same platform). No public API — affiliate account required. Cannot filter by single venue. US platform runs legacy ASP.NET (`wafform.aspx`), unlike Eventim Europe which has an unauthenticated search API at `public-api.eventim.com`. Venues like Mystic Theatre and HopMonk use this platform for ticketing. |
 | **BoardDocs** | Used by some cities for agenda publishing (e.g., `go.boarddocs.com/nc/raleigh/`). No public calendar API; LlamaIndex has a reader but it's for document extraction, not event feeds. |
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Uses default label vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
