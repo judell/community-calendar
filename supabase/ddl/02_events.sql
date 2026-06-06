@@ -51,6 +51,9 @@ CREATE INDEX IF NOT EXISTS events_city_idx ON events (city);
 -- Index for category filtering
 CREATE INDEX IF NOT EXISTS events_category_idx ON events (category);
 
+-- Index for source filtering (used by refresh_source_names() LIKE queries)
+CREATE INDEX IF NOT EXISTS events_source_idx ON events (source);
+
 -- Enable Row Level Security (public read access)
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 
