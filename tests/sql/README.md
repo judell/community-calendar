@@ -9,10 +9,10 @@ This directory contains local testing infrastructure for the community calendar 
 supabase start
 
 # Apply base schema (DDL files)
-./tests/setup_local_db.sh
+./tests/sql/setup_local_db.sh
 
 # Run tests
-./tests/run_tests_local.sh
+./tests/sql/run_tests_local.sh
 
 # Stop when done
 supabase stop
@@ -50,11 +50,11 @@ supabase start
 
 **If tests fail with "relation does not exist":**
 ```bash
-./tests/setup_local_db.sh
+./tests/sql/setup_local_db.sh
 ```
 
 **To reset local DB completely:**
 ```bash
 supabase db reset --local
-./tests/setup_local_db.sh
+./tests/sql/setup_local_db.sh
 ```
