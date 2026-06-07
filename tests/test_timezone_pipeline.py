@@ -650,7 +650,7 @@ class TestRealIcsFiles:
 
     def _parse_real_events(self, city, city_tz_name, ics_filename, max_events=5):
         """Parse events from a real ICS file and return (raw_input, parsed_output) pairs."""
-        ics_path = self.PROJECT_ROOT / 'cities' / city / ics_filename
+        ics_path = self.PROJECT_ROOT / 'tests' / 'fixtures' / city / ics_filename
         if not ics_path.exists():
             return []
         content = ics_path.read_text(encoding='utf-8', errors='ignore')
