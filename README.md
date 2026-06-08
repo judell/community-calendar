@@ -10,21 +10,15 @@ The gold standard is **iCalendar (ICS) feeds** — a format that machines can re
 
 ## Live App
 
-**XMLUI App**: https://judell.github.io/community-calendar/
+**XMLUI App**: <https://judell.github.io/community-calendar/>
 
-**Feed Health Report**: https://judell.github.io/community-calendar/report.html
+**Feed Health Report**: <https://judell.github.io/community-calendar/report.html>
 
 ## Architecture
 
 **[Interactive architecture explainer](https://judell.github.io/cc-architecture/)** — click through the 7 pipeline phases to see how data flows from sources to the frontend.
 
-
-
-https://github.com/user-attachments/assets/1010b793-a078-4983-a470-91221476373d
-
-
-
-
+<https://github.com/user-attachments/assets/1010b793-a078-4983-a470-91221476373d>
 
 ICS feeds, web scrapers, and curator picks are collected daily by GitHub Actions, combined and deduplicated per city, converted to JSON, classified by Claude AI, and loaded into Supabase. The XMLUI frontend queries the deduplicated materialized view and renders events. See [docs/pipeline.md](docs/pipeline.md) for the full pipeline details.
 
@@ -48,7 +42,8 @@ Know of a local calendar that should be included? [Open an issue](https://github
 ## Development
 
 - **App architecture**: [docs/app-architecture.md](docs/app-architecture.md) — XMLUI components, local dev setup, resources
-- **Tests**: Browser-based unit tests in `test.html`; regression tests via [trace-tools](https://github.com/xmlui-org/trace-tools). [docs/regression-testing.md](docs/regression-testing.md)
+- **Testing**: Python and database tests via `make test` and `make test-sql`. [tests/TEST_SUITE.md](tests/TEST_SUITE.md) — Python tests and Supabase-native pgTAP database tests run in CI on PRs
+- **Frontend tests**: Browser-based unit tests in `test.html`; regression tests via [trace-tools](https://github.com/xmlui-org/trace-tools). [docs/regression-testing.md](docs/regression-testing.md)
 - **Adding a city**: [docs/curator-guide.md](docs/curator-guide.md) (discovery) and [AGENTS.md](AGENTS.md) (technical steps)
 - **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md) — how to add feeds and submit PRs
 - **Adding sources**: [docs/procedures.md](docs/procedures.md) — feed discovery, testing, geo-filtering
@@ -69,4 +64,5 @@ scrapers/               # Event scrapers for sites without ICS feeds
 scripts/                # Build and utility scripts (combine_ics, ics_to_json, classify, etc.)
 supabase/               # DDL docs, edge functions (load-events, my-picks, capture-event)
 xmlui/                  # XMLUI app (Main.xmlui, Globals.xs, components/, helpers.js)
+tests/                  # Python test suite and repo-level testing docs
 ```
