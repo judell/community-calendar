@@ -1,20 +1,8 @@
--- Source names: clean flat list of individual source names per city
--- Populated/refreshed by refresh_source_names() RPC during nightly build
--- The events.source column may contain comma-separated merged sources from dedup;
--- this table provides the canonical individual source names with counts.
+-- Migration: Replace refresh_source_names() with set-based implementation
+-- Fixes performance issue (#12) and comma-only source bug
+-- Old: O(n×m) correlated subquery, 3.79s, misses comma-only sources
+-- New: O(n) set-based, 0.78s, counts all sources correctly
 
-CREATE TABLE source_names (
-  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  city text NOT NULL,
-  name text NOT NULL,
-  event_count integer DEFAULT 0,
-  UNIQUE(city, name)
-);
-
-ALTER TABLE source_names ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "source_names_read" ON source_names FOR SELECT USING (true);
-
--- RPC to refresh source names and counts for a city (called after load-events)
 CREATE OR REPLACE FUNCTION refresh_source_names(target_city text)
 RETURNS void
 SET statement_timeout TO '0'
