@@ -18,6 +18,15 @@
 | Buncombe County Parks & Recreation | CivicPlus ICS (catID=40) | 51 | `buncombenc.gov/…?catID=40&feed=calendar` |
 | Buncombe County Public Health Mobile Team | CivicPlus ICS (catID=35) | 39 | `buncombenc.gov/…?catID=35&feed=calendar`; added manually (add_feed.py test fails on cp1252 decode of feed content) |
 | Buncombe County Planning | CivicPlus ICS (catID=37) | 23 | `buncombenc.gov/…?catID=37&feed=calendar` |
+| Asheville City Schools | Finalsite `fs/calendar-manager` combined feed | 1275 (75 upcoming as of 2026-07-10) | `ashevillecityschools.net/fs/calendar-manager/events.ics?calendar_ids[]=18&...` — see notes below |
+
+**Asheville City Schools discovery notes:** `ashevillecityschools.net/acs-calendar` is built on Finalsite (fsCalendar widget), which renders the District calendar plus 9 individual school calendars (Asheville High, SILSA, Asheville Middle, Lucy S. Herring, Isaac Dickson, Hall Fletcher, Claxton, Ira B. Jones, ECA at William Randolph) and a CTE calendar. Each `<section class="fsElement fsCalendar ...">` on the page carries a `data-calendar-ids` attribute with that calendar's numeric ID(s). The page's "Calendar RSS Feeds" link opens a JS dialog (logic lives in `/assets/application-*.js`, not the theme `main.js`) that builds a feed URL of the form:
+
+```
+https://www.ashevillecityschools.net/fs/calendar-manager/events.ics?calendar_ids[]=<id>&calendar_ids[]=<id>&...
+```
+
+Pulled every `data-calendar-ids` value found on the page (18, 17, 20, 15, 14, 21, 27, 22, 26, 23, 24, 25, 28, 29, 34, 10 — district + all schools + CTE) into one combined URL, added it as a single feed named "Asheville City Schools" rather than one feed per school, since Finalsite supports combining IDs in one request and the district-level attribution is sufficient. Verified with `add_feed.py --test`: valid ICS, 1275 total events (past+future), 75 upcoming from today (2026-07-10) — low count is expected mid-summer before the fall term populates (mostly sports workouts currently). Events are sparse on DESCRIPTION/LOCATION fields as published.
 
 ### Songkick Scrapers
 
