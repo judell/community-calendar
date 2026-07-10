@@ -18,6 +18,7 @@
 | Buncombe County Parks & Recreation | CivicPlus ICS (catID=40) | 51 | `buncombenc.gov/…?catID=40&feed=calendar` |
 | Buncombe County Public Health Mobile Team | CivicPlus ICS (catID=35) | 39 | `buncombenc.gov/…?catID=35&feed=calendar`; added manually (add_feed.py test fails on cp1252 decode of feed content) |
 | Buncombe County Planning | CivicPlus ICS (catID=37) | 23 | `buncombenc.gov/…?catID=37&feed=calendar` |
+| Asheville City Schools | Finalsite `fs/calendar-manager` combined feed (district + 9 schools + CTE, IDs 18,17,20,15,14,21,27,22,26,23,24,25,28,29,34,10) | 1275 | `ashevillecityschools.net/fs/calendar-manager/events.ics?calendar_ids[]=...`; 75 upcoming as of 2026-07-10 — low mid-summer count expected, populates for fall term. See AGENTS.md Platform-Specific Techniques for the Finalsite URL pattern. |
 
 ### Songkick Scrapers
 

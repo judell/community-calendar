@@ -358,6 +358,7 @@ Events often have multiple timeslots (recurring phone banks, weekly protests, et
 | **CivicPlus** | `https://www.{city}.org/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID={N}` |
 | **Songkick** | `https://www.songkick.com/venues/{ID}-{slug}` (JSON-LD MusicEvent, use `scrapers/songkick.py`) |
 | **Guild.host** | No ICS feeds. JSON-LD Event on individual pages. Tech-focused platform. Use `scrapers/guildhost.py` |
+| **Finalsite** | `https://{domain}/fs/calendar-manager/events.ics?calendar_ids[]={ID}&...` (repeat param to combine calendars; IDs in `data-calendar-ids` attrs). K-12 school districts. |
 
 ### Drupal
 Drupal does not have a single standard event-feed pattern. Treat it as a short decision tree, not a generic platform:
