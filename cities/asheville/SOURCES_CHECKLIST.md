@@ -18,7 +18,18 @@
 | Buncombe County Parks & Recreation | CivicPlus ICS (catID=40) | 51 | `buncombenc.gov/…?catID=40&feed=calendar` |
 | Buncombe County Public Health Mobile Team | CivicPlus ICS (catID=35) | 39 | `buncombenc.gov/…?catID=35&feed=calendar`; added manually (add_feed.py test fails on cp1252 decode of feed content) |
 | Buncombe County Planning | CivicPlus ICS (catID=37) | 23 | `buncombenc.gov/…?catID=37&feed=calendar` |
-| Asheville City Schools | Finalsite `fs/calendar-manager` combined feed (district + 9 schools + CTE, IDs 18,17,20,15,14,21,27,22,26,23,24,25,28,29,34,10) | 1275 | `ashevillecityschools.net/fs/calendar-manager/events.ics?calendar_ids[]=...`; 75 upcoming as of 2026-07-10 — low mid-summer count expected, populates for fall term. See AGENTS.md Platform-Specific Techniques for the Finalsite URL pattern. |
+| Asheville City Schools | Finalsite ICS (IDs 26,27,14,15,17,18) | 220 | `ashevillecityschools.net/fs/calendar-manager/events.ics?calendar_ids[]=...` — district + enrollment calendars. See AGENTS.md Platform-Specific Techniques for the Finalsite URL pattern. |
+| Asheville High School | Finalsite ICS (ID 25) | 140 | `ashevillecityschools.net/…?calendar_ids[]=25` |
+| SILSA | Finalsite ICS (ID 32) | 13 | `ashevillecityschools.net/…?calendar_ids[]=32` |
+| Asheville Middle School | Finalsite ICS (IDs 24,10,6) | 602 | `ashevillecityschools.net/…?calendar_ids[]=24…` |
+| Claxton Elementary School | Finalsite ICS (ID 23) | 74 | `ashevillecityschools.net/…?calendar_ids[]=23` |
+| Hall Fletcher Elementary | Finalsite ICS (ID 21) | 30 | `ashevillecityschools.net/…?calendar_ids[]=21` |
+| Isaac Dickson Elementary | Finalsite ICS (IDs 28,2) | 112 | `ashevillecityschools.net/…?calendar_ids[]=28…` |
+| Ira B. Jones Elementary | Finalsite ICS (ID 29) | 0 | `ashevillecityschools.net/…?calendar_ids[]=29` — empty mid-summer, populates for fall term |
+| Lucy S. Herring Elementary | Finalsite ICS (ID 20) | 0 | `ashevillecityschools.net/…?calendar_ids[]=20` — empty mid-summer, populates for fall term |
+| ECA at William Randolph | Finalsite ICS (ID 22) | 7 | `ashevillecityschools.net/…?calendar_ids[]=22` |
+| ACS Career and Technical Education | Finalsite ICS (ID 34) | 91 | `ashevillecityschools.net/…?calendar_ids[]=34` |
+| ACS Preschool Program | Finalsite ICS (ID 30) | 2 | `ashevillecityschools.net/…?calendar_ids[]=30` |
 
 ### Songkick Scrapers
 
