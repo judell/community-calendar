@@ -23,7 +23,10 @@ CREATE TABLE IF NOT EXISTS events (
 );
 
 -- RPC for stale event cleanup (used by load-events edge function;
--- replaces URL-based NOT IN filter that exceeded PostgREST URL length limits)
+-- replaces URL-based NOT IN filter that exceeded PostgREST URL length limits).
+-- Uses NOT EXISTS (unnest) instead of != ALL() because != ALL() with 3000+ items
+-- hits Postgres statement timeout (57014). The unnest pattern is index-friendly
+-- and works with the composite events_city_source_uid_idx index.
 CREATE OR REPLACE FUNCTION delete_stale_events(p_city text, p_source_uids text[])
 RETURNS bigint
 LANGUAGE plpgsql
@@ -32,11 +35,13 @@ AS $$
 DECLARE
   deleted_count bigint;
 BEGIN
-  DELETE FROM events
-  WHERE city = p_city
-    AND source_uid IS NOT NULL
-    AND source_uid != ALL(p_source_uids)
-  ;
+  DELETE FROM events e
+  WHERE e.city = p_city
+    AND e.source_uid IS NOT NULL
+    AND NOT EXISTS (
+      SELECT 1 FROM unnest(p_source_uids) AS u(uid)
+      WHERE u.uid = e.source_uid
+    );
   GET DIAGNOSTICS deleted_count = ROW_COUNT;
   RETURN deleted_count;
 END;
@@ -50,6 +55,9 @@ CREATE INDEX IF NOT EXISTS events_city_idx ON events (city);
 
 -- Index for category filtering
 CREATE INDEX IF NOT EXISTS events_category_idx ON events (category);
+
+-- Composite index for delete_stale_events (city + source_uid filter)
+CREATE INDEX IF NOT EXISTS events_city_source_uid_idx ON events (city, source_uid);
 
 -- Index for source filtering (kept for general source-column lookups;
 -- refresh_source_names() now splits sources with string_to_array, not LIKE)
