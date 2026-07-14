@@ -52,6 +52,16 @@ def slugify(url: str) -> str:
         cat_id = f"_{cat_match.group(1)}" if cat_match else ''
         return f"civicplus_{domain}{cat_id}"
 
+    # Finalsite calendar-manager (e.g. school districts): include calendar_ids
+    # to avoid collisions — feeds share the /fs/calendar-manager/events.ics path
+    # and differ only by the calendar_ids query string.
+    if '/fs/calendar-manager/' in parsed.path:
+        domain = parsed.netloc.replace('www.', '').split('.')[0]
+        ids = re.findall(r'calendar_ids(?:%5B%5D|\[\])?=(\d+)', url)
+        suffix = '_'.join(ids) if ids else ''
+        slug = f"{domain}_cal_{suffix}" if suffix else f"{domain}_calendar_manager"
+        return re.sub(r'[^a-zA-Z0-9]+', '_', slug).lower().strip('_')[:50]
+
     # General case: use domain + path
     domain = parsed.netloc.replace('www.', '').split('.')[0]
     path_parts = [p for p in parsed.path.split('/') if p and p not in ('events', 'ical', 'feed', 'calendar')]
