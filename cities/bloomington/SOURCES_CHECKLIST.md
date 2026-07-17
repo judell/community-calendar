@@ -212,8 +212,8 @@ These curate or aggregate events from multiple venues:
 |--------|--------|
 | WCLS 97.7 | Site suspended |
 | Indiana Public Media | Brightspot CMS, no ICS/RSS for events |
-| The Back Door (Tockify) | ICS export disabled on their plan |
-| Chamber of Commerce Atlas | No ICS feed |
+| ~~The Back Door (Tockify)~~ | RESOLVED 2026-07-17: ICS export now enabled — see Ready to Add |
+| Chamber of Commerce Atlas | No ICS; UPDATE 2026-07-17: WebLink/Atlas JSON API exists (api-internal.weblinkconnect.com) behind auth — needs scraper if wanted |
 | Bloomington Board Games Meetup | 403 private |
 | Bloomington Remote Workers Meetup | Dormant |
 
@@ -227,6 +227,175 @@ These curate or aggregate events from multiple venues:
 | Bloomingtonian | Community blog, low volume |
 | NUVO | Regional, derivative |
 | Do317 | Indy-centric |
+
+---
+
+## Discovered 2026-07-17 — Ready to Add (tested feeds)
+
+Refresh pass, 8 lenses (see Discovery Run Log). All feeds below fetched and verified live on 2026-07-17.
+
+### Direct wins (incl. Phase 4 upstream-authority graduates)
+
+| Source | Events | URL | Notes |
+|--------|--------|-----|-------|
+| The Back Door | 268 | `https://tockify.com/api/feeds/ics/thebackdoor` | Was "ICS disabled" dead end — now enabled. 32 aggregator-only events graduate to direct. Queer bar: drag, karaoke, line dancing, trivia |
+| Brown County Art Guild | 3 now | `https://browncountyartguild.org/events/?ical=1` | WordPress/TEC; ModSecurity requires browser UA (`Mozilla/5.0 ... Chrome`). 87 aggregator-only events — feed sparsely populated at test time, worth adding + watching |
+| Brown County Inn | 260 | `https://www.browncountyinn.com/events-2/?ical=1` | WP Events Plugin; Nashville IN |
+| Art Sanctuary (Martinsville) | 168 | `https://calendar.google.com/calendar/ical/artsanctuaryindiana%40gmail.com/public/basic.ics` | Google Cal embed on artsanctuaryindiana.com |
+| Monroe Lake / Cutright SRA (DNR) | 138 | `https://events.in.gov/monroe_lake_296/calendar.ics` | Localist; covers Cutright + other Monroe Lake SRAs |
+| Butler Winery | 35 | `https://butlerwinery.com/?post_type=tribe_events&ical=1&eventDisplay=list` | Tribe iCal; Sunday live music, trivia, yoga |
+| Town of Ellettsville (CivicPlus) | 205 | `https://ellettsville.in.us/egov/apps/events/calendar.egov?view=ical` | Gov meetings + parks events |
+| Morgan County government (CivicPlus) | 73 | `https://morgancounty.in.gov/egov/apps/events/calendar.egov?view=ical` | Martinsville; county meetings + notices |
+| Monroe County Fairgrounds | 344 | `https://calendar.google.com/calendar/ical/mocofairgrounds%40gmail.com/public/basic.ics` | Master calendar: fair, 4-H, year-round venue events (gun shows, markets). Fills the fairgrounds gap; 7 more public sub-calendars exist |
+| Monroe County 4-H / Purdue Extension | 386 | `https://calendar.google.com/calendar/ical/mocoin4h%40gmail.com/public/basic.ics` | Club meetings, fair prep, camps; embedded at extension.purdue.edu/county/monroe |
+
+### Faith communities (volume caveat: congregation-wide calendars mix public events with internal meetings/worship — curator judgment on filtering)
+
+| Source | Events | URL | Notes |
+|--------|--------|-----|-------|
+| First Christian Church (Disciples) | 772 | `https://calendar.google.com/calendar/ical/mjsnm57lcjgbhseu4lj9ee704k%40group.calendar.google.com/public/basic.ics` | Concerts, forums, blood drives |
+| Trinity Episcopal | 262 | `https://calendar.google.com/calendar/ical/48ac7e6a73bd950b28dea0eca41b3050858f0c4f00ddfbd78dd23a2a9e5fc51d%40group.calendar.google.com/public/basic.ics` | Country Dance Nights, organ recitals — strong public-interest content |
+| First Presbyterian | 4,062 | `https://calendar.google.com/calendar/ical/fpcbloomington.org_soip8veg9uk3hvpo3oj19bc5tg%40group.calendar.google.com/public/basic.ics` | High volume |
+| St. Charles Borromeo (Catholic) | 10,924 | `https://calendar.google.com/calendar/ical/calendar%40stcharlesbloomington.org/public/basic.ics` | Very high volume, heavy internal content — filter before adding |
+| Sanshin Zen Community | 1,282 | `https://calendar.google.com/calendar/ical/sanshinji.org_3q9maq1gaa99bpu6da81ibrl7g%40group.calendar.google.com/public/basic.ics` | Practice schedule + retreats |
+| Ellettsville Church of Christ | 211 | `https://www.ellettsvillechurchofchrist.com/about/calendar/ical` | Native ICS; mostly worship schedule |
+
+### Ticketmaster venues (new IDs; run through the TM key to verify upcoming-event counts before adding — TM keeps pages for defunct venues)
+
+| Venue | ID | Notes |
+|-------|-----|-------|
+| IU Auditorium | 41148 | Major performing-arts venue, separate from Musical Arts Center |
+| Buskirk-Chumley Theatre | 41477 | Already covered by custom scraper — TM feed is a dedupe/complement question |
+| IU Studio Theatre | 42040 | May overlap with T300 below — verify |
+| T300 Studio Theatre | 41153 | |
+| IU Tailgate Field | 41923 | Sporadic special events |
+| Little Nashville Opry | 41458 | ⚠️ venue burned down 2009, never rebuilt — likely stale TM page; verify before adding |
+| John R. Wooden Gymnasium (Martinsville) | 41902 | |
+| CenterBrook Drive-in (Martinsville) | 42223 | Sporadic |
+
+### High-school athletics (existing `scrapers/maxpreps.py` takes these as `--url https://www.maxpreps.com{slug}events/` — no new code)
+
+| School | MaxPreps slug |
+|--------|---------------|
+| Bloomington North Cougars | `/in/bloomington/bloomington-north-cougars/` |
+| Bloomington South Panthers | `/in/bloomington/bloomington-south-panthers/` |
+| Edgewood Mustangs (Ellettsville) | `/in/ellettsville/edgewood-mustangs/` | 
+| Owen Valley Patriots (Spencer) | `/in/spencer/owen-valley-patriots/` |
+| Martinsville Artesians | `/in/martinsville/martinsville-artesians/` |
+| Brown County Eagles (Nashville) | `/in/nashville/brown-county-eagles/` |
+| Eastern Greene Thunderbirds | `/in/bloomfield/eastern-greene-thunderbirds/` |
+| Lighthouse Christian Academy Lions | `/in/bloomington/lighthouse-christian-academy-lions/` |
+
+Edgewood alone shows 84 aggregator-only events today. Also: third-party IU football ICS at `https://ics.calendarlabs.com/2134/a7e56915/Indiana_Hoosiers_Football_Schedule.ics` (valid VCALENDAR; unofficial source — caveat emptor).
+
+## Discovered 2026-07-17 — Needs Scraper
+
+### Bench build results (2026-07-17 evening pass)
+
+**Built and wired (12 scrapers + 4 feeds, ~150 events verified in test runs):**
+
+| Source | How | Events (test) | Notes |
+|--------|-----|--------------|-------|
+| The Orbit Room | `dice_venue.py` (from Asheville pass) | 8 | Venue's own domain is dead; DICE partner API. B-Square note: `dice_venue.py` requires upstream sync — not in their fork yet |
+| Brown County Government | `brown_county_gov.py` (new) | 82 | The simple CivicPlus GET (`?catID=14&feed=calendar`) works — no form POST needed |
+| Owen County Public Library | `owen_county_library.py` (new) | 14 | Payload CMS JSON; Lexical rich-text parsed |
+| Off Night Productions | `ludus.py` (new, parameterized) | 12 | Ludus needs full browser client-hint headers past Cloudflare; scrape `<sub>.ludus.com/index.php`, not `/` |
+| Monroe County Civic Theater | `ludus.py` | 7 | Cyrano Sep 4–13 |
+| Bloomington Symphony Orchestra | `bloomington_symphony.py` (new, lib/tribe_events subclass) | 6 | **bloomingtonsymphony.COM** (Tribe REST); the `.org/concert/` from discovery is the Bloomington MINNESOTA symphony. Recovers showtime from all-day titles. 4 of 6 at Buskirk-Chumley — dedup overlap expected |
+| Monroe Convention Center | `simpleview.py` (new, parameterized RSS→JSON-LD) | 4 | All-day events with proper multi-day DTEND |
+| Visit Morgan County | `simpleview.py` `--towns Martinsville` | 12 | Tourism aggregator (added to source_priority.json); Mooresville/Monrovia filtered out (outside radius) |
+| Tibetan Mongolian Buddhist Cultural Center | `tmbcc.py` (new) | 1 | Events as blog-post titles; wp-json bypasses mod_security; precision-first (10/10 posts handled right) |
+| Bloomington Brewing Co. | `bloomington_brewing.py` (new) | 0 seasonal | Per-event Squarespace ICS from sitemap (correct domain: bloomingtonbrew.com); populates at next festival |
+| Gaden KhachoeShing Monastery | `eventbrite.py` | 0 blocked | Organizer page CAPTCHA-gated locally; wire-and-wait for CI |
+| Exodus Refugee Immigration | `eventbrite.py` | 0 expected | Wire-and-wait per plan; re-probe near World Refugee Day |
+| Edgewood School District / High School / Junior High | Finalsite direct ICS (calendar_ids 7 / 3 / 11) | 102 / 103 / 499 | The Asheville Finalsite URL pattern works on rbbschools.net; athletics IDs 8/12 skipped (MaxPreps covers) |
+| Monroe County Democratic Party | Google Calendar ICS (adopted from B-Square's feeds table) | 204 | The only feed in their table we lacked (Chronically Dave is their curator's my-picks feed — fork-local; Ellettsville Town Gov we already had) |
+
+**Resolved without code:** Waldron Arts Center — `spektrix.py`'s Constellation output is 100% Waldron (65/65 events; `window.eventsListing` is the same Spektrix data re-rendered). Nothing to build.
+
+**Confirmed non-starters this pass:** Friendly Beasts Cidery (no Squarespace events collection — type=10 page; social-media-only). Bloomington Early Music Festival (SQ collection exists but only retrospective 2023–24 posts; re-probe spring 2027).
+
+
+| Source | Platform / path | Notes |
+|--------|-----------------|-------|
+| Indivisible South Central Indiana | `mobilize.py` slug `indivisiblesouthcentralindiana` | Confirmed Bloomington + Ellettsville events; distinct from implemented Indivisible Central Indiana |
+| Orbit Room | Dice widget (partner `WMJ4RCOX`) → Bandsintown `bandsintown.com/v/10090230-the-orbit-room` | 14 aggregator-only events; WFHB also covers it |
+| Waldron Arts Center | Constellation's `window.eventsListing` JSON on seeconstellation.org | Verify whether existing `constellation.py` (Spektrix) already captures Waldron events before writing anything |
+| Edgewood HS non-athletic events | Finalsite CMS at rbbschools.net | ICS behind UI interaction; athletics covered via MaxPreps above |
+| Tibetan Mongolian Buddhist Cultural Center | WordPress RSS `tmbcc.org/feed/` | Events as blog posts; retreats, LOSAR, Summer Prayer Festival; mod_security blocks ?ical=1 |
+| Brown County government | CivicEngage: POST `chkCalendarID=14` to `/iCalendar.aspx` | Button exists; needs form-style request |
+| Owen County Public Library (Spencer) | JSON API `https://owenlib.org/api/events` (87 events) | Payload CMS JSON — trivial adapter, not ICS |
+| Monroe County Public Library ICS | Communico (`calendar.mcpl.info`) | `showICAL: true` but export is a JS POST to api.communico.co; existing `library_intercept.py` scraper still covers MCPL — this is only an alternative |
+| Chamber of Commerce (Atlas) | WebLink JSON `api-internal.weblinkconnect.com` (auth) | Upgraded from dead end |
+| Bloomington Symphony Orchestra | WordPress, no TEC; ~6 concerts/yr | bloomingtonsymphony.org/concert/ |
+| Monroe County Civic Theater | WordPress/Kubio + Ludus ticketing | mcct.org; Shakespeare in the Park |
+| Off Night Productions | Ludus (offnight.ludus.com) | Shows at the Waldron |
+| Bloomington Creative Glass Center | Wix, manual posts | Great Glass Pumpkin Patch Oct 10, 2026 |
+| Bloomington Early Music Festival | Squarespace; annual May festival | May 26–30, 2026 |
+| Friendly Beasts Cidery | Squarespace, manual listings | Thursday trivia 6:30, live music |
+| Cosmic Songwriter Club | Mobirise static | Monthly at Orbit Room (1st Wed) + May festival |
+| Gaden KhachoeShing Monastery | Eventbrite organizer `10637013504` | Tibetan Buddhist monastery, public ceremonies |
+| Monroe Convention Center | Simpleview calendar | bloomingtonconvention.com/calendar/ |
+| United Way of South Central IN | Drupal 10, no iCal | ~2 large events/yr |
+| Hoosier Hills Food Bank | WordPress behind Incapsula; static events HTML | ~6 events/yr |
+| Monroe County Humane Association | Site CDN-flaky; race on RunSignUp | Run for the Animals Oct 4, 2026 |
+| IU Health Bloomington classes | Proprietary classes-events system | Low density; phone-register model |
+| Morgan County Public Library | Drupal 11 `librarycalendar.com`, no Views iCal | Scrape HTML |
+| Visit Morgan County | Simpleview | visitmorgancountyin.com/events |
+| Ellettsville Farmers Market | Custom site, no feed | Saturdays May–Sep |
+| Bloomington Brewing Co | Squarespace: events collection empty BUT individual festival pages carry per-event `.ics` links | Springfest/Summerfest/Oktoberfest/Winterfest only |
+| Exodus Refugee Immigration | Eventbrite organizer `36028304013` | Bloomington office; World Refugee Day; currently 0 upcoming — wire and wait |
+
+## Discovered 2026-07-17 — Manual / seasonal sweep list
+
+Annual events with reliable dates but no feeds — a once-a-season curator sweep keeps them current:
+
+| Event | When (2026 verified) | Where / URL |
+|-------|----------------------|-------------|
+| Monroe County Fall Festival | Sep 10–12 | Ellettsville — monroecountyfallfestival.com |
+| Owen County Apple Butter Festival | Sep 19–20 | Spencer — Facebook @theapplebutterfestival |
+| Gosport Lazy Days Festival | Aug 13–16 | gosportlazydaysfestival.com |
+| Stinesville Stone Quarry Festival | late Sep | Facebook @stinesvillequarryfest |
+| Harrodsburg Heritage Days | May 15–16 | harrodsburgheritagefestival.com |
+| Smithville Lake Festival | ~Jun 21 (Father's Day wkend) | smithvillelakefestival.com |
+| Morgan County Fair | Jul 10–18 | morgancountyfair.com |
+| Owen County Fair / 4-H | Jul 5–10 | Owen Co. Fairgrounds, Spencer (re-source the FB page — discovery URL was misattributed) |
+| Bloomington Pridefest | Aug 22 | bloomingtonpride.org |
+| 4th Street Festival of the Arts | Labor Day weekend | 4thstreet.org |
+| Hilly Hundred | Oct 2–4 | hillyhundred.org |
+| Bloomington Music Expo | Oct 3 | Switchyard Park — ftrvinyl.com |
+| Monroe County Recovery Summit | Sep 1–2 | Eventbrite organizer `89606403633` |
+| Area 10 / Endwright Center (seniors) | monthly PDF calendars | area10agency.org — Ellettsville; Senior Games annual |
+| El Centro Comunal Latino | Facebook-primary | elcentrocomunal.com — quarterly sweep; serves Spanish-speaking community |
+| Bloomington Refugee Support Network | Facebook-primary | bloomingtonrefugees.org |
+| Hoosier Trails Council BSA | scoutingevent.com/145 | Members-priority; public access unclear |
+
+## Dead-end additions (2026-07-17)
+
+| Source | Reason |
+|--------|--------|
+| Eventlink (BHS North/South, Martinsville athletics) | Public event pages but ICS requires login; no unauthenticated export |
+| IHSAA calendar | 403 on all probes |
+| fixtur.es | Pro/national leagues only; no Bloomington teams |
+| Bloomington Roller Derby / IU Club Rugby / Bloomington Soccer | Active schedules, no ICS anywhere |
+| IU Athletics composite (iuhoosiers.com) | No ICS; 2013-15 Google feeds dead (iu_athletics.ics feed already implemented remains the source) |
+| Legistar / Granicus (city) | Not a Legistar client; Granicus is meeting videos + RSS only |
+| B-Clear open data | No calendar/events datasets |
+| TeamUp / MembershipWorks | No area orgs found on either platform |
+| Sleeper's Bar | Wix, calendar page, no feed |
+| Max's Place | Webflow, no events section |
+| Starlite Drive-In | Showtimes via Veezi, not events |
+| Porthole Inn / Hoppy Wobbles | Recurring bar events, Facebook-primary, no dated calendar |
+| MCCSC calendar | Gabbart/ParentSquare ICS endpoint exists but login-gated |
+| Bloomington Volunteer Network | Galaxy Digital `/ical/` endpoint exists but redirects to login |
+| Amplify Bloomington | Re-probed: Cloudflare silently drops everything incl. wp-json — still dead |
+| Bloomington PRIDE / Bloomington Brewing (Squarespace JSON) | Events collections exist but empty (0 items) — they post to Facebook / per-event pages |
+| FUMC / Beth Shalom / ICOB / St. Thomas ELCA / Sherwood Oaks / St. Paul Catholic / Vine and Branch / St. Agnes / Ellettsville Christian | No embed, Planning Center, Fishhook, Cloudflare, or Wordfence — per-congregation notes in run log |
+| Indian Cultural Center | ASP.NET, contact-only event access |
+| parkrun | No Bloomington parkrun exists (nearest: Plainfield, ~38 mi) |
+| Unionville | Unincorporated; no org website |
+| Artie Fest (Martinsville) | Paused as of 2025; recheck 2027 |
+| Limestone Comedy Festival | Taking 2026 off |
 
 ---
 
@@ -269,7 +438,17 @@ These curate or aggregate events from multiple venues:
 - Bloominglabs, Let's Go! Bloomington, City Boards & Commissions (Google Calendars)
 - Lotus Festival (ICS)
 
-### 2026-03-28: Current Session (59 sources)
+### 2026-07-17: Refresh Pass (8 lenses, agent fan-out)
+- **Phase 4 upstream authority**: analyzed events.json for aggregator-only venues; graduated The Back Door (Tockify ICS re-enabled, 268), Brown County Art Guild (?ical=1 + browser UA), Brown County Inn (260), Art Sanctuary (168), Monroe Lake DNR (138)
+- **Dead-end re-litigation**: 13 dead ends re-probed with newer techniques; 1 resolved (Back Door), 1 upgraded (Chamber Atlas → WebLink API), MCCSC + Volunteer Network ICS endpoints found but login-gated
+- **Sports**: 8 MaxPreps school slugs verified (HS athletics was a whole missing category; Edgewood = 84 aggregator events); 8 new Ticketmaster venue IDs; Eventlink/IHSAA/fixtur.es ruled out
+- **Faith**: 6 tested feeds (5 Google Cal + 1 native ICS); TMBCC → RSS scraper lead; 11 congregations ruled out with reasons
+- **Platform sweeps**: Google Sites (nil), Mobilize (+Indivisible South Central Indiana), Tockify/TeamUp/MembershipWorks (Tockify only), CKAN/Legistar (nil)
+- **Surrounding towns**: Ellettsville CivicPlus (205), Morgan County CivicPlus (73), Monroe County Fairgrounds gcal (344), Owen County Library JSON API (87), full festival circuit with 2026 dates
+- **Directories**: Visit Bloomington/Gallery Walk/IDS Happenings/volunteer network mined; Butler Winery (35, tested); long Needs-Scraper bench (BSO, MCCT, BCGC, BLEMF, Cosmic Songwriter…)
+- **Gap topics**: Monroe County 4-H gcal (386); volunteerism orgs mapped (mostly Needs Scraper/Manual); El Centro + BRSN flagged for quarterly manual sweeps; no parkrun
+
+### 2026-03-28: Previous Session (59 sources)
 - **WFHB Community Calendar** (~349) — ai1ec scraper; aggregator covering many venues. New platform: `lib/ai1ec.py`
 - **Writers Guild at Bloomington** (~7) — Sugar Calendar scraper. New platform: `lib/sugar_calendar.py`
 - **Nerd Nite Bloomington** (~1) — Eventbrite organizer 95199764993
