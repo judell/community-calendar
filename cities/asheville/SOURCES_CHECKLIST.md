@@ -70,9 +70,31 @@
 | Asheville Breakfast Rotary Club | `ismyrotaryclub.py` | 51 | club-id 23683, account-id 7670 |
 | Harrah's Cherokee Center Asheville | `ticketmaster.py` | untested locally | venue-id `KovZpZAJvnIA` (verified via ticketmaster.com/venue/368913); `TICKETMASTER_API_KEY` is a repo secret used by 5 other cities — verify first CI run produces `tm_harrahs_cherokee.ics`. Supersedes Songkick interim (8) |
 
+### Platform Scrapers (added 2026-07-16 third pass)
+
+| Source | Scraper | Events (test) | Notes |
+|--------|---------|--------------|-------|
+| Hendersonville.com | `mainstreet.py` (new, parameterized) | 490 | Open MainStreet Online REST API `/wp-json/ms-events/v1/agenda`; needs full browser headers (bare UA gets Varnish 503). AGGREGATOR |
+| Asheville.com | `mainstreet.py` | 438 | **Formerly a Non-Starter** — the ms-events REST API answers with full browser headers despite Cloudflare on page fetches. Heavy content overlap with Hendersonville.com (same vendor network); dedup handles. AGGREGATOR |
+| Asheville Theater Alliance | `asheville_theater_alliance.py` (new) | 90 | Calendar-page + REST discovery, parses server-rendered performance rows. Covers NC Stage, SART, HART, Attic Salt etc. AGGREGATOR |
+| Asheville Community Theatre | `asheville_community_theatre.py` (new) | 69 | mc_event REST list + prose run-range/showtime expansion (verified: Fri/Sat 8+10pm, Sun 2+4pm patterns) |
+| Third Room | `third_room.py` (new, lib/seetickets) | 40 | 46 Wall St |
+| Eulogy (DICE) | `dice_venue.py` (new, DICE partner API) | 42 | Supersedes Songkick interim (8) — remove `eulogy_songkick` via Manage Feeds. API key extracted at runtime from a DICE-widget page (`--key-url`), `--api-key` override |
+| Static Age Records (DICE) | `dice_venue.py` | 21 | Supersedes Songkick interim (5) — remove `static_age_records` Songkick feed via Manage Feeds |
+| AyurPrana Listening Room (DICE) | `dice_venue.py` | 20 | 312 Haywood Rd |
+| Wortham Center for the Performing Arts | `wortham.py` (new) | 33 | Paginated /events/ listing + per-page showtime extraction |
+| Town of Weaverville | `tribe_rest.py` (new, parameterized Tribe REST) | 516 | `?ical=1` is 410; REST works. 6-month cap (SCRAPE_MONTHS) keeps recurrences sane |
+| Town of Fletcher | `tribe_rest.py` | 16 | |
+| White Horse Black Mountain | `eventon.py` (new, parameterized EventON) | 4 | Most of the 64 REST items are past; listening room posts sparsely |
+| Little Jumbo | `little_jumbo.py` (new) | 12 | Bespoke `?format=json`; shows default 8pm |
+| Congregation Beth HaTephila | `beth_hatephila.py` (new) | 6 | Weebly TLS fingerprint rejects curl/requests; urllib + Chrome UA works |
+| Haw Creek Community Association | `haw_creek.py` (new, lib/wild_apricot_rss) | 1 | RSS pubDate encodes event start |
+| Feed & Seed | `feed_and_seed.py` (new) | 3 | MF Gig Calendar rows; Fletcher |
+| MountainTrue | `mountaintrue.py` (new) | 4 | REST has no dates; per-page Start/End parse, serial + 429 backoff, Asheville-area radius filter (153 WNC-wide → 4) |
+
 ### Songkick Scrapers
 
-> 2026-07-16: The Grey Eagle, The Orange Peel, and Harrah's Cherokee Center Songkick interims are superseded by `rhp_events.py` / `ticketmaster.py` sources above. After the new sources land in a build, remove the three Songkick feeds via the Manage Feeds dialog.
+> 2026-07-16: FIVE Songkick interims are superseded — The Grey Eagle, The Orange Peel (`rhp_events.py`), Harrah's Cherokee Center (`ticketmaster.py`), Eulogy, Static Age Records (`dice_venue.py`). After the new sources land in a build, remove them via the Manage Feeds dialog.
 
 | Source | Songkick ID | Events | Notes |
 |--------|-------------|--------|-------|
@@ -153,32 +175,17 @@
 
 | Source | URL | Approach | Notes |
 |--------|-----|----------|-------|
-| Hendersonville.com | hendersonville.com | MainStreet REST API | **Open API on the same MainStreet Online platform that blocks asheville.com**: `/wp-json/ms-events/v1/agenda?start=YYYY-MM-DD&end=YYYY-MM-DD` returned 435 events/month (structured `start_utc`, `venue_name`, `venue_address`). Covers the whole Hendersonville side of the radius. AGGREGATOR — classify in source_priority.json. Re-test this endpoint pattern on other MainStreet sites (incl. asheville.com). |
-| Asheville Theater Alliance | ashevilletheateralliance.org | WP REST + HTML | JetEngine CPT `events` open at `/wp-json/wp/v2/events` (159 items) but dates NOT in REST; single event pages server-render full performance schedules ("Thu - Jul 30, 2026 7:30 pm" rows). Discovery via REST or the 16 links on `/asheville-performance-calendar/`. High value: covers NC Stage, SART, HART, Attic Salt, improv. AGGREGATOR. |
-| Asheville Community Theatre | ashevilletheatre.org | WP REST + HTML | `mc_event` CPT exposed via REST but no date fields; event pages server-render run info ("August 21-30, 2026 — Location: 35below — Fridays and Saturdays at 8:00 PM"). Parse pattern like `scrapers/turtle_back_zoo.py`. Ticketing is PatronManager (Salesforce SPA, CSRF-gated — not scrapable). No Eventbrite presence. ~27 shows/season. |
-| Third Room | thirdroom.art/calendar/ | SeeTickets | `seetickets-list-event-container` markup + WP REST `seetickets-event` CPT (41 events) — exact match for `scrapers/lib/seetickets.py`. |
-| DICE venues (Eulogy, Static Age, AyurPrana, Burial Forestry Camp) | events-api.dice.fm | DICE partner API | `filter[cities][]=Asheville` returns 86 events: Eulogy 42, Static Age 21 (vs Songkick interims 8 and 5 — upgrade path), AyurPrana Listening Room 20, Burial Forestry Camp 3. Partner apiKey is embedded in ayurpranalisteningroom.com page source. Repo `lib/dice.py` uses link.dice.fm; this API is cleaner. |
-| White Horse Black Mountain | whitehorseblackmountain.org | EventON WP REST | `wp-json/wp/v2/ajde_events?per_page=100` (64 posts, dates in content) — pattern per `scrapers/monroe_county_history_center.py`. Note **.org** (the .com is a separate weddings site). Established listening room. |
-| Town of Weaverville | weavervillenc.org | Tribe REST | `?ical=1` → 410 Gone; `wp-json/tribe/events/v1/events/` works. `lib/tribe_events.py` subclass (pattern: `scrapers/nami_bloomington.py`). Recurring meetings inflate counts. |
-| Town of Fletcher | fletchernc.org | Tribe REST | Same as Weaverville; 16 future events. |
-| MountainTrue | mountaintrue.org | WP REST event CPT | `wp-json/wp/v2/event` works, dates in acf/meta; events span all WNC (incl. Brevard) — needs radius filter. Medium effort. |
-| French Broad River Brewery | frenchbroadbrewery.com/events/ | Events Manager HTML | EM plugin but ICS/REST all empty/hang. 27 events/30d via LiveMusicAsheville; Where Y'at carries 59 — aggregators cover it for now. |
-| Feed & Seed | feedandseednc.com/music/ | MF Gig Calendar HTML | Structured HTML rows, 5 future gigs. Fletcher. Small scraper. |
-| Haw Creek Community Association | hawcreekavl.com/events | Wild Apricot | Per-event pages; adapt `scrapers/toronto_bicycling_network.py` pattern. 10+ events. |
-| Hotel Eve Jazz | hotel-eve-jazz.turntabletickets.com | Turntable Tickets HTML | Server-rendered (~8 dates); venue_id 173; API endpoints 404. Where Y'at carries 18 — aggregator covers it for now. |
-| Congregation Beth HaTephila | bethhatephila.org/cbht-calendar.html | Weebly HTML | Server-rendered "Upcoming 10 events" list; site 406s curl (WebFetch got through) — scraper needs header tuning. |
-| Wortham Center for the Performing Arts | worthamarts.org | HTML scraper | WordPress with Toolset Blocks (custom CPT). No Tribe/MEC plugin, no ICS. RSS pubDate is season-announcement date. JSON-LD is `WebPage` with no `startDate`. ~10 shows per season. |
-| NC Stage Company | ncstage.org | TBD | Professional equity theatre, 125-seat. WordPress; no feed detected. Small event count. Also covered by Asheville Theater Alliance scraper when built. |
-| Southern Highland Craft Guild / Folk Art Center | southernhighlandguild.org/calendar/ | TBD | WordPress; `?ical=1` returns HTML (JS-loaded). Try Tribe REST API. |
-| Mountain Xpress | mountainx.com/events/ | TBD | Local alt-weekly; Tribe Events but Cloudflare-protected (`?ical=1` blocked). High-value aggregator. Contact web admin for WAF exception (User-Agent `CommunityCalendar/1.0`, see curator-guide). |
-| asheville.com/calendar-events | asheville.com | MainStreet API? | Cloudflare blocks fetches, but hendersonville.com (same MainStreet Online platform) has an open `/wp-json/ms-events/v1/agenda` API — try that exact endpoint here before writing off. Otherwise contact MainStreet Online (based in Asheville) for a partnership. |
+| Mountain Xpress | mountainx.com/events/ | TBD | Local alt-weekly; Tribe Events but Cloudflare-protected (`?ical=1` blocked). High-value aggregator. Contact web admin for WAF exception (User-Agent `CommunityCalendar/1.0`, see curator-guide). NOTE: try the full-browser-header trick that unlocked asheville.com's ms-events API before writing this off. |
+| French Broad River Brewery | frenchbroadbrewery.com/events/ | Events Manager HTML | EM plugin but ICS/REST all empty/hang. Aggregator-covered for now (Where Y'at 59, LMA 27/30d). |
+| Hotel Eve Jazz | hotel-eve-jazz.turntabletickets.com | Turntable Tickets HTML | Server-rendered (~8 dates); venue_id 173; API 404s. Where Y'at carries 18 — aggregator covers it. |
+| NC Stage Company | ncstage.org | — | Covered by the Asheville Theater Alliance scraper (2026-07-16). Direct scraper only if ATA coverage proves incomplete. |
 | Asheville Tourists (MiLB) | milb.com/asheville/schedule | Custom scraper | 76 home + away games Apr–Sep 2026. No ICS anywhere. Lower community value. |
 
 ---
 
 ## To Investigate
 
-- [ ] **Retire Songkick interims** — after the next build lands, remove `grey_eagle_songkick`, `orange_peel_songkick`, and `harrahs_cherokee_songkick` via the Manage Feeds dialog (superseded by `rhp_events.py` and `ticketmaster.py` sources, 2026-07-16).
+- [ ] **Retire Songkick interims (5)** — after the next build lands, remove `grey_eagle_songkick`, `orange_peel_songkick`, `harrahs_cherokee_songkick`, `eulogy_songkick`, and the Static Age Songkick feed via the Manage Feeds dialog (superseded by `rhp_events.py`, `ticketmaster.py`, and `dice_venue.py` sources, 2026-07-16).
 - [ ] **Harrah's first CI run** — confirm `tm_harrahs_cherokee.ics` is produced (assumes `TICKETMASTER_API_KEY` secret is populated; 5 other cities use it).
 - [ ] **Buncombe County Government (Trumba) overlap** — verify dedup against the 5 CivicPlus county feeds after first build; drop whichever side loses.
 - [ ] **UA-gated feeds** — `ncarboretum.org` (existing feed, now 0 events) and `coabc.org` (Council on Aging, 1 event) return 403 to `Mozilla/5.0 (compatible; CommunityCalendar/1.0)` but 200 to a browser UA. Per curator-guide policy, ask each org's web admin for a WAF exception rather than spoofing.
@@ -187,7 +194,6 @@
 - [ ] **Buncombe County Schools** — Apptegy/Thrillshare SPA (~45 school subdomains); every route serves a JS shell. Needs a browser session to extract the Thrillshare org ID, then probe `api.thrillshare.com`.
 - [ ] **Empty Meetup feeds to recheck** (valid ICS, 0 events on 2026-07-16): art-circles, asheville-makers-pottery-clay-ceramic-arts, asheville-pastel-artists-meetup, whole-creative-living-collective, the-lobby-asheville-design-salon, asheville-rei-workshops-events, social-dance-club-swing-and-social-ballroom, open-heart-meditation-asheville, spirituality-asheville, carolinaactivechristians, asheville-gay-professionals-meetup-group, asheville-dining-out-meetup-group, asheville-short-story-club, vagabond-photo-walks, prime-focus-wnc-photography-community, asheville-language-exchange-english-spanish, asheville-travel-and-adventure-club.
 - [ ] **Sly Grog Lounge** — Eventbrite organizer valid but 0 events now; recheck.
-- [ ] **Little Jumbo** — `littlejumbobar.com/events?format=json` returns a clean bespoke JSON list (12 future) that squarespace.py doesn't parse; tiny custom scraper if wanted.
 - [ ] **Warren Wilson Athletics** — Sidearm ICS valid but empty mid-summer; recheck in fall. **Mars Hill Athletics** (mhulions.com) — DNS failure during sweep; retry.
 - [ ] **OLLI at UNC Asheville** — unca.edu/olliasheville TEC mini-calendar has 0 tagged events; course catalog is a Flipsnack PDF. Revisit if they publish structured events.
 
@@ -247,3 +253,4 @@
 | Town of Woodfin | Revize platform, proprietary calendar, no feed |
 | Buncombe County Schools | Apptegy/Thrillshare JS shell (see To Investigate) |
 | LibCal / TeamUp / guild.host / CampusLabs | Area sweeps 2026-07-16: zero viable calendars |
+| Southern Highland Craft Guild | Tribe REST probed 2026-07-16: 404 rest_no_route (plugin absent/disabled); `?ical=1` serves HTML. No machine surface. |
