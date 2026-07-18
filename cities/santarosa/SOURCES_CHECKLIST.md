@@ -292,3 +292,70 @@ Added MaxPreps scraper for Santa Rosa area high schools. The scraper parses `__N
 ### Middle Schools
 
 Middle school athletics are not tracked on MaxPreps. The district (SRCS) does not publish a public calendar for middle school sports.
+---
+
+## Rediscovery Pass (2026-07-17)
+
+Six-lane agent fan-out (Meetup refresh, platform sweeps with the post-2025 toolbox, directory cross-reference, faith/civic/seniors, dead-end re-litigation + feed health, Phase 4 upstream authority). 22 feeds + 14 scrapers wired; details below. Includes the two revived srcity.org feeds (`santarosa-srcity-revived-feeds` item): Courthouse Square Events (catID=52, 54 events — food trucks, festivals, tree lighting) and Recreation & Parks (catID=31, 10 — park volunteer days). The feeds went stale in 2025, were removed, and are maintained again; Main Calendar and board categories deliberately skipped (Legistar covers meetings). Issuu activity guide and ActiveNet confirmed non-starters (seasonal print PDF; API unlicensed, classic UI serves the SPA shell).
+
+### Added — live feeds (22)
+
+| Source | Type | Events | Notes |
+|---|---|---|---|
+| Congregation Beth Ami | Google Calendar ICS | 613 future | UA note: works with the full pipeline UA string; bare "CommunityCalendar/1.0" returns empty |
+| Sebastopol Calendar | Tribe ICS | 30 | Community aggregator for Sebastopol — in source_priority.json |
+| Center for Spiritual Living Santa Rosa | Tribe ICS | 30 | Their Meetup was 0-event; the website feed is live |
+| Children's Museum of Sonoma County | Tribe ICS | 18 | Was aggregator-only (13 events via aggregators) |
+| Healdsburg Community Events | CivicPlus catID=33 | 56 | catID=14 (Main) skipped: gov-meeting noise |
+| Town of Windsor | CivicPlus catID=14 | 10 | |
+| Rohnert Park City Events | CivicPlus catID=29 | 12 | Party on the Plaza concert series |
+| Redwood Cafe | WP My Calendar ICS (`?feed=my-calendar-ics`) | 11 future | UPGRADE from Songkick interim (now 0) — remove `songkick` Redwood Cafe feed via Manage Feeds |
+| Sonoma County DSA | Google Calendar ICS (new at socodsa.org) | 59 future | REPLACEMENT — old gcal deleted (404); remove old feed via Manage Feeds |
+| Gundlach Bundschu Winery | Tribe ICS | 10 | Ani DiFranco-tier concerts |
+| Mark West Area Chamber | Tribe ICS | 5 | |
+| Russian River Brewing (Windsor) | Tribe ICS (slug `/the-events-calendar/`) | 3 | |
+| + 10 Meetup groups | Meetup ICS | ~60 | Contra dance, book clubs, pool league, healing, woodworking, kayaking (2025's 0-event group now live), PlayYourCourt tennis, Unstruck Drum |
+
+### Added — scrapers (14)
+
+| Source | Scraper | Events (test) | Notes |
+|---|---|---|---|
+| Visit Santa Rosa | `visit_santa_rosa.py` (new) | 271 | **Formerly a non-starter** — public Algolia creds embedded in page JS, extracted at runtime. AGGREGATOR. The Metro Chamber Algolia index (262) is a near-duplicate — deliberately not added |
+| Sonoma Valley Events | `gatherboard.py` (new, parameterized) | 594 | **Formerly "RSS Coming Soon"** — per-event ICS aggregation (`/{hex-id}/ical/`); real title is in X-WR-CALNAME, not SUMMARY. AGGREGATOR. Heavy run (~600 page fetches) |
+| Sonoma Community Center | `tribe_rest.py` | 457 | Site redesign 404'd the Tribe ICS; REST API alive. Remove the dead `?ical=1` feed via Manage Feeds |
+| Santa Rosa Symphony | `santa_rosa_symphony.py` (new) | 10 | Tribe ICS/REST dead; admin-ajax card backdoor. KNOWN LIMITATION: cards carry no times — events emit at 00:00; follow-up could fetch detail pages |
+| Raven Performing Arts Theater | `thundertix.py` (new, parameterized) | 7 | ThunderTix ItemList JSON-LD |
+| The California (Cal Theatre) | `cal_theatre.py` REPAIRED | 20 | Was 0 ("Wix may require JavaScript") — events still in `wix-warmup-data` embedded JSON |
+| Little Saint (Healdsburg) | `dice_venue.py` | 22 | Only DICE venue in scope (city sweep: all other towns 0); not on Songkick |
+| Sebastopol Chamber of Commerce | `growthzone.py` | 27 | Live-music-heavy chamber; Windsor + Healdsburg chambers skipped (member-meeting noise) |
+| Sonoma County Board of Supervisors | `legistar.py --client sonoma-county` | 7 | Only body on the county's Legistar |
+| Windsor / Analy / Rancho Cotate / Healdsburg HS Athletics | `maxpreps.py` ×4 | 3–6 each | Fall seasons starting; El Molino 0 (recheck Sep) |
+
+### Feed health flags (2026-07-17 audit: 27 live feeds, 16 healthy)
+
+- **Remove via Manage Feeds dialog:** old Sonoma County DSA gcal (deleted, 404), The Big Easy Tribe ICS (site replatformed to Astro/Vercel; Songkick scraper still covers), Meetup `sonoma-county-go-wild-hikers` + `sonoma-county-boomers` (groups deleted), Redwood Cafe Songkick (superseded above), Sonoma Community Center `?ical=1` (404; tribe_rest scraper supersedes)
+- **UA-gated (WAF-exception ask per curator-guide, or accept loss):** Luther Burbank Center, Uptown Theatre Napa — both 403/202-challenge the pipeline UA; browser UA gets 30 events each
+- **Stale:** sonoma.com feed serves only past events while its HTML shows future ones — watch; scrape HTML if it persists
+- **PIPELINE ANOMALY:** GoLocal Cooperative feed serves 28 future VEVENTs to the pipeline UA, but 0 events land in the DB — investigate download/combine side, not the source
+- Dormant-not-dead: Meetup womens-creativity-collective (445 members, 0 upcoming) — keep watching
+
+### Needs Scraper (new bench from this pass)
+
+| Source | Approach | Volume | Notes |
+|---|---|---|---|
+| Napa County Library | Communico/libnet (events.napalibrary.gov) | 54–73 via aggregators | Largest remaining gap; JS widget, BiblioCommons API 403 |
+| Sonoma Botanical Garden | Veevart ticketing API | 41 via aggregators | |
+| Downtown Santa Rosa | ctykit CityCMS listing→detail (`dldate`/`dltime`) | 65 | Overlaps Visit SR + Barrel Proof; build only if gaps show |
+| Eventbrite city listing | browser-header fetch + JSON-LD ItemList | 47 | Replaces retired Eventbrite scraper; bot-fragile — revisit if wanted |
+| THE 222 | EventON server-rendered HTML (REST disabled) | 8 via Creative Sonoma | |
+| Blue Note Napa | bluenotejazz.com/napa/shows/ HTML | ~15 | Songkick interim carries 1 |
+| Sugarloaf Ridge State Park | Eventbrite organizer discovery | 11 via aggregators | Site is a JS shell |
+| Santa Rosa Symphony times | fetch detail pages for showtimes | — | Removes the 00:00 limitation |
+
+### Fall rechecks
+
+El Molino HS MaxPreps (0, off-season) · Sonoma State Sidearm athletics (2026-27 schedules unpublished; `sidearm.py` ready) · 30+ dormant Meetup groups (list in lane report)
+
+### Non-starters confirmed this pass
+
+Barrel Proof Lounge scraper dead (27 aggregator-only events — repair or retire, investigate separately) · SR City Schools (Finalsite `calendarsEnabled=false`) · Windsor/Mark West/Rincon Valley/Bellevue/Piner-Olivet/Roseland USDs (PDF or Cloudflare) · sonoma.edu + events.sonoma.edu (Cloudflare/dead) · Sebastopol city (`rg-event`, no export) · 6th Street Playhouse (JS SPA, no Ludus/OvationTix API) · Cotati CivicPlus (3 sparse) · Windsor + Healdsburg chambers (member-meeting noise) · Farm Trails, LandPaths, Habitat SoCo, Sonoma Land Trust, seb.org (Cloudflare/captcha-class blocks) · ShulCloud (Shomrei Torah), Church Center (Spring Hills, New Vintage), Wix faith/civic sites (no exports) · Oakmont Village (member-gated) · Rotary Sunrise ClubRunner (internal events) · Bandsintown (still 403) · Trumba/TeamUp/LibCal/guild.host area sweeps empty · DICE: no venues beyond Little Saint
