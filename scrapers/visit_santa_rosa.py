@@ -188,7 +188,8 @@ class VisitSantaRosaScraper(BaseScraper):
 
         # URL
         uri = hit.get('uri', '')
-        url = f"https://www.visitsantarosa.com{uri}" if uri.startswith('/') else uri
+        # Algolia's uri is a bare slug; the site serves event pages under /events/
+        url = f"https://www.visitsantarosa.com/events{uri}" if uri.startswith('/') else uri
 
         # Description from content (first 500 chars)
         content = hit.get('content', '') or hit.get('snippet', '') or ''

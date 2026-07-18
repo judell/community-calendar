@@ -309,7 +309,7 @@ Six-lane agent fan-out (Meetup refresh, platform sweeps with the post-2025 toolb
 | Healdsburg Community Events | CivicPlus catID=33 | 56 | catID=14 (Main) skipped: gov-meeting noise |
 | Town of Windsor | CivicPlus catID=14 | 10 | |
 | Rohnert Park City Events | CivicPlus catID=29 | 12 | Party on the Plaza concert series |
-| Redwood Cafe | WP My Calendar ICS (`?feed=my-calendar-ics`) | 11 future | UPGRADE from Songkick interim (now 0) — remove `songkick` Redwood Cafe feed via Manage Feeds |
+| Redwood Cafe | existing `redwood_cafe.py` HTML scraper (wired 2026-07-17, was orphaned) | 19 | The My Calendar ICS added earlier this pass has BROKEN per-event URLs (`/mc-events/` pages render empty — venue theme lacks the template); remove BOTH that ICS feed AND the 0-event Songkick interim via Manage Feeds. The HTML scraper links to the working `/events/` page and captures showtimes |
 | Sonoma County DSA | Google Calendar ICS (new at socodsa.org) | 59 future | REPLACEMENT — old gcal deleted (404); remove old feed via Manage Feeds |
 | Gundlach Bundschu Winery | Tribe ICS | 10 | Ani DiFranco-tier concerts |
 | Mark West Area Chamber | Tribe ICS | 5 | |
