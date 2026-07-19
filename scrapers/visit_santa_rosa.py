@@ -21,6 +21,7 @@ import logging
 import re
 from datetime import datetime, timezone
 from typing import Any, Optional
+from zoneinfo import ZoneInfo
 from urllib.parse import urlencode
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
@@ -150,7 +151,10 @@ class VisitSantaRosaScraper(BaseScraper):
             return None
 
         try:
-            dtstart = datetime.fromtimestamp(int(start_epoch), tz=timezone.utc)
+            # Simpleview encodes local wall time as a fake-UTC epoch:
+            # the UTC fields ARE the local wall clock — relabel, don't convert
+            dtstart = datetime.fromtimestamp(int(start_epoch), tz=timezone.utc) \
+                .replace(tzinfo=ZoneInfo(self.timezone))
         except (ValueError, TypeError):
             return None
 
@@ -158,7 +162,8 @@ class VisitSantaRosaScraper(BaseScraper):
         end_epoch = hit.get('endDate')
         if end_epoch:
             try:
-                dtend = datetime.fromtimestamp(int(end_epoch), tz=timezone.utc)
+                dtend = datetime.fromtimestamp(int(end_epoch), tz=timezone.utc) \
+                    .replace(tzinfo=ZoneInfo(self.timezone))
             except (ValueError, TypeError):
                 dtend = dtstart
             # Skip if end is in the past
