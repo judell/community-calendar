@@ -102,6 +102,9 @@
         .url-stat { background: #f5f5f5; padding: 8px 14px; border-radius: 6px; }
         .url-stat .label { font-size: 0.8em; color: #666; }
         .url-stat .value { font-size: 1.3em; font-weight: 600; }
+        .agg-columns { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+        .agg-column { flex: 1 1 320px; min-width: 280px; }
+        .agg-column h3 { margin: 0 0 8px; font-size: 1em; }
         .help-btn {
             display: inline-block; width: 16px; height: 16px; line-height: 16px;
             text-align: center; border-radius: 50%; background: #e0e0e0; color: #666;
@@ -172,6 +175,12 @@
     </div>
 
     <div class="url-section">
+        <h2>Aggregators</h2>
+        <div class="section-desc">Deduplicated events whose source attribution includes at least one known aggregator</div>
+        <div id="aggregators-report"></div>
+    </div>
+
+    <div class="url-section">
         <h2>URL Quality</h2>
         <div class="section-desc">Deduplicated events from the combined calendar</div>
         <div id="url-report">Loading...</div>
@@ -215,6 +224,7 @@
             'report.json',
             'https://raw.githubusercontent.com/judell/community-calendar/archive/report.json'
         ];
+        const SOURCE_PRIORITY_URL = 'source_priority.json';
 
         async function loadConfig() {
             try {
@@ -259,6 +269,11 @@
 
         function capitalize(s) {
             return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
+        function splitSources(sourceValue) {
+            if (!sourceValue) return [];
+            return sourceValue.split(',').map(s => s.trim()).filter(Boolean);
         }
 
         function renderReport(data) {
@@ -529,6 +544,204 @@
             container.innerHTML = html || '<div>No image data available</div>';
         }
 
+        function renderAggregators(cityStats) {
+            const container = document.getElementById('aggregators-report');
+            let html = '';
+            let overallTotal = 0;
+            let overallAggregator = 0;
+
+            for (const agg of Object.values(cityStats || {})) {
+                overallTotal += agg.total || 0;
+                overallAggregator += agg.aggregator_events || 0;
+            }
+
+            if (overallTotal > 0) {
+                const overallAggregatorPct = Math.round(overallAggregator / overallTotal * 100);
+                const overallNonAggregator = overallTotal - overallAggregator;
+                const overallNonAggregatorPct = 100 - overallAggregatorPct;
+                html += `
+                    <div class="url-summary">
+                        <div class="url-stat">
+                            <div class="label">Aggregator-attributable events</div>
+                            <div class="value">${overallAggregator.toLocaleString()} (${overallAggregatorPct}%)</div>
+                        </div>
+                        <div class="url-stat">
+                            <div class="label">Non-aggregator events</div>
+                            <div class="value">${overallNonAggregator.toLocaleString()} (${overallNonAggregatorPct}%)</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            for (const [cityName, agg] of Object.entries(cityStats || {}).sort((a, b) => a[0].localeCompare(b[0]))) {
+                if (!agg || !agg.total) continue;
+                const aggregatorPct = Math.round(agg.aggregator_events / agg.total * 100);
+                const nonAggregatorPct = 100 - aggregatorPct;
+                const aggregatorRows = (agg.aggregator_breakdown || []).map(row => `
+                    <tr>
+                        <td>${row.source}</td>
+                        <td class="num">${row.count.toLocaleString()}</td>
+                        <td class="num">${row.pct}%</td>
+                    </tr>
+                `).join('');
+                const nonAggregatorRows = (agg.non_aggregator_breakdown || []).map(row => `
+                    <tr>
+                        <td>${row.source}</td>
+                        <td class="num">${row.count.toLocaleString()}</td>
+                        <td class="num">${row.pct}%</td>
+                    </tr>
+                `).join('');
+                html += `
+                    <details>
+                        <summary><span class="city-name">${capitalize(cityName)}</span>
+                            <span class="city-stats">${agg.aggregator_events} aggregator-attributable of ${agg.total.toLocaleString()} total (${aggregatorPct}%)</span>
+                        </summary>
+                        <div class="city-content">
+                            <div class="url-summary">
+                                <div class="url-stat">
+                                    <div class="label">Aggregator-attributable events</div>
+                                    <div class="value">${agg.aggregator_events.toLocaleString()} (${aggregatorPct}%)</div>
+                                </div>
+                                <div class="url-stat">
+                                    <div class="label">Non-aggregator events</div>
+                                    <div class="value">${agg.non_aggregator_events.toLocaleString()} (${nonAggregatorPct}%)</div>
+                                </div>
+                            </div>
+                            <div class="agg-columns">
+                                <div class="agg-column">
+                                    <h3>Aggregators</h3>
+                                    ${aggregatorRows ? `
+                                    <table class="url-table">
+                                        <tr><th>Source</th><th>Events</th><th>%</th></tr>
+                                        ${aggregatorRows}
+                                    </table>` : '<div style="color:#666">No aggregator sources</div>'}
+                                </div>
+                                <div class="agg-column">
+                                    <h3>Non-aggregators</h3>
+                                    ${nonAggregatorRows ? `
+                                    <table class="url-table">
+                                        <tr><th>Source</th><th>Events</th><th>%</th></tr>
+                                        ${nonAggregatorRows}
+                                    </table>` : '<div style="color:#666">No non-aggregator sources</div>'}
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                `;
+            }
+
+            container.innerHTML = html || '<div>No aggregator attribution data available</div>';
+        }
+
+        async function loadAggregatorSourceNames() {
+            const resp = await fetch(SOURCE_PRIORITY_URL + '?_=' + Date.now(), { cache: 'no-store' });
+            if (!resp.ok) throw new Error('Failed to load source priority');
+            const data = await resp.json();
+            return new Set((data.aggregators || []).map(s => String(s)));
+        }
+
+        async function fetchAllDeduplicatedEventSources() {
+            const pageSize = 1000;
+            let offset = 0;
+            const rows = [];
+
+            while (true) {
+                const resp = await fetch(
+                    window.SUPABASE_URL + '/rest/v1/deduplicated_events?select=city,source&order=id.asc&limit=' + pageSize + '&offset=' + offset,
+                    { headers: { apikey: window.SUPABASE_KEY, Authorization: 'Bearer ' + window.SUPABASE_KEY } }
+                );
+                if (!resp.ok) {
+                    throw new Error('Failed to query deduplicated_events');
+                }
+                const page = await resp.json();
+                rows.push(...page);
+                if (page.length < pageSize) break;
+                offset += page.length;
+            }
+
+            return rows;
+        }
+
+        async function loadAggregators() {
+            const container = document.getElementById('aggregators-report');
+            container.innerHTML = '<div>Loading...</div>';
+
+            if (!window.SUPABASE_URL || !window.SUPABASE_KEY) {
+                container.innerHTML = '<div>No database connection configured</div>';
+                return;
+            }
+
+            try {
+                const aggregators = await loadAggregatorSourceNames();
+                const events = await fetchAllDeduplicatedEventSources();
+                const cityStats = {};
+
+                for (const event of events) {
+                    const city = event.city || '(unknown)';
+                    if (!cityStats[city]) {
+                        cityStats[city] = {
+                            total: 0,
+                            aggregator_events: 0,
+                            non_aggregator_events: 0,
+                            aggregator_source_counts: {},
+                            non_aggregator_source_counts: {}
+                        };
+                    }
+
+                    cityStats[city].total += 1;
+                    const uniqueSources = [...new Set(splitSources(event.source))];
+                    const hasAggregator = uniqueSources.some(source => aggregators.has(source));
+                    if (hasAggregator) {
+                        cityStats[city].aggregator_events += 1;
+                    } else {
+                        cityStats[city].non_aggregator_events += 1;
+                    }
+
+                    for (const source of uniqueSources) {
+                        if (aggregators.has(source)) {
+                            cityStats[city].aggregator_source_counts[source] = (cityStats[city].aggregator_source_counts[source] || 0) + 1;
+                        } else {
+                            cityStats[city].non_aggregator_source_counts[source] = (cityStats[city].non_aggregator_source_counts[source] || 0) + 1;
+                        }
+                    }
+                }
+
+                for (const cityData of Object.values(cityStats)) {
+                    cityData.aggregator_breakdown = Object.entries(cityData.aggregator_source_counts)
+                        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+                        .map(([source, count]) => ({
+                            source,
+                            count,
+                            pct: Math.round(count / cityData.total * 100)
+                        }));
+
+                    const nonAggregatorEntries = Object.entries(cityData.non_aggregator_source_counts)
+                        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+                    const topNonAggregators = nonAggregatorEntries.slice(0, 10).map(([source, count]) => ({
+                        source,
+                        count,
+                        pct: Math.round(count / cityData.total * 100)
+                    }));
+                    const restCount = nonAggregatorEntries.slice(10).reduce((sum, [, count]) => sum + count, 0);
+                    cityData.non_aggregator_breakdown = topNonAggregators;
+                    if (restCount > 0) {
+                        cityData.non_aggregator_breakdown.push({
+                            source: 'Rest',
+                            count: restCount,
+                            pct: Math.round(restCount / cityData.total * 100)
+                        });
+                    }
+
+                    delete cityData.aggregator_source_counts;
+                    delete cityData.non_aggregator_source_counts;
+                }
+
+                renderAggregators(cityStats);
+            } catch (e) {
+                container.innerHTML = '<div>Error loading aggregator attribution data: ' + e.message + '</div>';
+            }
+        }
+
         function renderUrlReport(data) {
             const container = document.getElementById('url-report');
             let html = '';
@@ -730,6 +943,7 @@
 
         async function initPage() {
             await loadConfig();
+            loadAggregators();
             loadReport();
             loadOverrides();
             loadSuggestions();

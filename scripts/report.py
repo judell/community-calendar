@@ -17,7 +17,6 @@ import json
 import os
 import re
 from datetime import datetime, date, timezone, timedelta
-from typing import Optional
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
