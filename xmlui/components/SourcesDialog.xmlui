@@ -60,7 +60,7 @@
       <Text
         fontSize="$fontSize-sm"
         color="$color-text-secondary">
-        Uncheck sources to hide them from this view.
+        Uncheck sources to hide from this view. * = aggregator
       </Text>
       <Spinner when="{!$props.events}" />
       <Table
@@ -82,7 +82,7 @@
         </Column>
         <Column bindTo="name" header="Source" width="*" minWidth="160px">
           <Text
-            value="{$cell}"
+            value="{$cell + (window.isAggregatorSource($cell) ? ' *' : '')}"
             breakMode="word"
             cursor="pointer"
             color="$color-primary-600"
@@ -93,6 +93,12 @@
           <Text value="{$cell}" />
         </Column>
       </Table>
+
+      <Checkbox
+        when="{window.hasAggregatorCoveredSources(window.dedupeEvents(currentEvents))}"
+        label="Hide sources covered by aggregators"
+        value="{excludeAggregatorCovered}"
+        onClick="excludeAggregatorCovered = !excludeAggregatorCovered" />
 
       <!-- Suggest a source button -->
       <Button

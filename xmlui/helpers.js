@@ -635,6 +635,41 @@ function getSourceCounts(events) {
     .sort((a, b) => b.count - a.count);
 }
 
+// True when the source name is a known aggregator (from source_priority.json)
+function isAggregatorSource(name) {
+  return AGGREGATOR_SOURCES.has(name);
+}
+
+// Non-aggregator sources that co-occur with an aggregator on at least one event
+function getAggregatorCoveredSources(events) {
+  var covered = new Set();
+  (events || []).forEach(function(e) {
+    var sources = uniqueSourceNames(e.source || '');
+    if (!sources.some(function(s) { return AGGREGATOR_SOURCES.has(s); })) return;
+    sources.forEach(function(s) {
+      if (!AGGREGATOR_SOURCES.has(s)) covered.add(s);
+    });
+  });
+  return Array.from(covered);
+}
+
+function hasAggregatorCoveredSources(events) {
+  return getAggregatorCoveredSources(events).length > 0;
+}
+
+// Union of the user's hidden sources and the aggregator-covered set, so the
+// covered-source toggle reuses filterHiddenSources' at-least-one-visible rule
+// without touching the persisted per-source hides.
+function expandHiddenWithAggregatorCovered(events, hiddenSources, enabled) {
+  var hidden = hiddenSources || [];
+  if (!enabled) return hidden;
+  var covered = getAggregatorCoveredSources(events);
+  if (!covered.length) return hidden;
+  var merged = new Set(hidden);
+  covered.forEach(function(s) { merged.add(s); });
+  return Array.from(merged);
+}
+
 // Deduplicate events: merge events with same title + start_time, combine sources
 // Cache variables (module-level for browser, will be on window)
 let _dedupedEventsCache = null;
@@ -1520,6 +1555,10 @@ if (typeof window !== 'undefined') {
       : _filterExternalExclusions(events);
   };
   window.getSourceCounts = getSourceCounts;
+  window.isAggregatorSource = isAggregatorSource;
+  window.getAggregatorCoveredSources = getAggregatorCoveredSources;
+  window.hasAggregatorCoveredSources = hasAggregatorCoveredSources;
+  window.expandHiddenWithAggregatorCovered = expandHiddenWithAggregatorCovered;
   var _dedupeEvents = dedupeEvents;
   window.dedupeEvents = function(events) {
     return window.xsTraceWith
