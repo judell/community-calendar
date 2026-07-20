@@ -609,13 +609,15 @@ function isSourceHidden(source, hiddenSources) {
   return hiddenSources.indexOf(source) >= 0;
 }
 
-// Filter out events where ALL sources are hidden
+// Filter out events where ALL sources are hidden, or where ANY hidden source
+// is an aggregator (unchecking an aggregator hides everything it covers)
 function filterHiddenSources(events, hiddenSources) {
   if (!hiddenSources || !hiddenSources.length) return events;
   if (!events) return [];
   return events.filter(function(e) {
     if (!e.source) return true;
     var sources = e.source.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+    if (sources.some(function(s) { return hiddenSources.indexOf(s) >= 0 && AGGREGATOR_SOURCES.has(s); })) return false;
     return !sources.every(function(s) { return hiddenSources.indexOf(s) >= 0; });
   });
 }
@@ -640,34 +642,46 @@ function isAggregatorSource(name) {
   return AGGREGATOR_SOURCES.has(name);
 }
 
-// Non-aggregator sources that co-occur with an aggregator on at least one event
-function getAggregatorCoveredSources(events) {
-  var covered = new Set();
-  (events || []).forEach(function(e) {
-    var sources = uniqueSourceNames(e.source || '');
-    if (!sources.some(function(s) { return AGGREGATOR_SOURCES.has(s); })) return;
-    sources.forEach(function(s) {
-      if (!AGGREGATOR_SOURCES.has(s)) covered.add(s);
+// Per-source counts over the currently visible events, with a row for every
+// source in the full list so hidden rows persist (count 0 when fully hidden)
+function getVisibleSourceCounts(events, hiddenSources) {
+  var all = getSourceCounts(events);
+  if (!hiddenSources || !hiddenSources.length) {
+    return all.map(function(item) {
+      return { source: item.source, count: item.count, total: item.count, hiddenViaAggregator: 0 };
     });
+  }
+  var counts = {};
+  var aggHidden = {};
+  (events || []).forEach(function(e) {
+    var sources = uniqueSourceNames(e.source || 'Unknown');
+    var viaAgg = sources.some(function(s) { return hiddenSources.indexOf(s) >= 0 && AGGREGATOR_SOURCES.has(s); });
+    if (viaAgg) {
+      sources.forEach(function(src) { aggHidden[src] = (aggHidden[src] || 0) + 1; });
+      return;
+    }
+    if (sources.length && sources.every(function(s) { return hiddenSources.indexOf(s) >= 0; })) return;
+    sources.forEach(function(src) { counts[src] = (counts[src] || 0) + 1; });
   });
-  return Array.from(covered);
+  return all.map(function(item) {
+    return {
+      source: item.source,
+      count: counts[item.source] || 0,
+      total: item.count,
+      hiddenViaAggregator: aggHidden[item.source] || 0
+    };
+  });
 }
 
-function hasAggregatorCoveredSources(events) {
-  return getAggregatorCoveredSources(events).length > 0;
-}
-
-// Union of the user's hidden sources and the aggregator-covered set, so the
-// covered-source toggle reuses filterHiddenSources' at-least-one-visible rule
-// without touching the persisted per-source hides.
-function expandHiddenWithAggregatorCovered(events, hiddenSources, enabled) {
+// Tooltip for a source-count row: explains why visible < total
+function sourceCountTooltip(row, hiddenSources) {
+  if (!row) return '';
   var hidden = hiddenSources || [];
-  if (!enabled) return hidden;
-  var covered = getAggregatorCoveredSources(events);
-  if (!covered.length) return hidden;
-  var merged = new Set(hidden);
-  covered.forEach(function(s) { merged.add(s); });
-  return Array.from(merged);
+  if (hidden.indexOf(row.name) >= 0 && AGGREGATOR_SOURCES.has(row.name)) {
+    return 'Hidden aggregator: all ' + row.total_count + ' events it carries are hidden';
+  }
+  if (!row.agg_hidden) return '';
+  return row.agg_hidden + ' of ' + row.total_count + ' events also arrive via a hidden aggregator (*) and are hidden with it';
 }
 
 // Deduplicate events: merge events with same title + start_time, combine sources
@@ -1556,9 +1570,8 @@ if (typeof window !== 'undefined') {
   };
   window.getSourceCounts = getSourceCounts;
   window.isAggregatorSource = isAggregatorSource;
-  window.getAggregatorCoveredSources = getAggregatorCoveredSources;
-  window.hasAggregatorCoveredSources = hasAggregatorCoveredSources;
-  window.expandHiddenWithAggregatorCovered = expandHiddenWithAggregatorCovered;
+  window.getVisibleSourceCounts = getVisibleSourceCounts;
+  window.sourceCountTooltip = sourceCountTooltip;
   var _dedupeEvents = dedupeEvents;
   window.dedupeEvents = function(events) {
     return window.xsTraceWith

@@ -14,7 +14,6 @@
   var.city="{window.cityFilter || null}"
   global.isAdmin="{false}"
   global.activePanel="{''}"
-  global.excludeAggregatorCovered="{false}"
   var.sliderRange="{false}"
   var.sliderStart="{null}"
   var.sliderEnd="{null}">
@@ -140,8 +139,7 @@
   <variable name="hiddenSources" value="{(userSettingsData && userSettingsData[0] && userSettingsData[0].hidden_sources) || window._localHiddenSources || []}" />
   <variable name="expandedEnrichments" value="{window.expandEnrichments(enrichments.value, window.getFromDate(), window.getToDate()) || []}" />
   <variable name="combinedEvents" value="{[...(Array.isArray(events.value) ? events.value : []), ...(Array.isArray(expandedEnrichments) ? expandedEnrichments : [])]}" />
-  <variable name="effectiveHiddenSources" value="{window.expandHiddenWithAggregatorCovered(combinedEvents, hiddenSources, excludeAggregatorCovered)}" />
-  <variable name="processedEvents" value="{window.buildSearchIndex(window.filterHiddenSources(window.collapseLongRunningEvents(window.sortSourcesForDisplay(window.filterExternalExclusions(combinedEvents))), effectiveHiddenSources))}" />
+  <variable name="processedEvents" value="{window.buildSearchIndex(window.filterHiddenSources(window.collapseLongRunningEvents(window.sortSourcesForDisplay(window.filterExternalExclusions(combinedEvents))), hiddenSources))}" />
   <variable name="eventDayRange" value="{processedEvents && processedEvents.length > 100 ? window.getEventDayRange(processedEvents) : null}" />
   <variable name="displayEvents" value="{sliderStart !== null ? processedEvents.filter(e => { const t = new Date(e.start_time).getTime(); const base = window._dateRangeBase.getTime(); return t >= base + sliderStart * 86400000 && t < base + (sliderEnd + 1) * 86400000 }) : processedEvents}" />
 

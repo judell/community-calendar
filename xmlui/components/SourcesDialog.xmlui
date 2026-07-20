@@ -45,7 +45,7 @@
       <VStack width="*" gap="$space-1">
         <H3>Sources</H3>
         <Text
-          value="{$props.events ? window.dedupeEvents(currentEvents).length + ' events for the next ' + window.getQueryMonths() + ' months' : 'Loading...'}" />
+          value="{$props.events ? window.filterHiddenSources(window.dedupeEvents(currentEvents), localHidden).length + ' events for the next ' + window.getQueryMonths() + ' months' : 'Loading...'}" />
       </VStack>
       <Icon
         name="close"
@@ -60,14 +60,14 @@
       <Text
         fontSize="$fontSize-sm"
         color="$color-text-secondary">
-        Uncheck sources to hide from this view. * = aggregator
+        Uncheck sources to hide from this view. * = aggregator; unchecking one hides every event it carries, even from checked sources. Counts show visible events (of total).
       </Text>
       <Spinner when="{!$props.events}" />
       <Table
         when="{!!$props.events}"
-        data="{window.getSourceCounts(window.dedupeEvents(currentEvents)).map(function(item) { return { name: item.source, event_count: item.count }; })}"
+        data="{window.getVisibleSourceCounts(window.dedupeEvents(currentEvents), localHidden).map(function(item) { return { name: item.source, event_count: item.count, total_count: item.total, agg_hidden: item.hiddenViaAggregator }; })}"
         idKey="name"
-        sortBy="event_count"
+        sortBy="total_count"
         sortDirection="descending"
         alwaysShowSortingIndicator="{true}"
         cellUserSelect="text"
@@ -89,16 +89,12 @@
             onClick="{() => { window.location.assign(window.location.pathname + '?city=' + encodeURIComponent($props.city || window.cityFilter || '') + '&images=preview&search=' + encodeURIComponent($cell)); }}"
           />
         </Column>
-        <Column bindTo="event_count" header="Events" width="110px" horizontalAlignment="right">
-          <Text value="{$cell}" />
+        <Column bindTo="total_count" header="Events" width="110px" horizontalAlignment="right">
+          <Text
+            value="{$item.event_count + ($item.total_count > $item.event_count ? ' (of ' + $item.total_count + ')' : '')}"
+            tooltip="{window.sourceCountTooltip($item, localHidden)}" />
         </Column>
       </Table>
-
-      <Checkbox
-        when="{window.hasAggregatorCoveredSources(window.dedupeEvents(currentEvents))}"
-        label="Hide sources covered by aggregators"
-        value="{excludeAggregatorCovered}"
-        onClick="excludeAggregatorCovered = !excludeAggregatorCovered" />
 
       <!-- Suggest a source button -->
       <Button
