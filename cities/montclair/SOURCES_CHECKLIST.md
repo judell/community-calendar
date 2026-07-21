@@ -1,6 +1,6 @@
 # Montclair NJ Sources Checklist
 
-## Currently Implemented (61 sources)
+## Currently Implemented (64 sources)
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
@@ -66,6 +66,9 @@
 | La Casa de Don Pedro | WordPress ICS | 3 | ✅ Ready (added 2026-07-20; Essex Co. settlement org) |
 | Montclair Business Networking | Meetup ICS | 1 | ✅ Ready (added 2026-07-20) |
 | Montclair Language Exchange | Meetup ICS | 1 | ✅ Ready (added 2026-07-20; weekly recurring) |
+| Cedar Grove Township | CivicPlus ICS | 36 | ✅ Ready (added 2026-07-20; municipal meetings) |
+| Township of Bloomfield | CivicPlus ICS | 31 | ✅ Ready (added 2026-07-20; municipal meetings; ~25 per-dept catIDs available) |
+| City of Clifton | CivicPlus ICS | 25 | ✅ Ready (added 2026-07-20; municipal meetings) |
 
 \* Google Calendar feeds include historical events; pipeline filters to future only.
 
