@@ -94,6 +94,16 @@ window._xsLogs = [];
   var cityParam = params.get('city');
   window.embed = params.get('embed') === 'true';
 
+  // config.json ships xsVerbose:false (the engine's trace serialization is
+  // too slow for production). ?trace=true arms the engine's per-session
+  // localStorage override before it boots, so the Inspector and trace
+  // capture still work anywhere; ?trace=false disarms it.
+  if (params.get('trace') === 'true') {
+    try { localStorage.setItem('xmlui:xsVerbose', 'true'); } catch (e) {}
+  } else if (params.get('trace') === 'false') {
+    try { localStorage.removeItem('xmlui:xsVerbose'); } catch (e) {}
+  }
+
   window.externalExclusions = null;
   var excludeUrl = params.get('exclude');
   if (excludeUrl) {
@@ -332,6 +342,116 @@ window._xsLogs = [];
     var to = new Date(window.toDate);
     return Math.round((to - from) / (30 * 24 * 60 * 60 * 1000));
   };
+
+  // Events prefetch + cache. The events fetch starts here, at boot, instead
+  // of waiting ~500ms for the XMLUI engine to evaluate a DataSource. The
+  // last payload per city is kept in IndexedDB so repeat visits paint
+  // immediately from cache while the network fetch refreshes in the
+  // background. Main.xmlui consumes this through a PushSource bound to
+  // window.subscribeEvents; window.refetchEvents replaces events.refetch().
+  (function () {
+    var STORE = 'payloads';
+    function idbOpen() {
+      return new Promise(function (resolve, reject) {
+        var req = indexedDB.open('cc-events-cache', 1);
+        req.onupgradeneeded = function () { req.result.createObjectStore(STORE); };
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { reject(req.error); };
+      });
+    }
+    function idbGet(key) {
+      return idbOpen().then(function (db) {
+        return new Promise(function (resolve, reject) {
+          var req = db.transaction(STORE, 'readonly').objectStore(STORE).get(key);
+          req.onsuccess = function () { resolve(req.result); };
+          req.onerror = function () { reject(req.error); };
+        });
+      });
+    }
+    function idbSet(key, val) {
+      return idbOpen().then(function (db) {
+        return new Promise(function (resolve, reject) {
+          var tx = db.transaction(STORE, 'readwrite');
+          tx.objectStore(STORE).put(val, key);
+          tx.oncomplete = function () { resolve(); };
+          tx.onerror = function () { reject(tx.error); };
+        });
+      });
+    }
+
+    var fetchPromise = null;
+    var fetchCity = null;
+    var currentEmit = null;
+    var cachedPromise = null;
+    var cachedCity = null;
+
+    function eventsUrl(city) {
+      return window.SUPABASE_URL + '/rest/v1/deduplicated_events' +
+        '?select=id,title,start_time,end_time,url,location,description,source,transcript,cluster_id,source_urls,category,image_url,all_day,merged_ids,city' +
+        '&order=start_time.asc&limit=6000' +
+        '&start_time=gte.' + window.fromDate +
+        '&start_time=lte.' + window.toDate +
+        '&city=eq.' + encodeURIComponent(city);
+    }
+
+    function startFetch(city) {
+      fetchCity = city;
+      fetchPromise = fetch(eventsUrl(city), {
+        headers: {
+          apikey: window.SUPABASE_KEY,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+      }).then(function (res) { return res.json(); });
+      return fetchPromise;
+    }
+
+    function deliverFresh(promise, city) {
+      return promise.then(function (rows) {
+        if (!Array.isArray(rows)) return false;
+        performance.mark('cc-events-emit-fresh');
+        if (currentEmit) currentEmit(rows);
+        idbSet('events:' + city, rows).catch(function () {});
+        return true;
+      }).catch(function () { return false; });
+    }
+
+    function startCacheRead(city) {
+      cachedCity = city;
+      cachedPromise = idbGet('events:' + city).catch(function () { return null; });
+      return cachedPromise;
+    }
+
+    window.subscribeEvents = function (emit) {
+      currentEmit = emit;
+      var city = window.cityFilter;
+      if (!city) return;
+      var gotFresh = false;
+      // Cached copy paints first, unless the network won the race. The read
+      // was started at boot, so by subscribe time it has usually resolved
+      // and the emit fires immediately.
+      var c = (cachedPromise && cachedCity === city) ? cachedPromise : startCacheRead(city);
+      c.then(function (cached) {
+        if (Array.isArray(cached) && !gotFresh) {
+          performance.mark('cc-events-emit-cached');
+          emit(cached);
+        }
+      });
+      var p = (fetchPromise && fetchCity === city) ? fetchPromise : startFetch(city);
+      deliverFresh(p, city).then(function (ok) { if (ok) gotFresh = true; });
+      return function () { if (currentEmit === emit) currentEmit = null; };
+    };
+
+    window.refetchEvents = function () {
+      var city = window.cityFilter;
+      if (!city) return;
+      deliverFresh(startFetch(city), city);
+    };
+
+    if (window.cityFilter) {
+      startCacheRead(window.cityFilter);
+      startFetch(window.cityFilter);
+    }
+  })();
 
   window.ccAutoHeight = new URLSearchParams(location.search).get('autoheight') === 'true';
   if (window.ccAutoHeight && window.parent !== window) {

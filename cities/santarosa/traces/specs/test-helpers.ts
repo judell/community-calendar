@@ -52,6 +52,16 @@ export const test = base.extend({
   page: async ({ page }, use, testInfo) => {
     const diagnostics = getDiagnostics(page);
 
+    // config.json ships xsVerbose:false (the engine's trace serialization is
+    // too slow for production with ~5k-row state). Trace capture still needs
+    // the engine log, so re-enable it per session via the engine's
+    // localStorage override before any page script runs.
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem('xmlui:xsVerbose', 'true');
+      } catch {}
+    });
+
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
         const message = msg.text();

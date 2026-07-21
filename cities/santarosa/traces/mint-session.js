@@ -146,6 +146,13 @@ async function mintSession() {
       localStorage: [{
         name: storageKey,
         value: storageValue,
+      }, {
+        // config.json ships xsVerbose:false (engine trace serialization is
+        // too slow for production). Trace capture needs the engine log, so
+        // arm the engine's per-session localStorage override for all tests
+        // (generated specs don't go through test-helpers.ts).
+        name: 'xmlui:xsVerbose',
+        value: 'true',
       }],
     }],
   };

@@ -47,7 +47,7 @@ test('one-click-pick-roundtrip', async ({ page }) => {
       addPickBtn.click(),
     ]);
 
-    await expect(page.getByTestId('pickForm')).toHaveCount(0, { timeout: 5000 });
+    await expect(page.getByRole('button', { name: 'Add to My Picks', exact: true })).toHaveCount(0, { timeout: 5000 });
     await expect(page.getByRole('button', { name: 'Done' })).toHaveCount(0, { timeout: 5000 });
 
     await page.getByRole('radio', { name: 'my picks' }).click();

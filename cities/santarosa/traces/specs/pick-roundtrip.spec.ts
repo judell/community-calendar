@@ -24,8 +24,9 @@ test('pick-roundtrip', async ({ page }) => {
     await addPickBtn.click();
     await page.waitForTimeout(500);
 
-    // Submit the PickEditor form
-    const submitBtn = page.getByTestId('pickForm').getByRole('button', { name: 'Add to My Picks' });
+    // Submit the PickEditor form (exact: true keeps this case-sensitive so the
+    // card icons named "Add to my picks" don't match)
+    const submitBtn = page.getByRole('button', { name: 'Add to My Picks', exact: true });
     await expect(submitBtn).toBeVisible({ timeout: 5000 });
     await Promise.all([
       page.waitForResponse(r => r.url().includes('/rest/v1/picks') && r.request().method() === 'POST'),
