@@ -117,6 +117,11 @@ def extract_events_from_blocks(blocks: list[dict], is_event=None) -> list[dict]:
             for item in data.get('event', []):
                 if isinstance(item, dict):
                     events.append(item)
+            # Check ItemList wrappers (e.g., ThunderTix listing pages)
+            for li in data.get('itemListElement', []):
+                item = li.get('item') if isinstance(li, dict) else None
+                if isinstance(item, dict) and is_event(item.get('@type', '')):
+                    events.append(item)
     return events
 
 

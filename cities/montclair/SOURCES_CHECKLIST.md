@@ -1,6 +1,6 @@
 # Montclair NJ Sources Checklist
 
-## Currently Implemented (64 sources)
+## Currently Implemented (71 sources)
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
@@ -69,6 +69,17 @@
 | Cedar Grove Township | CivicPlus ICS | 36 | ✅ Ready (added 2026-07-20; municipal meetings) |
 | Township of Bloomfield | CivicPlus ICS | 31 | ✅ Ready (added 2026-07-20; municipal meetings; ~25 per-dept catIDs available) |
 | City of Clifton | CivicPlus ICS | 25 | ✅ Ready (added 2026-07-20; municipal meetings) |
+| Pushcart Players | Tribe REST API scraper | 6 | ✅ Ready (added 2026-07-20; ?ical=1 empty) |
+| Dingbatz (Clifton) | Songkick scraper | 5 | ✅ Ready (added 2026-07-20) |
+| Outpost in the Burbs | ThunderTix JSON-LD scraper | 5 | ✅ Ready (added 2026-07-20; closes backlog item) |
+| Jazz House Kids | Tribe REST API scraper | 4 | ✅ Ready (added 2026-07-20; ICS export flaky) |
+| Skyline Theatre Company | Tribe REST API scraper | 2 | ✅ Ready (added 2026-07-20; ModSecurity blocks ICS) |
+| The Meatlocker | Songkick scraper | 1 | ✅ Ready (added 2026-07-20; artist-sourced, grows on its own) |
+| NJ Poetry Events | Squarespace JSON scraper | 119 statewide | ✅ Ready (added 2026-07-20; geo-filtered to coverage area) |
+
+Note: `city.conf` gained Clifton and West Caldwell (both within the 6-mile
+radius but missing from the auto-generated list) so their events survive
+geo-filtering.
 
 \* Google Calendar feeds include historical events; pipeline filters to future only.
 
@@ -141,8 +152,8 @@
 
 ## Potential Additional Sources — Long-Tail Music Venues
 Most are Facebook/Instagram-only; listed here for future reference if platforms open up.
-- [ ] Outpost in the Burbs (Wix + Thundertix, no feed; ~monthly folk/singer-songwriter concerts)
-- [ ] DLV Lounge (Facebook-only; jazz Wed-Sat since 1972)
-- [ ] The Meatlocker (Instagram @meatlockershows; DIY punk/metal, shows most nights)
+- [x] Outpost in the Burbs — ✅ Added via ThunderTix JSON-LD scraper (5 events, 2026-07-20)
+- [ ] DLV Lounge (Facebook-only; jazz Wed-Sat since 1972; 0 upcoming on Songkick 2026-07-20)
+- [x] The Meatlocker — ✅ Added via Songkick scraper (artist-sourced, 2026-07-20)
 - [ ] Just Jake's (Wix; live music Fri-Sat)
 - [ ] Tierney's Tavern (live music Fri-Sat; Bandsintown 403)
