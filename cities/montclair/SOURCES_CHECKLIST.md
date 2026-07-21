@@ -1,6 +1,6 @@
 # Montclair NJ Sources Checklist
 
-## Currently Implemented (47 sources)
+## Currently Implemented (61 sources)
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
@@ -52,6 +52,20 @@
 | Cloud Data Driven | Meetup ICS | 4 | ✅ Ready (added 2026-03-15) |
 | Trivia AD | Eventbrite scraper | 121 | ✅ Ready (added 2026-03-15) |
 | Montclair History Center | Squarespace scraper | 13 | ✅ Ready (added 2026-03-15) |
+| Glen Ridge Congregational Church | Google Calendar ICS | 831 | ✅ Ready (added 2026-07-20) |
+| West Orange Public Library | LibCal/BCCLS ICS | 245 | ✅ Ready (added 2026-07-20) |
+| Nutley Public Library | LibCal/BCCLS ICS | 226 | ✅ Ready (added 2026-07-20) |
+| Glen Ridge Public Library | LibCal/BCCLS ICS | 203 | ✅ Ready (added 2026-07-20) |
+| West Caldwell Public Library | LibCal/BCCLS ICS | 141 | ✅ Ready (added 2026-07-20) |
+| Bloomfield Public Library | LibCal/BCCLS ICS | 85 | ✅ Ready (added 2026-07-20) |
+| YWCA Northern New Jersey | WordPress ICS | 29 | ✅ Ready (added 2026-07-20; regional, geo-filtered) |
+| JCC MetroWest | WordPress ICS | 27 | ✅ Ready (added 2026-07-20; use /events/list/?ical=1) |
+| Church of the Holy Spirit Verona | Google Calendar ICS | 24 | ✅ Ready (added 2026-07-20) |
+| The Space For Art | WordPress ICS | 13 | ✅ Ready (added 2026-07-20) |
+| Upper Montclair Business Association | MembershipWorks ICS | 4 | ✅ Ready (added 2026-07-20) |
+| La Casa de Don Pedro | WordPress ICS | 3 | ✅ Ready (added 2026-07-20; Essex Co. settlement org) |
+| Montclair Business Networking | Meetup ICS | 1 | ✅ Ready (added 2026-07-20) |
+| Montclair Language Exchange | Meetup ICS | 1 | ✅ Ready (added 2026-07-20; weekly recurring) |
 
 \* Google Calendar feeds include historical events; pipeline filters to future only.
 
@@ -96,6 +110,20 @@
 | MC Hotel (Eventbrite) | Venue only, no organizer page (2026-03-15) |
 | Montclair Comedy Festival (Eventbrite) | No dedicated organizer; small comedy orgs have 1 event each (2026-03-15) |
 | Pride Center of NJ | Duda platform, stale events (last Oct 2025), no structured feed (2026-03-15) |
+| Bnai Keshet | HTTP 406 persists even with full browser headers — Fastly/Varnish edge block (retried 2026-07-20) |
+| Montclair Farmers' Market | Squarespace but no events collection (nav is About/Vendors/FAQ only) (2026-07-20) |
+| Montclair Community Farms | Squarespace; program pages are static, no events collection (2026-07-20) |
+| Montclair Culinary Academy | Squarespace Commerce products, dates only in free text (2026-07-20) |
+| Yogi Berra Museum (Little Falls) | Cloudflare challenge on both ?ical=1 and Tribe REST API (2026-07-20) |
+| St. James Episcopal Church | Google Calendar found but stale since ~Apr 2026, 1 future event (2026-07-20) |
+| DLV Lounge / Tierney's Tavern / Just Jake's | 0 upcoming on Songkick despite active live music (2026-07-20) |
+| Jazz House Kids (ICS) | Tribe ?ical=1 intermittently returns HTML; use Tribe REST API scraper instead (2026-07-20) |
+
+## Recheck Later
+| Source | When / Why |
+|--------|-----------|
+| Cedar Bean's Coffee Joint (Cedar Grove) | ai1ec plugin confirmed but export is JS-driven; needs Playwright-based recheck |
+| Montclair Cooperative School | Real Google Calendar (c_f5bqjfd6q17h34ojqoinq6udd4@group.calendar.google.com) but scoped to 2025-26 school year, nearly exhausted; recheck fall 2026 for new calendar ID |
 
 ## Potential Additional Sources — Community/Civic
 - [ ] Montclair YMCA (montclairymca.org - class schedules, special events)
