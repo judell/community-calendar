@@ -1,6 +1,6 @@
 # Montclair NJ Sources Checklist
 
-## Currently Implemented (71 sources)
+## Currently Implemented (73 sources)
 
 | Source | Type | Events | Status |
 |--------|------|--------|--------|
@@ -76,6 +76,8 @@
 | Skyline Theatre Company | Tribe REST API scraper | 2 | ✅ Ready (added 2026-07-20; ModSecurity blocks ICS) |
 | The Meatlocker | Songkick scraper | 1 | ✅ Ready (added 2026-07-20; artist-sourced, grows on its own) |
 | NJ Poetry Events | Squarespace JSON scraper | 119 statewide | ✅ Ready (added 2026-07-20; geo-filtered to coverage area) |
+| Cohome | Eventbrite scraper | 1 | ✅ Ready (added 2026-07-20; disability-inclusive housing nonprofit) |
+| The Franklin Wine Bar (Nutley) | Eventbrite scraper | 1 | ✅ Ready (added 2026-07-20) |
 
 Note: `city.conf` gained Clifton and West Caldwell (both within the 6-mile
 radius but missing from the auto-generated list) so their events survive

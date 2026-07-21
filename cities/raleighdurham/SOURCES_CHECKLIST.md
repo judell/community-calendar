@@ -108,7 +108,7 @@
 ### Bookstores
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
-| Quail Ridge Books | Eventbrite via eb-to-ical | ~616 | Author events, readings; Raleigh |
+| Quail Ridge Books | Eventbrite scraper | 10 | Author events, readings; Raleigh. Migrated 2026-07-20: eb-to-ical service shut down ("AI bot abuse"), replaced with first-party eventbrite.py scraper against the organizer page (JSON-LD lists current page of events, not the full 616-event history the converter enumerated) |
 
 ### Activism & Community (Phase 3 feeds)
 | Source | Type | Events | Notes |
