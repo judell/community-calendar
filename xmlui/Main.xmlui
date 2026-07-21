@@ -244,27 +244,13 @@
       <PickEditor when="{!!pickEvent && activePanel === 'pick'}" event="{pickEvent}" onClose="closePickEditor()" onSaved="picksCounter = picksCounter + 1" />
     </VStack>
     <HStack verticalAlignment="center" marginBottom="$space-2" gap="$space-2">
-      <HStack verticalAlignment="center" gap="$space-1" width="*">
-        <TextBox
-          id="searchBox"
-          autoFocus="false"
-          placeholder="Search events..."
-          fontSize="$fontSize-sm"
-          initialValue="{window.initialSearch || ''}"
-          onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; window.syncSearchParam(val); }"
-          width="*"
-        />
-          <Icon
-            name="close"
-            tooltip="Clear search"
-            width="20px"
-            height="20px"
-            cursor="pointer"
-            color="$color-text-tertiary"
-            opacity="{filterTerm ? 1 : 0}"
-          onClick="searchBox.setValue(''); setCategoryFilter(''); window.syncSearchParam(''); displayStartIndex = 0; browseStartIndex = 0; scrollRequest = scrollRequest + 1"
-        />
-      </HStack>
+      <SearchBox
+        id="searchBox"
+        width="*"
+        initialValue="{window.initialSearch || ''}"
+        onSearch="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; window.syncSearchParam(val); }"
+        onClear="setCategoryFilter(''); window.syncSearchParam(''); filterTerm = ''; displayStartIndex = 0; browseStartIndex = 0; scrollRequest = scrollRequest + 1"
+      />
       <Select
         id="categorySelect"
         aria-label="Event category"

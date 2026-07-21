@@ -1,0 +1,36 @@
+<!-- Confines per-keystroke reactivity to this component's subtree, per
+     https://docs.xmlui.org/howto/confine-a-hot-input-to-its-own-component.
+     The debounced ChangeListener emits the committed term to the parent,
+     so App-scope bindings (getPagedEvents, EventCard list) re-evaluate at
+     most once per pause instead of on every keystroke. -->
+<Component name="SearchBox" var.draft="{$props.initialValue || ''}" var.lastSent="{$props.initialValue || ''}">
+  <HStack verticalAlignment="center" gap="$space-1" width="100%">
+    <TextBox
+      id="box"
+      autoFocus="false"
+      placeholder="Search events..."
+      fontSize="$fontSize-sm"
+      initialValue="{$props.initialValue || ''}"
+      onDidChange="(val) => draft = val"
+      width="*"
+    />
+    <Icon
+      name="close"
+      tooltip="Clear search"
+      width="20px"
+      height="20px"
+      cursor="pointer"
+      color="$color-text-tertiary"
+      opacity="{draft ? 1 : 0}"
+      onClick="emitEvent('clear'); box.setValue(''); draft = ''"
+    />
+  </HStack>
+  <ChangeListener
+    listenTo="{draft}"
+    debounceWaitInMs="250"
+    onDidChange="(change) => { emitEvent('search', change.newValue); lastSent = change.newValue }"
+  />
+  <method name="setValue">
+    (v) => box.setValue(v)
+  </method>
+</Component>
