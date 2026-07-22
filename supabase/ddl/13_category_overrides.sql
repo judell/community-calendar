@@ -13,7 +13,10 @@ CREATE TABLE IF NOT EXISTS category_overrides (
   original_category text,
   curator_id uuid REFERENCES auth.users(id),
   created_at timestamptz DEFAULT now(),
-  source_uid text,  -- durable key; auto-backfilled from events on insert
+  source_uid text,      -- durable key; auto-backfilled from events on insert
+  event_title text,     -- snapshot for few-shot examples (survives event deletion)
+  event_location text,  -- snapshot for few-shot examples
+  event_city text,      -- snapshot; lets the classifier prefer same-city examples
   UNIQUE(event_id)
 );
 
@@ -26,18 +29,26 @@ CREATE POLICY "Anyone can read overrides" ON category_overrides FOR SELECT USING
 CREATE POLICY "Auth users can insert overrides" ON category_overrides FOR INSERT WITH CHECK (auth.uid() = curator_id);
 CREATE POLICY "Auth users can update own overrides" ON category_overrides FOR UPDATE USING (auth.uid() = curator_id);
 
--- Trigger (on category_overrides): backfill source_uid + original_category
--- from events, and propagate the override to events.category — but only
--- when the category actually changed (an event_id re-attach from the
--- events-side trigger must not recurse back into events).
+-- Trigger (on category_overrides): backfill source_uid, original_category,
+-- and the event_title/location/city snapshot from events, and propagate the
+-- override to events.category — but only when the category actually changed
+-- (an event_id re-attach from the events-side trigger must not recurse back
+-- into events).
 CREATE OR REPLACE FUNCTION apply_category_override()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF NEW.source_uid IS NULL AND NEW.event_id IS NOT NULL THEN
-    SELECT source_uid INTO NEW.source_uid FROM events WHERE id = NEW.event_id;
-  END IF;
-  IF NEW.original_category IS NULL AND NEW.event_id IS NOT NULL THEN
-    SELECT category INTO NEW.original_category FROM events WHERE id = NEW.event_id;
+  IF NEW.event_id IS NOT NULL THEN
+    IF NEW.source_uid IS NULL THEN
+      SELECT source_uid INTO NEW.source_uid FROM events WHERE id = NEW.event_id;
+    END IF;
+    IF NEW.original_category IS NULL THEN
+      SELECT category INTO NEW.original_category FROM events WHERE id = NEW.event_id;
+    END IF;
+    IF NEW.event_title IS NULL THEN
+      SELECT title, location, city
+      INTO NEW.event_title, NEW.event_location, NEW.event_city
+      FROM events WHERE id = NEW.event_id;
+    END IF;
   END IF;
   IF TG_OP = 'INSERT' OR NEW.category IS DISTINCT FROM OLD.category THEN
     UPDATE events SET category = NEW.category WHERE id = NEW.event_id;

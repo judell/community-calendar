@@ -221,8 +221,20 @@ def anthropic_call(api_key, model, prompt, retry_count=0):
 
 
 def fetch_overrides():
-    """Fetch curator overrides from Supabase as few-shot examples."""
-    path = "category_overrides?select=category,events(title,location,description)"
+    """Fetch curator overrides from Supabase as few-shot examples.
+
+    Most recent first. Event context comes from the denormalized
+    snapshot columns (event_title/event_location/event_city), so
+    overrides whose event was deleted (event_id NULL) still teach;
+    the events(...) embed is kept as a fallback for rows written
+    before the snapshot-columns migration.
+    """
+    path = (
+        "category_overrides"
+        "?select=category,event_title,event_location,event_city,"
+        "events(title,location)"
+        "&order=created_at.desc"
+    )
     url = SUPABASE_URL + "/rest/v1/" + path
     req = urllib.request.Request(
         url,
@@ -238,19 +250,37 @@ def fetch_overrides():
         return []
 
 
-def build_few_shot(overrides):
-    """Build few-shot examples string from curator overrides."""
+FEW_SHOT_CAP = 20
+
+
+def build_few_shot(overrides, city=None):
+    """Build few-shot examples string from curator overrides.
+
+    Overrides arrive most-recent-first; same-city overrides are
+    preferred when the pool exceeds FEW_SHOT_CAP. Falls back to the
+    embedded events row for overrides predating the snapshot columns.
+    """
     if not overrides:
         return ""
+    if city:
+        ordered = [o for o in overrides if o.get("event_city") == city] + [
+            o for o in overrides if o.get("event_city") != city
+        ]
+    else:
+        ordered = overrides
     lines = ["\nHere are examples of how the curator has classified similar events:"]
-    for o in overrides[:20]:
-        ev = o.get("events", {})
-        if not ev:
+    count = 0
+    for o in ordered:
+        ev = o.get("events") or {}
+        title = o.get("event_title") or ev.get("title", "")
+        location = o.get("event_location") or ev.get("location", "")
+        if not title:
             continue
-        title = ev.get("title", "")
-        location = ev.get("location", "")
         cat = o.get("category", "")
         lines.append(f'  Title: "{title}" Location: "{location}" → {cat}')
+        count += 1
+        if count >= FEW_SHOT_CAP:
+            break
     return "\n".join(lines) if len(lines) > 1 else ""
 
 
@@ -505,10 +535,13 @@ def process_file(  # noqa: PLR0915, PLR0912
     for title_key, group in title_groups.items():
         cat = rep_results.get(title_key)
         if cat:
-            for orig_idx, _event in group:
+            for orig_idx, event in group:
                 events[orig_idx]["category"] = cat
                 classified += 1
                 cats[cat] += 1
+                uid = event.get("source_uid", "")
+                title = event.get("title", "")
+                print(f'  + {uid} "{title}" → {cat}')
 
     msg = (
         f"  Classified {classified}/{len(to_classify)} events "
@@ -535,6 +568,11 @@ def main():
     parser.add_argument(
         "--dry-run", action="store_true", help="Print results without writing"
     )
+    parser.add_argument(
+        "--no-few-shot",
+        action="store_true",
+        help="Classify without curator-override examples (for A/B comparison)",
+    )
     args = parser.parse_args()
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -542,16 +580,22 @@ def main():
         print("ERROR: ANTHROPIC_API_KEY env var not set", file=sys.stderr)
         sys.exit(1)
 
-    overrides = fetch_overrides()
-    few_shot = build_few_shot(overrides)
-    if overrides:
-        print(f"Using {len(overrides)} curator overrides as few-shot examples")
+    overrides = [] if args.no_few_shot else fetch_overrides()
+    if args.no_few_shot:
+        print("Few-shot examples disabled (--no-few-shot)")
+    elif overrides:
+        print(f"Fetched {len(overrides)} curator overrides for few-shot examples")
 
     # Create shared rate limiter for all files in this run
     rate_limiter = RateLimitTracker()
 
     config = {"api_key": api_key, "model": args.model}
     for filepath in args.files:
+        # Same-city examples first, so local corrections win the prompt cap
+        city = Path(filepath).parent.name
+        few_shot = build_few_shot(overrides, city)
+        if few_shot:
+            print(f"{city}: few-shot examples in prompt:{few_shot}")
         process_file(filepath, config, few_shot, args.dry_run, rate_limiter)
 
 
