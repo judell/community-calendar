@@ -1,98 +1,37 @@
-# Add ICS feed URLs here. The build will process them into the
-# database automatically and reset this file to the template below.
+# Add feed URLs or scraper outputs here.
 #
-# Format:
+# Pipeline: On each build, process_pending_feeds.py reads this file,
+# inserts rows into the Supabase `feeds` table, then resets this file
+# to the template below. export_feeds_txt.py then regenerates feeds.txt
+# from the DB. Do not edit feeds.txt manually.
+# Think of this file as a temporary inbox for new sources, not as a
+# long-term source inventory.
+#
+# The "# Source Name" comment becomes the display name in the calendar
+# (user-visible source attribution under each event card). Use the bare
+# canonical venue/source name only — no parenthetical context, no event
+# counts, no strategy notes. Put verification/discovery notes in
+# SOURCES_CHECKLIST.md, not here.
+#
+# --- ICS feed URLs ---
+# Just add the name and URL. The build handles everything else.
+#
 #   # Source Name
 #   https://example.com/events/?ical=1
 #
+# --- Scrapers ---
+# Add the name, cmd, and output path here. But scrapers ALSO need a
+# line added to .github/workflows/generate-calendar.yml (in the city's
+# scrape step). This file only handles the DB insert; the workflow
+# entry is what actually runs the scraper. In other words: workflow =
+# execution, pending_feeds.txt = registration staging.
+#
+#   # Source Name
+#   # cmd: python scrapers/example.py --name "Source Name"
+#   cities/montclair/example.ics
+#
 # Test before adding:
 #   python scripts/add_feed.py URL montclair "Source Name" --test
+#   python scripts/add_scraper.py example montclair "Source Name" --test
 #
 # See CONTRIBUTING.md for details.
-
-# Glen Ridge Congregational Church
-https://calendar.google.com/calendar/ical/6r61j22m17ph76sbn635uu9ol0%40group.calendar.google.com/public/basic.ics
-
-# West Orange Public Library
-https://bccls.libcal.com/ical_subscribe.php?src=p&cid=10341
-
-# Nutley Public Library
-https://bccls.libcal.com/ical_subscribe.php?src=p&cid=10315
-
-# Glen Ridge Public Library
-https://bccls.libcal.com/ical_subscribe.php?src=p&cid=10286
-
-# West Caldwell Public Library
-https://bccls.libcal.com/ical_subscribe.php?src=p&cid=10340
-
-# Bloomfield Public Library
-https://bccls.libcal.com/ical_subscribe.php?src=p&cid=10270
-
-# YWCA Northern New Jersey
-https://ywcannj.org/events/?ical=1
-
-# JCC MetroWest
-https://jccmetrowest.org/events/list/?ical=1
-
-# Church of the Holy Spirit Verona
-https://calendar.google.com/calendar/ical/racioppi%40holyspiritverona.org/public/basic.ics
-
-# The Space For Art
-https://thespaceforart.com/events/?ical=1
-
-# Upper Montclair Business Association
-https://api.membershipworks.com/v2/events?_op=ics&org=19806
-
-# La Casa de Don Pedro
-https://lacasadedonpedro.org/events/list/?ical=1
-
-# Montclair Business Networking
-https://www.meetup.com/montclair-business-networking/events/ical/
-
-# Montclair Language Exchange
-https://www.meetup.com/montclair-language-exchange/events/ical/
-
-# Cedar Grove Township
-https://cedargrovenj.org/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar
-
-# Township of Bloomfield
-https://www.bloomfieldtwpnj.com/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar
-
-# City of Clifton
-https://cliftonnj.org/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar
-
-# Dingbatz
-# cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/33708-dingbatz" --name "Dingbatz"
-cities/montclair/songkick_dingbatz.ics
-
-# The Meatlocker
-# cmd: python scrapers/songkick.py --url "https://www.songkick.com/venues/3593184-meatlocker" --name "The Meatlocker"
-cities/montclair/songkick_meatlocker.ics
-
-# Pushcart Players
-# cmd: python scrapers/pushcart_players.py
-cities/montclair/pushcart_players.ics
-
-# Skyline Theatre Company
-# cmd: python scrapers/skyline_theatre.py
-cities/montclair/skyline_theatre.ics
-
-# Jazz House Kids
-# cmd: python scrapers/jazz_house_kids.py
-cities/montclair/jazz_house_kids.ics
-
-# Outpost in the Burbs
-# cmd: python scrapers/outpost_burbs.py
-cities/montclair/outpost_burbs.ics
-
-# NJ Poetry Events
-# cmd: python scrapers/nj_poetry_events.py
-cities/montclair/nj_poetry_events.ics
-
-# Cohome
-# cmd: python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/cohome-inc-17450245601" --name "Cohome"
-cities/montclair/eventbrite_cohome.ics
-
-# The Franklin Wine Bar
-# cmd: python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/the-franklin-wine-bar-74930758223" --name "The Franklin Wine Bar"
-cities/montclair/eventbrite_franklin_wine_bar.ics
