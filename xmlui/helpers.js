@@ -261,8 +261,11 @@ function filterEvents(events, term, category) {
   _prevEventsLen = events.length;
   _prevEventsFirst = events[0];
   var result = source.filter(function(e) {
-    var searchText = getEventSearchText(e);
-    e._search = searchText;
+    // Use the cache buildSearchIndex populated (after sortSourcesForDisplay's
+    // source-merge); fall back to computing only for a straggler that lacks it.
+    // Do NOT reintroduce a compute-once guard in buildSearchIndex — its
+    // unconditional recompute is what keeps source-name search working (49094c78e).
+    var searchText = e._search || getEventSearchText(e);
     return searchText.includes(lower);
   });
   var t1 = performance.now();
