@@ -408,9 +408,12 @@ window._xsLogs = [];
     function deliverFresh(promise, city) {
       return promise.then(function (rows) {
         if (!Array.isArray(rows)) return false;
+        // rows are genuinely `city`'s rows — cache them even if the user has
+        // switched away, but only emit if this city is still current.
+        idbSet('events:' + city, rows).catch(function () {});
+        if (city !== window.cityFilter) return false;  // stale-city race guard (#76)
         performance.mark('cc-events-emit-fresh');
         if (currentEmit) currentEmit(rows);
-        idbSet('events:' + city, rows).catch(function () {});
         return true;
       }).catch(function () { return false; });
     }
@@ -432,6 +435,7 @@ window._xsLogs = [];
       var c = (cachedPromise && cachedCity === city) ? cachedPromise : startCacheRead(city);
       c.then(function (cached) {
         if (Array.isArray(cached) && !gotFresh) {
+          if (city !== window.cityFilter) return;  // stale-city guard (#76)
           performance.mark('cc-events-emit-cached');
           emit(cached);
         }
