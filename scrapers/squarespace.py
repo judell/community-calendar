@@ -11,12 +11,26 @@ Usage:
 """
 
 import argparse
+import html as html_mod
 import logging
 import re
 import time
 from datetime import datetime
 from typing import Any
 from urllib.parse import urlparse
+
+# Squarespace seeds new Events collections with placeholder/demo events whose
+# slugs are event-one … event-five plus a random suffix (e.g.
+# /event-three-mz467-9slf2-wnm2y). Real events get human-readable slugs, so we
+# skip anything matching this pattern to keep demo junk (Impact Forum, Idea
+# Exchange, Vision Summit, Creative Sync, …) out of the calendar.
+DEMO_SLUG_RE = re.compile(r'/event-(one|two|three|four|five)-')
+
+
+def _clean_text(value: Any) -> str:
+    """Unescape HTML entities (&amp;, &nbsp;, …) and normalize whitespace."""
+    text = html_mod.unescape(str(value or ''))
+    return text.replace('\xa0', ' ').strip()
 
 import requests
 from icalendar import Calendar
@@ -76,6 +90,8 @@ class SquarespaceScraper(BaseScraper):
             if href.startswith(prefix) and href != prefix:
                 # Strip query strings and fragments
                 clean = href.split('?')[0].split('#')[0]
+                if DEMO_SLUG_RE.search(clean):
+                    continue  # skip Squarespace seeded demo events
                 urls.add(self.base_url + clean)
 
         return sorted(urls)
@@ -96,11 +112,11 @@ class SquarespaceScraper(BaseScraper):
                     if not dtstart:
                         continue
                     return {
-                        'title': str(component.get('summary', '')),
+                        'title': _clean_text(component.get('summary', '')),
                         'dtstart': dtstart.dt,
                         'dtend': component.get('dtend').dt if component.get('dtend') else None,
-                        'location': str(component.get('location', '')),
-                        'description': str(component.get('description', '')),
+                        'location': _clean_text(component.get('location', '')),
+                        'description': _clean_text(component.get('description', '')),
                         'url': event_url,
                         'uid': str(component.get('uid', ''))
                     }
