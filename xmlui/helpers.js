@@ -225,10 +225,13 @@ window.getRecordingFile = function() {
 // Pre-compute a lowercase search string per event (call once after events load)
 function buildSearchIndex(events) {
   if (!events) return events || [];
+  var _t0 = performance.now();
   for (var i = 0; i < events.length; i++) {
     var e = events[i];
     e._search = getEventSearchText(e);
   }
+  if (!window._pipelineLog) window._pipelineLog = [];
+  window._pipelineLog.push('buildSearchIndex: ' + (performance.now() - _t0).toFixed(1) + 'ms, ' + events.length + ' events');
   return events;
 }
 
@@ -786,20 +789,31 @@ function dedupeEvents(events) {
 // then subsequent occurrences appear ~7 days apart.
 var _collapseCache = null;
 var _collapseLastLen = 0;
-var _collapseLastFirst = null;
-var _collapseLastLast = null;
+var _collapseLastFirstId = null;
+var _collapseLastLastId = null;
+var _collapseRun = 0;
 
 function collapseLongRunningEvents(events) {
   if (!events || !events.length) return [];
+  var _t0 = performance.now();
+  _collapseRun++;
+  // Content-based cache key (event ids), not object identity: the PushSource
+  // network emit has different object *references* than the cached emit but the
+  // same content, so an identity check always missed on the 2nd pipeline run
+  // and recomputed (~300ms spike). See issue #77.
+  var firstId = events[0] && events[0].id;
+  var lastId = events[events.length - 1] && events[events.length - 1].id;
   if (_collapseCache &&
       events.length === _collapseLastLen &&
-      events[0] === _collapseLastFirst &&
-      events[events.length - 1] === _collapseLastLast) {
+      firstId === _collapseLastFirstId &&
+      lastId === _collapseLastLastId) {
+    if (!window._pipelineLog) window._pipelineLog = [];
+    window._pipelineLog.push('collapseLong run#' + _collapseRun + ': ' + (performance.now() - _t0).toFixed(1) + 'ms (cache HIT), ' + events.length + ' events');
     return _collapseCache;
   }
   _collapseLastLen = events.length;
-  _collapseLastFirst = events[0];
-  _collapseLastLast = events[events.length - 1];
+  _collapseLastFirstId = firstId;
+  _collapseLastLastId = lastId;
 
   const MIN_OCCURRENCES = 5;  // Need at least this many to consider "long-running"
   const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -875,6 +889,8 @@ function collapseLongRunningEvents(events) {
   });
 
   _collapseCache = result.sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+  if (!window._pipelineLog) window._pipelineLog = [];
+  window._pipelineLog.push('collapseLong run#' + _collapseRun + ': ' + (performance.now() - _t0).toFixed(1) + 'ms (cache MISS, computed), ' + events.length + ' events');
   return _collapseCache;
 }
 
