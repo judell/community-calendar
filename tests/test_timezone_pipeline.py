@@ -224,10 +224,9 @@ def _next_dst_spring_forward(today):
     """Return the next US DST spring-forward date (2nd Sunday of March) after `today`."""
     for year in (today.year, today.year + 1):
         # 2nd Sunday of March = first Sunday on or after March 8
-        first_sunday = date(year, 3, 1) + timedelta(
-            days=(6 - date(year, 3, 1).weekday()) % 7
+        second_sunday = date(year, 3, 8) + timedelta(
+            days=(6 - date(year, 3, 8).weekday()) % 7
         )
-        second_sunday = first_sunday + timedelta(days=7)
         if second_sunday > today:
             return second_sunday
     raise AssertionError("unreachable: no future DST spring-forward")
@@ -251,8 +250,9 @@ class TestCombineIcsRruleExpansion:
         """Expanded instances should retain DTSTART;TZID= from original."""
         # Anchor relative to today: expand_rrules windows on [today, today+window_days],
         # so hardcoded dates silently drift into the past and yield zero instances.
-        start = date.today() + timedelta(days=7)
-        until = date.today() + timedelta(days=60)
+        today = date.today()
+        start = today + timedelta(days=7)
+        until = today + timedelta(days=60)
         event = _make_weekly_la_event("Weekly Class", "test-rrule@test", start, until)
         ics = make_ics(event, vtimezone=VTIMEZONE_LA)
         expanded = expand_rrules(ics, window_days=120)
@@ -273,15 +273,16 @@ class TestCombineIcsRruleExpansion:
         # Anchor around the NEXT US DST spring-forward (2nd Sunday of March — the
         # same rule the VTIMEZONE_LA fixture encodes) so the window always spans
         # the transition, regardless of when the suite runs (hardcoded dates drift).
-        boundary = _next_dst_spring_forward(date.today())
+        today = date.today()
+        boundary = _next_dst_spring_forward(today)
         # Floor the series start at today: expand_rrules drops pre-today instances,
         # so without the floor a run just before the transition would only see
         # post-transition instances and pass without exercising the shift.
-        start = max(boundary - timedelta(days=21), date.today())
+        start = max(boundary - timedelta(days=21), today)
         until = boundary + timedelta(days=21)
         event = _make_weekly_la_event("Weekly Class", "dst-test@test", start, until)
         ics = make_ics(event, vtimezone=VTIMEZONE_LA)
-        window_days = (until - date.today()).days + 7
+        window_days = (until - today).days + 7
         expanded = expand_rrules(ics, window_days=window_days)
         assert expanded is not None
 
