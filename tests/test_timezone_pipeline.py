@@ -11,7 +11,7 @@ Run: python -m pytest tests/test_timezone_pipeline.py -v
 import json
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -220,19 +220,40 @@ class TestExtractField:
 # Test 3: combine_ics RRULE expansion — does it preserve TZID?
 # ===========================================================================
 
+def _next_dst_spring_forward(today):
+    """Return the next US DST spring-forward date (2nd Sunday of March) after `today`."""
+    for year in (today.year, today.year + 1):
+        # 2nd Sunday of March = first Sunday on or after March 8
+        first_sunday = date(year, 3, 1) + timedelta(
+            days=(6 - date(year, 3, 1).weekday()) % 7
+        )
+        second_sunday = first_sunday + timedelta(days=7)
+        if second_sunday > today:
+            return second_sunday
+    raise AssertionError("unreachable: no future DST spring-forward")
+
+
+def _make_weekly_la_event(summary, uid, start, until):
+    """Build a weekly 19:00-20:00 America/Los_Angeles VEVENT with UNTIL at the given dates."""
+    return make_vevent(
+        summary,
+        f"DTSTART;TZID=America/Los_Angeles:{start:%Y%m%d}T190000",
+        f"DTEND;TZID=America/Los_Angeles:{start:%Y%m%d}T200000",
+        uid,
+        rrule=f"FREQ=WEEKLY;UNTIL={until:%Y%m%d}T235959Z",
+    )
+
+
 class TestCombineIcsRruleExpansion:
     """Tests for combine_ics.py RRULE expansion timezone handling."""
 
     def test_rrule_expansion_preserves_tzid(self):
         """Expanded instances should retain DTSTART;TZID= from original."""
-        # Use dates far enough in the future to fall within the expansion window
-        event = make_vevent(
-            "Weekly Class",
-            "DTSTART;TZID=America/Los_Angeles:20260323T190000",
-            "DTEND;TZID=America/Los_Angeles:20260323T200000",
-            "test-rrule@test",
-            rrule="FREQ=WEEKLY;UNTIL=20260630T235959Z",
-        )
+        # Anchor relative to today: expand_rrules windows on [today, today+window_days],
+        # so hardcoded dates silently drift into the past and yield zero instances.
+        start = date.today() + timedelta(days=7)
+        until = date.today() + timedelta(days=60)
+        event = _make_weekly_la_event("Weekly Class", "test-rrule@test", start, until)
         ics = make_ics(event, vtimezone=VTIMEZONE_LA)
         expanded = expand_rrules(ics, window_days=120)
         assert expanded is not None
@@ -247,28 +268,43 @@ class TestCombineIcsRruleExpansion:
         """
         An RRULE spanning DST boundary should produce correct wall-clock times.
 
-        DST spring forward: March 9, 2025 (America/Los_Angeles).
         A weekly 7pm class should stay at 7pm local, not shift to 8pm.
         """
-        # Use dates around DST spring-forward (March 8, 2026 for America/Los_Angeles)
-        event = make_vevent(
-            "Weekly Class",
-            "DTSTART;TZID=America/Los_Angeles:20260302T190000",
-            "DTEND;TZID=America/Los_Angeles:20260302T200000",
-            "dst-test@test",
-            rrule="FREQ=WEEKLY;UNTIL=20260401T235959Z",
-        )
+        # Anchor around the NEXT US DST spring-forward (2nd Sunday of March — the
+        # same rule the VTIMEZONE_LA fixture encodes) so the window always spans
+        # the transition, regardless of when the suite runs (hardcoded dates drift).
+        boundary = _next_dst_spring_forward(date.today())
+        # Floor the series start at today: expand_rrules drops pre-today instances,
+        # so without the floor a run just before the transition would only see
+        # post-transition instances and pass without exercising the shift.
+        start = max(boundary - timedelta(days=21), date.today())
+        until = boundary + timedelta(days=21)
+        event = _make_weekly_la_event("Weekly Class", "dst-test@test", start, until)
         ics = make_ics(event, vtimezone=VTIMEZONE_LA)
-        expanded = expand_rrules(ics, window_days=30)
+        window_days = (until - date.today()).days + 7
+        expanded = expand_rrules(ics, window_days=window_days)
         assert expanded is not None
 
-        # Extract DTSTART times from expanded instances
+        # Extract DTSTART dates and times from expanded instances
+        inst = []
         for block in expanded:
-            m = re.search(r'DTSTART[^:]*:(\d{8}T\d{6})', block)
+            m = re.search(r"DTSTART[^:]*:(\d{8}T\d{6})", block)
             assert m, f"No DTSTART found in:\n{block}"
-            time_part = m.group(1)[-6:]  # HHMMSS
-            assert time_part == "190000", (
-                f"Expected 190000 (7pm local), got {time_part}. "
+            inst.append(m.group(1))
+
+        # The window must span the transition — instances on BOTH sides are what
+        # make the 190000 assertion meaningful: a wall-clock shift after spring
+        # forward is only visible against a pre-transition baseline.
+        inst_dates = [datetime.strptime(b[:8], "%Y%m%d").date() for b in inst]
+        assert any(d < boundary for d in inst_dates), (
+            "no pre-transition instance in window — DST shift untested"
+        )
+        assert any(d >= boundary for d in inst_dates), (
+            "no post-transition instance in window"
+        )
+        for b in inst:
+            assert b[-6:] == "190000", (
+                f"Expected 190000 (7pm local), got {b[-6:]}. "
                 "DST transition shifted the wall-clock time."
             )
 
