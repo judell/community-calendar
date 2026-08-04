@@ -42,3 +42,18 @@ jobs:
 
       - name: Run database tests
         run: supabase test db supabase/tests/
+
+  perf-gate:
+    # Guards the collapseLongRunningEvents content-key cache (issue #77) so a
+    # regression fails here in the PR instead of after a fork has merged it.
+    # Adopted from the B-Square fork's ADR 0004 verification protocol.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify collapse-cache regression gate
+        run: node scripts/bench_collapse_long.js
