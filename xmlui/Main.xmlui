@@ -243,13 +243,32 @@
       <PickEditor when="{!!pickEvent && activePanel === 'pick'}" event="{pickEvent}" onClose="closePickEditor()" onSaved="picksCounter = picksCounter + 1" />
     </VStack>
     <HStack verticalAlignment="center" marginBottom="$space-2" gap="$space-2">
-      <SearchBox
-        id="searchBox"
-        width="*"
-        initialValue="{window.initialSearch || ''}"
-        onSearch="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; window.syncSearchParam(val); }"
-        onClear="setCategoryFilter(''); window.syncSearchParam(''); filterTerm = ''; displayStartIndex = 0; browseStartIndex = 0; scrollRequest = scrollRequest + 1"
-      />
+      <!-- Inline search input: writes filterTerm directly on keystroke.
+           Converges with the B-Square fork (which runs this pattern, not the
+           SearchBox component) and drops the debounced-ChangeListener + emitEvent
+           re-entry loop that froze the UI 20-30s (issue #79). Safe/cheap since
+           #77 made the pipeline ~3ms, dissolving SearchBox's reason to exist. -->
+      <HStack width="*" verticalAlignment="center" gap="$space-1">
+        <TextBox
+          id="searchInput"
+          autoFocus="false"
+          placeholder="Search events..."
+          fontSize="$fontSize-sm"
+          initialValue="{window.initialSearch || ''}"
+          onDidChange="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; window.syncSearchParam(val); }"
+          width="*"
+        />
+        <Icon
+          name="close"
+          tooltip="Clear search"
+          width="20px"
+          height="20px"
+          cursor="pointer"
+          color="$color-text-tertiary"
+          opacity="{filterTerm ? 1 : 0}"
+          onClick="setCategoryFilter(''); window.syncSearchParam(''); filterTerm = ''; displayStartIndex = 0; browseStartIndex = 0; scrollRequest = scrollRequest + 1; searchInput.setValue('')"
+        />
+      </HStack>
       <Select
         id="categorySelect"
         aria-label="Event category"
