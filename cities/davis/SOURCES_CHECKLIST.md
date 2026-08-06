@@ -8,7 +8,6 @@
 | UC Davis AggieLife | CampusGroups ICS | ~606 | Student org events |
 | UC Davis Library | Localist ICS | ~118 | Library events |
 | Davis Downtown | tribe_events ICS | — | Downtown events |
-| Mondavi Center | Scraper | — | Performing arts |
 | UC Davis Athletics | Scraper | — | Sports events |
 | UC Davis Arts | Scraper | — | Arts events |
 | Yolo County Library | Scraper | — | Library events |
@@ -76,6 +75,7 @@ All 5 use standard `?ical=1` export — added to workflow as curl downloads:
 | Tree Davis | No calendar feed (Elementor, no tribe_events) |
 | Valley Clean Energy | tribe_events but ?ical=1 returns HTML |
 | The Davis Community (thedaviscommunity.org) | Actually Wilmington, NC — wrong city |
+| Mondavi Center | Removed 2026-08-06: site now returns 403 Forbidden to scraper requests upstream and locally |
 | Davis Arts Center | No feed found |
 | DMTC (Musical Theatre) | Google Calendar embed, no public ICS URL |
 | Manetti Shrem Museum | Cloudflare 403 block |

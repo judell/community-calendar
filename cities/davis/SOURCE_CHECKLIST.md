@@ -12,7 +12,6 @@ Prioritized list of potential event sources for the Davis community calendar.
 | Yolo County Library | RSS | ~129 | LibCal RSS, filtered to Davis branches |
 | Davis Downtown | ICS | ~5 | WordPress Events Calendar plugin |
 | UU Davis | ICS | ~17 | Google Calendar ICS feeds |
-| Mondavi Center | Scraper | ~12 | HTML scraper for performing arts |
 | Davis Chamber | XML | ~16 | MemberClicks XML API |
 | UC Davis Athletics | ICS | ~309 | Sidearm Sports ICS feed |
 
@@ -92,7 +91,6 @@ Well-structured pages that would need HTML scrapers.
 
 | Source | URL | Platform | Effort | Notes |
 |--------|-----|----------|--------|-------|
-| **UC Davis Mondavi Center** | mondaviarts.org/events | Custom | Medium | High-value performing arts |
 | **Manetti Shrem Museum** | manettishremmuseum.ucdavis.edu/events | Custom | Medium | Art exhibitions, events |
 | **Davis Chamber** | web.davischamber.com/events | MemberClicks | Medium | Business/community events |
 | **UC Davis Athletics** | ucdavisaggies.com/calendar | Sidearm | Medium | Sports schedules |
@@ -143,6 +141,7 @@ Well-structured pages that would need HTML scrapers.
 | Source | Reason |
 |--------|--------|
 | Visit Davis | Domain for sale |
+| Mondavi Center | Removed 2026-08-06: site now returns 403 Forbidden to scraper requests |
 | Facebook Groups | Not publicly exportable |
 | Instagram-only venues | No structured data |
 | Eventbrite (general) | No clean public feed |
@@ -163,7 +162,7 @@ Well-structured pages that would need HTML scrapers.
 2. [~] Pence Gallery - BLOCKED: RSS empty, My Calendar API disabled. Needs HTML scraper.
 
 ### Phase 2 (High-value HTML scrapers)
-3. [x] Mondavi Center scraper
+3. [~] Mondavi Center - REMOVED 2026-08-06: site now returns 403 Forbidden to scraper requests upstream and locally.
 4. [~] Manetti Shrem Museum - BLOCKED: Cloudflare Turnstile. Also currently shows "no events".
 5. [x] Davis Chamber - MemberClicks XML API works!
 
