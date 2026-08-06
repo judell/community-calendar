@@ -692,6 +692,18 @@ jobs:
                 cmd = cmd[4:].strip()
             return cmd
 
+        def has_output_target(cmd):
+            padded = f" {cmd} "
+            return "--output" in padded or " -o " in padded or ">" in cmd
+
+        def materialize_db_cmd(cmd, output_path):
+            cmd = normalize_cmd(cmd)
+            if not cmd:
+                return cmd
+            if has_output_target(cmd):
+                return cmd
+            return f"{cmd} --output {output_path}"
+
         def query_rows(city):
             query = (
                 f"{supabase_url}/rest/v1/feeds"
@@ -729,15 +741,16 @@ jobs:
             for url, row in db_by_url.items():
                 if row.get("status") == "removed":
                     continue
-                cmd = normalize_cmd(row.get("scraper_cmd"))
+                cmd = materialize_db_cmd(row.get("scraper_cmd"), url)
+                legacy_cmd = legacy_by_url.get(url, {}).get("scraper_cmd")
                 if cmd:
-                    run_rows.append((url, row.get("name") or url, cmd, "db"))
+                    run_rows.append((url, row.get("name") or url, cmd, "db", legacy_cmd))
                 elif url in legacy_by_url:
                     legacy = legacy_by_url[url]
-                    run_rows.append((url, legacy.get("name") or url, legacy["scraper_cmd"], "legacy-no-cmd"))
+                    run_rows.append((url, legacy.get("name") or url, legacy["scraper_cmd"], "legacy-no-cmd", None))
             for url, legacy in legacy_by_url.items():
                 if url not in db_by_url:
-                    run_rows.append((url, legacy.get("name") or url, legacy["scraper_cmd"], "legacy-missing-row"))
+                    run_rows.append((url, legacy.get("name") or url, legacy["scraper_cmd"], "legacy-missing-row", None))
 
             seen = set()
             deduped = []
@@ -750,7 +763,7 @@ jobs:
             print(f"=== {city} scraper feeds ===")
             print(f"DB rows: {len(db_rows)} | Legacy commands: {len(legacy_rows)} | Commands to run: {len(deduped)}")
             city_failures = 0
-            for url, name, cmd, mode in deduped:
+            for url, name, cmd, mode, legacy_cmd in deduped:
                 print(f"-> [{mode}] {name}")
                 result = subprocess.run(
                     cmd,
@@ -759,6 +772,15 @@ jobs:
                     cwd=ROOT,
                     env=env,
                 )
+                if result.returncode != 0 and legacy_cmd and legacy_cmd != cmd:
+                    print(f".. retrying with legacy command for {name}")
+                    result = subprocess.run(
+                        legacy_cmd,
+                        shell=True,
+                        executable="/bin/bash",
+                        cwd=ROOT,
+                        env=env,
+                    )
                 if result.returncode != 0:
                     city_failures += 1
                     print(f"!! {name} failed with exit code {result.returncode}")
