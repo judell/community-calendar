@@ -23,7 +23,6 @@ class UUDavisScraper(GoogleCalendarScraper):
     # Google Calendar IDs extracted from embedded calendar
     calendar_ids = [
         "uudavis@gmail.com",  # Main worship calendar
-        "0p5ed7hbg4p7b4atf3lgjmgic@group.calendar.google.com",
         "l7ct33327vaeffd8iu8ij0hjdg@group.calendar.google.com",
         "da9geoarq2p3o4ukb8vqseat8g@group.calendar.google.com",
     ]
