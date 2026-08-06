@@ -12,7 +12,7 @@ Prioritized list of potential event sources for the Davis community calendar.
 | Yolo County Library | RSS | ~129 | LibCal RSS, filtered to Davis branches |
 | Davis Downtown | ICS | ~5 | WordPress Events Calendar plugin |
 | UU Davis | ICS | ~17 | Google Calendar ICS feeds |
-| Davis Chamber | XML | ~16 | MemberClicks XML API |
+| ~~Davis Chamber~~ | ~~XML~~ | ~16 | Removed 2026-08-06: `web.davischamber.com` no longer resolves locally or in GitHub Actions |
 | UC Davis Athletics | ICS | ~309 | Sidearm Sports ICS feed |
 
 ---
@@ -92,7 +92,7 @@ Well-structured pages that would need HTML scrapers.
 | Source | URL | Platform | Effort | Notes |
 |--------|-----|----------|--------|-------|
 | **Manetti Shrem Museum** | manettishremmuseum.ucdavis.edu/events | Custom | Medium | Art exhibitions, events |
-| **Davis Chamber** | web.davischamber.com/events | MemberClicks | Medium | Business/community events |
+| **Davis Chamber** | web.davischamber.com/events | MemberClicks | Removed 2026-08-06 | `web.davischamber.com` no longer resolves locally or in GitHub Actions, so the XML endpoint is unfixable for now |
 | **UC Davis Athletics** | ucdavisaggies.com/calendar | Sidearm | Medium | Sports schedules |
 
 ### MEDIUM PRIORITY
@@ -164,7 +164,7 @@ Well-structured pages that would need HTML scrapers.
 ### Phase 2 (High-value HTML scrapers)
 3. [~] Mondavi Center - REMOVED 2026-08-06: site now returns 403 Forbidden to scraper requests upstream and locally.
 4. [~] Manetti Shrem Museum - BLOCKED: Cloudflare Turnstile. Also currently shows "no events".
-5. [x] Davis Chamber - MemberClicks XML API works!
+5. [~] Davis Chamber - REMOVED 2026-08-06: `web.davischamber.com` no longer resolves locally or in GitHub Actions.
 
 ### Phase 3 (Sports & Recreation)
 6. [x] UC Davis Athletics - Sidearm ICS feed works!
@@ -219,7 +219,7 @@ curl -sL "<URL>" | grep -i -E "(ical|\\.ics|webcal|calendar\\.google|rss|xml|fee
 ```
 
 ### Platform Notes
-- **MemberClicks**: Used by Davis Chamber, no standard feed
+- **MemberClicks**: Formerly used by Davis Chamber, but the upstream `web.davischamber.com` host no longer resolves as of 2026-08-06
 - **SharpSchool**: Used by DJUSD, complex CMS
 - **Sidearm Sports**: Used by UC Davis Athletics, may have ICS per team
 - **Localist**: Used by UC Davis Library, has ICS feeds

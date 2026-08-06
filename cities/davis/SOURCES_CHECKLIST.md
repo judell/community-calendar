@@ -12,7 +12,7 @@
 | UC Davis Arts | Scraper | — | Arts events |
 | Yolo County Library | Scraper | — | Library events |
 | UU Davis | Scraper | — | Unitarian Universalist |
-| Davis Chamber | Scraper | — | Chamber of commerce |
+| ~~Davis Chamber~~ | ~~Scraper~~ | — | Removed 2026-08-06: `web.davischamber.com` no longer resolves locally or in GitHub Actions |
 | ~~Eventbrite~~ | ~~Scraper~~ | — | Retired 2026-02-15: scraper broken, no public feeds |
 | The Dirt | tribe_events ICS | ~19 | Davis & Yolo arts/culture magazine |
 | Visit Davis | tribe_events ICS | ~14 | Official tourism events |
@@ -76,6 +76,7 @@ All 5 use standard `?ical=1` export — added to workflow as curl downloads:
 | Valley Clean Energy | tribe_events but ?ical=1 returns HTML |
 | The Davis Community (thedaviscommunity.org) | Actually Wilmington, NC — wrong city |
 | Mondavi Center | Removed 2026-08-06: site now returns 403 Forbidden to scraper requests upstream and locally |
+| Davis Chamber | Removed 2026-08-06: `web.davischamber.com` no longer resolves locally or in GitHub Actions, so the MemberClicks XML source is unfixable for now |
 | Davis Arts Center | No feed found |
 | DMTC (Musical Theatre) | Google Calendar embed, no public ICS URL |
 | Manetti Shrem Museum | Cloudflare 403 block |
