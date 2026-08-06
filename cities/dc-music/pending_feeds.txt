@@ -4,6 +4,8 @@
 # inserts rows into the Supabase `feeds` table, then resets this file
 # to the template below. export_feeds_txt.py then regenerates feeds.txt
 # from the DB. Do not edit feeds.txt manually.
+# Think of this file as a temporary inbox for new sources, not as a
+# long-term source inventory.
 #
 # The "# Source Name" comment becomes the display name in the calendar
 # (user-visible source attribution under each event card). Use the bare
@@ -18,10 +20,12 @@
 #   https://example.com/events/?ical=1
 #
 # --- Scrapers ---
-# Add the name, cmd, and output path here. But scrapers ALSO need a
-# line added to .github/workflows/generate-calendar.yml (in the city's
-# scrape step). This file only handles the DB insert; the workflow
-# entry is what actually runs the scraper.
+# Add the name, cmd, and output path here. The build stages those into
+# the `feeds` table as a scraper row. Later in the same build, the
+# scraper runner queries active scraper rows from the DB and executes
+# `scraper_cmd`, writing to the row's output path. Legacy hardcoded
+# workflow commands remain only as fallback for older scraper rows that
+# have not been backfilled yet.
 #
 #   # Source Name
 #   # cmd: python scrapers/example.py --name "Source Name"

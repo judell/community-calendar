@@ -20,11 +20,12 @@
 #   https://example.com/events/?ical=1
 #
 # --- Scrapers ---
-# Add the name, cmd, and output path here. But scrapers ALSO need a
-# line added to .github/workflows/generate-calendar.yml (in the city's
-# scrape step). This file only handles the DB insert; the workflow
-# entry is what actually runs the scraper. In other words: workflow =
-# execution, pending_feeds.txt = registration staging.
+# Add the name, cmd, and output path here. The build stages those into
+# the `feeds` table as a scraper row. Later in the same build, the
+# scraper runner queries active scraper rows from the DB and executes
+# `scraper_cmd`, writing to the row's output path. Legacy hardcoded
+# workflow commands remain only as fallback for older scraper rows that
+# have not been backfilled yet.
 #
 #   # Source Name
 #   # cmd: python scrapers/example.py --name "Source Name"

@@ -1,8 +1,8 @@
 <Component
   name="AddFeedDialog"
-  method.open="() => { feedUrl = ''; feedName = ''; fallbackUrl = ''; previewEvents = null; validating = false; validationError = ''; submitted = false; deleteError = ''; showInfo = false; activePanel = 'feeds'; feedsList.refetch(); }"
+  method.open="() => { feedUrl = ''; feedName = ''; fallbackUrl = ''; previewEvents = null; validating = false; validationError = ''; submitted = false; deleteError = ''; deletingId = ''; deletingType = ''; showInfo = false; activePanel = 'feeds'; feedsList.refetch(); }"
   method.close="() => { if (activePanel === 'feeds') activePanel = ''; }"
-  method.toggle="() => { if (activePanel === 'feeds') { activePanel = ''; } else { feedUrl = ''; feedName = ''; fallbackUrl = ''; previewEvents = null; validating = false; validationError = ''; submitted = false; deleteError = ''; showInfo = false; activePanel = 'feeds'; feedsList.refetch(); } }"
+  method.toggle="() => { if (activePanel === 'feeds') { activePanel = ''; } else { feedUrl = ''; feedName = ''; fallbackUrl = ''; previewEvents = null; validating = false; validationError = ''; submitted = false; deleteError = ''; deletingId = ''; deletingType = ''; showInfo = false; activePanel = 'feeds'; feedsList.refetch(); } }"
   var.feedUrl=""
   var.feedName=""
   var.fallbackUrl=""
@@ -14,6 +14,7 @@
   var.showInfo="{false}"
   var.deleteError=""
   var.deletingId=""
+  var.deletingType=""
   var.sortedFeeds="{(feedsList.value || []).slice().sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); })}"
   var.scraperFeeds="{sortedFeeds.filter(function(f) { return f.feed_type === 'scraper'; })}"
   var.pendingFeeds="{sortedFeeds.filter(function(f) { return f.status === 'pending'; })}"
@@ -77,9 +78,13 @@
       'Authorization': 'Bearer ' + window.authSession?.access_token
     }}"
     onSuccess="() => {
-      markRemovedApi.execute({ feed_id: deletingId });
+      if (deletingType === 'scraper') {
+        markScraperRemovedApi.execute({ status: 'removed' });
+      } else {
+        markRemovedApi.execute({ feed_id: deletingId });
+      }
     }"
-    onError="(err) => { deleteError = 'Failed to delete events: ' + (err.message || err); }" />
+    onError="(err) => { deletingId = ''; deletingType = ''; deleteError = 'Failed to delete events: ' + (err.message || err); }" />
 
   <APICall
     id="markRemovedApi"
@@ -91,8 +96,22 @@
       'Authorization': 'Bearer ' + window.authSession?.access_token
     }}"
     body="{$param}"
-    onSuccess="() => { deleteError = ''; feedsList.refetch(); }"
-    onError="(err) => { deleteError = 'Failed to mark feed as removed: ' + (err.message || err); }" />
+    onSuccess="() => { deleteError = ''; deletingId = ''; deletingType = ''; feedsList.refetch(); }"
+    onError="(err) => { deletingId = ''; deletingType = ''; deleteError = 'Failed to mark feed as removed: ' + (err.message || err); }" />
+
+  <APICall
+    id="markScraperRemovedApi"
+    method="patch"
+    url="{appGlobals.supabaseUrl + '/rest/v1/feeds?id=eq.' + deletingId}"
+    headers="{{
+      'Content-Type': 'application/json',
+      'apikey': appGlobals.supabasePublishableKey,
+      'Authorization': 'Bearer ' + window.authSession?.access_token,
+      'Prefer': 'return=minimal'
+    }}"
+    body="{$param}"
+    onSuccess="() => { deleteError = ''; deletingId = ''; deletingType = ''; feedsList.refetch(); }"
+    onError="(err) => { deletingId = ''; deletingType = ''; deleteError = 'Failed to disable scraper: ' + (err.message || err); }" />
 
   <Theme>
   <Card
@@ -140,6 +159,9 @@
         </Text>
         <Text fontSize="$fontSize-sm" color="$color-text-secondary">
           Git-side intake still exists in <Text variant="code">pending_feeds.txt</Text>. That complementary path is used for contributor-submitted ICS feeds and for scraper staging. The build moves those entries into the database before normal feed processing continues.
+        </Text>
+        <Text fontSize="$fontSize-sm" color="$color-text-secondary">
+          Scraper rows now follow database status too. Removing a scraper marks it removed so future builds stop executing it.
         </Text>
       </Card>
 
@@ -234,7 +256,7 @@
           when="{scraperFeeds.length > 0}"
           fontSize="$fontSize-sm"
           color="$color-text-secondary"
-          value="{scraperFeeds.length + ' scraper source' + (scraperFeeds.length === 1 ? '' : 's') + ' shown read-only (badge + command, no delete button).'}" />
+          value="{scraperFeeds.length + ' scraper source' + (scraperFeeds.length === 1 ? '' : 's') + ' shown with command metadata and durable remove behavior.'}" />
         <ScrollViewer height="50vh">
           <VStack gap="$space-1">
             <VStack when="{pendingFeeds.length > 0}" gap="$space-1" paddingBottom="$space-2">
@@ -245,14 +267,14 @@
                     <Text value="{$item.name}" flexGrow="1" />
                     <Badge when="{$item.feed_type === 'scraper'}" value="scraper" variant="pill" fontSize="0.65em" />
                     <Button
-                      when="{$item.feed_type !== 'scraper'}"
-                      label="Delete"
+                      label="{$item.feed_type === 'scraper' ? 'Remove' : 'Delete'}"
                       variant="outlined"
                       themeColor="attention"
                       size="xs"
                       onClick="() => {
-                        if (!confirm('Delete ' + $item.name + ' and all its events?')) return;
+                        if (!confirm(($item.feed_type === 'scraper' ? 'Remove ' : 'Delete ') + $item.name + ' and all its events?')) return;
                         deletingId = $item.id;
+                        deletingType = $item.feed_type || '';
                         deleteError = '';
                         deleteEventsApi.execute({ name: $item.name });
                       }"
@@ -260,7 +282,7 @@
                   </HStack>
                   <Text when="{$item.feed_type === 'scraper'}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{'Output: ' + $item.url}" breakMode="word" />
                   <Text when="{$item.feed_type === 'scraper' && $item.scraper_cmd}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{'Command: ' + $item.scraper_cmd}" breakMode="word" />
-                  <Text when="{$item.feed_type === 'scraper'}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="Managed in the build workflow; removing needs its workflow line + feeds row (see #80)." breakMode="word" />
+                  <Text when="{$item.feed_type === 'scraper'}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="Removing marks the scraper as removed so future builds stop running it." breakMode="word" />
                   <Text when="{$item.feed_type !== 'scraper'}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.url}" breakMode="word" />
                   <Text when="{$item.feed_type !== 'scraper' && $item.fallback_url}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="{'Source page: ' + $item.fallback_url}" breakMode="word" />
                 </VStack>
@@ -274,14 +296,14 @@
                     <Text value="{$item.name}" flexGrow="1" />
                     <Badge when="{$item.feed_type === 'scraper'}" value="scraper" variant="pill" fontSize="0.65em" />
                     <Button
-                      when="{$item.feed_type !== 'scraper'}"
-                      label="Delete"
+                      label="{$item.feed_type === 'scraper' ? 'Remove' : 'Delete'}"
                       variant="outlined"
                       themeColor="attention"
                       size="xs"
                       onClick="() => {
-                        if (!confirm('Delete ' + $item.name + ' and all its events?')) return;
+                        if (!confirm(($item.feed_type === 'scraper' ? 'Remove ' : 'Delete ') + $item.name + ' and all its events?')) return;
                         deletingId = $item.id;
+                        deletingType = $item.feed_type || '';
                         deleteError = '';
                         deleteEventsApi.execute({ name: $item.name });
                       }"
@@ -289,7 +311,7 @@
                   </HStack>
                   <Text when="{$item.feed_type === 'scraper'}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{'Output: ' + $item.url}" breakMode="word" />
                   <Text when="{$item.feed_type === 'scraper' && $item.scraper_cmd}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{'Command: ' + $item.scraper_cmd}" breakMode="word" />
-                  <Text when="{$item.feed_type === 'scraper'}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="Managed in the build workflow; removing needs its workflow line + feeds row (see #80)." breakMode="word" />
+                  <Text when="{$item.feed_type === 'scraper'}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="Removing marks the scraper as removed so future builds stop running it." breakMode="word" />
                   <Text when="{$item.feed_type !== 'scraper'}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.url}" breakMode="word" />
                   <Text when="{$item.feed_type !== 'scraper' && $item.fallback_url}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="{'Source page: ' + $item.fallback_url}" breakMode="word" />
                 </VStack>
