@@ -15,13 +15,14 @@
   var.deleteError=""
   var.deletingId=""
   var.sortedFeeds="{(feedsList.value || []).slice().sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); })}"
+  var.scraperFeeds="{sortedFeeds.filter(function(f) { return f.feed_type === 'scraper'; })}"
   var.pendingFeeds="{sortedFeeds.filter(function(f) { return f.status === 'pending'; })}"
   var.activeFeeds="{sortedFeeds.filter(function(f) { return f.status === 'active'; })}">
 
   <DataSource
     id="feedsList"
     when="{activePanel === 'feeds'}"
-    url="{appGlobals.supabaseUrl + '/rest/v1/feeds?select=id,name,url,status,fallback_url&city=eq.' + (window.cityFilter || 'bloomington') + '&status=in.(active,pending)&feed_type=in.(ics_url,curator)&order=name.asc'}"
+    url="{appGlobals.supabaseUrl + '/rest/v1/feeds?select=id,name,url,status,fallback_url,feed_type,scraper_cmd&city=eq.' + (window.cityFilter || 'bloomington') + '&status=in.(active,pending)&feed_type=in.(ics_url,curator,scraper)&order=name.asc'}"
     headers="{{
       apikey: appGlobals.supabasePublishableKey
     }}"
@@ -229,6 +230,11 @@
           fontSize="$fontSize-sm"
           color="$color-text-secondary"
           value="{pendingCount + ' feed' + (pendingCount === 1 ? '' : 's') + ' queued for the next build.'}" />
+        <Text
+          when="{scraperFeeds.length > 0}"
+          fontSize="$fontSize-sm"
+          color="$color-text-secondary"
+          value="{scraperFeeds.length + ' scraper source' + (scraperFeeds.length === 1 ? '' : 's') + ' shown read-only (badge + command, no delete button).'}" />
         <ScrollViewer height="50vh">
           <VStack gap="$space-1">
             <VStack when="{pendingFeeds.length > 0}" gap="$space-1" paddingBottom="$space-2">
@@ -237,7 +243,9 @@
                 <VStack paddingVertical="$space-1">
                   <HStack gap="$space-2" verticalAlignment="center">
                     <Text value="{$item.name}" flexGrow="1" />
+                    <Badge when="{$item.feed_type === 'scraper'}" value="scraper" variant="pill" fontSize="0.65em" />
                     <Button
+                      when="{$item.feed_type !== 'scraper'}"
                       label="Delete"
                       variant="outlined"
                       themeColor="attention"
@@ -250,8 +258,11 @@
                       }"
                     />
                   </HStack>
-                  <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.url}" breakMode="word" />
-                  <Text when="{$item.fallback_url}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="{'Source page: ' + $item.fallback_url}" breakMode="word" />
+                  <Text when="{$item.feed_type === 'scraper'}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{'Output: ' + $item.url}" breakMode="word" />
+                  <Text when="{$item.feed_type === 'scraper' && $item.scraper_cmd}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{'Command: ' + $item.scraper_cmd}" breakMode="word" />
+                  <Text when="{$item.feed_type === 'scraper'}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="Managed in the build workflow; removing needs its workflow line + feeds row (see #80)." breakMode="word" />
+                  <Text when="{$item.feed_type !== 'scraper'}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.url}" breakMode="word" />
+                  <Text when="{$item.feed_type !== 'scraper' && $item.fallback_url}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="{'Source page: ' + $item.fallback_url}" breakMode="word" />
                 </VStack>
               </Items>
             </VStack>
@@ -261,7 +272,9 @@
                 <VStack paddingVertical="$space-1">
                   <HStack gap="$space-2" verticalAlignment="center">
                     <Text value="{$item.name}" flexGrow="1" />
+                    <Badge when="{$item.feed_type === 'scraper'}" value="scraper" variant="pill" fontSize="0.65em" />
                     <Button
+                      when="{$item.feed_type !== 'scraper'}"
                       label="Delete"
                       variant="outlined"
                       themeColor="attention"
@@ -274,8 +287,11 @@
                       }"
                     />
                   </HStack>
-                  <Text fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.url}" breakMode="word" />
-                  <Text when="{$item.fallback_url}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="{'Source page: ' + $item.fallback_url}" breakMode="word" />
+                  <Text when="{$item.feed_type === 'scraper'}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{'Output: ' + $item.url}" breakMode="word" />
+                  <Text when="{$item.feed_type === 'scraper' && $item.scraper_cmd}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{'Command: ' + $item.scraper_cmd}" breakMode="word" />
+                  <Text when="{$item.feed_type === 'scraper'}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="Managed in the build workflow; removing needs its workflow line + feeds row (see #80)." breakMode="word" />
+                  <Text when="{$item.feed_type !== 'scraper'}" fontSize="$fontSize-xs" color="$color-text-secondary" value="{$item.url}" breakMode="word" />
+                  <Text when="{$item.feed_type !== 'scraper' && $item.fallback_url}" fontSize="$fontSize-xs" fontStyle="italic" color="$color-text-secondary" value="{'Source page: ' + $item.fallback_url}" breakMode="word" />
                 </VStack>
               </Items>
             </VStack>
