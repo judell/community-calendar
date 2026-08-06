@@ -4,11 +4,9 @@
 Contributors add ICS feed URLs to cities/<city>/pending_feeds.txt in their PRs.
 After merging, the build runs this script to move them into the database.
 
-For scraper entries, this script stages source metadata into the feeds table.
-It does not run the scraper directly. Later in the build, the scraper runner
-queries active `feed_type='scraper'` rows from the database and executes each
-row's `scraper_cmd`. Legacy hardcoded workflow commands remain only as fallback
-for older scraper rows that have not been backfilled yet.
+For scraper entries, this script registers source metadata only. It does not
+run the scraper. Actual scraper execution still comes from the matching line in
+.github/workflows/generate-calendar.yml.
 
 Format of pending_feeds.txt:
 
@@ -149,12 +147,11 @@ TEMPLATE = """\
 #   https://example.com/events/?ical=1
 #
 # --- Scrapers ---
-# Add the name, cmd, and output path here. The build stages those into
-# the `feeds` table as a scraper row. Later in the same build, the
-# scraper runner queries active scraper rows from the DB and executes
-# `scraper_cmd`, writing to the row's output path. Legacy hardcoded
-# workflow commands remain only as fallback for older scraper rows that
-# have not been backfilled yet.
+# Add the name, cmd, and output path here. But scrapers ALSO need a
+# line added to .github/workflows/generate-calendar.yml (in the city's
+# scrape step). This file only handles the DB insert; the workflow
+# entry is what actually runs the scraper. In other words: workflow =
+# execution, pending_feeds.txt = registration staging.
 #
 #   # Source Name
 #   # cmd: python scrapers/example.py --name "Source Name"

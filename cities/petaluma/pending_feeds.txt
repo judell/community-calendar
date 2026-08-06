@@ -1,38 +1,11 @@
-# Add feed URLs or scraper outputs here.
+# Add ICS feed URLs here. The build will process them into the
+# database automatically and reset this file to the template below.
 #
-# Pipeline: On each build, process_pending_feeds.py reads this file,
-# inserts rows into the Supabase `feeds` table, then resets this file
-# to the template below. export_feeds_txt.py then regenerates feeds.txt
-# from the DB. Do not edit feeds.txt manually.
-# Think of this file as a temporary inbox for new sources, not as a
-# long-term source inventory.
-#
-# The "# Source Name" comment becomes the display name in the calendar
-# (user-visible source attribution under each event card). Use the bare
-# canonical venue/source name only — no parenthetical context, no event
-# counts, no strategy notes. Put verification/discovery notes in
-# SOURCES_CHECKLIST.md, not here.
-#
-# --- ICS feed URLs ---
-# Just add the name and URL. The build handles everything else.
-#
+# Format:
 #   # Source Name
 #   https://example.com/events/?ical=1
 #
-# --- Scrapers ---
-# Add the name, cmd, and output path here. The build stages those into
-# the `feeds` table as a scraper row. Later in the same build, the
-# scraper runner queries active scraper rows from the DB and executes
-# `scraper_cmd`, writing to the row's output path. Legacy hardcoded
-# workflow commands remain only as fallback for older scraper rows that
-# have not been backfilled yet.
-#
-#   # Source Name
-#   # cmd: python scrapers/example.py --name "Source Name"
-#   cities/petaluma/example.ics
-#
 # Test before adding:
 #   python scripts/add_feed.py URL petaluma "Source Name" --test
-#   python scripts/add_scraper.py example petaluma "Source Name" --test
 #
 # See CONTRIBUTING.md for details.

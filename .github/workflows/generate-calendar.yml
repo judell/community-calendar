@@ -81,7 +81,7 @@ jobs:
     # Santa Rosa
     # ==========================================
     - name: Scrape Santa Rosa sources
-      if: contains(steps.locations.outputs.list, 'santarosa') && github.event.inputs.regenerate_only != 'true' && false
+      if: contains(steps.locations.outputs.list, 'santarosa') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Santa Rosa..."
         python scripts/library_intercept.py --location santarosa --output cities/santarosa/library_intercept.ics || true
@@ -173,7 +173,7 @@ jobs:
     # Bloomington
     # ==========================================
     - name: Scrape Bloomington sources
-      if: contains(steps.locations.outputs.list, 'bloomington') && github.event.inputs.regenerate_only != 'true' && false
+      if: contains(steps.locations.outputs.list, 'bloomington') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Bloomington..."
         python scrapers/buskirk_chumley.py --output cities/bloomington/buskirk_chumley.ics || true
@@ -252,7 +252,7 @@ jobs:
     # Davis
     # ==========================================
     - name: Scrape Davis sources
-      if: contains(steps.locations.outputs.list, 'davis') && github.event.inputs.regenerate_only != 'true' && false
+      if: contains(steps.locations.outputs.list, 'davis') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Davis..."
         python scrapers/ucdavis_arts.py --output cities/davis/ucdavis_arts.ics || true
@@ -272,7 +272,7 @@ jobs:
     # Petaluma
     # ==========================================
     - name: Scrape Petaluma sources
-      if: contains(steps.locations.outputs.list, 'petaluma') && github.event.inputs.regenerate_only != 'true' && false
+      if: contains(steps.locations.outputs.list, 'petaluma') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Petaluma..."
         python scripts/library_intercept.py --location petaluma --output cities/petaluma/library_intercept.ics || true
@@ -301,7 +301,7 @@ jobs:
     # Toronto
     # ==========================================
     - name: Scrape Toronto sources
-      if: contains(steps.locations.outputs.list, 'toronto') && github.event.inputs.regenerate_only != 'true' && false
+      if: contains(steps.locations.outputs.list, 'toronto') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Toronto..."
         python scrapers/uoft_events.py -o cities/toronto/uoft_events.ics || true
@@ -391,7 +391,7 @@ jobs:
     # Raleigh-Durham
     # ==========================================
     - name: Scrape Raleigh-Durham sources
-      if: contains(steps.locations.outputs.list, 'raleighdurham') && github.event.inputs.regenerate_only != 'true' && false
+      if: contains(steps.locations.outputs.list, 'raleighdurham') && github.event.inputs.regenerate_only != 'true'
       run: |
         python scrapers/legistar.py --client wake --source "Wake County" -o cities/raleighdurham/wake_county_legistar.ics || true
         python scrapers/legistar.py --client chapelhill --source "Town of Chapel Hill" -o cities/raleighdurham/chapelhill_legistar.ics || true
@@ -421,7 +421,7 @@ jobs:
     # Montclair
     # ==========================================
     - name: Scrape Montclair sources
-      if: contains(steps.locations.outputs.list, 'montclair') && github.event.inputs.regenerate_only != 'true' && false
+      if: contains(steps.locations.outputs.list, 'montclair') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Montclair..."
         python scrapers/growthzone.py --url "https://business.northessexchamber.com/api/events" --name "North Essex Chamber of Commerce" --output cities/montclair/north_essex_chamber.ics || true
@@ -457,7 +457,7 @@ jobs:
     # Lancaster
     # ==========================================
     - name: Scrape Lancaster sources
-      if: contains(steps.locations.outputs.list, 'lancaster') && github.event.inputs.regenerate_only != 'true' && false
+      if: contains(steps.locations.outputs.list, 'lancaster') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Lancaster..."
         python scrapers/mobilize.py --url "https://www.mobilize.us/lancastercountydems/" --name "Lancaster County Dems (Mobilize)" --output cities/lancaster/mobilize_lancaster_county_dems.ics || true
@@ -506,7 +506,7 @@ jobs:
     # Asheville
     # ==========================================
     - name: Scrape Asheville sources
-      if: contains(steps.locations.outputs.list, 'asheville') && github.event.inputs.regenerate_only != 'true' && false
+      if: contains(steps.locations.outputs.list, 'asheville') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Asheville..."
         python scrapers/songkick.py --url "https://www.songkick.com/venues/107138-asheville-music-hall" --name "Asheville Music Hall" --output cities/asheville/asheville_music_hall.ics || true
@@ -559,7 +559,7 @@ jobs:
     # Teton Valley
     # ==========================================
     - name: Scrape Teton Valley sources
-      if: contains(steps.locations.outputs.list, 'tetonvalley') && github.event.inputs.regenerate_only != 'true' && false
+      if: contains(steps.locations.outputs.list, 'tetonvalley') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping Teton Valley..."
         python scrapers/knotty_pine.py --output cities/tetonvalley/knotty_pine.ics || true
@@ -572,7 +572,7 @@ jobs:
     # DC Music
     # ==========================================
     - name: Scrape DC Music sources
-      if: contains(steps.locations.outputs.list, 'dc-music') && github.event.inputs.regenerate_only != 'true' && false
+      if: contains(steps.locations.outputs.list, 'dc-music') && github.event.inputs.regenerate_only != 'true'
       run: |
         echo "Scraping DC Music..."
         # City-level aggregators
@@ -651,163 +651,6 @@ jobs:
         else
           echo "No pending feeds to process"
         fi
-
-    - name: Run scraper feeds from DB
-      if: github.event.inputs.regenerate_only != 'true'
-      env:
-        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      run: |
-        # Initial rollout sequence:
-        # 1. Merge this DB-driven runner while legacy city scraper blocks stay in
-        #    the workflow as disabled fallback/manifest data.
-        # 2. Backfill existing scraper rows into the feeds table with
-        #    scripts/backfill_scraper_feeds.py in the main upstream.
-        # 3. After that, new scrapers should enter through pending_feeds.txt /
-        #    add_scraper.py so they get a DB row from the start.
-        # 4. A later cleanup pass can remove legacy hardcoded scraper commands
-        #    once backfill coverage has been verified.
-        python - <<'PY'
-        import json
-        import os
-        import subprocess
-        import sys
-        import urllib.parse
-        import urllib.request
-        from pathlib import Path
-
-        ROOT = Path.cwd()
-        sys.path.insert(0, str(ROOT / "scripts"))
-        from backfill_scraper_feeds import workflow_scraper_rows
-
-        supabase_url = os.environ["SUPABASE_URL"]
-        service_key = os.environ["SUPABASE_SERVICE_KEY"]
-        selected_cities = [city.strip() for city in "${{ steps.locations.outputs.list }}".split(",") if city.strip()]
-
-        def normalize_cmd(raw_cmd):
-            if not raw_cmd:
-                return raw_cmd
-            cmd = raw_cmd.strip()
-            if cmd.startswith("cmd:"):
-                cmd = cmd[4:].strip()
-            return cmd
-
-        def has_output_target(cmd):
-            padded = f" {cmd} "
-            return "--output" in padded or " -o " in padded or ">" in cmd
-
-        def materialize_db_cmd(cmd, output_path):
-            cmd = normalize_cmd(cmd)
-            if not cmd:
-                return cmd
-            if has_output_target(cmd):
-                return cmd
-            return f"{cmd} --output {output_path}"
-
-        def query_rows(city):
-            query = (
-                f"{supabase_url}/rest/v1/feeds"
-                f"?select=city,url,name,status,scraper_cmd"
-                f"&feed_type=eq.scraper"
-                f"&city=eq.{urllib.parse.quote(city)}"
-            )
-            req = urllib.request.Request(
-                query,
-                headers={
-                    "apikey": service_key,
-                    "Authorization": f"Bearer {service_key}",
-                },
-            )
-            with urllib.request.urlopen(req) as resp:
-                return json.loads(resp.read().decode())
-
-        env = os.environ.copy()
-        env["SCRAPE_MONTHS"] = os.environ.get("SCRAPE_MONTHS", "3")
-
-        overall_failures = 0
-        for city in selected_cities:
-            legacy_rows = workflow_scraper_rows(city)
-            legacy_by_url = {row["url"]: row for row in legacy_rows}
-            db_rows = query_rows(city)
-            db_by_url = {row["url"]: row for row in db_rows}
-
-            cleanup_paths = set(legacy_by_url.keys()) | set(db_by_url.keys())
-            for rel_path in cleanup_paths:
-                path = ROOT / rel_path
-                if path.exists():
-                    path.unlink()
-
-            run_rows = []
-            for url, row in db_by_url.items():
-                if row.get("status") == "removed":
-                    continue
-                cmd = materialize_db_cmd(row.get("scraper_cmd"), url)
-                legacy_cmd = legacy_by_url.get(url, {}).get("scraper_cmd")
-                if cmd:
-                    run_rows.append((url, row.get("name") or url, cmd, "db", legacy_cmd))
-                elif url in legacy_by_url:
-                    legacy = legacy_by_url[url]
-                    run_rows.append((url, legacy.get("name") or url, legacy["scraper_cmd"], "legacy-no-cmd", None))
-            for url, legacy in legacy_by_url.items():
-                if url not in db_by_url:
-                    run_rows.append((url, legacy.get("name") or url, legacy["scraper_cmd"], "legacy-missing-row", None))
-
-            seen = set()
-            deduped = []
-            for row in run_rows:
-                if row[0] in seen:
-                    continue
-                seen.add(row[0])
-                deduped.append(row)
-
-            print(f"=== {city} scraper feeds ===")
-            print(f"DB rows: {len(db_rows)} | Legacy commands: {len(legacy_rows)} | Commands to run: {len(deduped)}")
-            city_failures = 0
-            for url, name, cmd, mode, legacy_cmd in deduped:
-                print(f"-> [{mode}] {name}")
-                result = subprocess.run(
-                    cmd,
-                    shell=True,
-                    executable="/bin/bash",
-                    cwd=ROOT,
-                    env=env,
-                )
-                if result.returncode != 0 and legacy_cmd and legacy_cmd != cmd:
-                    print(f".. retrying with legacy command for {name}")
-                    result = subprocess.run(
-                        legacy_cmd,
-                        shell=True,
-                        executable="/bin/bash",
-                        cwd=ROOT,
-                        env=env,
-                    )
-                if result.returncode != 0:
-                    city_failures += 1
-                    print(f"!! {name} failed with exit code {result.returncode}")
-            overall_failures += city_failures
-
-            for rel_path in sorted(cleanup_paths):
-                if not rel_path.startswith(f"cities/{city}/"):
-                    continue
-                path = ROOT / rel_path
-                if not path.exists():
-                    print(f"  MISSING {Path(rel_path).name}")
-                    continue
-                try:
-                    events = path.read_text(errors="ignore").count("BEGIN:VEVENT")
-                except OSError:
-                    events = 0
-                if events > 0:
-                    print(f"  OK {Path(rel_path).name}: {events} events")
-                else:
-                    print(f"  WARN {Path(rel_path).name}: no events")
-
-            if city_failures:
-                print(f"{city}: {city_failures} scraper command(s) failed")
-
-        if overall_failures:
-            print(f"Completed with {overall_failures} scraper command failure(s)")
-        PY
 
     - name: Download live feeds
       env:
