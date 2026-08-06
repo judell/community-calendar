@@ -1,6 +1,7 @@
 """ICS feed scraper base class."""
 
 import logging
+import re
 from typing import Any, Optional
 
 import requests
@@ -75,11 +76,24 @@ class IcsScraper(BaseScraper):
         self.logger.debug(f"Total events after dedup: {len(unique_events)}")
         return unique_events
 
+    def normalize_ics_content(self, ics_content: str) -> str:
+        """Repair known malformed ICS patterns before parsing.
+
+        Some feeds incorrectly serialize all-day dates as `YYYYMMDDZ`
+        instead of plain `YYYYMMDD`. Strip the trailing `Z` only for that
+        exact date-only form so `icalendar` can parse the event.
+        """
+        return re.sub(
+            r'(?m)^(DTSTART|DTEND)(;VALUE=DATE)?:(\d{8})Z\r?$',
+            r'\1;VALUE=DATE:\3',
+            ics_content,
+        )
+
     def _parse_ics(self, ics_content: str) -> list[dict[str, Any]]:
         """Parse events from ICS content."""
         events = []
         try:
-            cal = Calendar.from_ical(ics_content)
+            cal = Calendar.from_ical(self.normalize_ics_content(ics_content))
         except Exception as e:
             self.logger.warning(f"Error parsing ICS: {e}")
             return events
