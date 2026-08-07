@@ -53,9 +53,23 @@
 
 | Source | Scraper | Events (test) | Notes |
 |--------|---------|--------------|-------|
-| The Grey Eagle | `rhp_events.py` (new, parameterized from sweetwater.py) | 66 | RSS `thegreyeagle.com/calendar/feed/` + JSON-LD per page. Supersedes Songkick interim (5) — remove `grey_eagle_songkick` via Manage Feeds once this lands |
-| The Orange Peel | `rhp_events.py` | 37 | RSS `theorangepeel.net/events/feed/`; includes Hellbender (their new 5,000-cap outdoor venue). Supersedes Songkick interim (5) |
-| Pisgah Brewing Company | `rhp_events.py` | 16 | RSS `pisgahbrewing.com/events/feed/` — same Rockhouse plugin; Eventbrite organizer is dormant (0 events) |
+| The Grey Eagle | `rhp_events.py` (new, parameterized from sweetwater.py) | 56 | RSS `thegreyeagle.com/calendar/feed/` + JSON-LD per page. Supersedes Songkick interim (5) — remove `grey_eagle_songkick` via Manage Feeds once this lands. See 2026-08-07 date-parsing fix note below. |
+| The Orange Peel | `rhp_events.py` | 35 | RSS `theorangepeel.net/events/feed/`; includes Hellbender (their new 5,000-cap outdoor venue). Supersedes Songkick interim (5). See 2026-08-07 date-parsing fix note below. |
+| Pisgah Brewing Company | `rhp_events.py` | 20 | RSS `pisgahbrewing.com/events/feed/` — same Rockhouse plugin; Eventbrite organizer is dormant (0 events). See 2026-08-07 date-parsing fix note below. |
+
+> **2026-08-07 fix: `rhp_events.py` was silently returning 0 events for all three venues above.**
+> Root cause: `_fetch_event_jsonld()` parsed each page's JSON-LD `startDate`/`endDate`
+> (e.g. `2026-08-24T18:00:00-0400`) with `datetime.fromisoformat()`, which on Python <3.11
+> rejects UTC offsets that omit the colon (`-0400` instead of `-04:00`) and raises
+> `ValueError` on every event — silently skipped, no error surfaced anywhere in the
+> pipeline. Confirmed reproducible both locally (Python 3.10 parity venv) and in the
+> 2026-08-07 upstream GitHub run (commit `784f5d8a`). RSS discovery and JSON-LD extraction
+> were both working the whole time (57/36/20 event URLs discovered per venue); only the
+> date parse failed. Fix: normalize colon-less offsets (and `Z`) before parsing, in
+> `scrapers/rhp_events.py`. Verified with `/tmp/community-calendar-audit-venv310/bin/python`
+> (Python 3.10.20): The Grey Eagle 0 → 56 events, The Orange Peel 0 → 35 events (36 found,
+> 1 filtered beyond the 6-month window), Pisgah Brewing Company 0 → 20 events. Full audit
+> writeup: `reports/asheville-2026-08-07-soak.md` (F003/A001).
 | Where Y'at AVL Music | `whereyat.py` (new) | 982 | Open JSON API `whereyatavlmusic.com/api/events`; ~50 venues incl. many with no feeds (5 Walnut, Fleetwood's, Double Crown, One World, Sierra Nevada, Asheville Symphony...). AGGREGATOR — listed in source_priority.json |
 | Blue Mountain Pizza | `squarespace.py` | 68 | Weaverville; `/events` collection |
 | Modelface Comedy | `squarespace.py` | 84 | City's main comedy producer; `/shows` collection |

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       locations:
-        description: 'Locations to process (comma-separated: santarosa,bloomington,davis,petaluma or "all")'
+        description: 'Locations to process (comma-separated: santarosa,bloomington,davis,montclair or "all")'
         required: false
         default: 'all'
       regenerate_only:
@@ -91,7 +91,6 @@ jobs:
         python scrapers/cal_theatre.py --output cities/santarosa/cal_theatre.ics || true
         python scrapers/copperfields.py --output cities/santarosa/copperfields.ics || true
         python scrapers/sonoma_county_gov.py --output cities/santarosa/sonoma_county_gov.ics || true
-        python scrapers/cafefrida.py --output cities/santarosa/cafefrida.ics || true
         python scrapers/srcc.py --output cities/santarosa/srcc.ics || true
         python scrapers/barrel_proof.py --output cities/santarosa/barrel_proof.ics || true
         python scrapers/sportsbasement.py --location "Santa Rosa" --output cities/santarosa/sportsbasement.ics || true
@@ -105,12 +104,12 @@ jobs:
         python scrapers/cinnabar.py --output cities/santarosa/cinnabar.ics || true
         python scrapers/green_music_center.py --output cities/santarosa/green_music_center.ics || true
         # Santa Rosa area high schools (MaxPreps)
-        python scrapers/maxpreps.py --school santa-rosa-panthers --output cities/santarosa/maxpreps_santa_rosa_high.ics || true
-        python scrapers/maxpreps.py --school montgomery-vikings --output cities/santarosa/maxpreps_montgomery_high.ics || true
-        python scrapers/maxpreps.py --school maria-carrillo-pumas --output cities/santarosa/maxpreps_maria_carrillo.ics || true
-        python scrapers/maxpreps.py --school piner-prospectors --output cities/santarosa/maxpreps_piner_high.ics || true
-        python scrapers/maxpreps.py --school elsie-allen-lobos --output cities/santarosa/maxpreps_elsie_allen.ics || true
-        python scrapers/maxpreps.py --school cardinal-newman-cardinals --output cities/santarosa/maxpreps_cardinal_newman.ics || true
+        python scrapers/maxpreps.py --school santa-rosa-panthers --name "Santa Rosa High School Athletics" --output cities/santarosa/maxpreps_santa_rosa_high.ics || true
+        python scrapers/maxpreps.py --school montgomery-vikings --name "Montgomery High School Athletics" --output cities/santarosa/maxpreps_montgomery_high.ics || true
+        python scrapers/maxpreps.py --school maria-carrillo-pumas --name "Maria Carrillo High School Athletics" --output cities/santarosa/maxpreps_maria_carrillo.ics || true
+        python scrapers/maxpreps.py --school piner-prospectors --name "Piner High School Athletics" --output cities/santarosa/maxpreps_piner_high.ics || true
+        python scrapers/maxpreps.py --school elsie-allen-lobos --name "Elsie Allen High School Athletics" --output cities/santarosa/maxpreps_elsie_allen.ics || true
+        python scrapers/maxpreps.py --school cardinal-newman-cardinals --name "Cardinal Newman High School Athletics" --output cities/santarosa/maxpreps_cardinal_newman.ics || true
         python scrapers/jack_london_park.py --output cities/santarosa/jack_london_park.ics || true
         python scrapers/songkick.py --url "https://www.songkick.com/venues/3757589-elephant-in-the-room" --name "Elephant in the Room (Songkick)" --output cities/santarosa/songkick_elephant.ics || true
         python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/elephant-in-the-room-45984150493" --name "Elephant in the Room (Eventbrite)" --output cities/santarosa/eventbrite_elephant.ics || true
@@ -129,7 +128,6 @@ jobs:
         python scrapers/songkick.py --url "https://www.songkick.com/venues/4364786-shady-oak-barrel-house" --name "Shady Oak Barrel House" --output cities/santarosa/songkick_shady_oak.ics || true
         python scrapers/songkick.py --url "https://www.songkick.com/venues/4426320-222" --name "THE 222" --output cities/santarosa/songkick_222.ics || true
         python scrapers/songkick.py --url "https://www.songkick.com/venues/877176-rio-nido-roadhouse" --name "Rio Nido Roadhouse" --output cities/santarosa/songkick_rio_nido.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/1900888-redwood-cafe" --name "Redwood Cafe" --output cities/santarosa/songkick_redwood_cafe.ics || true
         python scrapers/songkick.py --url "https://www.songkick.com/venues/4617123-henhouse-brewing" --name "HenHouse Brewing" --output cities/santarosa/songkick_henhouse.ics || true
         python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/phoenix-theater-26319831111" --name "Phoenix Theater (Eventbrite)" --output cities/santarosa/eventbrite_phoenix.ics || true
         python scrapers/mobilize.py --url "https://www.mobilize.us/indivisiblesonomacounty/" --name "Indivisible Sonoma County (Mobilize)" --output cities/santarosa/mobilize_indivisible_sonoma.ics || true
@@ -144,8 +142,9 @@ jobs:
         python scrapers/legistar.py --client sonoma-county --source "Sonoma County Board of Supervisors" --output cities/santarosa/legistar_sonoma_county.ics || true
         python scrapers/growthzone.py --url "https://business.sebastopol.org/api/events" --name "Sebastopol Chamber of Commerce" --output cities/santarosa/growthzone_sebastopol.ics || true
         python scrapers/tribe_rest.py --api-base https://sonomacommunitycenter.org --name "Sonoma Community Center" --timezone America/Los_Angeles --output cities/santarosa/sonoma_community_center.ics || true
+        python scrapers/tribe_rest.py --api-base "https://lutherburbankcenter.org" --name "Luther Burbank Center" --timezone America/Los_Angeles --user-agent "Mozilla/5.0" --output cities/santarosa/lutherburbankcenter.ics || true
+        python scrapers/tribe_rest.py --api-base "https://uptowntheatrenapa.com" --name "Uptown Theatre Napa" --timezone America/Los_Angeles --user-agent "Mozilla/5.0" --output cities/santarosa/uptowntheatrenapa.ics || true
         python scrapers/visit_santa_rosa.py --output cities/santarosa/visit_santa_rosa.ics || true
-        python scrapers/gatherboard.py --url "https://www.sonomavalleyevents.com" --name "Sonoma Valley Events" --output cities/santarosa/sonoma_valley_events.ics || true
         python scrapers/santa_rosa_symphony.py --output cities/santarosa/santa_rosa_symphony.ics || true
         python scrapers/thundertix.py --url "https://ravenperformingartstheater.thundertix.com/" --name "Raven Performing Arts Theater" --default-location "Raven Performing Arts Theater, 115 North St, Healdsburg, CA 95448" --output cities/santarosa/raven_theater.ics || true
         python scrapers/redwood_cafe.py --output cities/santarosa/redwood_cafe.ics || true
@@ -199,6 +198,7 @@ jobs:
         python scrapers/far_center.py --output cities/bloomington/far_center.ics || true
         python scrapers/habitat.py --output cities/bloomington/habitat.ics || true
         python scrapers/nami_bloomington.py --output cities/bloomington/nami_bloomington.ics || true
+        python scrapers/tribe_rest.py --api-base "https://bgcbloomington.org" --name "Boys & Girls Club Bloomington" --timezone "America/Indiana/Indianapolis" --output cities/bloomington/bgcbloomington.ics || true
         python scrapers/monroe_county_history_center.py --output cities/bloomington/monroe_county_history_center.ics || true
         python scrapers/localist.py --base-url "https://events.in.gov" --venue-id 35217665860404 --name "McCormick's Creek State Park" --output cities/bloomington/localist_mccormicks_creek.ics || true
         python scrapers/localist.py --base-url "https://events.in.gov" --venue-id 35217662417669 --name "Brown County State Park" --output cities/bloomington/localist_brown_county_sp.ics || true
@@ -245,6 +245,8 @@ jobs:
         python scrapers/bloomington_symphony.py --output cities/bloomington/bloomington_symphony.ics || true
         python scrapers/ludus.py --url "https://offnight.ludus.com" --name "Off Night Productions" --default-location "Bloomington, IN" --output cities/bloomington/off_night_productions.ics || true
         python scrapers/ludus.py --url "https://mcct.ludus.com" --name "Monroe County Civic Theater" --default-location "Bloomington, IN" --output cities/bloomington/mcct.ics || true
+        python scrapers/tribe_rest.py --api-base "https://www.bloomingtoncommunityband.org" --name "Bloomington Community Band" --timezone "America/Indiana/Indianapolis" --output cities/bloomington/bloomington_community_band.ics || true
+        python scrapers/tribe_rest.py --api-base "https://uplandbeer.com" --name "Upland Brewing" --timezone "America/Indiana/Indianapolis" --output cities/bloomington/upland_brewing.ics || true
       continue-on-error: true
 
 
@@ -263,35 +265,6 @@ jobs:
         python scrapers/uudavis.py --output cities/davis/uudavis.ics || true
         python scrapers/ucdavis_athletics.py --output cities/davis/ucdavis_athletics.ics || true
         python scrapers/mobilize.py --url "https://www.mobilize.us/indivisibleyolo/" --name "Indivisible Yolo (Mobilize)" --output cities/davis/mobilize_indivisible_yolo.ics || true
-      continue-on-error: true
-
-
-    # ==========================================
-    # Petaluma
-    # ==========================================
-    - name: Scrape Petaluma sources
-      if: contains(steps.locations.outputs.list, 'petaluma') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        echo "Scraping Petaluma..."
-        python scripts/library_intercept.py --location petaluma --output cities/petaluma/library_intercept.ics || true
-        python scrapers/mystic_theatre.py --output cities/petaluma/mystic_theatre.ics || true
-        # High school athletics
-        python scrapers/maxpreps.py --school petaluma-trojans --output cities/petaluma/maxpreps_petaluma_high.ics || true
-        python scrapers/maxpreps.py --school casa-grande-gauchos --output cities/petaluma/maxpreps_casa_grande.ics || true
-        # Petaluma Chamber of Commerce (GrowthZone)
-        python scrapers/growthzone.py --site petalumachamber --output cities/petaluma/petaluma_chamber.ics || true
-        python scrapers/srjc_petaluma.py --output cities/petaluma/srjc_petaluma.ics || true
-        # HenHouse Brewing and Phoenix Theater
-        python scrapers/henhouse.py > cities/petaluma/henhouse.ics || true
-        # Mercury Theater and Adobe Road Winery
-        python scrapers/mercury_theater.py --output cities/petaluma/mercury_theater.ics || true
-        python scrapers/adobe_road.py --output cities/petaluma/adobe_road.ics || true
-        # Squarespace venues
-        python scrapers/petaluma_arts_center.py --output cities/petaluma/petaluma_arts_center.ics || true
-        python scrapers/brewsters.py --output cities/petaluma/brewsters.ics || true
-        python scrapers/cool_petaluma.py --output cities/petaluma/cool_petaluma.ics || true
-        python scrapers/petaluma_river_park.py --output cities/petaluma/petaluma_river_park.ics || true
-        python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/78957912343" --name "Blue Zones Project Petaluma" --output cities/petaluma/bluezones_petaluma.ics || true
       continue-on-error: true
 
 
@@ -338,14 +311,14 @@ jobs:
         python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/glad-day-bookshop-12026081388" --name "Glad Day Bookshop" -o cities/toronto/eventbrite_glad_day.ics || true
         python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/torontos-first-post-office-7903835251" --name "Toronto's First Post Office" -o cities/toronto/eventbrite_first_post_office.ics || true
         python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/fuzzy-lab-toronto-102501807981" --name "Fuzzy Lab Toronto" -o cities/toronto/eventbrite_fuzzy_lab.ics || true
-        python scrapers/eventbrite_filtered.py --organizer 13112142972 --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Penguin Random House Canada" -o cities/toronto/prh_canada.ics || true
-        python scrapers/eventbrite_filtered.py --organizer 17669573222 --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "HarperCollins Canada" -o cities/toronto/harpercollins_canada.ics || true
-        python scrapers/eventbrite_filtered.py --organizer 57010055313 --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Simon & Schuster Canada" -o cities/toronto/simon_schuster_canada.ics || true
-        python scrapers/eventbrite_filtered.py --organizer 1330302385 --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Diaspora Dialogues" -o cities/toronto/diaspora_dialogues.ics || true
-        python scrapers/eventbrite_filtered.py --organizer 21689379263 --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "House of Anansi" -o cities/toronto/house_of_anansi.ics || true
-        python scrapers/eventbrite_filtered.py --organizer 6007837525 --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Coach House Books" -o cities/toronto/coach_house.ics || true
-        python scrapers/eventbrite_filtered.py --organizer 31280011011 --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Cormorant Books" -o cities/toronto/cormorant_books.ics || true
-        python scrapers/eventbrite_filtered.py --organizer 30975200167 --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Book*hug Press" -o cities/toronto/bookhug_press.ics || true
+        python scrapers/eventbrite_filtered.py --url "https://www.eventbrite.ca/o/penguin-random-house-canada-13112142972" --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Penguin Random House Canada" -o cities/toronto/prh_canada.ics || true
+        python scrapers/eventbrite_filtered.py --url "https://www.eventbrite.ca/o/harpercollins-canada-17669573222" --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "HarperCollins Canada" -o cities/toronto/harpercollins_canada.ics || true
+        python scrapers/eventbrite_filtered.py --url "https://www.eventbrite.ca/o/simon-schuster-canada-57010055313" --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Simon & Schuster Canada" -o cities/toronto/simon_schuster_canada.ics || true
+        python scrapers/eventbrite_filtered.py --url "https://www.eventbrite.ca/o/diaspora-dialogues-1330302385" --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Diaspora Dialogues" -o cities/toronto/diaspora_dialogues.ics || true
+        python scrapers/eventbrite_filtered.py --url "https://www.eventbrite.ca/o/house-of-anansi-21689379263" --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "House of Anansi" -o cities/toronto/house_of_anansi.ics || true
+        python scrapers/eventbrite_filtered.py --url "https://www.eventbrite.ca/o/coach-house-books-6007837525" --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Coach House Books" -o cities/toronto/coach_house.ics || true
+        python scrapers/eventbrite_filtered.py --url "https://www.eventbrite.ca/o/cormorant-books-inc-31280011011" --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Cormorant Books" -o cities/toronto/cormorant_books.ics || true
+        python scrapers/eventbrite_filtered.py --url "https://www.eventbrite.com/o/bookhug-press-30975200167" --denylist cities/toronto/bookstore_venue_denylist.txt --geo-allowlist cities/toronto/geo_allowlist.txt --name "Book*hug Press" -o cities/toronto/bookhug_press.ics || true
         python scrapers/blogto.py --output cities/toronto/blogto.ics || true
         python scrapers/toronto_tool_library.py --output cities/toronto/toronto_tool_library.ics || true
         python scrapers/bistitchual.py --output cities/toronto/bistitchual.ics || true
@@ -382,6 +355,10 @@ jobs:
         python scrapers/luma_collection.py --url "https://luma.com/genai-collective" --name "The AI Collective" --timezone "America/Toronto" --output cities/toronto/luma_genai_collective.ics || true
         python scrapers/luma_collection.py --url "https://luma.com/devtoolsTO" --name "Devtools Toronto" --timezone "America/Toronto" --output cities/toronto/luma_devtools_toronto.ics || true
         python scrapers/luma_collection.py --url "https://luma.com/intuit-open-source-meetup" --name "Intuit Open Source Meetup" --timezone "America/Toronto" --output cities/toronto/luma_intuit_open_source.ics || true
+        python scrapers/tribe_rest.py --api-base "https://www.buddiesinbadtimes.com" --name "Buddies in Bad Times Theatre" --timezone "America/Toronto" --user-agent "Mozilla/5.0" --output cities/toronto/buddiesinbadtimes.ics || true
+        python scrapers/tribe_rest.py --api-base "https://highparknaturecentre.com" --name "High Park Nature Centre" --timezone "America/Toronto" --user-agent "Mozilla/5.0" --output cities/toronto/highparknaturecentre.ics || true
+        python scrapers/tribe_rest.py --api-base "https://scaddingcourt.org" --name "Scadding Court Community Centre" --timezone "America/Toronto" --user-agent "Mozilla/5.0" --output cities/toronto/scaddingcourt.ics || true
+        python scrapers/tribe_rest.py --api-base "https://www.jewelenvy.ca" --name "Jewel Envy" --timezone "America/Toronto" --output cities/toronto/jewelenvy.ics || true
       continue-on-error: true
 
 
@@ -412,6 +389,10 @@ jobs:
         python scrapers/ticketmaster.py --venue-id KovZpa2X8e --name "DPAC" -o cities/raleighdurham/dpac.ics || true
         python scrapers/ticketmaster.py --venue-id KovZpZAFF1nA --name "Martin Marietta Center" -o cities/raleighdurham/martin_marietta.ics || true
         python scrapers/eventbrite.py --url "https://www.eventbrite.com/o/quail-ridge-books-17882467120" --name "Quail Ridge Books" --output cities/raleighdurham/eventbrite_quail_ridge.ics || true
+        # Tribe REST scrapers (SiteGround WAF blocks ?ical=1 intermittently; REST API sometimes reachable)
+        python scrapers/tribe_rest.py --api-base "https://durhamcentralpark.org" --name "Durham Central Park" --timezone "America/New_York" --output cities/raleighdurham/durhamcentralpark.ics || true
+        python scrapers/tribe_rest.py --api-base "https://secondchancenc.org" --name "Second Chance Pet Adoptions" --timezone "America/New_York" --output cities/raleighdurham/secondchancenc.ics || true
+        python scrapers/tribe_rest.py --api-base "https://www.apsofdurham.org" --name "Animal Protection Society of Durham" --timezone "America/New_York" --output cities/raleighdurham/apsofdurham.ics || true
       continue-on-error: true
 
 
@@ -462,7 +443,6 @@ jobs:
         # Songkick venues
         python scrapers/songkick.py --url "https://www.songkick.com/venues/1614528-tellus-360" --name "Tellus360" --output cities/lancaster/songkick_tellus360.ics || true
         python scrapers/songkick.py --url "https://www.songkick.com/venues/3942704-temple-tellus360" --name "Tellus360 - The Temple" --output cities/lancaster/songkick_tellus360_temple.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/415-chameleon-club" --name "Chameleon Club" --output cities/lancaster/songkick_chameleon.ics || true
         python scrapers/songkick.py --url "https://www.songkick.com/venues/4369005-phantom-power" --name "Phantom Power" --output cities/lancaster/songkick_phantom_power.ics || true
         python scrapers/songkick.py --url "https://www.songkick.com/venues/4420425-freedom-hall-lancaster-convention-center" --name "Freedom Hall" --output cities/lancaster/songkick_freedom_hall.ics || true
         python scrapers/songkick.py --url "https://www.songkick.com/venues/65068-village" --name "The Village" --output cities/lancaster/songkick_village.ics || true
@@ -479,7 +459,6 @@ jobs:
         python scrapers/ticketmaster.py --venue-id KovZpZAEe6dA --name "Freedom Hall" -o cities/lancaster/tm_freedom_hall.ics || true
         python scrapers/ticketmaster.py --venue-id KovZpZAEeklA --name "Tellus 360" -o cities/lancaster/tm_tellus360.ics || true
         python scrapers/ticketmaster.py --venue-id KovZ917AxW7 --name "Phantom Power" -o cities/lancaster/tm_phantom_power.ics || true
-        python scrapers/ticketmaster.py --venue-id KovZpZAa1t1A --name "Chameleon Club" -o cities/lancaster/tm_chameleon.ics || true
         # Drupal (library calendar JSON feed)
         python scrapers/drupal_events.py --url "https://calendar.lancasterlibraries.org/events/feed/json" --name "Lancaster Libraries" -o cities/lancaster/lancaster_libraries.ics || true
         # College athletics (Sidearm v3 Calendar API)
@@ -550,81 +529,6 @@ jobs:
         python scrapers/mountaintrue.py --output cities/asheville/mountaintrue.ics || true
         python scrapers/asheville_theater_alliance.py --output cities/asheville/asheville_theater_alliance.ics || true
         python scrapers/asheville_community_theatre.py --output cities/asheville/asheville_community_theatre.ics || true
-      continue-on-error: true
-
-
-    # ==========================================
-    # Teton Valley
-    # ==========================================
-    - name: Scrape Teton Valley sources
-      if: contains(steps.locations.outputs.list, 'tetonvalley') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        echo "Scraping Teton Valley..."
-        python scrapers/knotty_pine.py --output cities/tetonvalley/knotty_pine.ics || true
-        python scrapers/church_in_tetons.py --output cities/tetonvalley/church_in_tetons.ics || true
-        python scrapers/tvtap.py --output cities/tetonvalley/tvtap.ics || true
-      continue-on-error: true
-
-
-    # ==========================================
-    # DC Music
-    # ==========================================
-    - name: Scrape DC Music sources
-      if: contains(steps.locations.outputs.list, 'dc-music') && github.event.inputs.regenerate_only != 'true'
-      run: |
-        echo "Scraping DC Music..."
-        # City-level aggregators
-        python scrapers/dc_events_concerts.py --output cities/dc-music/dc_events_concerts.ics || true
-        python scrapers/eventbrite.py --url "https://www.eventbrite.com/d/dc--washington/music--events/" --name "Eventbrite DC Music" --output cities/dc-music/eventbrite_dc_music.ics || true
-        # DICE-link harvest
-        python scrapers/songbyrd.py --output cities/dc-music/songbyrd.ics || true
-        # DC Jazz Jam (RSS)
-        python scrapers/dc_jazz_jam.py --output cities/dc-music/dc_jazz_jam.ics || true
-        # Ticketmaster city-level music aggregator
-        python scrapers/ticketmaster.py --city Washington --state DC --classification Music --name "Ticketmaster DC Music" --output cities/dc-music/ticketmaster_dc_music.ics || true
-        # Ticketmaster (per-venue)
-        python scrapers/ticketmaster.py --venue-id ZFr9jZak17 --name "Kennedy Center" --output cities/dc-music/ticketmaster_kennedy.ics || true
-        # Songkick venues
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/922-930-club" --name "9:30 Club" --output cities/dc-music/songkick_930club.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/3552789-anthem" --name "The Anthem" --output cities/dc-music/songkick_anthem.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/2826-lincoln-theatre" --name "Lincoln Theatre" --output cities/dc-music/songkick_lincoln.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/1038-black-cat" --name "Black Cat" --output cities/dc-music/songkick_blackcat.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/20843-dc9-nightclub" --name "DC9" --output cities/dc-music/songkick_dc9.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/3637839-pearl-street-warehouse" --name "Pearl Street Warehouse" --output cities/dc-music/songkick_pearlst.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/3623159-union-stage" --name "Union Stage" --output cities/dc-music/songkick_unionstage.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/4498657-atlantis" --name "The Atlantis" --output cities/dc-music/songkick_atlantis.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/1611908-hamilton-live" --name "The Hamilton" --output cities/dc-music/songkick_hamilton.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/74872-howard-theatre" --name "Howard Theatre" --output cities/dc-music/songkick_howard.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/1864683-echostage" --name "Echostage" --output cities/dc-music/songkick_echostage.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/647-warner-theatre" --name "Warner Theatre" --output cities/dc-music/songkick_warner.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/3998914-pie-shop" --name "Pie Shop" --output cities/dc-music/songkick_pieshop.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/10881-blues-alley" --name "Blues Alley" --output cities/dc-music/songkick_bluesalley.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/148048-comet-ping-pong" --name "Comet Ping Pong" --output cities/dc-music/songkick_comet.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/3342239-rhizome-dc" --name "Rhizome DC" --output cities/dc-music/songkick_rhizome.ics || true
-        python scrapers/songkick.py --url "https://www.songkick.com/venues/1095-dar-constitution-hall" --name "DAR Constitution Hall" --output cities/dc-music/songkick_darhall.ics || true
-        python scrapers/the_pocket.py --output cities/dc-music/the_pocket.ics || true
-        python scrapers/dcmusic_live.py --slug jojo --name "dcmusic.live" --address "1518 U Street NW, Washington, DC 20009" --output cities/dc-music/dcmusic_jojo.ics || true
-        python scrapers/dcmusic_live.py --slug madamsorgan --name "dcmusic.live" --address "2461 18th St NW, Washington, DC 20009" --output cities/dc-music/dcmusic_madamsorgan.ics || true
-        python scrapers/bossa.py --output cities/dc-music/bossa.ics || true
-        python scrapers/dcmusic_live.py --slug atlasarts --name "dcmusic.live" --address "1333 H St NE, Washington, DC 20002" --output cities/dc-music/dcmusic_atlasarts.ics || true
-        python scrapers/dcmusic_live.py --slug hillcenter --name "dcmusic.live" --address "921 Pennsylvania Ave SE, Washington, DC 20003" --output cities/dc-music/dcmusic_hillcenter.ics || true
-        python scrapers/dcmusic_live.py --slug mrhenrys --name "dcmusic.live" --address "601 Pennsylvania Ave SE, Washington, DC 20003" --output cities/dc-music/dcmusic_mrhenrys.ics || true
-        python scrapers/dcmusic_live.py --slug nga --name "dcmusic.live" --address "6th St & Constitution Ave NW, Washington, DC 20565" --output cities/dc-music/dcmusic_nga.ics || true
-        python scrapers/dcmusic_live.py --slug takomastation --name "dcmusic.live" --address "6914 4th St NW, Washington, DC 20012" --output cities/dc-music/dcmusic_takomastation.ics || true
-        python scrapers/dcmusic_live.py --slug libraryofcongress --name "dcmusic.live" --address "101 Independence Ave SE, Washington, DC 20540" --output cities/dc-music/dcmusic_libraryofcongress.ics || true
-        python scrapers/dcmusic_live.py --slug americanartmuseum --name "dcmusic.live" --address "8th & G St NW, Washington, DC 20004" --output cities/dc-music/dcmusic_americanartmuseum.ics || true
-        python scrapers/dcmusic_live.py --slug phillipscollection --name "dcmusic.live" --address "1600 21st St NW, Washington, DC 20009" --output cities/dc-music/dcmusic_phillipscollection.ics || true
-        python scrapers/dcmusic_live.py --slug flash --name "dcmusic.live" --address "645 Florida Ave NW, Washington, DC 20001" --output cities/dc-music/dcmusic_flash.ics || true
-        python scrapers/dcmusic_live.py --slug roofers --name "dcmusic.live" --address "2438 18th St NW, Washington, DC 20009" --output cities/dc-music/dcmusic_roofers.ics || true
-        python scrapers/dcmusic_live.py --slug miracletheatre --name "dcmusic.live" --address "535 8th St SE, Washington, DC 20003" --output cities/dc-music/dcmusic_miracletheatre.ics || true
-        python scrapers/dcmusic_live.py --slug dumbartonconcerts --name "dcmusic.live" --address "3133 Dumbarton St NW, Washington, DC 20007" --output cities/dc-music/dcmusic_dumbartonconcerts.ics || true
-        python scrapers/dcmusic_live.py --slug citychurch --name "dcmusic.live" --address "5 Thomas Circle NW, Washington, DC 20005" --output cities/dc-music/dcmusic_citychurch.ics || true
-        python scrapers/dcmusic_live.py --slug esl --name "dcmusic.live" --address "1015 7th St NW, Washington, DC 20001" --output cities/dc-music/dcmusic_esl.ics || true
-        python scrapers/flash.py --output cities/dc-music/flash.ics || true
-        python scrapers/holy_trinity_concerts.py --output cities/dc-music/holy_trinity_concerts.ics || true
-        python scrapers/dumbarton_concerts.py --output cities/dc-music/dumbarton_concerts.ics || true
-        python scrapers/madams_organ.py --output cities/dc-music/madams_organ.ics || true
-        python scrapers/openmikes.py --city-slug Washington-DC --name "openmikes.org DC" --output cities/dc-music/openmikes_dc.ics || true
       continue-on-error: true
 
 

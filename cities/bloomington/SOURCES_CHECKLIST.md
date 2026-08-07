@@ -82,10 +82,10 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Monroe County Public Library | Scraper | ~483 | `library_intercept.py --location bloomington` |
-| Boys & Girls Club | ICS | — | WordPress Events Calendar |
+| Boys & Girls Club | Scraper | ~2 | `tribe_rest.py` — Tribe ICS returns empty reply; REST API works (2026-08) |
 | WonderLab Museum | ICS | ~30+ | WordPress ICS — Cloudflare blocks HTML but not ICS |
 | First United Church | ICS | ~50+ | WordPress ICS — community hub (DSA, Al-Anon, scouts) |
-| Bloomington Community Band | ICS | ~20 | WordPress Events Calendar |
+| Bloomington Community Band | Scraper | ~5 | `tribe_rest.py` — Tribe ICS returns an empty body; REST API works (2026-08) |
 | Bloominglabs Makerspace | Google Calendar | ~10+ | |
 | Habitat for Humanity Monroe County | Scraper | ~4 | `habitat.py` — fundraisers, 5K, volunteer events |
 | NAMI Greater Bloomington | Scraper | ~31 | `nami_bloomington.py` — Tribe Events API; support groups at library |
@@ -121,7 +121,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Martinsville Arts Council | Eventbrite scraper | ~6 | Community theater in Martinsville (20 mi) |
 | Story Inn | Eventbrite scraper | — | Seasonal: wine fairs, comedy, music in Story (17 mi) |
 | Hard Truth Distilling Co. | ICS | ~15 | TEC feed; Nashville, IN (16 mi) |
-| Upland Brewing | ICS | — | WordPress Events Calendar — dormant, populates seasonally |
+| Upland Brewing | Scraper | 0 current | `tribe_rest.py` — valid REST calendar, dormant/seasonal as of 2026-08 |
 | People's Market | Scraper | ~10 | Squarespace — `peoples_market.py` |
 
 ### Aggregators (10 sources)
@@ -409,7 +409,7 @@ Annual events with reliable dates but no feeds — a once-a-season curator sweep
 | Songkick | `lib/songkick.py` | Bluebird, Blockhouse | Venue event pages |
 | Eventbrite | `scrapers/eventbrite.py` | Morgenstern Books, Nerd Nite | Organizer page → JSON-LD |
 | Mobilize.us | `scrapers/mobilize.py` | Indivisible | Organizer event pages |
-| The Events Calendar (Tribe) | `lib/tribe_events.py` | NAMI | WordPress plugin REST API; bypasses WAF-blocked ICS |
+| The Events Calendar (Tribe) | `lib/tribe_events.py`, `scrapers/tribe_rest.py` | NAMI, Boys & Girls Club, Community Band, Upland | WordPress plugin REST API; bypasses blocked or empty ICS exports |
 | Localist | `scrapers/localist.py` | McCormick's Creek SP, Brown County SP | events.in.gov JSON API; filter by venue_id |
 | JSON-LD | `lib/jsonld.py` | (used by Eventbrite) | Schema.org Event extraction |
 
@@ -447,6 +447,13 @@ Annual events with reliable dates but no feeds — a once-a-season curator sweep
 - **Surrounding towns**: Ellettsville CivicPlus (205), Morgan County CivicPlus (73), Monroe County Fairgrounds gcal (344), Owen County Library JSON API (87), full festival circuit with 2026 dates
 - **Directories**: Visit Bloomington/Gallery Walk/IDS Happenings/volunteer network mined; Butler Winery (35, tested); long Needs-Scraper bench (BSO, MCCT, BCGC, BLEMF, Cosmic Songwriter…)
 - **Gap topics**: Monroe County 4-H gcal (386); volunteerism orgs mapped (mostly Needs Scraper/Manual); El Centro + BRSN flagged for quarterly manual sweeps; no parkrun
+
+### 2026-08-07: DB-first cleanup and full local audit
+- Reconciled workflow scraper commands against Supabase: no missing rows, metadata updates, or DB-only scraper rows remained after cleanup.
+- Replaced the empty Boys & Girls Club Tribe ICS export with `tribe_rest.py` (2 events).
+- Replaced the zero-byte Community Band ICS export with `tribe_rest.py` (5 events).
+- Replaced Upland's zero-byte seasonal ICS export with `tribe_rest.py`; its REST calendar is healthy but currently has 0 upcoming events.
+- Ran every Bloomington source through `scripts/local_build.py`: all scraper commands succeeded, no scraper or live-feed outputs were missing, pipeline validation had no errors, and 6,362 unique future events combined before the final two REST conversions.
 
 ### 2026-03-28: Previous Session (59 sources)
 - **WFHB Community Calendar** (~349) — ai1ec scraper; aggregator covering many venues. New platform: `lib/ai1ec.py`

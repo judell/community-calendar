@@ -50,6 +50,20 @@ HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
 }
 
+# datetime.fromisoformat() on Python <3.11 rejects UTC offsets that omit the
+# colon (e.g. "-0400"), which is exactly what this platform's JSON-LD
+# startDate/endDate values use. Insert the colon before parsing so the
+# offset becomes "-04:00". Already-coloned offsets are left untouched
+# because the colon breaks the trailing \d{4} match.
+_TZ_OFFSET_NO_COLON_RE = re.compile(r'([+-]\d{2})(\d{2})$')
+
+
+def _normalize_iso_offset(value: str) -> str:
+    value = value.strip()
+    if value.endswith('Z'):
+        return value[:-1] + '+00:00'
+    return _TZ_OFFSET_NO_COLON_RE.sub(r'\1:\2', value)
+
 
 class RhpEventsScraper(BaseScraper):
     """Scraper for rhp-events (Rockhouse Partners) venues via RSS + JSON-LD."""
@@ -130,7 +144,7 @@ class RhpEventsScraper(BaseScraper):
             return None
 
         try:
-            dtstart = datetime.fromisoformat(start_str.replace('Z', '+00:00'))
+            dtstart = datetime.fromisoformat(_normalize_iso_offset(start_str))
         except ValueError:
             self.logger.debug(f"Skipping {title}: bad startDate {start_str}")
             return None
@@ -146,7 +160,7 @@ class RhpEventsScraper(BaseScraper):
         end_str = item.get('endDate', '')
         if end_str:
             try:
-                dtend = datetime.fromisoformat(end_str.replace('Z', '+00:00'))
+                dtend = datetime.fromisoformat(_normalize_iso_offset(end_str))
             except ValueError:
                 pass
 

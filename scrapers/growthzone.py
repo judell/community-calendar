@@ -29,13 +29,6 @@ from lib.utils import DEFAULT_HEADERS
 
 # Known GrowthZone sites
 KNOWN_SITES = {
-    'petalumachamber': {
-        'name': 'Petaluma Chamber of Commerce',
-        'api_url': 'https://business.petalumachamber.us/api/events',
-        'base_url': 'https://business.petalumachamber.us',
-        'timezone': 'America/Los_Angeles',
-        'location': 'Petaluma, CA',
-    },
     'durhamchamber': {
         'name': 'Durham Chamber of Commerce',
         'api_url': 'https://members.durhamchamber.org/api/events',

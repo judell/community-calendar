@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
-"""Eventbrite organizer feed with venue denylist filter.
+"""Eventbrite organizer events with venue denylist + geo allowlist filters.
 
-Fetches an Eventbrite organizer's ICS feed via eb-to-ical and excludes events
-whose LOCATION matches any keyword in a denylist file. Everything else passes
-through as a plausible candidate.
+Discovers an Eventbrite organizer's events from the organizer page (/o/slug)
+and per-event JSON-LD (same mechanism as scrapers/eventbrite.py), then
+excludes events whose LOCATION matches any keyword in a denylist file and
+(optionally) requires the LOCATION to match a geo allowlist.
 
 Designed for publisher organizer feeds (Coach House, Cormorant, Penguin Random
 House Canada, etc.) where most events are at indie venues we want to capture
-but some are at big-box chains we want to exclude.
+but some are at big-box chains we want to exclude, and where the organizer
+runs events far outside the city.
+
+Historical note: this scraper originally fetched a ready-made ICS from
+eb-to-ical.daylightpirates.org, which went dead in 2026 (HTTP 404). It now
+scrapes Eventbrite directly via scrapers/eventbrite.py.
 
 Usage:
     python scrapers/eventbrite_filtered.py \\
-        --organizer 6007837525 \\
+        --url "https://www.eventbrite.ca/o/coach-house-books-6007837525" \\
         --denylist cities/toronto/bookstore_venue_denylist.txt \\
+        --geo-allowlist cities/toronto/geo_allowlist.txt \\
         --name "Coach House Books" \\
         -o cities/toronto/coach_house.ics
 
@@ -26,15 +33,10 @@ import re
 import sys
 from pathlib import Path
 from typing import Any
-import urllib.request
 
 sys.path.insert(0, str(__file__).rsplit('/', 1)[0])
 
-from icalendar import Calendar
-
-from lib.base import BaseScraper
-
-EB_TO_ICAL_URL = "https://eb-to-ical.daylightpirates.org/eventbrite-organizer-ical?organizer={}"
+from eventbrite import EventbriteScraper
 
 
 def load_keyword_file(path: Path) -> list[str]:
@@ -58,48 +60,35 @@ def matches_keyword(location: str, keywords: list[str]) -> str | None:
     return None
 
 
-class EventbriteFilteredScraper(BaseScraper):
-    """Eventbrite organizer feed filtered by venue denylist + geo allowlist."""
+class EventbriteFilteredScraper(EventbriteScraper):
+    """Eventbrite organizer events filtered by venue denylist + geo allowlist."""
 
     domain = "eventbrite.ca"
     timezone = "America/Toronto"
 
     def __init__(
         self,
-        organizer_id: str,
+        organizer_url: str,
         denylist: list[str],
         name: str,
         geo_allowlist: list[str] | None = None,
         report: bool = False,
     ):
-        super().__init__()
-        self.organizer_id = organizer_id
         self.denylist = denylist
         self.geo_allowlist = geo_allowlist or []
-        self.name = name
         self.report = report
+        super().__init__(organizer_url=organizer_url, source_name=name)
 
     def fetch_events(self) -> list[dict[str, Any]]:
-        url = EB_TO_ICAL_URL.format(self.organizer_id)
-        try:
-            data = urllib.request.urlopen(url, timeout=30).read()
-        except Exception as exc:
-            self.logger.error(f"Failed to fetch {url}: {exc}")
-            return []
-
-        try:
-            cal = Calendar.from_ical(data)
-        except Exception as exc:
-            self.logger.error(f"Failed to parse ICS: {exc}")
-            return []
+        candidates = super().fetch_events()
 
         events: list[dict[str, Any]] = []
         denied_venues: list[str] = []
         out_of_area: list[str] = []
         passed_venues: list[str] = []
 
-        for ev in cal.walk('VEVENT'):
-            location = str(ev.get('location') or '').strip()
+        for ev in candidates:
+            location = (ev.get('location') or '').strip()
 
             denied_kw = matches_keyword(location, self.denylist)
             if denied_kw:
@@ -114,23 +103,7 @@ class EventbriteFilteredScraper(BaseScraper):
                     out_of_area.append(location)
                     continue
 
-            dtstart = ev.get('dtstart')
-            if not dtstart:
-                continue
-
-            dtend = ev.get('dtend')
-            dt_start_value = dtstart.dt if hasattr(dtstart, 'dt') else dtstart
-            dt_end_value = (dtend.dt if (dtend and hasattr(dtend, 'dt')) else dt_start_value)
-
-            events.append({
-                'uid': str(ev.get('uid') or ''),
-                'title': str(ev.get('summary') or ''),
-                'dtstart': dt_start_value,
-                'dtend': dt_end_value,
-                'location': location,
-                'description': str(ev.get('description') or ''),
-                'url': str(ev.get('url') or ''),
-            })
+            events.append(ev)
             passed_venues.append(location or '(no location)')
 
         self.logger.info(
@@ -157,9 +130,9 @@ class EventbriteFilteredScraper(BaseScraper):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Filter an Eventbrite organizer feed by venue denylist"
+        description="Scrape an Eventbrite organizer's events, filtered by venue denylist + geo allowlist"
     )
-    parser.add_argument('--organizer', required=True, help='Eventbrite organizer ID')
+    parser.add_argument('--url', required=True, help='Eventbrite organizer URL (/o/slug)')
     parser.add_argument('--denylist', required=True, help='Path to venue denylist file')
     parser.add_argument('--geo-allowlist', help='Path to geo allowlist file (require LOCATION to contain at least one keyword)')
     parser.add_argument('--name', required=True, help='Source display name (X-SOURCE)')
@@ -175,7 +148,7 @@ def main():
     denylist = load_keyword_file(Path(args.denylist))
     geo_allowlist = load_keyword_file(Path(args.geo_allowlist)) if args.geo_allowlist else []
     scraper = EventbriteFilteredScraper(
-        organizer_id=args.organizer,
+        organizer_url=args.url,
         denylist=denylist,
         geo_allowlist=geo_allowlist,
         name=args.name,

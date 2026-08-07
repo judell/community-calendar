@@ -15,6 +15,12 @@ from bs4 import BeautifulSoup
 from lib.base import BaseScraper
 
 
+MONTH_RE = (
+    r"(?:January|February|March|April|May|June|July|August|September|October|"
+    r"November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)"
+)
+
+
 def _clean(text: str | None) -> str:
     text = html.unescape(text or "")
     text = text.replace("\xa0", " ")
@@ -63,7 +69,32 @@ class AgaKhanMuseumScraper(BaseScraper):
 
     def parse_date_fragment(self, fragment: str, default_year: int | None = None) -> date:
         fragment = _clean(fragment).replace(".", "")
-        if default_year and not re.search(r"\b\d{4}\b", fragment):
+        # Extract the "Month DD(, YYYY)" portion so decorated labels such as
+        # "Doors Open • May 23, 2026" still parse.
+        match = re.search(
+            rf"\b({MONTH_RE})\s+(\d{{1,2}})(?:,?\s*(\d{{4}}))?\b", fragment, re.I
+        )
+        if match:
+            month_name, day_str, year_str = match.groups()
+            if year_str:
+                fragment = f"{month_name} {day_str}, {year_str}"
+            elif default_year:
+                fragment = f"{month_name} {day_str}, {default_year}"
+            else:
+                # No year anywhere ("November 18"): assume the next occurrence.
+                today = datetime.now(self.tz).date()
+                for fmt in ("%B %d, %Y", "%b %d, %Y"):
+                    try:
+                        candidate = datetime.strptime(
+                            f"{month_name} {day_str}, {today.year}", fmt
+                        ).date()
+                    except ValueError:
+                        continue
+                    if candidate < today - timedelta(days=45):
+                        candidate = candidate.replace(year=today.year + 1)
+                    return candidate
+                fragment = f"{month_name} {day_str}, {today.year}"
+        elif default_year and not re.search(r"\b\d{4}\b", fragment):
             fragment = f"{fragment}, {default_year}"
         for fmt in ("%B %d, %Y", "%b %d, %Y"):
             try:
@@ -71,6 +102,25 @@ class AgaKhanMuseumScraper(BaseScraper):
             except ValueError:
                 continue
         raise ValueError(f"Unparseable date fragment: {fragment}")
+
+    def parse_showtime_pairs(self, text: str) -> list[tuple[date, time]]:
+        """Parse multi-showtime labels: "August 28 • 8 pm August 29 • 8 pm August 30 • 2 pm"."""
+        normalized = _clean(text)
+        pairs = re.findall(
+            rf"\b({MONTH_RE}\s+\d{{1,2}}(?:,?\s*\d{{4}})?)\s*•\s*"
+            rf"(\d{{1,2}}(?::\d{{2}})?\s*(?:am|pm))",
+            normalized,
+            re.I,
+        )
+        if len(pairs) < 2:
+            return []
+        year_match = re.search(r"(\d{4})", normalized)
+        default_year = int(year_match.group(1)) if year_match else None
+        showtimes: list[tuple[date, time]] = []
+        for date_part, time_part in pairs:
+            day = self.parse_date_fragment(date_part, default_year)
+            showtimes.append((day, self.parse_time_value(time_part)))
+        return showtimes
 
     def strip_weekdays(self, text: str) -> str:
         text = text.replace("New Date:", "").strip()
@@ -198,6 +248,20 @@ class AgaKhanMuseumScraper(BaseScraper):
         date_label: str,
         time_label: str | None,
     ) -> list[dict]:
+        showtimes = self.parse_showtime_pairs(date_label)
+        if showtimes:
+            return [
+                self.build_event(
+                    title=title,
+                    event_url=event_url,
+                    location=location,
+                    description=description,
+                    dtstart=self.combine_dt(day, start_time),
+                    image_url=image_url,
+                )
+                for day, start_time in showtimes
+            ]
+
         dates = self.expand_date_label(date_label)
         if not dates:
             return []

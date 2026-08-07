@@ -61,7 +61,6 @@ Prioritized list of potential event sources for the Lancaster, PA community cale
 | Lancaster County Dems | Scraper | `mobilize.py` civic organizing |
 | Tellus360 | Scraper | `songkick.py` venue 1614528 |
 | Tellus360 - The Temple | Scraper | `songkick.py` venue 3942704 |
-| Chameleon Club | Scraper | `songkick.py` venue 415 |
 | Phantom Power | Scraper | `songkick.py` venue 4369005 |
 | Freedom Hall | Scraper | `songkick.py` venue 4420425 |
 | The Village | Scraper | `songkick.py` venue 65068 |
@@ -75,7 +74,6 @@ Prioritized list of potential event sources for the Lancaster, PA community cale
 | Freedom Hall (TM) | Scraper | `ticketmaster.py` venue KovZpZAEe6dA |
 | Tellus 360 (TM) | Scraper | `ticketmaster.py` venue KovZpZAEeklA |
 | Phantom Power (TM) | Scraper | `ticketmaster.py` venue KovZ917AxW7 |
-| Chameleon Club (TM) | Scraper | `ticketmaster.py` venue KovZpZAa1t1A |
 | Lancaster Catholic | Scraper | `maxpreps.py` lancaster-catholic-crusaders |
 | Lancaster Mennonite | Scraper | `maxpreps.py` lancaster-mennonite-blazers |
 | Manheim Township HS | Scraper | `maxpreps.py` manheim-township-blue-streaks |
@@ -123,3 +121,79 @@ Prioritized list of potential event sources for the Lancaster, PA community cale
 | Discover Lancaster | Tourism aggregator, useful for phase 4 upstream authority |
 | Lancaster Bible College | Ticketmaster venue Z7r9jZadtj, check for campus calendar |
 | Demuth Museum | Squarespace brochure site, no events feature — needs custom scraper or RSS |
+
+## 2026-08-07 Audit Findings
+
+Source: `reports/lancaster-2026-08-07-soak.md` (local Python 3.10 audit against
+`scripts/local_build.py`, `--sync-existing --dry-run` comparison against the
+`feeds` table, and a same-day upstream `generate-calendar.yml` run comparison).
+Local run: `0` scraper failures, `0` missing outputs, `0` validation errors.
+Same 10 zero-event scrapers appeared in both the local run and the upstream
+run, and no DB-only or workflow-only scraper rows existed (`0` missing,
+`0` to retire).
+
+### Resolved: workflow/DB metadata drift (command/name-drift class)
+
+Applied via `scripts/backfill_scraper_feeds.py --city lancaster --sync-existing`
+(no `--dry-run`), `3` updated, `0` inserted, `0` retired, `0` errors:
+
+- **Penn Medicine Park** (`ticketmaster.py` venue ZFr9jZ7FaA) — DB display
+  name was the generic `"Ticketmaster"`; synced to `"Penn Medicine Park"` to
+  match the workflow.
+- **F&M Athletics** (`sidearm.py`) — the DB-stored command used `--url`,
+  which `scrapers/sidearm.py` does not accept (`--base-url` is the required
+  flag); the stored command would have failed with `--base-url: required` if
+  ever executed, and it silently dropped the workflow's `--home-only` scope
+  flag. Synced to the workflow's exact command: `python scrapers/sidearm.py
+  --base-url "https://godiplomats.com" --name "F&M Athletics" --home-only -o
+  cities/lancaster/fandm_athletics.ics`.
+- **Lancaster Catholic** (`maxpreps.py`) — DB display name was the generic
+  `"High school athletics (MaxPreps)"`; synced to `"Lancaster Catholic"`.
+
+### Investigated: Fulton Opera House Ticketmaster zero-event output
+
+`ticketmaster.py --venue-id ZFr9jZe1Fk --name "Fulton Opera House"` logs
+`Ticketmaster: 0 events across 0 pages` in both the local and upstream runs,
+with no scraper error. Direct read-only Ticketmaster Discovery API probes
+(2026-08-07, using `TICKETMASTER_API_KEY`, no key value logged) confirm:
+
+- `GET /discovery/v2/venues.json?keyword=Fulton+Opera+House&stateCode=PA`
+  returns exactly one venue: `id=ZFr9jZe1Fk, name="Fulton Opera House",
+  city=Lancaster, state=PA` — **the workflow's venue ID is correct**, not
+  stale or mismatched.
+- `GET /discovery/v2/events.json?venueId=ZFr9jZe1Fk` returns
+  `totalElements: 0, totalPages: 0` directly from Ticketmaster's own catalog
+  — independent of the repo's scraper code.
+
+Conclusion: this is not a broken venue ID or a scraper bug. Ticketmaster's
+own catalog currently has no listed events for this venue (Fulton Opera
+House's public season likely isn't sold through Ticketmaster comprehensively,
+or is between listed runs). No corrected command exists to propose. Classify
+as **valid but quiet** — leave as-is, re-check periodically rather than
+retiring.
+
+### Adjudicated 2026-08-07 (duplicate-producer decisions)
+
+- **Chameleon Club — retired, both producers.** The venue closed permanently
+  in 2020 and the 223 N. Water St. building was sold to the Pennsylvania
+  College of Art & Design (lancasteronline.com coverage; Yelp lists the
+  venue as CLOSED). Both workflow lines removed and both DB scraper rows
+  marked removed on 2026-08-07.
+- **Freedom Hall — keep both.** Active venue at the Lancaster Convention
+  Center; Ticketmaster lists shows in Dec 2026 (beyond the 3-month scrape
+  horizon, which explains today's zeros). Both producers retained by
+  decision; dedup reconciles any future overlap.
+- **Tellus 360 — keep both.** Active venue with overlapping-but-different
+  Songkick (4) and Ticketmaster (5) coverage; both retained by decision to
+  preserve long-tail coverage, dedup reconciles the overlap.
+- **Phantom Power — keep both.** Songkick (5) currently finds more than
+  Ticketmaster (3); both retained by decision, dedup reconciles.
+
+### Still open (not changed this pass)
+
+- **Eight other zero-event scraper outputs** (Tellus360 - The Temple,
+  Freedom Hall via Songkick, The Village, Lancaster Dispensing Co., Penn
+  Medicine Park via Ticketmaster, Freedom Hall via Ticketmaster,
+  Lampeter-Strasburg) and **eighteen zero-event live feeds** still need
+  individual review; see `reports/lancaster-2026-08-07-soak.md` F005 for
+  the full list. None were retired this pass.

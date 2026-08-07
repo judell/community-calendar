@@ -15,7 +15,7 @@
 ### Museums & Cultural Resources
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
-| NC Dept. of Natural & Cultural Resources | Localist ICS | ~1,537 | Aggregates NC Museum of Art, History, Natural Sciences, Historic Sites — statewide |
+| NC Dept. of Natural & Cultural Resources | Localist ICS | ~1,537 | Aggregates NC Museum of Art, History, Natural Sciences, Historic Sites — statewide. Note (2026-08-07): on at least one local dev machine, `curl` fails this URL with `SSL certificate problem: unable to get local issuer certificate` (DigiCert G5 chain) — a local trust-store gap, not a source problem; the same-day GitHub Actions run pulled 1,411 events from it cleanly. If a local audit shows this feed unexpectedly missing, check the local machine's CA bundle before suspecting the source. |
 | Ackland Art Museum | WordPress Tribe ICS | ~30 | Chapel Hill, UNC campus |
 | Nasher Museum of Art | WordPress Tribe ICS | ~30 | Duke campus |
 | NC Botanical Garden | WordPress Tribe ICS | ~13 | Chapel Hill, UNC |
@@ -31,7 +31,7 @@
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Triangle Land Conservancy | WordPress Tribe ICS | ~21 | Conservation hikes, volunteer days |
-| Durham Central Park | WordPress Tribe ICS | ~8 | Farmers market, community events |
+| Durham Central Park | Tribe REST scraper | ~64 (intermittent) | Farmers market, community events. **CONVERTED (2026-08-07, user-adjudicated)**: `?ical=1` was returning HTTP 403 from a SiteGround WAF. Root cause turned out to be an intermittently-permissive WAF, not fixed UA/IP filtering — a raw probe from this machine got HTTP 200 with `total:64` at one point, then the actual `scrapers/tribe_rest.py` run 403'd 4 times in a row minutes later (1 initial + 3 retries). Converted to `scrapers/tribe_rest.py --api-base https://durhamcentralpark.org` in the workflow; old `ics_url` row removed. Accepted flakiness: a scraper that sometimes succeeds beats a feed that always serves a block page; a bad day surfaces as a missing/zero output like any other scraper hiccup, not silently. |
 
 ### Libraries
 | Source | Type | Events | Notes |
@@ -103,7 +103,7 @@
 ### Faith Communities
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
-| Islamic Association of Raleigh | WordPress Tribe ICS | ~1 | Community events, programs |
+| Islamic Association of Raleigh | WordPress Tribe ICS | ~1 | Community events, programs. **FIXED (2026-08-07)**: WordPress permalink changed from `/programs/` to `/masjid-programs/`, so the old `?ical=1` URL 302-redirected to the HTML events page and lost the query string. Feed row updated to `https://raleighmasjid.org/masjid-programs/?ical=1` (verified: HTTP 200, valid `BEGIN:VCALENDAR`, 1 event at check time). |
 
 ### Bookstores
 | Source | Type | Events | Notes |
@@ -127,14 +127,14 @@
 |--------|------|--------|-------|
 | Independent Animal Rescue | WordPress Tribe ICS | ~2 | Cat adoption events, Durham |
 | Hope Animal Rescue | WordPress Tribe ICS | ~3 | Pints & Pups, Yappy Hour |
-| Animal Protection Society of Durham | WordPress Tribe ICS | ~4 | Crafts & Dogs, Out & About |
-| Second Chance Pet Adoptions | WordPress Tribe ICS | ~6 | Pups & Pucks, adoption at museums |
+| Animal Protection Society of Durham | Tribe REST scraper | 0 (verified intermittent, first success pending) | Crafts & Dogs, Out & About. **CONVERTED (2026-08-07, user-adjudicated)**: `?ical=1` was HTTP 403. Every attempt against `/wp-json/tribe/events/v1/events` in this session (3 retries) hit SiteGround's `sgcaptcha` bot-challenge page (`HTTP 202` + meta-refresh to `/.well-known/sgcaptcha/`), not a clean 403 — same intermittent-WAF family as Durham Central Park, just a different challenge response. "A working scraper honestly reporting 0 beats a 403/captcha feed" — converted anyway. Old `ics_url` row removed. |
+| Second Chance Pet Adoptions | Tribe REST scraper | 0 (verified intermittent, first success pending) | Pups & Pucks, adoption at museums. **CONVERTED (2026-08-07, user-adjudicated)**: `?ical=1` was HTTP 403. Same SiteGround `sgcaptcha` challenge pattern as APS of Durham on every attempt this session (3 retries, no successful run yet). Converted anyway per the intermittent-WAF evidence. Old `ics_url` row removed. |
 
 ### Play & Games
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Triangle Board Games & Bars | Meetup ICS | ~10 | Board games at Geekery, Gamers Geekery |
-| The Gathering Place Games | WordPress ICS | ~50 | D&D, Commander, Pokémon, board games; Chapel Hill |
+| ~~The Gathering Place Games~~ | WordPress ICS | ~50 | D&D, Commander, Pokémon, board games; Chapel Hill. **RETIRED (2026-08-07, user-adjudicated)**: `?ical=1` now returns the HTML events page, not ICS. Events moved from `/events/` to `/events-2/` but `/events-2/?ical=1` still returns HTML; `/wp-json/tribe/events/v1/events` 404s (no Tribe REST route). No machine-readable events surface exists after 6 probes (list view, `/feed/events/`, `/events-2/` variants, `?post_type=tribe_events&ical=1`, Tribe REST API). 0 events had ever loaded from this source. Feed row removed via `remove_feed()`. Re-add if they restore a working ICS or REST export. |
 
 ### Ideas & Learning
 | Source | Type | Events | Notes |
@@ -181,7 +181,7 @@
 |-------|--------|----------|
 | Triangle Hiking and Outdoors | 3 | Hiking |
 | Durham Geeks | 0 | Geek social |
-| Durham Board Games | 0 | Board games |
+| ~~Durham Board Games~~ | 0 | **RETIRED (2026-08-07)** — Meetup group `durham-board-games-meetup-group` returns `{"message":"Group not found"}`, not a calendar; 0 events had ever loaded. Feed row removed via `remove_feed()`. |
 | CHAD (Chapel Hill and Durham Fun) | 10 | Social activities |
 | Discover Durham Together | 0 | Social/exploration |
 | ChickTech RDU | 0 | Women in tech |
@@ -503,3 +503,35 @@ With 99 active sources and ~14,400+ events, this is the most comprehensive open 
 **Raleigh civic** — City of Raleigh (Drupal, no ICS), Raleigh Parks & Rec (not on CivicPlus), CAM Raleigh (Tribe Events installed but empty).
 
 **Faith** — Many churches on Planning Center (Church Center) which supports ICS but requires browser interaction to get subscribe URL. ShulCloud synagogues similar.
+
+---
+
+### 2026-08-07: DB-first cleanup soak — audit + fixes
+
+Full soak (`scripts/local_build.py` + `scripts/backfill_scraper_feeds.py --dry-run` + same-day GitHub Actions comparison) writeup: `reports/raleighdurham-2026-08-07-soak.md`. Scraper/DB drift confirmed clean (19/19 rows in parity after re-running the dry run against fresh scraper output — an earlier drift report was a false positive caused by `local_build.py` deriving names before scrapers regenerate their output). All 19 workflow scrapers reproduced their upstream event counts within normal live-source drift.
+
+**Fixed:**
+- Islamic Association of Raleigh — stale `?ical=1` URL updated to `/masjid-programs/?ical=1` after a WordPress permalink change (see Faith Communities row above).
+- Durham Board Games (Meetup) — retired; group no longer exists (see Meetup Groups — Social/Outdoors table above).
+
+**Local-runtime-only (no repo/DB action taken):**
+- NC Cultural Resources — local SSL trust-store gap on at least one dev machine (see note on the NC Dept. of Natural & Cultural Resources row above). Confirmed healthy upstream (1,411 events in the same-day GitHub Actions run).
+
+### 2026-08-07 (follow-up): user adjudication of the open-review items
+
+The user reviewed the four open items above and decided:
+
+- **Retire The Gathering Place Games.** No machine-readable events surface exists (6 probes, all HTML or 404; no Tribe REST route). Feed row removed via `remove_feed()`; 0 events had ever loaded. See updated Play & Games row above.
+- **Convert Durham Central Park, Animal Protection Society of Durham, and Second Chance Pet Adoptions to `scrapers/tribe_rest.py`** against `/wp-json/tribe/events/v1/events`, on the theory (matching the NAMI/Boys & Girls Club Bloomington pattern) that the Tribe REST API is reachable even though `?ical=1` is WAF-blocked, with reported totals of 64 / 0 / 6 respectively — "a working scraper honestly reporting 0 beats a 403 feed" for APS.
+
+**Initial pass: not applied, contradiction flagged.** Re-verification from this machine — the scraper's default UA, a full Chrome UA, and a full browser header set (Accept/Accept-Language/Accept-Encoding/Referer/Sec-Fetch-*), plus an actual `scrapers/tribe_rest.py` run against Durham Central Park (`403 Client Error: Forbidden`) — got HTTP 403 from the Tribe REST endpoint on all three sites, identical to the `?ical=1` block. The outbound IP for this check was a residential (Comcast) address, not an obvious datacenter/bot-flagged range, so the block did not appear to be simple IP-reputation filtering. This directly contradicted the reported working totals (64/0/6).
+
+**Resolution: both observations were real — the WAF is intermittently permissive.** A follow-up probe from the same machine, minutes later, got `durhamcentralpark.org`'s Tribe REST endpoint to return `HTTP 200` with `total:64` via a plain read-only curl. Immediately after, an actual `scrapers/tribe_rest.py` run against the same endpoint hit `403` four times in a row (1 + 3 retries). Second Chance and APS of Durham never succeeded in this session — every attempt (raw probe and scraper) hit SiteGround's `sgcaptcha` bot-challenge page (`HTTP 202` + meta-refresh to `/.well-known/sgcaptcha/`) instead of a clean 403. This is a stateful/rate-based WAF, not fixed UA or IP filtering — consistent with both the earlier all-403 series and the later occasional 200.
+
+**Decision (user-adjudicated): convert all three anyway, flakiness accepted.** "A scraper that sometimes succeeds beats feeds that always serve 403 pages, and bad days surface as a missing output flagged normally" — same posture as any other flaky upstream source in this project. Applied 2026-08-07:
+- Added three `scrapers/tribe_rest.py` lines to the `.github/workflows/generate-calendar.yml` Raleigh-Durham block (`--timezone America/New_York`, outputs `durhamcentralpark.ics` / `secondchancenc.ics` / `apsofdurham.ics`, display names reused verbatim from the old DB rows).
+- Removed the three old `ics_url` feed rows (ids 278, 289, 290; 0 events had loaded from any of them) via the Manage Feeds sequence (events DELETE, then `remove_feed` RPC).
+- `backfill_scraper_feeds.py --city raleighdurham --sync-existing --dry-run` confirmed exactly 3 inserts (no other drift), then applied non-dry-run: `Inserted: 3, Updated: 0, Retired: 0, Errors: 0`. Final dry-run: 22/22 rows in parity, 0 drift.
+- `feeds.txt` regenerated from the DB.
+
+Per-site verification result this session: Durham Central Park — one raw-HTTP success (`total:64`), scraper itself did not succeed in 4 attempts. Second Chance Pet Adoptions and Animal Protection Society of Durham — no successful run yet (`sgcaptcha` challenge on every attempt); documented as "verified intermittent: first success pending," not reverted, per the user's explicit acceptance of this risk. Future scheduled/CI runs will surface real event counts (or their absence) through the normal zero-event/missing-output review path — no special handling needed.

@@ -92,7 +92,7 @@ def detect_anomalies(feed_name: str, current: int, history: list[dict]) -> list[
         anomalies.append({
             'type': 'zero_events',
             'message': f'Feed returned 0 events (was {prev_count})',
-            'severity': 'high'
+            'severity': 'info'
         })
     elif prev_count >= MIN_EVENTS_FOR_DROP and current < prev_count:
         drop_pct = (prev_count - current) / prev_count
@@ -453,8 +453,27 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
             print(f"  [{a['severity']}] {a['city']}/{a['feed']}: {a['message']}")
 
 
+def classify_log_issue(message: str, level: str) -> str:
+    text = message.lower()
+    if "the following arguments are required" in text or "unrecognized arguments" in text:
+        return "arg_error"
+    if "http error" in text or "client error" in text:
+        return "http_error"
+    if "failed to resolve" in text or "name or service not known" in text:
+        return "dns_error"
+    if "connectionerror" in text or "connection refused" in text or "connection reset" in text:
+        return "connection_error"
+    if "timed out" in text or "timeout" in text:
+        return "timeout"
+    if "broken property" in text or "error parsing vevent" in text:
+        return "parse_warning"
+    if "traceback" in text:
+        return "traceback"
+    return "warning" if level == "warning" else "error"
+
+
 def parse_build_errors(log_path: str) -> list[dict]:
-    """Parse build.log for error patterns. Returns list of error dicts."""
+    """Parse build.log for source-level error and warning issues."""
     try:
         with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
             lines = f.readlines()
@@ -464,7 +483,27 @@ def parse_build_errors(log_path: str) -> list[dict]:
     errors = []
     today = date.today().isoformat()
 
-    # Patterns that indicate errors
+    structured_log_pattern = re.compile(
+        r'^\[(?P<city>[^\]]+)\]\[(?P<phase>[^\]]+)\]\s+'
+        r'(?P<timestamp>\d{4}-\d{2}-\d{2} [^ ]+)?'
+        r'(?:\s+-\s+)?(?P<logger>[A-Za-z0-9_]+)\s+-\s+'
+        r'(?P<level>ERROR|WARNING)\s+-\s+(?P<message>.*)$'
+    )
+
+    # local_build.py brackets each command's output with RUN/EXIT marker lines
+    # labeled by the source's display name. Attributing issues to the active
+    # RUN label keeps errors from a shared scraper script (one script, many
+    # sources) tied to the specific source that logged them instead of being
+    # matched to every source using that script.
+    run_marker_pattern = re.compile(
+        r'^\[(?P<city>[^\]]+)\]\[(?P<phase>[^\]]+)\]\s+RUN\s+(?P<label>.+)$'
+    )
+    exit_marker_pattern = re.compile(
+        r'^\[(?P<city>[^\]]+)\]\[(?P<phase>[^\]]+)\]\s+EXIT\s+-?\d+\s+(?P<label>.+)$'
+    )
+    active_run_label = None
+
+    # Legacy patterns that indicate issues
     error_patterns = [
         re.compile(r'error: the following arguments are required', re.IGNORECASE),
         re.compile(r'HTTP Error \d+', re.IGNORECASE),
@@ -480,6 +519,36 @@ def parse_build_errors(log_path: str) -> list[dict]:
     i = 0
     while i < len(lines):
         line = lines[i].rstrip()
+
+        run_match = run_marker_pattern.match(line)
+        if run_match:
+            active_run_label = run_match.group('label').strip()
+            i += 1
+            continue
+        exit_match = exit_marker_pattern.match(line)
+        if exit_match:
+            active_run_label = None
+            i += 1
+            continue
+
+        structured_match = structured_log_pattern.match(line)
+        if structured_match:
+            level = structured_match.group('level').lower()
+            logger = structured_match.group('logger')
+            message = structured_match.group('message')
+            errors.append({
+                'date': today,
+                'line': line.strip(),
+                'city': structured_match.group('city'),
+                'phase': structured_match.group('phase'),
+                'logger': logger,
+                'source': active_run_label or logger.removesuffix('Scraper'),
+                'level': level,
+                'issue_type': classify_log_issue(message, level),
+                'message': message,
+            })
+            i += 1
+            continue
 
         # Check for traceback blocks
         if 'Traceback (most recent call last)' in line:
@@ -505,7 +574,9 @@ def parse_build_errors(log_path: str) -> list[dict]:
             errors.append({
                 'date': today,
                 'line': last_error_line,
-                'source': source
+                'source': active_run_label or source,
+                'level': 'error',
+                'issue_type': 'traceback',
             })
             i = j + 1
             continue
@@ -527,7 +598,9 @@ def parse_build_errors(log_path: str) -> list[dict]:
                 errors.append({
                     'date': today,
                     'line': line.strip(),
-                    'source': source
+                    'source': active_run_label or source,
+                    'level': 'error',
+                    'issue_type': classify_log_issue(line, 'error'),
                 })
                 break
 
@@ -537,7 +610,7 @@ def parse_build_errors(log_path: str) -> list[dict]:
     seen = set()
     unique = []
     for e in errors:
-        key = (e['line'], e['source'])
+        key = (e['line'], e.get('source'), e.get('level'))
         if key not in seen:
             seen.add(key)
             unique.append(e)
@@ -565,11 +638,13 @@ def main():
         report['errors'] = build_errors
         save_report(report, args.output)
         if build_errors:
-            print(f"Build errors found: {len(build_errors)}")
+            error_count = sum(1 for e in build_errors if e.get('level') == 'error')
+            warning_count = sum(1 for e in build_errors if e.get('level') == 'warning')
+            print(f"Build issues found: {len(build_errors)} ({error_count} errors, {warning_count} warnings)")
             for e in build_errors:
-                print(f"  [{e.get('source', '?')}] {e['line'][:120]}")
+                print(f"  [{e.get('level', '?')}:{e.get('source', '?')}] {e['line'][:120]}")
         else:
-            print("No build errors found in log.")
+            print("No build issues found in log.")
 
 
 if __name__ == '__main__':

@@ -65,6 +65,7 @@ class TribeRestScraper(BaseScraper):
         source_name: str,
         tz: str = "America/New_York",
         default_location: str = "",
+        user_agent: str | None = None,
     ):
         self.api_base = api_base.rstrip('/')
         self.name = source_name
@@ -72,6 +73,12 @@ class TribeRestScraper(BaseScraper):
         self.timezone = tz
         self.default_location = default_location
         self.api_url = f"{self.api_base}/wp-json/tribe/events/v1/events/"
+        # Some hosts (e.g. SiteGround's bot protection) hard-403 the default
+        # UA but accept a plain one; --user-agent overrides per site without
+        # changing behavior for existing invocations.
+        self.headers = dict(HEADERS)
+        if user_agent:
+            self.headers['User-Agent'] = user_agent
         super().__init__()
 
     def fetch_events(self) -> list[dict[str, Any]]:
@@ -97,7 +104,7 @@ class TribeRestScraper(BaseScraper):
             self.logger.info(f"Fetching page {page}: {url}")
 
             try:
-                response = requests.get(url, headers=HEADERS, timeout=30)
+                response = requests.get(url, headers=self.headers, timeout=30)
                 response.raise_for_status()
                 data = response.json()
             except Exception as e:
@@ -199,6 +206,10 @@ def main():
         help='Fallback location when the API venue is empty'
     )
     parser.add_argument('--output', '-o', help='Output ICS file path')
+    parser.add_argument(
+        '--user-agent',
+        help='Override the request User-Agent (some hosts 403 the default)'
+    )
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
     args = parser.parse_args()
 
@@ -210,6 +221,7 @@ def main():
         source_name=args.name,
         tz=args.timezone,
         default_location=args.default_location,
+        user_agent=args.user_agent,
     )
     scraper.run(args.output)
 

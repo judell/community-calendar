@@ -6,14 +6,14 @@
 | Source | URL | Notes |
 |--------|-----|-------|
 | Arlene Francis Theater | Google Calendar | Events at local theater |
-| Luther Burbank Center | `lutherburbankcenter.org/events/?ical=1` | Major performing arts venue |
+| Luther Burbank Center | ~~`lutherburbankcenter.org/events/?ical=1`~~ | CONVERTED 2026-08-07 to `tribe_rest.py` scraper (feed served SiteGround 403 block page) |
 | Schulz Museum | `schulzmuseum.org/events/?ical=1` | Charles Schulz museum events |
 | Sonoma.com | `sonoma.com/events/?ical=1` | Regional tourism/events |
 | GoLocal Coop | `golocal.coop` Tribe Events | Local business coop |
 | Sonoma County AA | `sonomacountyaa.org/events/?ical=1` | Recovery community |
 | DSA Sonoma County | Google Calendar | Political org |
-| Sonoma Community Center | `sonomacommunitycenter.org/events/?ical=1` | Tribe Events; tai chi, dancing, printmaking, bluegrass, sewing (30 events) |
-| Santa Rosa Symphony | `srsymphony.org/events/?ical=1` | Tribe Events; concerts and youth ensembles |
+| Sonoma Community Center | ~~`sonomacommunitycenter.org/events/?ical=1`~~ | REMOVED 2026-08-07 (dead after site redesign; `tribe_rest.py` scraper supersedes) |
+| Santa Rosa Symphony | ~~`srsymphony.org/events/?ical=1`~~ | REMOVED 2026-08-07 (feed serves empty reply; `santa_rosa_symphony.py` scraper supersedes) |
 | California Bluegrass Association | Filtered Tribe Events ICS | Sonoma-area bluegrass/jam/live performance feed (30 events as of 2026-05-10) |
 
 ### Scraped Sources
@@ -27,19 +27,20 @@
 | California Theatre | `cal_theatre.py` | Historic theater |
 | Copperfield's Books | `copperfields.py` | Bookstore events |
 | Sonoma County Gov | `sonoma_county_gov.py` | Government meetings |
-| Cafe Frida | Scraper | Music venue |
 | SRCC | `srcc.py` | Santa Rosa Chamber? |
 | Museum of Sonoma County | ICS | Local museum |
-| Spreckels Performing Arts | `spreckels.py` | Tribe Events REST API; Rohnert Park theater |
+| Spreckels Performing Arts | `spreckels.py` | REWRITTEN 2026-08-07: Divi show pages under `/show/<season>-season/` (Tribe REST removed in site redesign); all-day run ranges, no showtimes exposed |
+| Luther Burbank Center | `tribe_rest.py` | Converted 2026-08-07 from dead `?ical=1`; SiteGround PoW WAF blocks most programmatic access — valid-empty on blocked days, `--user-agent "Mozilla/5.0"`; reliable coverage needs venue allowlist or headless harness |
+| Uptown Theatre Napa | `tribe_rest.py` | Converted 2026-08-07 from dead `?ical=1`; same SiteGround WAF situation as LBC |
 | Lagunitas Brewing Company | `lagunitas.py` | Petaluma taproom; live music, trivia, food trucks (37 events) |
 | Creative Sonoma | `creative_sonoma.py` | County arts agency aggregator (55 events) |
-| Cinnabar Theater | `cinnabar.py` | Petaluma community theater (5 shows/season) |
+| Cinnabar Theater | `cinnabar.py` | Petaluma community theater (5 shows/season); date parser extended 2026-08-07 for abbreviated months and comma-less years ("Sept. 18 – Oct. 4 2026") |
 | Green Music Center | `green_music_center.py` | Sonoma State performing arts venue (10 events) |
 | Occidental Center for the Arts | `occidental_arts.py` | Occidental performing arts venue and studio classes (42 future events as of 2026-05-10) |
 | Elephant in the Room (Songkick) | `songkick.py` | Healdsburg music pub — artist-sourced tour dates |
 | Elephant in the Room (Eventbrite) | `eventbrite.py` | Healdsburg music pub — ticketed events |
 | Rancho Nicasio | iCal feed | Nicasio roadhouse — WordPress Tribe Events (30 events) |
-| The Big Easy | iCal feed | Petaluma underground nightclub — WordPress Tribe Events (30 events) |
+| The Big Easy | ~~iCal feed~~ `songkick.py` | Petaluma underground nightclub — Tribe ICS feed REMOVED 2026-08-07 (site replatformed, past-only events); Songkick scraper covers |
 | Sweetwater Music Hall | `songkick.py` | Mill Valley — flagship North Bay venue (8+ events) |
 | Mystic Theatre | `songkick.py` | Petaluma — major indie venue (8+ events) |
 | HopMonk Tavern Sebastopol | `songkick.py` | Sebastopol — beer garden + live music (8+ events) |
@@ -52,7 +53,7 @@
 | Shady Oak Barrel House | `songkick.py` | Santa Rosa — brewery + live music (3 events) |
 | THE 222 | `songkick.py` | Healdsburg — music venue (3 events) |
 | Rio Nido Roadhouse | `songkick.py` | Rio Nido — live music (3 events) |
-| Redwood Cafe | `songkick.py` | Cotati — live music (2 events) |
+| Redwood Cafe | `redwood_cafe.py` | Cotati — live music; Songkick interim + My Calendar ICS both REMOVED 2026-08-07 per 2026-07-17 flags (first-party HTML scraper is the sole producer) |
 | HenHouse Brewing | `songkick.py` | Santa Rosa — brewery (1 event) |
 
 ### City of Santa Rosa Calendars
@@ -321,7 +322,7 @@ Six-lane agent fan-out (Meetup refresh, platform sweeps with the post-2025 toolb
 | Source | Scraper | Events (test) | Notes |
 |---|---|---|---|
 | Visit Santa Rosa | `visit_santa_rosa.py` (new) | 271 | **Formerly a non-starter** — public Algolia creds embedded in page JS, extracted at runtime. AGGREGATOR. The Metro Chamber Algolia index (262) is a near-duplicate — deliberately not added |
-| Sonoma Valley Events | `gatherboard.py` (new, parameterized) | 594 | **Formerly "RSS Coming Soon"** — per-event ICS aggregation (`/{hex-id}/ical/`); real title is in X-WR-CALNAME, not SUMMARY. AGGREGATOR. Heavy run (~600 page fetches) |
+| ~~Sonoma Valley Events~~ | ~~`gatherboard.py`~~ | 594 at add | **REMOVED 2026-08-07 by owner decision** — site has a history of rejecting our probes; workflow line, DB row, and events all removed. Do not re-add without owner sign-off (see Reconciled section) |
 | Sonoma Community Center | `tribe_rest.py` | 457 | Site redesign 404'd the Tribe ICS; REST API alive. Remove the dead `?ical=1` feed via Manage Feeds |
 | Santa Rosa Symphony | `santa_rosa_symphony.py` (new) | 10 | Tribe ICS/REST dead; admin-ajax card backdoor. KNOWN LIMITATION: cards carry no times — events emit at 00:00; follow-up could fetch detail pages |
 | Raven Performing Arts Theater | `thundertix.py` (new, parameterized) | 7 | ThunderTix ItemList JSON-LD |
@@ -359,3 +360,125 @@ El Molino HS MaxPreps (0, off-season) · Sonoma State Sidearm athletics (2026-27
 ### Non-starters confirmed this pass
 
 Barrel Proof Lounge scraper dead (27 aggregator-only events — repair or retire, investigate separately) · SR City Schools (Finalsite `calendarsEnabled=false`) · Windsor/Mark West/Rincon Valley/Bellevue/Piner-Olivet/Roseland USDs (PDF or Cloudflare) · sonoma.edu + events.sonoma.edu (Cloudflare/dead) · Sebastopol city (`rg-event`, no export) · 6th Street Playhouse (JS SPA, no Ludus/OvationTix API) · Cotati CivicPlus (3 sparse) · Windsor + Healdsburg chambers (member-meeting noise) · Farm Trails, LandPaths, Habitat SoCo, Sonoma Land Trust, seb.org (Cloudflare/captcha-class blocks) · ShulCloud (Shomrei Torah), Church Center (Spring Hills, New Vintage), Wix faith/civic sites (no exports) · Oakmont Village (member-gated) · Rotary Sunrise ClubRunner (internal events) · Bandsintown (still 403) · Trumba/TeamUp/LibCal/guild.host area sweeps empty · DICE: no venues beyond Little Saint
+
+## Clean pass (2026-08-07)
+
+Source-health soak (`reports/santarosa-2026-08-07-soak.md`) plus the executed
+fixes. Local audit and the same-day GitHub run agreed on producer set,
+failures, and zero-event roster before these changes.
+
+### Retired
+
+- **Cafe Frida** — venue rebranded: `cafefridagallery.com` now redirects to
+  `cafelittledeer.com`, which has no public events page (only
+  private-event booking; checked 2026-08-07). `/events` 404s locally and in
+  Actions. Scraper `scrapers/cafefrida.py` deleted, workflow line removed,
+  DB row (id 351) marked removed. Mondavi/Davis-Chamber pattern.
+- **New World Ballet** — DB scraper row (id 416) had no command and no
+  producer; marked removed.
+- **North Bay Derby duplicate** — malformed DB row (id 822) keyed on the
+  page URL instead of an output path (the feed downloader saved 596KB of
+  HTML as an "ics"); marked removed. The real
+  `squarespace_northbayderby.ics` row (id 1101) is untouched.
+
+### Repaired
+
+- **Spreckels Performing Arts Center** — Tribe REST API 404s after the 2026
+  site redesign; `scrapers/spreckels.py` rewritten against the Divi
+  server-rendered `/show/<season>-season/<slug>/` pages (Arts People
+  ticketing). Season slug supplies the year (Aug–Dec → first year, Jan–Jul
+  → second). No per-performance times exposed — all-day run ranges, like
+  the Santa Rosa Symphony 00:00 limitation. 6 shows parsed on rewrite day.
+- **Cinnabar Theater** — `_parse_date_range` extended for abbreviated
+  months with periods and comma-less years ("Sept. 18 – Oct. 4 2026",
+  "April 9 – 25 2027"); cross-year ranges ("Dec. 19 – Jan. 4") now roll the
+  end year. All 4 current-season shows parse (2 within the 6-month
+  horizon).
+
+### Executed the 2026-07-17 "Remove via Manage Feeds" flags (production `remove_feed` path: events delete + feed hard-delete)
+
+- old Sonoma County DSA gcal (id 392; feed served a Google 404 page) — new
+  socodsa.org gcal (id 1055) remains
+- Meetup: Go Wild Hikers (id 403) and Meetup: Sonoma County Boomers
+  (id 410) — groups deleted
+- The Big Easy Tribe ICS (id 402) — replatformed site, past-only events;
+  Songkick scraper covers
+- Redwood Cafe My Calendar ICS (id 1060) and Songkick interim (id 381,
+  workflow line also removed) — first-party `redwood_cafe.py` (id 1071) is
+  the sole producer
+- Sonoma Community Center `?ical=1` (id 398) — `tribe_rest.py` scraper
+  supersedes
+- Santa Rosa Symphony `?ical=1` (id 399) — `santa_rosa_symphony.py`
+  scraper supersedes
+
+### Reconciled
+
+- **Sonoma Valley Events** (id 1066) — row was `status=removed` while the
+  workflow still ran it (451+ events/run); removal judged accidental
+  against this checklist's 2026-07-17 record, set back to `active`.
+  **REVERSED later on 2026-08-07 by owner decision — REMOVED for good.**
+  The DB `removed` status had been deliberate: sonomavalleyevents.com has
+  a history of rejecting our probes, and the owner chose to drop the
+  source rather than keep an intermittently-hostile aggregator. The
+  same-day reactivation (made before that intent was known) was undone:
+  workflow line removed, 333 events deleted, feed row 1066 hard-removed
+  via `remove_feed`, `feeds.txt` re-exported (106 rows). Do NOT
+  re-reconcile this source back to active in future clean passes — the
+  removal is intentional even though the site may answer probes on any
+  given day.
+- **Sonoma County Board of Supervisors** (id 1054) — `scraper_cmd`
+  normalized to the workflow form (`--source` + `--output`).
+- `feeds.txt` re-exported from the DB (107 rows).
+
+### Adjudicated 2026-08-07 (display names, A004 — resolved)
+
+- The 6 MaxPreps workflow lines gained explicit `--name "<School> High
+  School Athletics"` flags matching the DB display names, and the DB
+  `scraper_cmd` rows were synced to the new commands.
+- `scrapers/santa_rosa_arts_center.py` and `scrapers/movingwriting.py`
+  now emit stable `X-WR-CALNAME` values ("Santa Rosa Arts Center",
+  "MovingWriting") instead of month-stamped titles — the "- 2026/08"
+  artifacts are gone at the source.
+- Post-fix `--sync-existing --dry-run` is fully clean: 63/63 rows,
+  0 updates, 0 retirements, 0 weak-name skips.
+
+### Adjudicated 2026-08-07 (A007 review queue — user decisions)
+
+- **Barrel Proof Lounge — REPAIRED.** Site alive; the 2026 redesign moved
+  events to `/events/`, whose Widget-for-Eventbrite FullCalendar embeds the
+  full list as an inline `var wfea_events_N = [...]` JSON array.
+  `scrapers/barrel_proof.py` rewritten to parse that array (was scraping
+  homepage widget blocks that no longer carry events). 291 events on the
+  repair-day run (was 0). Workflow line unchanged (already runs
+  `barrel_proof.py`).
+- **Sweetwater Music Hall — REPAIRED.** First-party RSS + JSON-LD scraper
+  emitted 0 under Python 3.10 because every event page's JSON-LD
+  `startDate` carries a colon-less UTC offset (`...T20:00:00-0800`), which
+  3.10's `datetime.fromisoformat` rejects (3.11+ accepts it) — so every
+  event hit the "bad startDate" skip. Added `_normalize_iso` to insert the
+  offset colon (and map `Z`). 33 future events now parse (was 0). The
+  Songkick duplicate (`songkick_sweetwater.ics`, id 367) stays by user
+  decision — dedup reconciles.
+- **Luther Burbank Center + Uptown Theatre Napa — converted to
+  `tribe_rest` scrapers (final user adjudication 2026-08-07), with the WAF
+  reality documented.** The Tribe REST APIs return real JSON (LBC `total`
+  43, Uptown 35) reliably only to a real browser: SiteGround answers
+  `requests`/`curl` with a `202` JavaScript proof-of-work challenge, then
+  a hard `403` block page even after the PoW is solved in code (SHA1,
+  complexity 21, ~1.45M hashes, `_I_` pass cookie issued — the homepage
+  itself still `403`s), and the identical block produced 0 events for both
+  `?ical=1` feeds in the same-day GitHub run. The user chose conversion
+  anyway, matching the toronto/raleighdurham precedent: on blocked days
+  the scraper writes a valid empty calendar (audits read "quiet", not
+  "broken" `not_ics`), and any WAF relenting harvests events. Old feed
+  rows removed via `remove_feed` (LBC id 393, Uptown id 400, both 0
+  events); new scraper rows inserted via the reviewed sync; workflow lines
+  carry `--user-agent "Mozilla/5.0"`. The real fix for reliable coverage
+  remains a venue-side WAF allowlist ask (per the 2026-07-17 curator-guide
+  note) or a headless-browser scraper harness — **that part stays open.**
+- **Deliberately kept, watching (no change):** Sonoma County AA empty feed,
+  sonoma.com past-only staleness, Santa Rosa Arts Center (quiet, no
+  errors), and the 9 quiet Songkick venues (Elephant/Will Call/Rancho
+  Nicasio/Big Easy/Twin Oaks/Fern Bar/Shady Oak/THE 222/HenHouse — valid
+  but no current listings). Sonoma Community Center REST stays productive
+  locally but quiet in Actions (possible datacenter-IP gating) — watch.

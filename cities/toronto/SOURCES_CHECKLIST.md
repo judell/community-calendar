@@ -5,7 +5,7 @@
 ### Aggregators
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
-| NOW Magazine | WordPress Tribe ICS | ~30 | Arts, music, comedy, cultural events |
+| ~~NOW Magazine~~ | WordPress Tribe ICS | 0 | Retired 2026-08-07: `nowtoronto.com/events/?ical=1` serves a BigScoots WAF interstitial (HTML, 38 KB); re-probe occasionally and re-add if an ICS/REST export returns |
 | Toronto Events (torevent) | Tockify ICS | ~2,899 | Music, comedy, film, nightlife — biggest source |
 
 ### Venues & Institutions
@@ -19,9 +19,9 @@
 | Bata Shoe Museum | WordPress Tribe ICS | 5 | |
 | Aga Khan Museum | HTML scraper | 63 at add time | Homepage upcoming cards + detail pages; includes recurring BMO Wednesdays and announced TD Pop-Up performances |
 | Japanese Canadian Cultural Centre | HTML scraper | 18 at add time | Drupal event listing + detail pages; expands multi-date programs like SakuraFest workshops into separate instances |
-| Buddies in Bad Times Theatre | WordPress Tribe ICS | 4 | LGBTQ+ theatre |
-| Factory Theatre | WordPress Tribe ICS | 9 | Canadian theatre |
-| High Park Nature Centre | WordPress Tribe ICS | 10 | Outdoor/nature programs |
+| Buddies in Bad Times Theatre | Tribe REST scraper | 7 via REST at conversion | LGBTQ+ theatre. Converted 2026-08-07: `?ical=1` served an HTML block page; SiteGround-protected — `--user-agent "Mozilla/5.0"` landed same day; local verification still hits the transient sgcaptcha interstitial under probe bursts, expect events from CI's quieter network path |
+| ~~Factory Theatre~~ | WordPress Tribe ICS | 0 | Retired 2026-08-07: `?ical=1` endpoint dead (empty response locally and in Actions); feed row removed |
+| High Park Nature Centre | Tribe REST scraper | 15 via REST at conversion | Outdoor/nature programs. Converted 2026-08-07: `?ical=1` served an HTML block page; SiteGround-protected — `--user-agent "Mozilla/5.0"` landed same day; expect events from CI's quieter network path |
 
 ### Ticketmaster Venues (via Discovery API)
 | Source | Type | Events | Notes |
@@ -41,7 +41,7 @@
 | University of Toronto | HTML scraper | 176 | Aggregate page + 32 department deep-links |
 | UofT Engineering | WordPress Tribe ICS | 17 | |
 | UofT Philosophy | WordPress Tribe ICS | 7 | |
-| UofT Social Work | WordPress Tribe ICS | 4 | |
+| ~~UofT Social Work~~ | WordPress Tribe ICS | 0 | Retired 2026-08-07: `?ical=1` endpoint dead (empty response locally and in Actions); feed row removed. UofT Knox College retired the same day for the same reason |
 | OCAD University | Listing/detail scraper | 12 at add time | Exhibitions, talks, senate meetings, creative entrepreneurship |
 | York University | WordPress MEC ICS | 6,558 | Huge feed, pipeline filters by date |
 
@@ -55,7 +55,7 @@
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | CultureLink | WordPress Events Manager ICS | 494 | Newcomer/community events |
-| Scadding Court Community Centre | WordPress Tribe ICS | 30 | |
+| Scadding Court Community Centre | Tribe REST scraper | 157 via REST at conversion | Converted 2026-08-07: `?ical=1` served an HTML block page; SiteGround-protected — `--user-agent "Mozilla/5.0"` landed same day; expect events from CI's quieter network path |
 | St. Lawrence Neighbourhood Assoc. | Tockify ICS | 82 | Community meetings, markets, kids |
 | Bloor West Village BIA | WordPress Tribe ICS | 6 | |
 | Councillor Jamaal Myers | Tockify ICS | 27 | Scarborough community, city council |
@@ -72,13 +72,13 @@
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Repair Cafe Toronto | WordPress ICS | 82 | Community repair workshops across GTA |
-| Toronto Knitters Guild | WordPress Tribe ICS | 9 | Guild meetings, knit nights, workshops |
+| ~~Toronto Knitters Guild~~ | WordPress Tribe ICS | 0 | Retired 2026-08-07: `?ical=1` endpoint dead (empty response locally and in Actions); feed row removed |
 | Toronto Tool Library | Shopify product scraper | 22 at sweep time | TTLMakerspace workshops at 192 Spadina; woodworking, sewing, leathercraft, CNC |
 | Bistitchual | Shopify product scraper | 3 at sweep time | Yarn shop classes at 266 Jane St; knitting + crochet courses |
 | Parkdale Pottery | Shopify product scraper | 2 at sweep time | Pottery workshops at Queen/Campbell studios |
 | Site 3 CoLaboratory | WordPress Tribe ICS | 1 | Art/tech makerspace workshops |
 | The Devil's Workshop | WordPress Events Manager ICS | 50 | Jewellery, glass fusing, silversmithing, lost wax casting, metal printmaking |
-| Jewel Envy | WordPress Tribe ICS | 5 | Jewellery, enamel, metalwork, kids polymer clay |
+| Jewel Envy | Tribe REST scraper | 18 | Jewellery, enamel, metalwork, kids polymer clay. Converted 2026-08-07: `?ical=1` served HTML; Tribe REST works as-is (18 events on first run) |
 | HackLab.TO | Public Google Calendar ICS | 1,104 (pipeline date-filters) | Toronto's hackerspace; open house Tuesdays, workshops, maker events |
 | Queen City Stitch and Bitch | Meetup ICS | 10 | Fibre arts — knit, crochet, spin, weave, sew |
 | Studio Mooi | Eventbrite organizer scraper | 2 | Pottery/craft workshops (Wix site, no own feed) |
@@ -88,7 +88,7 @@
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Green Neighbours Network of Toronto | WordPress Tribe ICS | 50 | Native plant walks, tree stewardship, community garden events |
-| GardenOntario (OHA) | WordPress Tribe ICS | 30 | Province-wide hort society events; geo-filter trims to Toronto |
+| ~~GardenOntario (OHA)~~ | WordPress Tribe ICS | 0 | Retired 2026-08-07: `gardenontario.org/events/?ical=1` serves a Cloudflare "Just a moment" challenge; re-probe occasionally and re-add if an export returns |
 | Etobicoke Horticultural Society | Squarespace per-event ICS scraper | 4 future | Monthly meetings, garden tours, plant sales |
 | Toronto Master Gardeners | WordPress Tribe ICS | 15 | Demos at libraries, advice clinics, TBG presentations |
 | Anga's Farm & Nursery | Squarespace per-event ICS scraper | 11 | Workshops: kokedama, pruning, floral design at 89 Bankfield Dr |
@@ -109,7 +109,7 @@
 ### Outdoor & Nature
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
-| Ontario Nature | WordPress Tribe ICS | 11 | Birding trips, nature talks, conservation |
+| ~~Ontario Nature~~ | WordPress Tribe ICS | 0 | Retired 2026-08-07: Tribe REST route removed (`rest_no_route`) and `?ical=1` serves the 75,193-byte HTML block page; re-probe occasionally and re-add if an export returns |
 
 ### Literary & Bookstores
 | Source | Type | Events | Notes |
@@ -191,13 +191,34 @@
 | Toronto 3D Printing | 10 | Makers/3D printing |
 | Midtown Arts & Crafts | 1 | General crafts |
 
+## Maintenance Log
+
+### 2026-08-07 clean pass (soak report `reports/toronto-2026-08-07-soak.md`)
+
+- **DB metadata sync** (`backfill_scraper_feeds.py --city toronto --sync-existing`): retired 14 legacy URL-keyed scraper rows that duplicated workflow producers (A Different Booklist, Bakka Phoenix Books, Ben McNally Books, Queen Books, Flying Books, blogTO, and the 8 Eventbrite publishers below). These rows dated from the pending_feeds era, were keyed by website URL instead of output path, and corrupted local audit builds (they exported as bogus live feeds; the blogTO row's HTML download clobbered the real scraper's output). Also normalized 3 display names from output `X-SOURCE`: University of Toronto, City of Toronto Meetings, City of Toronto Festivals & Events.
+- **Eventbrite publishers converted off eb-to-ical** (dead since 2026, HTTP 404): `scrapers/eventbrite_filtered.py` now scrapes Eventbrite directly via organizer page + JSON-LD; all 8 workflow lines switched from `--organizer <id>` to `--url "<organizer page>"`; DB `scraper_cmd` synced. See the publisher-feed section update below.
+- **Dead live ICS endpoints retired** (empty/failed in both local and Actions runs, 0 events in DB for each): Cecil Community Centre, Factory Theatre, Toronto Knitters Guild, UofT Knox College, UofT Social Work — feed rows removed via `remove_feed`.
+- **Aga Khan Museum parser fix**: `scrapers/agakhan_museum.py` now handles decorated date labels ("Doors Open • May 23, 2026"), multi-showtime labels ("August 28 • 8 pm August 29 • 8 pm August 30 • 2 pm"), and year-less dates ("November 18", next-occurrence inference). All three recurring parse warnings gone; 62 events on the verification run (previously 15, with the TD Pop-Up and Ali Sethi pages contributing nothing).
+- **Left open for review at soak time**, adjudicated later the same day — see the next entry.
+
+### 2026-08-07 adjudication of the HTML-serving feeds and environment splits
+
+- **Converted to `scrapers/tribe_rest.py`** (old `?ical=1` rows removed via `remove_feed`, all four had 0 events in the DB): Buddies in Bad Times Theatre (REST total 7), High Park Nature Centre (15), Scadding Court Community Centre (157), Jewel Envy (18). Jewel Envy produced 18 events immediately. The other three are SiteGround-hosted: their REST APIs hard-403 tribe_rest.py's default UA (and a full fake-Chrome UA) but accept a plain `Mozilla/5.0`, with a transient `/.well-known/sgcaptcha/` interstitial under bursts. The `--user-agent` override landed in `scrapers/tribe_rest.py` the same day and the three workflow lines (plus DB commands) now pass `--user-agent "Mozilla/5.0"`; local verification afterward still hit the sgcaptcha interstitial (this network had been probing in bursts), so first real event counts are expected from CI's quieter network path — check the next GitHub run.
+- **Retired** (feed rows removed via `remove_feed`, 0 events each; re-probe occasionally and re-add if a machine-readable export returns): Toronto Dance and Ontario Nature (Tribe REST route removed — `rest_no_route` — and `?ical=1` serves the shared 75,193-byte HTML block page), NOW Toronto (BigScoots WAF interstitial), GardenOntario (Cloudflare challenge).
+- **Accepted environment splits — policy, no mechanical change (2026-08-07)**:
+  - blogTO: 403 from GitHub Actions IPs; works locally (1016 events on 2026-08-07). Keep the producer; CI contribution is 0 until the block lifts or a proxy decision is made.
+  - York University feed (`events.yorku.ca` MEC ICS): failed upstream on 2026-08-07 while yielding 6,958 raw events locally. Keep; watch upstream runs.
+  - UofT sub-calendars: 7 sub-calendars 403 in CI vs 1 locally; the aggregate scraper still produced 74 events upstream. Keep as-is.
+  - Trinity College (within UofT scraper): SSL verification broken in both environments — stays an **open review item**.
+- **Quiet-source queue (A008)**: the ~30 valid-but-quiet zero-event sources (16 Meetup feeds, 9 Eventbrite organizers, 4 Luma collections, TCDSB Meetings, City Planning Consultations) stay **keep-watching** by default; no retirements without evidence of upstream death.
+
 ## Needs Further Assessment
 
 - ~~**Toronto Public Library**~~ — split into six audience-specific scrapers on 2026-04-16 so library events stay findable by audience without duplicating multi-tagged programs across feeds.
 - ~~**BlogTO**~~ — Implemented as `scrapers/blogto.py`. Uses public `/api/v2/events/?date=YYYY-MM-DD&bundle_type=medium` listing endpoint (no per-event fetch). Walks day-by-day, dedupes by event id, stops after 7 empty days.
 - **Explore Kids Ontario Adventures** — Tockify feed (`ekoad`) has 822 events but covers broader GTA/Ontario, not just Toronto. May need geo-filtering.
 - ~~**Toronto Bicycling Network**~~ — Implemented as `scrapers/toronto_bicycling_network.py`. Wild Apricot RSS source with strong outdoor recreation coverage.
-- **Cecil Community Centre** — AI1EC export feed confirmed live (`?plugin=all-in-one-event-calendar&controller=ai1ec_exporter_controller&action=export_events`), added to `feeds` table as pending on 2026-04-15.
+- ~~**Cecil Community Centre**~~ — AI1EC export feed was confirmed live on 2026-04-15, but by 2026-08-07 the endpoint no longer downloads (fails locally and in Actions). Feed row removed 2026-08-07.
 - **Lula Lounge** — Eventbrite organizer `19825205758`; staged as `scrapers/eventbrite.py` entry in workflow + `pending_feeds.txt` on 2026-04-15.
 - **The Rosedale Centre** — Eventbrite organizer `83757475743`; staged as `scrapers/eventbrite.py` entry in workflow + `pending_feeds.txt` on 2026-04-15.
 - **Hand Eye Society** — Eventbrite organizer `15539055266`; staged as `scrapers/eventbrite.py` entry in workflow + `pending_feeds.txt` on 2026-04-15.
@@ -498,7 +519,7 @@ Track progress on topical searches to find long-tail community sources.
 | Sunshine Centres for Seniors | `sunshinecentres.com/events/?ical=1` | 15 | Senior programs across multiple Toronto locations |
 | GO Latin Dance | `golatindance.com/events/?ical=1` | 30 | Salsa, bachata, kizomba events (Dovercourt House) |
 | Boulderz Climbing | `boulderzclimbing.com/events/?ical=1` | 6 | Climbing gym events |
-| Toronto Dance | `torontodance.com/events/?ical=1` | ~68 (2025-26) | Dance community aggregator (large historical archive) |
+| ~~Toronto Dance~~ | `torontodance.com/events/?ical=1` | 0 | Retired 2026-08-07: Tribe REST route removed (`rest_no_route`) and `?ical=1` serves the 75,193-byte HTML block page; re-probe occasionally and re-add if an export returns |
 | Toronto Choir | `torontochoir.org/events/?ical=1` | 1 | Community choir (small feed) |
 
 ### RSS Feeds (needs RSS-to-ICS conversion)
@@ -645,6 +666,8 @@ This is the triangulation working as intended: publisher feeds are filtered for 
 ### Publisher-feed venue filter (`scrapers/eventbrite_filtered.py`)
 
 The 8 publisher organizer feeds (Coach House, Cormorant, Book*hug, PRH Canada, HarperCollins Canada, Simon & Schuster Canada, Diaspora Dialogues, House of Anansi) used to be wired as raw `eb-to-ical` URLs. That dumped Vancouver, Montreal, Halifax, and Calgary launches into the Toronto feed. Replaced with a parameterized filter scraper that applies two rules:
+
+> **Update 2026-08-07:** the eb-to-ical.daylightpirates.org service died (HTTP 404 on every organizer), which zeroed all 8 publisher feeds. `eventbrite_filtered.py` was rewritten to scrape Eventbrite directly (organizer page + per-event JSON-LD, the `scrapers/eventbrite.py` mechanism) while keeping the same denylist + geo-allowlist filters; workflow lines now pass `--url "<organizer page>"` instead of `--organizer <id>`. First run after conversion: PRH Canada 2 events, Coach House 2, the other six organizers currently list no upcoming events (valid empty calendars — the April counts below reflect pre-outage volumes and should recover as publishers post fall seasons).
 
 - **Denylist** (`cities/toronto/bookstore_venue_denylist.txt`) — drop events at Indigo / Chapters chain stores. Currently catches 0 events; serves as a safeguard for the future.
 - **Geo allowlist** (`cities/toronto/geo_allowlist.txt`) — require LOCATION to contain "Toronto" or one of the 5 inner boroughs (North York, Scarborough, Etobicoke, East York, York). Events with no location at all pass (online events from Toronto orgs).

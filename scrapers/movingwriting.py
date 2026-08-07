@@ -241,7 +241,7 @@ def create_calendar(events: list[dict], year: int, month: int) -> Calendar:
     cal = Calendar()
     cal.add('prodid', f'-//MovingWriting//{DOMAIN}//')
     cal.add('version', '2.0')
-    cal.add('x-wr-calname', f'MovingWriting - {year}/{month:02d}')
+    cal.add('x-wr-calname', 'MovingWriting')
     cal.add('x-wr-timezone', 'America/Los_Angeles')
     
     for event_data in events:
