@@ -5,6 +5,13 @@
 -- source_uid is the durable key (survives event delete/re-create), and a
 -- trigger on events re-asserts the override on every category write, so
 -- the nightly load-events upsert cannot clobber a curator correction.
+--
+-- Protected since 20260722210000_guard_delete_stale_events.sql:
+-- delete_stale_events refuses a deletion that would remove more than 50%
+-- of a city's events when driven by a source_uid list smaller than the
+-- would-delete count. That closes the partial-load mass-delete path (a
+-- short load-events POST silently gutting a city), which is the most
+-- plausible mechanism for the ~29 historical override-row losses.
 
 CREATE TABLE IF NOT EXISTS category_overrides (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
