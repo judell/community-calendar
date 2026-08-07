@@ -31,3 +31,43 @@ BEGIN
   DELETE FROM feeds WHERE id = feed_id;
 END;
 $$;
+
+-- Insert-time validation for scraper rows
+-- (since 20260807171000_insert_time_scraper_validation.sql):
+-- a BEFORE INSERT OR UPDATE trigger (feeds_validate_scraper_row →
+-- validate_scraper_row()) rejects non-removed scraper rows whose url is
+-- not an output path (cities/<city>/<file>.ics — never an http(s) URL),
+-- whose scraper_cmd is missing/empty, or whose scraper_cmd does not
+-- start with "python scrapers/" or "python scripts/". Removed-status
+-- tombstones are exempt. This enforces cleanup-plan item 4 on every
+-- write path (Manage Feeds, pending-feeds processing, backfill sync,
+-- ad hoc SQL) ahead of DB-first scraper execution.
+CREATE OR REPLACE FUNCTION validate_scraper_row()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF NEW.feed_type = 'scraper' AND coalesce(NEW.status, 'active') <> 'removed' THEN
+    IF NEW.url IS NULL OR NEW.url !~ '^cities/[a-z0-9-]+/[A-Za-z0-9._-]+\.ics$' THEN
+      RAISE EXCEPTION
+        'scraper row rejected: url must be an output path like cities/<city>/<file>.ics, got %',
+        coalesce(NEW.url, '<null>');
+    END IF;
+    IF NEW.scraper_cmd IS NULL OR btrim(NEW.scraper_cmd) = '' THEN
+      RAISE EXCEPTION
+        'scraper row rejected: scraper_cmd is required for non-removed scraper rows (url %)',
+        NEW.url;
+    END IF;
+    IF NEW.scraper_cmd !~ '^python (scrapers|scripts)/' THEN
+      RAISE EXCEPTION
+        'scraper row rejected: scraper_cmd must start with "python scrapers/" or "python scripts/", got %',
+        left(NEW.scraper_cmd, 80);
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER feeds_validate_scraper_row
+BEFORE INSERT OR UPDATE ON feeds
+FOR EACH ROW EXECUTE FUNCTION validate_scraper_row();
