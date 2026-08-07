@@ -22,13 +22,31 @@ CREATE POLICY "Anyone can read feeds" ON feeds FOR SELECT USING (true);
 CREATE POLICY "Admin users can manage feeds" ON feeds FOR ALL
   USING (auth.uid() IN (SELECT user_id FROM admin_users));
 
--- Used by the Manage Feeds delete button (SECURITY DEFINER bypasses RLS)
-CREATE OR REPLACE FUNCTION remove_feed(feed_id bigint)
-RETURNS void
+-- Used by the Manage Feeds delete button (SECURITY DEFINER bypasses RLS).
+-- Atomic since 20260807170000_atomic_remove_feed.sql: deletes the feed's
+-- events (matched by the feed's city + name) and the feed row in one
+-- transaction, returns what it deleted, and raises for an unknown id.
+-- Callers that still pre-delete events by source+city simply leave 0
+-- rows for the RPC to delete — backward compatible.
+CREATE FUNCTION remove_feed(feed_id bigint)
+RETURNS TABLE (events_deleted bigint, feed_deleted boolean)
 LANGUAGE plpgsql SECURITY DEFINER
 AS $$
+DECLARE
+  f record;
+  ev_count bigint;
 BEGIN
+  SELECT city, name INTO f FROM feeds WHERE id = feed_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'remove_feed: no feed row with id %', feed_id;
+  END IF;
+
+  DELETE FROM events e WHERE e.city = f.city AND e.source = f.name;
+  GET DIAGNOSTICS ev_count = ROW_COUNT;
+
   DELETE FROM feeds WHERE id = feed_id;
+
+  RETURN QUERY SELECT ev_count, true;
 END;
 $$;
 
