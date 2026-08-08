@@ -2,15 +2,24 @@
 """
 Scraper for Montclair Film showtimes (Clairidge & Bellevue theaters).
 
-Montclair Film uses WordPress with a custom mc_event post type and the
-groundplan-pro plugin. Individual event pages contain JSON-LD with a
-subEvent array — each subEvent is a screening with its own startDate,
-endDate, and location.
+As of the 2026-08-07 montclairfilm.org redesign, individual event pages no
+longer carry a JSON-LD subEvent array with every showtime — the JSON-LD
+Event block now carries only a single representative startDate/endDate.
+The full multi-date, multi-venue, multi-time showtimes grid is server-
+rendered directly in the page HTML instead, as nested
+`.venue[data-venue]` > `.date[data-date]` > `<elevent-ticket-button-widget>`
+blocks (one button per showtime). This scraper walks that HTML structure
+positionally (venue/date markers in document order) to recover every
+showtime, and falls back to the single JSON-LD startDate/endDate only if
+that HTML grid is absent for a given page (defensive, not currently
+expected to trigger).
 
 Strategy:
-1. Fetch /all-event/ listing page to discover currently-showing film URLs (~15)
+1. Fetch /cinemas/now-playing/ listing page to discover currently-showing
+   film URLs (~12)
 2. Fetch each film page in parallel
-3. Extract JSON-LD Event → subEvent array for individual showtimes
+3. Extract title/description from JSON-LD Event; extract every showtime
+   (venue, date, time) from the rendered showtimes grid
 This is much cheaper than paginating the WP REST API (1021 total posts).
 
 Usage:
@@ -30,17 +39,30 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
+from zoneinfo import ZoneInfo
 
 from lib.base import BaseScraper
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-LISTING_URL = "https://montclairfilm.org/all-event/"
+LISTING_URL = "https://www.montclairfilm.org/cinemas/now-playing/"
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
     'Accept': 'text/html,application/xhtml+xml',
 }
+EASTERN = ZoneInfo("America/New_York")
+
+# Per-venue street addresses, read from the site's own JSON-LD Place data
+# (2026-08-07); used since the showtimes grid only gives a bare venue name.
+VENUE_ADDRESSES = {
+    "The Clairidge": "486 Bloomfield Avenue, Montclair, NJ 07042",
+    "The Bellevue": "260 Bellevue Avenue, Montclair, NJ 07043",
+}
+
+VENUE_RE = re.compile(r'<div class="venue" data-venue="([^"]+)">')
+DATE_RE = re.compile(r'<div class="date" data-date="([^"]+)">')
+TIME_RE = re.compile(r'<button>([\d: ]+(?:AM|PM))')
 
 
 class MontclairFilmScraper(BaseScraper):
@@ -61,7 +83,7 @@ class MontclairFilmScraper(BaseScraper):
             return None
 
     def _get_event_urls(self) -> list[str]:
-        """Scrape /all-event/ listing page for currently-showing film URLs."""
+        """Scrape /cinemas/now-playing/ listing page for currently-showing film URLs."""
         html = self._fetch_page(LISTING_URL)
         if not html:
             return []
@@ -71,81 +93,132 @@ class MontclairFilmScraper(BaseScraper):
         self.logger.info(f"Found {len(urls)} current films on listing page")
         return urls
 
-    def _extract_screenings(self, event_url: str) -> list[dict[str, Any]]:
-        """Fetch an event page and extract individual screenings from JSON-LD subEvents."""
-        html = self._fetch_page(event_url)
-        if not html:
-            return []
-
-        now = datetime.now(timezone.utc)
-        screenings = []
-
-        # Extract JSON-LD blocks
+    @staticmethod
+    def _film_meta(html: str, event_url: str) -> dict[str, Any]:
+        """Extract title/description/url from the page's JSON-LD Event block."""
         blocks = re.findall(
             r'<script\s+type="application/ld\+json"[^>]*>(.*?)</script>',
             html, re.DOTALL
         )
-
         for block_str in blocks:
             try:
                 data = json.loads(block_str)
             except json.JSONDecodeError:
                 continue
+            if isinstance(data, dict) and data.get('@type') == 'Event':
+                return {
+                    'title': html_mod.unescape(data.get('name', 'Untitled')),
+                    'description': (data.get('description') or '')[:500],
+                    'url': data.get('url', event_url),
+                }
+        return {'title': 'Untitled', 'description': '', 'url': event_url}
 
-            if not isinstance(data, dict) or data.get('@type') != 'Event':
+    @staticmethod
+    def _parse_showtimes(html: str) -> list[dict[str, str]]:
+        """Walk the rendered showtimes grid: venue[data-venue] > date[data-date] >
+        one or more <button>TIME</button> ticket widgets, in document order.
+        Returns a flat list of {venue, date, time} dicts."""
+        markers: list[tuple[int, str, str]] = []
+        markers.extend((m.start(), 'venue', m.group(1)) for m in VENUE_RE.finditer(html))
+        markers.extend((m.start(), 'date', m.group(1)) for m in DATE_RE.finditer(html))
+        markers.sort(key=lambda t: t[0])
+
+        showtimes = []
+        current_venue = None
+        for i, (pos, kind, value) in enumerate(markers):
+            if kind == 'venue':
+                current_venue = value
+                continue
+            next_pos = markers[i + 1][0] if i + 1 < len(markers) else pos + 8000
+            chunk = html[pos:next_pos]
+            for time_str in TIME_RE.findall(chunk):
+                showtimes.append({'venue': current_venue, 'date': value, 'time': time_str})
+        return showtimes
+
+    def _extract_screenings(self, event_url: str) -> list[dict[str, Any]]:
+        """Fetch an event page and extract every screening from the rendered
+        showtimes grid, falling back to the single JSON-LD startDate/endDate
+        if the grid is absent."""
+        html = self._fetch_page(event_url)
+        if not html:
+            return []
+
+        now = datetime.now(EASTERN)
+        meta = self._film_meta(html, event_url)
+        screenings = []
+
+        for st in self._parse_showtimes(html):
+            try:
+                dtstart = datetime.strptime(
+                    f"{st['date']} {st['time']}", "%Y-%m-%d %I:%M %p"
+                ).replace(tzinfo=EASTERN)
+            except ValueError:
                 continue
 
-            film_title = html_mod.unescape(data.get('name', 'Untitled'))
-            film_desc = data.get('description', '') or ''
-            film_url = data.get('url', event_url)
+            if dtstart < now:
+                continue
 
-            for sub in data.get('subEvent', []):
-                start_str = sub.get('startDate', '')
-                if not start_str:
-                    continue
+            venue = st['venue'] or ''
+            addr = VENUE_ADDRESSES.get(venue, 'Montclair, NJ')
+            location = f"{venue}, {addr}" if venue else addr
 
+            screenings.append({
+                'title': meta['title'],
+                'dtstart': dtstart,
+                'dtend': None,
+                'location': location,
+                'description': meta['description'],
+                'url': meta['url'],
+            })
+
+        if screenings:
+            return screenings
+
+        # Fallback: no showtimes grid found, use the single JSON-LD date if present.
+        blocks = re.findall(
+            r'<script\s+type="application/ld\+json"[^>]*>(.*?)</script>',
+            html, re.DOTALL
+        )
+        for block_str in blocks:
+            try:
+                data = json.loads(block_str)
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(data, dict) or data.get('@type') != 'Event':
+                continue
+            start_str = data.get('startDate', '')
+            if not start_str:
+                continue
+            try:
+                dtstart = datetime.fromisoformat(start_str.replace('Z', '+00:00'))
+            except ValueError:
+                continue
+            start_aware = dtstart if dtstart.tzinfo else dtstart.replace(tzinfo=EASTERN)
+            if start_aware < now:
+                continue
+            dtend = None
+            end_str = data.get('endDate', '')
+            if end_str:
                 try:
-                    dtstart = datetime.fromisoformat(start_str.replace('Z', '+00:00'))
+                    dtend = datetime.fromisoformat(end_str.replace('Z', '+00:00'))
                 except ValueError:
-                    continue
-
-                # Skip past screenings
-                start_aware = dtstart if dtstart.tzinfo else dtstart.replace(tzinfo=timezone.utc)
-                if start_aware < now:
-                    continue
-
-                # End time
-                dtend = None
-                end_str = sub.get('endDate', '')
-                if end_str:
-                    try:
-                        dtend = datetime.fromisoformat(end_str.replace('Z', '+00:00'))
-                    except ValueError:
-                        pass
-
-                # Location (theater + screen)
-                loc_data = sub.get('location', {})
-                if isinstance(loc_data, dict):
-                    loc_name = loc_data.get('name', '')
-                    addr = loc_data.get('address', '')
-                    if isinstance(addr, str):
-                        addr = addr.replace('\r\n', ', ')
-                    location = f"{loc_name}, {addr}" if loc_name and addr else (loc_name or addr)
-                else:
-                    location = "Montclair Film, 505 Bloomfield Ave, Montclair, NJ 07042"
-
-                # Ticket URL from subEvent
-                ticket_url = sub.get('url', film_url)
-
-                screenings.append({
-                    'title': film_title,
-                    'dtstart': dtstart,
-                    'dtend': dtend,
-                    'location': location,
-                    'description': film_desc[:500] if film_desc else '',
-                    'url': ticket_url,
-                })
-
+                    pass
+            loc_data = data.get('location', {})
+            if isinstance(loc_data, dict):
+                loc_name = loc_data.get('name', '')
+                addr = loc_data.get('address', {})
+                addr_str = addr.get('name', '') if isinstance(addr, dict) else (addr or '')
+                location = f"{loc_name}, {addr_str}" if loc_name and addr_str else (loc_name or addr_str)
+            else:
+                location = 'Montclair, NJ'
+            screenings.append({
+                'title': meta['title'],
+                'dtstart': start_aware,
+                'dtend': dtend,
+                'location': location,
+                'description': meta['description'],
+                'url': meta['url'],
+            })
         return screenings
 
     def fetch_events(self) -> list[dict[str, Any]]:

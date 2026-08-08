@@ -6,22 +6,22 @@ Prioritized list of event sources for the Davis community calendar.
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
-| UC Davis AggieLife | CampusGroups ICS | ~606 | Student org events via `aggielife.ucdavis.edu` |
-| UC Davis Library | Localist ICS | ~118 | `events.library.ucdavis.edu/calendar/1.ics` |
-| Davis Downtown | Tribe ICS | ~5 | WordPress Events Calendar plugin |
-| UC Davis Athletics | Scraper | ~309 | Sidearm sports schedule feed |
-| UC Davis Arts | Scraper | ~2 current | Monthly ICS feeds, normalized malformed all-day dates on 2026-08-06 |
-| Yolo County Library | Scraper | ~104 | LibCal RSS filtered to Davis branches |
-| UU Davis | Scraper | ~11 future / 2300+ raw | Google Calendar aggregation; dead sub-calendar removed 2026-08-06 |
-| The Dirt | Tribe ICS | ~19 | Davis & Yolo arts/culture magazine |
-| Visit Davis | Tribe ICS | ~14 | Official tourism events |
-| Visit Yolo | Tribe ICS | ~30 | County-wide tourism |
-| Putah Creek Council | Tribe ICS | ~5 | Environmental org |
-| Hate-Free Together | Tribe ICS | ~12 | Community and social justice events |
-| Davis Bike Club | Google Calendar ICS | ~107 | Cycling rides and events |
-| Indivisible Yolo | Mobilize scraper | ~110 | `mobilize.py` civic and political organizing |
-| ~~Davis Chamber~~ | ~~Scraper~~ | ~16 former | Removed 2026-08-06: `web.davischamber.com` no longer resolves locally or in GitHub Actions |
-| ~~Mondavi Center~~ | ~~Scraper~~ | — | Removed 2026-08-06: site now returns 403 Forbidden to scraper requests upstream and locally |
+| UC Davis AggieLife (UC Davis CampusGroups) | CampusGroups ICS | ~216 raw / ~32 future | Student org events via `aggielife.ucdavis.edu`; DB row `id=50` renamed `UC Davis Campus Groups` → `UC Davis CampusGroups` on 2026-08-07 to match the workflow/X-SOURCE display name |
+| UC Davis Library | Localist ICS | 0 (open review) | `events.library.ucdavis.edu/calendar/1.ics`; produced 0 events with no hard error in both the 2026-08-06 and 2026-08-07 local runs — action A004 remains open, not retired |
+| Davis Downtown | Tribe ICS | ~29 | WordPress Events Calendar plugin |
+| UC Davis Athletics | Scraper | ~137 future | Sidearm sports schedule feed |
+| UC Davis Arts | Scraper | ~1 current | Monthly ICS feeds, normalized malformed all-day dates on 2026-08-06 |
+| Yolo Library | Scraper | ~100 | LibCal RSS filtered to Davis branches; DB row `id=52` renamed `Yolo County Library` → `Yolo Library` on 2026-08-07 to match the workflow/X-SOURCE display name |
+| UU Davis | Scraper | ~13 future / 2300+ raw | Google Calendar aggregation; dead sub-calendar removed 2026-08-06; DB row `id=53` renamed `Unitarian Universalist Church of Davis` → `UU Davis` on 2026-08-07 to match the workflow/X-SOURCE display name |
+| The Dirt | Tribe ICS | ~15 | Davis & Yolo arts/culture magazine |
+| Visit Davis | Tribe ICS | 0 (open review) | Official tourism events; `?ical=1` returned HTML, not ICS, in the 2026-08-07 local run — needs review, not yet retired |
+| Visit Yolo | Tribe ICS | 0 (open review) | County-wide tourism; `?ical=1` returned HTML, not ICS, in the 2026-08-07 local run — needs review, not yet retired |
+| Putah Creek Council | Tribe ICS | 0 (open review) | Environmental org; `?ical=1` returned HTML, not ICS, in the 2026-08-07 local run — needs review, not yet retired |
+| Hate-Free Together | Tribe ICS | ~30 | Community and social justice events |
+| Davis Bike Club | Google Calendar ICS | ~127 | Cycling rides and events |
+| Indivisible Yolo | Mobilize scraper | ~108 | `mobilize.py` civic and political organizing |
+| ~~Davis Chamber~~ | ~~Scraper~~ | ~16 former | Removed from the workflow 2026-08-06 (`web.davischamber.com` no longer resolves); DB row `id=55` retired (`status=removed`) on 2026-08-07, completing the repo/DB reconciliation — `--sync-existing --dry-run` is now fully clean for Davis |
+| ~~Mondavi Center~~ | ~~Scraper~~ | — | Removed 2026-08-06: site now returns 403 Forbidden to scraper requests upstream and locally; reverified 2026-08-07 absent from both the workflow and active DB rows (no `feeds` row for city=davis matching name/url `%mondavi%`) |
 | ~~Eventbrite~~ | ~~Scraper~~ | — | Retired 2026-02-15: scraper broken, no public feeds |
 
 ## Meetup Groups
@@ -225,8 +225,62 @@ Removed from the scraper on 2026-08-06 because it returned `404`:
 - Home page said programming was paused when checked
 - Would require a more expensive dynamic scraper if it becomes relevant
 
+## 2026-08-07 DB Reconciliation
+
+Completed the unfinished half of the 2026-08-06 Davis clean pass: the repo-side
+fixes and retirements were committed on 2026-08-06, but the `feeds` table still
+disagreed with the workflow until this pass. A fresh local audit
+(`scripts/local_build.py --city davis`) was run first so display-name
+derivation could read current `X-SOURCE` headers, then
+`scripts/backfill_scraper_feeds.py --city davis --sync-existing` was applied
+and `cities/davis/feeds.txt` was regenerated.
+
+Applied:
+
+- **Retired** DB row `id=55` (`Davis Chamber of Commerce`, `status: active` →
+  `removed`). This completes the 2026-08-06 repo-side retirement
+  (`web.davischamber.com` no longer resolves); the workflow already had no
+  invocation, but the DB row was still active and exporting into
+  `feeds.txt`.
+- **Renamed** DB row `id=50`: `UC Davis Campus Groups` → `UC Davis CampusGroups`.
+- **Renamed** DB row `id=52`: `Yolo County Library` → `Yolo Library`.
+- **Renamed** DB row `id=53`: `Unitarian Universalist Church of Davis` → `UU Davis`.
+
+All three renames were verified against the `X-SOURCE` header written into
+the corresponding `.ics` output by the scraper itself, and match the
+workflow's own scraper naming — not filename-derived fallbacks.
+
+Verified:
+
+- **Mondavi Center** is absent from both the workflow
+  (`.github/workflows/generate-calendar.yml`) and active `feeds` rows for
+  `city=davis` (no row matches `%mondavi%` in name or url). No workflow edit
+  was needed; Davis required none.
+- Final `--sync-existing --dry-run` for Davis: `0` missing, `0` updates,
+  `0` retirements, `0` weak-name skips — clean gate reached.
+
+Open review items (not resolved this pass, no action taken):
+
+- **UC Davis Library** (action A004, still open): produced `0` events with no
+  hard transport error in both the 2026-08-06 and 2026-08-07 local runs.
+  Two consecutive zero-event runs without an error is stronger evidence of a
+  real problem than one, but still short of a confirmed cause — needs a
+  source-side check (is the Localist calendar genuinely empty, or is the
+  scraper missing something) before deciding to fix or retire.
+- **Three not_ics live feeds**: `Putah Creek Council`, `Visit Davis`, and
+  `Visit Yolo` all returned HTML instead of ICS from their `?ical=1` URLs in
+  the 2026-08-07 local run (`putahcreekcouncil.ics`, `visitdavis.ics`,
+  `visityolo_event.ics`). These are live feeds, not scrapers, so they sit
+  outside the `backfill_scraper_feeds.py` sync scope; each needs to be
+  checked upstream (endpoint broken, blocked, or serving an error page) and
+  either fixed or retired in a future pass.
+
 ## Notes
 
 - `Visit Davis` and `Visit Yolo` overlap; both use The Events Calendar
 - `events.ucdavis.edu` would be the biggest win if Cloudflare access can be resolved
 - The 2026-08-06 Davis cleanup fixed `UC Davis Arts`, removed the dead UU Davis sub-calendar, and retired the broken Davis Chamber source
+- The 2026-08-07 DB reconciliation retired the Davis Chamber DB row, renamed
+  three scraper rows to match their workflow/X-SOURCE display names, verified
+  Mondavi's absence from both the workflow and the DB, and reached a clean
+  `--sync-existing --dry-run` gate for Davis
