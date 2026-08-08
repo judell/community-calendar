@@ -75,6 +75,39 @@ Keep the DB-exported `feeds.txt` files instead of restoring tracked copies:
 python3 scripts/local_build.py --city santarosa --keep-db-export
 ```
 
+Run the scraper phase DB-first (active `feeds`-table rows as the only
+execution set) instead of from the workflow manifest:
+
+```bash
+python3 scripts/local_build.py --city santarosa --db-first
+```
+
+## DB-first execution
+
+`scripts/run_scrapers_from_db.py` executes a city's active scraper rows
+from the `feeds` table — the canonical execution source of truth. It can
+run standalone (`--city`, `--list` to preview the execution set) or
+supply the scraper phase of `local_build.py --db-first`, where the full
+audit/report/validation machinery measures the DB-first build unchanged.
+
+Rows whose stored command lacks an output flag get `--output <row.url>`
+appended; each run is bracketed with the same `RUN`/`EXIT` log lines the
+build-log error attribution parses.
+
+**`feeds.txt` is a generated, read-only artifact.** It keeps its two
+sections (direct ICS feeds and scrapers) and exists as a human-readable
+reference for what the database canonically drives — it is never edited
+by hand and never an execution authority. The only executable use is
+the runner's explicit fallback for forks without database credentials:
+fallback use is logged (`[db-first] fallback=feeds.txt reason=...`),
+counted in the audit report (`db_first_fallbacks`), and in `--db-first`
+mode a fallback on a credentialed instance fails the run — the DB was
+not actually driving execution.
+
+The audit report's per-city `execution` object records the mode
+(`db` / `feeds.txt-fallback` / `workflow`), the row count, and any
+fallback reason.
+
 ## What It Runs
 
 For each selected city, the runner:

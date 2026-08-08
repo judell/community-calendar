@@ -44,6 +44,7 @@ from backfill_scraper_feeds import workflow_scraper_rows
 from feed_slug import slugify
 from process_pending_feeds import parse_pending_feeds
 from report import parse_build_errors, update_report
+from run_scrapers_from_db import load_scraper_rows as load_db_scraper_rows
 from validate_pipeline import build_validation_summary, validate_city, validate_scraper_health
 
 
@@ -73,6 +74,9 @@ def parse_args() -> argparse.Namespace:
                         help="Path to validation report JSON")
     parser.add_argument("--keep-db-export", action="store_true",
                         help="Keep DB-exported feeds.txt files instead of restoring tracked copies")
+    parser.add_argument("--db-first", action="store_true",
+                        help="Execute scrapers from active feeds-table rows (DB-first) "
+                             "instead of the workflow manifest")
     return parser.parse_args()
 
 
@@ -586,10 +590,23 @@ def run_city(city: str, logger: BuildLogger, args: argparse.Namespace) -> dict:
     snapshot_rows = [row for row in (db_rows or []) if row["feed_type"] in {"ics_url", "curator", "scraper"} and row["status"] in {"active", "pending"}]
     pending_entries = pending_entries_for_city(city)
 
+    # DB-first mode: the active feeds-table scraper rows are the execution
+    # set (with loud, counted feeds.txt fallback for credential-less forks);
+    # workflow rows are still parsed for the drift comparison.
+    if args.db_first:
+        execution_rows, execution_info = load_db_scraper_rows(city)
+        if execution_info["fallback_used"]:
+            logger.section(city, "scraper",
+                           f"[db-first] fallback=feeds.txt reason={execution_info.get('fallback_reason')}")
+    else:
+        execution_rows = workflow_rows
+        execution_info = {"mode": "workflow", "fallback_used": False}
+
     city_result: dict = {
         "city": city,
         "workflow_scrapers": len(workflow_rows),
         "db_rows_available": db_rows is not None,
+        "execution": {**execution_info, "rows": len(execution_rows)},
         "drift": [],
         "pending_entries": pending_entries,
         "scrapers": [],
@@ -603,7 +620,7 @@ def run_city(city: str, logger: BuildLogger, args: argparse.Namespace) -> dict:
 
     # Legacy URL-keyed scraper rows are a registration problem worth surfacing
     # on their own: they duplicate a real producer under an http(s) key.
-    scraper_output_paths = {ROOT / row["url"] for row in workflow_rows}
+    scraper_output_paths = {ROOT / row["url"] for row in execution_rows}
     for row in snapshot_rows:
         if row["feed_type"] == "scraper" and row["url"].startswith(("http://", "https://")):
             city_result["notes"].append({
@@ -647,7 +664,7 @@ def run_city(city: str, logger: BuildLogger, args: argparse.Namespace) -> dict:
         tracked_feeds_differs = not feeds_path.exists() or feeds_path.read_text() != temp_feeds_text
         city_result["tracked_feeds_differs_from_db"] = tracked_feeds_differs
 
-    clean_known_outputs(city, workflow_rows, snapshot_rows)
+    clean_known_outputs(city, execution_rows, snapshot_rows)
 
     env = os.environ.copy()
     env["SCRAPE_MONTHS"] = args.months
@@ -661,7 +678,7 @@ def run_city(city: str, logger: BuildLogger, args: argparse.Namespace) -> dict:
             yield
 
     with maybe_db_export():
-        for row in workflow_rows:
+        for row in execution_rows:
             output_path = ROOT / row["url"]
             local_cmd = localize_workflow_cmd(row["scraper_cmd"])
             result = run_command(
@@ -1047,6 +1064,10 @@ def main() -> int:
             "runtime_issue_count": len(runtime["issues"]),
             "runtime_error_count": sum(1 for issue in runtime["issues"] if issue.get("level") == "error"),
             "runtime_warning_count": sum(1 for issue in runtime["issues"] if issue.get("level") == "warning"),
+            "db_first_fallbacks": sum(
+                1 for city_result in results
+                if city_result.get("execution", {}).get("fallback_used")
+            ),
         },
     }
 
@@ -1096,6 +1117,9 @@ def main() -> int:
         audit["summary"]["live_feed_missing_outputs"] > 0,
         audit["summary"]["live_feed_not_ics_outputs"] > 0,
         audit["summary"]["build_error_count"] > 0,
+        # In --db-first mode a feeds.txt fallback on a credentialed
+        # instance means the DB was not actually driving execution.
+        args.db_first and audit["summary"]["db_first_fallbacks"] > 0,
     ])
     return 1 if has_failures else 0
 
