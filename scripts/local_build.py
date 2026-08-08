@@ -74,10 +74,17 @@ def parse_args() -> argparse.Namespace:
                         help="Path to validation report JSON")
     parser.add_argument("--keep-db-export", action="store_true",
                         help="Keep DB-exported feeds.txt files instead of restoring tracked copies")
-    parser.add_argument("--db-first", action="store_true",
-                        help="Execute scrapers from active feeds-table rows (DB-first) "
-                             "instead of the workflow manifest")
-    return parser.parse_args()
+    parser.add_argument("--db-first", action="store_true", default=True,
+                        help="Execute scrapers from active feeds-table rows (DB-first). "
+                             "This is the default since the workflow switch.")
+    parser.add_argument("--workflow-mode", action="store_true",
+                        help="Legacy escape hatch: execute scrapers from the workflow "
+                             "manifest instead of the DB. Only meaningful on historical "
+                             "checkouts or forks whose workflows still carry scraper lines.")
+    args = parser.parse_args()
+    if args.workflow_mode:
+        args.db_first = False
+    return args
 
 
 def load_dotenv(path: Path) -> list[str]:
@@ -785,7 +792,17 @@ def run_city(city: str, logger: BuildLogger, args: argparse.Namespace) -> dict:
     # display-name derivation reads fresh X-SOURCE headers from this run's
     # outputs instead of falling back to filename-derived names (which produce
     # false name-mismatch drift when outputs are stale or missing).
-    city_result["drift"] = build_scraper_drift(city, workflow_scraper_rows(city), db_rows)
+    #
+    # Since the DB-first switch the workflow carries no scraper lines; an
+    # empty manifest would make every active DB row look "missing from the
+    # workflow", so the comparison only runs when a manifest actually exists
+    # (historical checkouts / not-yet-switched forks).
+    workflow_rows_post = workflow_scraper_rows(city)
+    if workflow_rows_post:
+        city_result["drift"] = build_scraper_drift(city, workflow_rows_post, db_rows)
+    else:
+        city_result["drift"] = []
+        city_result["drift_skipped"] = "workflow carries no scraper manifest (DB-first)"
 
     return city_result
 

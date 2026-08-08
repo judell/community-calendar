@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """Backfill and sync scraper rows in the feeds table from workflow commands.
 
-This is a one-off maintenance tool for legacy scrapers that were added to
-the GitHub Actions workflow before scraper metadata was staged through
-pending_feeds.txt / process_pending_feeds.py.
+HISTORICAL/MIGRATION TOOL. During the 2026-08 cleanup this reconciled the
+feeds table against the workflow's scraper manifest (the then-source of
+truth). Since the DB-first switch the workflow carries no scraper lines —
+the feeds table IS the execution source of truth — so on a current
+checkout this tool finds no manifest and exits without proposing anything
+(deliberate guard: an empty manifest must never read as "retire every
+row"). It remains useful against historical checkouts or forks whose
+workflows still carry scraper lines.
 
 It scans .github/workflows/generate-calendar.yml for scraper-like commands that
 write .ics files under cities/<city>/, derives the feed metadata, and can:
@@ -358,7 +363,15 @@ def main() -> int:
     rows = workflow_scraper_rows(args.city)
     if not rows:
         scope = args.city or "all cities"
-        print(f"No workflow scraper rows found for {scope}")
+        print(f"No workflow scraper rows found for {scope}.")
+        print(
+            "Since the DB-first switch (switch-workflow-to-db-first) the workflow "
+            "carries no scraper lines: the feeds table is the execution source of "
+            "truth and there is no manifest to sync FROM. This early return is a "
+            "guard — without it, --sync-existing would read the empty manifest as "
+            "'retire every scraper row'. This tool remains useful only against "
+            "historical checkouts or forks that still carry workflow scraper lines."
+        )
         return 0
 
     existing_rows: list[dict] = []

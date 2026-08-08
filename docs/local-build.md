@@ -75,20 +75,27 @@ Keep the DB-exported `feeds.txt` files instead of restoring tracked copies:
 python3 scripts/local_build.py --city santarosa --keep-db-export
 ```
 
-Run the scraper phase DB-first (active `feeds`-table rows as the only
-execution set) instead of from the workflow manifest:
+## DB-first execution (the default)
 
-```bash
-python3 scripts/local_build.py --city santarosa --db-first
-```
+Since the workflow switch (`switch-workflow-to-db-first`), scraper
+execution is DB-first everywhere: the GitHub workflow's single "Run
+scrapers from DB" step and `local_build.py`'s default scraper phase both
+execute the active `feeds`-table rows as the only execution set. The
+workflow carries no per-scraper lines; adding or removing a scraper is a
+database operation.
 
-## DB-first execution
+`scripts/run_scrapers_from_db.py` is the runner. It can run standalone
+(`--city`, `--list` to preview the execution set) or supply the scraper
+phase of `local_build.py`, where the full audit/report/validation
+machinery measures the build unchanged.
 
-`scripts/run_scrapers_from_db.py` executes a city's active scraper rows
-from the `feeds` table — the canonical execution source of truth. It can
-run standalone (`--city`, `--list` to preview the execution set) or
-supply the scraper phase of `local_build.py --db-first`, where the full
-audit/report/validation machinery measures the DB-first build unchanged.
+`--workflow-mode` remains as a legacy escape hatch that executes from
+the workflow manifest — only meaningful on historical checkouts or forks
+whose workflows still carry scraper lines. For the same reason, the
+audit's workflow/DB drift comparison runs only when a workflow scraper
+manifest actually exists (`drift_skipped` is reported otherwise), and
+`backfill_scraper_feeds.py --sync-existing` refuses to plan against an
+empty manifest rather than reading it as a mass retirement.
 
 Rows whose stored command lacks an output flag get `--output <row.url>`
 appended; each run is bracketed with the same `RUN`/`EXIT` log lines the
