@@ -116,6 +116,12 @@ def main():
     parser.add_argument('city')
     parser.add_argument('--events', help='Path to events.json (default cities/<city>/events.json)')
     parser.add_argument('--outdir', default=str(ROOT / 'rss'))
+    parser.add_argument(
+        '--state-dir', default=str(ROOT / 'rss'),
+        help="Where to read the previous build's feeds (the latest-feed "
+             "baseline). Defaults to the tracked rss/ directory, which is "
+             "CI-owned published state; local runs pass --outdir elsewhere "
+             "while still diffing against the real baseline here.")
     args = parser.parse_args()
 
     events_path = Path(args.events) if args.events else ROOT / 'cities' / args.city / 'events.json'
@@ -141,8 +147,9 @@ def main():
     app_link = f"{SITE_BASE}/xmlui/index.html?city={args.city}"
     city_title = args.city.capitalize()
 
-    prev_full_guids = set(read_prev_feed(full_path))
-    prev_latest = read_prev_feed(latest_path)
+    state_dir = Path(args.state_dir)
+    prev_full_guids = set(read_prev_feed(state_dir / full_path.name))
+    prev_latest = read_prev_feed(state_dir / latest_path.name)
 
     # Full feed: every upcoming event, pubDate = event start.
     full_items = [render_item(ev, event_guid(ev), start, app_link, desc_cap=300)

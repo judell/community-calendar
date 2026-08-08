@@ -28,6 +28,7 @@ import re
 import shlex
 import subprocess
 import sys
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -779,14 +780,24 @@ def run_city(city: str, logger: BuildLogger, args: argparse.Namespace) -> dict:
             "event_count": event_count,
         }
 
+        # The tracked rss/ directory is CI-owned published state (GitHub
+        # Pages serves it, and it is the latest-feed baseline). Local runs
+        # write RSS to a scratch dir — still diffing against the tracked
+        # baseline via generate_rss.py's default --state-dir — so audits
+        # measure RSS generation without dirtying the tree.
+        rss_outdir = Path(tempfile.mkdtemp(prefix=f"local-build-rss-{city}-"))
         rss_result = run_command(
             logger,
             city,
             "rss",
-            [sys.executable, "scripts/generate_rss.py", city],
+            [sys.executable, "scripts/generate_rss.py", city,
+             "--outdir", str(rss_outdir)],
             env,
         )
-        city_result["rss"] = {"returncode": rss_result["returncode"]}
+        city_result["rss"] = {
+            "returncode": rss_result["returncode"],
+            "outdir": str(rss_outdir),
+        }
 
     # Drift is computed after the build, from re-derived workflow rows, so
     # display-name derivation reads fresh X-SOURCE headers from this run's

@@ -115,6 +115,13 @@ The audit report's per-city `execution` object records the mode
 (`db` / `feeds.txt-fallback` / `workflow`), the row count, and any
 fallback reason.
 
+**The tracked `rss/` directory is CI-owned published state** — GitHub
+Pages serves it as the live feed URLs, and each build's `-latest.xml`
+is diffed against the previously committed full feed. Local runs never
+write it: the runner sends RSS output to a per-run temp directory
+(recorded as `rss.outdir` in the audit report) while still reading the
+tracked feeds as the diff baseline via `generate_rss.py --state-dir`.
+
 ## What It Runs
 
 For each selected city, the runner:
