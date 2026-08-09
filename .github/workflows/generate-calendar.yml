@@ -78,8 +78,29 @@ jobs:
         echo "manifest_list=$MANIFEST" >> $GITHUB_OUTPUT
 
     # ==========================================
-    # Scrapers (all cities, DB-first)
+    # Register pending sources, then run scrapers (all cities, DB-first)
     # ==========================================
+    # Pending sources are processed into the feeds table BEFORE the
+    # scrape step so a just-merged scraper executes in this same build.
+    - name: Process pending feeds into DB
+      env:
+        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      run: |
+        python scripts/process_pending_feeds.py --all
+
+    - name: Commit processed pending_feeds.txt
+      run: |
+        if git status --porcelain | grep -q pending_feeds.txt; then
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add cities/*/pending_feeds.txt
+          git commit -m "Process pending feeds into DB"
+          git pull --rebase --autostash && git push || true
+        else
+          echo "No pending feeds to process"
+        fi
+
     # The active scraper rows in the feeds table are the only execution
     # set (see docs/local-build.md and reports/db-first-parity-2026-08-07.md).
     # Adding or removing a scraper is a database operation; the generated
@@ -104,24 +125,6 @@ jobs:
     # ==========================================
     # Download feeds + Combine ICS (all cities)
     # ==========================================
-    - name: Process pending feeds into DB
-      env:
-        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      run: |
-        python scripts/process_pending_feeds.py --all
-
-    - name: Commit processed pending_feeds.txt
-      run: |
-        if git status --porcelain | grep -q pending_feeds.txt; then
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add cities/*/pending_feeds.txt
-          git commit -m "Process pending feeds into DB"
-          git pull --rebase --autostash && git push || true
-        else
-          echo "No pending feeds to process"
-        fi
 
     - name: Download live feeds
       env:

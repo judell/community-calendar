@@ -31,7 +31,7 @@
 All sources are stored in the Supabase `feeds` table — the single source of truth. Columns:
 - `city`, `url`, `name`, `status` (active/pending/removed), `feed_type` (ics_url/scraper/curator), `scraper_cmd`
 
-The Manage Feeds dialog (admin-only) reads and writes this table; its Delete button removes any source — scraper or ICS feed — and all its events in one atomic server operation. Scrapers are added via `add_scraper.py`, which stages a scraper entry in `pending_feeds.txt`; the next build inserts it into the `feeds` table (validated at insert time) and the DB-first runner executes it from the build after that (pending entries are processed after the scrape step runs). The workflow is never edited.
+The Manage Feeds dialog (admin-only) reads and writes this table; its Delete button removes any source — scraper or ICS feed — and all its events in one atomic server operation. Scrapers are added via `add_scraper.py`, which stages a scraper entry in `pending_feeds.txt`; the next build inserts it into the `feeds` table (validated at insert time, before the scrape step) and the DB-first runner executes it in that same build. The workflow is never edited.
 
 `feeds.txt` files are **generated** from the `feeds` table during each build (by `export_feeds_txt.py`) for fork compatibility. Do not edit feeds.txt manually.
 
@@ -76,8 +76,8 @@ The workflow in `.github/workflows/generate-calendar.yml` runs daily or on manua
 
 **Per-city steps:**
 
-1. **Run scrapers** — `run_scrapers_from_db.py` executes the active scraper rows in the `feeds` table (DB-first; the workflow carries no per-scraper lines)
-2. **Process `pending_feeds.txt`** — `process_pending_feeds.py` inserts staged entries into the `feeds` table and resets the file to its template
+1. **Process `pending_feeds.txt`** — `process_pending_feeds.py` inserts staged entries into the `feeds` table and resets the file to its template, so just-merged sources participate in this build
+2. **Run scrapers** — `run_scrapers_from_db.py` executes the active scraper rows in the `feeds` table (DB-first; the workflow carries no per-scraper lines)
 3. **Download live feeds** — `download_feeds.py` queries the `feeds` table for active+pending `ics_url`/`curator` feeds, downloads each, injects `X-SOURCE` headers. Falls back to `feeds.txt` if DB not available (forks). Marks pending feeds as `active` after download.
 4. **Export feeds.txt** — `export_feeds_txt.py` regenerates `feeds.txt` from the `feeds` table (the read-only reference of what the database drives). It exports active+pending rows so just-added sources appear immediately.
 5. **Combine ICS** — `combine_ics.py` merges all `.ics` files, deduplicates, applies geo filtering. Display names come from `feeds.txt` (parsed at runtime) for scrapers, and from `X-SOURCE` headers (injected by `download_feeds.py`) for live feeds.

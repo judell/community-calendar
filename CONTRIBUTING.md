@@ -50,8 +50,8 @@ python scripts/add_scraper.py tribe_rest davis "My Venue" \
 `--test` runs the exact command being registered and shows the event
 count before anything is written. The script appends a scraper entry to
 `cities/<city>/pending_feeds.txt`; the next build inserts it into the
-`feeds` table (validated at insert time), and the DB-first runner
-executes it starting with the following build.
+`feeds` table (validated at insert time) and the DB-first runner
+executes it in that same build.
 
 See `scrapers/README.md` for the available base scrapers and how to
 form each one's arguments (widget IDs, venue IDs, API bases, etc.).

@@ -238,10 +238,10 @@ python scripts/add_scraper.py songkick santarosa "My Venue" \
 ```
 
 The next build moves the pending entry into the `feeds` table
-(validated at insert time) and regenerates `feeds.txt` — the read-only
-reference of what the database drives; the DB-first runner executes the
-scraper starting with the following build. See `scrapers/README.md` for
-each base scraper's arguments.
+(validated at insert time), executes the scraper in that same build,
+and regenerates `feeds.txt` — the read-only reference of what the
+database drives. See `scrapers/README.md` for each base scraper's
+arguments.
 
 ### Forks without a feeds table
 
