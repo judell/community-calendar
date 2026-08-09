@@ -31,7 +31,7 @@
 All sources are stored in the Supabase `feeds` table — the single source of truth. Columns:
 - `city`, `url`, `name`, `status` (active/pending/removed), `feed_type` (ics_url/scraper/curator), `scraper_cmd`
 
-The Manage Feeds dialog (admin-only) reads and writes this table for ICS URL feeds. Scrapers are added via `add_scraper.py`, which updates the workflow YAML and stages a scraper entry in `pending_feeds.txt`.
+The Manage Feeds dialog (admin-only) reads and writes this table; its Delete button removes any source — scraper or ICS feed — and all its events in one atomic server operation. Scrapers are added via `add_scraper.py`, which stages a scraper entry in `pending_feeds.txt`; the next build inserts it into the `feeds` table (validated at insert time) and the DB-first runner executes it from the build after that (pending entries are processed after the scrape step runs). The workflow is never edited.
 
 `feeds.txt` files are **generated** from the `feeds` table during each build (by `export_feeds_txt.py`) for fork compatibility. Do not edit feeds.txt manually.
 
@@ -62,9 +62,13 @@ Use the `add_scraper.py` script:
 
 ```bash
 python scripts/add_scraper.py myscraper santarosa "My Source Name"
+# parameterized base scrapers take their site-specific args:
+python scripts/add_scraper.py tribe_rest davis "My Venue" \
+  --extra-args '--api-base "https://myvenue.org" --name "My Venue"' \
+  --output-name myvenue --test
 ```
 
-This adds the scraper to the workflow YAML and appends a scraper entry to `pending_feeds.txt`. The workflow moves that pending entry into the `feeds` table and regenerates `feeds.txt` before `combine_ics.py` runs.
+`--test` runs the exact command being registered. The script appends a scraper entry to `pending_feeds.txt`; the next build moves it into the `feeds` table (validated at insert time) and regenerates `feeds.txt`, and the DB-first runner executes it starting with the build after that. See `scrapers/README.md` for each base scraper's arguments.
 
 ## Build Pipeline
 
@@ -72,10 +76,10 @@ The workflow in `.github/workflows/generate-calendar.yml` runs daily or on manua
 
 **Per-city steps:**
 
-1. **Run scrapers** — hardcoded commands in the workflow YAML
+1. **Run scrapers** — `run_scrapers_from_db.py` executes the active scraper rows in the `feeds` table (DB-first; the workflow carries no per-scraper lines)
 2. **Process `pending_feeds.txt`** — `process_pending_feeds.py` inserts staged entries into the `feeds` table and resets the file to its template
 3. **Download live feeds** — `download_feeds.py` queries the `feeds` table for active+pending `ics_url`/`curator` feeds, downloads each, injects `X-SOURCE` headers. Falls back to `feeds.txt` if DB not available (forks). Marks pending feeds as `active` after download.
-4. **Export feeds.txt** — `export_feeds_txt.py` regenerates `feeds.txt` from the `feeds` table for fork compatibility. It exports active+pending rows so newly added scrapers participate in the same build.
+4. **Export feeds.txt** — `export_feeds_txt.py` regenerates `feeds.txt` from the `feeds` table (the read-only reference of what the database drives). It exports active+pending rows so just-added sources appear immediately.
 5. **Combine ICS** — `combine_ics.py` merges all `.ics` files, deduplicates, applies geo filtering. Display names come from `feeds.txt` (parsed at runtime) for scrapers, and from `X-SOURCE` headers (injected by `download_feeds.py`) for live feeds.
 6. **Convert to JSON** — `ics_to_json.py` converts combined ICS to JSON with fuzzy title clustering
 7. **Classify events** — `classify_events_anthropic.py` categorizes uncategorized events via Claude Haiku
