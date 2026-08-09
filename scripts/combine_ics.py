@@ -906,7 +906,7 @@ def extract_events(ics_content, source_name=None, source_id=None, fallback_url=N
     return events
 
 
-def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar", exclude_sources=None):
+def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar", exclude_sources=None, geo_report=None):
     """Combine all ICS files in a directory into one.
     
     Args:
@@ -1045,8 +1045,11 @@ def combine_ics_files(input_dir, output_file, calendar_name="Combined Calendar",
     
     if geo_filtered_count > 0:
         print(f"  (Geo-filtered {geo_filtered_count} events outside allowed cities)")
-        # Write sidecar for report visibility
-        geo_report_path = Path(output_file).parent / 'geo_filtered.json'
+        # Write sidecar for report visibility. The tracked
+        # cities/<city>/geo_filtered.json is CI-owned generated state;
+        # local audit runs pass --geo-report to keep it out of the tree.
+        geo_report_path = Path(geo_report) if geo_report else Path(output_file).parent / 'geo_filtered.json'
+        geo_report_path.parent.mkdir(parents=True, exist_ok=True)
         # Summarize by source + city extracted from location
         by_source_city = {}
         for d in geo_filtered_details:
@@ -1070,6 +1073,7 @@ if __name__ == '__main__':
     parser.add_argument('--output', '-o', required=True, help='Output ICS file')
     parser.add_argument('--name', '-n', default='Community Calendar', help='Calendar name')
     parser.add_argument('--exclude', '-x', default='', help='Comma-separated source filenames to exclude (without .ics)')
+    parser.add_argument('--geo-report', default='', help='Where to write the geo_filtered.json sidecar (default: next to the output file)')
     
     args = parser.parse_args()
     exclude_sources = set(s.strip() for s in args.exclude.split(',') if s.strip())
@@ -1077,4 +1081,4 @@ if __name__ == '__main__':
     print(f"Combining ICS files from {args.input_dir}...")
     if exclude_sources:
         print(f"  Excluding sources: {', '.join(sorted(exclude_sources))}")
-    combine_ics_files(args.input_dir, args.output, args.name, exclude_sources)
+    combine_ics_files(args.input_dir, args.output, args.name, exclude_sources, geo_report=args.geo_report or None)

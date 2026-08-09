@@ -736,6 +736,11 @@ def run_city(city: str, logger: BuildLogger, args: argparse.Namespace) -> dict:
                 "output": summarize_output(output_path),
             })
 
+        # The tracked cities/<city>/geo_filtered.json is CI-owned generated
+        # state (committed by the nightly metadata step, read by report.py).
+        # Local runs write the sidecar to scratch so audits keep the
+        # curator-visible detail without dirtying the tree.
+        geo_report_path = Path(tempfile.mkdtemp(prefix=f"local-build-geo-{city}-")) / "geo_filtered.json"
         combine_result = run_command(
             logger,
             city,
@@ -746,12 +751,14 @@ def run_city(city: str, logger: BuildLogger, args: argparse.Namespace) -> dict:
                 "--input-dir", f"cities/{city}",
                 "--output", f"cities/{city}/combined.ics",
                 "--name", f"{titleize_city(city)} Community Calendar",
+                "--geo-report", str(geo_report_path),
             ],
             env,
         )
         city_result["combine"] = {
             "returncode": combine_result["returncode"],
             "output": summarize_output(ROOT / "cities" / city / "combined.ics"),
+            "geo_report": str(geo_report_path),
         }
 
         convert_result = run_command(

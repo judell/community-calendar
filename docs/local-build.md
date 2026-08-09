@@ -122,6 +122,13 @@ write it: the runner sends RSS output to a per-run temp directory
 (recorded as `rss.outdir` in the audit report) while still reading the
 tracked feeds as the diff baseline via `generate_rss.py --state-dir`.
 
+**`cities/<city>/geo_filtered.json` is likewise CI-owned generated
+state** (committed by the nightly metadata step, read into the feed
+health report). Local runs write the sidecar to a per-run temp path
+(recorded as `combine.geo_report` in the audit report) via
+`combine_ics.py --geo-report`; the local feed report's geo section
+therefore reflects the tracked baseline, not the local run.
+
 ## What It Runs
 
 For each selected city, the runner:
