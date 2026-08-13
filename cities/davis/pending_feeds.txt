@@ -1,11 +1,38 @@
-# Add ICS feed URLs here. The build will process them into the
-# database automatically and reset this file to the template below.
+# Add feed URLs or scraper outputs here.
 #
-# Format:
+# Pipeline: On each build, process_pending_feeds.py reads this file,
+# inserts rows into the Supabase `feeds` table, then resets this file
+# to the template below. export_feeds_txt.py then regenerates feeds.txt
+# from the DB. Do not edit feeds.txt manually.
+# Think of this file as a temporary inbox for new sources, not as a
+# long-term source inventory.
+#
+# The "# Source Name" comment becomes the display name in the calendar
+# (user-visible source attribution under each event card). Use the bare
+# canonical venue/source name only — no parenthetical context, no event
+# counts, no strategy notes. Put verification/discovery notes in
+# SOURCES_CHECKLIST.md, not here.
+#
+# --- ICS feed URLs ---
+# Just add the name and URL. The build handles everything else.
+#
 #   # Source Name
 #   https://example.com/events/?ical=1
 #
-# Test before adding:
+# --- Scrapers ---
+# Add the name, cmd, and output path. That is the whole job: the build
+# inserts the row into the feeds table (validated at insert time) and
+# the DB-first runner executes it in that same build. The workflow is
+# never edited. Prefer scripts/add_scraper.py, which tests the exact
+# command and writes this entry for you.
+#
+#   # Source Name
+#   # cmd: python scrapers/example.py --name "Source Name" --output cities/davis/example.ics
+#   cities/davis/example.ics
+#
+# Validate without registering (--test writes nothing); run without
+# --test to validate and register:
 #   python scripts/add_feed.py URL davis "Source Name" --test
+#   python scripts/add_scraper.py example davis "Source Name" --test
 #
 # See CONTRIBUTING.md for details.

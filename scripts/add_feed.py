@@ -8,10 +8,13 @@ This script automates the steps for integrating an ICS feed:
 In the main repo, the workflow processes pending_feeds.txt into the feeds
 table, then regenerates feeds.txt from the database.
 
+By default the feed is validated (fetched, checked for real ICS) and
+then registered. --test validates and shows what would be registered
+without writing anything.
+
 Usage:
     python scripts/add_feed.py "https://example.com/events/?ical=1" toronto "Example Events"
     python scripts/add_feed.py "https://meetup.com/group/events/ical/" toronto "Meetup Group" --test
-    python scripts/add_feed.py URL city "Source Name" --dry-run
 """
 
 import argparse
@@ -107,14 +110,15 @@ def main():
 Examples:
   python scripts/add_feed.py "https://example.com/events/?ical=1" toronto "Example Events"
   python scripts/add_feed.py "https://meetup.com/mygroup/events/ical/" toronto "My Group" --test
-  python scripts/add_feed.py URL city "Source Name" --dry-run
 """
     )
     parser.add_argument('url', help='ICS feed URL')
     parser.add_argument('city', help='City directory name (e.g., toronto, santarosa)')
     parser.add_argument('display_name', help='Human-readable source name')
-    parser.add_argument('--test', action='store_true', help='Test the feed before adding')
-    parser.add_argument('--dry-run', action='store_true', help='Show what would be done without making changes')
+    parser.add_argument('--test', action='store_true',
+                        help='Validate the feed and show what would be registered, without writing anything')
+    parser.add_argument('--dry-run', action='store_true',
+                        help='Deprecated alias of --test')
     parser.add_argument('--slug', help='Override the auto-generated filename slug')
     
     args = parser.parse_args()
@@ -127,20 +131,28 @@ Examples:
     print(f"   Name: {args.display_name}")
     print(f"   Slug: {slug}")
     
-    # Test the feed
-    if args.test or args.dry_run:
-        valid, event_count = test_feed(args.url)
-        if not valid and not args.dry_run:
-            print("\n⚠️  Feed test failed. Continue anyway? [y/N] ", end='')
-            response = input().strip().lower()
-            if response != 'y':
-                sys.exit(1)
-    
-    if args.dry_run:
-        print("\n[DRY RUN] Would perform the following:")
-        print(f"  1. Add to cities/{args.city}/pending_feeds.txt: {args.url}")
-        print("  2. Next build will move it into the feeds table")
-        print(f"  3. download_feeds.py will save as: {slug}.ics")
+    validate_only = args.test or args.dry_run
+
+    # Always validate first — registering an unvalidated feed is never
+    # the right default.
+    valid, event_count = test_feed(args.url)
+    if not valid:
+        if validate_only:
+            sys.exit(1)
+        if not sys.stdin.isatty():
+            print("\n❌ Feed validation failed (non-interactive session — aborting; nothing was written)")
+            sys.exit(1)
+        print("\n⚠️  Feed validation failed. Register anyway? [y/N] ", end='')
+        response = input().strip().lower()
+        if response != 'y':
+            sys.exit(1)
+
+    if validate_only:
+        print("\n[TEST] Nothing written. Registering would:")
+        print(f"  add to cities/{args.city}/pending_feeds.txt:")
+        print(f"    # {args.display_name}")
+        print(f"    {args.url}")
+        print(f"  next build: insert into the feeds table, download as {slug}.ics")
         return
 
     # Add to pending_feeds.txt
@@ -152,11 +164,9 @@ Examples:
 
     print("\n" + "="*60)
     print("✅ Done! Next steps:")
-    print("  1. Review changes: git diff")
-    print(f"  2. Update SOURCES_CHECKLIST.md if needed")
-    print(f"  3. Commit: git add -A && git commit -m 'Add {args.display_name} feed'")
-    print("  4. Push: git push")
-    print(f"\n  The build will insert it into the feeds table and save as: {slug}.ics")
+    print(f"  1. Review the entry: git diff cities/{args.city}/pending_feeds.txt")
+    print("  2. Commit and push it (or let your usual flow do so)")
+    print(f"  3. The next build inserts it into the feeds table and downloads it as {slug}.ics")
     print("="*60)
 
 

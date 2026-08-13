@@ -65,10 +65,10 @@ python scripts/add_scraper.py myscraper santarosa "My Source Name"
 # parameterized base scrapers take their site-specific args:
 python scripts/add_scraper.py tribe_rest davis "My Venue" \
   --extra-args '--api-base "https://myvenue.org" --name "My Venue"' \
-  --output-name myvenue --test
+  --output-name myvenue
 ```
 
-`--test` runs the exact command being registered. The script appends a scraper entry to `pending_feeds.txt`; the next build moves it into the `feeds` table (validated at insert time) and regenerates `feeds.txt`, and the DB-first runner executes it starting with the build after that. See `scrapers/README.md` for each base scraper's arguments.
+The scraper is always tested first (the exact command being registered); `--test` validates only, writing nothing. On success the script appends a scraper entry to `pending_feeds.txt`; the next build moves it into the `feeds` table (validated at insert time, before the scrape step), executes it in that same build, and regenerates `feeds.txt`. See `scrapers/README.md` for each base scraper's arguments.
 
 ## Build Pipeline
 

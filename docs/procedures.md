@@ -221,7 +221,9 @@ After the PR is merged, the next build automatically runs `scripts/process_pendi
 python scripts/add_feed.py URL city "Source Name" --test
 ```
 
-> **Note:** `add_feed.py --test` is useful for validation. In the main repo its normal add mode now writes to `pending_feeds.txt`, not `feeds.txt`.
+> **Note:** `--test` validates only — nothing is written. Running
+> without `--test` validates and then registers (writing to
+> `pending_feeds.txt`, never `feeds.txt`).
 
 ### Scrapers
 
@@ -234,8 +236,11 @@ python scripts/add_scraper.py <scraper_name> <city> "<Display Name>"
 # parameterized base scrapers take their site-specific args:
 python scripts/add_scraper.py songkick santarosa "My Venue" \
   --extra-args '--url "https://www.songkick.com/venues/NNN" --name "My Venue"' \
-  --output-name songkick_myvenue --test
+  --output-name songkick_myvenue
 ```
+
+The scraper is always tested before registration; add `--test` to
+validate only, writing nothing.
 
 The next build moves the pending entry into the `feeds` table
 (validated at insert time), executes the scraper in that same build,

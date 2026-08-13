@@ -20,10 +20,12 @@ Each feed is a comment line with the display name, followed by the URL.
 
 **Naming rule:** the `# Display Name` comment is the user-visible source attribution under each event card in the calendar UI. Use the bare canonical venue/source name only — no parenthetical context, no event counts, no strategy notes. Verification details, run-time counts, and discovery notes belong in `cities/<city>/SOURCES_CHECKLIST.md` (or a city-local `STRATEGIES_REVIEW.md`), not here.
 
-You can test a URL before adding it:
+The CLI alternative validates the feed and registers it (`--test`
+validates only — nothing written):
 
 ```bash
-python scripts/add_feed.py URL city "Source Name" --test
+python scripts/add_feed.py URL city "Source Name"          # validate + register
+python scripts/add_feed.py URL city "Source Name" --test   # validate only
 ```
 
 After your PR is merged, the next build automatically processes `pending_feeds.txt` — inserting the feeds into the database and resetting the file to its template.
@@ -44,11 +46,13 @@ arguments and an output filename:
 ```bash
 python scripts/add_scraper.py tribe_rest davis "My Venue" \
   --extra-args '--api-base "https://myvenue.org" --name "My Venue" --timezone America/Los_Angeles' \
-  --output-name myvenue --test
+  --output-name myvenue
 ```
 
-`--test` runs the exact command being registered and shows the event
-count before anything is written. The script appends a scraper entry to
+The scraper is always tested first — the exact command being
+registered, including `--extra-args` — and registration aborts if the
+test fails. Add `--test` to validate only, writing nothing. On
+success the script appends a scraper entry to
 `cities/<city>/pending_feeds.txt`; the next build inserts it into the
 `feeds` table (validated at insert time) and the DB-first runner
 executes it in that same build.

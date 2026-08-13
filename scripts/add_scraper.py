@@ -2,9 +2,13 @@
 """Add a new scraper to the pipeline (DB-first).
 
 This script registers a scraper for a city:
-1. Verify the scraper exists and optionally test it — the test runs the
-   exact command that will be registered, including --extra-args
+1. Verify the scraper exists and test it — the test runs the exact
+   command that will be registered, including --extra-args
 2. Add a scraper entry to cities/<city>/pending_feeds.txt
+
+By default the scraper is tested and then registered. --test runs the
+same validation and shows what would be registered without writing
+anything.
 
 The nightly build's process_pending_feeds step moves the entry into the
 feeds table (validated at insert time), and the DB-first runner executes
@@ -132,15 +136,16 @@ def main():
 Examples:
   python scripts/add_scraper.py sportsbasement santarosa "Sports Basement"
   python scripts/add_scraper.py myscraper davis "My Source" --test
-  python scripts/add_scraper.py newscraper bloomington "News Source" --dry-run
   python scripts/add_scraper.py eventbrite petaluma "Blue Zones Project Petaluma" --extra-args '--url "https://www.eventbrite.com/o/78957912343" --name "Blue Zones Project Petaluma"' --output-name bluezones_petaluma
 """
     )
     parser.add_argument('scraper', help='Scraper name (without .py extension)')
     parser.add_argument('city', help='City directory name (e.g., santarosa, davis, bloomington)')
     parser.add_argument('display_name', help='Human-readable source name for display')
-    parser.add_argument('--test', action='store_true', help='Test the scraper (with --extra-args) before adding')
-    parser.add_argument('--dry-run', action='store_true', help='Show what would be done without making changes')
+    parser.add_argument('--test', action='store_true',
+                        help='Validate the scraper (with --extra-args) and show what would be registered, without writing anything')
+    parser.add_argument('--dry-run', action='store_true',
+                        help='Deprecated alias of --test')
     parser.add_argument('--extra-args', default='', help='Extra arguments inserted before --output (e.g. \'--url "https://..." --name "My Source"\')')
     parser.add_argument('--output-name', default='', help='Override the output .ics filename (without .ics extension, default: scraper name)')
 
@@ -161,24 +166,25 @@ Examples:
 
     ics_name = args.output_name or Path(args.scraper).name
     extra = f" {args.extra_args}" if args.extra_args else ""
+    validate_only = args.test or args.dry_run
 
-    if args.dry_run:
-        print("\n[DRY RUN] Would perform the following:")
-        print(f"  Add to pending_feeds.txt: cities/{args.city}/{ics_name}.ics")
-        print(f"  Registered command: python {scraper_path.relative_to(ROOT)}{extra} --output cities/{args.city}/{ics_name}.ics")
+    # Step 2: Always test — the same command shape as the registration.
+    if not test_scraper(scraper_path, args.extra_args):
+        if validate_only:
+            sys.exit(1)
+        if not sys.stdin.isatty():
+            print("\n❌ Scraper test failed (non-interactive session — aborting; nothing was written)")
+            sys.exit(1)
+        print("\n⚠️  Scraper test had issues. Register anyway? [y/N] ", end='')
+        response = input().strip().lower()
+        if response != 'y':
+            sys.exit(1)
+
+    if validate_only:
+        print("\n[TEST] Nothing written. Registering would:")
+        print(f"  add to pending_feeds.txt: cities/{args.city}/{ics_name}.ics")
+        print(f"  registered command: python {scraper_path.relative_to(ROOT)}{extra} --output cities/{args.city}/{ics_name}.ics")
         return
-
-    # Step 2: Test if requested — same command shape as the registration
-    if args.test:
-        if not test_scraper(scraper_path, args.extra_args):
-            if not sys.stdin.isatty():
-                print("\n❌ Scraper test failed (non-interactive session — aborting; "
-                      "re-run without --test to register anyway)")
-                sys.exit(1)
-            print("\n⚠️  Scraper test had issues. Continue anyway? [y/N] ", end='')
-            response = input().strip().lower()
-            if response != 'y':
-                sys.exit(1)
 
     # Step 3: Add to pending_feeds.txt
     add_to_pending_feeds(args.city, scraper_path, args.extra_args, ics_name, args.display_name)

@@ -20,17 +20,18 @@
 #   https://example.com/events/?ical=1
 #
 # --- Scrapers ---
-# Add the name, cmd, and output path here. But scrapers ALSO need a
-# line added to .github/workflows/generate-calendar.yml (in the city's
-# scrape step). This file only handles the DB insert; the workflow
-# entry is what actually runs the scraper. In other words: workflow =
-# execution, pending_feeds.txt = registration staging.
+# Add the name, cmd, and output path. That is the whole job: the build
+# inserts the row into the feeds table (validated at insert time) and
+# the DB-first runner executes it in that same build. The workflow is
+# never edited. Prefer scripts/add_scraper.py, which tests the exact
+# command and writes this entry for you.
 #
 #   # Source Name
-#   # cmd: python scrapers/example.py --name "Source Name"
+#   # cmd: python scrapers/example.py --name "Source Name" --output cities/bloomington/example.ics
 #   cities/bloomington/example.ics
 #
-# Test before adding:
+# Validate without registering (--test writes nothing); run without
+# --test to validate and register:
 #   python scripts/add_feed.py URL bloomington "Source Name" --test
 #   python scripts/add_scraper.py example bloomington "Source Name" --test
 #
