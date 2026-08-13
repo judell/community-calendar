@@ -386,28 +386,39 @@ jobs:
         git checkout -- . 2>/dev/null || true
         git clean -fd 2>/dev/null || true
 
-        # Fetch or create orphan archive branch
-        if git fetch origin archive:archive 2>/dev/null; then
-          git checkout archive
-        else
-          git checkout --orphan archive
-          git rm -rf . 2>/dev/null || true
-          git clean -fd 2>/dev/null || true
+        # The archive branch is always exactly ONE snapshot: a fresh
+        # orphan commit force-pushed each night (bound-archive-branch-
+        # growth). The 224-commit history through 2026-08-13 is
+        # preserved as a git bundle on the archive-history-2026-08-13
+        # release. Consumer URLs (raw .../archive/...) are unchanged.
+        git fetch origin archive --depth=1 2>/dev/null || true
+
+        git checkout --orphan archive-snapshot
+        git rm -rf . 2>/dev/null || true
+        git clean -fd 2>/dev/null || true
+
+        # Carry forward cities from the previous snapshot that were not
+        # rebuilt this run, so a scoped build doesn't drop other cities.
+        if git rev-parse --verify origin/archive >/dev/null 2>&1; then
+          for prev_city in $(git ls-tree --name-only origin/archive cities 2>/dev/null | sed 's|cities/||'); do
+            skip=false
+            for city in "${CITIES[@]}"; do
+              [ "$(echo "$city" | xargs)" = "$prev_city" ] && skip=true
+            done
+            if [ "$skip" = "false" ]; then
+              git checkout origin/archive -- "cities/$prev_city" 2>/dev/null || true
+            fi
+          done
         fi
 
-        # Replace only the cities that were built (preserve others)
-        for city in "${CITIES[@]}"; do
-          city=$(echo "$city" | xargs)
-          git rm -rf "cities/$city" 2>/dev/null || true
-        done
-        git rm -f report.json 2>/dev/null || true
         cp -r "$ARCHIVE_DIR"/* .
         rm -rf "$ARCHIVE_DIR"
 
         git add cities/ report.json
         TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
         git commit -m "Build artifacts $TIMESTAMP" || echo "No changes to archive"
-        git push origin archive
+        git push --force origin archive-snapshot:archive
 
         # Return to main
         git checkout main
+        git branch -D archive-snapshot 2>/dev/null || true

@@ -37,6 +37,12 @@ def get_city_timezone(city):
 DROP_THRESHOLD = 0.5  # 50% drop from previous
 MIN_EVENTS_FOR_DROP = 5  # Only flag drops if previous had at least this many
 
+# History bounds (bound-archive-branch-growth): anomaly detection needs
+# one prior data point and the per-city report sparklines use 30, so 90
+# daily entries per feed and 180 days of anomaly log are generous.
+MAX_FEED_HISTORY = 90
+MAX_ANOMALY_DAYS = 180
+
 
 def count_future_events_in_ics(filepath: str) -> tuple[int, str | None]:
     """Count VEVENT entries with future DTSTART in an ICS file."""
@@ -206,6 +212,7 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
                 feed_data['history'][-1] = entry
             else:
                 feed_data['history'].append(entry)
+            feed_data['history'] = feed_data['history'][-MAX_FEED_HISTORY:]
 
         # Remove feeds from report that no longer have .ics files
         current_basenames = {
@@ -225,6 +232,10 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
         key = (a['city'], a['feed'], a['type'])
         if key not in existing_today:
             report['anomalies'].append(a)
+
+    anomaly_cutoff = (date.today() - timedelta(days=MAX_ANOMALY_DAYS)).isoformat()
+    report['anomalies'] = [a for a in report['anomalies']
+                           if (a.get('date') or '') >= anomaly_cutoff]
 
     # URL quality analysis from events.json
     for city in cities:
