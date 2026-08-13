@@ -235,7 +235,8 @@ jobs:
 
     - name: Generate feed health report
       run: |
-        python scripts/report.py --cities ${{ steps.locations.outputs.list }} --build-log build.log
+        python scripts/report.py --cities ${{ steps.locations.outputs.list }} --build-log build.log \
+          --slice-dir report --template scripts/report_page_template.html
 
     - name: Generate PRODID platform report
       run: python scripts/prodid.py
@@ -353,6 +354,7 @@ jobs:
 
         git add -f xmlui/config.json
         git add cities.json report.html cities/*/feeds.txt
+        [ -d report ] && git add report/ || true
         [ -d rss ] && git add rss/*.xml || true
         git diff --staged --quiet || (
           git commit -m "Auto-generate calendar metadata"

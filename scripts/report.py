@@ -106,6 +106,28 @@ def detect_anomalies(feed_name: str, current: int, history: list[dict]) -> list[
     return anomalies
 
 
+def classify_ics_content(filepath: str) -> str:
+    """Classify what a feed file actually contains, so a zero count
+    carries a cause: 'not_ics:html' / 'not_ics:json' / 'not_ics:empty'
+    (broken/blocked), 'quiet' (valid calendar, no future events), or
+    'ok' (has future events — callers only ask for zero-count feeds)."""
+    try:
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+    except OSError:
+        return 'unreadable'
+    if 'BEGIN:VCALENDAR' not in content:
+        head = content[:512].lstrip().lower()
+        if not head:
+            return 'not_ics:empty'
+        if head.startswith('<!doctype') or head.startswith('<html') or '<html' in head:
+            return 'not_ics:html'
+        if head.startswith('{') or head.startswith('['):
+            return 'not_ics:json'
+        return 'not_ics:unknown'
+    return 'quiet'
+
+
 def load_report(report_path: str) -> dict:
     """Load existing report or create new one."""
     try:
@@ -175,6 +197,10 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
             entry = {'date': today, 'count': count}
             if error:
                 entry['error'] = error
+            if count == 0 and not error:
+                feed_data['content'] = classify_ics_content(ics_path)
+            else:
+                feed_data.pop('content', None)
 
             if feed_data['history'] and feed_data['history'][-1]['date'] == today:
                 feed_data['history'][-1] = entry
@@ -314,6 +340,13 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
         except (FileNotFoundError, json.JSONDecodeError):
             report['cities'][city].pop('geo_filtered', None)
 
+        prev_build = report['cities'][city].get('build') or {}
+        report['cities'][city]['build'] = {
+            'generated': now,
+            'total_events': len(events),
+            'prev_total_events': prev_build.get('total_events'),
+        }
+
         report['cities'][city]['url_quality'] = {
             'total_with_url': total,
             'total_events': len(events),
@@ -437,6 +470,19 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
                 'distinct_tzids': len(inventory),
                 'tzids': inventory
             }
+
+    # Prune cities that no longer exist in cities.json so retired
+    # cities stop lingering in the aggregate forever.
+    cities_json = Path(__file__).parent.parent / 'cities.json'
+    try:
+        active_cities = set(json.loads(cities_json.read_text()).keys())
+    except (OSError, json.JSONDecodeError):
+        active_cities = None
+    if active_cities:
+        for stale in [c for c in report['cities'] if c not in active_cities]:
+            del report['cities'][stale]
+        report['anomalies'] = [a for a in report['anomalies']
+                               if a.get('city') in active_cities]
 
     report['generated'] = now
 
@@ -618,6 +664,232 @@ def parse_build_errors(log_path: str) -> list[dict]:
     return unique
 
 
+def parse_feeds_reference(city: str) -> dict:
+    """Map feed stems to their source using the generated read-only
+    cities/<city>/feeds.txt, so report problems can carry a
+    reproduction command (curl for live feeds, the registered command
+    for scrapers)."""
+    path = Path(__file__).parent.parent / 'cities' / city / 'feeds.txt'
+    ref = {}
+    if not path.exists():
+        return ref
+    try:
+        from feed_slug import slugify
+    except ImportError:
+        return ref
+    pending_name = None
+    pending_cmd = None
+    for raw in path.read_text().splitlines():
+        line = raw.strip()
+        if line.startswith('# cmd:'):
+            pending_cmd = line[len('# cmd:'):].strip()
+            continue
+        if line.startswith('#'):
+            body = line.lstrip('# ').split(' | ')[0].strip()
+            if body and not line.startswith('# ---'):
+                pending_name = body
+            continue
+        if line.startswith('http'):
+            ref[slugify(line)] = {'kind': 'feed', 'name': pending_name or '', 'url': line}
+            pending_name = pending_cmd = None
+        elif line.startswith('cities/') and line.endswith('.ics'):
+            ref[Path(line).stem] = {'kind': 'scraper', 'name': pending_name or '', 'cmd': pending_cmd}
+            pending_name = pending_cmd = None
+        else:
+            pending_name = pending_cmd = None
+    return ref
+
+
+def _norm_key(text):
+    return re.sub(r'[^a-z0-9]+', '', (text or '').lower())
+
+
+def build_city_slice(report: dict, city: str, prev_error_lines: set) -> dict:
+    """Assemble the per-city report slice: last-build status, ranked
+    action items answering "has a feed gone silent (and why)", "are
+    there new errors", "are there tz anomalies" — plus the full detail
+    sections for drill-down."""
+    data = report['cities'].get(city, {})
+    feeds = data.get('feeds', {})
+    stems = {_norm_key(name) for name in feeds}
+
+    def error_matches_city(e):
+        if e.get('city') == city:
+            return True
+        src = _norm_key(e.get('source'))
+        return bool(src) and src in stems
+
+    errors = [e for e in report.get('errors', []) if error_matches_city(e)]
+    new_errors = [e for e in errors if e.get('line') not in prev_error_lines]
+    ongoing_errors = [e for e in errors if e.get('line') in prev_error_lines]
+
+    silent = []
+    for name, fd in sorted(feeds.items()):
+        hist = fd.get('history', [])
+        if not hist or hist[-1].get('count') != 0 or hist[-1].get('error'):
+            continue
+        was_count, was_date = None, None
+        for h in reversed(hist):
+            if h.get('count'):
+                was_count, was_date = h['count'], h['date']
+                break
+        since = hist[-1]['date']
+        for h in reversed(hist):
+            if h.get('count') == 0 and not h.get('error'):
+                since = h['date']
+            else:
+                break
+        silent.append({
+            'feed': name,
+            'was': was_count,
+            'was_date': was_date,
+            'silent_since': since,
+            'content': fd.get('content', 'quiet'),
+        })
+
+    week_ago = (date.today() - timedelta(days=7)).isoformat()
+    recent_anoms = [a for a in report.get('anomalies', [])
+                    if a.get('city') == city and (a.get('date') or '') >= week_ago]
+    tz = data.get('tz_anomalies', [])
+    ref = parse_feeds_reference(city)
+
+    def repro_for(stem):
+        src = ref.get(stem)
+        if not src:
+            return None
+        if src['kind'] == 'feed':
+            return {
+                'display': src.get('name') or stem,
+                'source': src['url'],
+                'command': f"curl -sL -A 'Mozilla/5.0' '{src['url']}' | grep -c 'BEGIN:VEVENT'",
+            }
+        return {
+            'display': src.get('name') or stem,
+            'source': src.get('cmd'),
+            'command': src.get('cmd'),
+        }
+
+    items = []
+    for e in new_errors:
+        stem = _norm_key(e.get('source'))
+        match = next((n for n in feeds if _norm_key(n) == stem), None)
+        items.append({
+            'severity': 1, 'kind': 'new_error',
+            'title': f"New error: {e.get('source') or e.get('feed') or 'build'}",
+            'detail': (e.get('message') or e.get('line') or '')[:300],
+            'feed': match,
+            'repro': repro_for(match) if match else None,
+        })
+    for s in silent:
+        if str(s['content']).startswith('not_ics'):
+            kind = str(s['content']).split(':', 1)[-1]
+            items.append({
+                'severity': 1, 'kind': 'broken_feed',
+                'title': f"{s['feed']} is serving {kind}, not ICS",
+                'detail': f"was {s['was']} events on {s['was_date']}; broken since {s['silent_since']}",
+                'feed': s['feed'],
+                'repro': repro_for(s['feed']),
+            })
+    newly_zero = {a.get('feed') for a in recent_anoms if a.get('type') == 'zero_events'}
+    for s in silent:
+        if not str(s['content']).startswith('not_ics') and s['feed'] in newly_zero:
+            items.append({
+                'severity': 2, 'kind': 'newly_silent',
+                'title': f"{s['feed']} went silent (valid calendar, 0 events)",
+                'detail': f"was {s['was']} events on {s['was_date']}",
+                'feed': s['feed'],
+                'repro': repro_for(s['feed']),
+            })
+    for a in recent_anoms:
+        if a.get('type') == 'significant_drop':
+            items.append({
+                'severity': 2, 'kind': 'drop',
+                'title': f"{a.get('feed')}: {a.get('message')}",
+                'detail': a.get('date'),
+                'feed': a.get('feed'),
+                'repro': repro_for(a.get('feed')),
+            })
+    for z in tz:
+        stem = _norm_key(z.get('source'))
+        match = next((n for n in feeds if _norm_key(n) == stem), None)
+        items.append({
+            'severity': 3, 'kind': 'tz_anomaly',
+            'title': f"{z.get('source')}: {z.get('count')}/{z.get('total')} events at suspicious hours",
+            'detail': f"likely a {z.get('offset')}h offset error",
+            'feed': match,
+            'repro': repro_for(match) if match else None,
+            'samples': z.get('samples'),
+        })
+    for e in ongoing_errors:
+        items.append({
+            'severity': 3, 'kind': 'ongoing_error',
+            'title': f"Ongoing error: {e.get('source') or e.get('feed') or 'build'}",
+            'detail': (e.get('message') or e.get('line') or '')[:300],
+        })
+    items.sort(key=lambda i: i['severity'])
+
+    # Long-silent feeds are not surfaced as problems — they are a watch
+    # list rendered in the drill-downs.
+    watching = [
+        {**s, 'repro': repro_for(s['feed'])}
+        for s in silent
+        if not str(s['content']).startswith('not_ics') and s['feed'] not in newly_zero
+    ]
+
+    build = dict(data.get('build') or {})
+    if build.get('total_events') is not None and build.get('prev_total_events') is not None:
+        build['delta'] = build['total_events'] - build['prev_total_events']
+
+    slim_feeds = {}
+    for name, fd in sorted(feeds.items()):
+        hist = fd.get('history', [])
+        slim_feeds[name] = {
+            'count': hist[-1]['count'] if hist else None,
+            'error': hist[-1].get('error') if hist else None,
+            'content': fd.get('content'),
+            'history': hist[-30:],
+        }
+
+    return {
+        'city': city,
+        'generated': report.get('generated'),
+        'build': build,
+        'problems': items,
+        'watching': watching,
+        'silent_feeds': silent,
+        'new_errors': new_errors,
+        'ongoing_errors': ongoing_errors,
+        'tz_anomalies': tz,
+        'recent_anomalies': recent_anoms,
+        'detail': {
+            'feeds': slim_feeds,
+            'url_quality': data.get('url_quality'),
+            'tzid_inventory': data.get('tzid_inventory'),
+            'geo_filtered': data.get('geo_filtered'),
+            'categories': data.get('categories'),
+            'images': data.get('images'),
+        },
+    }
+
+
+def write_city_slices(report: dict, cities: list[str], prev_error_lines: set,
+                      slice_dir: str, template_path: str | None):
+    """Write report/<city>/report.json (+ index.html from the template)."""
+    template = None
+    if template_path and Path(template_path).exists():
+        template = Path(template_path).read_text()
+    for city in cities:
+        if city not in report.get('cities', {}):
+            continue
+        out = Path(slice_dir) / city
+        out.mkdir(parents=True, exist_ok=True)
+        slice_data = build_city_slice(report, city, prev_error_lines)
+        (out / 'report.json').write_text(json.dumps(slice_data, indent=2, default=str))
+        if template:
+            (out / 'index.html').write_text(template)
+        print(f"  wrote {out}/report.json")
+
+
 def main():
     parser = argparse.ArgumentParser(description='Generate feed health report')
     parser.add_argument('--cities', type=str, default='santarosa,bloomington,davis',
@@ -626,9 +898,16 @@ def main():
                         help='Output JSON file path')
     parser.add_argument('--build-log', type=str, default=None,
                         help='Path to build.log for error extraction')
+    parser.add_argument('--slice-dir', type=str, default=None,
+                        help='Write per-city report slices (and pages) under this directory')
+    parser.add_argument('--template', type=str, default=None,
+                        help='HTML template copied to <slice-dir>/<city>/index.html')
     args = parser.parse_args()
 
     cities = [c.strip() for c in args.cities.split(',')]
+    # Snapshot the prior build's error lines before this run overwrites
+    # them, so slices can distinguish NEW errors from ongoing ones.
+    prev_error_lines = {e.get('line') for e in load_report(args.output).get('errors', [])}
     update_report(cities, args.output)
 
     # Parse build errors if log provided
@@ -645,6 +924,10 @@ def main():
                 print(f"  [{e.get('level', '?')}:{e.get('source', '?')}] {e['line'][:120]}")
         else:
             print("No build issues found in log.")
+
+    if args.slice_dir:
+        report = load_report(args.output)
+        write_city_slices(report, cities, prev_error_lines, args.slice_dir, args.template)
 
 
 if __name__ == '__main__':
