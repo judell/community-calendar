@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>City Health Report</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+         max-width: 860px; margin: 0 auto; padding: 20px; line-height: 1.5; color: #333; }
+  h1 { margin: 0; text-transform: capitalize; font-size: 1.4em; display: inline; }
+  .headline { margin-bottom: 18px; }
+  .headline .meta { color: #666; font-size: 0.9em; }
+  .delta.up { color: #388e3c; }
+  .delta.down { color: #d32f2f; }
+  h2 { font-size: 1.05em; margin: 20px 0 8px; }
+  .ok { padding: 10px 14px; background: #f0f7f0; border-left: 3px solid #388e3c; color: #2e7d32; }
+  details.problem { margin: 6px 0; border-left: 3px solid; background: #fafafa; }
+  details.problem > summary { cursor: pointer; padding: 8px 12px; font-weight: 500; }
+  details.problem > .body { padding: 0 12px 10px; font-size: 0.9em; }
+  details.problem .repro { margin-top: 8px; }
+  details.problem .repro code { display: block; background: #f0f0f0; padding: 8px;
+    font-size: 0.8em; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+  .sev1 { border-color: #d32f2f; }
+  .sev2 { border-color: #f57c00; }
+  .sev3 { border-color: #fbc02d; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+  th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid #eee; }
+  td.num { text-align: right; }
+  .zero { color: #d32f2f; }
+  .quiet { color: #999; }
+  details.section { margin: 8px 0; }
+  details.section > summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+  .spark { display: inline-flex; align-items: flex-end; gap: 1px; height: 18px; width: 120px; }
+  .spark i { flex: 1; background: #90caf9; min-height: 1px; }
+  .footer { margin-top: 32px; font-size: 0.85em; color: #666; }
+  pre.raw { font-size: 0.8em; overflow-x: auto; background: #fafafa; padding: 8px; }
+</style>
+</head>
+<body>
+<div class="headline">
+  <h1 id="city">…</h1>
+  <span class="meta" id="buildline"></span>
+</div>
+
+<div id="problems"></div>
+
+<div id="sections"></div>
+
+<div class="footer">
+  <a href="../../report.html">All cities</a> ·
+  <a href="https://github.com/judell/community-calendar/actions/workflows/generate-calendar.yml" target="_blank">Build history</a>
+</div>
+
+<script>
+function el(tag, attrs, children) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === 'text') e.textContent = v;
+    else e.setAttribute(k, v);
+  }
+  for (const c of children || []) e.appendChild(c);
+  return e;
+}
+
+function spark(history) {
+  const wrap = el('span', {class: 'spark'});
+  const counts = (history || []).map(h => h.count || 0);
+  const max = Math.max(1, ...counts);
+  for (const c of counts) {
+    const bar = el('i');
+    bar.style.height = Math.max(5, Math.round(c / max * 100)) + '%';
+    if (c === 0) bar.style.background = '#ef9a9a';
+    wrap.appendChild(bar);
+  }
+  return wrap;
+}
+
+function renderHeadline(d) {
+  document.getElementById('city').textContent = d.city;
+  document.title = d.city + ' — health report';
+  const b = d.build || {};
+  let parts = [];
+  if (b.total_events != null) {
+    let s = b.total_events.toLocaleString() + ' events';
+    if (b.delta != null) s += ' (' + (b.delta >= 0 ? '+' : '') + b.delta + ')';
+    parts.push(s);
+  }
+  if (d.generated) parts.push('built ' + d.generated.slice(0, 16).replace('T', ' '));
+  const span = document.getElementById('buildline');
+  span.textContent = ' — ' + parts.join(' · ');
+  if (b.delta != null) {
+    span.className = 'meta ' + (b.delta >= 0 ? '' : '');
+  }
+}
+
+function problemBody(p, d) {
+  const body = el('div', {class: 'body'});
+  if (p.detail) body.appendChild(el('div', {text: p.detail}));
+
+  // Feed history context when we can find it.
+  const feeds = (d.detail || {}).feeds || {};
+  if (p.feed && feeds[p.feed]) {
+    const f = feeds[p.feed];
+    const row = el('div', {}, [
+      el('span', {text: 'Recent history: '}),
+      spark(f.history),
+    ]);
+    body.appendChild(row);
+  }
+
+  // Timezone samples.
+  if (p.samples && p.samples.length) {
+    const t = el('table');
+    t.appendChild(el('tr', {}, [
+      el('th', {text: 'Event'}), el('th', {text: 'Shows'}), el('th', {text: 'Likely'}),
+    ]));
+    for (const s of p.samples) {
+      t.appendChild(el('tr', {}, [
+        el('td', {text: s.title || ''}),
+        el('td', {text: s.shows || ''}),
+        el('td', {text: s.likely || ''}),
+      ]));
+    }
+    body.appendChild(t);
+  }
+
+  // Reproduction.
+  if (p.repro) {
+    const r = el('div', {class: 'repro'});
+    if (p.repro.display) r.appendChild(el('div', {text: 'Source: ' + p.repro.display}));
+    if (p.repro.command) {
+      r.appendChild(el('div', {text: 'Reproduce:'}));
+      r.appendChild(el('code', {text: p.repro.command}));
+    } else if (p.repro.source) {
+      r.appendChild(el('code', {text: p.repro.source}));
+    }
+    body.appendChild(r);
+  }
+  return body;
+}
+
+function renderProblems(d) {
+  const box = document.getElementById('problems');
+  const problems = d.problems || [];
+  box.appendChild(el('h2', {text: 'Potential problems' +
+    (problems.length ? ' (' + problems.length + ')' : '')}));
+  if (!problems.length) {
+    box.appendChild(el('div', {class: 'ok', text: 'None detected in the last build.'}));
+    return;
+  }
+  for (const p of problems) {
+    const det = el('details', {class: 'problem sev' + p.severity});
+    det.appendChild(el('summary', {text: p.title}));
+    det.appendChild(problemBody(p, d));
+    box.appendChild(det);
+  }
+}
+
+function feedTable(feeds) {
+  const table = el('table');
+  table.appendChild(el('tr', {}, [
+    el('th', {text: 'Feed'}), el('th', {text: 'Events'}),
+    el('th', {text: 'Last 30 builds'}), el('th', {text: 'Note'}),
+  ]));
+  const names = Object.keys(feeds).sort((a, b) => (feeds[b].count || 0) - (feeds[a].count || 0));
+  for (const name of names) {
+    const f = feeds[name];
+    const note = f.error ? ('error: ' + f.error)
+               : (f.content && f.content.startsWith('not_ics')) ? f.content
+               : (f.count === 0 ? 'quiet' : '');
+    table.appendChild(el('tr', {}, [
+      el('td', {text: name}),
+      el('td', {class: 'num' + (f.count === 0 ? ' zero' : ''), text: String(f.count ?? '—')}),
+      el('td', {}, [spark(f.history)]),
+      el('td', {class: f.count === 0 ? 'zero' : 'quiet', text: note}),
+    ]));
+  }
+  return table;
+}
+
+function watchingTable(watching) {
+  const table = el('table');
+  table.appendChild(el('tr', {}, [
+    el('th', {text: 'Feed'}), el('th', {text: 'Was'}),
+    el('th', {text: 'Silent since'}),
+  ]));
+  for (const w of watching) {
+    table.appendChild(el('tr', {}, [
+      el('td', {text: w.feed}),
+      el('td', {class: 'num', text: w.was != null ? String(w.was) : '—'}),
+      el('td', {text: w.silent_since || ''}),
+    ]));
+  }
+  return table;
+}
+
+function section(title, node) {
+  const det = el('details', {class: 'section'});
+  det.appendChild(el('summary', {text: title}));
+  det.appendChild(node);
+  return det;
+}
+
+function pre(obj) {
+  const p = el('pre', {class: 'raw'});
+  p.textContent = JSON.stringify(obj, null, 2);
+  return p;
+}
+
+async function main() {
+  let d;
+  try {
+    d = await (await fetch('./report.json')).json();
+  } catch (e) {
+    document.getElementById('problems').textContent = 'Could not load report.json: ' + e;
+    return;
+  }
+  renderHeadline(d);
+  renderProblems(d);
+
+  const s = document.getElementById('sections');
+  const det = d.detail || {};
+  if ((d.watching || []).length)
+    s.appendChild(section('Quiet feeds, watching (' + d.watching.length + ')',
+                          watchingTable(d.watching)));
+  if (det.feeds) s.appendChild(section(
+    'All feeds (' + Object.keys(det.feeds).length + ')', feedTable(det.feeds)));
+  if (det.geo_filtered) s.appendChild(section('Geo-filtered events', pre(det.geo_filtered)));
+  if (det.url_quality) s.appendChild(section('URL quality', pre(det.url_quality)));
+  if (det.tzid_inventory) s.appendChild(section('TZID inventory', pre(det.tzid_inventory)));
+  if (det.categories) s.appendChild(section('Categories', pre(det.categories)));
+  if ((d.new_errors || []).length || (d.ongoing_errors || []).length)
+    s.appendChild(section('Errors (raw)', pre({new: d.new_errors, ongoing: d.ongoing_errors})));
+}
+main();
+</script>
+</body>
+</html>
