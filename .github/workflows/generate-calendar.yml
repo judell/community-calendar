@@ -400,7 +400,9 @@ jobs:
         # Carry forward cities from the previous snapshot that were not
         # rebuilt this run, so a scoped build doesn't drop other cities.
         if git rev-parse --verify origin/archive >/dev/null 2>&1; then
-          for prev_city in $(git ls-tree --name-only origin/archive cities 2>/dev/null | sed 's|cities/||'); do
+          # Trailing slash matters: "cities" returns the single tree
+          # entry itself; "cities/" lists its children.
+          for prev_city in $(git ls-tree --name-only origin/archive cities/ 2>/dev/null | sed 's|cities/||'); do
             skip=false
             for city in "${CITIES[@]}"; do
               [ "$(echo "$city" | xargs)" = "$prev_city" ] && skip=true

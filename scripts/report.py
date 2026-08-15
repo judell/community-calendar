@@ -389,10 +389,16 @@ def update_report(cities: list[str], report_path: str = 'report.json'):
             if 'T' not in st:
                 continue
             src = e.get('source', 'unknown')
+            # Honor UTC offsets: a correct instant expressed in another
+            # zone (e.g. an Eventbrite feed emitting Eastern) must be
+            # judged by its hour in the city's timezone, not the raw
+            # string hour. Naive timestamps keep the raw-hour reading.
             try:
-                hour = int(st[11:13])
-                minute = int(st[14:16])
-            except (ValueError, IndexError):
+                dt = datetime.fromisoformat(st.replace('Z', '+00:00'))
+                if dt.tzinfo is not None:
+                    dt = dt.astimezone(tz)
+                hour, minute = dt.hour, dt.minute
+            except ValueError:
                 continue
             by_source.setdefault(src, []).append({
                 'hour': hour, 'minute': minute,
@@ -780,6 +786,11 @@ def build_city_slice(report: dict, city: str, prev_error_lines: set) -> dict:
             'command': src.get('cmd'),
         }
 
+    def _was_phrase(s):
+        if s.get('was') is None:
+            return "no good build in recorded history"
+        return f"was {s['was']} events on {s['was_date']}"
+
     items = []
     for e in new_errors:
         stem = _norm_key(e.get('source'))
@@ -797,7 +808,7 @@ def build_city_slice(report: dict, city: str, prev_error_lines: set) -> dict:
             items.append({
                 'severity': 1, 'kind': 'broken_feed',
                 'title': f"{s['feed']} is serving {kind}, not ICS",
-                'detail': f"was {s['was']} events on {s['was_date']}; broken since {s['silent_since']}",
+                'detail': f"{_was_phrase(s)}; broken since {s['silent_since']}",
                 'feed': s['feed'],
                 'repro': repro_for(s['feed']),
             })
@@ -807,7 +818,7 @@ def build_city_slice(report: dict, city: str, prev_error_lines: set) -> dict:
             items.append({
                 'severity': 2, 'kind': 'newly_silent',
                 'title': f"{s['feed']} went silent (valid calendar, 0 events)",
-                'detail': f"was {s['was']} events on {s['was_date']}",
+                'detail': _was_phrase(s),
                 'feed': s['feed'],
                 'repro': repro_for(s['feed']),
             })
