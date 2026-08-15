@@ -20,6 +20,7 @@
   details.problem .repro { margin-top: 8px; }
   details.problem .repro code { display: block; background: #f0f0f0; padding: 8px;
     font-size: 0.8em; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+  details.problem .repro-note { color: #666; font-size: 0.85em; margin-top: 4px; }
   .sev1 { border-color: #d32f2f; }
   .sev2 { border-color: #f57c00; }
   .sev3 { border-color: #fbc02d; }
@@ -131,6 +132,8 @@ function problemBody(p, d) {
     if (p.repro.command) {
       r.appendChild(el('div', {text: 'Reproduce:'}));
       r.appendChild(el('code', {text: p.repro.command}));
+      r.appendChild(el('div', {class: 'repro-note',
+        text: 'If this succeeds from your machine while the build keeps failing, the site is likely blocking CI’s datacenter IPs.'}));
     } else if (p.repro.source) {
       r.appendChild(el('code', {text: p.repro.source}));
     }

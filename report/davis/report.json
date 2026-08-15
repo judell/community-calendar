@@ -1,0 +1,2921 @@
+{
+  "city": "davis",
+  "generated": "2026-08-15T02:31:21.073871",
+  "build": {
+    "generated": "2026-08-15T02:31:21.073871",
+    "total_events": 618,
+    "prev_total_events": null
+  },
+  "problems": [
+    {
+      "severity": 1,
+      "kind": "broken_feed",
+      "title": "putahcreekcouncil is serving html, not ICS",
+      "detail": "no good build in recorded history; broken since 2026-05-18",
+      "feed": "putahcreekcouncil",
+      "repro": {
+        "display": "Putah Creek Council",
+        "source": "https://putahcreekcouncil.org/events/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://putahcreekcouncil.org/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "severity": 1,
+      "kind": "broken_feed",
+      "title": "visitdavis is serving html, not ICS",
+      "detail": "no good build in recorded history; broken since 2026-08-14",
+      "feed": "visitdavis",
+      "repro": {
+        "display": "Visit Davis",
+        "source": "https://visitdavis.org/events/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://visitdavis.org/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "severity": 1,
+      "kind": "broken_feed",
+      "title": "visityolo_event is serving html, not ICS",
+      "detail": "no good build in recorded history; broken since 2026-08-14",
+      "feed": "visityolo_event",
+      "repro": {
+        "display": "Visit Yolo",
+        "source": "https://visityolo.com/event/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://visityolo.com/event/?ical=1' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "severity": 3,
+      "kind": "tz_anomaly",
+      "title": "Davis Downtown: 14/30 events at suspicious hours",
+      "detail": "likely a -7h offset error",
+      "feed": "davis_downtown",
+      "repro": {
+        "display": "Davis Downtown",
+        "source": "python scrapers/davis_downtown.py",
+        "command": "python scrapers/davis_downtown.py"
+      },
+      "samples": [
+        {
+          "start_time": "2026-08-15T01:00",
+          "shows": "01:00",
+          "likely": "08:00",
+          "title": "Davis Farmers Market - Every Saturday from 8am - 1pm"
+        },
+        {
+          "start_time": "2026-08-22T01:00",
+          "shows": "01:00",
+          "likely": "08:00",
+          "title": "Davis Farmers Market - Every Saturday from 8am - 1pm"
+        },
+        {
+          "start_time": "2026-08-29T01:00",
+          "shows": "01:00",
+          "likely": "08:00",
+          "title": "Davis Farmers Market - Every Saturday from 8am - 1pm"
+        },
+        {
+          "start_time": "2026-09-05T01:00",
+          "shows": "01:00",
+          "likely": "08:00",
+          "title": "Davis Farmers Market - Every Saturday from 8am - 1pm"
+        },
+        {
+          "start_time": "2026-09-10T02:00",
+          "shows": "02:00",
+          "likely": "09:00",
+          "title": "Davis Downtown Board Meeting"
+        }
+      ]
+    }
+  ],
+  "watching": [
+    {
+      "feed": "gcal_davisbikeclubwww",
+      "was": 1,
+      "was_date": "2026-07-12",
+      "silent_since": "2026-07-13",
+      "content": "quiet",
+      "repro": {
+        "display": "Davis Bike Club",
+        "source": "https://calendar.google.com/calendar/ical/davisbikeclubwww%40gmail.com/public/basic.ics",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://calendar.google.com/calendar/ical/davisbikeclubwww%40gmail.com/public/basic.ics' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "feed": "meetup_winters_shut_up_and_write_meetup_group",
+      "was": null,
+      "was_date": null,
+      "silent_since": "2026-05-18",
+      "content": "quiet",
+      "repro": {
+        "display": "Meetup: Winters Shut Up & Write",
+        "source": "https://www.meetup.com/winters-shut-up-and-write-meetup-group/events/ical/",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://www.meetup.com/winters-shut-up-and-write-meetup-group/events/ical/' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "feed": "ucdavis_library",
+      "was": 1,
+      "was_date": "2026-06-06",
+      "silent_since": "2026-06-07",
+      "content": "quiet",
+      "repro": {
+        "display": "UC Davis Library",
+        "source": "python scrapers/ucdavis_library.py",
+        "command": "python scrapers/ucdavis_library.py"
+      }
+    }
+  ],
+  "silent_feeds": [
+    {
+      "feed": "gcal_davisbikeclubwww",
+      "was": 1,
+      "was_date": "2026-07-12",
+      "silent_since": "2026-07-13",
+      "content": "quiet"
+    },
+    {
+      "feed": "meetup_winters_shut_up_and_write_meetup_group",
+      "was": null,
+      "was_date": null,
+      "silent_since": "2026-05-18",
+      "content": "quiet"
+    },
+    {
+      "feed": "putahcreekcouncil",
+      "was": null,
+      "was_date": null,
+      "silent_since": "2026-05-18",
+      "content": "not_ics:html"
+    },
+    {
+      "feed": "ucdavis_library",
+      "was": 1,
+      "was_date": "2026-06-06",
+      "silent_since": "2026-06-07",
+      "content": "quiet"
+    },
+    {
+      "feed": "visitdavis",
+      "was": null,
+      "was_date": null,
+      "silent_since": "2026-08-14",
+      "content": "not_ics:html"
+    },
+    {
+      "feed": "visityolo_event",
+      "was": null,
+      "was_date": null,
+      "silent_since": "2026-08-14",
+      "content": "not_ics:html"
+    }
+  ],
+  "new_errors": [],
+  "ongoing_errors": [],
+  "tz_anomalies": [
+    {
+      "source": "Davis Downtown",
+      "count": 14,
+      "total": 30,
+      "offset": -7,
+      "samples": [
+        {
+          "start_time": "2026-08-15T01:00",
+          "shows": "01:00",
+          "likely": "08:00",
+          "title": "Davis Farmers Market - Every Saturday from 8am - 1pm"
+        },
+        {
+          "start_time": "2026-08-22T01:00",
+          "shows": "01:00",
+          "likely": "08:00",
+          "title": "Davis Farmers Market - Every Saturday from 8am - 1pm"
+        },
+        {
+          "start_time": "2026-08-29T01:00",
+          "shows": "01:00",
+          "likely": "08:00",
+          "title": "Davis Farmers Market - Every Saturday from 8am - 1pm"
+        },
+        {
+          "start_time": "2026-09-05T01:00",
+          "shows": "01:00",
+          "likely": "08:00",
+          "title": "Davis Farmers Market - Every Saturday from 8am - 1pm"
+        },
+        {
+          "start_time": "2026-09-10T02:00",
+          "shows": "02:00",
+          "likely": "09:00",
+          "title": "Davis Downtown Board Meeting"
+        }
+      ]
+    }
+  ],
+  "recent_anomalies": [
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 17)",
+      "severity": "info",
+      "date": "2026-08-09",
+      "city": "davis",
+      "feed": "thedirt"
+    }
+  ],
+  "detail": {
+    "feeds": {
+      "davis_downtown": {
+        "count": 30,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 29
+          },
+          {
+            "date": "2026-07-18",
+            "count": 29
+          },
+          {
+            "date": "2026-07-19",
+            "count": 29
+          },
+          {
+            "date": "2026-07-20",
+            "count": 29
+          },
+          {
+            "date": "2026-07-21",
+            "count": 29
+          },
+          {
+            "date": "2026-07-22",
+            "count": 29
+          },
+          {
+            "date": "2026-07-23",
+            "count": 29
+          },
+          {
+            "date": "2026-07-24",
+            "count": 29
+          },
+          {
+            "date": "2026-07-25",
+            "count": 29
+          },
+          {
+            "date": "2026-07-26",
+            "count": 29
+          },
+          {
+            "date": "2026-07-27",
+            "count": 29
+          },
+          {
+            "date": "2026-07-28",
+            "count": 30
+          },
+          {
+            "date": "2026-07-29",
+            "count": 30
+          },
+          {
+            "date": "2026-07-30",
+            "count": 30
+          },
+          {
+            "date": "2026-07-31",
+            "count": 30
+          },
+          {
+            "date": "2026-08-01",
+            "count": 30
+          },
+          {
+            "date": "2026-08-02",
+            "count": 29
+          },
+          {
+            "date": "2026-08-03",
+            "count": 29
+          },
+          {
+            "date": "2026-08-04",
+            "count": 29
+          },
+          {
+            "date": "2026-08-05",
+            "count": 29
+          },
+          {
+            "date": "2026-08-06",
+            "count": 29
+          },
+          {
+            "date": "2026-08-07",
+            "count": 29
+          },
+          {
+            "date": "2026-08-08",
+            "count": 29
+          },
+          {
+            "date": "2026-08-09",
+            "count": 29
+          },
+          {
+            "date": "2026-08-10",
+            "count": 30
+          },
+          {
+            "date": "2026-08-11",
+            "count": 30
+          },
+          {
+            "date": "2026-08-12",
+            "count": 30
+          },
+          {
+            "date": "2026-08-13",
+            "count": 30
+          },
+          {
+            "date": "2026-08-14",
+            "count": 30
+          },
+          {
+            "date": "2026-08-15",
+            "count": 30
+          }
+        ]
+      },
+      "gcal_davisbikeclubwww": {
+        "count": 0,
+        "error": null,
+        "content": "quiet",
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 0
+          },
+          {
+            "date": "2026-07-18",
+            "count": 0
+          },
+          {
+            "date": "2026-07-19",
+            "count": 0
+          },
+          {
+            "date": "2026-07-20",
+            "count": 0
+          },
+          {
+            "date": "2026-07-21",
+            "count": 0
+          },
+          {
+            "date": "2026-07-22",
+            "count": 0
+          },
+          {
+            "date": "2026-07-23",
+            "count": 0
+          },
+          {
+            "date": "2026-07-24",
+            "count": 0
+          },
+          {
+            "date": "2026-07-25",
+            "count": 0
+          },
+          {
+            "date": "2026-07-26",
+            "count": 0
+          },
+          {
+            "date": "2026-07-27",
+            "count": 0
+          },
+          {
+            "date": "2026-07-28",
+            "count": 0
+          },
+          {
+            "date": "2026-07-29",
+            "count": 0
+          },
+          {
+            "date": "2026-07-30",
+            "count": 0
+          },
+          {
+            "date": "2026-07-31",
+            "count": 0
+          },
+          {
+            "date": "2026-08-01",
+            "count": 0
+          },
+          {
+            "date": "2026-08-02",
+            "count": 0
+          },
+          {
+            "date": "2026-08-03",
+            "count": 0
+          },
+          {
+            "date": "2026-08-04",
+            "count": 0
+          },
+          {
+            "date": "2026-08-05",
+            "count": 0
+          },
+          {
+            "date": "2026-08-06",
+            "count": 0
+          },
+          {
+            "date": "2026-08-07",
+            "count": 0
+          },
+          {
+            "date": "2026-08-08",
+            "count": 0
+          },
+          {
+            "date": "2026-08-09",
+            "count": 0
+          },
+          {
+            "date": "2026-08-10",
+            "count": 0
+          },
+          {
+            "date": "2026-08-11",
+            "count": 0
+          },
+          {
+            "date": "2026-08-12",
+            "count": 0
+          },
+          {
+            "date": "2026-08-13",
+            "count": 0
+          },
+          {
+            "date": "2026-08-14",
+            "count": 0
+          },
+          {
+            "date": "2026-08-15",
+            "count": 0
+          }
+        ]
+      },
+      "hatefreetogether": {
+        "count": 30,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 30
+          },
+          {
+            "date": "2026-07-18",
+            "count": 30
+          },
+          {
+            "date": "2026-07-19",
+            "count": 30
+          },
+          {
+            "date": "2026-07-20",
+            "count": 30
+          },
+          {
+            "date": "2026-07-21",
+            "count": 30
+          },
+          {
+            "date": "2026-07-22",
+            "count": 30
+          },
+          {
+            "date": "2026-07-23",
+            "count": 30
+          },
+          {
+            "date": "2026-07-24",
+            "count": 30
+          },
+          {
+            "date": "2026-07-25",
+            "count": 30
+          },
+          {
+            "date": "2026-07-26",
+            "count": 30
+          },
+          {
+            "date": "2026-07-27",
+            "count": 30
+          },
+          {
+            "date": "2026-07-28",
+            "count": 30
+          },
+          {
+            "date": "2026-07-29",
+            "count": 30
+          },
+          {
+            "date": "2026-07-30",
+            "count": 30
+          },
+          {
+            "date": "2026-07-31",
+            "count": 30
+          },
+          {
+            "date": "2026-08-01",
+            "count": 30
+          },
+          {
+            "date": "2026-08-02",
+            "count": 30
+          },
+          {
+            "date": "2026-08-03",
+            "count": 30
+          },
+          {
+            "date": "2026-08-04",
+            "count": 30
+          },
+          {
+            "date": "2026-08-05",
+            "count": 30
+          },
+          {
+            "date": "2026-08-06",
+            "count": 30
+          },
+          {
+            "date": "2026-08-07",
+            "count": 30
+          },
+          {
+            "date": "2026-08-08",
+            "count": 30
+          },
+          {
+            "date": "2026-08-09",
+            "count": 30
+          },
+          {
+            "date": "2026-08-10",
+            "count": 30
+          },
+          {
+            "date": "2026-08-11",
+            "count": 30
+          },
+          {
+            "date": "2026-08-12",
+            "count": 30
+          },
+          {
+            "date": "2026-08-13",
+            "count": 30
+          },
+          {
+            "date": "2026-08-14",
+            "count": 30
+          },
+          {
+            "date": "2026-08-15",
+            "count": 30
+          }
+        ]
+      },
+      "meetup_intercultural_mosaics": {
+        "count": 10,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 10
+          },
+          {
+            "date": "2026-07-18",
+            "count": 10
+          },
+          {
+            "date": "2026-07-19",
+            "count": 10
+          },
+          {
+            "date": "2026-07-20",
+            "count": 10
+          },
+          {
+            "date": "2026-07-21",
+            "count": 10
+          },
+          {
+            "date": "2026-07-22",
+            "count": 10
+          },
+          {
+            "date": "2026-07-23",
+            "count": 10
+          },
+          {
+            "date": "2026-07-24",
+            "count": 10
+          },
+          {
+            "date": "2026-07-25",
+            "count": 10
+          },
+          {
+            "date": "2026-07-26",
+            "count": 10
+          },
+          {
+            "date": "2026-07-27",
+            "count": 10
+          },
+          {
+            "date": "2026-07-28",
+            "count": 10
+          },
+          {
+            "date": "2026-07-29",
+            "count": 10
+          },
+          {
+            "date": "2026-07-30",
+            "count": 10
+          },
+          {
+            "date": "2026-07-31",
+            "count": 10
+          },
+          {
+            "date": "2026-08-01",
+            "count": 10
+          },
+          {
+            "date": "2026-08-02",
+            "count": 10
+          },
+          {
+            "date": "2026-08-03",
+            "count": 10
+          },
+          {
+            "date": "2026-08-04",
+            "count": 10
+          },
+          {
+            "date": "2026-08-05",
+            "count": 10
+          },
+          {
+            "date": "2026-08-06",
+            "count": 10
+          },
+          {
+            "date": "2026-08-07",
+            "count": 10
+          },
+          {
+            "date": "2026-08-08",
+            "count": 10
+          },
+          {
+            "date": "2026-08-09",
+            "count": 10
+          },
+          {
+            "date": "2026-08-10",
+            "count": 10
+          },
+          {
+            "date": "2026-08-11",
+            "count": 10
+          },
+          {
+            "date": "2026-08-12",
+            "count": 10
+          },
+          {
+            "date": "2026-08-13",
+            "count": 10
+          },
+          {
+            "date": "2026-08-14",
+            "count": 10
+          },
+          {
+            "date": "2026-08-15",
+            "count": 10
+          }
+        ]
+      },
+      "meetup_mindful_embodied_spirituality": {
+        "count": 10,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 10
+          },
+          {
+            "date": "2026-07-18",
+            "count": 10
+          },
+          {
+            "date": "2026-07-19",
+            "count": 10
+          },
+          {
+            "date": "2026-07-20",
+            "count": 10
+          },
+          {
+            "date": "2026-07-21",
+            "count": 10
+          },
+          {
+            "date": "2026-07-22",
+            "count": 10
+          },
+          {
+            "date": "2026-07-23",
+            "count": 10
+          },
+          {
+            "date": "2026-07-24",
+            "count": 10
+          },
+          {
+            "date": "2026-07-25",
+            "count": 10
+          },
+          {
+            "date": "2026-07-26",
+            "count": 10
+          },
+          {
+            "date": "2026-07-27",
+            "count": 10
+          },
+          {
+            "date": "2026-07-28",
+            "count": 10
+          },
+          {
+            "date": "2026-07-29",
+            "count": 10
+          },
+          {
+            "date": "2026-07-30",
+            "count": 10
+          },
+          {
+            "date": "2026-07-31",
+            "count": 10
+          },
+          {
+            "date": "2026-08-01",
+            "count": 10
+          },
+          {
+            "date": "2026-08-02",
+            "count": 10
+          },
+          {
+            "date": "2026-08-03",
+            "count": 10
+          },
+          {
+            "date": "2026-08-04",
+            "count": 10
+          },
+          {
+            "date": "2026-08-05",
+            "count": 10
+          },
+          {
+            "date": "2026-08-06",
+            "count": 10
+          },
+          {
+            "date": "2026-08-07",
+            "count": 10
+          },
+          {
+            "date": "2026-08-08",
+            "count": 10
+          },
+          {
+            "date": "2026-08-09",
+            "count": 10
+          },
+          {
+            "date": "2026-08-10",
+            "count": 10
+          },
+          {
+            "date": "2026-08-11",
+            "count": 10
+          },
+          {
+            "date": "2026-08-12",
+            "count": 10
+          },
+          {
+            "date": "2026-08-13",
+            "count": 10
+          },
+          {
+            "date": "2026-08-14",
+            "count": 10
+          },
+          {
+            "date": "2026-08-15",
+            "count": 10
+          }
+        ]
+      },
+      "meetup_mosaics": {
+        "count": 10,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 10
+          },
+          {
+            "date": "2026-07-18",
+            "count": 10
+          },
+          {
+            "date": "2026-07-19",
+            "count": 10
+          },
+          {
+            "date": "2026-07-20",
+            "count": 10
+          },
+          {
+            "date": "2026-07-21",
+            "count": 10
+          },
+          {
+            "date": "2026-07-22",
+            "count": 10
+          },
+          {
+            "date": "2026-07-23",
+            "count": 10
+          },
+          {
+            "date": "2026-07-24",
+            "count": 10
+          },
+          {
+            "date": "2026-07-25",
+            "count": 10
+          },
+          {
+            "date": "2026-07-26",
+            "count": 10
+          },
+          {
+            "date": "2026-07-27",
+            "count": 10
+          },
+          {
+            "date": "2026-07-28",
+            "count": 10
+          },
+          {
+            "date": "2026-07-29",
+            "count": 10
+          },
+          {
+            "date": "2026-07-30",
+            "count": 10
+          },
+          {
+            "date": "2026-07-31",
+            "count": 10
+          },
+          {
+            "date": "2026-08-01",
+            "count": 10
+          },
+          {
+            "date": "2026-08-02",
+            "count": 10
+          },
+          {
+            "date": "2026-08-03",
+            "count": 10
+          },
+          {
+            "date": "2026-08-04",
+            "count": 10
+          },
+          {
+            "date": "2026-08-05",
+            "count": 10
+          },
+          {
+            "date": "2026-08-06",
+            "count": 10
+          },
+          {
+            "date": "2026-08-07",
+            "count": 10
+          },
+          {
+            "date": "2026-08-08",
+            "count": 10
+          },
+          {
+            "date": "2026-08-09",
+            "count": 10
+          },
+          {
+            "date": "2026-08-10",
+            "count": 10
+          },
+          {
+            "date": "2026-08-11",
+            "count": 10
+          },
+          {
+            "date": "2026-08-12",
+            "count": 10
+          },
+          {
+            "date": "2026-08-13",
+            "count": 10
+          },
+          {
+            "date": "2026-08-14",
+            "count": 10
+          },
+          {
+            "date": "2026-08-15",
+            "count": 10
+          }
+        ]
+      },
+      "meetup_pence_adult_art_programs": {
+        "count": 6,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 4
+          },
+          {
+            "date": "2026-07-18",
+            "count": 4
+          },
+          {
+            "date": "2026-07-19",
+            "count": 4
+          },
+          {
+            "date": "2026-07-20",
+            "count": 4
+          },
+          {
+            "date": "2026-07-21",
+            "count": 4
+          },
+          {
+            "date": "2026-07-22",
+            "count": 4
+          },
+          {
+            "date": "2026-07-23",
+            "count": 4
+          },
+          {
+            "date": "2026-07-24",
+            "count": 4
+          },
+          {
+            "date": "2026-07-25",
+            "count": 4
+          },
+          {
+            "date": "2026-07-26",
+            "count": 4
+          },
+          {
+            "date": "2026-07-27",
+            "count": 4
+          },
+          {
+            "date": "2026-07-28",
+            "count": 5
+          },
+          {
+            "date": "2026-07-29",
+            "count": 5
+          },
+          {
+            "date": "2026-07-30",
+            "count": 5
+          },
+          {
+            "date": "2026-07-31",
+            "count": 5
+          },
+          {
+            "date": "2026-08-01",
+            "count": 5
+          },
+          {
+            "date": "2026-08-02",
+            "count": 5
+          },
+          {
+            "date": "2026-08-03",
+            "count": 5
+          },
+          {
+            "date": "2026-08-04",
+            "count": 5
+          },
+          {
+            "date": "2026-08-05",
+            "count": 5
+          },
+          {
+            "date": "2026-08-06",
+            "count": 5
+          },
+          {
+            "date": "2026-08-07",
+            "count": 5
+          },
+          {
+            "date": "2026-08-08",
+            "count": 6
+          },
+          {
+            "date": "2026-08-09",
+            "count": 6
+          },
+          {
+            "date": "2026-08-10",
+            "count": 5
+          },
+          {
+            "date": "2026-08-11",
+            "count": 6
+          },
+          {
+            "date": "2026-08-12",
+            "count": 6
+          },
+          {
+            "date": "2026-08-13",
+            "count": 6
+          },
+          {
+            "date": "2026-08-14",
+            "count": 6
+          },
+          {
+            "date": "2026-08-15",
+            "count": 6
+          }
+        ]
+      },
+      "meetup_winters_shut_up_and_write_meetup_group": {
+        "count": 0,
+        "error": null,
+        "content": "quiet",
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 0
+          },
+          {
+            "date": "2026-07-18",
+            "count": 0
+          },
+          {
+            "date": "2026-07-19",
+            "count": 0
+          },
+          {
+            "date": "2026-07-20",
+            "count": 0
+          },
+          {
+            "date": "2026-07-21",
+            "count": 0
+          },
+          {
+            "date": "2026-07-22",
+            "count": 0
+          },
+          {
+            "date": "2026-07-23",
+            "count": 0
+          },
+          {
+            "date": "2026-07-24",
+            "count": 0
+          },
+          {
+            "date": "2026-07-25",
+            "count": 0
+          },
+          {
+            "date": "2026-07-26",
+            "count": 0
+          },
+          {
+            "date": "2026-07-27",
+            "count": 0
+          },
+          {
+            "date": "2026-07-28",
+            "count": 0
+          },
+          {
+            "date": "2026-07-29",
+            "count": 0
+          },
+          {
+            "date": "2026-07-30",
+            "count": 0
+          },
+          {
+            "date": "2026-07-31",
+            "count": 0
+          },
+          {
+            "date": "2026-08-01",
+            "count": 0
+          },
+          {
+            "date": "2026-08-02",
+            "count": 0
+          },
+          {
+            "date": "2026-08-03",
+            "count": 0
+          },
+          {
+            "date": "2026-08-04",
+            "count": 0
+          },
+          {
+            "date": "2026-08-05",
+            "count": 0
+          },
+          {
+            "date": "2026-08-06",
+            "count": 0
+          },
+          {
+            "date": "2026-08-07",
+            "count": 0
+          },
+          {
+            "date": "2026-08-08",
+            "count": 0
+          },
+          {
+            "date": "2026-08-09",
+            "count": 0
+          },
+          {
+            "date": "2026-08-10",
+            "count": 0
+          },
+          {
+            "date": "2026-08-11",
+            "count": 0
+          },
+          {
+            "date": "2026-08-12",
+            "count": 0
+          },
+          {
+            "date": "2026-08-13",
+            "count": 0
+          },
+          {
+            "date": "2026-08-14",
+            "count": 0
+          },
+          {
+            "date": "2026-08-15",
+            "count": 0
+          }
+        ]
+      },
+      "meetup_yolo_county_board_game_gathering": {
+        "count": 10,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 10
+          },
+          {
+            "date": "2026-07-18",
+            "count": 10
+          },
+          {
+            "date": "2026-07-19",
+            "count": 10
+          },
+          {
+            "date": "2026-07-20",
+            "count": 10
+          },
+          {
+            "date": "2026-07-21",
+            "count": 10
+          },
+          {
+            "date": "2026-07-22",
+            "count": 10
+          },
+          {
+            "date": "2026-07-23",
+            "count": 10
+          },
+          {
+            "date": "2026-07-24",
+            "count": 10
+          },
+          {
+            "date": "2026-07-25",
+            "count": 10
+          },
+          {
+            "date": "2026-07-26",
+            "count": 10
+          },
+          {
+            "date": "2026-07-27",
+            "count": 10
+          },
+          {
+            "date": "2026-07-28",
+            "count": 10
+          },
+          {
+            "date": "2026-07-29",
+            "count": 10
+          },
+          {
+            "date": "2026-07-30",
+            "count": 10
+          },
+          {
+            "date": "2026-07-31",
+            "count": 10
+          },
+          {
+            "date": "2026-08-01",
+            "count": 10
+          },
+          {
+            "date": "2026-08-02",
+            "count": 10
+          },
+          {
+            "date": "2026-08-03",
+            "count": 10
+          },
+          {
+            "date": "2026-08-04",
+            "count": 10
+          },
+          {
+            "date": "2026-08-05",
+            "count": 10
+          },
+          {
+            "date": "2026-08-06",
+            "count": 10
+          },
+          {
+            "date": "2026-08-07",
+            "count": 10
+          },
+          {
+            "date": "2026-08-08",
+            "count": 10
+          },
+          {
+            "date": "2026-08-09",
+            "count": 10
+          },
+          {
+            "date": "2026-08-10",
+            "count": 10
+          },
+          {
+            "date": "2026-08-11",
+            "count": 10
+          },
+          {
+            "date": "2026-08-12",
+            "count": 10
+          },
+          {
+            "date": "2026-08-13",
+            "count": 10
+          },
+          {
+            "date": "2026-08-14",
+            "count": 10
+          },
+          {
+            "date": "2026-08-15",
+            "count": 10
+          }
+        ]
+      },
+      "mobilize_indivisible_yolo": {
+        "count": 120,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 84
+          },
+          {
+            "date": "2026-07-18",
+            "count": 80
+          },
+          {
+            "date": "2026-07-19",
+            "count": 79
+          },
+          {
+            "date": "2026-07-20",
+            "count": 82
+          },
+          {
+            "date": "2026-07-21",
+            "count": 89
+          },
+          {
+            "date": "2026-07-22",
+            "count": 91
+          },
+          {
+            "date": "2026-07-23",
+            "count": 89
+          },
+          {
+            "date": "2026-07-24",
+            "count": 87
+          },
+          {
+            "date": "2026-07-25",
+            "count": 85
+          },
+          {
+            "date": "2026-07-26",
+            "count": 86
+          },
+          {
+            "date": "2026-07-27",
+            "count": 84
+          },
+          {
+            "date": "2026-07-28",
+            "count": 82
+          },
+          {
+            "date": "2026-07-29",
+            "count": 82
+          },
+          {
+            "date": "2026-07-30",
+            "count": 82
+          },
+          {
+            "date": "2026-07-31",
+            "count": 108
+          },
+          {
+            "date": "2026-08-01",
+            "count": 148
+          },
+          {
+            "date": "2026-08-02",
+            "count": 145
+          },
+          {
+            "date": "2026-08-03",
+            "count": 143
+          },
+          {
+            "date": "2026-08-04",
+            "count": 146
+          },
+          {
+            "date": "2026-08-05",
+            "count": 145
+          },
+          {
+            "date": "2026-08-06",
+            "count": 149
+          },
+          {
+            "date": "2026-08-07",
+            "count": 147
+          },
+          {
+            "date": "2026-08-08",
+            "count": 134
+          },
+          {
+            "date": "2026-08-09",
+            "count": 129
+          },
+          {
+            "date": "2026-08-10",
+            "count": 140
+          },
+          {
+            "date": "2026-08-11",
+            "count": 134
+          },
+          {
+            "date": "2026-08-12",
+            "count": 131
+          },
+          {
+            "date": "2026-08-13",
+            "count": 125
+          },
+          {
+            "date": "2026-08-14",
+            "count": 121
+          },
+          {
+            "date": "2026-08-15",
+            "count": 120
+          }
+        ]
+      },
+      "putahcreekcouncil": {
+        "count": 0,
+        "error": null,
+        "content": "not_ics:html",
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 0
+          },
+          {
+            "date": "2026-07-18",
+            "count": 0
+          },
+          {
+            "date": "2026-07-19",
+            "count": 0
+          },
+          {
+            "date": "2026-07-20",
+            "count": 0
+          },
+          {
+            "date": "2026-07-21",
+            "count": 0
+          },
+          {
+            "date": "2026-07-22",
+            "count": 0
+          },
+          {
+            "date": "2026-07-23",
+            "count": 0
+          },
+          {
+            "date": "2026-07-24",
+            "count": 0
+          },
+          {
+            "date": "2026-07-25",
+            "count": 0
+          },
+          {
+            "date": "2026-07-26",
+            "count": 0
+          },
+          {
+            "date": "2026-07-27",
+            "count": 0
+          },
+          {
+            "date": "2026-07-28",
+            "count": 0
+          },
+          {
+            "date": "2026-07-29",
+            "count": 0
+          },
+          {
+            "date": "2026-07-30",
+            "count": 0
+          },
+          {
+            "date": "2026-07-31",
+            "count": 0
+          },
+          {
+            "date": "2026-08-01",
+            "count": 0
+          },
+          {
+            "date": "2026-08-02",
+            "count": 0
+          },
+          {
+            "date": "2026-08-03",
+            "count": 0
+          },
+          {
+            "date": "2026-08-04",
+            "count": 0
+          },
+          {
+            "date": "2026-08-05",
+            "count": 0
+          },
+          {
+            "date": "2026-08-06",
+            "count": 0
+          },
+          {
+            "date": "2026-08-07",
+            "count": 0
+          },
+          {
+            "date": "2026-08-08",
+            "count": 0
+          },
+          {
+            "date": "2026-08-09",
+            "count": 0
+          },
+          {
+            "date": "2026-08-10",
+            "count": 0
+          },
+          {
+            "date": "2026-08-11",
+            "count": 0
+          },
+          {
+            "date": "2026-08-12",
+            "count": 0
+          },
+          {
+            "date": "2026-08-13",
+            "count": 0
+          },
+          {
+            "date": "2026-08-14",
+            "count": 0
+          },
+          {
+            "date": "2026-08-15",
+            "count": 0
+          }
+        ]
+      },
+      "thedirt": {
+        "count": 16,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 17
+          },
+          {
+            "date": "2026-07-18",
+            "count": 20
+          },
+          {
+            "date": "2026-07-19",
+            "count": 20
+          },
+          {
+            "date": "2026-07-20",
+            "count": 20
+          },
+          {
+            "date": "2026-07-21",
+            "count": 0
+          },
+          {
+            "date": "2026-07-22",
+            "count": 0
+          },
+          {
+            "date": "2026-07-23",
+            "count": 0
+          },
+          {
+            "date": "2026-07-24",
+            "count": 18
+          },
+          {
+            "date": "2026-07-25",
+            "count": 19
+          },
+          {
+            "date": "2026-07-26",
+            "count": 19
+          },
+          {
+            "date": "2026-07-27",
+            "count": 0
+          },
+          {
+            "date": "2026-07-28",
+            "count": 19
+          },
+          {
+            "date": "2026-07-29",
+            "count": 18
+          },
+          {
+            "date": "2026-07-30",
+            "count": 17
+          },
+          {
+            "date": "2026-07-31",
+            "count": 0
+          },
+          {
+            "date": "2026-08-01",
+            "count": 19
+          },
+          {
+            "date": "2026-08-02",
+            "count": 18
+          },
+          {
+            "date": "2026-08-03",
+            "count": 0
+          },
+          {
+            "date": "2026-08-04",
+            "count": 18
+          },
+          {
+            "date": "2026-08-05",
+            "count": 15
+          },
+          {
+            "date": "2026-08-06",
+            "count": 15
+          },
+          {
+            "date": "2026-08-07",
+            "count": 15
+          },
+          {
+            "date": "2026-08-08",
+            "count": 18
+          },
+          {
+            "date": "2026-08-09",
+            "count": 0
+          },
+          {
+            "date": "2026-08-10",
+            "count": 18
+          },
+          {
+            "date": "2026-08-11",
+            "count": 18
+          },
+          {
+            "date": "2026-08-12",
+            "count": 17
+          },
+          {
+            "date": "2026-08-13",
+            "count": 15
+          },
+          {
+            "date": "2026-08-14",
+            "count": 15
+          },
+          {
+            "date": "2026-08-15",
+            "count": 16
+          }
+        ]
+      },
+      "ucdavis_arts": {
+        "count": 1,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 0
+          },
+          {
+            "date": "2026-07-18",
+            "count": 0
+          },
+          {
+            "date": "2026-07-19",
+            "count": 0
+          },
+          {
+            "date": "2026-07-20",
+            "count": 0
+          },
+          {
+            "date": "2026-07-21",
+            "count": 0
+          },
+          {
+            "date": "2026-07-22",
+            "count": 0
+          },
+          {
+            "date": "2026-07-23",
+            "count": 0
+          },
+          {
+            "date": "2026-07-24",
+            "count": 0
+          },
+          {
+            "date": "2026-07-25",
+            "count": 0
+          },
+          {
+            "date": "2026-07-26",
+            "count": 0
+          },
+          {
+            "date": "2026-07-27",
+            "count": 0
+          },
+          {
+            "date": "2026-07-28",
+            "count": 0
+          },
+          {
+            "date": "2026-07-29",
+            "count": 0
+          },
+          {
+            "date": "2026-07-30",
+            "count": 0
+          },
+          {
+            "date": "2026-07-31",
+            "count": 0
+          },
+          {
+            "date": "2026-08-01",
+            "count": 0
+          },
+          {
+            "date": "2026-08-02",
+            "count": 0
+          },
+          {
+            "date": "2026-08-03",
+            "count": 0
+          },
+          {
+            "date": "2026-08-04",
+            "count": 0
+          },
+          {
+            "date": "2026-08-05",
+            "count": 0
+          },
+          {
+            "date": "2026-08-06",
+            "count": 0
+          },
+          {
+            "date": "2026-08-07",
+            "count": 1
+          },
+          {
+            "date": "2026-08-08",
+            "count": 1
+          },
+          {
+            "date": "2026-08-09",
+            "count": 1
+          },
+          {
+            "date": "2026-08-10",
+            "count": 1
+          },
+          {
+            "date": "2026-08-11",
+            "count": 1
+          },
+          {
+            "date": "2026-08-12",
+            "count": 1
+          },
+          {
+            "date": "2026-08-13",
+            "count": 1
+          },
+          {
+            "date": "2026-08-14",
+            "count": 1
+          },
+          {
+            "date": "2026-08-15",
+            "count": 1
+          }
+        ]
+      },
+      "ucdavis_athletics": {
+        "count": 156,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 96
+          },
+          {
+            "date": "2026-07-18",
+            "count": 100
+          },
+          {
+            "date": "2026-07-19",
+            "count": 100
+          },
+          {
+            "date": "2026-07-20",
+            "count": 100
+          },
+          {
+            "date": "2026-07-21",
+            "count": 110
+          },
+          {
+            "date": "2026-07-22",
+            "count": 110
+          },
+          {
+            "date": "2026-07-23",
+            "count": 114
+          },
+          {
+            "date": "2026-07-24",
+            "count": 117
+          },
+          {
+            "date": "2026-07-25",
+            "count": 119
+          },
+          {
+            "date": "2026-07-26",
+            "count": 119
+          },
+          {
+            "date": "2026-07-27",
+            "count": 119
+          },
+          {
+            "date": "2026-07-28",
+            "count": 121
+          },
+          {
+            "date": "2026-07-29",
+            "count": 121
+          },
+          {
+            "date": "2026-07-30",
+            "count": 123
+          },
+          {
+            "date": "2026-07-31",
+            "count": 128
+          },
+          {
+            "date": "2026-08-01",
+            "count": 134
+          },
+          {
+            "date": "2026-08-02",
+            "count": 134
+          },
+          {
+            "date": "2026-08-03",
+            "count": 134
+          },
+          {
+            "date": "2026-08-04",
+            "count": 134
+          },
+          {
+            "date": "2026-08-05",
+            "count": 134
+          },
+          {
+            "date": "2026-08-06",
+            "count": 139
+          },
+          {
+            "date": "2026-08-07",
+            "count": 141
+          },
+          {
+            "date": "2026-08-08",
+            "count": 144
+          },
+          {
+            "date": "2026-08-09",
+            "count": 144
+          },
+          {
+            "date": "2026-08-10",
+            "count": 145
+          },
+          {
+            "date": "2026-08-11",
+            "count": 154
+          },
+          {
+            "date": "2026-08-12",
+            "count": 156
+          },
+          {
+            "date": "2026-08-13",
+            "count": 157
+          },
+          {
+            "date": "2026-08-14",
+            "count": 158
+          },
+          {
+            "date": "2026-08-15",
+            "count": 156
+          }
+        ]
+      },
+      "ucdavis_campusgroups": {
+        "count": 26,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 41
+          },
+          {
+            "date": "2026-07-18",
+            "count": 39
+          },
+          {
+            "date": "2026-07-19",
+            "count": 39
+          },
+          {
+            "date": "2026-07-20",
+            "count": 40
+          },
+          {
+            "date": "2026-07-21",
+            "count": 40
+          },
+          {
+            "date": "2026-07-22",
+            "count": 39
+          },
+          {
+            "date": "2026-07-23",
+            "count": 38
+          },
+          {
+            "date": "2026-07-24",
+            "count": 40
+          },
+          {
+            "date": "2026-07-25",
+            "count": 39
+          },
+          {
+            "date": "2026-07-26",
+            "count": 39
+          },
+          {
+            "date": "2026-07-27",
+            "count": 40
+          },
+          {
+            "date": "2026-07-28",
+            "count": 40
+          },
+          {
+            "date": "2026-07-29",
+            "count": 39
+          },
+          {
+            "date": "2026-07-30",
+            "count": 37
+          },
+          {
+            "date": "2026-07-31",
+            "count": 36
+          },
+          {
+            "date": "2026-08-01",
+            "count": 34
+          },
+          {
+            "date": "2026-08-02",
+            "count": 34
+          },
+          {
+            "date": "2026-08-03",
+            "count": 35
+          },
+          {
+            "date": "2026-08-04",
+            "count": 35
+          },
+          {
+            "date": "2026-08-05",
+            "count": 34
+          },
+          {
+            "date": "2026-08-06",
+            "count": 33
+          },
+          {
+            "date": "2026-08-07",
+            "count": 33
+          },
+          {
+            "date": "2026-08-08",
+            "count": 32
+          },
+          {
+            "date": "2026-08-09",
+            "count": 31
+          },
+          {
+            "date": "2026-08-10",
+            "count": 31
+          },
+          {
+            "date": "2026-08-11",
+            "count": 31
+          },
+          {
+            "date": "2026-08-12",
+            "count": 30
+          },
+          {
+            "date": "2026-08-13",
+            "count": 27
+          },
+          {
+            "date": "2026-08-14",
+            "count": 27
+          },
+          {
+            "date": "2026-08-15",
+            "count": 26
+          }
+        ]
+      },
+      "ucdavis_library": {
+        "count": 0,
+        "error": null,
+        "content": "quiet",
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 0
+          },
+          {
+            "date": "2026-07-18",
+            "count": 0
+          },
+          {
+            "date": "2026-07-19",
+            "count": 0
+          },
+          {
+            "date": "2026-07-20",
+            "count": 0
+          },
+          {
+            "date": "2026-07-21",
+            "count": 0
+          },
+          {
+            "date": "2026-07-22",
+            "count": 0
+          },
+          {
+            "date": "2026-07-23",
+            "count": 0
+          },
+          {
+            "date": "2026-07-24",
+            "count": 0
+          },
+          {
+            "date": "2026-07-25",
+            "count": 0
+          },
+          {
+            "date": "2026-07-26",
+            "count": 0
+          },
+          {
+            "date": "2026-07-27",
+            "count": 0
+          },
+          {
+            "date": "2026-07-28",
+            "count": 0
+          },
+          {
+            "date": "2026-07-29",
+            "count": 0
+          },
+          {
+            "date": "2026-07-30",
+            "count": 0
+          },
+          {
+            "date": "2026-07-31",
+            "count": 0
+          },
+          {
+            "date": "2026-08-01",
+            "count": 0
+          },
+          {
+            "date": "2026-08-02",
+            "count": 0
+          },
+          {
+            "date": "2026-08-03",
+            "count": 0
+          },
+          {
+            "date": "2026-08-04",
+            "count": 0
+          },
+          {
+            "date": "2026-08-05",
+            "count": 0
+          },
+          {
+            "date": "2026-08-06",
+            "count": 0
+          },
+          {
+            "date": "2026-08-07",
+            "count": 0
+          },
+          {
+            "date": "2026-08-08",
+            "count": 0
+          },
+          {
+            "date": "2026-08-09",
+            "count": 0
+          },
+          {
+            "date": "2026-08-10",
+            "count": 0
+          },
+          {
+            "date": "2026-08-11",
+            "count": 0
+          },
+          {
+            "date": "2026-08-12",
+            "count": 0
+          },
+          {
+            "date": "2026-08-13",
+            "count": 0
+          },
+          {
+            "date": "2026-08-14",
+            "count": 0
+          },
+          {
+            "date": "2026-08-15",
+            "count": 0
+          }
+        ]
+      },
+      "uudavis": {
+        "count": 16,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 9
+          },
+          {
+            "date": "2026-07-18",
+            "count": 9
+          },
+          {
+            "date": "2026-07-19",
+            "count": 9
+          },
+          {
+            "date": "2026-07-20",
+            "count": 9
+          },
+          {
+            "date": "2026-07-21",
+            "count": 9
+          },
+          {
+            "date": "2026-07-22",
+            "count": 9
+          },
+          {
+            "date": "2026-07-23",
+            "count": 9
+          },
+          {
+            "date": "2026-07-24",
+            "count": 9
+          },
+          {
+            "date": "2026-07-25",
+            "count": 10
+          },
+          {
+            "date": "2026-07-26",
+            "count": 10
+          },
+          {
+            "date": "2026-07-27",
+            "count": 9
+          },
+          {
+            "date": "2026-07-28",
+            "count": 9
+          },
+          {
+            "date": "2026-07-29",
+            "count": 11
+          },
+          {
+            "date": "2026-07-30",
+            "count": 12
+          },
+          {
+            "date": "2026-07-31",
+            "count": 11
+          },
+          {
+            "date": "2026-08-01",
+            "count": 11
+          },
+          {
+            "date": "2026-08-02",
+            "count": 12
+          },
+          {
+            "date": "2026-08-03",
+            "count": 12
+          },
+          {
+            "date": "2026-08-04",
+            "count": 11
+          },
+          {
+            "date": "2026-08-05",
+            "count": 11
+          },
+          {
+            "date": "2026-08-06",
+            "count": 11
+          },
+          {
+            "date": "2026-08-07",
+            "count": 11
+          },
+          {
+            "date": "2026-08-08",
+            "count": 13
+          },
+          {
+            "date": "2026-08-09",
+            "count": 13
+          },
+          {
+            "date": "2026-08-10",
+            "count": 13
+          },
+          {
+            "date": "2026-08-11",
+            "count": 14
+          },
+          {
+            "date": "2026-08-12",
+            "count": 14
+          },
+          {
+            "date": "2026-08-13",
+            "count": 16
+          },
+          {
+            "date": "2026-08-14",
+            "count": 16
+          },
+          {
+            "date": "2026-08-15",
+            "count": 16
+          }
+        ]
+      },
+      "visitdavis": {
+        "count": 0,
+        "error": null,
+        "content": "not_ics:html",
+        "history": [
+          {
+            "date": "2026-08-14",
+            "count": 0
+          },
+          {
+            "date": "2026-08-15",
+            "count": 0
+          }
+        ]
+      },
+      "visityolo_event": {
+        "count": 0,
+        "error": null,
+        "content": "not_ics:html",
+        "history": [
+          {
+            "date": "2026-08-14",
+            "count": 0
+          },
+          {
+            "date": "2026-08-15",
+            "count": 0
+          }
+        ]
+      },
+      "yolo_library": {
+        "count": 93,
+        "error": null,
+        "content": null,
+        "history": [
+          {
+            "date": "2026-07-17",
+            "count": 102
+          },
+          {
+            "date": "2026-07-18",
+            "count": 100
+          },
+          {
+            "date": "2026-07-19",
+            "count": 103
+          },
+          {
+            "date": "2026-07-20",
+            "count": 102
+          },
+          {
+            "date": "2026-07-21",
+            "count": 103
+          },
+          {
+            "date": "2026-07-22",
+            "count": 103
+          },
+          {
+            "date": "2026-07-23",
+            "count": 100
+          },
+          {
+            "date": "2026-07-24",
+            "count": 99
+          },
+          {
+            "date": "2026-07-25",
+            "count": 97
+          },
+          {
+            "date": "2026-07-26",
+            "count": 100
+          },
+          {
+            "date": "2026-07-27",
+            "count": 100
+          },
+          {
+            "date": "2026-07-28",
+            "count": 102
+          },
+          {
+            "date": "2026-07-29",
+            "count": 100
+          },
+          {
+            "date": "2026-07-30",
+            "count": 95
+          },
+          {
+            "date": "2026-07-31",
+            "count": 93
+          },
+          {
+            "date": "2026-08-01",
+            "count": 92
+          },
+          {
+            "date": "2026-08-02",
+            "count": 95
+          },
+          {
+            "date": "2026-08-03",
+            "count": 102
+          },
+          {
+            "date": "2026-08-04",
+            "count": 111
+          },
+          {
+            "date": "2026-08-05",
+            "count": 109
+          },
+          {
+            "date": "2026-08-06",
+            "count": 104
+          },
+          {
+            "date": "2026-08-07",
+            "count": 104
+          },
+          {
+            "date": "2026-08-08",
+            "count": 100
+          },
+          {
+            "date": "2026-08-09",
+            "count": 104
+          },
+          {
+            "date": "2026-08-10",
+            "count": 104
+          },
+          {
+            "date": "2026-08-11",
+            "count": 105
+          },
+          {
+            "date": "2026-08-12",
+            "count": 100
+          },
+          {
+            "date": "2026-08-13",
+            "count": 95
+          },
+          {
+            "date": "2026-08-14",
+            "count": 95
+          },
+          {
+            "date": "2026-08-15",
+            "count": 93
+          }
+        ]
+      }
+    },
+    "url_quality": {
+      "total_with_url": 618,
+      "total_events": 618,
+      "unique_urls": 398,
+      "generic_count": 142,
+      "generic_domains": [
+        {
+          "domain": "davisbikeclub.org",
+          "events": 126,
+          "url": "https://davisbikeclub.org/club-events-calendar/"
+        },
+        {
+          "domain": "uudavis.org",
+          "events": 16,
+          "url": "https://uudavis.org/calendar/"
+        }
+      ],
+      "http_count": 0,
+      "http_domains": 0,
+      "source_specificity": [
+        {
+          "source": "UC Davis Athletics",
+          "events": 144,
+          "unique_urls": 144,
+          "specificity_pct": 100
+        },
+        {
+          "source": "Davis Bike Club",
+          "events": 126,
+          "unique_urls": 1,
+          "specificity_pct": 1
+        },
+        {
+          "source": "Indivisible Yolo (Mobilize)",
+          "events": 95,
+          "unique_urls": 15,
+          "specificity_pct": 16
+        },
+        {
+          "source": "Yolo Library",
+          "events": 91,
+          "unique_urls": 91,
+          "specificity_pct": 100
+        },
+        {
+          "source": "Davis Downtown",
+          "events": 30,
+          "unique_urls": 30,
+          "specificity_pct": 100
+        },
+        {
+          "source": "Hate-Free Together",
+          "events": 30,
+          "unique_urls": 30,
+          "specificity_pct": 100
+        },
+        {
+          "source": "UC Davis CampusGroups",
+          "events": 26,
+          "unique_urls": 26,
+          "specificity_pct": 100
+        },
+        {
+          "source": "UU Davis",
+          "events": 16,
+          "unique_urls": 1,
+          "specificity_pct": 6
+        },
+        {
+          "source": "The Dirt",
+          "events": 13,
+          "unique_urls": 13,
+          "specificity_pct": 100
+        },
+        {
+          "source": "Meetup: Mosaics",
+          "events": 10,
+          "unique_urls": 10,
+          "specificity_pct": 100
+        },
+        {
+          "source": "Meetup: Mindful Embodied Spirituality",
+          "events": 10,
+          "unique_urls": 10,
+          "specificity_pct": 100
+        },
+        {
+          "source": "Meetup: Yolo Board Game Gathering",
+          "events": 10,
+          "unique_urls": 10,
+          "specificity_pct": 100
+        },
+        {
+          "source": "Meetup: Intercultural Mosaics",
+          "events": 10,
+          "unique_urls": 10,
+          "specificity_pct": 100
+        },
+        {
+          "source": "Meetup: Pence Art Programs",
+          "events": 6,
+          "unique_urls": 6,
+          "specificity_pct": 100
+        },
+        {
+          "source": "UC Davis Arts",
+          "events": 1,
+          "unique_urls": 1,
+          "specificity_pct": 100
+        }
+      ]
+    },
+    "tzid_inventory": {
+      "city_timezone": "America/Los_Angeles",
+      "distinct_tzids": 4,
+      "tzids": [
+        {
+          "tzid": "America/Los_Angeles",
+          "count": 2359,
+          "files": 13,
+          "matches_city": true,
+          "sample_files": [
+            "davis_downtown.ics",
+            "gcal_davisbikeclubwww.ics",
+            "meetup_intercultural_mosaics.ics",
+            "meetup_mindful_embodied_spirituality.ics",
+            "meetup_mosaics.ics"
+          ]
+        },
+        {
+          "tzid": "UTC",
+          "count": 29,
+          "files": 1,
+          "matches_city": false,
+          "sample_files": [
+            "hatefreetogether.ics"
+          ]
+        },
+        {
+          "tzid": "(bare \u2014 assumes city tz)",
+          "count": 21,
+          "files": 8,
+          "matches_city": false,
+          "sample_files": [
+            "gcal_davisbikeclubwww.ics",
+            "hatefreetogether.ics",
+            "meetup_intercultural_mosaics.ics",
+            "meetup_mindful_embodied_spirituality.ics",
+            "meetup_mosaics.ics"
+          ]
+        },
+        {
+          "tzid": "UTC (Z suffix)",
+          "count": 15,
+          "files": 1,
+          "matches_city": false,
+          "sample_files": [
+            "gcal_davisbikeclubwww.ics"
+          ]
+        }
+      ]
+    },
+    "geo_filtered": [
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
+        "location": "Fresno, CA",
+        "count": 16,
+        "titles": [
+          "Knock on Doors for Randy Villegas in Fresno & Kerman",
+          "Knock on Doors for Randy Villegas in Fresno & Kerman",
+          "Knock on Doors for Randy Villegas in Fresno & Kerman"
+        ]
+      },
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
+        "location": "Tulare, CA",
+        "count": 4,
+        "titles": [
+          "Knock on Doors for Randy Villegas in Tulare!",
+          "Knock on Doors for Randy Villegas in Tulare!",
+          "Knock on Doors for Randy Villegas in Tulare!"
+        ]
+      },
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
+        "location": "Bakersfield, CA",
+        "count": 3,
+        "titles": [
+          "Villegas for Congress: Bakersfield Town Hall",
+          "Knock Doors for Randy Villegas in Bakersfield!",
+          "Knock Doors for Randy Villegas in Bakersfield!"
+        ]
+      },
+      {
+        "source": "Thedirt",
+        "source_id": "thedirt",
+        "location": "Great Bear Vineyards (Great Bear), 24800 County Rd 101A",
+        "count": 2,
+        "titles": [
+          "Carl Winter & Italian Brother's Pizza",
+          "Beginner Yoga at the Vineyard"
+        ]
+      },
+      {
+        "source": "UC Davis Athletics",
+        "source_id": "ucdavis_athletics",
+        "location": "Stanford, CA",
+        "count": 2,
+        "titles": [
+          "University of California\\, Davis  Field Hockey at Stanford",
+          "University of California\\, Davis  Men's Soccer at Stanford"
+        ]
+      },
+      {
+        "source": "UC Davis Athletics",
+        "source_id": "ucdavis_athletics",
+        "location": "Seattle, WA",
+        "count": 2,
+        "titles": [
+          "University of California\\, Davis  Men's Soccer at Seattle",
+          "University of California\\, Davis  Men's Soccer at Washington"
+        ]
+      },
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
+        "location": "Arvin, CA",
+        "count": 1,
+        "titles": [
+          "Knock Doors for Randy Villegas in Arvin!"
+        ]
+      },
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
+        "location": "Hanford, CA",
+        "count": 1,
+        "titles": [
+          "Knock on Doors for Randy Villegas in Hanford!"
+        ]
+      },
+      {
+        "source": "Thedirt",
+        "source_id": "thedirt",
+        "location": "Upper Crust Baking Co. (Upper Crust), 634 G St.",
+        "count": 1,
+        "titles": [
+          "Bistro Night"
+        ]
+      },
+      {
+        "source": "UC Davis Athletics",
+        "source_id": "ucdavis_athletics",
+        "location": "Stockton, CA",
+        "count": 1,
+        "titles": [
+          "University of California\\, Davis  Men's Soccer at Pacific"
+        ]
+      },
+      {
+        "source": "UC Davis Athletics",
+        "source_id": "ucdavis_athletics",
+        "location": "Moraga, CA",
+        "count": 1,
+        "titles": [
+          "University of California\\, Davis  Men's Soccer at Saint Mary's"
+        ]
+      },
+      {
+        "source": "UC Davis Athletics",
+        "source_id": "ucdavis_athletics",
+        "location": "Hanover, NH",
+        "count": 1,
+        "titles": [
+          "University of California\\, Davis  Field Hockey at Dartmouth"
+        ]
+      }
+    ],
+    "categories": [
+      {
+        "category": "Sports / Fitness",
+        "count": 214
+      },
+      {
+        "category": "Government / Civic",
+        "count": 115
+      },
+      {
+        "category": "Nature / Outdoors / Recreation",
+        "count": 55
+      },
+      {
+        "category": "Education / Workshops",
+        "count": 47
+      },
+      {
+        "category": "Family / Kids",
+        "count": 35
+      },
+      {
+        "category": "Community / Social",
+        "count": 32
+      },
+      {
+        "category": "Craft / Maker",
+        "count": 27
+      },
+      {
+        "category": "Food / Drink",
+        "count": 26
+      },
+      {
+        "category": "Games / Trivia",
+        "count": 18
+      },
+      {
+        "category": "Arts / Culture",
+        "count": 12
+      },
+      {
+        "category": "Religion / Spirituality",
+        "count": 11
+      },
+      {
+        "category": "Health / Wellness",
+        "count": 6
+      },
+      {
+        "category": "Schools / K-12",
+        "count": 6
+      },
+      {
+        "category": "Music / Concerts",
+        "count": 5
+      },
+      {
+        "category": "Books / Literature / Poetry",
+        "count": 5
+      },
+      {
+        "category": "Dance / Performance",
+        "count": 2
+      },
+      {
+        "category": "History / Heritage",
+        "count": 1
+      },
+      {
+        "category": "Technology / Careers",
+        "count": 1
+      }
+    ],
+    "images": {
+      "total": 618,
+      "with_image": 138,
+      "by_source": [
+        {
+          "source": "Indivisible Yolo (Mobilize)",
+          "total": 95,
+          "with_image": 95
+        },
+        {
+          "source": "Hate-Free Together",
+          "total": 30,
+          "with_image": 30
+        },
+        {
+          "source": "The Dirt",
+          "total": 13,
+          "with_image": 13
+        }
+      ]
+    }
+  }
+}
