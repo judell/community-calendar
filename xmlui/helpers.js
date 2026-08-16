@@ -1612,6 +1612,34 @@ if (typeof window !== 'undefined') {
           function(result) { return { count: result.length }; })
       : _sortSourcesForDisplay(events);
   };
+  // issue-82 ingest instrumentation (observe-only). Wraps the transform
+  // chain exports with performance marks and running totals so a boot's
+  // recompute count and per-stage cost are readable without console.log
+  // (disabled in index.html): the cc:* measures land on the Timings
+  // track of a DevTools Performance recording, and window.__ccIngestStats
+  // holds {calls, totalMs, rows} per function for console inspection.
+  window.__ccIngestStats = {};
+  function instrumentIngest(name) {
+    var orig = window[name];
+    if (!orig) return;
+    window[name] = function() {
+      var t0 = performance.now();
+      try { performance.mark('cc:' + name + ':start'); } catch (e) {}
+      var result = orig.apply(this, arguments);
+      var ms = performance.now() - t0;
+      try { performance.measure('cc:' + name, 'cc:' + name + ':start'); } catch (e) {}
+      var s = window.__ccIngestStats[name] ||
+        (window.__ccIngestStats[name] = { calls: 0, totalMs: 0, rows: 0 });
+      s.calls += 1;
+      s.totalMs += ms;
+      if (result && result.length !== undefined) s.rows = result.length;
+      return result;
+    };
+  }
+  ['filterExternalExclusions', 'sortSourcesForDisplay',
+   'collapseLongRunningEvents', 'filterHiddenSources', 'buildSearchIndex',
+   'getPagedEvents'].forEach(instrumentIngest);
+
   window.clearDedupeCache = clearDedupeCache;
   window.isEventPicked = isEventPicked;
   window.buildGoogleCalendarUrl = buildGoogleCalendarUrl;
