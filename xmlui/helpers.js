@@ -1724,6 +1724,35 @@ if (typeof window !== 'undefined') {
    'collapseLongRunningEvents', 'filterHiddenSources', 'buildSearchIndex',
    'getPagedEvents'].forEach(instrumentIngest);
 
+  // issue-83: single named entry points keep Main.xmlui bindings tiny. The
+  // engine re-parses inline {...} expressions on every render (no parse
+  // cache), so parse cost scales with expression size; a short call
+  // expression parses in microseconds. Each stage below is the
+  // memoized + instrumented window.* wrapper installed above.
+  window.processEvents = function(combined, hidden) {
+    return window.buildSearchIndex(
+      window.filterHiddenSources(
+        window.collapseLongRunningEvents(
+          window.sortSourcesForDisplay(
+            window.filterExternalExclusions(combined))), hidden));
+  };
+
+  // Replaces Main.xmlui's inline date-slider filter lambda. Returns the
+  // input by reference when the slider is inactive so downstream bindings
+  // keep a stable identity.
+  window.filterByDayWindow = function(events, startDay, endDay) {
+    if (startDay === null || startDay === undefined || !events) return events;
+    var base = window._dateRangeBase.getTime();
+    var fromMs = base + startDay * 86400000;
+    var toMs = base + (endDay + 1) * 86400000;
+    return events.filter(function(e) {
+      var t = new Date(e.start_time).getTime();
+      return t >= fromMs && t < toMs;
+    });
+  };
+  memoizeIngest('filterByDayWindow',
+    function(events, startDay, endDay) { return [startDay, endDay]; });
+
   window.clearDedupeCache = clearDedupeCache;
   window.isEventPicked = isEventPicked;
   window.buildGoogleCalendarUrl = buildGoogleCalendarUrl;
