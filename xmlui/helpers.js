@@ -1729,12 +1729,30 @@ if (typeof window !== 'undefined') {
   // cache), so parse cost scales with expression size; a short call
   // expression parses in microseconds. Each stage below is the
   // memoized + instrumented window.* wrapper installed above.
+  var _chainFirstDone = false;
   window.processEvents = function(combined, hidden) {
-    return window.buildSearchIndex(
+    var result = window.buildSearchIndex(
       window.filterHiddenSources(
         window.collapseLongRunningEvents(
           window.sortSourcesForDisplay(
             window.filterExternalExclusions(combined))), hidden));
+    if (!_chainFirstDone && result && result.length) {
+      _chainFirstDone = true;
+      try { performance.mark('cc-chain-first-done'); } catch (e) {}
+    }
+    return result;
+  };
+
+  // boot-attribution-marks: one-read summary of every cc-* mark as ms
+  // since navigation start, in fired order. In-memory only — marks live
+  // in the page's Performance timeline and vanish on reload.
+  window.__ccBootMarks = function() {
+    var out = {};
+    performance.getEntriesByType('mark')
+      .filter(function(m) { return m.name.indexOf('cc') === 0; })
+      .sort(function(a, b) { return a.startTime - b.startTime; })
+      .forEach(function(m) { out[m.name] = Math.round(m.startTime); });
+    return out;
   };
 
   // Replaces Main.xmlui's inline date-slider filter lambda. Returns the

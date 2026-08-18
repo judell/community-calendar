@@ -33,6 +33,11 @@ window._xsLogs = [];
   if (!window.SUPABASE_URL || !window.SUPABASE_KEY) {
     loadJsonFallback();
   }
+  // boot-attribution-marks: in-memory Performance-timeline milestones
+  // (cc-* namespace, same as the emit marks below). Visible on the
+  // Timings track of any DevTools recording; summarized by
+  // window.__ccBootMarks() in helpers.js. Nothing is persisted.
+  try { performance.mark('cc-config-loaded'); } catch (e) {}
 
   var versionProbe = Date.now();
   var vxhr = new XMLHttpRequest();
@@ -67,7 +72,12 @@ window._xsLogs = [];
   window.APP_VERSION = baseVersion + assetVersionSuffix;
   var v = window.APP_VERSION;
 
+  // Bracket the engine bundle's parse+eval (the 6.5 MB script): the
+  // document.write'd scripts execute in order after this one, so the
+  // two inline marks land immediately before and after the bundle.
+  document.write('<script>performance.mark("cc-bundle-eval-start")<\/script>');
   document.write('<script src="xmlui/xmlui-standalone.umd.js?v=' + v + '"><\/script>');
+  document.write('<script>performance.mark("cc-bundle-eval-end")<\/script>');
   document.write('<script src="xmlui/xmlui-masonry.js?v=' + v + '"><\/script>');
   document.write('<link rel="stylesheet" href="xmlui/xmlui-grid-layout.css?v=' + v + '">');
   document.write('<script src="xmlui/xmlui-grid-layout.js?v=' + v + '"><\/script>');
@@ -86,6 +96,10 @@ window._xsLogs = [];
   spxhr.open('GET', '../source_priority.json?v=' + window.APP_VERSION, false);
   spxhr.send();
   window._sourcePriority = JSON.parse(spxhr.responseText);
+  try { performance.mark('cc-static-json-loaded'); } catch (e) {}
+  document.addEventListener('DOMContentLoaded', function () {
+    try { performance.mark('cc-dom-ready'); } catch (e) {}
+  });
 
   document.write('<script src="helpers.js?v=' + window.APP_VERSION + '"><\/script>');
   document.write('<script src="xs-trace.js?v=' + window.APP_VERSION + '"><\/script>');
