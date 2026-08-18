@@ -458,7 +458,13 @@ window._xsLogs = [];
           'Cache-Control': 'no-cache, no-store, must-revalidate',
         },
       }).then(function (res) { return res.json(); }).then(function (rows) {
-        if (Array.isArray(rows)) fetchResolvedCity = city;
+        if (Array.isArray(rows)) {
+          fetchResolvedCity = city;
+          // True network completion, independent of any subscriber —
+          // cc-events-emit-fresh records delivery, which collapses to
+          // subscription time when the response wins that race.
+          try { performance.mark('cc-events-fetch-resolved'); } catch (e) {}
+        }
         return rows;
       });
       return fetchPromise;
