@@ -11,6 +11,25 @@
       var _ccCacheBust = '?_=' + Date.now();
       document.write('<link rel="stylesheet" href="shell.css' + _ccCacheBust + '">');
     </script>
+    <script>
+      // async-boot-fetches (#82 item 4): start the small boot resources
+      // downloading in parallel immediately, overlapping the CDN scripts
+      // below; shell.js awaits window.__ccBootFetches before injecting
+      // the engine scripts.
+      (function () {
+        var isLocal = /^(localhost|127(?:\.\d+){3}|0\.0\.0\.0)$/.test(location.hostname) || location.protocol === 'file:';
+        var j = function (u) { return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); };
+        var t = function (u) { return fetch(u).then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; }); };
+        window.__ccBootFetches = {
+          localConfig: isLocal ? t('config.local.js' + _ccCacheBust) : Promise.resolve(''),
+          config: j('config.json' + _ccCacheBust),
+          version: t('version.txt' + _ccCacheBust),
+          categories: j('../categories.json' + _ccCacheBust),
+          cities: j('../cities.json' + _ccCacheBust),
+          sourcePriority: j('../source_priority.json' + _ccCacheBust)
+        };
+      })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/rrule@2.8.1/dist/es5/rrule.min.js"></script>
     <script>
