@@ -382,6 +382,20 @@ window._xsLogs = [];
     var currentEmit = null;
     var cachedPromise = null;
     var cachedCity = null;
+    // issue-82 emission coalescing state. lastEmitFn tracks WHICH
+    // subscriber received the last emission — an identical-data skip is
+    // only safe for a subscriber that already has the data; a fresh
+    // subscriber (resubscribe after a city round-trip) must always get
+    // its first emit.
+    var fetchResolvedCity = null;
+    var lastEmitFn = null;
+    var lastEmitCity = null;
+    var lastEmitSig = null;
+
+    function rowsSig(rows) {
+      return rows.length + ':' +
+        (rows.length ? rows[0].id + ':' + rows[rows.length - 1].id : '');
+    }
 
     function eventsUrl(city) {
       return window.SUPABASE_URL + '/rest/v1/deduplicated_events' +
@@ -394,12 +408,16 @@ window._xsLogs = [];
 
     function startFetch(city) {
       fetchCity = city;
+      fetchResolvedCity = null;
       fetchPromise = fetch(eventsUrl(city), {
         headers: {
           apikey: window.SUPABASE_KEY,
           'Cache-Control': 'no-cache, no-store, must-revalidate',
         },
-      }).then(function (res) { return res.json(); });
+      }).then(function (res) { return res.json(); }).then(function (rows) {
+        if (Array.isArray(rows)) fetchResolvedCity = city;
+        return rows;
+      });
       return fetchPromise;
     }
 
@@ -410,8 +428,20 @@ window._xsLogs = [];
         // switched away, but only emit if this city is still current.
         idbSet('events:' + city, rows).catch(function () {});
         if (city !== window.cityFilter) return false;  // stale-city race guard (#76)
+        // issue-82: skip the replacement when this same subscriber already
+        // holds identical data — the emit would only trigger a re-render.
+        if (currentEmit && currentEmit === lastEmitFn &&
+            city === lastEmitCity && rowsSig(rows) === lastEmitSig) {
+          performance.mark('cc-events-skip-fresh-identical');
+          return true;
+        }
         performance.mark('cc-events-emit-fresh');
-        if (currentEmit) currentEmit(rows);
+        if (currentEmit) {
+          lastEmitFn = currentEmit;
+          lastEmitCity = city;
+          lastEmitSig = rowsSig(rows);
+          currentEmit(rows);
+        }
         return true;
       }).catch(function () { return false; });
     }
@@ -434,7 +464,17 @@ window._xsLogs = [];
       c.then(function (cached) {
         if (Array.isArray(cached) && !gotFresh) {
           if (city !== window.cityFilter) return;  // stale-city guard (#76)
+          // issue-82: when the network fetch has already resolved, the
+          // fresh emit is imminent — a cached paint would only add a
+          // full ingest+render that is immediately redone.
+          if (fetchResolvedCity === city) {
+            performance.mark('cc-events-skip-cached-superseded');
+            return;
+          }
           performance.mark('cc-events-emit-cached');
+          lastEmitFn = emit;
+          lastEmitCity = city;
+          lastEmitSig = rowsSig(cached);
           emit(cached);
         }
       });

@@ -1636,6 +1636,90 @@ if (typeof window !== 'undefined') {
       return result;
     };
   }
+  // issue-82 memoization: the instrumented boot showed the chain running
+  // 10x with reference-identical input. A single-entry cache per function
+  // returns the previous result BY REFERENCE on a hit, so downstream
+  // XMLUI consumers see unchanged data and skip re-rendering; one entry
+  // (not a WeakMap history) avoids retaining superseded 4.6 MB arrays.
+  // Applied before instrumentIngest so the stats wrappers stay outermost:
+  // calls keeps counting invocations, hits show up as ~0 ms.
+  // Keyed on a content signature (length + first/last ids), not the input
+  // reference: the __ccRefStats probe showed boundary refs are mostly
+  // stable, yet ref-keyed memos still missed at engine-mediated stage
+  // boundaries — the engine gives intermediate expression results fresh
+  // identities per evaluation. Signatures sidestep identity entirely.
+  // (Known tradeoff, same as shell.js rowsSig: a mid-array content change
+  // with identical length and endpoint ids would falsely hit.)
+  window.__ccMemoStats = {};
+  function memoizeIngest(name, extraKey) {
+    var orig = window[name];
+    if (!orig) return;
+    var lastKey = null, lastResult = null;
+    var stats = window.__ccMemoStats[name] = { hits: 0, misses: 0 };
+    window[name] = function() {
+      var key = [ccArraySig(arguments[0])];
+      if (extraKey) key = key.concat(extraKey.apply(null, arguments));
+      if (lastKey !== null && key.length === lastKey.length &&
+          key.every(function(k, i) { return k === lastKey[i]; })) {
+        stats.hits += 1;
+        return lastResult;
+      }
+      stats.misses += 1;
+      var result = orig.apply(this, arguments);
+      lastKey = key;
+      lastResult = result;
+      return result;
+    };
+  }
+  memoizeIngest('filterExternalExclusions',
+    function() { return [window.externalExclusions]; });
+  memoizeIngest('sortSourcesForDisplay');
+  memoizeIngest('collapseLongRunningEvents');
+  // hiddenSources may be a fresh small array each evaluation, so key on
+  // its content, not its reference.
+  memoizeIngest('filterHiddenSources',
+    function(events, hidden) { return [JSON.stringify(hidden || null)]; });
+  memoizeIngest('buildSearchIndex');
+  // getPagedEvents is not memoized: it is cheap and its scalar arguments
+  // (page index, filter term) legitimately change.
+
+  // Head of the chain: Main.xmlui's combinedEvents was an inline spread,
+  // building a NEW array on every binding evaluation and defeating every
+  // memo downstream (verified: 8 full-price collapseLongRunningEvents
+  // runs after memoization landed). This memoized combiner returns a
+  // stable reference while both inputs are reference-unchanged.
+  // Reference keying fails at the engine boundary: the readouts showed 8
+  // full-price chain runs even after ref memoization, i.e. the engine
+  // presents a different events.value/enrichments.value identity per
+  // binding evaluation. So the boundary memo keys on a cheap content
+  // signature instead (length + first/last ids — the same identity test
+  // shell.js uses to skip identical emissions), and __ccRefStats counts
+  // the identity churn as evidence for the upstream XMLUI finding.
+  function ccArraySig(a) {
+    if (!Array.isArray(a)) return 'na';
+    if (!a.length) return '0';
+    return a.length + ':' + a[0].id + ':' + a[a.length - 1].id;
+  }
+  window.__ccRefStats = { combineCalls: 0, eventsRefChanges: 0, enrichRefChanges: 0 };
+  var _combineLastARef = null, _combineLastBRef = null;
+  var _combineLastASig = null, _combineLastBSig = null, _combineResult = null;
+  window.combineEvents = function(events, enrichments) {
+    var s = window.__ccRefStats;
+    s.combineCalls += 1;
+    if (events !== _combineLastARef) { s.eventsRefChanges += 1; _combineLastARef = events; }
+    if (enrichments !== _combineLastBRef) { s.enrichRefChanges += 1; _combineLastBRef = enrichments; }
+    var aSig = ccArraySig(events), bSig = ccArraySig(enrichments);
+    if (aSig === _combineLastASig && bSig === _combineLastBSig &&
+        _combineResult !== null) {
+      return _combineResult;
+    }
+    _combineLastASig = aSig;
+    _combineLastBSig = bSig;
+    _combineResult = (Array.isArray(events) ? events : [])
+      .concat(Array.isArray(enrichments) ? enrichments : []);
+    return _combineResult;
+  };
+
   ['filterExternalExclusions', 'sortSourcesForDisplay',
    'collapseLongRunningEvents', 'filterHiddenSources', 'buildSearchIndex',
    'getPagedEvents'].forEach(instrumentIngest);
@@ -1651,7 +1735,34 @@ if (typeof window !== 'undefined') {
   window.loadEnrichment = loadEnrichment;
   window.loadAllEnrichments = loadAllEnrichments;
   window.getEnrichmentFromCache = getEnrichmentFromCache;
-  window.expandEnrichments = expandEnrichments;
+  // issue-82: memoized export — Main.xmlui:139 evaluates this on every
+  // binding pass, and an unstable result reference here cascades memo
+  // misses through the whole processedEvents chain. Returning a stable
+  // (always-array) result also neutralizes the markup's `|| []` fallback,
+  // which would otherwise mint a fresh empty array per evaluation.
+  // Capture the original first — reassigning window.expandEnrichments
+  // rebinds the top-level function's own global identifier, so calling
+  // `expandEnrichments` from inside the wrapper would recurse into the
+  // wrapper itself (the file's other _-prefixed captures exist for the
+  // same reason).
+  var _expandEnrichmentsOrig = expandEnrichments;
+  var _expandLastKey = null, _expandResult = null;
+  window.expandEnrichments = function(enrichments, fromDateStr, toDateStr) {
+    // Content-signature key, not reference: the engine's per-evaluation
+    // value identities defeat ref keying (see combineEvents above), and
+    // the rrule expansion inside is worth skipping.
+    var sig = Array.isArray(enrichments)
+      ? (enrichments.length + ':' +
+         (enrichments.length ? enrichments[0].id + ':' + enrichments[enrichments.length - 1].id : ''))
+      : 'na';
+    var key = sig + '|' + fromDateStr + '|' + toDateStr;
+    if (key === _expandLastKey && _expandResult !== null) {
+      return _expandResult;
+    }
+    _expandLastKey = key;
+    _expandResult = _expandEnrichmentsOrig(enrichments, fromDateStr, toDateStr);
+    return _expandResult;
+  };
   window.getNextOccurrence = getNextOccurrence;
   window.formatPickDate = function(enrichments, eventId, startTime) {
     var d = getNextOccurrence(enrichments, eventId, startTime);
