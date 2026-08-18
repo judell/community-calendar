@@ -318,23 +318,23 @@
       variant="outlined"
       width="100%"
       marginBottom="$space-2"
-      onClick="const prevIndex = morePrevIndex(displayStartIndex, filterTerm ? 10 : 50); displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
+      onClick="const prevIndex = morePrevIndex(displayStartIndex, pageSizeFor(filterTerm)); displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
     />
-    <Masonry when="{!!events.value && viewMode === 'all' && layoutMode === 'multicol'}" data="{getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter, sliderStart, sliderEnd)}" columns="3" gap="$space-3" rowGap="0" minColumnWidth="300px">
+    <Masonry when="{!!events.value && viewMode === 'all' && layoutMode === 'multicol'}" data="{getPagedEvents(processedEvents, filterTerm, displayStartIndex, pageSizeFor(filterTerm), categoryFilter, sliderStart, sliderEnd)}" columns="3" gap="$space-3" rowGap="0" minColumnWidth="300px">
       <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
     </Masonry>
     <VStack when="{!!events.value && viewMode === 'all' && layoutMode !== 'multicol'}" gap="$space-0">
-      <Items data="{getPagedEvents(processedEvents, filterTerm, displayStartIndex, filterTerm ? 10 : 50, categoryFilter, sliderStart, sliderEnd)}">
+      <Items data="{getPagedEvents(processedEvents, filterTerm, displayStartIndex, pageSizeFor(filterTerm), categoryFilter, sliderStart, sliderEnd)}">
         <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
       </Items>
     </VStack>
     <Button
-      when="{!!events.value && viewMode === 'all' && !filterTerm && moreHasMore(displayEvents, displayStartIndex, filterTerm ? 10 : 50)}"
+      when="{!!events.value && viewMode === 'all' && !filterTerm && moreHasMore(displayEvents, displayStartIndex, pageSizeFor(filterTerm))}"
       label="Later"
       variant="outlined"
       width="100%"
       marginTop="$space-2"
-      onClick="const nextIndex = moreNextIndex(displayStartIndex, filterTerm ? 10 : 50); displayStartIndex = nextIndex; browseStartIndex = nextIndex; scrollRequest = scrollRequest + 1;"
+      onClick="const nextIndex = moreNextIndex(displayStartIndex, pageSizeFor(filterTerm)); displayStartIndex = nextIndex; browseStartIndex = nextIndex; scrollRequest = scrollRequest + 1;"
     />
     <VStack when="{viewMode === 'picks'}" gap="$space-2">
       <Text fontSize="$fontSize-sm" value="{(picks.value || []).length + ' events'}" />

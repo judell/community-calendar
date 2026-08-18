@@ -197,6 +197,15 @@ window._xsLogs = [];
   window.initialCategory = params.get('category') || '';
   window.initialSearch = params.get('search') || '';
 
+  // ?cards=N overrides the browse page size (default 50, clamped 1..500).
+  // Boot-time constant, same pattern as initialSearch. Search-mode paging
+  // stays at 10 regardless; pageSizeFor is the one place that rule lives.
+  var cardsParam = parseInt(params.get('cards'), 10);
+  window.cardPageSize = cardsParam >= 1 && cardsParam <= 500 ? cardsParam : 50;
+  window.pageSizeFor = function (term) {
+    return term ? 10 : window.cardPageSize;
+  };
+
   var cityNameOverrides = {
     santarosa: 'Santa Rosa',
     raleighdurham: 'Raleigh-Durham',
