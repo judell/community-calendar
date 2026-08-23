@@ -429,6 +429,25 @@ window._xsLogs = [];
       });
     }
 
+    // skip-stale-cached-paint: a cache old enough to differ from fresh is
+    // wrong-data, because the engine does not re-render the list on the
+    // fresh replacement emission (latent since the cached-then-fresh
+    // pattern landed; reproduced on both deployments 2026-08-19). Data
+    // changes at most nightly, so a young cache is byte-identical to
+    // fresh and keeps the instant paint; an old one waits for fresh.
+    var CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+    function unwrapCachedRows(val) {
+      if (val && Array.isArray(val.rows) && typeof val.at === 'number' &&
+          Date.now() - val.at <= CACHE_TTL_MS) {
+        return val.rows;
+      }
+      if (val) {
+        // Aged envelope, or a legacy raw-array entry with no age: skip.
+        try { performance.mark('cc-events-skip-cached-stale'); } catch (e) {}
+      }
+      return null;
+    }
+
     var fetchPromise = null;
     var fetchCity = null;
     var currentEmit = null;
@@ -484,7 +503,7 @@ window._xsLogs = [];
         if (!Array.isArray(rows)) return false;
         // rows are genuinely `city`'s rows — cache them even if the user has
         // switched away, but only emit if this city is still current.
-        idbSet('events:' + city, rows).catch(function () {});
+        idbSet('events:' + city, { at: Date.now(), rows: rows }).catch(function () {});
         if (city !== window.cityFilter) return false;  // stale-city race guard (#76)
         // issue-82: skip the replacement when this same subscriber already
         // holds identical data — the emit would only trigger a re-render.
@@ -506,7 +525,9 @@ window._xsLogs = [];
 
     function startCacheRead(city) {
       cachedCity = city;
-      cachedPromise = idbGet('events:' + city).catch(function () { return null; });
+      cachedPromise = idbGet('events:' + city)
+        .then(unwrapCachedRows)
+        .catch(function () { return null; });
       return cachedPromise;
     }
 
