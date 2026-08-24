@@ -243,34 +243,13 @@
       <PickEditor when="{!!pickEvent && activePanel === 'pick'}" event="{pickEvent}" onClose="closePickEditor()" onSaved="picksCounter = picksCounter + 1" />
     </VStack>
     <HStack verticalAlignment="center" marginBottom="$space-2" gap="$space-2">
-      <!-- Inline search input, debounced in place (issue #83): the engine
-           re-parses this scope's inline expressions on every render, so each
-           raw keystroke paid the full parse+render cost (~1-2s on slower
-           machines). debounce(250, ...) makes a typing burst pay once.
-           Deliberately NOT a SearchBox-style component: the confined
-           component + emitEvent pattern caused the 20-30s render feedback
-           loop of issue #79; the inline write stays. -->
-      <HStack width="*" verticalAlignment="center" gap="$space-1">
-        <TextBox
-          id="searchInput"
-          autoFocus="false"
-          placeholder="Search events..."
-          fontSize="$fontSize-sm"
-          initialValue="{window.initialSearch || ''}"
-          onDidChange="(val) => { debounce(250, (v) => { filterTerm = v; displayStartIndex = browseStartIndex; window.syncSearchParam(v); }, val); }"
-          width="*"
-        />
-        <Icon
-          name="close"
-          tooltip="Clear search"
-          width="20px"
-          height="20px"
-          cursor="pointer"
-          color="$color-text-tertiary"
-          opacity="{filterTerm ? 1 : 0}"
-          onClick="setCategoryFilter(''); window.syncSearchParam(''); filterTerm = ''; displayStartIndex = 0; browseStartIndex = 0; scrollRequest = scrollRequest + 1; searchInput.setValue('')"
-        />
-      </HStack>
+      <SearchBox
+        id="searchBox"
+        width="*"
+        initialValue="{window.initialSearch || ''}"
+        onSearch="(val) => { filterTerm = val; displayStartIndex = browseStartIndex; window.syncSearchParam(val); }"
+        onClear="setCategoryFilter(''); window.syncSearchParam(''); filterTerm = ''; displayStartIndex = 0; browseStartIndex = 0; scrollRequest = scrollRequest + 1"
+      />
       <Select
         id="categorySelect"
         aria-label="Event category"

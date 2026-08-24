@@ -1,0 +1,30 @@
+<!-- Keep raw keystroke reactivity inside this component's subtree, per
+     https://www.xmlui.org/docs/howto/confine-a-hot-input-to-its-own-component.
+     Only the settled search term crosses into App scope. -->
+<Component
+  name="SearchBox"
+  var.draft="{$props.initialValue || ''}"
+  var.lastSent="{$props.initialValue || ''}"
+>
+  <HStack verticalAlignment="center" gap="$space-1" width="100%">
+    <TextBox
+      id="box"
+      autoFocus="false"
+      placeholder="Search events..."
+      fontSize="$fontSize-sm"
+      initialValue="{$props.initialValue || ''}"
+      onDidChange="(val) => { draft = val; debounce(250, (v) => { if (v === lastSent) return; emitEvent('search', v); lastSent = v; }, val); }"
+      width="*"
+    />
+    <Icon
+      name="close"
+      tooltip="Clear search"
+      width="20px"
+      height="20px"
+      cursor="pointer"
+      color="$color-text-tertiary"
+      opacity="{draft ? 1 : 0}"
+      onClick="emitEvent('clear'); box.setValue(''); draft = ''; lastSent = ''"
+    />
+  </HStack>
+</Component>
