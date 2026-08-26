@@ -429,23 +429,27 @@ window._xsLogs = [];
       });
     }
 
-    // skip-stale-cached-paint: a cache old enough to differ from fresh is
-    // wrong-data, because the engine does not re-render the list on the
-    // fresh replacement emission (latent since the cached-then-fresh
-    // pattern landed; reproduced on both deployments 2026-08-19). Data
-    // changes at most nightly, so a young cache is byte-identical to
-    // fresh and keeps the instant paint; an old one waits for fresh.
+    // The epoch nudge in Main.xmlui (xmlui#3816 workaround) makes the
+    // fresh replacement emission actually repaint the list, so a stale
+    // cached paint self-corrects seconds later and the TTL gate that
+    // skipped it (4ff187d) is retired: instant paint always, correct
+    // within the fresh fetch. The {at, rows} envelope stays; painting a
+    // cache older than the nightly-build horizon marks
+    // cc-events-cached-stale-painted for observability.
     var CACHE_TTL_MS = 6 * 60 * 60 * 1000;
     function unwrapCachedRows(val) {
-      if (val && Array.isArray(val.rows) && typeof val.at === 'number' &&
-          Date.now() - val.at <= CACHE_TTL_MS) {
-        return val.rows;
+      var rows = null;
+      var age = null;
+      if (val && Array.isArray(val.rows)) {
+        rows = val.rows;
+        if (typeof val.at === 'number') age = Date.now() - val.at;
+      } else if (Array.isArray(val)) {
+        rows = val; // legacy raw entry, age unknown
       }
-      if (val) {
-        // Aged envelope, or a legacy raw-array entry with no age: skip.
-        try { performance.mark('cc-events-skip-cached-stale'); } catch (e) {}
+      if (rows && (age === null || age > CACHE_TTL_MS)) {
+        try { performance.mark('cc-events-cached-stale-painted'); } catch (e) {}
       }
-      return null;
+      return rows;
     }
 
     var fetchPromise = null;

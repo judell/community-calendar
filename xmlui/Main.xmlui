@@ -4,6 +4,7 @@
   fitContent="{window.ccAutoHeight}"
   var.filterTerm="{window.initialSearch || ''}"
   var.viewMode="{'all'}"
+  var.eventsEpoch="{0}"
   var.displayStartIndex="{0}"
   var.browseStartIndex="{0}"
   global.scrollRequest="{0}"
@@ -53,6 +54,17 @@
   <ChangeListener
     listenTo="{picks.value}"
     onDidChange="() => picksData = picks.value"
+  />
+
+  <!-- Epoch nudge (xmlui#3816 workaround): a PushSource's second emission
+       re-evaluates derived vars but does not repaint the list; a scalar
+       dependency change does. Bumping eventsEpoch on every events.value
+       change, and threading it as an inert final argument through the
+       list's getPagedEvents(...) bindings, forces the repaint that lets
+       the fresh replacement of a cached paint actually show. -->
+  <ChangeListener
+    listenTo="{events.value}"
+    onDidChange="() => eventsEpoch = eventsEpoch + 1"
   />
 
   <ChangeListener
@@ -299,11 +311,11 @@
       marginBottom="$space-2"
       onClick="const prevIndex = morePrevIndex(displayStartIndex, pageSizeFor(filterTerm)); displayStartIndex = prevIndex; browseStartIndex = prevIndex; scrollRequest = scrollRequest + 1;"
     />
-    <Masonry when="{!!events.value && viewMode === 'all' && layoutMode === 'multicol'}" data="{getPagedEvents(processedEvents, filterTerm, displayStartIndex, pageSizeFor(filterTerm), categoryFilter, sliderStart, sliderEnd)}" columns="3" gap="$space-3" rowGap="0" minColumnWidth="300px">
+    <Masonry when="{!!events.value && viewMode === 'all' && layoutMode === 'multicol'}" data="{getPagedEvents(processedEvents, filterTerm, displayStartIndex, pageSizeFor(filterTerm), categoryFilter, sliderStart, sliderEnd, eventsEpoch)}" columns="3" gap="$space-3" rowGap="0" minColumnWidth="300px">
       <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
     </Masonry>
     <VStack when="{!!events.value && viewMode === 'all' && layoutMode !== 'multicol'}" gap="$space-0">
-      <Items data="{getPagedEvents(processedEvents, filterTerm, displayStartIndex, pageSizeFor(filterTerm), categoryFilter, sliderStart, sliderEnd)}">
+      <Items data="{getPagedEvents(processedEvents, filterTerm, displayStartIndex, pageSizeFor(filterTerm), categoryFilter, sliderStart, sliderEnd, eventsEpoch)}">
         <EventCard event="{$item}" filterTerm="{filterTerm}" categoryColorMap="{window.categoryColorMap}" categoryList="{window.categoryList}" />
       </Items>
     </VStack>
