@@ -1,11 +1,11 @@
 {
   "city": "santarosa",
-  "generated": "2026-09-04T04:26:49.977906",
+  "generated": "2026-09-05T04:27:09.062955",
   "build": {
-    "generated": "2026-09-04T04:26:49.977906",
-    "total_events": 6417,
-    "prev_total_events": 6380,
-    "delta": 37
+    "generated": "2026-09-05T04:27:09.062955",
+    "total_events": 6250,
+    "prev_total_events": 6417,
+    "delta": -167
   },
   "problems": [
     {
@@ -23,6 +23,18 @@
     {
       "severity": 1,
       "kind": "broken_feed",
+      "title": "golocal is serving html, not ICS",
+      "detail": "was 11 events on 2026-09-04; broken since 2026-09-05",
+      "feed": "golocal",
+      "repro": {
+        "display": "GoLocal Cooperative",
+        "source": "https://golocal.coop/?post_type=tribe_events&ical=1&eventDisplay=list",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://golocal.coop/?post_type=tribe_events&ical=1&eventDisplay=list' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "severity": 1,
+      "kind": "broken_feed",
       "title": "meetup_woodworking_workshops_for_women is serving json, not ICS",
       "detail": "was 1 events on 2026-08-18; broken since 2026-08-19",
       "feed": "meetup_woodworking_workshops_for_women",
@@ -35,30 +47,6 @@
     {
       "severity": 2,
       "kind": "newly_silent",
-      "title": "creative_sonoma went silent (valid calendar, 0 events)",
-      "detail": "was 25 events on 2026-09-03",
-      "feed": "creative_sonoma",
-      "repro": {
-        "display": "Creative Sonoma",
-        "source": "python scrapers/creative_sonoma.py",
-        "command": "python scrapers/creative_sonoma.py"
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "newly_silent",
-      "title": "lutherburbankcenter went silent (valid calendar, 0 events)",
-      "detail": "was 22 events on 2026-09-02",
-      "feed": "lutherburbankcenter",
-      "repro": {
-        "display": "Luther Burbank Center",
-        "source": "python scrapers/tribe_rest.py --api-base \"https://lutherburbankcenter.org\" --name \"Luther Burbank Center\" --timezone America/Los_Angeles --user-agent \"Mozilla/5.0\" --output cities/santarosa/lutherburbankcenter.ics",
-        "command": "python scrapers/tribe_rest.py --api-base \"https://lutherburbankcenter.org\" --name \"Luther Burbank Center\" --timezone America/Los_Angeles --user-agent \"Mozilla/5.0\" --output cities/santarosa/lutherburbankcenter.ics"
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "newly_silent",
       "title": "maxpreps_elsie_allen went silent (valid calendar, 0 events)",
       "detail": "was 1 events on 2026-09-03",
       "feed": "maxpreps_elsie_allen",
@@ -66,6 +54,18 @@
         "display": "Elsie Allen High School Athletics",
         "source": "python scrapers/maxpreps.py --school elsie-allen-lobos --name \"Elsie Allen High School Athletics\" --output cities/santarosa/maxpreps_elsie_allen.ics",
         "command": "python scrapers/maxpreps.py --school elsie-allen-lobos --name \"Elsie Allen High School Athletics\" --output cities/santarosa/maxpreps_elsie_allen.ics"
+      }
+    },
+    {
+      "severity": 2,
+      "kind": "newly_silent",
+      "title": "maxpreps_maria_carrillo went silent (valid calendar, 0 events)",
+      "detail": "was 3 events on 2026-09-04",
+      "feed": "maxpreps_maria_carrillo",
+      "repro": {
+        "display": "Maria Carrillo High School Athletics",
+        "source": "python scrapers/maxpreps.py --school maria-carrillo-pumas --name \"Maria Carrillo High School Athletics\" --output cities/santarosa/maxpreps_maria_carrillo.ics",
+        "command": "python scrapers/maxpreps.py --school maria-carrillo-pumas --name \"Maria Carrillo High School Athletics\" --output cities/santarosa/maxpreps_maria_carrillo.ics"
       }
     },
     {
@@ -94,54 +94,6 @@
     },
     {
       "severity": 2,
-      "kind": "newly_silent",
-      "title": "uptowntheatrenapa went silent (valid calendar, 0 events)",
-      "detail": "was 32 events on 2026-09-02",
-      "feed": "uptowntheatrenapa",
-      "repro": {
-        "display": "Uptown Theatre Napa",
-        "source": "python scrapers/tribe_rest.py --api-base \"https://uptowntheatrenapa.com\" --name \"Uptown Theatre Napa\" --timezone America/Los_Angeles --user-agent \"Mozilla/5.0\" --output cities/santarosa/uptowntheatrenapa.ics",
-        "command": "python scrapers/tribe_rest.py --api-base \"https://uptowntheatrenapa.com\" --name \"Uptown Theatre Napa\" --timezone America/Los_Angeles --user-agent \"Mozilla/5.0\" --output cities/santarosa/uptowntheatrenapa.ics"
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "drop",
-      "title": "maxpreps_maria_carrillo: Events dropped 50% (6 \u2192 3)",
-      "detail": "2026-08-28",
-      "feed": "maxpreps_maria_carrillo",
-      "repro": {
-        "display": "Maria Carrillo High School Athletics",
-        "source": "python scrapers/maxpreps.py --school maria-carrillo-pumas --name \"Maria Carrillo High School Athletics\" --output cities/santarosa/maxpreps_maria_carrillo.ics",
-        "command": "python scrapers/maxpreps.py --school maria-carrillo-pumas --name \"Maria Carrillo High School Athletics\" --output cities/santarosa/maxpreps_maria_carrillo.ics"
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "drop",
-      "title": "maxpreps_rancho_cotate: Events dropped 50% (8 \u2192 4)",
-      "detail": "2026-08-28",
-      "feed": "maxpreps_rancho_cotate",
-      "repro": {
-        "display": "Rancho Cotate High School Athletics",
-        "source": "python scrapers/maxpreps.py --url \"https://www.maxpreps.com/ca/rohnert-park/rancho-cotate-cougars/events/\" --name \"Rancho Cotate High School Athletics\" --timezone America/Los_Angeles",
-        "command": "python scrapers/maxpreps.py --url \"https://www.maxpreps.com/ca/rohnert-park/rancho-cotate-cougars/events/\" --name \"Rancho Cotate High School Athletics\" --timezone America/Los_Angeles"
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "drop",
-      "title": "sonoma_community_center: Events dropped 83% (302 \u2192 50)",
-      "detail": "2026-08-28",
-      "feed": "sonoma_community_center",
-      "repro": {
-        "display": "Sonoma Community Center",
-        "source": "python scrapers/tribe_rest.py --api-base https://sonomacommunitycenter.org --name \"Sonoma Community Center\" --timezone America/Los_Angeles",
-        "command": "python scrapers/tribe_rest.py --api-base https://sonomacommunitycenter.org --name \"Sonoma Community Center\" --timezone America/Los_Angeles"
-      }
-    },
-    {
-      "severity": 2,
       "kind": "drop",
       "title": "maxpreps_windsor: Events dropped 50% (10 \u2192 5)",
       "detail": "2026-09-02",
@@ -162,6 +114,30 @@
         "display": "Creative Sonoma",
         "source": "python scrapers/creative_sonoma.py",
         "command": "python scrapers/creative_sonoma.py"
+      }
+    },
+    {
+      "severity": 2,
+      "kind": "drop",
+      "title": "maxpreps_healdsburg: Events dropped 60% (5 \u2192 2)",
+      "detail": "2026-09-05",
+      "feed": "maxpreps_healdsburg",
+      "repro": {
+        "display": "Healdsburg High School Athletics",
+        "source": "python scrapers/maxpreps.py --url \"https://www.maxpreps.com/ca/healdsburg/healdsburg-greyhounds/events/\" --name \"Healdsburg High School Athletics\" --timezone America/Los_Angeles",
+        "command": "python scrapers/maxpreps.py --url \"https://www.maxpreps.com/ca/healdsburg/healdsburg-greyhounds/events/\" --name \"Healdsburg High School Athletics\" --timezone America/Los_Angeles"
+      }
+    },
+    {
+      "severity": 2,
+      "kind": "drop",
+      "title": "sonoma_community_center: Events dropped 69% (325 \u2192 100)",
+      "detail": "2026-09-05",
+      "feed": "sonoma_community_center",
+      "repro": {
+        "display": "Sonoma Community Center",
+        "source": "python scrapers/tribe_rest.py --api-base https://sonomacommunitycenter.org --name \"Sonoma Community Center\" --timezone America/Los_Angeles",
+        "command": "python scrapers/tribe_rest.py --api-base https://sonomacommunitycenter.org --name \"Sonoma Community Center\" --timezone America/Los_Angeles"
       }
     },
     {
@@ -192,7 +168,7 @@
       "feed": "dzpdualvwspgqghrysyz_functions_v1",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet",
       "repro": {
         "display": "Jon",
@@ -216,7 +192,7 @@
       "feed": "meetup_santa_rosa_womens_creativity_collective",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Women's Creativity Collective",
@@ -264,7 +240,7 @@
       "feed": "songkick_222",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet",
       "repro": {
         "display": "THE 222",
@@ -300,7 +276,7 @@
       "feed": "songkick_fern_bar",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet",
       "repro": {
         "display": "The Fern Bar",
@@ -312,7 +288,7 @@
       "feed": "songkick_henhouse",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet",
       "repro": {
         "display": "HenHouse Brewing",
@@ -336,7 +312,7 @@
       "feed": "songkick_twin_oaks",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet",
       "repro": {
         "display": "Twin Oaks Roadhouse",
@@ -348,7 +324,7 @@
       "feed": "songkick_will_call",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet",
       "repro": {
         "display": "The Will Call",
@@ -378,17 +354,10 @@
       "content": "not_ics:html"
     },
     {
-      "feed": "creative_sonoma",
-      "was": 25,
-      "was_date": "2026-09-03",
-      "silent_since": "2026-09-04",
-      "content": "quiet"
-    },
-    {
       "feed": "dzpdualvwspgqghrysyz_functions_v1",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet"
     },
     {
@@ -399,17 +368,24 @@
       "content": "quiet"
     },
     {
-      "feed": "lutherburbankcenter",
-      "was": 22,
-      "was_date": "2026-09-02",
-      "silent_since": "2026-09-03",
-      "content": "quiet"
+      "feed": "golocal",
+      "was": 11,
+      "was_date": "2026-09-04",
+      "silent_since": "2026-09-05",
+      "content": "not_ics:html"
     },
     {
       "feed": "maxpreps_elsie_allen",
       "was": 1,
       "was_date": "2026-09-03",
       "silent_since": "2026-09-04",
+      "content": "quiet"
+    },
+    {
+      "feed": "maxpreps_maria_carrillo",
+      "was": 3,
+      "was_date": "2026-09-04",
+      "silent_since": "2026-09-05",
       "content": "quiet"
     },
     {
@@ -423,7 +399,7 @@
       "feed": "meetup_santa_rosa_womens_creativity_collective",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet"
     },
     {
@@ -458,7 +434,7 @@
       "feed": "songkick_222",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet"
     },
     {
@@ -479,14 +455,14 @@
       "feed": "songkick_fern_bar",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet"
     },
     {
       "feed": "songkick_henhouse",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet"
     },
     {
@@ -500,14 +476,14 @@
       "feed": "songkick_twin_oaks",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet"
     },
     {
       "feed": "songkick_will_call",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-07",
+      "silent_since": "2026-06-08",
       "content": "quiet"
     },
     {
@@ -522,13 +498,6 @@
       "was": 1,
       "was_date": "2026-08-30",
       "silent_since": "2026-08-31",
-      "content": "quiet"
-    },
-    {
-      "feed": "uptowntheatrenapa",
-      "was": 32,
-      "was_date": "2026-09-02",
-      "silent_since": "2026-09-03",
       "content": "quiet"
     }
   ],
@@ -557,54 +526,6 @@
     }
   ],
   "recent_anomalies": [
-    {
-      "type": "zero_events",
-      "message": "Feed returned 0 events (was 89)",
-      "severity": "info",
-      "date": "2026-08-28",
-      "city": "santarosa",
-      "feed": "creative_sonoma"
-    },
-    {
-      "type": "zero_events",
-      "message": "Feed returned 0 events (was 19)",
-      "severity": "info",
-      "date": "2026-08-28",
-      "city": "santarosa",
-      "feed": "lutherburbankcenter"
-    },
-    {
-      "type": "significant_drop",
-      "message": "Events dropped 50% (6 \u2192 3)",
-      "severity": "medium",
-      "date": "2026-08-28",
-      "city": "santarosa",
-      "feed": "maxpreps_maria_carrillo"
-    },
-    {
-      "type": "significant_drop",
-      "message": "Events dropped 50% (8 \u2192 4)",
-      "severity": "medium",
-      "date": "2026-08-28",
-      "city": "santarosa",
-      "feed": "maxpreps_rancho_cotate"
-    },
-    {
-      "type": "significant_drop",
-      "message": "Events dropped 83% (302 \u2192 50)",
-      "severity": "medium",
-      "date": "2026-08-28",
-      "city": "santarosa",
-      "feed": "sonoma_community_center"
-    },
-    {
-      "type": "zero_events",
-      "message": "Feed returned 0 events (was 32)",
-      "severity": "info",
-      "date": "2026-08-28",
-      "city": "santarosa",
-      "feed": "uptowntheatrenapa"
-    },
     {
       "type": "zero_events",
       "message": "Feed returned 0 events (was 2)",
@@ -780,19 +701,47 @@
       "date": "2026-09-04",
       "city": "santarosa",
       "feed": "maxpreps_elsie_allen"
+    },
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 11)",
+      "severity": "info",
+      "date": "2026-09-05",
+      "city": "santarosa",
+      "feed": "golocal"
+    },
+    {
+      "type": "significant_drop",
+      "message": "Events dropped 60% (5 \u2192 2)",
+      "severity": "medium",
+      "date": "2026-09-05",
+      "city": "santarosa",
+      "feed": "maxpreps_healdsburg"
+    },
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 3)",
+      "severity": "info",
+      "date": "2026-09-05",
+      "city": "santarosa",
+      "feed": "maxpreps_maria_carrillo"
+    },
+    {
+      "type": "significant_drop",
+      "message": "Events dropped 69% (325 \u2192 100)",
+      "severity": "medium",
+      "date": "2026-09-05",
+      "city": "santarosa",
+      "feed": "sonoma_community_center"
     }
   ],
   "detail": {
     "feeds": {
       "barrel_proof": {
-        "count": 240,
+        "count": 237,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 0
-          },
           {
             "date": "2026-08-07",
             "count": 0
@@ -908,6 +857,10 @@
           {
             "date": "2026-09-04",
             "count": 240
+          },
+          {
+            "date": "2026-09-05",
+            "count": 237
           }
         ]
       },
@@ -916,10 +869,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 2100
-          },
           {
             "date": "2026-08-07",
             "count": 2100
@@ -1035,18 +984,18 @@
           {
             "date": "2026-09-04",
             "count": 2100
+          },
+          {
+            "date": "2026-09-05",
+            "count": 2100
           }
         ]
       },
       "cal_theatre": {
-        "count": 22,
+        "count": 21,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 18
-          },
           {
             "date": "2026-08-07",
             "count": 17
@@ -1162,18 +1111,18 @@
           {
             "date": "2026-09-04",
             "count": 22
+          },
+          {
+            "date": "2026-09-05",
+            "count": 21
           }
         ]
       },
       "calendar_livewhale": {
-        "count": 639,
+        "count": 634,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 174
-          },
           {
             "date": "2026-08-07",
             "count": 173
@@ -1289,6 +1238,10 @@
           {
             "date": "2026-09-04",
             "count": 639
+          },
+          {
+            "date": "2026-09-05",
+            "count": 634
           }
         ]
       },
@@ -1297,10 +1250,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 30
-          },
           {
             "date": "2026-08-07",
             "count": 30
@@ -1415,6 +1364,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 30
+          },
+          {
+            "date": "2026-09-05",
             "count": 30
           }
         ]
@@ -1425,10 +1378,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -1543,18 +1492,18 @@
           {
             "date": "2026-09-04",
             "count": 1
+          },
+          {
+            "date": "2026-09-05",
+            "count": 1
           }
         ]
       },
       "civicplus_ci_33": {
-        "count": 21,
+        "count": 22,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 39
-          },
           {
             "date": "2026-08-07",
             "count": 39
@@ -1670,6 +1619,10 @@
           {
             "date": "2026-09-04",
             "count": 21
+          },
+          {
+            "date": "2026-09-05",
+            "count": 22
           }
         ]
       },
@@ -1678,10 +1631,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 7
-          },
           {
             "date": "2026-08-07",
             "count": 7
@@ -1796,6 +1745,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 3
+          },
+          {
+            "date": "2026-09-05",
             "count": 3
           }
         ]
@@ -1806,10 +1759,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 25
-          },
-          {
             "date": "2026-08-07",
             "count": 25
           },
@@ -1924,6 +1873,10 @@
           {
             "date": "2026-09-04",
             "count": 20
+          },
+          {
+            "date": "2026-09-05",
+            "count": 20
           }
         ]
       },
@@ -1932,10 +1885,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 44
-          },
           {
             "date": "2026-08-07",
             "count": 43
@@ -2051,6 +2000,10 @@
           {
             "date": "2026-09-04",
             "count": 29
+          },
+          {
+            "date": "2026-09-05",
+            "count": 29
           }
         ]
       },
@@ -2059,10 +2012,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 9
-          },
           {
             "date": "2026-08-07",
             "count": 8
@@ -2177,6 +2126,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 9
+          },
+          {
+            "date": "2026-09-05",
             "count": 9
           }
         ]
@@ -2187,10 +2140,6 @@
         "content": "not_ics:html",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -2304,6 +2253,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -2314,10 +2267,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 24
-          },
-          {
             "date": "2026-08-07",
             "count": 24
           },
@@ -2432,13 +2381,17 @@
           {
             "date": "2026-09-04",
             "count": 29
+          },
+          {
+            "date": "2026-09-05",
+            "count": 29
           }
         ]
       },
       "creative_sonoma": {
-        "count": 0,
+        "count": 105,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
           {
             "date": "2026-08-20",
@@ -2503,6 +2456,10 @@
           {
             "date": "2026-09-04",
             "count": 0
+          },
+          {
+            "date": "2026-09-05",
+            "count": 105
           }
         ]
       },
@@ -2530,6 +2487,10 @@
           {
             "date": "2026-09-04",
             "count": 30
+          },
+          {
+            "date": "2026-09-05",
+            "count": 30
           }
         ]
       },
@@ -2538,10 +2499,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 20
-          },
           {
             "date": "2026-08-07",
             "count": 19
@@ -2656,6 +2613,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 18
+          },
+          {
+            "date": "2026-09-05",
             "count": 18
           }
         ]
@@ -2666,10 +2627,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -2783,6 +2740,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -2793,10 +2754,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 2
-          },
-          {
             "date": "2026-08-07",
             "count": 2
           },
@@ -2910,6 +2867,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -2920,10 +2881,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 12
-          },
-          {
             "date": "2026-08-07",
             "count": 12
           },
@@ -3037,6 +2994,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 11
+          },
+          {
+            "date": "2026-09-05",
             "count": 11
           }
         ]
@@ -3047,10 +3008,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 13
-          },
-          {
             "date": "2026-08-07",
             "count": 13
           },
@@ -3165,18 +3122,18 @@
           {
             "date": "2026-09-04",
             "count": 15
+          },
+          {
+            "date": "2026-09-05",
+            "count": 15
           }
         ]
       },
       "gcal_15c2778ff1500632209a3609f5dea164325b8db50375c24ebea8e22e3ab8dca8": {
-        "count": 45,
+        "count": 44,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 44
-          },
           {
             "date": "2026-08-07",
             "count": 44
@@ -3292,6 +3249,10 @@
           {
             "date": "2026-09-04",
             "count": 45
+          },
+          {
+            "date": "2026-09-05",
+            "count": 44
           }
         ]
       },
@@ -3300,10 +3261,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 614
-          },
           {
             "date": "2026-08-07",
             "count": 614
@@ -3419,6 +3376,10 @@
           {
             "date": "2026-09-04",
             "count": 614
+          },
+          {
+            "date": "2026-09-05",
+            "count": 614
           }
         ]
       },
@@ -3427,10 +3388,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 26
-          },
           {
             "date": "2026-08-07",
             "count": 26
@@ -3546,18 +3503,18 @@
           {
             "date": "2026-09-04",
             "count": 67
+          },
+          {
+            "date": "2026-09-05",
+            "count": 67
           }
         ]
       },
       "gcal_eventsatarlenefransictheater_gmail_com": {
-        "count": 43,
+        "count": 44,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 49
-          },
           {
             "date": "2026-08-07",
             "count": 49
@@ -3673,18 +3630,18 @@
           {
             "date": "2026-09-04",
             "count": 43
+          },
+          {
+            "date": "2026-09-05",
+            "count": 44
           }
         ]
       },
       "golocal": {
-        "count": 11,
+        "count": 0,
         "error": null,
-        "content": null,
+        "content": "not_ics:html",
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 22
-          },
           {
             "date": "2026-08-07",
             "count": 22
@@ -3800,6 +3757,10 @@
           {
             "date": "2026-09-04",
             "count": 11
+          },
+          {
+            "date": "2026-09-05",
+            "count": 0
           }
         ]
       },
@@ -3808,10 +3769,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 9
-          },
           {
             "date": "2026-08-07",
             "count": 9
@@ -3927,11 +3884,15 @@
           {
             "date": "2026-09-04",
             "count": 10
+          },
+          {
+            "date": "2026-09-05",
+            "count": 10
           }
         ]
       },
       "growthzone_sebastopol": {
-        "count": 34,
+        "count": 32,
         "error": null,
         "content": null,
         "history": [
@@ -4010,6 +3971,10 @@
           {
             "date": "2026-09-04",
             "count": 34
+          },
+          {
+            "date": "2026-09-05",
+            "count": 32
           }
         ]
       },
@@ -4018,10 +3983,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 10
-          },
           {
             "date": "2026-08-07",
             "count": 10
@@ -4137,6 +4098,10 @@
           {
             "date": "2026-09-04",
             "count": 13
+          },
+          {
+            "date": "2026-09-05",
+            "count": 13
           }
         ]
       },
@@ -4145,10 +4110,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 6
-          },
           {
             "date": "2026-08-07",
             "count": 5
@@ -4263,6 +4224,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 7
+          },
+          {
+            "date": "2026-09-05",
             "count": 7
           }
         ]
@@ -4273,10 +4238,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 12
-          },
-          {
             "date": "2026-08-07",
             "count": 11
           },
@@ -4391,6 +4352,10 @@
           {
             "date": "2026-09-04",
             "count": 7
+          },
+          {
+            "date": "2026-09-05",
+            "count": 7
           }
         ]
       },
@@ -4399,10 +4364,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 4
-          },
           {
             "date": "2026-08-07",
             "count": 5
@@ -4518,18 +4479,18 @@
           {
             "date": "2026-09-04",
             "count": 3
+          },
+          {
+            "date": "2026-09-05",
+            "count": 3
           }
         ]
       },
       "legistar_sonoma_county": {
-        "count": 3,
+        "count": 4,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 8
-          },
           {
             "date": "2026-08-07",
             "count": 8
@@ -4645,18 +4606,18 @@
           {
             "date": "2026-09-04",
             "count": 3
+          },
+          {
+            "date": "2026-09-05",
+            "count": 4
           }
         ]
       },
       "library_intercept": {
-        "count": 1228,
+        "count": 1220,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 915
-          },
           {
             "date": "2026-08-07",
             "count": 908
@@ -4772,13 +4733,17 @@
           {
             "date": "2026-09-04",
             "count": 1228
+          },
+          {
+            "date": "2026-09-05",
+            "count": 1220
           }
         ]
       },
       "lutherburbankcenter": {
-        "count": 0,
+        "count": 24,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
           {
             "date": "2026-08-07",
@@ -4895,6 +4860,10 @@
           {
             "date": "2026-09-04",
             "count": 0
+          },
+          {
+            "date": "2026-09-05",
+            "count": 24
           }
         ]
       },
@@ -4903,10 +4872,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 5
-          },
           {
             "date": "2026-08-07",
             "count": 5
@@ -5021,6 +4986,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 4
+          },
+          {
+            "date": "2026-09-05",
             "count": 4
           }
         ]
@@ -5031,10 +5000,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 6
-          },
-          {
             "date": "2026-08-07",
             "count": 6
           },
@@ -5148,6 +5113,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 1
+          },
+          {
+            "date": "2026-09-05",
             "count": 1
           }
         ]
@@ -5158,10 +5127,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 4
-          },
-          {
             "date": "2026-08-07",
             "count": 4
           },
@@ -5275,6 +5240,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 1
+          },
+          {
+            "date": "2026-09-05",
             "count": 1
           }
         ]
@@ -5285,10 +5254,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 1
-          },
-          {
             "date": "2026-08-07",
             "count": 1
           },
@@ -5402,19 +5367,19 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
       },
       "maxpreps_healdsburg": {
-        "count": 5,
+        "count": 2,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 4
-          },
           {
             "date": "2026-08-07",
             "count": 4
@@ -5530,18 +5495,18 @@
           {
             "date": "2026-09-04",
             "count": 5
+          },
+          {
+            "date": "2026-09-05",
+            "count": 2
           }
         ]
       },
       "maxpreps_maria_carrillo": {
-        "count": 3,
+        "count": 0,
         "error": null,
-        "content": null,
+        "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 2
-          },
           {
             "date": "2026-08-07",
             "count": 2
@@ -5657,18 +5622,18 @@
           {
             "date": "2026-09-04",
             "count": 3
+          },
+          {
+            "date": "2026-09-05",
+            "count": 0
           }
         ]
       },
       "maxpreps_montgomery_high": {
-        "count": 4,
+        "count": 2,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 2
-          },
           {
             "date": "2026-08-07",
             "count": 2
@@ -5784,18 +5749,18 @@
           {
             "date": "2026-09-04",
             "count": 4
+          },
+          {
+            "date": "2026-09-05",
+            "count": 2
           }
         ]
       },
       "maxpreps_piner_high": {
-        "count": 4,
+        "count": 2,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 4
-          },
           {
             "date": "2026-08-07",
             "count": 4
@@ -5911,6 +5876,10 @@
           {
             "date": "2026-09-04",
             "count": 4
+          },
+          {
+            "date": "2026-09-05",
+            "count": 2
           }
         ]
       },
@@ -5919,10 +5888,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 5
-          },
           {
             "date": "2026-08-07",
             "count": 5
@@ -6038,6 +6003,10 @@
           {
             "date": "2026-09-04",
             "count": 2
+          },
+          {
+            "date": "2026-09-05",
+            "count": 2
           }
         ]
       },
@@ -6046,10 +6015,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 3
-          },
           {
             "date": "2026-08-07",
             "count": 3
@@ -6164,6 +6129,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 2
+          },
+          {
+            "date": "2026-09-05",
             "count": 2
           }
         ]
@@ -6174,10 +6143,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 1
-          },
-          {
             "date": "2026-08-07",
             "count": 1
           },
@@ -6291,6 +6256,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 3
+          },
+          {
+            "date": "2026-09-05",
             "count": 3
           }
         ]
@@ -6301,10 +6270,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 10
-          },
-          {
             "date": "2026-08-07",
             "count": 10
           },
@@ -6418,6 +6383,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 10
+          },
+          {
+            "date": "2026-09-05",
             "count": 10
           }
         ]
@@ -6428,10 +6397,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 10
-          },
-          {
             "date": "2026-08-07",
             "count": 10
           },
@@ -6545,6 +6510,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 10
+          },
+          {
+            "date": "2026-09-05",
             "count": 10
           }
         ]
@@ -6555,10 +6524,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 10
-          },
-          {
             "date": "2026-08-07",
             "count": 10
           },
@@ -6672,6 +6637,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 10
+          },
+          {
+            "date": "2026-09-05",
             "count": 10
           }
         ]
@@ -6682,10 +6651,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 6
-          },
-          {
             "date": "2026-08-07",
             "count": 6
           },
@@ -6799,6 +6764,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 9
+          },
+          {
+            "date": "2026-09-05",
             "count": 9
           }
         ]
@@ -6809,10 +6778,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 10
-          },
-          {
             "date": "2026-08-07",
             "count": 10
           },
@@ -6926,6 +6891,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 10
+          },
+          {
+            "date": "2026-09-05",
             "count": 10
           }
         ]
@@ -6936,10 +6905,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 8
-          },
-          {
             "date": "2026-08-07",
             "count": 8
           },
@@ -7053,6 +7018,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 10
+          },
+          {
+            "date": "2026-09-05",
             "count": 10
           }
         ]
@@ -7063,10 +7032,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 5
-          },
-          {
             "date": "2026-08-07",
             "count": 5
           },
@@ -7181,6 +7146,10 @@
           {
             "date": "2026-09-04",
             "count": 0
+          },
+          {
+            "date": "2026-09-05",
+            "count": 0
           }
         ]
       },
@@ -7189,10 +7158,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 10
-          },
           {
             "date": "2026-08-07",
             "count": 10
@@ -7307,6 +7272,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 10
+          },
+          {
+            "date": "2026-09-05",
             "count": 10
           }
         ]
@@ -7317,10 +7286,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 9
-          },
-          {
             "date": "2026-08-07",
             "count": 9
           },
@@ -7434,6 +7399,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 9
+          },
+          {
+            "date": "2026-09-05",
             "count": 9
           }
         ]
@@ -7444,10 +7413,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 10
-          },
-          {
             "date": "2026-08-07",
             "count": 10
           },
@@ -7561,6 +7526,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 10
+          },
+          {
+            "date": "2026-09-05",
             "count": 10
           }
         ]
@@ -7571,10 +7540,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 10
-          },
-          {
             "date": "2026-08-07",
             "count": 10
           },
@@ -7688,6 +7653,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 10
+          },
+          {
+            "date": "2026-09-05",
             "count": 10
           }
         ]
@@ -7698,10 +7667,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -7815,6 +7780,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -7825,10 +7794,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 1
-          },
-          {
             "date": "2026-08-07",
             "count": 1
           },
@@ -7942,6 +7907,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -7952,10 +7921,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 10
-          },
-          {
             "date": "2026-08-07",
             "count": 10
           },
@@ -8069,6 +8034,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 10
+          },
+          {
+            "date": "2026-09-05",
             "count": 10
           }
         ]
@@ -8079,10 +8048,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 10
-          },
-          {
             "date": "2026-08-07",
             "count": 10
           },
@@ -8196,6 +8161,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 10
+          },
+          {
+            "date": "2026-09-05",
             "count": 10
           }
         ]
@@ -8206,10 +8175,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 9
-          },
-          {
             "date": "2026-08-07",
             "count": 9
           },
@@ -8323,6 +8288,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 8
+          },
+          {
+            "date": "2026-09-05",
             "count": 8
           }
         ]
@@ -8419,6 +8388,10 @@
           {
             "date": "2026-09-04",
             "count": 8
+          },
+          {
+            "date": "2026-09-05",
+            "count": 8
           }
         ]
       },
@@ -8427,10 +8400,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 8
-          },
           {
             "date": "2026-08-07",
             "count": 8
@@ -8545,6 +8514,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 8
+          },
+          {
+            "date": "2026-09-05",
             "count": 8
           }
         ]
@@ -8555,10 +8528,6 @@
         "content": "not_ics:json",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 1
           },
@@ -8673,18 +8642,18 @@
           {
             "date": "2026-09-04",
             "count": 0
+          },
+          {
+            "date": "2026-09-05",
+            "count": 0
           }
         ]
       },
       "mobilize_indivisible_sonoma": {
-        "count": 111,
+        "count": 126,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 150
-          },
           {
             "date": "2026-08-07",
             "count": 146
@@ -8800,6 +8769,10 @@
           {
             "date": "2026-09-04",
             "count": 111
+          },
+          {
+            "date": "2026-09-05",
+            "count": 126
           }
         ]
       },
@@ -8808,10 +8781,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 3
-          },
           {
             "date": "2026-08-07",
             "count": 3
@@ -8927,18 +8896,18 @@
           {
             "date": "2026-09-04",
             "count": 3
+          },
+          {
+            "date": "2026-09-05",
+            "count": 3
           }
         ]
       },
       "occidental_arts": {
-        "count": 96,
+        "count": 95,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 15
-          },
           {
             "date": "2026-08-07",
             "count": 15
@@ -9054,6 +9023,10 @@
           {
             "date": "2026-09-04",
             "count": 96
+          },
+          {
+            "date": "2026-09-05",
+            "count": 95
           }
         ]
       },
@@ -9062,10 +9035,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 11
-          },
           {
             "date": "2026-08-07",
             "count": 9
@@ -9181,11 +9150,15 @@
           {
             "date": "2026-09-04",
             "count": 2
+          },
+          {
+            "date": "2026-09-05",
+            "count": 2
           }
         ]
       },
       "petaluma_chamber": {
-        "count": 43,
+        "count": 41,
         "error": null,
         "content": null,
         "history": [
@@ -9264,6 +9237,10 @@
           {
             "date": "2026-09-04",
             "count": 43
+          },
+          {
+            "date": "2026-09-05",
+            "count": 41
           }
         ]
       },
@@ -9272,10 +9249,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 2100
-          },
           {
             "date": "2026-08-07",
             "count": 2100
@@ -9391,18 +9364,18 @@
           {
             "date": "2026-09-04",
             "count": 2100
+          },
+          {
+            "date": "2026-09-05",
+            "count": 2100
           }
         ]
       },
       "ranchonicasio": {
-        "count": 29,
+        "count": 28,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 20
-          },
           {
             "date": "2026-08-07",
             "count": 20
@@ -9518,6 +9491,10 @@
           {
             "date": "2026-09-04",
             "count": 29
+          },
+          {
+            "date": "2026-09-05",
+            "count": 28
           }
         ]
       },
@@ -9526,10 +9503,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 16
-          },
           {
             "date": "2026-08-07",
             "count": 15
@@ -9645,18 +9618,18 @@
           {
             "date": "2026-09-04",
             "count": 0
+          },
+          {
+            "date": "2026-09-05",
+            "count": 0
           }
         ]
       },
       "redwood_cafe": {
-        "count": 31,
+        "count": 29,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 49
-          },
           {
             "date": "2026-08-07",
             "count": 55
@@ -9772,6 +9745,10 @@
           {
             "date": "2026-09-04",
             "count": 31
+          },
+          {
+            "date": "2026-09-05",
+            "count": 29
           }
         ]
       },
@@ -9780,10 +9757,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 2
-          },
           {
             "date": "2026-08-07",
             "count": 2
@@ -9898,6 +9871,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 1
+          },
+          {
+            "date": "2026-09-05",
             "count": 1
           }
         ]
@@ -9990,18 +9967,18 @@
           {
             "date": "2026-09-04",
             "count": 0
+          },
+          {
+            "date": "2026-09-05",
+            "count": 0
           }
         ]
       },
       "santa_rosa_symphony": {
-        "count": 6,
+        "count": 7,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 5
-          },
           {
             "date": "2026-08-07",
             "count": 5
@@ -10117,6 +10094,10 @@
           {
             "date": "2026-09-04",
             "count": 6
+          },
+          {
+            "date": "2026-09-05",
+            "count": 7
           }
         ]
       },
@@ -10125,10 +10106,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 26
-          },
           {
             "date": "2026-08-07",
             "count": 26
@@ -10244,6 +10221,10 @@
           {
             "date": "2026-09-04",
             "count": 30
+          },
+          {
+            "date": "2026-09-05",
+            "count": 30
           }
         ]
       },
@@ -10252,10 +10233,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 30
-          },
           {
             "date": "2026-08-07",
             "count": 30
@@ -10370,6 +10347,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 35
+          },
+          {
+            "date": "2026-09-05",
             "count": 35
           }
         ]
@@ -10380,10 +10361,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 30
-          },
-          {
             "date": "2026-08-07",
             "count": 30
           },
@@ -10497,6 +10474,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 30
+          },
+          {
+            "date": "2026-09-05",
             "count": 30
           }
         ]
@@ -10507,10 +10488,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -10624,6 +10601,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -10634,10 +10615,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -10751,6 +10728,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -10761,10 +10742,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 1
-          },
-          {
             "date": "2026-08-07",
             "count": 1
           },
@@ -10878,6 +10855,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 1
+          },
+          {
+            "date": "2026-09-05",
             "count": 1
           }
         ]
@@ -10888,10 +10869,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -11005,6 +10982,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -11015,10 +10996,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -11132,6 +11109,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -11142,10 +11123,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -11259,19 +11236,19 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
       },
       "songkick_hopmonk": {
-        "count": 5,
+        "count": 4,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 4
-          },
           {
             "date": "2026-08-07",
             "count": 4
@@ -11387,6 +11364,10 @@
           {
             "date": "2026-09-04",
             "count": 5
+          },
+          {
+            "date": "2026-09-05",
+            "count": 4
           }
         ]
       },
@@ -11396,10 +11377,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 1
-          },
-          {
             "date": "2026-08-07",
             "count": 1
           },
@@ -11513,6 +11490,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 1
+          },
+          {
+            "date": "2026-09-05",
             "count": 1
           }
         ]
@@ -11523,10 +11504,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 5
-          },
-          {
             "date": "2026-08-07",
             "count": 5
           },
@@ -11641,18 +11618,18 @@
           {
             "date": "2026-09-04",
             "count": 5
+          },
+          {
+            "date": "2026-09-05",
+            "count": 5
           }
         ]
       },
       "songkick_phoenix": {
-        "count": 5,
+        "count": 4,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 5
-          },
           {
             "date": "2026-08-07",
             "count": 5
@@ -11768,6 +11745,10 @@
           {
             "date": "2026-09-04",
             "count": 5
+          },
+          {
+            "date": "2026-09-05",
+            "count": 4
           }
         ]
       },
@@ -11776,10 +11757,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 0
-          },
           {
             "date": "2026-08-07",
             "count": 0
@@ -11894,6 +11871,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 2
+          },
+          {
+            "date": "2026-09-05",
             "count": 2
           }
         ]
@@ -11904,10 +11885,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 3
-          },
-          {
             "date": "2026-08-07",
             "count": 3
           },
@@ -12021,6 +11998,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 2
+          },
+          {
+            "date": "2026-09-05",
             "count": 2
           }
         ]
@@ -12031,10 +12012,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -12148,6 +12125,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -12158,10 +12139,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 5
-          },
-          {
             "date": "2026-08-07",
             "count": 4
           },
@@ -12275,6 +12252,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 5
+          },
+          {
+            "date": "2026-09-05",
             "count": 5
           }
         ]
@@ -12285,10 +12266,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -12402,6 +12379,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -12412,10 +12393,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 0
-          },
-          {
             "date": "2026-08-07",
             "count": 0
           },
@@ -12530,18 +12507,18 @@
           {
             "date": "2026-09-04",
             "count": 0
+          },
+          {
+            "date": "2026-09-05",
+            "count": 0
           }
         ]
       },
       "sonoma_community_center": {
-        "count": 325,
+        "count": 100,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 0
-          },
           {
             "date": "2026-08-07",
             "count": 0
@@ -12657,18 +12634,18 @@
           {
             "date": "2026-09-04",
             "count": 325
+          },
+          {
+            "date": "2026-09-05",
+            "count": 100
           }
         ]
       },
       "sonoma_county_gov": {
-        "count": 191,
+        "count": 186,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 173
-          },
           {
             "date": "2026-08-07",
             "count": 170
@@ -12784,18 +12761,18 @@
           {
             "date": "2026-09-04",
             "count": 191
+          },
+          {
+            "date": "2026-09-05",
+            "count": 186
           }
         ]
       },
       "sonoma_parks": {
-        "count": 76,
+        "count": 75,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 63
-          },
           {
             "date": "2026-08-07",
             "count": 61
@@ -12911,6 +12888,10 @@
           {
             "date": "2026-09-04",
             "count": 76
+          },
+          {
+            "date": "2026-09-05",
+            "count": 75
           }
         ]
       },
@@ -12919,10 +12900,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 0
-          },
           {
             "date": "2026-08-07",
             "count": 0
@@ -13037,6 +13014,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 4
+          },
+          {
+            "date": "2026-09-05",
             "count": 4
           }
         ]
@@ -13047,10 +13028,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-06",
-            "count": 1
-          },
-          {
             "date": "2026-08-07",
             "count": 1
           },
@@ -13164,6 +13141,10 @@
           },
           {
             "date": "2026-09-04",
+            "count": 0
+          },
+          {
+            "date": "2026-09-05",
             "count": 0
           }
         ]
@@ -13284,6 +13265,10 @@
           {
             "date": "2026-09-04",
             "count": 2
+          },
+          {
+            "date": "2026-09-05",
+            "count": 2
           }
         ]
       },
@@ -13292,10 +13277,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 1
-          },
           {
             "date": "2026-08-07",
             "count": 1
@@ -13411,6 +13392,10 @@
           {
             "date": "2026-09-04",
             "count": 0
+          },
+          {
+            "date": "2026-09-05",
+            "count": 0
           }
         ]
       },
@@ -13419,10 +13404,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 37
-          },
           {
             "date": "2026-08-07",
             "count": 35
@@ -13538,18 +13519,18 @@
           {
             "date": "2026-09-04",
             "count": 35
+          },
+          {
+            "date": "2026-09-05",
+            "count": 35
           }
         ]
       },
       "sweetwater": {
-        "count": 31,
+        "count": 32,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 0
-          },
           {
             "date": "2026-08-07",
             "count": 0
@@ -13665,6 +13646,10 @@
           {
             "date": "2026-09-04",
             "count": 31
+          },
+          {
+            "date": "2026-09-05",
+            "count": 32
           }
         ]
       },
@@ -13673,10 +13658,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 502
-          },
           {
             "date": "2026-08-07",
             "count": 503
@@ -13792,13 +13773,17 @@
           {
             "date": "2026-09-04",
             "count": 503
+          },
+          {
+            "date": "2026-09-05",
+            "count": 503
           }
         ]
       },
       "uptowntheatrenapa": {
-        "count": 0,
+        "count": 33,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
           {
             "date": "2026-08-07",
@@ -13915,18 +13900,18 @@
           {
             "date": "2026-09-04",
             "count": 0
+          },
+          {
+            "date": "2026-09-05",
+            "count": 33
           }
         ]
       },
       "visit_santa_rosa": {
-        "count": 224,
+        "count": 221,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-06",
-            "count": 231
-          },
           {
             "date": "2026-08-07",
             "count": 232
@@ -14042,40 +14027,44 @@
           {
             "date": "2026-09-04",
             "count": 224
+          },
+          {
+            "date": "2026-09-05",
+            "count": 221
           }
         ]
       }
     },
     "url_quality": {
-      "total_with_url": 5888,
-      "total_events": 6417,
-      "unique_urls": 4380,
-      "generic_count": 516,
+      "total_with_url": 5724,
+      "total_events": 6250,
+      "unique_urls": 4203,
+      "generic_count": 519,
       "generic_domains": [
         {
           "domain": "www.lakecountyca.gov",
-          "events": 68,
+          "events": 70,
           "url": "https://www.lakecountyca.gov/calendar.aspx?CID=24&showPastEvents=false"
         },
         {
           "domain": "www.upstairsartgallery.net",
-          "events": 37,
+          "events": 35,
           "url": "http://www.upstairsartgallery.net"
         },
         {
           "domain": "redwoodcafecotati.com",
-          "events": 31,
+          "events": 29,
           "url": "https://redwoodcafecotati.com/events/"
-        },
-        {
-          "domain": "lynmarestate.com",
-          "events": 30,
-          "url": "https://lynmarestate.com/reservation/type/collectors-lunch-pairing/"
         },
         {
           "domain": "/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=52",
           "events": 29,
           "url": "/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=52"
+        },
+        {
+          "domain": "lynmarestate.com",
+          "events": 28,
+          "url": "https://lynmarestate.com/reservation/type/collectors-lunch-pairing/"
         },
         {
           "domain": "tewines.com",
@@ -14089,8 +14078,13 @@
         },
         {
           "domain": "/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=33",
-          "events": 21,
+          "events": 22,
           "url": "/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=33"
+        },
+        {
+          "domain": "sangeronimovalleycommunitycenter.eventcalendarapp.com",
+          "events": 21,
+          "url": "https://sangeronimovalleycommunitycenter.eventcalendarapp.com/henry-frank-j-80928-a-human-experience-exhibition"
         },
         {
           "domain": "/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31",
@@ -14099,12 +14093,17 @@
         },
         {
           "domain": "gratongallery.net",
-          "events": 19,
+          "events": 18,
           "url": "http://gratongallery.net"
         },
         {
-          "domain": "cmvineyard.com",
+          "domain": "eldoradosonoma.com",
           "events": 18,
+          "url": "https://eldoradosonoma.com/el-dorado-kitchen/"
+        },
+        {
+          "domain": "cmvineyard.com",
+          "events": 17,
           "url": "https://cmvineyard.com/visit/"
         },
         {
@@ -14113,29 +14112,9 @@
           "url": "https://marinopenstudios.org/"
         },
         {
-          "domain": "eldoradosonoma.com",
-          "events": 17,
-          "url": "https://eldoradosonoma.com/el-dorado-kitchen/"
-        },
-        {
-          "domain": "gambleestates.com",
-          "events": 12,
-          "url": "https://gambleestates.com/reservation/type/sauvignon-blanc-experience/"
-        },
-        {
-          "domain": "bricoleurvineyards.com",
-          "events": 12,
-          "url": "https://bricoleurvineyards.com/pages/visit?srsltid=AfmBOoq4MRc2MHal1tH0HwUmLbCHlVrPlsnizqNwrRFitw3UKui4rRJV"
-        },
-        {
           "domain": "www.prwinery.com",
           "events": 12,
           "url": "https://www.prwinery.com/"
-        },
-        {
-          "domain": "6thstreetplayhouse.com",
-          "events": 11,
-          "url": "https://6thstreetplayhouse.com/shows/rodgers-hammersteins-south-pacific/"
         },
         {
           "domain": "www.northbayoa.org",
@@ -14143,19 +14122,19 @@
           "url": "https://www.northbayoa.org/"
         },
         {
-          "domain": "moonlightbrewing.com",
-          "events": 10,
-          "url": "http://MoonlightBrewing.com"
+          "domain": "gambleestates.com",
+          "events": 11,
+          "url": "https://gambleestates.com/reservation/type/sauvignon-blanc-experience/"
         },
         {
-          "domain": "raventheater.org",
-          "events": 10,
-          "url": "https://raventheater.org/events/macbitches/"
+          "domain": "bricoleurvineyards.com",
+          "events": 11,
+          "url": "https://bricoleurvineyards.com/pages/visit?srsltid=AfmBOoq4MRc2MHal1tH0HwUmLbCHlVrPlsnizqNwrRFitw3UKui4rRJV"
         },
         {
-          "domain": "www.riverrockcasino.com",
-          "events": 9,
-          "url": "http://www.riverrockcasino.com/promotions/calendar?event_type=Entertainment#specials"
+          "domain": "6thstreetplayhouse.com",
+          "events": 10,
+          "url": "https://6thstreetplayhouse.com/shows/rodgers-hammersteins-south-pacific/"
         },
         {
           "domain": "www.thesearanchlodge.com",
@@ -14168,9 +14147,24 @@
           "url": "/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=14"
         },
         {
+          "domain": "moonlightbrewing.com",
+          "events": 9,
+          "url": "http://MoonlightBrewing.com"
+        },
+        {
           "domain": "zoppefamilycircus.com",
           "events": 9,
           "url": "https://zoppefamilycircus.com/"
+        },
+        {
+          "domain": "www.healdsburgfarmersmarket.org",
+          "events": 8,
+          "url": "https://www.healdsburgfarmersmarket.org/"
+        },
+        {
+          "domain": "www.riverrockcasino.com",
+          "events": 8,
+          "url": "http://www.riverrockcasino.com/promotions/calendar?event_type=Entertainment#specials"
         },
         {
           "domain": "sonomacountyfair.com",
@@ -14181,11 +14175,6 @@
           "domain": "www.vallejorunclub.com",
           "events": 7,
           "url": "https://www.vallejorunclub.com"
-        },
-        {
-          "domain": "www.healdsburgfarmersmarket.org",
-          "events": 7,
-          "url": "https://www.healdsburgfarmersmarket.org/"
         },
         {
           "domain": "lagunitas.com",
@@ -14208,43 +14197,37 @@
           "url": "http://www.verismoopera.org"
         }
       ],
-      "http_count": 292,
-      "http_domains": 51,
+      "http_count": 284,
+      "http_domains": 53,
       "source_specificity": [
         {
           "source": "North Bay Bohemian",
-          "events": 971,
-          "unique_urls": 754,
-          "specificity_pct": 78
+          "events": 966,
+          "unique_urls": 729,
+          "specificity_pct": 75
         },
         {
           "source": "Sonoma County Library",
-          "events": 910,
-          "unique_urls": 910,
+          "events": 890,
+          "unique_urls": 890,
           "specificity_pct": 100
         },
         {
           "source": "North Bay Bohemian, Press Democrat",
-          "events": 628,
-          "unique_urls": 270,
+          "events": 611,
+          "unique_urls": 260,
           "specificity_pct": 43
         },
         {
           "source": "Santa Rosa Junior College",
-          "events": 513,
-          "unique_urls": 145,
+          "events": 512,
+          "unique_urls": 144,
           "specificity_pct": 28
         },
         {
           "source": "Riley Street Art Supply",
           "events": 453,
           "unique_urls": 453,
-          "specificity_pct": 100
-        },
-        {
-          "source": "Sonoma Community Center",
-          "events": 306,
-          "unique_urls": 306,
           "specificity_pct": 100
         },
         {
@@ -14255,50 +14238,56 @@
         },
         {
           "source": "Barrel Proof Lounge",
-          "events": 204,
-          "unique_urls": 204,
+          "events": 202,
+          "unique_urls": 202,
           "specificity_pct": 100
         },
         {
           "source": "Sonoma County Library, North Bay Bohemian",
-          "events": 199,
-          "unique_urls": 199,
+          "events": 201,
+          "unique_urls": 201,
           "specificity_pct": 100
         },
         {
           "source": "Visit Santa Rosa",
-          "events": 148,
-          "unique_urls": 45,
-          "specificity_pct": 30
-        },
-        {
-          "source": "Sonoma County Government",
-          "events": 116,
-          "unique_urls": 116,
-          "specificity_pct": 100
+          "events": 136,
+          "unique_urls": 37,
+          "specificity_pct": 27
         },
         {
           "source": "Indivisible Sonoma County (Mobilize)",
-          "events": 110,
+          "events": 115,
           "unique_urls": 23,
-          "specificity_pct": 21
+          "specificity_pct": 20
+        },
+        {
+          "source": "Sonoma County Government",
+          "events": 112,
+          "unique_urls": 112,
+          "specificity_pct": 100
+        },
+        {
+          "source": "Sonoma Community Center",
+          "events": 87,
+          "unique_urls": 87,
+          "specificity_pct": 100
         },
         {
           "source": "Occidental Center for the Arts",
-          "events": 81,
-          "unique_urls": 81,
+          "events": 80,
+          "unique_urls": 80,
           "specificity_pct": 100
         },
         {
           "source": "Sonoma County Government, Sonoma County Parks",
-          "events": 75,
-          "unique_urls": 75,
+          "events": 74,
+          "unique_urls": 74,
           "specificity_pct": 100
         },
         {
           "source": "Petaluma Chamber of Commerce",
-          "events": 42,
-          "unique_urls": 42,
+          "events": 40,
+          "unique_urls": 40,
           "specificity_pct": 100
         }
       ]
@@ -14309,7 +14298,7 @@
       "tzids": [
         {
           "tzid": "UTC (Z suffix)",
-          "count": 10438,
+          "count": 10441,
           "files": 5,
           "matches_city": false,
           "sample_files": [
@@ -14322,7 +14311,7 @@
         },
         {
           "tzid": "America/Los_Angeles",
-          "count": 8439,
+          "count": 8231,
           "files": 59,
           "matches_city": true,
           "sample_files": [
@@ -14335,7 +14324,7 @@
         },
         {
           "tzid": "(bare \u2014 assumes city tz)",
-          "count": 777,
+          "count": 872,
           "files": 55,
           "matches_city": false,
           "sample_files": [
@@ -14389,11 +14378,11 @@
         "source": "North Bay Bohemian",
         "source_id": "bohemian",
         "location": "Fairfield Cordelia Library",
-        "count": 19,
+        "count": 18,
         "titles": [
-          "Preschool Storytime & Crafts",
           "Reiki-Infused Sound Healing",
-          "Baby Bounce"
+          "Baby Bounce",
+          "Toddler Storytime"
         ]
       },
       {
@@ -14405,6 +14394,17 @@
           "Life Visioning Practice",
           "Cancer Thrivers Support Group",
           "Wednesday Evening Meditation: Inviting the Sacred"
+        ]
+      },
+      {
+        "source": "Indivisible Sonoma County (Mobilize)",
+        "source_id": "mobilize_indivisible_sonoma",
+        "location": "Porterville Staging Location, San Jose, CA, 95128",
+        "count": 10,
+        "titles": [
+          "Canvass for Villegas to Flip the House (Porterville): CD-22",
+          "Canvass for Villegas to Flip the House (Porterville): CD-22",
+          "Canvass for Villegas to Flip the House (Porterville): CD-22"
         ]
       },
       {
@@ -14461,19 +14461,19 @@
       {
         "source": "Gcal 15C2778Ff1500632209A3609F5Dea164325B8Db50375C24Ebea8E22E3Ab8Dca8",
         "source_id": "gcal_15c2778ff1500632209a3609f5dea164325b8db50375c24ebea8e22e3ab8dca8",
-        "location": "200 Park St, Lakeport, CA 95453, USA",
+        "location": "Todd Grove Park, Live Oak Avenue, Ukiah, CA, USA",
         "count": 1,
         "titles": [
-          "\ud83c\udf32 Mendo-Lake Branch - Potluck Picnic in Lakeport\u00ad\u00ad\u00ad\u00ad"
+          "\ud83c\udf32 Mendo-Lake Branch - Business Meeting\u00ad\u00ad\u00ad\u00ad"
         ]
       },
       {
         "source": "Gcal 15C2778Ff1500632209A3609F5Dea164325B8Db50375C24Ebea8E22E3Ab8Dca8",
         "source_id": "gcal_15c2778ff1500632209a3609f5dea164325b8db50375c24ebea8e22e3ab8dca8",
-        "location": "Todd Grove Park, Live Oak Avenue, Ukiah, CA, USA",
+        "location": "200 Park St, Lakeport, CA 95453, USA",
         "count": 1,
         "titles": [
-          "\ud83c\udf32 Mendo-Lake Branch - Business Meeting\u00ad\u00ad\u00ad\u00ad"
+          "\ud83c\udf32 Mendo-Lake Branch - Potluck Picnic in Lakeport\u00ad\u00ad\u00ad\u00ad"
         ]
       },
       {
@@ -14507,87 +14507,87 @@
     "categories": [
       {
         "category": "Arts / Culture",
-        "count": 858
+        "count": 870
       },
       {
         "category": "Music / Concerts",
-        "count": 794
+        "count": 790
       },
       {
         "category": "Craft / Maker",
-        "count": 607
-      },
-      {
-        "category": "Family / Kids",
         "count": 560
       },
       {
+        "category": "Family / Kids",
+        "count": 550
+      },
+      {
         "category": "Education / Workshops",
-        "count": 516
+        "count": 500
       },
       {
         "category": "Food / Drink",
-        "count": 477
+        "count": 462
       },
       {
         "category": "Community / Social",
-        "count": 401
+        "count": 394
       },
       {
         "category": "Religion / Spirituality",
-        "count": 316
+        "count": 317
       },
       {
         "category": "Government / Civic",
-        "count": 275
-      },
-      {
-        "category": "Health / Wellness",
-        "count": 263
+        "count": 288
       },
       {
         "category": "Books / Literature / Poetry",
-        "count": 253
+        "count": 262
       },
       {
-        "category": "Dance / Performance",
-        "count": 201
+        "category": "Health / Wellness",
+        "count": 196
       },
       {
         "category": "Games / Trivia",
-        "count": 197
+        "count": 187
+      },
+      {
+        "category": "Dance / Performance",
+        "count": 180
       },
       {
         "category": "Comedy / Improv",
-        "count": 148
+        "count": 171
       },
       {
         "category": "Sports / Fitness",
-        "count": 136
+        "count": 122
       },
       {
         "category": "(uncategorized)",
-        "count": 120
+        "count": 111
       },
       {
         "category": "Nature / Outdoors / Recreation",
-        "count": 102
+        "count": 97
       },
       {
         "category": "History / Heritage",
-        "count": 65
+        "count": 64
       },
       {
         "category": "Film / Cinema",
-        "count": 58
+        "count": 52
       },
       {
         "category": "Gardening / Horticulture",
-        "count": 38
+        "count": 39
       },
       {
         "category": "Technology / Careers",
-        "count": 17
+        "count": 22
       },
       {
         "category": "LGBTQ+ / Gender",
@@ -14595,17 +14595,17 @@
       },
       {
         "category": "Schools / K-12",
-        "count": 4
+        "count": 5
       }
     ],
     "images": {
-      "total": 6417,
-      "with_image": 1192,
+      "total": 6250,
+      "with_image": 1191,
       "by_source": [
         {
           "source": "Santa Rosa Junior College",
-          "total": 513,
-          "with_image": 513
+          "total": 512,
+          "with_image": 512
         },
         {
           "source": "Riley Street Art Supply",
@@ -14614,27 +14614,27 @@
         },
         {
           "source": "Indivisible Sonoma County (Mobilize)",
-          "total": 110,
-          "with_image": 96
+          "total": 115,
+          "with_image": 101
         },
         {
           "source": "Rancho Nicasio",
-          "total": 27,
-          "with_image": 27
+          "total": 26,
+          "with_image": 26
         },
         {
           "source": "Sebastopol Calendar",
           "total": 21,
-          "with_image": 21
+          "with_image": 20
+        },
+        {
+          "source": "California Bluegrass Association",
+          "total": 28,
+          "with_image": 20
         },
         {
           "source": "Center for Spiritual Living Santa Rosa",
           "total": 16,
-          "with_image": 16
-        },
-        {
-          "source": "California Bluegrass Association",
-          "total": 24,
           "with_image": 16
         },
         {
@@ -14648,19 +14648,9 @@
           "with_image": 8
         },
         {
-          "source": "California Bluegrass Association, Sonoma Community Center",
-          "total": 6,
-          "with_image": 6
-        },
-        {
           "source": "Gundlach Bundschu Winery, North Bay Bohemian",
           "total": 5,
           "with_image": 5
-        },
-        {
-          "source": "Santa Rosa Junior College, North Bay Bohemian, Press Democrat",
-          "total": 4,
-          "with_image": 4
         },
         {
           "source": "Sonoma County AA",
@@ -14668,12 +14658,17 @@
           "with_image": 4
         },
         {
-          "source": "GoLocal Cooperative",
-          "total": 4,
-          "with_image": 2
+          "source": "Santa Rosa Junior College, North Bay Bohemian, Press Democrat",
+          "total": 3,
+          "with_image": 3
         },
         {
           "source": "Little Saint, North Bay Bohemian",
+          "total": 2,
+          "with_image": 2
+        },
+        {
+          "source": "California Bluegrass Association, Sonoma Community Center",
           "total": 2,
           "with_image": 2
         },
