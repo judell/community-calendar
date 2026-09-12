@@ -506,8 +506,13 @@ window._xsLogs = [];
         if (city !== window.cityFilter) return false;  // stale-city race guard (#76)
         // issue-82: skip the replacement when this same subscriber already
         // holds identical data — the emit would only trigger a re-render.
-        if (currentEmit && currentEmit === lastEmitFn &&
-            city === lastEmitCity && window.eventsSignature(rows) === lastEmitSig) {
+        if (window.shouldSkipFreshEmit({
+              currentEmit: currentEmit,
+              lastEmitFn: lastEmitFn,
+              city: city,
+              lastEmitCity: lastEmitCity,
+              lastEmitSig: lastEmitSig,
+            }, rows)) {
           performance.mark('cc-events-skip-fresh-identical');
           return true;
         }

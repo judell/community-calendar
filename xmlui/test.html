@@ -1224,14 +1224,59 @@
         });
 
         it('returns a stable key for empty and non-array input', () => {
-          assertEqual(eventsSignature([]), eventsSignature([]));
-          assertEqual(eventsSignature(null), eventsSignature(null));
-          assertEqual(eventsSignature(undefined), eventsSignature(undefined));
+          assertEqual(eventsSignature([]), '0');
+          assertEqual(eventsSignature(null), 'na');
+          assertEqual(eventsSignature(undefined), 'na');
         });
 
         it('treats a reordering as a change', () => {
           assert(eventsSignature(stale) !== eventsSignature([stale[1], stale[0], stale[2]]),
             'order must be part of the identity');
+        });
+      });
+
+      // ============================================================
+      // shouldSkipFreshEmit — the coalescing decision shell.js makes
+      // ============================================================
+      // Pins the coalescing itself, not just the signature: with the old
+      // weak key, a fresh payload that differed only in the middle matched
+      // the cached paint's signature and was skipped, so eventsEpoch never
+      // bumped and the stale paint stayed on screen.
+      describe('shouldSkipFreshEmit', () => {
+        const emit = function () {};
+        const state = (lastSig) => ({
+          currentEmit: emit,
+          lastEmitFn: emit,
+          city: 'davis',
+          lastEmitCity: 'davis',
+          lastEmitSig: lastSig
+        });
+        const stale = [
+          { id: 1, title: 'Early' },
+          { id: 2, title: 'Middle OLD' },
+          { id: 3, title: 'Late' }
+        ];
+        const fresh = [
+          { id: 1, title: 'Early' },
+          { id: 2, title: 'Middle NEW' },
+          { id: 3, title: 'Late' }
+        ];
+
+        it('does not skip a fresh payload that differs only in the middle', () => {
+          assertEqual(shouldSkipFreshEmit(state(eventsSignature(stale)), fresh), false);
+        });
+
+        it('skips a truly identical payload for the same subscriber and city', () => {
+          const copy = JSON.parse(JSON.stringify(stale));
+          assertEqual(shouldSkipFreshEmit(state(eventsSignature(stale)), copy), true);
+        });
+
+        it('does not skip when no subscriber is current', () => {
+          assertEqual(shouldSkipFreshEmit({ ...state(eventsSignature(stale)), currentEmit: null }, stale), false);
+        });
+
+        it('does not skip for a different city', () => {
+          assertEqual(shouldSkipFreshEmit({ ...state(eventsSignature(stale)), city: 'davis', lastEmitCity: 'santarosa' }, stale), false);
         });
       });
 

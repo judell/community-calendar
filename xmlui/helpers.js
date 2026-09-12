@@ -247,35 +247,52 @@ function getEventSearchText(event) {
 // Strong content identity for an events payload. shell.js's issue-82
 // emission coalescing uses this to decide whether a fresh fetch is
 // identical to the paint it would replace. Unlike ccArraySig — kept O(1)
-// because memoizeIngest runs it on every evaluation — this is called at
-// most twice per load (once per cache paint, once per fetch), so it can
-// afford to hash every row. The previous key (length + first/last id)
-// called two payloads identical when only the middle changed, which let a
-// stale cached paint suppress the fresh emission and, after the epoch
-// nudge landed, leave the repaint unfired. Two independent 32-bit FNV-1a
-// hashes keep an accidental collision between distinct payloads
-// negligible; the length prefix is part of the returned key.
+// because memoizeIngest runs it on every evaluation — this runs only a
+// handful of times per load (cache paint, fetch compare/store, refetch),
+// so it can afford to examine every row. The previous key (length +
+// first/last id) called two payloads identical when only the middle
+// changed, which let a stale cached paint suppress the fresh emission
+// and, after the epoch nudge landed, leave the repaint unfired. Two
+// 32-bit multiplicative hashes with independent seeds (an FNV-1a pass and
+// a MurmurHash3-style pass) over the same stream give ~64 bits, so an
+// accidental collision between distinct payloads is negligible.
 function eventsSignature(rows) {
   if (!Array.isArray(rows)) return 'na';
   if (!rows.length) return '0';
-  var h1 = 0x811c9dc5;
-  var h2 = 0x811c9dc5;
+  var h1 = 0x811c9dc5; // FNV-1a offset basis
+  var h2 = 0x9747b28c; // independent seed
   for (var i = 0; i < rows.length; i++) {
     var row = rows[i];
     var s = row === undefined ? 'undefined' : JSON.stringify(row);
     if (s === undefined) s = 'undefined';
     for (var j = 0; j < s.length; j++) {
       var c = s.charCodeAt(j);
-      h1 = Math.imul(h1 ^ c, 16777619);
-      h2 = Math.imul(h2 ^ c, 2246822519);
+      h1 = Math.imul(h1 ^ c, 0x01000193); // FNV-1a prime
+      h2 = Math.imul(h2 ^ c, 0x85ebca6b); // MurmurHash3 constant
     }
     // Row separator: keeps ["ab"] from hashing the same as ["a", "b"].
-    h1 = Math.imul(h1 ^ 0x1f, 16777619);
-    h2 = Math.imul(h2 ^ 0x1f, 2246822519);
+    h1 = Math.imul(h1 ^ 0x1f, 0x01000193);
+    h2 = Math.imul(h2 ^ 0x1f, 0x85ebca6b);
   }
   return rows.length + ':' + (h1 >>> 0).toString(16) + ':' + (h2 >>> 0).toString(16);
 }
 window.eventsSignature = eventsSignature;
+
+// The issue-82 fresh-emission skip decision, extracted from shell.js so
+// test.html can pin the coalescing itself, not just the signature: a fresh
+// payload is skipped only when it is identical to the last emission and
+// came from the same subscriber and city. With the old weak key, a
+// mid-payload change looked identical and suppressed the fresh emit — and
+// therefore the epoch bump that repaints the stale cache.
+function shouldSkipFreshEmit(state, rows) {
+  return !!(
+    state.currentEmit &&
+    state.currentEmit === state.lastEmitFn &&
+    state.city === state.lastEmitCity &&
+    eventsSignature(rows) === state.lastEmitSig
+  );
+}
+window.shouldSkipFreshEmit = shouldSkipFreshEmit;
 
 // Filter events by search term with progressive narrowing
 var _prevTerm = '';
