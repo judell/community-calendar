@@ -39,7 +39,7 @@ Real-world lessons from source discovery across cities. These complement the str
 - [Squarespace Per-Event ICS Aggregation](#squarespace-per-event-ics-aggregation)
 - [Faith Communities Are a Rich Source Category](#faith-communities-are-a-rich-source-category)
 - [Sidearm Sports for NCAA Athletics](#sidearm-sports-for-ncaa-athletics)
-- [Eventbrite-to-ICS via eb-to-ical](#eventbrite-to-ics-via-eb-to-ical)
+- [Eventbrite Organizer Pages: Use the First-Party Scraper](#eventbrite-organizer-pages-use-the-first-party-scraper)
 - [fixtur.es for Pro/Semi-Pro Sports Teams](#fixtures-for-prosemi-pro-sports-teams)
 - [CivicPlus Municipal Calendars](#civicplus-municipal-calendars)
 - [Localist Group/Venue Sub-Calendars](#localist-groupvenue-sub-calendars)
@@ -483,17 +483,21 @@ This is a high-volume source. NC State (gopack.com) returned 297 events, UNC (go
 
 **How the new API URL was found:** The ICS endpoint was discovered by searching minified Nuxt.js bundles (`/_nuxt/*.js`) for "Calendar/subscribe". The Sidearm `/api/v2/Calendar/subscribe` pattern works across all schools on the new platform.
 
-## Eventbrite-to-ICS via eb-to-ical
+## Eventbrite Organizer Pages: Use the First-Party Scraper
 
-When a venue uses Eventbrite for ticketing but has no ICS feed on their own site, the third-party service [eb-to-ical](https://eb-to-ical.daylightpirates.org/) converts any Eventbrite organizer page into an ICS subscription feed:
+The third-party `eb-to-ical` service shut down permanently in 2026 after AI bot abuse made it unsustainable. Do not add its organizer-feed URLs. When a venue uses Eventbrite for ticketing but has no ICS feed on its own site, use the repository's `scrapers/eventbrite.py` instead. It extracts Eventbrite's JSON-LD from the organizer page and emits ICS locally.
 
-```
-https://eb-to-ical.daylightpirates.org/eventbrite-organizer-ical?organizer={ORGANIZER_ID}
+Register it through `add_scraper.py` so both execution and source metadata are wired into the pipeline:
+
+```bash
+python scripts/add_scraper.py eventbrite raleighdurham "Quail Ridge Books" \
+  --extra-args '--url "https://www.eventbrite.com/o/quail-ridge-books-17882467120" --name "Quail Ridge Books"' \
+  --output-name eventbrite_quail_ridge --test
 ```
 
 **How to find the organizer ID:** Search `site:eventbrite.com "{venue name}"` and look for the organizer page URL pattern `eventbrite.com/o/{name}-{ID}/`. The numeric suffix is the organizer ID.
 
-**Example:** Quail Ridge Books (Raleigh) — their IndieCommerce site has no feed, but their Eventbrite organizer page (`17882467120`) yields 616 events via eb-to-ical. Source: [eb-to-ical GitHub](https://github.com/diafygi/eb-to-ical).
+**Tradeoff:** The organizer page generally exposes the current set of roughly 10–30 events, not the full historical inventory that `eb-to-ical` enumerated. That is enough for an upcoming-events calendar. Quail Ridge Books and several Montclair organizers use this scraper pattern in the repository.
 
 ## fixtur.es for Pro/Semi-Pro Sports Teams
 
