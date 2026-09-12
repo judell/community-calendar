@@ -244,6 +244,56 @@ function getEventSearchText(event) {
   ).toLowerCase();
 }
 
+// Strong content identity for an events payload. shell.js's issue-82
+// emission coalescing uses this to decide whether a fresh fetch is
+// identical to the paint it would replace. Unlike ccArraySig — kept O(1)
+// because memoizeIngest runs it on every evaluation — this runs only a
+// handful of times per load (cache paint, fetch compare/store, refetch),
+// so it can afford to examine every row. The previous key (length +
+// first/last id) called two payloads identical when only the middle
+// changed, which let a stale cached paint suppress the fresh emission
+// and, after the epoch nudge landed, leave the repaint unfired. Two
+// 32-bit multiplicative hashes with independent seeds (an FNV-1a pass and
+// a MurmurHash3-style pass) over the same stream give ~64 bits, so an
+// accidental collision between distinct payloads is negligible.
+function eventsSignature(rows) {
+  if (!Array.isArray(rows)) return 'na';
+  if (!rows.length) return '0';
+  var h1 = 0x811c9dc5; // FNV-1a offset basis
+  var h2 = 0x9747b28c; // independent seed
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var s = row === undefined ? 'undefined' : JSON.stringify(row);
+    if (s === undefined) s = 'undefined';
+    for (var j = 0; j < s.length; j++) {
+      var c = s.charCodeAt(j);
+      h1 = Math.imul(h1 ^ c, 0x01000193); // FNV-1a prime
+      h2 = Math.imul(h2 ^ c, 0x85ebca6b); // MurmurHash3 constant
+    }
+    // Row separator: keeps ["ab"] from hashing the same as ["a", "b"].
+    h1 = Math.imul(h1 ^ 0x1f, 0x01000193);
+    h2 = Math.imul(h2 ^ 0x1f, 0x85ebca6b);
+  }
+  return rows.length + ':' + (h1 >>> 0).toString(16) + ':' + (h2 >>> 0).toString(16);
+}
+window.eventsSignature = eventsSignature;
+
+// The issue-82 fresh-emission skip decision, extracted from shell.js so
+// test.html can pin the coalescing itself, not just the signature: a fresh
+// payload is skipped only when it is identical to the last emission and
+// came from the same subscriber and city. With the old weak key, a
+// mid-payload change looked identical and suppressed the fresh emit — and
+// therefore the epoch bump that repaints the stale cache.
+function shouldSkipFreshEmit(state, rows) {
+  return !!(
+    state.currentEmit &&
+    state.currentEmit === state.lastEmitFn &&
+    state.city === state.lastEmitCity &&
+    eventsSignature(rows) === state.lastEmitSig
+  );
+}
+window.shouldSkipFreshEmit = shouldSkipFreshEmit;
+
 // Filter events by search term with progressive narrowing
 var _prevTerm = '';
 var _prevCategory = '';
@@ -1648,8 +1698,9 @@ if (typeof window !== 'undefined') {
   // stable, yet ref-keyed memos still missed at engine-mediated stage
   // boundaries — the engine gives intermediate expression results fresh
   // identities per evaluation. Signatures sidestep identity entirely.
-  // (Known tradeoff, same as shell.js rowsSig: a mid-array content change
-  // with identical length and endpoint ids would falsely hit.)
+  // (Known ccArraySig tradeoff: a mid-array content change with identical
+  // length and endpoint ids would falsely hit. The emission coalescing in
+  // shell.js keys on eventsSignature, a full-payload hash, instead.)
   window.__ccMemoStats = {};
   function memoizeIngest(name, extraKey) {
     var orig = window[name];
@@ -1692,9 +1743,9 @@ if (typeof window !== 'undefined') {
   // full-price chain runs even after ref memoization, i.e. the engine
   // presents a different events.value/enrichments.value identity per
   // binding evaluation. So the boundary memo keys on a cheap content
-  // signature instead (length + first/last ids — the same identity test
-  // shell.js uses to skip identical emissions), and __ccRefStats counts
-  // the identity churn as evidence for the upstream XMLUI finding.
+  // signature instead (the ccArraySig length + first/last id test), and
+  // __ccRefStats counts the identity churn as evidence for the upstream
+  // XMLUI finding.
   function ccArraySig(a) {
     if (!Array.isArray(a)) return 'na';
     if (!a.length) return '0';

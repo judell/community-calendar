@@ -467,11 +467,6 @@ window._xsLogs = [];
     var lastEmitCity = null;
     var lastEmitSig = null;
 
-    function rowsSig(rows) {
-      return rows.length + ':' +
-        (rows.length ? rows[0].id + ':' + rows[rows.length - 1].id : '');
-    }
-
     function eventsUrl(city) {
       return window.SUPABASE_URL + '/rest/v1/deduplicated_events' +
         '?select=id,title,start_time,end_time,url,location,description,source,transcript,cluster_id,source_urls,category,image_url,all_day,merged_ids,city' +
@@ -511,8 +506,13 @@ window._xsLogs = [];
         if (city !== window.cityFilter) return false;  // stale-city race guard (#76)
         // issue-82: skip the replacement when this same subscriber already
         // holds identical data — the emit would only trigger a re-render.
-        if (currentEmit && currentEmit === lastEmitFn &&
-            city === lastEmitCity && rowsSig(rows) === lastEmitSig) {
+        if (window.shouldSkipFreshEmit({
+              currentEmit: currentEmit,
+              lastEmitFn: lastEmitFn,
+              city: city,
+              lastEmitCity: lastEmitCity,
+              lastEmitSig: lastEmitSig,
+            }, rows)) {
           performance.mark('cc-events-skip-fresh-identical');
           return true;
         }
@@ -520,7 +520,7 @@ window._xsLogs = [];
         if (currentEmit) {
           lastEmitFn = currentEmit;
           lastEmitCity = city;
-          lastEmitSig = rowsSig(rows);
+          lastEmitSig = window.eventsSignature(rows);
           currentEmit(rows);
         }
         return true;
@@ -557,7 +557,7 @@ window._xsLogs = [];
           performance.mark('cc-events-emit-cached');
           lastEmitFn = emit;
           lastEmitCity = city;
-          lastEmitSig = rowsSig(cached);
+          lastEmitSig = window.eventsSignature(cached);
           emit(cached);
         }
       });
