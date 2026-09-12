@@ -437,6 +437,10 @@ window._xsLogs = [];
     // cache older than the nightly-build horizon marks
     // cc-events-cached-stale-painted for observability.
     var CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+    // staged-cached-paint-backfill: rows in the immediate cached slice.
+    // Enough for several screenfuls; small enough that its ingest+render
+    // is a rounding error next to the full 5-6k array.
+    var FIRST_PAINT_ROWS = 200;
     function unwrapCachedRows(val) {
       var rows = null;
       var age = null;
@@ -552,6 +556,32 @@ window._xsLogs = [];
           // full ingest+render that is immediately redone.
           if (fetchResolvedCity === city) {
             performance.mark('cc-events-skip-cached-superseded');
+            return;
+          }
+          // staged-cached-paint-backfill: paint a thin slice immediately —
+          // ingest+render of ~200 rows is near-free, so first paint lands
+          // at the engine floor instead of paying the full-array cost —
+          // then backfill the complete cached array ~100ms later. The
+          // epoch nudge (7a120555) is what makes multi-emission repaint
+          // reliable. The backfill is load-bearing: with a young cache the
+          // later fresh emit is suppressed as identical (PR #85's
+          // eventsSignature decides that now), so the backfill is what
+          // completes the page. Skip it only when fresh has already
+          // emitted or the subscriber changed.
+          if (cached.length > FIRST_PAINT_ROWS) {
+            try { performance.mark('cc-events-emit-cached-slice'); } catch (e) {}
+            lastEmitFn = emit;
+            lastEmitCity = city;
+            lastEmitSig = null; // transient slice: never a skip-identical baseline
+            emit(cached.slice(0, FIRST_PAINT_ROWS));
+            setTimeout(function () {
+              if (gotFresh || currentEmit !== emit || city !== window.cityFilter) return;
+              try { performance.mark('cc-events-emit-cached-full'); } catch (e) {}
+              lastEmitFn = emit;
+              lastEmitCity = city;
+              lastEmitSig = window.eventsSignature(cached);
+              emit(cached);
+            }, 100);
             return;
           }
           performance.mark('cc-events-emit-cached');
