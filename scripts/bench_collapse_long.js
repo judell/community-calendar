@@ -145,7 +145,17 @@ function main() {
     console.error('ERROR: fresh reference array not actually fresh — test is broken');
     process.exit(2);
   }
+  // Snapshot both cache layers before run #2. The hit may land in either: the
+  // content-key cache (logs "cache HIT" via _pipelineLog) or the issue-82
+  // memoize wrapper (short-circuits before it and bumps
+  // __ccMemoStats.collapseLongRunningEvents.hits instead, with no log).
+  const memoStats = windowObj.__ccMemoStats && windowObj.__ccMemoStats.collapseLongRunningEvents;
+  const memoHitsBefore = memoStats ? memoStats.hits : 0;
+  const logLenBefore = windowObj._pipelineLog.length;
   const run2 = run(freshRefs, 'run#2 (network emit, fresh refs)');
+  const run2Hit =
+    /cache HIT/.test(windowObj._pipelineLog.slice(logLenBefore).join('\n')) ||
+    (memoStats && memoStats.hits > memoHitsBefore);
   console.log('run#2: ' + run2.ms.toFixed(1) + 'ms');
 
   // Run #3 — repeat to confirm the cache stays warm.
@@ -155,15 +165,17 @@ function main() {
   console.log('');
   console.log('window._pipelineLog:');
   windowObj._pipelineLog.forEach(function (line) { console.log('  ' + line); });
+  if (memoStats) {
+    console.log('window.__ccMemoStats.collapseLongRunningEvents: ' + memoStats.hits + ' hits / ' + memoStats.misses + ' misses');
+  }
   console.log('');
 
   // --- Assertions -----------------------------------------------------------
   const failures = [];
   const HIT_THRESHOLD_MS = 5; // cache hits take microseconds; 5ms is generous
 
-  const run2Hit = /cache HIT/.test(windowObj._pipelineLog[windowObj._pipelineLog.length - 2] || '');
   if (!run2Hit) {
-    failures.push('run#2 was not a cache HIT (expected content-key cache hit on fresh references)');
+    failures.push('run#2 was not a cache HIT at either layer (content-key cache or issue-82 memoize)');
   }
   if (run2.ms > HIT_THRESHOLD_MS) {
     failures.push('run#2 took ' + run2.ms.toFixed(1) + 'ms (expected < ' + HIT_THRESHOLD_MS + 'ms; regression was 254-336ms)');
