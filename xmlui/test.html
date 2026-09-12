@@ -1184,6 +1184,58 @@
       }
 
       // ============================================================
+      // eventsSignature — issue-82 coalescing identity
+      // ============================================================
+      // shell.js skips a fresh emission only when it is truly identical to
+      // what was already emitted. The old key (length + first/last id)
+      // treated a mid-array content change as identical, so a stale cached
+      // paint could suppress the fresh emit and, after the epoch nudge,
+      // leave the repaint unfired. These lock the stronger contract.
+      describe('eventsSignature', () => {
+        const stale = [
+          { id: 1, title: 'Early', start_time: '2026-01-01T10:00:00Z' },
+          { id: 2, title: 'Middle OLD', start_time: '2026-01-02T10:00:00Z' },
+          { id: 3, title: 'Late', start_time: '2026-01-03T10:00:00Z' }
+        ];
+        const fresh = [
+          { id: 1, title: 'Early', start_time: '2026-01-01T10:00:00Z' },
+          { id: 2, title: 'Middle NEW', start_time: '2026-01-02T10:00:00Z' },
+          { id: 3, title: 'Late', start_time: '2026-01-03T10:00:00Z' }
+        ];
+
+        it('is exported', () => {
+          assertEqual(typeof eventsSignature, 'function');
+        });
+
+        it('distinguishes payloads that differ only between the endpoint ids', () => {
+          assert(eventsSignature(stale) !== eventsSignature(fresh),
+            'a mid-array content change must change the signature');
+        });
+
+        it('is stable for identical content across distinct references', () => {
+          assertEqual(eventsSignature(stale), eventsSignature(JSON.parse(JSON.stringify(stale))));
+        });
+
+        it('catches an in-place field edit with identical ids', () => {
+          const edited = JSON.parse(JSON.stringify(stale));
+          edited[1].start_time = '2026-01-02T11:00:00Z';
+          assert(eventsSignature(stale) !== eventsSignature(edited),
+            'a field edit must change the signature');
+        });
+
+        it('returns a stable key for empty and non-array input', () => {
+          assertEqual(eventsSignature([]), eventsSignature([]));
+          assertEqual(eventsSignature(null), eventsSignature(null));
+          assertEqual(eventsSignature(undefined), eventsSignature(undefined));
+        });
+
+        it('treats a reordering as a change', () => {
+          assert(eventsSignature(stale) !== eventsSignature([stale[1], stale[0], stale[2]]),
+            'order must be part of the identity');
+        });
+      });
+
+      // ============================================================
       // RENDER RESULTS
       // ============================================================
 
