@@ -841,6 +841,7 @@ var _collapseCache = null;
 var _collapseLastLen = 0;
 var _collapseLastFirstId = null;
 var _collapseLastLastId = null;
+var _collapseLastEmitSig = null;
 var _collapseRun = 0;
 
 function collapseLongRunningEvents(events) {
@@ -851,12 +852,22 @@ function collapseLongRunningEvents(events) {
   // network emit has different object *references* than the cached emit but the
   // same content, so an identity check always missed on the 2nd pipeline run
   // and recomputed (~300ms spike). See issue #77.
+  //
+  // The id triple alone is too weak (#86): a payload differing only in the
+  // middle matches it, and this returns _collapseCache BY REFERENCE, so the
+  // fresh rows are swallowed here even after the outer memoizeIngest key was
+  // fixed in 4cb2e05 — the outer memo misses, calls through, and gets the
+  // stale array back. The emission signature shell.js publishes closes that:
+  // it changes iff the emitted content changed, and stays constant within one
+  // emission, so the repeated pipeline runs this cache exists for still hit.
   var firstId = events[0] && events[0].id;
   var lastId = events[events.length - 1] && events[events.length - 1].id;
+  var emitSig = window.__ccEmitSig || '';
   if (_collapseCache &&
       events.length === _collapseLastLen &&
       firstId === _collapseLastFirstId &&
-      lastId === _collapseLastLastId) {
+      lastId === _collapseLastLastId &&
+      emitSig === _collapseLastEmitSig) {
     if (!window._pipelineLog) window._pipelineLog = [];
     window._pipelineLog.push('collapseLong run#' + _collapseRun + ': ' + (performance.now() - _t0).toFixed(1) + 'ms (cache HIT), ' + events.length + ' events');
     return _collapseCache;
@@ -864,6 +875,7 @@ function collapseLongRunningEvents(events) {
   _collapseLastLen = events.length;
   _collapseLastFirstId = firstId;
   _collapseLastLastId = lastId;
+  _collapseLastEmitSig = emitSig;
 
   const MIN_OCCURRENCES = 5;  // Need at least this many to consider "long-running"
   const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
