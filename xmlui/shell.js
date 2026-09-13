@@ -471,6 +471,20 @@ window._xsLogs = [];
     var lastEmitCity = null;
     var lastEmitSig = null;
 
+    // #86: the ingest memos in helpers.js key on ccArraySig (length +
+    // endpoint ids), which falsely HITs on a mid-only payload change and
+    // returns the previous array by reference — so fresh data that the
+    // #85 emission fix correctly lets through never reaches the list.
+    // Every emission publishes its own strong identity here, and the
+    // memo keys carry it, so an emission with different content
+    // invalidates the chain exactly once. emitSeq disambiguates the
+    // transient slice, whose payload has no independent signature.
+    var emitSeq = 0;
+    function publishEmitSig(sig) {
+      emitSeq += 1;
+      window.__ccEmitSig = (sig == null ? 'null' : sig) + '#' + emitSeq;
+    }
+
     function eventsUrl(city) {
       return window.SUPABASE_URL + '/rest/v1/deduplicated_events' +
         '?select=id,title,start_time,end_time,url,location,description,source,transcript,cluster_id,source_urls,category,image_url,all_day,merged_ids,city' +
@@ -525,6 +539,7 @@ window._xsLogs = [];
           lastEmitFn = currentEmit;
           lastEmitCity = city;
           lastEmitSig = window.eventsSignature(rows);
+          publishEmitSig(lastEmitSig);
           currentEmit(rows);
         }
         return true;
@@ -573,6 +588,7 @@ window._xsLogs = [];
             lastEmitFn = emit;
             lastEmitCity = city;
             lastEmitSig = null; // transient slice: never a skip-identical baseline
+            publishEmitSig('slice:' + FIRST_PAINT_ROWS + ':' + emitSeq);
             emit(cached.slice(0, FIRST_PAINT_ROWS));
             setTimeout(function () {
               if (gotFresh || currentEmit !== emit || city !== window.cityFilter) return;
@@ -580,6 +596,7 @@ window._xsLogs = [];
               lastEmitFn = emit;
               lastEmitCity = city;
               lastEmitSig = window.eventsSignature(cached);
+              publishEmitSig(lastEmitSig);
               emit(cached);
             }, 100);
             return;
@@ -588,6 +605,7 @@ window._xsLogs = [];
           lastEmitFn = emit;
           lastEmitCity = city;
           lastEmitSig = window.eventsSignature(cached);
+          publishEmitSig(lastEmitSig);
           emit(cached);
         }
       });

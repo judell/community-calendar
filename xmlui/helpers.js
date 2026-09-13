@@ -1698,9 +1698,17 @@ if (typeof window !== 'undefined') {
   // stable, yet ref-keyed memos still missed at engine-mediated stage
   // boundaries — the engine gives intermediate expression results fresh
   // identities per evaluation. Signatures sidestep identity entirely.
-  // (Known ccArraySig tradeoff: a mid-array content change with identical
-  // length and endpoint ids would falsely hit. The emission coalescing in
-  // shell.js keys on eventsSignature, a full-payload hash, instead.)
+  // ccArraySig alone is too weak to key these memos: a mid-array content
+  // change with identical length and endpoint ids falsely HITs, and the
+  // memo then returns the previous array BY REFERENCE, so fresh data that
+  // shell.js correctly emitted never reaches the list (#86 — PR #85 fixed
+  // the emission layer, this is the stage immediately downstream). Every
+  // key therefore carries window.__ccEmitSig, the strong signature of the
+  // emission the data came from, which shell.js publishes at each emit.
+  // The hot path stays O(1) — one extra string compare, no full-payload
+  // hashing per evaluation — while correctness rides on a signature the
+  // emission already computed. Between emissions the value is constant,
+  // so typing/category/slider churn still hits.
   window.__ccMemoStats = {};
   function memoizeIngest(name, extraKey) {
     var orig = window[name];
@@ -1708,7 +1716,7 @@ if (typeof window !== 'undefined') {
     var lastKey = null, lastResult = null;
     var stats = window.__ccMemoStats[name] = { hits: 0, misses: 0 };
     window[name] = function() {
-      var key = [ccArraySig(arguments[0])];
+      var key = [ccArraySig(arguments[0]), window.__ccEmitSig || ''];
       if (extraKey) key = key.concat(extraKey.apply(null, arguments));
       if (lastKey !== null && key.length === lastKey.length &&
           key.every(function(k, i) { return k === lastKey[i]; })) {
@@ -1754,18 +1762,24 @@ if (typeof window !== 'undefined') {
   window.__ccRefStats = { combineCalls: 0, eventsRefChanges: 0, enrichRefChanges: 0 };
   var _combineLastARef = null, _combineLastBRef = null;
   var _combineLastASig = null, _combineLastBSig = null, _combineResult = null;
+  var _combineLastEmitSig = null;
   window.combineEvents = function(events, enrichments) {
     var s = window.__ccRefStats;
     s.combineCalls += 1;
     if (events !== _combineLastARef) { s.eventsRefChanges += 1; _combineLastARef = events; }
     if (enrichments !== _combineLastBRef) { s.enrichRefChanges += 1; _combineLastBRef = enrichments; }
+    // Head of the chain, so it carries __ccEmitSig for the same reason the
+    // memoizeIngest keys do (#86): without it a mid-only fresh payload
+    // HITs here and the whole chain below sees the cached array.
     var aSig = ccArraySig(events), bSig = ccArraySig(enrichments);
+    var emitSig = window.__ccEmitSig || '';
     if (aSig === _combineLastASig && bSig === _combineLastBSig &&
-        _combineResult !== null) {
+        emitSig === _combineLastEmitSig && _combineResult !== null) {
       return _combineResult;
     }
     _combineLastASig = aSig;
     _combineLastBSig = bSig;
+    _combineLastEmitSig = emitSig;
     _combineResult = (Array.isArray(events) ? events : [])
       .concat(Array.isArray(enrichments) ? enrichments : []);
     return _combineResult;
