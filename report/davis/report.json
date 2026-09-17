@@ -1,18 +1,18 @@
 {
   "city": "davis",
-  "generated": "2026-09-16T04:43:01.873019",
+  "generated": "2026-09-17T04:52:27.030766",
   "build": {
-    "generated": "2026-09-16T04:43:01.873019",
-    "total_events": 724,
-    "prev_total_events": 723,
-    "delta": 1
+    "generated": "2026-09-17T04:52:27.030766",
+    "total_events": 741,
+    "prev_total_events": 724,
+    "delta": 17
   },
   "problems": [
     {
       "severity": 1,
       "kind": "broken_feed",
       "title": "putahcreekcouncil is serving html, not ICS",
-      "detail": "no good build in recorded history; broken since 2026-06-19",
+      "detail": "no good build in recorded history; broken since 2026-06-20",
       "feed": "putahcreekcouncil",
       "repro": {
         "display": "Putah Creek Council",
@@ -46,20 +46,20 @@
     },
     {
       "severity": 2,
-      "kind": "newly_silent",
-      "title": "ucdavis_arts went silent (valid calendar, 0 events)",
-      "detail": "was 2 events on 2026-09-08",
-      "feed": "ucdavis_arts",
+      "kind": "drop",
+      "title": "mobilize_indivisible_yolo: Events dropped 65% (294 \u2192 102)",
+      "detail": "2026-09-17",
+      "feed": "mobilize_indivisible_yolo",
       "repro": {
-        "display": "UC Davis Arts",
-        "source": "python scrapers/ucdavis_arts.py",
-        "command": "python scrapers/ucdavis_arts.py"
+        "display": "Indivisible Yolo (Mobilize)",
+        "source": "python scrapers/mobilize.py --url \"https://www.mobilize.us/indivisibleyolo/\" --name \"Indivisible Yolo (Mobilize)\" --output cities/davis/mobilize_indivisible_yolo.ics",
+        "command": "python scrapers/mobilize.py --url \"https://www.mobilize.us/indivisibleyolo/\" --name \"Indivisible Yolo (Mobilize)\" --output cities/davis/mobilize_indivisible_yolo.ics"
       }
     },
     {
       "severity": 3,
       "kind": "tz_anomaly",
-      "title": "Davis Downtown: 14/29 events at suspicious hours",
+      "title": "Davis Downtown: 15/29 events at suspicious hours",
       "detail": "likely a -7h offset error",
       "feed": "davis_downtown",
       "repro": {
@@ -106,12 +106,24 @@
       "feed": "meetup_winters_shut_up_and_write_meetup_group",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-19",
+      "silent_since": "2026-06-20",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Winters Shut Up & Write",
         "source": "https://www.meetup.com/winters-shut-up-and-write-meetup-group/events/ical/",
         "command": "curl -sL -A 'Mozilla/5.0' 'https://www.meetup.com/winters-shut-up-and-write-meetup-group/events/ical/' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "feed": "ucdavis_arts",
+      "was": 2,
+      "was_date": "2026-09-08",
+      "silent_since": "2026-09-09",
+      "content": "quiet",
+      "repro": {
+        "display": "UC Davis Arts",
+        "source": "python scrapers/ucdavis_arts.py",
+        "command": "python scrapers/ucdavis_arts.py"
       }
     }
   ],
@@ -120,14 +132,14 @@
       "feed": "meetup_winters_shut_up_and_write_meetup_group",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-19",
+      "silent_since": "2026-06-20",
       "content": "quiet"
     },
     {
       "feed": "putahcreekcouncil",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-19",
+      "silent_since": "2026-06-20",
       "content": "not_ics:html"
     },
     {
@@ -157,7 +169,7 @@
   "tz_anomalies": [
     {
       "source": "Davis Downtown",
-      "count": 14,
+      "count": 15,
       "total": 29,
       "offset": -7,
       "samples": [
@@ -196,12 +208,12 @@
   ],
   "recent_anomalies": [
     {
-      "type": "zero_events",
-      "message": "Feed returned 0 events (was 2)",
-      "severity": "info",
-      "date": "2026-09-09",
+      "type": "significant_drop",
+      "message": "Events dropped 65% (294 \u2192 102)",
+      "severity": "medium",
+      "date": "2026-09-17",
       "city": "davis",
-      "feed": "ucdavis_arts"
+      "feed": "mobilize_indivisible_yolo"
     }
   ],
   "detail": {
@@ -211,10 +223,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-18",
-            "count": 30
-          },
           {
             "date": "2026-08-19",
             "count": 30
@@ -330,18 +338,18 @@
           {
             "date": "2026-09-16",
             "count": 30
+          },
+          {
+            "date": "2026-09-17",
+            "count": 30
           }
         ]
       },
       "gcal_davisbikeclubwww": {
-        "count": 28,
+        "count": 24,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-18",
-            "count": 0
-          },
           {
             "date": "2026-08-19",
             "count": 0
@@ -457,6 +465,10 @@
           {
             "date": "2026-09-16",
             "count": 28
+          },
+          {
+            "date": "2026-09-17",
+            "count": 24
           }
         ]
       },
@@ -465,10 +477,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-18",
-            "count": 30
-          },
           {
             "date": "2026-08-19",
             "count": 30
@@ -584,6 +592,10 @@
           {
             "date": "2026-09-16",
             "count": 29
+          },
+          {
+            "date": "2026-09-17",
+            "count": 29
           }
         ]
       },
@@ -592,10 +604,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-18",
-            "count": 10
-          },
           {
             "date": "2026-08-19",
             "count": 10
@@ -710,6 +718,10 @@
           },
           {
             "date": "2026-09-16",
+            "count": 10
+          },
+          {
+            "date": "2026-09-17",
             "count": 10
           }
         ]
@@ -720,10 +732,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-18",
-            "count": 10
-          },
-          {
             "date": "2026-08-19",
             "count": 10
           },
@@ -837,6 +845,10 @@
           },
           {
             "date": "2026-09-16",
+            "count": 10
+          },
+          {
+            "date": "2026-09-17",
             "count": 10
           }
         ]
@@ -847,10 +859,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-18",
-            "count": 10
-          },
-          {
             "date": "2026-08-19",
             "count": 10
           },
@@ -964,6 +972,10 @@
           },
           {
             "date": "2026-09-16",
+            "count": 10
+          },
+          {
+            "date": "2026-09-17",
             "count": 10
           }
         ]
@@ -974,10 +986,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-18",
-            "count": 5
-          },
-          {
             "date": "2026-08-19",
             "count": 5
           },
@@ -1091,6 +1099,10 @@
           },
           {
             "date": "2026-09-16",
+            "count": 2
+          },
+          {
+            "date": "2026-09-17",
             "count": 2
           }
         ]
@@ -1101,10 +1113,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-18",
-            "count": 0
-          },
-          {
             "date": "2026-08-19",
             "count": 0
           },
@@ -1218,6 +1226,10 @@
           },
           {
             "date": "2026-09-16",
+            "count": 0
+          },
+          {
+            "date": "2026-09-17",
             "count": 0
           }
         ]
@@ -1228,10 +1240,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-18",
-            "count": 10
-          },
-          {
             "date": "2026-08-19",
             "count": 10
           },
@@ -1346,18 +1354,18 @@
           {
             "date": "2026-09-16",
             "count": 10
+          },
+          {
+            "date": "2026-09-17",
+            "count": 10
           }
         ]
       },
       "mobilize_indivisible_yolo": {
-        "count": 294,
+        "count": 102,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-18",
-            "count": 121
-          },
           {
             "date": "2026-08-19",
             "count": 122
@@ -1473,6 +1481,10 @@
           {
             "date": "2026-09-16",
             "count": 294
+          },
+          {
+            "date": "2026-09-17",
+            "count": 102
           }
         ]
       },
@@ -1481,10 +1493,6 @@
         "error": null,
         "content": "not_ics:html",
         "history": [
-          {
-            "date": "2026-08-18",
-            "count": 0
-          },
           {
             "date": "2026-08-19",
             "count": 0
@@ -1599,6 +1607,10 @@
           },
           {
             "date": "2026-09-16",
+            "count": 0
+          },
+          {
+            "date": "2026-09-17",
             "count": 0
           }
         ]
@@ -1609,10 +1621,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-18",
-            "count": 21
-          },
-          {
             "date": "2026-08-19",
             "count": 21
           },
@@ -1726,6 +1734,10 @@
           },
           {
             "date": "2026-09-16",
+            "count": 23
+          },
+          {
+            "date": "2026-09-17",
             "count": 23
           }
         ]
@@ -1736,10 +1748,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-18",
-            "count": 1
-          },
-          {
             "date": "2026-08-19",
             "count": 1
           },
@@ -1854,18 +1862,18 @@
           {
             "date": "2026-09-16",
             "count": 0
+          },
+          {
+            "date": "2026-09-17",
+            "count": 0
           }
         ]
       },
       "ucdavis_athletics": {
-        "count": 142,
+        "count": 143,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-18",
-            "count": 155
-          },
           {
             "date": "2026-08-19",
             "count": 157
@@ -1981,18 +1989,18 @@
           {
             "date": "2026-09-16",
             "count": 142
+          },
+          {
+            "date": "2026-09-17",
+            "count": 143
           }
         ]
       },
       "ucdavis_campusgroups": {
-        "count": 115,
+        "count": 119,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-18",
-            "count": 27
-          },
           {
             "date": "2026-08-19",
             "count": 27
@@ -2108,6 +2116,10 @@
           {
             "date": "2026-09-16",
             "count": 115
+          },
+          {
+            "date": "2026-09-17",
+            "count": 119
           }
         ]
       },
@@ -2116,10 +2128,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-18",
-            "count": 0
-          },
           {
             "date": "2026-08-19",
             "count": 0
@@ -2235,18 +2243,18 @@
           {
             "date": "2026-09-16",
             "count": 4
+          },
+          {
+            "date": "2026-09-17",
+            "count": 4
           }
         ]
       },
       "uudavis": {
-        "count": 17,
+        "count": 18,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-18",
-            "count": 16
-          },
           {
             "date": "2026-08-19",
             "count": 16
@@ -2362,6 +2370,10 @@
           {
             "date": "2026-09-16",
             "count": 17
+          },
+          {
+            "date": "2026-09-17",
+            "count": 18
           }
         ]
       },
@@ -2480,6 +2492,10 @@
           },
           {
             "date": "2026-09-16",
+            "count": 0
+          },
+          {
+            "date": "2026-09-17",
             "count": 0
           }
         ]
@@ -2600,18 +2616,18 @@
           {
             "date": "2026-09-16",
             "count": 0
+          },
+          {
+            "date": "2026-09-17",
+            "count": 0
           }
         ]
       },
       "yolo_library": {
-        "count": 132,
+        "count": 126,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-18",
-            "count": 97
-          },
           {
             "date": "2026-08-19",
             "count": 94
@@ -2727,24 +2743,28 @@
           {
             "date": "2026-09-16",
             "count": 132
+          },
+          {
+            "date": "2026-09-17",
+            "count": 126
           }
         ]
       }
     },
     "url_quality": {
-      "total_with_url": 724,
-      "total_events": 724,
-      "unique_urls": 517,
-      "generic_count": 144,
+      "total_with_url": 741,
+      "total_events": 741,
+      "unique_urls": 525,
+      "generic_count": 146,
       "generic_domains": [
         {
           "domain": "davisbikeclub.org",
-          "events": 127,
+          "events": 128,
           "url": "https://davisbikeclub.org/club-events-calendar/"
         },
         {
           "domain": "uudavis.org",
-          "events": 17,
+          "events": 18,
           "url": "https://uudavis.org/calendar/"
         }
       ],
@@ -2753,33 +2773,33 @@
       "source_specificity": [
         {
           "source": "UC Davis Athletics",
-          "events": 138,
-          "unique_urls": 138,
-          "specificity_pct": 100
-        },
-        {
-          "source": "Yolo Library",
-          "events": 131,
-          "unique_urls": 131,
+          "events": 139,
+          "unique_urls": 139,
           "specificity_pct": 100
         },
         {
           "source": "Davis Bike Club",
-          "events": 127,
+          "events": 128,
           "unique_urls": 1,
           "specificity_pct": 1
         },
         {
+          "source": "Yolo Library",
+          "events": 125,
+          "unique_urls": 125,
+          "specificity_pct": 100
+        },
+        {
           "source": "UC Davis CampusGroups",
-          "events": 113,
-          "unique_urls": 113,
+          "events": 116,
+          "unique_urls": 116,
           "specificity_pct": 100
         },
         {
           "source": "Indivisible Yolo (Mobilize)",
-          "events": 78,
-          "unique_urls": 14,
-          "specificity_pct": 18
+          "events": 94,
+          "unique_urls": 23,
+          "specificity_pct": 24
         },
         {
           "source": "Davis Downtown",
@@ -2795,24 +2815,24 @@
         },
         {
           "source": "The Dirt",
-          "events": 17,
-          "unique_urls": 17,
+          "events": 18,
+          "unique_urls": 18,
           "specificity_pct": 100
         },
         {
           "source": "UU Davis",
-          "events": 17,
+          "events": 18,
           "unique_urls": 1,
           "specificity_pct": 6
         },
         {
-          "source": "Meetup: Yolo Board Game Gathering",
+          "source": "Meetup: Mindful Embodied Spirituality",
           "events": 10,
           "unique_urls": 10,
           "specificity_pct": 100
         },
         {
-          "source": "Meetup: Mindful Embodied Spirituality",
+          "source": "Meetup: Yolo Board Game Gathering",
           "events": 10,
           "unique_urls": 10,
           "specificity_pct": 100
@@ -2849,7 +2869,7 @@
       "tzids": [
         {
           "tzid": "America/Los_Angeles",
-          "count": 2615,
+          "count": 2423,
           "files": 14,
           "matches_city": true,
           "sample_files": [
@@ -2897,56 +2917,12 @@
       {
         "source": "Indivisible Yolo (Mobilize)",
         "source_id": "mobilize_indivisible_yolo",
-        "location": "Tulare, CA",
-        "count": 67,
-        "titles": [
-          "Knock on Doors for Randy Villegas in Tulare!",
-          "Knock on Doors for Randy Villegas in Tulare!",
-          "Knock on Doors for Randy Villegas in Tulare!"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Bakersfield, CA",
-        "count": 65,
-        "titles": [
-          "Knock Doors for Randy Villegas in Bakersfield!",
-          "Knock Doors for Randy Villegas in Bakersfield!",
-          "Knock Doors for Randy Villegas in Bakersfield!"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
         "location": "Fresno, CA",
-        "count": 65,
+        "count": 4,
         "titles": [
           "Knock on Doors for Randy Villegas in Fresno & Kerman",
           "Knock on Doors for Randy Villegas in Fresno & Kerman",
           "Knock on Doors for Randy Villegas in Fresno & Kerman"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Arvin, CA",
-        "count": 15,
-        "titles": [
-          "Knock Doors for Randy Villegas in Arvin!",
-          "Knock Doors for Randy Villegas in Arvin!",
-          "Knock Doors for Randy Villegas in Arvin!"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Delano, CA",
-        "count": 4,
-        "titles": [
-          "Knock Doors for Randy Villegas in Delano",
-          "Knock Doors for Randy Villegas in Delano",
-          "Knock Doors for Randy Villegas in Delano"
         ]
       },
       {
@@ -2955,9 +2931,19 @@
         "location": "Great Bear Vineyards (Great Bear), 24800 County Rd 101A",
         "count": 3,
         "titles": [
-          "Fit4Mom Yoga Night",
           "Thursday Social",
-          "Beginner Yoga at the Vineyard"
+          "Beginner Yoga at the Vineyard",
+          "The Vinyl Tones & Fry Boys"
+        ]
+      },
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
+        "location": "94612, Oakland, CA, 94612",
+        "count": 2,
+        "titles": [
+          "Knock doors for Randy Villegas in Fresno",
+          "Knock doors for Randy Villegas in Fresno"
         ]
       },
       {
@@ -2966,16 +2952,7 @@
         "location": "Upper Crust Baking Co. (Upper Crust), 634 G St.",
         "count": 1,
         "titles": [
-          "Pizza Night"
-        ]
-      },
-      {
-        "source": "Thedirt",
-        "source_id": "thedirt",
-        "location": "Watermelon Music, 1970 Lake Blvd., Suite 1",
-        "count": 1,
-        "titles": [
-          "Open Jam Session"
+          "Bistro Night"
         ]
       },
       {
@@ -3009,31 +2986,31 @@
     "categories": [
       {
         "category": "Sports / Fitness",
-        "count": 152
+        "count": 154
       },
       {
         "category": "Nature / Outdoors / Recreation",
-        "count": 115
-      },
-      {
-        "category": "Education / Workshops",
-        "count": 97
+        "count": 116
       },
       {
         "category": "Government / Civic",
-        "count": 85
+        "count": 101
+      },
+      {
+        "category": "Education / Workshops",
+        "count": 94
       },
       {
         "category": "Community / Social",
-        "count": 67
+        "count": 68
       },
       {
         "category": "Family / Kids",
-        "count": 37
+        "count": 39
       },
       {
         "category": "Craft / Maker",
-        "count": 34
+        "count": 33
       },
       {
         "category": "Food / Drink",
@@ -3041,7 +3018,7 @@
       },
       {
         "category": "Religion / Spirituality",
-        "count": 21
+        "count": 22
       },
       {
         "category": "Games / Trivia",
@@ -3049,31 +3026,35 @@
       },
       {
         "category": "Arts / Culture",
-        "count": 15
+        "count": 14
       },
       {
         "category": "Health / Wellness",
-        "count": 13
+        "count": 12
       },
       {
         "category": "Technology / Careers",
-        "count": 10
-      },
-      {
-        "category": "Books / Literature / Poetry",
-        "count": 7
-      },
-      {
-        "category": "History / Heritage",
-        "count": 6
+        "count": 9
       },
       {
         "category": "Music / Concerts",
+        "count": 6
+      },
+      {
+        "category": "Books / Literature / Poetry",
+        "count": 6
+      },
+      {
+        "category": "History / Heritage",
         "count": 5
       },
       {
         "category": "LGBTQ+ / Gender",
         "count": 5
+      },
+      {
+        "category": "Dance / Performance",
+        "count": 3
       },
       {
         "category": "Schools / K-12",
@@ -3088,22 +3069,18 @@
         "count": 2
       },
       {
-        "category": "Dance / Performance",
-        "count": 1
-      },
-      {
-        "category": "(uncategorized)",
+        "category": "Comedy / Improv",
         "count": 1
       }
     ],
     "images": {
-      "total": 724,
-      "with_image": 118,
+      "total": 741,
+      "with_image": 133,
       "by_source": [
         {
           "source": "Indivisible Yolo (Mobilize)",
-          "total": 78,
-          "with_image": 78
+          "total": 94,
+          "with_image": 94
         },
         {
           "source": "Hate-Free Together",
@@ -3112,8 +3089,8 @@
         },
         {
           "source": "The Dirt",
-          "total": 17,
-          "with_image": 14
+          "total": 18,
+          "with_image": 13
         }
       ]
     }
