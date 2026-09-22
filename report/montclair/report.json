@@ -1,11 +1,11 @@
 {
   "city": "montclair",
-  "generated": "2026-09-21T04:45:14.572966",
+  "generated": "2026-09-22T04:44:34.715175",
   "build": {
-    "generated": "2026-09-21T04:45:14.572966",
-    "total_events": 3650,
-    "prev_total_events": 3639,
-    "delta": 11
+    "generated": "2026-09-22T04:44:34.715175",
+    "total_events": 3436,
+    "prev_total_events": 3650,
+    "delta": -214
   },
   "problems": [
     {
@@ -18,6 +18,18 @@
         "display": "Meetup: Board Game Night at Verona Inn",
         "source": "https://www.meetup.com/board-game-night-at-verona-inn/events/ical/",
         "command": "curl -sL -A 'Mozilla/5.0' 'https://www.meetup.com/board-game-night-at-verona-inn/events/ical/' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "severity": 1,
+      "kind": "broken_feed",
+      "title": "njaudubon is serving html, not ICS",
+      "detail": "was 30 events on 2026-09-21; broken since 2026-09-22",
+      "feed": "njaudubon",
+      "repro": {
+        "display": "NJ Audubon",
+        "source": "https://njaudubon.org/events/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://njaudubon.org/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
       }
     },
     {
@@ -42,6 +54,30 @@
         "display": "Studio Montclair",
         "source": "python scrapers/studio_montclair.py",
         "command": "python scrapers/studio_montclair.py"
+      }
+    },
+    {
+      "severity": 2,
+      "kind": "newly_silent",
+      "title": "ywcannj went silent (valid calendar, 0 events)",
+      "detail": "was 264 events on 2026-09-21",
+      "feed": "ywcannj",
+      "repro": {
+        "display": "YWCA Northern New Jersey",
+        "source": "python scrapers/tribe_rest.py --api-base \"https://ywcannj.org\" --name \"YWCA Northern New Jersey\" --timezone America/New_York --user-agent \"Mozilla/5.0\" --output cities/montclair/ywcannj.ics",
+        "command": "python scrapers/tribe_rest.py --api-base \"https://ywcannj.org\" --name \"YWCA Northern New Jersey\" --timezone America/New_York --user-agent \"Mozilla/5.0\" --output cities/montclair/ywcannj.ics"
+      }
+    },
+    {
+      "severity": 2,
+      "kind": "drop",
+      "title": "nertamid: Events dropped 80% (256 \u2192 50)",
+      "detail": "2026-09-22",
+      "feed": "nertamid",
+      "repro": {
+        "display": "Temple Ner Tamid",
+        "source": "python scrapers/tribe_rest.py --api-base \"https://www.nertamid.org\" --name \"Temple Ner Tamid\" --timezone America/New_York --user-agent \"Mozilla/5.0\" --output cities/montclair/nertamid.ics",
+        "command": "python scrapers/tribe_rest.py --api-base \"https://www.nertamid.org\" --name \"Temple Ner Tamid\" --timezone America/New_York --user-agent \"Mozilla/5.0\" --output cities/montclair/nertamid.ics"
       }
     }
   ],
@@ -74,7 +110,7 @@
       "feed": "eventbrite_watchung_booksellers",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-23",
+      "silent_since": "2026-06-24",
       "content": "quiet",
       "repro": {
         "display": "Watchung Booksellers",
@@ -98,7 +134,7 @@
       "feed": "meetup_bicycle_touring_club_of_north_jersey",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-23",
+      "silent_since": "2026-06-24",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Bicycle Touring Club of North Jersey",
@@ -134,7 +170,7 @@
       "feed": "meetup_league_of_women_voters_of_the_montclair_area",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-23",
+      "silent_since": "2026-06-24",
       "content": "quiet",
       "repro": {
         "display": "Meetup: League of Women Voters Montclair",
@@ -210,7 +246,7 @@
       "feed": "eventbrite_watchung_booksellers",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-23",
+      "silent_since": "2026-06-24",
       "content": "quiet"
     },
     {
@@ -224,7 +260,7 @@
       "feed": "meetup_bicycle_touring_club_of_north_jersey",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-23",
+      "silent_since": "2026-06-24",
       "content": "quiet"
     },
     {
@@ -259,7 +295,7 @@
       "feed": "meetup_league_of_women_voters_of_the_montclair_area",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-06-23",
+      "silent_since": "2026-06-24",
       "content": "quiet"
     },
     {
@@ -268,6 +304,13 @@
       "was_date": "2026-08-31",
       "silent_since": "2026-09-01",
       "content": "quiet"
+    },
+    {
+      "feed": "njaudubon",
+      "was": 30,
+      "was_date": "2026-09-21",
+      "silent_since": "2026-09-22",
+      "content": "not_ics:html"
     },
     {
       "feed": "outpost_burbs",
@@ -296,20 +339,19 @@
       "was_date": "2026-09-18",
       "silent_since": "2026-09-19",
       "content": "quiet"
+    },
+    {
+      "feed": "ywcannj",
+      "was": 264,
+      "was_date": "2026-09-21",
+      "silent_since": "2026-09-22",
+      "content": "quiet"
     }
   ],
   "new_errors": [],
   "ongoing_errors": [],
   "tz_anomalies": [],
   "recent_anomalies": [
-    {
-      "type": "zero_events",
-      "message": "Feed returned 0 events (was 30)",
-      "severity": "info",
-      "date": "2026-09-14",
-      "city": "montclair",
-      "feed": "njaudubon"
-    },
     {
       "type": "zero_events",
       "message": "Feed returned 0 events (was 30)",
@@ -365,6 +407,30 @@
       "date": "2026-09-20",
       "city": "montclair",
       "feed": "maxpreps_montclair_high"
+    },
+    {
+      "type": "significant_drop",
+      "message": "Events dropped 80% (256 \u2192 50)",
+      "severity": "medium",
+      "date": "2026-09-22",
+      "city": "montclair",
+      "feed": "nertamid"
+    },
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 30)",
+      "severity": "info",
+      "date": "2026-09-22",
+      "city": "montclair",
+      "feed": "njaudubon"
+    },
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 264)",
+      "severity": "info",
+      "date": "2026-09-22",
+      "city": "montclair",
+      "feed": "ywcannj"
     }
   ],
   "detail": {
@@ -374,10 +440,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 0
-          },
           {
             "date": "2026-08-24",
             "count": 0
@@ -493,18 +555,18 @@
           {
             "date": "2026-09-21",
             "count": 0
+          },
+          {
+            "date": "2026-09-22",
+            "count": 0
           }
         ]
       },
       "campuslabs_montclair": {
-        "count": 732,
+        "count": 776,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 289
-          },
           {
             "date": "2026-08-24",
             "count": 310
@@ -620,6 +682,10 @@
           {
             "date": "2026-09-21",
             "count": 732
+          },
+          {
+            "date": "2026-09-22",
+            "count": 776
           }
         ]
       },
@@ -628,10 +694,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 39
-          },
           {
             "date": "2026-08-24",
             "count": 39
@@ -747,6 +809,10 @@
           {
             "date": "2026-09-21",
             "count": 31
+          },
+          {
+            "date": "2026-09-22",
+            "count": 31
           }
         ]
       },
@@ -755,10 +821,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 32
-          },
           {
             "date": "2026-08-24",
             "count": 32
@@ -873,6 +935,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 29
+          },
+          {
+            "date": "2026-09-22",
             "count": 29
           }
         ]
@@ -883,10 +949,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 21
-          },
-          {
             "date": "2026-08-24",
             "count": 21
           },
@@ -1001,18 +1063,18 @@
           {
             "date": "2026-09-21",
             "count": 17
+          },
+          {
+            "date": "2026-09-22",
+            "count": 17
           }
         ]
       },
       "essex_county_parks": {
-        "count": 42,
+        "count": 41,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 15
-          },
           {
             "date": "2026-08-24",
             "count": 15
@@ -1128,6 +1190,10 @@
           {
             "date": "2026-09-21",
             "count": 42
+          },
+          {
+            "date": "2026-09-22",
+            "count": 41
           }
         ]
       },
@@ -1136,10 +1202,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 1
-          },
           {
             "date": "2026-08-24",
             "count": 1
@@ -1254,6 +1316,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 1
+          },
+          {
+            "date": "2026-09-22",
             "count": 1
           }
         ]
@@ -1264,10 +1330,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 0
-          },
-          {
             "date": "2026-08-24",
             "count": 0
           },
@@ -1381,6 +1443,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 0
+          },
+          {
+            "date": "2026-09-22",
             "count": 0
           }
         ]
@@ -1391,10 +1457,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 8
-          },
-          {
             "date": "2026-08-24",
             "count": 8
           },
@@ -1508,6 +1570,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 6
+          },
+          {
+            "date": "2026-09-22",
             "count": 6
           }
         ]
@@ -1518,10 +1584,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 1
-          },
-          {
             "date": "2026-08-24",
             "count": 1
           },
@@ -1635,6 +1697,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 1
+          },
+          {
+            "date": "2026-09-22",
             "count": 1
           }
         ]
@@ -1645,10 +1711,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 9
-          },
-          {
             "date": "2026-08-24",
             "count": 10
           },
@@ -1763,6 +1825,10 @@
           {
             "date": "2026-09-21",
             "count": 6
+          },
+          {
+            "date": "2026-09-22",
+            "count": 6
           }
         ]
       },
@@ -1771,10 +1837,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 12
-          },
           {
             "date": "2026-08-24",
             "count": 12
@@ -1890,6 +1952,10 @@
           {
             "date": "2026-09-21",
             "count": 12
+          },
+          {
+            "date": "2026-09-22",
+            "count": 12
           }
         ]
       },
@@ -1898,10 +1964,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 0
-          },
           {
             "date": "2026-08-24",
             "count": 0
@@ -2017,18 +2079,18 @@
           {
             "date": "2026-09-21",
             "count": 0
+          },
+          {
+            "date": "2026-09-22",
+            "count": 0
           }
         ]
       },
       "gcal_6r61j22m17ph76sbn635uu9ol0": {
-        "count": 60,
+        "count": 57,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 48
-          },
           {
             "date": "2026-08-24",
             "count": 50
@@ -2144,6 +2206,10 @@
           {
             "date": "2026-09-21",
             "count": 60
+          },
+          {
+            "date": "2026-09-22",
+            "count": 57
           }
         ]
       },
@@ -2152,10 +2218,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 0
-          },
           {
             "date": "2026-08-24",
             "count": 0
@@ -2271,18 +2333,18 @@
           {
             "date": "2026-09-21",
             "count": 0
+          },
+          {
+            "date": "2026-09-22",
+            "count": 0
           }
         ]
       },
       "gcal_racioppi": {
-        "count": 41,
+        "count": 51,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 43
-          },
           {
             "date": "2026-08-24",
             "count": 43
@@ -2398,18 +2460,18 @@
           {
             "date": "2026-09-21",
             "count": 41
+          },
+          {
+            "date": "2026-09-22",
+            "count": 51
           }
         ]
       },
       "gcal_uumontclair_org_9kptanknnvqcom49ks44nnaaak": {
-        "count": 118,
+        "count": 117,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 124
-          },
           {
             "date": "2026-08-24",
             "count": 124
@@ -2525,6 +2587,10 @@
           {
             "date": "2026-09-21",
             "count": 118
+          },
+          {
+            "date": "2026-09-22",
+            "count": 117
           }
         ]
       },
@@ -2533,10 +2599,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 17
-          },
           {
             "date": "2026-08-24",
             "count": 17
@@ -2652,18 +2714,18 @@
           {
             "date": "2026-09-21",
             "count": 20
+          },
+          {
+            "date": "2026-09-22",
+            "count": 20
           }
         ]
       },
       "jazz_house_kids": {
-        "count": 9,
+        "count": 7,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 0
-          },
           {
             "date": "2026-08-24",
             "count": 0
@@ -2779,6 +2841,10 @@
           {
             "date": "2026-09-21",
             "count": 9
+          },
+          {
+            "date": "2026-09-22",
+            "count": 7
           }
         ]
       },
@@ -2788,10 +2854,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 30
-          },
-          {
             "date": "2026-08-24",
             "count": 30
           },
@@ -2905,6 +2967,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 30
+          },
+          {
+            "date": "2026-09-22",
             "count": 30
           }
         ]
@@ -2915,10 +2981,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 3
-          },
-          {
             "date": "2026-08-24",
             "count": 3
           },
@@ -3033,18 +3095,18 @@
           {
             "date": "2026-09-21",
             "count": 2
+          },
+          {
+            "date": "2026-09-22",
+            "count": 2
           }
         ]
       },
       "lackawanna": {
-        "count": 19,
+        "count": 18,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 32
-          },
           {
             "date": "2026-08-24",
             "count": 30
@@ -3160,6 +3222,10 @@
           {
             "date": "2026-09-21",
             "count": 19
+          },
+          {
+            "date": "2026-09-22",
+            "count": 18
           }
         ]
       },
@@ -3168,10 +3234,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 54
-          },
           {
             "date": "2026-08-24",
             "count": 53
@@ -3287,6 +3349,10 @@
           {
             "date": "2026-09-21",
             "count": 48
+          },
+          {
+            "date": "2026-09-22",
+            "count": 48
           }
         ]
       },
@@ -3295,10 +3361,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 239
-          },
           {
             "date": "2026-08-24",
             "count": 238
@@ -3414,18 +3476,18 @@
           {
             "date": "2026-09-21",
             "count": 227
+          },
+          {
+            "date": "2026-09-22",
+            "count": 227
           }
         ]
       },
       "libcal_bccls_10306": {
-        "count": 344,
+        "count": 351,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 225
-          },
           {
             "date": "2026-08-24",
             "count": 232
@@ -3541,18 +3603,18 @@
           {
             "date": "2026-09-21",
             "count": 344
+          },
+          {
+            "date": "2026-09-22",
+            "count": 351
           }
         ]
       },
       "libcal_bccls_10315": {
-        "count": 258,
+        "count": 259,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 274
-          },
           {
             "date": "2026-08-24",
             "count": 272
@@ -3668,18 +3730,18 @@
           {
             "date": "2026-09-21",
             "count": 258
+          },
+          {
+            "date": "2026-09-22",
+            "count": 259
           }
         ]
       },
       "libcal_bccls_10340": {
-        "count": 163,
+        "count": 164,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 170
-          },
           {
             "date": "2026-08-24",
             "count": 170
@@ -3795,18 +3857,18 @@
           {
             "date": "2026-09-21",
             "count": 163
+          },
+          {
+            "date": "2026-09-22",
+            "count": 164
           }
         ]
       },
       "libcal_bccls_10341": {
-        "count": 398,
+        "count": 401,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 383
-          },
           {
             "date": "2026-08-24",
             "count": 381
@@ -3922,6 +3984,10 @@
           {
             "date": "2026-09-21",
             "count": 398
+          },
+          {
+            "date": "2026-09-22",
+            "count": 401
           }
         ]
       },
@@ -3930,10 +3996,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 18
-          },
           {
             "date": "2026-08-24",
             "count": 18
@@ -4049,18 +4111,18 @@
           {
             "date": "2026-09-21",
             "count": 16
+          },
+          {
+            "date": "2026-09-22",
+            "count": 16
           }
         ]
       },
       "maxpreps_montclair_high": {
-        "count": 28,
+        "count": 27,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 23
-          },
           {
             "date": "2026-08-24",
             "count": 23
@@ -4176,6 +4238,10 @@
           {
             "date": "2026-09-21",
             "count": 28
+          },
+          {
+            "date": "2026-09-22",
+            "count": 27
           }
         ]
       },
@@ -4184,10 +4250,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 0
-          },
           {
             "date": "2026-08-24",
             "count": 0
@@ -4302,6 +4364,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 0
+          },
+          {
+            "date": "2026-09-22",
             "count": 0
           }
         ]
@@ -4312,10 +4378,6 @@
         "content": "not_ics:json",
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 2
-          },
-          {
             "date": "2026-08-24",
             "count": 2
           },
@@ -4429,6 +4491,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 0
+          },
+          {
+            "date": "2026-09-22",
             "count": 0
           }
         ]
@@ -4439,10 +4505,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 10
-          },
-          {
             "date": "2026-08-24",
             "count": 10
           },
@@ -4556,6 +4618,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 10
+          },
+          {
+            "date": "2026-09-22",
             "count": 10
           }
         ]
@@ -4566,10 +4632,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 2
-          },
-          {
             "date": "2026-08-24",
             "count": 2
           },
@@ -4683,6 +4745,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 0
+          },
+          {
+            "date": "2026-09-22",
             "count": 0
           }
         ]
@@ -4693,10 +4759,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 0
-          },
-          {
             "date": "2026-08-24",
             "count": 0
           },
@@ -4810,6 +4872,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 0
+          },
+          {
+            "date": "2026-09-22",
             "count": 0
           }
         ]
@@ -4820,10 +4886,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 0
-          },
-          {
             "date": "2026-08-24",
             "count": 0
           },
@@ -4937,6 +4999,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 0
+          },
+          {
+            "date": "2026-09-22",
             "count": 0
           }
         ]
@@ -4947,10 +5013,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 0
-          },
-          {
             "date": "2026-08-24",
             "count": 0
           },
@@ -5064,6 +5126,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 0
+          },
+          {
+            "date": "2026-09-22",
             "count": 0
           }
         ]
@@ -5074,10 +5140,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 10
-          },
-          {
             "date": "2026-08-24",
             "count": 10
           },
@@ -5191,6 +5253,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 10
+          },
+          {
+            "date": "2026-09-22",
             "count": 10
           }
         ]
@@ -5201,10 +5267,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 2
-          },
-          {
             "date": "2026-08-24",
             "count": 1
           },
@@ -5318,6 +5380,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 2
+          },
+          {
+            "date": "2026-09-22",
             "count": 2
           }
         ]
@@ -5328,10 +5394,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 2
-          },
-          {
             "date": "2026-08-24",
             "count": 2
           },
@@ -5445,6 +5507,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 1
+          },
+          {
+            "date": "2026-09-22",
             "count": 1
           }
         ]
@@ -5455,10 +5521,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 2
-          },
-          {
             "date": "2026-08-24",
             "count": 2
           },
@@ -5572,6 +5634,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 0
+          },
+          {
+            "date": "2026-09-22",
             "count": 0
           }
         ]
@@ -5582,10 +5648,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 2
-          },
-          {
             "date": "2026-08-24",
             "count": 2
           },
@@ -5699,6 +5761,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 1
+          },
+          {
+            "date": "2026-09-22",
             "count": 1
           }
         ]
@@ -5709,10 +5775,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 5
-          },
-          {
             "date": "2026-08-24",
             "count": 5
           },
@@ -5826,6 +5888,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 3
+          },
+          {
+            "date": "2026-09-22",
             "count": 3
           }
         ]
@@ -5836,10 +5902,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 10
-          },
-          {
             "date": "2026-08-24",
             "count": 10
           },
@@ -5953,6 +6015,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 10
+          },
+          {
+            "date": "2026-09-22",
             "count": 10
           }
         ]
@@ -5963,10 +6029,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 9
-          },
-          {
             "date": "2026-08-24",
             "count": 8
           },
@@ -6080,6 +6142,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 8
+          },
+          {
+            "date": "2026-09-22",
             "count": 8
           }
         ]
@@ -6090,10 +6156,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 10
-          },
-          {
             "date": "2026-08-24",
             "count": 10
           },
@@ -6207,6 +6269,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 10
+          },
+          {
+            "date": "2026-09-22",
             "count": 10
           }
         ]
@@ -6217,10 +6283,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 0
-          },
-          {
             "date": "2026-08-24",
             "count": 0
           },
@@ -6334,6 +6396,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 9
+          },
+          {
+            "date": "2026-09-22",
             "count": 9
           }
         ]
@@ -6344,10 +6410,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 30
-          },
-          {
             "date": "2026-08-24",
             "count": 30
           },
@@ -6462,6 +6524,10 @@
           {
             "date": "2026-09-21",
             "count": 30
+          },
+          {
+            "date": "2026-09-22",
+            "count": 30
           }
         ]
       },
@@ -6470,10 +6536,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 8
-          },
           {
             "date": "2026-08-24",
             "count": 8
@@ -6589,18 +6651,18 @@
           {
             "date": "2026-09-21",
             "count": 21
+          },
+          {
+            "date": "2026-09-22",
+            "count": 21
           }
         ]
       },
       "montclair_film": {
-        "count": 40,
+        "count": 75,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 60
-          },
           {
             "date": "2026-08-24",
             "count": 48
@@ -6716,18 +6778,18 @@
           {
             "date": "2026-09-21",
             "count": 40
+          },
+          {
+            "date": "2026-09-22",
+            "count": 75
           }
         ]
       },
       "montclair_foundation": {
-        "count": 94,
+        "count": 92,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 87
-          },
           {
             "date": "2026-08-24",
             "count": 88
@@ -6843,6 +6905,10 @@
           {
             "date": "2026-09-21",
             "count": 94
+          },
+          {
+            "date": "2026-09-22",
+            "count": 92
           }
         ]
       },
@@ -6851,10 +6917,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 23
-          },
           {
             "date": "2026-08-24",
             "count": 21
@@ -6970,18 +7032,18 @@
           {
             "date": "2026-09-21",
             "count": 19
+          },
+          {
+            "date": "2026-09-22",
+            "count": 19
           }
         ]
       },
       "montclairathletics_calendar_ashx_calendar_ics": {
-        "count": 147,
+        "count": 146,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 153
-          },
           {
             "date": "2026-08-24",
             "count": 153
@@ -7097,6 +7159,10 @@
           {
             "date": "2026-09-21",
             "count": 147
+          },
+          {
+            "date": "2026-09-22",
+            "count": 146
           }
         ]
       },
@@ -7105,10 +7171,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 26
-          },
           {
             "date": "2026-08-24",
             "count": 26
@@ -7223,6 +7285,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 27
+          },
+          {
+            "date": "2026-09-22",
             "count": 27
           }
         ]
@@ -7233,10 +7299,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 1
-          },
-          {
             "date": "2026-08-24",
             "count": 1
           },
@@ -7351,18 +7413,18 @@
           {
             "date": "2026-09-21",
             "count": 1
+          },
+          {
+            "date": "2026-09-22",
+            "count": 1
           }
         ]
       },
       "nertamid": {
-        "count": 256,
+        "count": 50,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 234
-          },
           {
             "date": "2026-08-24",
             "count": 232
@@ -7478,18 +7540,18 @@
           {
             "date": "2026-09-21",
             "count": 256
+          },
+          {
+            "date": "2026-09-22",
+            "count": 50
           }
         ]
       },
       "nj_poetry_events": {
-        "count": 122,
+        "count": 121,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 118
-          },
           {
             "date": "2026-08-24",
             "count": 116
@@ -7605,18 +7667,18 @@
           {
             "date": "2026-09-21",
             "count": 122
+          },
+          {
+            "date": "2026-09-22",
+            "count": 121
           }
         ]
       },
       "njaudubon": {
-        "count": 30,
+        "count": 0,
         "error": null,
-        "content": null,
+        "content": "not_ics:html",
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 30
-          },
           {
             "date": "2026-08-24",
             "count": 30
@@ -7732,6 +7794,10 @@
           {
             "date": "2026-09-21",
             "count": 30
+          },
+          {
+            "date": "2026-09-22",
+            "count": 0
           }
         ]
       },
@@ -7740,10 +7806,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 4
-          },
           {
             "date": "2026-08-24",
             "count": 4
@@ -7858,6 +7920,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 5
+          },
+          {
+            "date": "2026-09-22",
             "count": 5
           }
         ]
@@ -7868,10 +7934,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 4
-          },
-          {
             "date": "2026-08-24",
             "count": 0
           },
@@ -7986,6 +8048,10 @@
           {
             "date": "2026-09-21",
             "count": 0
+          },
+          {
+            "date": "2026-09-22",
+            "count": 0
           }
         ]
       },
@@ -7994,10 +8060,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 9
-          },
           {
             "date": "2026-08-24",
             "count": 9
@@ -8113,6 +8175,10 @@
           {
             "date": "2026-09-21",
             "count": 7
+          },
+          {
+            "date": "2026-09-22",
+            "count": 7
           }
         ]
       },
@@ -8121,10 +8187,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 0
-          },
           {
             "date": "2026-08-24",
             "count": 0
@@ -8239,6 +8301,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 0
+          },
+          {
+            "date": "2026-09-22",
             "count": 0
           }
         ]
@@ -8249,10 +8315,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 0
-          },
-          {
             "date": "2026-08-24",
             "count": 0
           },
@@ -8366,6 +8428,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 3
+          },
+          {
+            "date": "2026-09-22",
             "count": 3
           }
         ]
@@ -8376,10 +8442,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 1
-          },
-          {
             "date": "2026-08-24",
             "count": 1
           },
@@ -8493,6 +8555,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 1
+          },
+          {
+            "date": "2026-09-22",
             "count": 1
           }
         ]
@@ -8503,10 +8569,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 4
-          },
-          {
             "date": "2026-08-24",
             "count": 4
           },
@@ -8620,6 +8682,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 5
+          },
+          {
+            "date": "2026-09-22",
             "count": 5
           }
         ]
@@ -8630,10 +8696,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 0
-          },
-          {
             "date": "2026-08-24",
             "count": 0
           },
@@ -8748,18 +8810,18 @@
           {
             "date": "2026-09-21",
             "count": 0
+          },
+          {
+            "date": "2026-09-22",
+            "count": 0
           }
         ]
       },
       "songkick_wellmont": {
-        "count": 4,
+        "count": 5,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 5
-          },
           {
             "date": "2026-08-24",
             "count": 4
@@ -8875,6 +8937,10 @@
           {
             "date": "2026-09-21",
             "count": 4
+          },
+          {
+            "date": "2026-09-22",
+            "count": 5
           }
         ]
       },
@@ -8926,6 +8992,10 @@
           {
             "date": "2026-09-21",
             "count": 0
+          },
+          {
+            "date": "2026-09-22",
+            "count": 0
           }
         ]
       },
@@ -8934,10 +9004,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 12
-          },
           {
             "date": "2026-08-24",
             "count": 13
@@ -9053,6 +9119,10 @@
           {
             "date": "2026-09-21",
             "count": 17
+          },
+          {
+            "date": "2026-09-22",
+            "count": 17
           }
         ]
       },
@@ -9061,10 +9131,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 19
-          },
           {
             "date": "2026-08-24",
             "count": 19
@@ -9180,6 +9246,10 @@
           {
             "date": "2026-09-21",
             "count": 33
+          },
+          {
+            "date": "2026-09-22",
+            "count": 33
           }
         ]
       },
@@ -9188,10 +9258,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 30
-          },
           {
             "date": "2026-08-24",
             "count": 30
@@ -9306,6 +9372,10 @@
           },
           {
             "date": "2026-09-21",
+            "count": 30
+          },
+          {
+            "date": "2026-09-22",
             "count": 30
           }
         ]
@@ -9316,10 +9386,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-23",
-            "count": 8
-          },
-          {
             "date": "2026-08-24",
             "count": 8
           },
@@ -9434,18 +9500,18 @@
           {
             "date": "2026-09-21",
             "count": 30
+          },
+          {
+            "date": "2026-09-22",
+            "count": 30
           }
         ]
       },
       "ywcannj": {
-        "count": 264,
+        "count": 0,
         "error": null,
-        "content": null,
+        "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-23",
-            "count": 271
-          },
           {
             "date": "2026-08-24",
             "count": 274
@@ -9561,19 +9627,23 @@
           {
             "date": "2026-09-21",
             "count": 264
+          },
+          {
+            "date": "2026-09-22",
+            "count": 0
           }
         ]
       }
     },
     "url_quality": {
-      "total_with_url": 3272,
-      "total_events": 3650,
-      "unique_urls": 2901,
-      "generic_count": 329,
+      "total_with_url": 3046,
+      "total_events": 3436,
+      "unique_urls": 2663,
+      "generic_count": 337,
       "generic_domains": [
         {
           "domain": "www.uumontclair.org",
-          "events": 243,
+          "events": 250,
           "url": "https://www.uumontclair.org/events"
         },
         {
@@ -9583,47 +9653,41 @@
         },
         {
           "domain": "fccmontclair.org",
-          "events": 12,
+          "events": 13,
           "url": "https://fccmontclair.org/upcoming-events-at-fcc/"
         }
       ],
-      "http_count": 9,
+      "http_count": 10,
       "http_domains": 1,
       "source_specificity": [
         {
           "source": "Montclair State University",
-          "events": 702,
-          "unique_urls": 702,
+          "events": 742,
+          "unique_urls": 742,
           "specificity_pct": 100
         },
         {
           "source": "Libcal Bccls 10341",
-          "events": 397,
-          "unique_urls": 397,
+          "events": 400,
+          "unique_urls": 400,
           "specificity_pct": 100
         },
         {
           "source": "Libcal Bccls 10306",
-          "events": 320,
-          "unique_urls": 320,
-          "specificity_pct": 100
-        },
-        {
-          "source": "Libcal Bccls 10315",
-          "events": 244,
-          "unique_urls": 244,
+          "events": 325,
+          "unique_urls": 325,
           "specificity_pct": 100
         },
         {
           "source": "UU Congregation of Montclair",
-          "events": 243,
+          "events": 250,
           "unique_urls": 1,
           "specificity_pct": 0
         },
         {
-          "source": "Temple Ner Tamid",
-          "events": 239,
-          "unique_urls": 239,
+          "source": "Libcal Bccls 10315",
+          "events": 245,
+          "unique_urls": 245,
           "specificity_pct": 100
         },
         {
@@ -9634,26 +9698,26 @@
         },
         {
           "source": "Libcal Bccls 10340",
-          "events": 154,
-          "unique_urls": 154,
+          "events": 155,
+          "unique_urls": 155,
           "specificity_pct": 100
         },
         {
           "source": "Montclair Foundation",
-          "events": 93,
-          "unique_urls": 93,
-          "specificity_pct": 100
-        },
-        {
-          "source": "YWCA Northern New Jersey",
-          "events": 90,
-          "unique_urls": 90,
+          "events": 91,
+          "unique_urls": 91,
           "specificity_pct": 100
         },
         {
           "source": "MSU Red Hawks Athletics",
-          "events": 64,
-          "unique_urls": 64,
+          "events": 63,
+          "unique_urls": 63,
+          "specificity_pct": 100
+        },
+        {
+          "source": "Temple Ner Tamid",
+          "events": 48,
+          "unique_urls": 48,
           "specificity_pct": 100
         },
         {
@@ -9679,6 +9743,12 @@
           "events": 30,
           "unique_urls": 24,
           "specificity_pct": 80
+        },
+        {
+          "source": "Township of Bloomfield",
+          "events": 30,
+          "unique_urls": 1,
+          "specificity_pct": 3
         }
       ]
     },
@@ -9688,7 +9758,7 @@
       "tzids": [
         {
           "tzid": "UTC (Z suffix)",
-          "count": 6682,
+          "count": 6734,
           "files": 12,
           "matches_city": false,
           "sample_files": [
@@ -9701,8 +9771,8 @@
         },
         {
           "tzid": "America/New_York",
-          "count": 3539,
-          "files": 43,
+          "count": 3094,
+          "files": 41,
           "matches_city": true,
           "sample_files": [
             "civicplus_bloomfieldtwpnj_14.ics",
@@ -9714,8 +9784,8 @@
         },
         {
           "tzid": "(bare \u2014 assumes city tz)",
-          "count": 137,
-          "files": 31,
+          "count": 130,
+          "files": 30,
           "matches_city": false,
           "sample_files": [
             "civicplus_bloomfieldtwpnj_14.ics",
@@ -9727,7 +9797,7 @@
         },
         {
           "tzid": "America/Los_Angeles",
-          "count": 136,
+          "count": 130,
           "files": 5,
           "matches_city": false,
           "sample_files": [
@@ -9740,61 +9810,16 @@
         },
         {
           "tzid": "UTC",
-          "count": 23,
-          "files": 2,
+          "count": 2,
+          "files": 1,
           "matches_city": false,
           "sample_files": [
-            "lacasadedonpedro.ics",
-            "njaudubon.ics"
+            "lacasadedonpedro.ics"
           ]
         }
       ]
     },
     "geo_filtered": [
-      {
-        "source": "YWCA Northern New Jersey",
-        "source_id": "ywcannj",
-        "location": "147 Hackensack Street, East Rutherford, 147 Hackensack Street, East Rutherford, NJ",
-        "count": 40,
-        "titles": [
-          "Senior Zumba Toning (East Rutherford)",
-          "Senior Fitness Zumba (East Rutherford)",
-          "Senior Fitness Mobility Workshop (East Rutherford)"
-        ]
-      },
-      {
-        "source": "YWCA Northern New Jersey",
-        "source_id": "ywcannj",
-        "location": "293 Murray Hill Terrace, Bergenfield, 293 Murray Hill Terrace, Bergenfield, NJ",
-        "count": 40,
-        "titles": [
-          "Senior Fitness Zumba (Bergenfield)",
-          "Senior Fitness Zumba (Bergenfield)",
-          "Senior Fitness Zumba (Bergenfield)"
-        ]
-      },
-      {
-        "source": "YWCA Northern New Jersey",
-        "source_id": "ywcannj",
-        "location": "46-50 Center Street, Midland Park, 46-50 Center Street, Midland Park, NJ",
-        "count": 27,
-        "titles": [
-          "Senior Fitness Safe &#038\\; Fit (Midland Park)",
-          "Senior Fitness Zumba Gold (Midland Park)",
-          "Senior Fitness Safe &#038\\; Fit (Midland Park)"
-        ]
-      },
-      {
-        "source": "YWCA Northern New Jersey",
-        "source_id": "ywcannj",
-        "location": "500 Mola Boulevard, Elmwood Park, 500 Mora Boulevard, Elmwood Park, NJ",
-        "count": 27,
-        "titles": [
-          "Senior Fitness Zumba (Elmwood Park)",
-          "Senior Zumba Toning (Elmwood Park)",
-          "Senior Fitness Zumba (Elmwood Park)"
-        ]
-      },
       {
         "source": "Essex County Parks",
         "source_id": "essex_county_parks",
@@ -9807,54 +9832,10 @@
         ]
       },
       {
-        "source": "Whartonarts",
-        "source_id": "whartonarts",
-        "location": "Burgdorff Hall at New Jersey Youth Symphony, New Providence, 570 Central Ave, New Providence, New Jersey, 07974, United States",
-        "count": 17,
-        "titles": [
-          "NJYS Chamber Music Concert",
-          "NJYS Alumni Night",
-          "NJYS Open Rehearsals Week"
-        ]
-      },
-      {
-        "source": "YWCA Northern New Jersey",
-        "source_id": "ywcannj",
-        "location": "11 York Road, North Arlington, 11 York Road, North Arlington, NJ",
-        "count": 14,
-        "titles": [
-          "Senior Fitness Strength Training (North Arlington)",
-          "Senior Fitness Strength Training (North Arlington)",
-          "Senior Fitness Strength Training (North Arlington)"
-        ]
-      },
-      {
-        "source": "YWCA Northern New Jersey",
-        "source_id": "ywcannj",
-        "location": "159 Park Street, Ridgefield, 159 Park Street, Ridgefield, NJ",
-        "count": 13,
-        "titles": [
-          "Senior Fitness Zumba (Ridgefield Park)",
-          "Senior Fitness Zumba (Ridgefield Park)",
-          "Senior Fitness Zumba (Ridgefield Park)"
-        ]
-      },
-      {
-        "source": "YWCA Northern New Jersey",
-        "source_id": "ywcannj",
-        "location": "101 Hudson Street, Hackensack, 101 Hudson Street, Hackensack, NJ",
-        "count": 13,
-        "titles": [
-          "Senior Fitness Total Body (Hackensack)",
-          "Senior Fitness Total Body (Hackensack)",
-          "Senior Fitness Total Body (Hackensack)"
-        ]
-      },
-      {
         "source": "Mhainspire",
         "source_id": "mhainspire",
         "location": "Trinity Lutheran Church, 123 E. Blackwell Street, Dover, NJ, 07801, United States",
-        "count": 10,
+        "count": 11,
         "titles": [
           "Edna's Haven",
           "Edna's Haven",
@@ -9884,6 +9865,17 @@
         ]
       },
       {
+        "source": "Whartonarts",
+        "source_id": "whartonarts",
+        "location": "Burgdorff Hall at New Jersey Youth Symphony, New Providence, 570 Central Ave, New Providence, New Jersey, 07974, United States",
+        "count": 8,
+        "titles": [
+          "NJYS Chamber Music Concert",
+          "NJYS Alumni Night",
+          "NJYS Open Rehearsals Week"
+        ]
+      },
+      {
         "source": "Essex County Parks",
         "source_id": "essex_county_parks",
         "location": "Essex County Parks, NJ",
@@ -9892,28 +9884,6 @@
           "Francis Byrne Course 15th Annual County Open Championship",
           "Championship Round 15th Annual County Open at  Hendricks Field",
           "Gardens Aglow at Essex County Presby Memorial Iris Gardens"
-        ]
-      },
-      {
-        "source": "Jazz House Kids",
-        "source_id": "jazz_house_kids",
-        "location": "Trinity Church, 89 Broadway, New York, NY",
-        "count": 6,
-        "titles": [
-          "Jazz Icons:\u202fC\u00e9cile McLorin Salvant with Glenn Zaleski",
-          "JAZZ HOUSE NYC First day of classes",
-          "Jazz at One: Tia Fuller &#038\\; Shamie Royston Duo Concert"
-        ]
-      },
-      {
-        "source": "NJ Poetry Events",
-        "source_id": "nj_poetry_events",
-        "location": "MY WAY CAFE, 823 Broadway, Long Branch, NJ, 07764",
-        "count": 6,
-        "titles": [
-          "BARDS",
-          "BARDS",
-          "BARDS"
         ]
       },
       {
@@ -9983,12 +9953,23 @@
         ]
       },
       {
+        "source": "Jazz House Kids",
+        "source_id": "jazz_house_kids",
+        "location": "Trinity Church, 89 Broadway, New York, NY",
+        "count": 5,
+        "titles": [
+          "JAZZ HOUSE NYC First day of classes",
+          "Jazz at One: Tia Fuller &#038\\; Shamie Royston Duo Concert",
+          "Jazz at One: Jazz House Collective"
+        ]
+      },
+      {
         "source": "Indivisible One NJ (Mobilize)",
         "source_id": "mobilize_indivisible_nj",
         "location": "Washington, NJ",
         "count": 5,
         "titles": [
-          "Copy of: Warren County Action Together NJ Monthly Meeting 2026",
+          "WCATNJ POSTCARD TUESDAYS",
           "WCATNJ POSTCARD TUESDAYS",
           "WCATNJ POSTCARD TUESDAYS"
         ]
@@ -10068,6 +10049,28 @@
           "HOUSE OF 1000 HACKS",
           "HOUSE OF 1000 HACKS",
           "HOUSE OF 1000 HACKS"
+        ]
+      },
+      {
+        "source": "NJ Poetry Events",
+        "source_id": "nj_poetry_events",
+        "location": "MY WAY CAFE, 823 Broadway, Long Branch, NJ, 07764",
+        "count": 5,
+        "titles": [
+          "BARDS",
+          "BARDS",
+          "BARDS"
+        ]
+      },
+      {
+        "source": "Whartonarts",
+        "source_id": "whartonarts",
+        "location": "Wharton Black Box Theater, 60 Locust Ave, Berkeley Heights, NJ, 07922, United States",
+        "count": 5,
+        "titles": [
+          "PAS Suzuki Halloween Playdown",
+          "Wharton CAF\u00c9 Choir",
+          "Wharton Players presents Roald Dahl\u2019s Matilda The Musical JR"
         ]
       },
       {
@@ -10156,17 +10159,6 @@
           "3OBURGERS X BREWS: Burgers BEATS OPEN MIC",
           "3OBURGERS X BREWS: Burgers BEATS OPEN MIC",
           "3OBURGERS X BREWS: Burgers BEATS OPEN MIC"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "The Nature Conservancy\u2019s South Cape May Meadows, 692 Sunset Blvd, Cape May, NJ, 08204, United States",
-        "count": 4,
-        "titles": [
-          "Birding the Meadows",
-          "Twilight Walk at the Meadows",
-          "Cape May Songbird Stopover Project: Banding Demo"
         ]
       },
       {
@@ -10379,39 +10371,6 @@
         ]
       },
       {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Lorrimer Sanctuary, 790 Ewing Avenue, Franklin Lakes, NJ, 07417, United States",
-        "count": 3,
-        "titles": [
-          "Nature Book Club",
-          "Monarch Wednesdays",
-          "Forest Stewards: Volunteer Opportunities"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Cape May Point State Park \u2013 East Shelter, NJ, United States",
-        "count": 3,
-        "titles": [
-          "Migration 101 Mini-Workshop",
-          "Migration 101 Mini-Workshop",
-          "Monarch Tagging Demo"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "New Jersey Audubon\u2019s Scherman Hoffman Wildlife Sanctuary, 11 Hardscrabble Road, Bernardsville, NJ, 07924, United States",
-        "count": 3,
-        "titles": [
-          "Bernardsville Hawkwatch",
-          "Bernardsville Hawkwatch",
-          "NJ Audubon: Morning Walk at Scherman Hoffman Wildlife Sanctuary"
-        ]
-      },
-      {
         "source": "Civicplus Cedargrovenj 14",
         "source_id": "civicplus_cedargrovenj_14",
         "location": " -   Manhattan KS 66502",
@@ -10419,16 +10378,6 @@
         "titles": [
           "New Year's Day",
           "New Year's Day"
-        ]
-      },
-      {
-        "source": "Trivia AD",
-        "source_id": "eventbrite_trivia_ad",
-        "location": "Slattery's Midtown Pub, 8 East 36th Street, New York, NY 10016, New York, NY",
-        "count": 2,
-        "titles": [
-          "Harry Potter Movies Trivia",
-          "Bob\u2019s Burgers Trivia"
         ]
       },
       {
@@ -10592,26 +10541,6 @@
         ]
       },
       {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Nature Center of Cape May, 1600 Delaware Avenue, Cape May, NJ, 08204, United States",
-        "count": 2,
-        "titles": [
-          "Monarch Drop-In at the Nature Center of Cape May",
-          "Monarch Drop-In at the Nature Center of Cape May"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Sandy Hook \u2013 Lot B, Hartshorne Drive, Sandy Hook, NJ, 07732, United States",
-        "count": 2,
-        "titles": [
-          "Half Day Fridays at Sandy Hook",
-          "Sandy Hook Birding"
-        ]
-      },
-      {
         "source": "Whartonarts",
         "source_id": "whartonarts",
         "location": "Morristown United Methodist Church, 50 S Park Pl, Morristown, NJ, 07960, United States",
@@ -10619,6 +10548,16 @@
         "titles": [
           "NJYS Primo Strings\\, Flute Choir\\, Flute Forum & Concertino Winds Concert",
           "NJYS Concertino Strings\\, Fortissimo Flutes\\, Sinfonia\\, Clarinet Ensemble\\, & CL4tet Concert"
+        ]
+      },
+      {
+        "source": "Whartonarts",
+        "source_id": "whartonarts",
+        "location": "Paterson School 16, 11 22nd Avenue, Paterson, 07513, United States",
+        "count": 2,
+        "titles": [
+          "PMP Play for Paterson",
+          "PMP Day of Bands"
         ]
       },
       {
@@ -10669,10 +10608,19 @@
       {
         "source": "Trivia AD",
         "source_id": "eventbrite_trivia_ad",
-        "location": "Deal Lake Bar + Co., 601 Main Street, Loch Arbour, NJ 07711, Loch Arbour, NJ",
+        "location": "Blue Moon Mexican Cafe, 327 Franklin Avenue, #Suite J, Wyckoff, NJ 07481, Wyckoff, NJ",
         "count": 1,
         "titles": [
-          "General Trivia + Golden Girls"
+          "Disney Parks Trivia"
+        ]
+      },
+      {
+        "source": "Trivia AD",
+        "source_id": "eventbrite_trivia_ad",
+        "location": "Slattery's Midtown Pub, 8 East 36th Street, New York, NY 10016, New York, NY",
+        "count": 1,
+        "titles": [
+          "Bob\u2019s Burgers Trivia"
         ]
       },
       {
@@ -10696,19 +10644,28 @@
       {
         "source": "Trivia AD",
         "source_id": "eventbrite_trivia_ad",
-        "location": "Blue Moon Mexican Cafe, 327 Franklin Avenue, #Suite J, Wyckoff, NJ 07481, Wyckoff, NJ",
+        "location": "Kitchen and Beer Bar, 1093 Ringwood Avenue, Wanaque, NJ 07420, Wanaque, NJ",
         "count": 1,
         "titles": [
-          "Disney Parks Trivia"
+          "Friends Trivia Tournament \u2013 Preliminary Round 3"
         ]
       },
       {
         "source": "Trivia AD",
         "source_id": "eventbrite_trivia_ad",
-        "location": "Kitchen and Beer Bar, 1093 Ringwood Avenue, Wanaque, NJ 07420, Wanaque, NJ",
+        "location": "The Shepherd & the Knucklehead of Hoboken, 1313 Willow Avenue, Hoboken, NJ 07030, Hoboken, NJ",
         "count": 1,
         "titles": [
-          "Friends Trivia Tournament \u2013 Preliminary Round 3"
+          "Off Campus Trivia"
+        ]
+      },
+      {
+        "source": "Trivia AD",
+        "source_id": "eventbrite_trivia_ad",
+        "location": "McLoone's Pier House, 1 Ocean Avenue North, Long Branch, NJ 07740, Long Branch, NJ",
+        "count": 1,
+        "titles": [
+          "80s Pop Culture Trivia"
         ]
       },
       {
@@ -10727,15 +10684,6 @@
         "count": 1,
         "titles": [
           "WWE Trivia"
-        ]
-      },
-      {
-        "source": "Trivia AD",
-        "source_id": "eventbrite_trivia_ad",
-        "location": "McLoone's Pier House, 1 Ocean Avenue North, Long Branch, NJ 07740, Long Branch, NJ",
-        "count": 1,
-        "titles": [
-          "80s Pop Culture Trivia"
         ]
       },
       {
@@ -10973,132 +10921,6 @@
         ]
       },
       {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Miss Chris Marina \u2013 The Osprey, 1212 Wilson Dr,\u00a0Cape May,\u00a0NJ\u00a008204, NJ, United States",
-        "count": 1,
-        "titles": [
-          "Back Bay Birding by Boat on the Osprey"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Cape May Bird Observatory \u2013 Northwood Center, 701 East Lake Drive, Cape May Point, NJ, 08212, United States",
-        "count": 1,
-        "titles": [
-          "Birding Northwood and Beyond"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Lafayette Street Park, 711 Lafayette St., Cape May, NJ, 08204, United States",
-        "count": 1,
-        "titles": [
-          "Friends in the Field: An Intro to Birding with The Boarding House"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Stone Harbor Point \u2013 2nd Ave Parking Lot, NJ, United States",
-        "count": 1,
-        "titles": [
-          "Sunset Birding at Stone Harbor Point"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Cape May Point State Park \u2013 Outer Parking Lot, Lighthouse Ave, Cape May Point, NJ, 08212, United States",
-        "count": 1,
-        "titles": [
-          "Migration at the Point"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Sunset Pavilion, 62 Beach Avenue, Cape May, NJ, 08204, United States",
-        "count": 1,
-        "titles": [
-          "Beachcombing the Cove"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Washington Street Mall Info Booth, Washington Street Mall at Ocean Street Cape May, NJ 08204, NJ, United States",
-        "count": 1,
-        "titles": [
-          "Natural Habitats Trolley Tour"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Hawk Rise Sanctuary, 1811 Lower Rd, Linden, NJ, 07036, United States",
-        "count": 1,
-        "titles": [
-          "Fall Birding at Hawk Rise Sanctuary"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Cape May Point State Park Hawkwatch Platform, NJ, United States",
-        "count": 1,
-        "titles": [
-          "E-Z Birding at the Cape May Point State Park"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Higbee Beach WMA, NJ, United States",
-        "count": 1,
-        "titles": [
-          "Higbee Beach Birding"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Higbee Beach Morning Flight Observation Deck, NJ, United States",
-        "count": 1,
-        "titles": [
-          "Morning Flight Experience"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Rea Farm \u2013 The Beanery, Bayshore Rd, West Cape May, NJ, 08204, United States",
-        "count": 1,
-        "titles": [
-          "Fall Migrants at the Rea Farm"
-        ]
-      },
-      {
-        "source": "Njaudubon",
-        "source_id": "njaudubon",
-        "location": "Rutgers University Ecological Preserve, 83 Rockafeller Rd, Piscataway, NJ, 08854, United States",
-        "count": 1,
-        "titles": [
-          "NJ Audubon: Rutgers University Ecological Preserve Birder\u2019s Walk"
-        ]
-      },
-      {
-        "source": "The Raptor Trust",
-        "source_id": "raptor_trust",
-        "location": "Lord Stirling Environmental Education Center, 190 Lord Stirling Road, Bernards, New Jersey, 07920, United States",
-        "count": 1,
-        "titles": [
-          "2026 Memorial Lecture with Doug Tallamy"
-        ]
-      },
-      {
         "source": "The Raptor Trust",
         "source_id": "raptor_trust",
         "location": "The Raptor Trust, 1390 White Bridge Road, Millington, NJ 07946, United States",
@@ -11114,6 +10936,15 @@
         "count": 1,
         "titles": [
           "Owl-O-Ween"
+        ]
+      },
+      {
+        "source": "The Raptor Trust",
+        "source_id": "raptor_trust",
+        "location": "Lord Stirling Environmental Education Center, 190 Lord Stirling Road, Bernards, New Jersey, 07920, United States",
+        "count": 1,
+        "titles": [
+          "2026 Memorial Lecture with Doug Tallamy"
         ]
       },
       {
@@ -11160,104 +10991,122 @@
         "titles": [
           "NJYS Jazz Concert"
         ]
+      },
+      {
+        "source": "Whartonarts",
+        "source_id": "whartonarts",
+        "location": "Nicholas Music Center at Rutgers New Brunswick, 85 George St, New Brunswick, NJ, 08901, United States",
+        "count": 1,
+        "titles": [
+          "NJYS Music Across Generations"
+        ]
+      },
+      {
+        "source": "Whartonarts",
+        "source_id": "whartonarts",
+        "location": "Dr. Hani Awadallah School, 515 Marshall Street, NJ, 07503, United States",
+        "count": 1,
+        "titles": [
+          "PMP Day of Strings"
+        ]
       }
     ],
     "categories": [
       {
         "category": "Education / Workshops",
-        "count": 605
+        "count": 536
       },
       {
         "category": "Community / Social",
-        "count": 390
+        "count": 400
       },
       {
         "category": "Family / Kids",
-        "count": 334
-      },
-      {
-        "category": "Religion / Spirituality",
-        "count": 331
+        "count": 329
       },
       {
         "category": "Sports / Fitness",
-        "count": 311
+        "count": 305
       },
       {
         "category": "Games / Trivia",
-        "count": 297
+        "count": 292
+      },
+      {
+        "category": "Religion / Spirituality",
+        "count": 273
       },
       {
         "category": "Health / Wellness",
-        "count": 288
+        "count": 209
       },
       {
         "category": "Music / Concerts",
-        "count": 171
+        "count": 174
       },
       {
         "category": "Books / Literature / Poetry",
-        "count": 142
+        "count": 141
       },
       {
         "category": "Craft / Maker",
-        "count": 131
+        "count": 128
       },
       {
         "category": "Government / Civic",
-        "count": 113
-      },
-      {
-        "category": "Arts / Culture",
-        "count": 110
+        "count": 111
       },
       {
         "category": "Technology / Careers",
+        "count": 110
+      },
+      {
+        "category": "Arts / Culture",
         "count": 109
       },
       {
         "category": "Food / Drink",
-        "count": 75
+        "count": 74
       },
       {
         "category": "Dance / Performance",
-        "count": 57
+        "count": 72
       },
       {
         "category": "(uncategorized)",
-        "count": 41
+        "count": 44
       },
       {
         "category": "Film / Cinema",
-        "count": 37
+        "count": 38
       },
       {
         "category": "Nature / Outdoors / Recreation",
         "count": 27
       },
       {
-        "category": "Schools / K-12",
-        "count": 26
-      },
-      {
         "category": "History / Heritage",
-        "count": 22
-      },
-      {
-        "category": "Comedy / Improv",
-        "count": 14
+        "count": 21
       },
       {
         "category": "Gardening / Horticulture",
+        "count": 13
+      },
+      {
+        "category": "Comedy / Improv",
         "count": 12
       },
       {
+        "category": "Schools / K-12",
+        "count": 10
+      },
+      {
         "category": "LGBTQ+ / Gender",
-        "count": 7
+        "count": 8
       }
     ],
     "images": {
-      "total": 3650,
+      "total": 3436,
       "with_image": 73,
       "by_source": [
         {
