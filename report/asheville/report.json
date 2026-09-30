@@ -1,13 +1,25 @@
 {
   "city": "asheville",
-  "generated": "2026-09-29T05:54:28.062513",
+  "generated": "2026-09-30T05:31:27.273582",
   "build": {
-    "generated": "2026-09-29T05:54:28.062513",
-    "total_events": 4006,
-    "prev_total_events": 4331,
-    "delta": -325
+    "generated": "2026-09-30T05:31:27.273582",
+    "total_events": 4638,
+    "prev_total_events": 4006,
+    "delta": 632
   },
   "problems": [
+    {
+      "severity": 1,
+      "kind": "broken_feed",
+      "title": "ashevillenc is serving empty, not ICS",
+      "detail": "was 2 events on 2026-09-29; broken since 2026-09-30",
+      "feed": "ashevillenc",
+      "repro": {
+        "display": "City of Asheville",
+        "source": "https://www.ashevillenc.gov/events/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://www.ashevillenc.gov/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
     {
       "severity": 1,
       "kind": "broken_feed",
@@ -24,108 +36,12 @@
       "severity": 1,
       "kind": "broken_feed",
       "title": "riverartsdistrict is serving html, not ICS",
-      "detail": "no good build in recorded history; broken since 2026-07-01",
+      "detail": "no good build in recorded history; broken since 2026-07-02",
       "feed": "riverartsdistrict",
       "repro": {
         "display": "River Arts District",
         "source": "https://www.riverartsdistrict.com/events/?ical=1",
         "command": "curl -sL -A 'Mozilla/5.0' 'https://www.riverartsdistrict.com/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
-      }
-    },
-    {
-      "severity": 1,
-      "kind": "broken_feed",
-      "title": "unca is serving empty, not ICS",
-      "detail": "was 6 events on 2026-09-28; broken since 2026-09-29",
-      "feed": "unca",
-      "repro": {
-        "display": "UNC Asheville",
-        "source": "https://www.unca.edu/events/?ical=1",
-        "command": "curl -sL -A 'Mozilla/5.0' 'https://www.unca.edu/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "newly_silent",
-      "title": "asheville_com went silent (valid calendar, 0 events)",
-      "detail": "was 573 events on 2026-09-28",
-      "feed": "asheville_com",
-      "repro": {
-        "display": "Asheville.com",
-        "source": "python scrapers/mainstreet.py --url \"https://www.asheville.com\" --name \"Asheville.com\"",
-        "command": "python scrapers/mainstreet.py --url \"https://www.asheville.com\" --name \"Asheville.com\""
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "newly_silent",
-      "title": "asheville_yards went silent (valid calendar, 0 events)",
-      "detail": "was 1 events on 2026-09-21",
-      "feed": "asheville_yards",
-      "repro": {
-        "display": "Asheville Yards",
-        "source": "python scrapers/songkick.py --url \"https://www.songkick.com/venues/4591672-asheville-yards\" --name \"Asheville Yards\" --output cities/asheville/asheville_yards.ics",
-        "command": "python scrapers/songkick.py --url \"https://www.songkick.com/venues/4591672-asheville-yards\" --name \"Asheville Yards\" --output cities/asheville/asheville_yards.ics"
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "newly_silent",
-      "title": "barleys_taproom went silent (valid calendar, 0 events)",
-      "detail": "was 1 events on 2026-09-28",
-      "feed": "barleys_taproom",
-      "repro": {
-        "display": "Barley's Taproom",
-        "source": "python scrapers/squarespace.py --url \"https://www.barleystaproom.com/new-events-2\" --name \"Barley's Taproom\"",
-        "command": "python scrapers/squarespace.py --url \"https://www.barleystaproom.com/new-events-2\" --name \"Barley's Taproom\""
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "newly_silent",
-      "title": "dice_ayurprana went silent (valid calendar, 0 events)",
-      "detail": "was 28 events on 2026-09-28",
-      "feed": "dice_ayurprana",
-      "repro": {
-        "display": "AyurPrana Listening Room",
-        "source": "python scrapers/dice_venue.py --venue \"AyurPrana Listening Room\" --name \"AyurPrana Listening Room\"",
-        "command": "python scrapers/dice_venue.py --venue \"AyurPrana Listening Room\" --name \"AyurPrana Listening Room\""
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "newly_silent",
-      "title": "dice_eulogy went silent (valid calendar, 0 events)",
-      "detail": "was 42 events on 2026-09-28",
-      "feed": "dice_eulogy",
-      "repro": {
-        "display": "Eulogy",
-        "source": "python scrapers/dice_venue.py --venue \"Eulogy\" --name \"Eulogy\"",
-        "command": "python scrapers/dice_venue.py --venue \"Eulogy\" --name \"Eulogy\""
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "newly_silent",
-      "title": "dice_static_age went silent (valid calendar, 0 events)",
-      "detail": "was 16 events on 2026-09-28",
-      "feed": "dice_static_age",
-      "repro": {
-        "display": "Static Age Records",
-        "source": "python scrapers/dice_venue.py --venue \"Static Age Records\" --name \"Static Age Records\"",
-        "command": "python scrapers/dice_venue.py --venue \"Static Age Records\" --name \"Static Age Records\""
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "newly_silent",
-      "title": "hendersonville_com went silent (valid calendar, 0 events)",
-      "detail": "was 623 events on 2026-09-28",
-      "feed": "hendersonville_com",
-      "repro": {
-        "display": "Hendersonville.com",
-        "source": "python scrapers/mainstreet.py --url \"https://www.hendersonville.com\" --name \"Hendersonville.com\"",
-        "command": "python scrapers/mainstreet.py --url \"https://www.hendersonville.com\" --name \"Hendersonville.com\""
       }
     },
     {
@@ -138,6 +54,18 @@
         "display": "Asheville Adventures 30s & 40s",
         "source": "https://www.meetup.com/asheville-adventures-30-s-40-s/events/ical/",
         "command": "curl -sL -A 'Mozilla/5.0' 'https://www.meetup.com/asheville-adventures-30-s-40-s/events/ical/' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "severity": 2,
+      "kind": "newly_silent",
+      "title": "meetup_asheville_filmmakers_and_actors_group went silent (valid calendar, 0 events)",
+      "detail": "was 1 events on 2026-09-29",
+      "feed": "meetup_asheville_filmmakers_and_actors_group",
+      "repro": {
+        "display": "Asheville Filmmakers and Actors Group",
+        "source": "https://www.meetup.com/asheville-filmmakers-and-actors-group/events/ical/",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://www.meetup.com/asheville-filmmakers-and-actors-group/events/ical/' | grep -c 'BEGIN:VEVENT'"
       }
     },
     {
@@ -190,18 +118,6 @@
     },
     {
       "severity": 2,
-      "kind": "newly_silent",
-      "title": "shamrock_irons went silent (valid calendar, 0 events)",
-      "detail": "was 1 events on 2026-09-28",
-      "feed": "shamrock_irons",
-      "repro": {
-        "display": "Shamrock Irons",
-        "source": "python scrapers/squarespace.py --url \"https://www.shamrockirons.com/events\" --name \"Shamrock Irons\"",
-        "command": "python scrapers/squarespace.py --url \"https://www.shamrockirons.com/events\" --name \"Shamrock Irons\""
-      }
-    },
-    {
-      "severity": 2,
       "kind": "drop",
       "title": "devilsfootbrew: Events dropped 50% (6 \u2192 3)",
       "detail": "2026-09-28",
@@ -248,6 +164,18 @@
     }
   ],
   "watching": [
+    {
+      "feed": "asheville_yards",
+      "was": 1,
+      "was_date": "2026-09-21",
+      "silent_since": "2026-09-22",
+      "content": "quiet",
+      "repro": {
+        "display": "Asheville Yards",
+        "source": "python scrapers/songkick.py --url \"https://www.songkick.com/venues/4591672-asheville-yards\" --name \"Asheville Yards\" --output cities/asheville/asheville_yards.ics",
+        "command": "python scrapers/songkick.py --url \"https://www.songkick.com/venues/4591672-asheville-yards\" --name \"Asheville Yards\" --output cities/asheville/asheville_yards.ics"
+      }
+    },
     {
       "feed": "ashevillecityschools_cal_20",
       "was": null,
@@ -306,6 +234,18 @@
         "display": "ACS Preschool Program",
         "source": "https://www.ashevillecityschools.net/fs/calendar-manager/events.ics?calendar_ids%5B%5D=30",
         "command": "curl -sL -A 'Mozilla/5.0' 'https://www.ashevillecityschools.net/fs/calendar-manager/events.ics?calendar_ids%5B%5D=30' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "feed": "bethisraelnc",
+      "was": null,
+      "was_date": null,
+      "silent_since": "2026-09-30",
+      "content": "quiet",
+      "repro": {
+        "display": "Congregation Beth Israel",
+        "source": "https://bethisraelnc.org/events/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://bethisraelnc.org/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
       }
     },
     {
@@ -372,7 +312,7 @@
       "feed": "meetup_asheville_garden_club_meetup_group",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-01",
+      "silent_since": "2026-07-02",
       "content": "quiet",
       "repro": {
         "display": "Asheville Garden Club",
@@ -390,18 +330,6 @@
         "display": "Atheists of WNC",
         "source": "https://www.meetup.com/atheistsofwnc/events/ical/",
         "command": "curl -sL -A 'Mozilla/5.0' 'https://www.meetup.com/atheistsofwnc/events/ical/' | grep -c 'BEGIN:VEVENT'"
-      }
-    },
-    {
-      "feed": "meetup_international_connections_avl",
-      "was": 1,
-      "was_date": "2026-09-15",
-      "silent_since": "2026-09-16",
-      "content": "quiet",
-      "repro": {
-        "display": "AVL International Connections",
-        "source": "https://www.meetup.com/international-connections-avl/events/ical/",
-        "command": "curl -sL -A 'Mozilla/5.0' 'https://www.meetup.com/international-connections-avl/events/ical/' | grep -c 'BEGIN:VEVENT'"
       }
     },
     {
@@ -467,13 +395,6 @@
   ],
   "silent_feeds": [
     {
-      "feed": "asheville_com",
-      "was": 573,
-      "was_date": "2026-09-28",
-      "silent_since": "2026-09-29",
-      "content": "quiet"
-    },
-    {
       "feed": "asheville_yards",
       "was": 1,
       "was_date": "2026-09-21",
@@ -516,10 +437,17 @@
       "content": "quiet"
     },
     {
-      "feed": "barleys_taproom",
-      "was": 1,
-      "was_date": "2026-09-28",
-      "silent_since": "2026-09-29",
+      "feed": "ashevillenc",
+      "was": 2,
+      "was_date": "2026-09-29",
+      "silent_since": "2026-09-30",
+      "content": "not_ics:empty"
+    },
+    {
+      "feed": "bethisraelnc",
+      "was": null,
+      "was_date": null,
+      "silent_since": "2026-09-30",
       "content": "quiet"
     },
     {
@@ -530,38 +458,10 @@
       "content": "quiet"
     },
     {
-      "feed": "dice_ayurprana",
-      "was": 28,
-      "was_date": "2026-09-28",
-      "silent_since": "2026-09-29",
-      "content": "quiet"
-    },
-    {
-      "feed": "dice_eulogy",
-      "was": 42,
-      "was_date": "2026-09-28",
-      "silent_since": "2026-09-29",
-      "content": "quiet"
-    },
-    {
-      "feed": "dice_static_age",
-      "was": 16,
-      "was_date": "2026-09-28",
-      "silent_since": "2026-09-29",
-      "content": "quiet"
-    },
-    {
       "feed": "gcal_montfordmnaboard",
       "was": null,
       "was_date": null,
       "silent_since": "2026-07-17",
-      "content": "quiet"
-    },
-    {
-      "feed": "hendersonville_com",
-      "was": 623,
-      "was_date": "2026-09-28",
-      "silent_since": "2026-09-29",
       "content": "quiet"
     },
     {
@@ -593,10 +493,17 @@
       "content": "quiet"
     },
     {
+      "feed": "meetup_asheville_filmmakers_and_actors_group",
+      "was": 1,
+      "was_date": "2026-09-29",
+      "silent_since": "2026-09-30",
+      "content": "quiet"
+    },
+    {
       "feed": "meetup_asheville_garden_club_meetup_group",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-01",
+      "silent_since": "2026-07-02",
       "content": "quiet"
     },
     {
@@ -635,13 +542,6 @@
       "content": "quiet"
     },
     {
-      "feed": "meetup_international_connections_avl",
-      "was": 1,
-      "was_date": "2026-09-15",
-      "silent_since": "2026-09-16",
-      "content": "quiet"
-    },
-    {
       "feed": "meetup_misfit_improv_acting_school",
       "was": 1,
       "was_date": "2026-09-14",
@@ -673,22 +573,8 @@
       "feed": "riverartsdistrict",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-01",
+      "silent_since": "2026-07-02",
       "content": "not_ics:html"
-    },
-    {
-      "feed": "shamrock_irons",
-      "was": 1,
-      "was_date": "2026-09-28",
-      "silent_since": "2026-09-29",
-      "content": "quiet"
-    },
-    {
-      "feed": "unca",
-      "was": 6,
-      "was_date": "2026-09-28",
-      "silent_since": "2026-09-29",
-      "content": "not_ics:empty"
     },
     {
       "feed": "urban_dharma",
@@ -742,22 +628,6 @@
     }
   ],
   "recent_anomalies": [
-    {
-      "type": "zero_events",
-      "message": "Feed returned 0 events (was 1)",
-      "severity": "info",
-      "date": "2026-09-22",
-      "city": "asheville",
-      "feed": "asheville_yards"
-    },
-    {
-      "type": "zero_events",
-      "message": "Feed returned 0 events (was 1)",
-      "severity": "info",
-      "date": "2026-09-22",
-      "city": "asheville",
-      "feed": "meetup_asheville_mountains_to_sea_trail_hiking_club"
-    },
     {
       "type": "zero_events",
       "message": "Feed returned 0 events (was 1)",
@@ -909,19 +779,31 @@
       "date": "2026-09-29",
       "city": "asheville",
       "feed": "unca"
+    },
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 2)",
+      "severity": "info",
+      "date": "2026-09-30",
+      "city": "asheville",
+      "feed": "ashevillenc"
+    },
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 1)",
+      "severity": "info",
+      "date": "2026-09-30",
+      "city": "asheville",
+      "feed": "meetup_asheville_filmmakers_and_actors_group"
     }
   ],
   "detail": {
     "feeds": {
       "asheville_chamber": {
-        "count": 34,
+        "count": 33,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 31
-          },
           {
             "date": "2026-09-01",
             "count": 36
@@ -1037,18 +919,18 @@
           {
             "date": "2026-09-29",
             "count": 34
+          },
+          {
+            "date": "2026-09-30",
+            "count": 33
           }
         ]
       },
       "asheville_com": {
-        "count": 0,
+        "count": 594,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 466
-          },
           {
             "date": "2026-09-01",
             "count": 470
@@ -1164,6 +1046,10 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 594
           }
         ]
       },
@@ -1172,10 +1058,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 50
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -1291,6 +1173,10 @@
           {
             "date": "2026-09-29",
             "count": 56
+          },
+          {
+            "date": "2026-09-30",
+            "count": 56
           }
         ]
       },
@@ -1299,10 +1185,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 5
-          },
           {
             "date": "2026-09-01",
             "count": 5
@@ -1418,6 +1300,10 @@
           {
             "date": "2026-09-29",
             "count": 5
+          },
+          {
+            "date": "2026-09-30",
+            "count": 5
           }
         ]
       },
@@ -1426,10 +1312,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 49
-          },
           {
             "date": "2026-09-01",
             "count": 49
@@ -1545,6 +1427,10 @@
           {
             "date": "2026-09-29",
             "count": 77
+          },
+          {
+            "date": "2026-09-30",
+            "count": 77
           }
         ]
       },
@@ -1553,10 +1439,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 2
-          },
           {
             "date": "2026-09-01",
             "count": 2
@@ -1671,6 +1553,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -1681,10 +1567,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 30
-          },
-          {
             "date": "2026-09-01",
             "count": 30
           },
@@ -1798,6 +1680,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 30
+          },
+          {
+            "date": "2026-09-30",
             "count": 30
           }
         ]
@@ -1808,10 +1694,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -1926,6 +1808,10 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 0
           }
         ]
       },
@@ -1934,10 +1820,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 34
-          },
           {
             "date": "2026-09-01",
             "count": 34
@@ -2053,6 +1935,10 @@
           {
             "date": "2026-09-29",
             "count": 27
+          },
+          {
+            "date": "2026-09-30",
+            "count": 27
           }
         ]
       },
@@ -2061,10 +1947,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 0
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -2179,6 +2061,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -2189,10 +2075,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -2307,18 +2189,18 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 0
           }
         ]
       },
       "ashevillecityschools_cal_24_10_6": {
-        "count": 48,
+        "count": 46,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 64
-          },
           {
             "date": "2026-09-01",
             "count": 64
@@ -2434,18 +2316,18 @@
           {
             "date": "2026-09-29",
             "count": 48
+          },
+          {
+            "date": "2026-09-30",
+            "count": 46
           }
         ]
       },
       "ashevillecityschools_cal_25": {
-        "count": 13,
+        "count": 17,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 15
-          },
           {
             "date": "2026-09-01",
             "count": 15
@@ -2561,6 +2443,10 @@
           {
             "date": "2026-09-29",
             "count": 13
+          },
+          {
+            "date": "2026-09-30",
+            "count": 17
           }
         ]
       },
@@ -2570,10 +2456,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -2688,6 +2570,10 @@
           {
             "date": "2026-09-29",
             "count": 1
+          },
+          {
+            "date": "2026-09-30",
+            "count": 1
           }
         ]
       },
@@ -2696,10 +2582,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 21
-          },
           {
             "date": "2026-09-01",
             "count": 23
@@ -2815,6 +2697,10 @@
           {
             "date": "2026-09-29",
             "count": 19
+          },
+          {
+            "date": "2026-09-30",
+            "count": 19
           }
         ]
       },
@@ -2823,10 +2709,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 0
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -2941,6 +2823,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -2951,10 +2837,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -3069,6 +2951,10 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 0
           }
         ]
       },
@@ -3077,10 +2963,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 68
-          },
           {
             "date": "2026-09-01",
             "count": 68
@@ -3196,18 +3078,18 @@
           {
             "date": "2026-09-29",
             "count": 52
+          },
+          {
+            "date": "2026-09-30",
+            "count": 52
           }
         ]
       },
       "ashevillecityschools_cal_34": {
-        "count": 2,
+        "count": 4,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 3
-          },
           {
             "date": "2026-09-01",
             "count": 3
@@ -3323,18 +3205,18 @@
           {
             "date": "2026-09-29",
             "count": 2
+          },
+          {
+            "date": "2026-09-30",
+            "count": 4
           }
         ]
       },
       "ashevillenc": {
-        "count": 2,
+        "count": 0,
         "error": null,
-        "content": null,
+        "content": "not_ics:empty",
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 0
-          },
           {
             "date": "2026-09-01",
             "count": 20
@@ -3450,18 +3332,18 @@
           {
             "date": "2026-09-29",
             "count": 2
+          },
+          {
+            "date": "2026-09-30",
+            "count": 0
           }
         ]
       },
       "barleys_taproom": {
-        "count": 0,
+        "count": 26,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 5
-          },
           {
             "date": "2026-09-01",
             "count": 4
@@ -3577,6 +3459,10 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 26
           }
         ]
       },
@@ -3585,10 +3471,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 0
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -3704,6 +3586,21 @@
           {
             "date": "2026-09-29",
             "count": 1
+          },
+          {
+            "date": "2026-09-30",
+            "count": 1
+          }
+        ]
+      },
+      "bethisraelnc": {
+        "count": 0,
+        "error": null,
+        "content": "quiet",
+        "history": [
+          {
+            "date": "2026-09-30",
+            "count": 0
           }
         ]
       },
@@ -3712,10 +3609,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 34
-          },
           {
             "date": "2026-09-01",
             "count": 33
@@ -3831,18 +3724,18 @@
           {
             "date": "2026-09-29",
             "count": 27
+          },
+          {
+            "date": "2026-09-30",
+            "count": 27
           }
         ]
       },
       "buncombe_dems": {
-        "count": 42,
+        "count": 45,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 66
-          },
           {
             "date": "2026-09-01",
             "count": 66
@@ -3958,6 +3851,10 @@
           {
             "date": "2026-09-29",
             "count": 42
+          },
+          {
+            "date": "2026-09-30",
+            "count": 45
           }
         ]
       },
@@ -3966,10 +3863,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 159
-          },
           {
             "date": "2026-09-01",
             "count": 159
@@ -4085,6 +3978,10 @@
           {
             "date": "2026-09-29",
             "count": 142
+          },
+          {
+            "date": "2026-09-30",
+            "count": 142
           }
         ]
       },
@@ -4093,10 +3990,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 185
-          },
           {
             "date": "2026-09-01",
             "count": 185
@@ -4212,6 +4105,10 @@
           {
             "date": "2026-09-29",
             "count": 166
+          },
+          {
+            "date": "2026-09-30",
+            "count": 166
           }
         ]
       },
@@ -4220,10 +4117,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 3
-          },
           {
             "date": "2026-09-01",
             "count": 3
@@ -4338,6 +4231,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -4348,10 +4245,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 9
-          },
-          {
             "date": "2026-09-01",
             "count": 9
           },
@@ -4466,6 +4359,10 @@
           {
             "date": "2026-09-29",
             "count": 8
+          },
+          {
+            "date": "2026-09-30",
+            "count": 8
           }
         ]
       },
@@ -4474,10 +4371,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 27
-          },
           {
             "date": "2026-09-01",
             "count": 27
@@ -4593,6 +4486,10 @@
           {
             "date": "2026-09-29",
             "count": 24
+          },
+          {
+            "date": "2026-09-30",
+            "count": 24
           }
         ]
       },
@@ -4601,10 +4498,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 135
-          },
           {
             "date": "2026-09-01",
             "count": 135
@@ -4720,6 +4613,10 @@
           {
             "date": "2026-09-29",
             "count": 130
+          },
+          {
+            "date": "2026-09-30",
+            "count": 130
           }
         ]
       },
@@ -4728,10 +4625,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 0
-          },
           {
             "date": "2026-09-01",
             "count": 30
@@ -4847,18 +4740,18 @@
           {
             "date": "2026-09-29",
             "count": 3
+          },
+          {
+            "date": "2026-09-30",
+            "count": 3
           }
         ]
       },
       "dice_ayurprana": {
-        "count": 0,
+        "count": 30,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 27
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -4974,18 +4867,18 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 30
           }
         ]
       },
       "dice_eulogy": {
-        "count": 0,
+        "count": 41,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 44
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -5101,18 +4994,18 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 41
           }
         ]
       },
       "dice_static_age": {
-        "count": 0,
+        "count": 16,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 21
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -5228,18 +5121,18 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 16
           }
         ]
       },
       "eulogy_songkick": {
-        "count": 5,
+        "count": 4,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 5
-          },
           {
             "date": "2026-09-01",
             "count": 4
@@ -5355,6 +5248,10 @@
           {
             "date": "2026-09-29",
             "count": 5
+          },
+          {
+            "date": "2026-09-30",
+            "count": 4
           }
         ]
       },
@@ -5364,10 +5261,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 6
-          },
-          {
             "date": "2026-09-01",
             "count": 6
           },
@@ -5482,18 +5375,18 @@
           {
             "date": "2026-09-29",
             "count": 4
+          },
+          {
+            "date": "2026-09-30",
+            "count": 4
           }
         ]
       },
       "events_calendar_ics": {
-        "count": 210,
+        "count": 208,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 89
-          },
           {
             "date": "2026-09-01",
             "count": 90
@@ -5609,6 +5502,10 @@
           {
             "date": "2026-09-29",
             "count": 210
+          },
+          {
+            "date": "2026-09-30",
+            "count": 208
           }
         ]
       },
@@ -5720,6 +5617,10 @@
           {
             "date": "2026-09-29",
             "count": 2
+          },
+          {
+            "date": "2026-09-30",
+            "count": 2
           }
         ]
       },
@@ -5728,10 +5629,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 10
-          },
           {
             "date": "2026-09-01",
             "count": 10
@@ -5847,6 +5744,10 @@
           {
             "date": "2026-09-29",
             "count": 9
+          },
+          {
+            "date": "2026-09-30",
+            "count": 9
           }
         ]
       },
@@ -5855,10 +5756,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 7
-          },
           {
             "date": "2026-09-01",
             "count": 7
@@ -5974,18 +5871,18 @@
           {
             "date": "2026-09-29",
             "count": 8
+          },
+          {
+            "date": "2026-09-30",
+            "count": 8
           }
         ]
       },
       "gcal_gcpcusa_org_cff3s75sgv2btvjo73j07erbqo": {
-        "count": 13,
+        "count": 15,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 21
-          },
           {
             "date": "2026-09-01",
             "count": 19
@@ -6101,6 +5998,10 @@
           {
             "date": "2026-09-29",
             "count": 13
+          },
+          {
+            "date": "2026-09-30",
+            "count": 15
           }
         ]
       },
@@ -6109,10 +6010,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 0
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -6228,18 +6125,18 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 0
           }
         ]
       },
       "grey_eagle": {
-        "count": 19,
+        "count": 29,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 37
-          },
           {
             "date": "2026-09-01",
             "count": 41
@@ -6355,6 +6252,10 @@
           {
             "date": "2026-09-29",
             "count": 19
+          },
+          {
+            "date": "2026-09-30",
+            "count": 29
           }
         ]
       },
@@ -6363,10 +6264,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 4
-          },
           {
             "date": "2026-09-01",
             "count": 5
@@ -6481,6 +6378,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 5
+          },
+          {
+            "date": "2026-09-30",
             "count": 5
           }
         ]
@@ -6491,10 +6392,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 5
-          },
-          {
             "date": "2026-09-01",
             "count": 4
           },
@@ -6609,6 +6506,10 @@
           {
             "date": "2026-09-29",
             "count": 5
+          },
+          {
+            "date": "2026-09-30",
+            "count": 5
           }
         ]
       },
@@ -6617,10 +6518,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 2
-          },
           {
             "date": "2026-09-01",
             "count": 2
@@ -6736,18 +6633,18 @@
           {
             "date": "2026-09-29",
             "count": 2
+          },
+          {
+            "date": "2026-09-30",
+            "count": 2
           }
         ]
       },
       "hendersonville_com": {
-        "count": 0,
+        "count": 640,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 534
-          },
           {
             "date": "2026-09-01",
             "count": 538
@@ -6863,6 +6760,10 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 640
           }
         ]
       },
@@ -6871,10 +6772,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 30
-          },
           {
             "date": "2026-09-01",
             "count": 30
@@ -6989,6 +6886,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 30
+          },
+          {
+            "date": "2026-09-30",
             "count": 30
           }
         ]
@@ -6999,10 +6900,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 50
-          },
-          {
             "date": "2026-09-01",
             "count": 50
           },
@@ -7117,18 +7014,18 @@
           {
             "date": "2026-09-29",
             "count": 50
+          },
+          {
+            "date": "2026-09-30",
+            "count": 50
           }
         ]
       },
       "little_jumbo": {
-        "count": 9,
+        "count": 8,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 2
-          },
           {
             "date": "2026-09-01",
             "count": 1
@@ -7244,18 +7141,18 @@
           {
             "date": "2026-09-29",
             "count": 9
+          },
+          {
+            "date": "2026-09-30",
+            "count": 8
           }
         ]
       },
       "livemusicasheville": {
-        "count": 26,
+        "count": 28,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 28
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -7371,6 +7268,10 @@
           {
             "date": "2026-09-29",
             "count": 26
+          },
+          {
+            "date": "2026-09-30",
+            "count": 28
           }
         ]
       },
@@ -7380,10 +7281,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -7497,6 +7394,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 2
+          },
+          {
+            "date": "2026-09-30",
             "count": 2
           }
         ]
@@ -7507,10 +7408,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -7624,6 +7521,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -7634,10 +7535,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 8
-          },
-          {
             "date": "2026-09-01",
             "count": 8
           },
@@ -7751,6 +7648,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -7761,10 +7662,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -7878,6 +7775,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -7888,10 +7789,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -8005,6 +7902,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -8015,10 +7916,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -8132,6 +8029,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -8142,10 +8043,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -8259,6 +8156,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -8269,10 +8170,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 4
-          },
-          {
             "date": "2026-09-01",
             "count": 4
           },
@@ -8386,6 +8283,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 3
+          },
+          {
+            "date": "2026-09-30",
             "count": 3
           }
         ]
@@ -8396,10 +8297,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -8513,6 +8410,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -8523,10 +8424,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -8640,6 +8537,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -8650,10 +8551,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 4
-          },
-          {
             "date": "2026-09-01",
             "count": 4
           },
@@ -8768,18 +8665,18 @@
           {
             "date": "2026-09-29",
             "count": 5
+          },
+          {
+            "date": "2026-09-30",
+            "count": 5
           }
         ]
       },
       "meetup_asheville_filmmakers_and_actors_group": {
-        "count": 1,
+        "count": 0,
         "error": null,
-        "content": null,
+        "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 0
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -8895,6 +8792,10 @@
           {
             "date": "2026-09-29",
             "count": 1
+          },
+          {
+            "date": "2026-09-30",
+            "count": 0
           }
         ]
       },
@@ -8904,10 +8805,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -9021,6 +8918,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -9031,10 +8932,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -9148,19 +9045,19 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
       },
       "meetup_asheville_lose_the_booze_crew": {
-        "count": 2,
+        "count": 1,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 0
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -9276,6 +9173,10 @@
           {
             "date": "2026-09-29",
             "count": 2
+          },
+          {
+            "date": "2026-09-30",
+            "count": 1
           }
         ]
       },
@@ -9285,10 +9186,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -9402,6 +9299,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -9412,10 +9313,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 2
-          },
-          {
             "date": "2026-09-01",
             "count": 2
           },
@@ -9529,6 +9426,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -9539,10 +9440,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 2
-          },
-          {
             "date": "2026-09-01",
             "count": 1
           },
@@ -9656,6 +9553,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -9666,10 +9567,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -9783,6 +9680,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -9793,10 +9694,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 3
-          },
-          {
             "date": "2026-09-01",
             "count": 3
           },
@@ -9910,6 +9807,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 1
+          },
+          {
+            "date": "2026-09-30",
             "count": 1
           }
         ]
@@ -9920,10 +9821,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 1
-          },
-          {
             "date": "2026-09-01",
             "count": 1
           },
@@ -10037,6 +9934,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 1
+          },
+          {
+            "date": "2026-09-30",
             "count": 1
           }
         ]
@@ -10047,10 +9948,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -10164,6 +10061,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -10174,10 +10075,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -10292,18 +10189,18 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 0
           }
         ]
       },
       "meetup_ashevillehikinggroup": {
-        "count": 5,
+        "count": 4,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 4
-          },
           {
             "date": "2026-09-01",
             "count": 6
@@ -10419,6 +10316,10 @@
           {
             "date": "2026-09-29",
             "count": 5
+          },
+          {
+            "date": "2026-09-30",
+            "count": 4
           }
         ]
       },
@@ -10427,10 +10328,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 10
-          },
           {
             "date": "2026-09-01",
             "count": 10
@@ -10545,6 +10442,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -10555,10 +10456,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -10672,6 +10569,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -10682,10 +10583,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 2
-          },
-          {
             "date": "2026-09-01",
             "count": 3
           },
@@ -10799,6 +10696,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 2
+          },
+          {
+            "date": "2026-09-30",
             "count": 2
           }
         ]
@@ -10809,10 +10710,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -10926,6 +10823,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -10936,10 +10837,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -11053,6 +10950,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -11063,10 +10964,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 2
-          },
-          {
             "date": "2026-09-01",
             "count": 2
           },
@@ -11180,6 +11077,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 3
+          },
+          {
+            "date": "2026-09-30",
             "count": 3
           }
         ]
@@ -11190,10 +11091,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -11307,6 +11204,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -11317,10 +11218,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -11434,6 +11331,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -11444,10 +11345,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 3
-          },
-          {
             "date": "2026-09-01",
             "count": 3
           },
@@ -11561,6 +11458,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 2
+          },
+          {
+            "date": "2026-09-30",
             "count": 2
           }
         ]
@@ -11571,10 +11472,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 4
-          },
-          {
             "date": "2026-09-01",
             "count": 5
           },
@@ -11688,6 +11585,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 3
+          },
+          {
+            "date": "2026-09-30",
             "count": 3
           }
         ]
@@ -11698,10 +11599,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -11815,6 +11712,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -11825,10 +11726,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 4
-          },
-          {
             "date": "2026-09-01",
             "count": 4
           },
@@ -11942,6 +11839,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 3
+          },
+          {
+            "date": "2026-09-30",
             "count": 3
           }
         ]
@@ -11952,10 +11853,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 6
-          },
-          {
             "date": "2026-09-01",
             "count": 6
           },
@@ -12069,6 +11966,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 8
+          },
+          {
+            "date": "2026-09-30",
             "count": 8
           }
         ]
@@ -12079,10 +11980,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -12196,6 +12093,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 9
+          },
+          {
+            "date": "2026-09-30",
             "count": 9
           }
         ]
@@ -12206,10 +12107,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -12323,19 +12220,19 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
       },
       "meetup_international_connections_avl": {
-        "count": 0,
+        "count": 1,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 0
-          },
           {
             "date": "2026-09-01",
             "count": 1
@@ -12451,6 +12348,10 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 1
           }
         ]
       },
@@ -12459,10 +12360,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 4
-          },
           {
             "date": "2026-09-01",
             "count": 4
@@ -12577,6 +12474,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 6
+          },
+          {
+            "date": "2026-09-30",
             "count": 6
           }
         ]
@@ -12587,10 +12488,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -12705,6 +12602,10 @@
           {
             "date": "2026-09-29",
             "count": 10
+          },
+          {
+            "date": "2026-09-30",
+            "count": 10
           }
         ]
       },
@@ -12713,10 +12614,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 1
-          },
           {
             "date": "2026-09-01",
             "count": 1
@@ -12832,6 +12729,10 @@
           {
             "date": "2026-09-29",
             "count": 3
+          },
+          {
+            "date": "2026-09-30",
+            "count": 3
           }
         ]
       },
@@ -12840,10 +12741,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 1
-          },
           {
             "date": "2026-09-01",
             "count": 1
@@ -12958,6 +12855,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 2
+          },
+          {
+            "date": "2026-09-30",
             "count": 2
           }
         ]
@@ -12968,10 +12869,6 @@
         "content": "not_ics:json",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 2
-          },
-          {
             "date": "2026-09-01",
             "count": 2
           },
@@ -13085,6 +12982,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -13095,10 +12996,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -13212,6 +13109,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -13222,10 +13123,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -13339,6 +13236,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -13349,10 +13250,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -13466,6 +13363,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -13476,10 +13377,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -13593,6 +13490,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 7
+          },
+          {
+            "date": "2026-09-30",
             "count": 7
           }
         ]
@@ -13603,10 +13504,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -13721,6 +13618,10 @@
           {
             "date": "2026-09-29",
             "count": 10
+          },
+          {
+            "date": "2026-09-30",
+            "count": 10
           }
         ]
       },
@@ -13729,10 +13630,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 9
-          },
           {
             "date": "2026-09-01",
             "count": 9
@@ -13848,6 +13745,10 @@
           {
             "date": "2026-09-29",
             "count": 7
+          },
+          {
+            "date": "2026-09-30",
+            "count": 7
           }
         ]
       },
@@ -13856,10 +13757,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 1
-          },
           {
             "date": "2026-09-01",
             "count": 1
@@ -13974,6 +13871,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 1
+          },
+          {
+            "date": "2026-09-30",
             "count": 1
           }
         ]
@@ -13984,10 +13885,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -14101,6 +13998,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 10
+          },
+          {
+            "date": "2026-09-30",
             "count": 10
           }
         ]
@@ -14111,10 +14012,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 10
-          },
-          {
             "date": "2026-09-01",
             "count": 10
           },
@@ -14229,6 +14126,10 @@
           {
             "date": "2026-09-29",
             "count": 10
+          },
+          {
+            "date": "2026-09-30",
+            "count": 10
           }
         ]
       },
@@ -14237,10 +14138,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 1
-          },
           {
             "date": "2026-09-01",
             "count": 1
@@ -14356,18 +14253,29 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 0
           }
         ]
       },
-      "modelface_comedy": {
-        "count": 56,
+      "mhu": {
+        "count": 10,
         "error": null,
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 50
-          },
+            "date": "2026-09-30",
+            "count": 10
+          }
+        ]
+      },
+      "modelface_comedy": {
+        "count": 57,
+        "error": null,
+        "content": null,
+        "history": [
           {
             "date": "2026-09-01",
             "count": 50
@@ -14483,18 +14391,18 @@
           {
             "date": "2026-09-29",
             "count": 56
+          },
+          {
+            "date": "2026-09-30",
+            "count": 57
           }
         ]
       },
       "montreatcavaliers_calendar_ashx_calendar_ics": {
-        "count": 197,
+        "count": 196,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 210
-          },
           {
             "date": "2026-09-01",
             "count": 210
@@ -14610,18 +14518,18 @@
           {
             "date": "2026-09-29",
             "count": 197
+          },
+          {
+            "date": "2026-09-30",
+            "count": 196
           }
         ]
       },
       "mountaintrue": {
-        "count": 9,
+        "count": 8,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 8
-          },
           {
             "date": "2026-09-01",
             "count": 8
@@ -14737,6 +14645,10 @@
           {
             "date": "2026-09-29",
             "count": 9
+          },
+          {
+            "date": "2026-09-30",
+            "count": 8
           }
         ]
       },
@@ -14745,10 +14657,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 30
-          },
           {
             "date": "2026-09-01",
             "count": 30
@@ -14864,6 +14772,10 @@
           {
             "date": "2026-09-29",
             "count": 29
+          },
+          {
+            "date": "2026-09-30",
+            "count": 29
           }
         ]
       },
@@ -14872,10 +14784,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 14
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -14991,6 +14899,10 @@
           {
             "date": "2026-09-29",
             "count": 17
+          },
+          {
+            "date": "2026-09-30",
+            "count": 17
           }
         ]
       },
@@ -14999,10 +14911,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 5
-          },
           {
             "date": "2026-09-01",
             "count": 5
@@ -15118,6 +15026,10 @@
           {
             "date": "2026-09-29",
             "count": 5
+          },
+          {
+            "date": "2026-09-30",
+            "count": 5
           }
         ]
       },
@@ -15126,10 +15038,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 16
-          },
           {
             "date": "2026-09-01",
             "count": 16
@@ -15245,18 +15153,18 @@
           {
             "date": "2026-09-29",
             "count": 11
+          },
+          {
+            "date": "2026-09-30",
+            "count": 11
           }
         ]
       },
       "orange_peel_songkick": {
-        "count": 5,
+        "count": 4,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 5
-          },
           {
             "date": "2026-09-01",
             "count": 5
@@ -15372,18 +15280,18 @@
           {
             "date": "2026-09-29",
             "count": 5
+          },
+          {
+            "date": "2026-09-30",
+            "count": 4
           }
         ]
       },
       "otd_black_mountain": {
-        "count": 2,
+        "count": 1,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 1
-          },
           {
             "date": "2026-09-01",
             "count": 1
@@ -15499,6 +15407,10 @@
           {
             "date": "2026-09-29",
             "count": 2
+          },
+          {
+            "date": "2026-09-30",
+            "count": 1
           }
         ]
       },
@@ -15507,10 +15419,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 28
-          },
           {
             "date": "2026-09-01",
             "count": 28
@@ -15626,18 +15534,18 @@
           {
             "date": "2026-09-29",
             "count": 11
+          },
+          {
+            "date": "2026-09-30",
+            "count": 11
           }
         ]
       },
       "revival_songkick": {
-        "count": 5,
+        "count": 4,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 5
-          },
           {
             "date": "2026-09-01",
             "count": 5
@@ -15753,6 +15661,10 @@
           {
             "date": "2026-09-29",
             "count": 5
+          },
+          {
+            "date": "2026-09-30",
+            "count": 4
           }
         ]
       },
@@ -15762,10 +15674,6 @@
         "content": "not_ics:html",
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 0
-          },
-          {
             "date": "2026-09-01",
             "count": 0
           },
@@ -15880,18 +15788,18 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 0
           }
         ]
       },
       "rotary_asheville": {
-        "count": 62,
+        "count": 63,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 60
-          },
           {
             "date": "2026-09-01",
             "count": 61
@@ -16007,6 +15915,10 @@
           {
             "date": "2026-09-29",
             "count": 62
+          },
+          {
+            "date": "2026-09-30",
+            "count": 63
           }
         ]
       },
@@ -16015,10 +15927,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 31
-          },
           {
             "date": "2026-09-01",
             "count": 31
@@ -16134,18 +16042,18 @@
           {
             "date": "2026-09-29",
             "count": 31
+          },
+          {
+            "date": "2026-09-30",
+            "count": 31
           }
         ]
       },
       "shamrock_irons": {
-        "count": 0,
+        "count": 19,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 17
-          },
           {
             "date": "2026-09-01",
             "count": 16
@@ -16261,6 +16169,10 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 19
           }
         ]
       },
@@ -16270,10 +16182,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 6
-          },
-          {
             "date": "2026-09-01",
             "count": 6
           },
@@ -16387,19 +16295,19 @@
           },
           {
             "date": "2026-09-29",
+            "count": 7
+          },
+          {
+            "date": "2026-09-30",
             "count": 7
           }
         ]
       },
       "static_age_records": {
-        "count": 5,
+        "count": 4,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 5
-          },
           {
             "date": "2026-09-01",
             "count": 5
@@ -16515,18 +16423,18 @@
           {
             "date": "2026-09-29",
             "count": 5
+          },
+          {
+            "date": "2026-09-30",
+            "count": 4
           }
         ]
       },
       "third_room": {
-        "count": 52,
+        "count": 51,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 25
-          },
           {
             "date": "2026-09-01",
             "count": 25
@@ -16642,18 +16550,18 @@
           {
             "date": "2026-09-29",
             "count": 52
+          },
+          {
+            "date": "2026-09-30",
+            "count": 51
           }
         ]
       },
       "tm_harrahs_cherokee": {
-        "count": 13,
+        "count": 18,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 15
-          },
           {
             "date": "2026-09-01",
             "count": 14
@@ -16769,18 +16677,18 @@
           {
             "date": "2026-09-29",
             "count": 13
+          },
+          {
+            "date": "2026-09-30",
+            "count": 18
           }
         ]
       },
       "tockify_fooddistributionhendersoncountync": {
-        "count": 876,
+        "count": 957,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 602
-          },
           {
             "date": "2026-09-01",
             "count": 607
@@ -16896,6 +16804,10 @@
           {
             "date": "2026-09-29",
             "count": 876
+          },
+          {
+            "date": "2026-09-30",
+            "count": 957
           }
         ]
       },
@@ -16904,10 +16816,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 252
-          },
           {
             "date": "2026-09-01",
             "count": 252
@@ -17023,6 +16931,10 @@
           {
             "date": "2026-09-29",
             "count": 240
+          },
+          {
+            "date": "2026-09-30",
+            "count": 240
           }
         ]
       },
@@ -17031,10 +16943,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 200
-          },
           {
             "date": "2026-09-01",
             "count": 200
@@ -17149,6 +17057,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 200
+          },
+          {
+            "date": "2026-09-30",
             "count": 200
           }
         ]
@@ -17159,10 +17071,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 200
-          },
-          {
             "date": "2026-09-01",
             "count": 200
           },
@@ -17276,6 +17184,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 200
+          },
+          {
+            "date": "2026-09-30",
             "count": 200
           }
         ]
@@ -17286,10 +17198,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 200
-          },
-          {
             "date": "2026-09-01",
             "count": 200
           },
@@ -17404,18 +17312,18 @@
           {
             "date": "2026-09-29",
             "count": 200
+          },
+          {
+            "date": "2026-09-30",
+            "count": 200
           }
         ]
       },
       "unca": {
-        "count": 0,
+        "count": 6,
         "error": null,
-        "content": "not_ics:empty",
+        "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 6
-          },
           {
             "date": "2026-09-01",
             "count": 8
@@ -17531,6 +17439,10 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 6
           }
         ]
       },
@@ -17539,10 +17451,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 87
-          },
           {
             "date": "2026-09-01",
             "count": 86
@@ -17658,6 +17566,10 @@
           {
             "date": "2026-09-29",
             "count": 130
+          },
+          {
+            "date": "2026-09-30",
+            "count": 130
           }
         ]
       },
@@ -17666,10 +17578,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 0
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -17785,6 +17693,10 @@
           {
             "date": "2026-09-29",
             "count": 0
+          },
+          {
+            "date": "2026-09-30",
+            "count": 0
           }
         ]
       },
@@ -17793,10 +17705,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 30
-          },
           {
             "date": "2026-09-01",
             "count": 30
@@ -17912,6 +17820,10 @@
           {
             "date": "2026-09-29",
             "count": 30
+          },
+          {
+            "date": "2026-09-30",
+            "count": 30
           }
         ]
       },
@@ -17920,10 +17832,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 268
-          },
           {
             "date": "2026-09-01",
             "count": 267
@@ -18039,18 +17947,18 @@
           {
             "date": "2026-09-29",
             "count": 223
+          },
+          {
+            "date": "2026-09-30",
+            "count": 223
           }
         ]
       },
       "whereyat": {
-        "count": 631,
+        "count": 647,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 780
-          },
           {
             "date": "2026-09-01",
             "count": 796
@@ -18166,6 +18074,10 @@
           {
             "date": "2026-09-29",
             "count": 631
+          },
+          {
+            "date": "2026-09-30",
+            "count": 647
           }
         ]
       },
@@ -18174,10 +18086,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-08-31",
-            "count": 0
-          },
           {
             "date": "2026-09-01",
             "count": 0
@@ -18292,6 +18200,10 @@
           },
           {
             "date": "2026-09-29",
+            "count": 0
+          },
+          {
+            "date": "2026-09-30",
             "count": 0
           }
         ]
@@ -18302,10 +18214,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-08-31",
-            "count": 22
-          },
-          {
             "date": "2026-09-01",
             "count": 22
           },
@@ -18420,14 +18328,18 @@
           {
             "date": "2026-09-29",
             "count": 23
+          },
+          {
+            "date": "2026-09-30",
+            "count": 23
           }
         ]
       }
     },
     "url_quality": {
-      "total_with_url": 3602,
-      "total_events": 4006,
-      "unique_urls": 2667,
+      "total_with_url": 4237,
+      "total_events": 4638,
+      "unique_urls": 3335,
       "generic_count": 507,
       "generic_domains": [
         {
@@ -18437,7 +18349,7 @@
         },
         {
           "domain": "ams.ashevillecityschools.net",
-          "events": 48,
+          "events": 46,
           "url": "https://ams.ashevillecityschools.net/asheville-middle-calendar"
         },
         {
@@ -18472,12 +18384,12 @@
         },
         {
           "domain": "ahs.ashevillecityschools.net",
-          "events": 10,
+          "events": 14,
           "url": "https://ahs.ashevillecityschools.net/asheville-high-calendar"
         },
         {
           "domain": "www.instagram.com",
-          "events": 9,
+          "events": 8,
           "url": "https://www.instagram.com/5walnutwinebar/"
         },
         {
@@ -18487,29 +18399,35 @@
         },
         {
           "domain": "www.ashevillekava.com",
-          "events": 7,
+          "events": 6,
           "url": "https://www.ashevillekava.com/live-shows"
         }
       ],
-      "http_count": 40,
+      "http_count": 34,
       "http_domains": 1,
       "source_specificity": [
         {
           "source": "Henderson County Food Distributions",
-          "events": 571,
-          "unique_urls": 571,
+          "events": 651,
+          "unique_urls": 651,
           "specificity_pct": 100
         },
         {
           "source": "Where Y'at AVL Music",
-          "events": 419,
-          "unique_urls": 335,
-          "specificity_pct": 80
+          "events": 363,
+          "unique_urls": 293,
+          "specificity_pct": 81
+        },
+        {
+          "source": "Asheville.com, Hendersonville.com",
+          "events": 278,
+          "unique_urls": 278,
+          "specificity_pct": 100
         },
         {
           "source": "Asheville Farmers Markets (Tockify)",
-          "events": 235,
-          "unique_urls": 235,
+          "events": 229,
+          "unique_urls": 229,
           "specificity_pct": 100
         },
         {
@@ -18520,19 +18438,19 @@
         },
         {
           "source": "Warren Wilson College",
-          "events": 204,
-          "unique_urls": 115,
+          "events": 201,
+          "unique_urls": 112,
           "specificity_pct": 56
         },
         {
           "source": "Montreat College Athletics",
-          "events": 197,
-          "unique_urls": 197,
+          "events": 196,
+          "unique_urls": 196,
           "specificity_pct": 100
         },
         {
           "source": "Buncombe County Public Libraries",
-          "events": 176,
+          "events": 175,
           "unique_urls": 10,
           "specificity_pct": 6
         },
@@ -18549,15 +18467,15 @@
           "specificity_pct": 1
         },
         {
-          "source": "Asheville Theater Alliance",
-          "events": 76,
-          "unique_urls": 14,
-          "specificity_pct": 18
+          "source": "Hendersonville.com",
+          "events": 109,
+          "unique_urls": 109,
+          "specificity_pct": 100
         },
         {
           "source": "Rotary Club of Asheville",
-          "events": 61,
-          "unique_urls": 61,
+          "events": 62,
+          "unique_urls": 62,
           "specificity_pct": 100
         },
         {
@@ -18568,44 +18486,38 @@
         },
         {
           "source": "Modelface Comedy",
-          "events": 54,
-          "unique_urls": 54,
+          "events": 55,
+          "unique_urls": 55,
           "specificity_pct": 100
         },
         {
           "source": "Asheville Middle School",
-          "events": 48,
+          "events": 46,
           "unique_urls": 1,
           "specificity_pct": 2
-        },
-        {
-          "source": "Jack of the Wood, Where Y'at AVL Music",
-          "events": 45,
-          "unique_urls": 45,
-          "specificity_pct": 100
         }
       ]
     },
     "tzid_inventory": {
       "city_timezone": "America/New_York",
-      "distinct_tzids": 5,
+      "distinct_tzids": 6,
       "tzids": [
         {
           "tzid": "America/New_York",
-          "count": 4360,
-          "files": 83,
+          "count": 5686,
+          "files": 89,
           "matches_city": true,
           "sample_files": [
             "asheville_chamber.ics",
+            "asheville_com.ics",
             "asheville_community_theatre.ics",
             "asheville_theater_alliance.ics",
-            "ashevilleart.ics",
-            "ashevillecityschools_cal_21.ics"
+            "ashevilleart.ics"
           ]
         },
         {
           "tzid": "UTC (Z suffix)",
-          "count": 3193,
+          "count": 3274,
           "files": 8,
           "matches_city": false,
           "sample_files": [
@@ -18618,7 +18530,7 @@
         },
         {
           "tzid": "America/Los_Angeles",
-          "count": 329,
+          "count": 377,
           "files": 8,
           "matches_city": false,
           "sample_files": [
@@ -18631,8 +18543,8 @@
         },
         {
           "tzid": "(bare \u2014 assumes city tz)",
-          "count": 216,
-          "files": 79,
+          "count": 223,
+          "files": 81,
           "matches_city": false,
           "sample_files": [
             "asheville_music_hall.ics",
@@ -18644,12 +18556,21 @@
         },
         {
           "tzid": "America/Indiana/Indianapolis",
-          "count": 138,
+          "count": 139,
           "files": 2,
           "matches_city": false,
           "sample_files": [
             "rotary_asheville.ics",
             "rotary_asheville_breakfast.ics"
+          ]
+        },
+        {
+          "tzid": "America/Halifax",
+          "count": 6,
+          "files": 1,
+          "matches_city": false,
+          "sample_files": [
+            "unca.ics"
           ]
         }
       ]
@@ -18659,7 +18580,7 @@
         "source": "Trumba Calendars Social Work Services Age Friendly",
         "source_id": "trumba_calendars_social_work_services_age_friendly",
         "location": "Grove Street Community Center<br>36 Grove Street",
-        "count": 156,
+        "count": 157,
         "titles": [
           "Social Seniors",
           "Senior Dining and Wellness/Grove Street Community Center",
@@ -18683,9 +18604,20 @@
         "location": "185 King Street, 185 King St, Brevard, NC 28712",
         "count": 44,
         "titles": [
-          "Daniel Kimbro & Casey Driessen",
           "Congdon & Co. featuring Mike Barnes \u2013 Free Show",
-          "Ashes & Arrows with Nicole Lund"
+          "Ashes & Arrows with Nicole Lund",
+          "The Steel Wheels"
+        ]
+      },
+      {
+        "source": "Tockify Fooddistributionhendersoncountync",
+        "source_id": "tockify_fooddistributionhendersoncountync",
+        "location": "54 Carolina St, Saluda, NC 28773, USA",
+        "count": 41,
+        "titles": [
+          " Saluda Pantry",
+          " Saluda Pantry",
+          " Saluda Pantry"
         ]
       },
       {
@@ -18700,25 +18632,36 @@
         ]
       },
       {
-        "source": "Tockify Fooddistributionhendersoncountync",
-        "source_id": "tockify_fooddistributionhendersoncountync",
-        "location": "54 Carolina St, Saluda, NC 28773, USA",
-        "count": 40,
-        "titles": [
-          " Saluda Pantry",
-          " Saluda Pantry",
-          " Saluda Pantry"
-        ]
-      },
-      {
         "source": "Trumba Calendars Social Work Services Age Friendly",
         "source_id": "trumba_calendars_social_work_services_age_friendly",
         "location": "Burton Street Community Center<br>134 Burton Street",
-        "count": 32,
+        "count": 31,
         "titles": [
           "Burton Street Senior Elite Club",
           "Burton Street Senior Elite Club",
           "Burton Street Senior Elite Club"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Ginger's Revenge Tasting Room, 829 Riverside Dr Suite 100,",
+        "count": 24,
+        "titles": [
+          "Sit a Spell | Ginger's Revenge Tasting Room",
+          "Sit a Spell | Ginger's Revenge Tasting Room",
+          "Sit a Spell | Ginger's Revenge Tasting Room"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Flat Rock Playhouse, 2661 Greenville Hwy, Flat Rock, NC 28731",
+        "count": 18,
+        "titles": [
+          "A Flat Rock Playhouse Christmas Show - 10th Anniversary Special",
+          "A Flat Rock Playhouse Christmas Show - 10th Anniversary Special",
+          "A Flat Rock Playhouse Christmas Show - 10th Anniversary Special"
         ]
       },
       {
@@ -18733,6 +18676,17 @@
         ]
       },
       {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Flat Rock Playhouse, 2661 Greenville Hwy, Flat Rock, NC 28731",
+        "count": 18,
+        "titles": [
+          "A Flat Rock Playhouse Christmas Show - 10th Anniversary Special",
+          "A Flat Rock Playhouse Christmas Show - 10th Anniversary Special",
+          "A Flat Rock Playhouse Christmas Show - 10th Anniversary Special"
+        ]
+      },
+      {
         "source": "Trumba Calendars Buncombe County Government Ics",
         "source_id": "trumba_calendars_buncombe_county_government_ics",
         "location": "Burton Street Community Center<br>134 Burton Street",
@@ -18741,6 +18695,61 @@
           "Burton Street Senior Elite Club",
           "Burton Street Senior Elite Club",
           "Burton Street Senior Elite Club"
+        ]
+      },
+      {
+        "source": "Where Y'at AVL Music",
+        "source_id": "whereyat",
+        "location": "Oskar Blues Taproom, 342 Mountain Industrial Dr, Brevard, NC 28712",
+        "count": 17,
+        "titles": [
+          "McIntosh & The Lionhearts",
+          "Ryan Zimmerman",
+          "Darby Wilcox"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Lake Hickory Haunts, 520 Carolina Ave, Hickory, NC 28601",
+        "count": 15,
+        "titles": [
+          "Lake Hickory Haunts 2026 - Celebrating 15 Years of Fear",
+          "Lake Hickory Haunts 2026 - Celebrating 15 Years of Fear",
+          "Lake Hickory Haunts 2026 - Celebrating 15 Years of Fear"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Lake Hickory Haunts, 520 Carolina Ave, Hickory, NC 28601",
+        "count": 15,
+        "titles": [
+          "Lake Hickory Haunts 2026 - Celebrating 15 Years of Fear",
+          "Lake Hickory Haunts 2026 - Celebrating 15 Years of Fear",
+          "Lake Hickory Haunts 2026 - Celebrating 15 Years of Fear"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Bon Secours Wellness Arena, 650 North Academy Street Greenville, SC 29601",
+        "count": 14,
+        "titles": [
+          "Greenville Swamp Rabbits vs Atlanta",
+          "Greenville Swamp Rabbits vs. Jacksonville",
+          "Greenville Swamp Rabbits vs. Florida Everblades"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Bon Secours Wellness Arena, 650 North Academy Street Greenville, SC 29601",
+        "count": 14,
+        "titles": [
+          "Greenville Swamp Rabbits vs Atlanta",
+          "Greenville Swamp Rabbits vs. Jacksonville",
+          "Greenville Swamp Rabbits vs. Florida Everblades"
         ]
       },
       {
@@ -18821,6 +18830,28 @@
         ]
       },
       {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Bon Secours Wellness Arena, 650 N Academy St, Greenville, SC 29601, USA",
+        "count": 6,
+        "titles": [
+          "Zac Brown Band: Love & Fear Tour",
+          "Zac Brown Band at Bon Secours Wellness Arena",
+          "CeCe Winans - COME WORSHIP! Tour"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Bon Secours Wellness Arena, 650 N Academy St, Greenville, SC 29601, USA",
+        "count": 6,
+        "titles": [
+          "Zac Brown Band: Love & Fear Tour",
+          "Zac Brown Band at Bon Secours Wellness Arena",
+          "CeCe Winans - COME WORSHIP! Tour"
+        ]
+      },
+      {
         "source": "Uncabulldogs Api V2",
         "source_id": "uncabulldogs_api_v2",
         "location": "Radford, VA",
@@ -18829,6 +18860,61 @@
           "UNC Asheville Women's Soccer at Radford",
           "UNC Asheville Men's Soccer at Radford ",
           "UNC Asheville Women's Volleyball at Radford"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Spartanburg Memorial Auditorium, 385 N Church St, Spartanburg, SC 29303, USA",
+        "count": 5,
+        "titles": [
+          "Shelly Belly",
+          "Celtic Thunder",
+          "Daniel Tosh: My First Farewell Tour"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Bank of America Stadium, 800 S Mint St, Charlotte, NC 28202",
+        "count": 5,
+        "titles": [
+          "Carolina Panthers VS  Detroit Lions",
+          "Carolina Panthers VS  Tampa Bay Buccaneers",
+          "Carolina Panthers VS  Baltimore Ravens"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Harrah's Cherokee Casino, 777 Casino Drive, Cherokee, NC 28719",
+        "count": 5,
+        "titles": [
+          "Mike Epps",
+          "Trace Adkins",
+          "Collective Soul"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Spartanburg Memorial Auditorium, 385 N Church St, Spartanburg, SC 29303, USA",
+        "count": 5,
+        "titles": [
+          "Shelly Belly",
+          "Celtic Thunder",
+          "Daniel Tosh: My First Farewell Tour"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Bank of America Stadium, 800 S Mint St, Charlotte, NC 28202",
+        "count": 5,
+        "titles": [
+          "Carolina Panthers VS  Detroit Lions",
+          "Carolina Panthers VS  Tampa Bay Buccaneers",
+          "Carolina Panthers VS  Baltimore Ravens"
         ]
       },
       {
@@ -18851,6 +18937,39 @@
           "UNC Asheville Men's Soccer at Gardner-Webb",
           "UNC Asheville Women's Soccer at Gardner-Webb",
           "UNC Asheville Women's Volleyball at Gardner-Webb"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Odyssey Clayworks, 236 Clingman Ave EXT",
+        "count": 4,
+        "titles": [
+          "Weekend 1-On-1 Pottery Lessons",
+          "Weekend 1-On-1 Pottery Lessons",
+          "Weekend 1-On-1 Pottery Lessons"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Bon Secours Wellness Arena, 650 North Academy Street, Greenville, SC 29601",
+        "count": 4,
+        "titles": [
+          "Disney On Ice presents Spotlight Magic!",
+          "Disney On Ice presents Spotlight Magic!",
+          "Disney On Ice presents Spotlight Magic!"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Bon Secours Wellness Arena, 650 North Academy Street, Greenville, SC 29601",
+        "count": 4,
+        "titles": [
+          "Disney On Ice presents Spotlight Magic!",
+          "Disney On Ice presents Spotlight Magic!",
+          "Disney On Ice presents Spotlight Magic!"
         ]
       },
       {
@@ -18884,6 +19003,61 @@
           "UNC Asheville Women's Swimming & Diving vs Atlantic Sun Swimming & Diving Championships- Day One",
           "UNC Asheville Women's Swimming & Diving vs Atlantic Sun Swimming & Diving Championships- Day Two",
           "UNC Asheville Women's Swimming & Diving vs Atlantic Sun Swimming & Diving Championships- Day Three"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Bon Secours Wellness Arena, 650 N Academy St, Greenville, SC 29601",
+        "count": 3,
+        "titles": [
+          "MercyMe Live With Jeremy Camp\\, Tim Timmons & Sam Wesley",
+          "Journey - Final Frontier Tour",
+          "for KING + COUNTRY A DRUMMER BOY CHRISTMAS"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Landmark Hal, 156 Landmark Drive, Taylors, SC Carolina 29687",
+        "count": 3,
+        "titles": [
+          "City Dance",
+          "City Dance",
+          "City Dance"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Stuart Auditorium, 212 fox run drive, Lake Junaluska, NC",
+        "count": 3,
+        "titles": [
+          "Balsam Range Art of Music Festival",
+          "Balsam Range Art of Music Festival",
+          "Balsam Range Art of Music Festival"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Bon Secours Wellness Arena, 650 N Academy St, Greenville, SC 29601",
+        "count": 3,
+        "titles": [
+          "MercyMe Live With Jeremy Camp\\, Tim Timmons & Sam Wesley",
+          "Journey - Final Frontier Tour",
+          "for KING + COUNTRY A DRUMMER BOY CHRISTMAS"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Landmark Hal, 156 Landmark Drive, Taylors, SC Carolina 29687",
+        "count": 3,
+        "titles": [
+          "City Dance",
+          "City Dance",
+          "City Dance"
         ]
       },
       {
@@ -18953,6 +19127,86 @@
         ]
       },
       {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Flat Rock Playhouse, 2661 Greenville Hwy, Flat Rock, NC 28731, USA",
+        "count": 2,
+        "titles": [
+          "Sister Act",
+          "RUMPELSTILTSKIN"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Grey Eagle Music Hall, 185 Clingman Ave.",
+        "count": 2,
+        "titles": [
+          "Boot Scootin\u2019 Boogie Nights",
+          "Hayes Carll"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Grey Eagle Music Hall, 185 Clingman Ave",
+        "count": 2,
+        "titles": [
+          "Ethan Regan: Young Regan Tour",
+          "Eddie 9V"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Spartanburg Memorial Auditorium, 385 N Church Street Spartanburg, SC 29303",
+        "count": 2,
+        "titles": [
+          "Daniel in The Lions' Den \u2013 Featuring Queen Esther",
+          "Mannheim Steamroller Christmas"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Flat Rock Playhouse, 2661 Greenville Hwy, Flat Rock, NC 28731, USA",
+        "count": 2,
+        "titles": [
+          "Sister Act",
+          "RUMPELSTILTSKIN"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Grey Eagle Music Hall, 185 Clingman Ave.",
+        "count": 2,
+        "titles": [
+          "Boot Scootin\u2019 Boogie Nights",
+          "Hayes Carll"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Grey Eagle Music Hall, 185 Clingman Ave",
+        "count": 2,
+        "titles": [
+          "Ethan Regan: Young Regan Tour",
+          "Eddie 9V"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Spartanburg Memorial Auditorium, 385 N Church Street Spartanburg, SC 29303",
+        "count": 2,
+        "titles": [
+          "Daniel in The Lions' Den \u2013 Featuring Queen Esther",
+          "Mannheim Steamroller Christmas"
+        ]
+      },
+      {
         "source": "Uncabulldogs Api V2",
         "source_id": "uncabulldogs_api_v2",
         "location": "Winston-Salem, NC",
@@ -18983,6 +19237,123 @@
         ]
       },
       {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Gorges State Park, Visitor Center, 976 Grassy Ridge Road, Sapphire, NC 28774",
+        "count": 1,
+        "titles": [
+          "4th Annual Mountain Monarch Festival"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "The Orchard Inn, 100 Orchard Inn Ln, Saluda, NC 28773, USA",
+        "count": 1,
+        "titles": [
+          "Honey Tasting & Bee Yard Tour"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Riverside Cemetery, 53 Birch St",
+        "count": 1,
+        "titles": [
+          "Thomas Wolfe's Buried Lives: A Special Evening Tour of Riverside C"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Tryon Fine Arts, 34 Melrose Avenue, Tryon, NC 28782",
+        "count": 1,
+        "titles": [
+          "Awadagin Pratt Recital"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "AyurPrana Listening Room, 312 Haywood Road",
+        "count": 1,
+        "titles": [
+          "Nessi Gomes - Workshop and Concert"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "TerraBella Greenville, 11 E. Augusta Place | Greenville, SC 29605",
+        "count": 1,
+        "titles": [
+          "TerraBella Greenville"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Tryon International Equestrian Center, 25 International Blvd, Mill Spring, NC 28756",
+        "count": 1,
+        "titles": [
+          "Brooke USA's Divertimentos & Dressage Brings Horses and Symphony T"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Spartanburg Memorial Auditorium, 385 N Church St, Spartanburg, SC 29303",
+        "count": 1,
+        "titles": [
+          "Ali Siddiq: The Custom Fit Tour"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "AVL Clay, AVL clay, 4 Mulvaney St.",
+        "count": 1,
+        "titles": [
+          "The Art of the Pour: Form\\, Function\\, and Gesture in Porcelain"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Diana Wortham Theatre, 18 Biltmore Ave",
+        "count": 1,
+        "titles": [
+          "Stundom"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Emberlight, 83 Sanctuary Road, Swananoa",
+        "count": 1,
+        "titles": [
+          "Spirited Improv Fall Night Time Playshop Series in Asheville"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "Peace Center, 300 S. Main St., Greenville, SC 29601",
+        "count": 1,
+        "titles": [
+          "Indigo Girls with Linda Perry"
+        ]
+      },
+      {
+        "source": "Asheville.com",
+        "source_id": "asheville_com",
+        "location": "The Grey Eagle Music Hall and Pub, 185 Clingman Ave",
+        "count": 1,
+        "titles": [
+          "Burlesque Brunch"
+        ]
+      },
+      {
         "source": "Ashevillecityschools Cal 32",
         "source_id": "ashevillecityschools_cal_32",
         "location": "450 Auburn Avenue NE, Atlanta , GA 30312",
@@ -18998,6 +19369,105 @@
         "count": 1,
         "titles": [
           "Fall Colors Stroll - Craggy Pinnacle"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Gorges State Park, Visitor Center, 976 Grassy Ridge Road, Sapphire, NC 28774",
+        "count": 1,
+        "titles": [
+          "4th Annual Mountain Monarch Festival"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "The Orchard Inn, 100 Orchard Inn Ln, Saluda, NC 28773, USA",
+        "count": 1,
+        "titles": [
+          "Honey Tasting & Bee Yard Tour"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Riverside Cemetery, 53 Birch St",
+        "count": 1,
+        "titles": [
+          "Thomas Wolfe's Buried Lives: A Special Evening Tour of Riverside C"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Tryon Fine Arts, 34 Melrose Avenue, Tryon, NC 28782",
+        "count": 1,
+        "titles": [
+          "Awadagin Pratt Recital"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Tryon International Equestrian Center, 25 International Blvd, Mill Spring, NC 28756",
+        "count": 1,
+        "titles": [
+          "Brooke USA's Divertimentos & Dressage Brings Horses and Symphony T"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Diana Wortham Theatre, 18 Biltmore Ave",
+        "count": 1,
+        "titles": [
+          "Stundom"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Front Yard, 21 Spring Valley Rd Greenville, SC 29615",
+        "count": 1,
+        "titles": [
+          "Steve Eager & Friends Outdoor Concert"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Ginger's Revenge Tasting Room, 829 Riverside Dr Suite 100,",
+        "count": 1,
+        "titles": [
+          "Mixed Company | A Night of Improv Comedy"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Peace Center, 300 S. Main St., Greenville, SC 29601",
+        "count": 1,
+        "titles": [
+          "Indigo Girls with Linda Perry"
+        ]
+      },
+      {
+        "source": "Hendersonville.com",
+        "source_id": "hendersonville_com",
+        "location": "Kenmure Country Club, 100 Clubhouse Drive",
+        "count": 1,
+        "titles": [
+          "Grand Thanksgiving Buffet at Kenmure Country Club"
+        ]
+      },
+      {
+        "source": "Livemusicasheville",
+        "source_id": "livemusicasheville",
+        "location": "Doug McElvy\u2019s Mountain Fly Outfitters Canton, 18 Church St, Canton, NC, 28716",
+        "count": 1,
+        "titles": [
+          "Papertown Bluegrass Jam"
         ]
       },
       {
@@ -19201,106 +19671,111 @@
     ],
     "categories": [
       {
-        "category": "Community / Social",
-        "count": 756
-      },
-      {
         "category": "Music / Concerts",
-        "count": 754
+        "count": 893
       },
       {
-        "category": "Sports / Fitness",
-        "count": 443
+        "category": "Community / Social",
+        "count": 857
       },
       {
         "category": "Food / Drink",
-        "count": 425
+        "count": 475
+      },
+      {
+        "category": "Sports / Fitness",
+        "count": 457
       },
       {
         "category": "Government / Civic",
-        "count": 282
+        "count": 288
       },
       {
         "category": "Family / Kids",
-        "count": 203
-      },
-      {
-        "category": "Religion / Spirituality",
-        "count": 182
-      },
-      {
-        "category": "Health / Wellness",
-        "count": 139
+        "count": 258
       },
       {
         "category": "Dance / Performance",
-        "count": 138
+        "count": 215
       },
       {
-        "category": "Comedy / Improv",
-        "count": 116
-      },
-      {
-        "category": "Games / Trivia",
-        "count": 77
-      },
-      {
-        "category": "(uncategorized)",
-        "count": 69
-      },
-      {
-        "category": "Craft / Maker",
-        "count": 68
-      },
-      {
-        "category": "Schools / K-12",
-        "count": 64
+        "category": "Religion / Spirituality",
+        "count": 188
       },
       {
         "category": "Arts / Culture",
-        "count": 60
+        "count": 180
+      },
+      {
+        "category": "Health / Wellness",
+        "count": 154
+      },
+      {
+        "category": "Comedy / Improv",
+        "count": 117
+      },
+      {
+        "category": "Games / Trivia",
+        "count": 104
+      },
+      {
+        "category": "Craft / Maker",
+        "count": 81
+      },
+      {
+        "category": "Schools / K-12",
+        "count": 67
+      },
+      {
+        "category": "Education / Workshops",
+        "count": 65
       },
       {
         "category": "Nature / Outdoors / Recreation",
         "count": 60
       },
       {
-        "category": "Education / Workshops",
+        "category": "Books / Literature / Poetry",
         "count": 52
       },
       {
-        "category": "Books / Literature / Poetry",
-        "count": 47
+        "category": "(uncategorized)",
+        "count": 52
       },
       {
         "category": "Gardening / Horticulture",
-        "count": 29
+        "count": 31
       },
       {
         "category": "Technology / Careers",
         "count": 16
       },
       {
-        "category": "Film / Cinema",
-        "count": 11
-      },
-      {
         "category": "LGBTQ+ / Gender",
         "count": 11
       },
       {
+        "category": "Film / Cinema",
+        "count": 11
+      },
+      {
         "category": "History / Heritage",
-        "count": 4
+        "count": 6
       }
     ],
     "images": {
-      "total": 4006,
-      "with_image": 277,
+      "total": 4638,
+      "with_image": 385,
       "by_source": [
         {
           "source": "Buncombe County Public Libraries",
-          "total": 176,
+          "total": 175,
           "with_image": 66
+        },
+        {
+          "source": "Buncombe County Democratic Party",
+          "total": 45,
+          "with_image": 45
         },
         {
           "source": "Jack of the Wood, Where Y'at AVL Music",
@@ -19308,9 +19783,9 @@
           "with_image": 45
         },
         {
-          "source": "Buncombe County Democratic Party",
+          "source": "Eulogy",
           "total": 42,
-          "with_image": 42
+          "with_image": 39
         },
         {
           "source": "Asheville Art Museum",
@@ -19319,13 +19794,18 @@
         },
         {
           "source": "NC Arboretum",
-          "total": 29,
-          "with_image": 29
+          "total": 27,
+          "with_image": 27
         },
         {
           "source": "Unitarian Universalist Congregation of Asheville",
           "total": 30,
           "with_image": 23
+        },
+        {
+          "source": "AyurPrana Listening Room, Where Y'at AVL Music",
+          "total": 19,
+          "with_image": 19
         },
         {
           "source": "Highland Brewing",
@@ -19338,19 +19818,69 @@
           "with_image": 15
         },
         {
+          "source": "Static Age Records",
+          "total": 16,
+          "with_image": 13
+        },
+        {
+          "source": "Mars Hill University",
+          "total": 10,
+          "with_image": 10
+        },
+        {
+          "source": "AyurPrana Listening Room",
+          "total": 8,
+          "with_image": 8
+        },
+        {
+          "source": "LiveMusicAsheville.com",
+          "total": 22,
+          "with_image": 7
+        },
+        {
+          "source": "UNC Asheville",
+          "total": 6,
+          "with_image": 6
+        },
+        {
           "source": "Jack of the Wood",
           "total": 5,
           "with_image": 5
         },
         {
-          "source": "LiveMusicAsheville.com",
-          "total": 22,
-          "with_image": 4
-        },
-        {
           "source": "The Mule at Devils Foot",
           "total": 3,
           "with_image": 3
+        },
+        {
+          "source": "NC Arboretum, Asheville.com, Hendersonville.com",
+          "total": 2,
+          "with_image": 2
+        },
+        {
+          "source": "AyurPrana Listening Room, Asheville.com, Hendersonville.com, Where Y'at AVL Music",
+          "total": 2,
+          "with_image": 2
+        },
+        {
+          "source": "Static Age Records, Where Y'at AVL Music",
+          "total": 2,
+          "with_image": 2
+        },
+        {
+          "source": "Eulogy, LiveMusicAsheville.com",
+          "total": 1,
+          "with_image": 1
+        },
+        {
+          "source": "AyurPrana Listening Room, Asheville.com, Where Y'at AVL Music",
+          "total": 1,
+          "with_image": 1
+        },
+        {
+          "source": "Eulogy, Where Y'at AVL Music",
+          "total": 1,
+          "with_image": 1
         }
       ]
     }
