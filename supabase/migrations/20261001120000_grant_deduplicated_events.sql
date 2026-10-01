@@ -1,0 +1,27 @@
+-- Grant the Data API read on deduplicated_events, completing PR #87.
+--
+-- #87 added explicit grants ahead of Supabase's 2026-10-30 change (public
+-- tables stop being granted to anon/authenticated/service_role
+-- automatically). It covered 14 of the 15 objects these migrations create.
+-- The miss was deduplicated_events, created in
+-- 20260101000000_initial_schema.sql and read by the client at
+-- xmlui/shell.js (/rest/v1/deduplicated_events) with the publishable key —
+-- the app's primary read path. Without this, a database built from these
+-- migrations without automatic grants (a fork on a new Supabase project, a
+-- local reset with auto_expose_new_tables = false) answers the main
+-- calendar query with 42501 and renders an empty page.
+--
+-- Easy to miss because it is a MATERIALIZED view: information_schema
+-- .role_table_grants does not report matviews at all — they are not in the
+-- SQL standard — so a grants audit built on information_schema shows this
+-- object as having no grantees even when it is fully granted. pg_class
+-- .relacl is the ground truth.
+--
+-- No-op on the hosted project, where anon, authenticated and service_role
+-- already hold these privileges. Nothing is revoked.
+--
+-- select only: the matview is a read-only projection, refreshed server
+-- side by the build. The sibling deduplicated_chat_events is created
+-- outside these migrations and is deliberately not granted here.
+
+grant select on public.deduplicated_events to anon, authenticated, service_role;
