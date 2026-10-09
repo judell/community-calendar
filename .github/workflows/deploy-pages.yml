@@ -1,0 +1,61 @@
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publication-mode:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.mode.outputs.enabled }}
+    steps:
+      - name: Check Pages publication source
+        id: mode
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mode=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .build_type)
+          if [ "$mode" = workflow ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Pages still uses branch publication. Switch its Source to GitHub Actions to activate this workflow."
+          fi
+  deploy:
+    needs: publication-mode
+    if: needs.publication-mode.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+      - uses: actions/configure-pages@v5
+      - name: Assemble and version the static site
+        shell: bash
+        run: |
+          # Preserve the existing .nojekyll site's tracked-file publication.
+          # Export exactly this checkout, never local/untracked build output.
+          mkdir -p "$RUNNER_TEMP/pages"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/pages"
+          python scripts/app_version.py --root "$RUNNER_TEMP/pages"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/pages
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
