@@ -59,7 +59,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Constellation Stage & Screen | Scraper | ~45 | Spektrix API — `constellation.py` |
 | Brown County Playhouse | ICS | ~12 | WordPress Events Calendar |
 
-### Arts & Culture (6 sources)
+### Arts & Culture (8 sources)
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
@@ -68,6 +68,8 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Cicada Cinema | Scraper | ~6 | Shopify products API — `cicada_cinema.py` |
 | Pottery House Studio | Scraper | ~40 | Squarespace — `squarespace.py` workshops |
 | Monroe County History Center | Scraper | ~17 | `monroe_county_history_center.py` — EventON WP REST API; behind SiteGround sgcaptcha (plain-Mozilla UA) |
+| Gallery at the Vault | Eventbrite scraper | ~5 | Gallery events, 205 N College Ave |
+| Keplinger Institute for Wellness and Art | Eventbrite scraper | ~2 | Massage CE classes, Wellness Through Art |
 | Bloomington Old-Time Music & Dance | Google Calendar | — | |
 
 ### Literary (4 sources)
@@ -79,7 +81,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Redbud Books | Google Calendar | ~348 | Book clubs, author talks, film, community events |
 | Nerd Nite Bloomington | Eventbrite scraper | ~1 | Quarterly science talks at The Bishop |
 
-### Community & Family (7 sources)
+### Community & Family (8 sources)
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
@@ -89,6 +91,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Bloomington Community Band | Scraper | ~5 | `tribe_rest.py` — Tribe ICS returns an empty body; REST API works (2026-08) |
 | Bloominglabs Makerspace | Google Calendar | ~10+ | |
 | Habitat for Humanity Monroe County | Scraper | ~4 | `habitat.py` — fundraisers, 5K, volunteer events |
+| Reviving Hope for the Nations | Eventbrite scraper | 0 current | Faith/community events |
 | Bloomington Spinners & Weavers Guild | ICS | — | |
 
 ### Nature & Outdoors (6 sources)
@@ -102,7 +105,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Brown County State Park | Localist scraper | ~13 | `localist.py` — events.in.gov venue 35217662417669 (17 mi) |
 | Knobstone Hiking Trail Meetup | ICS | ~10 | Meetup group — regional hiking |
 
-### Interest Groups & Civic (5 sources)
+### Interest Groups & Civic (7 sources)
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
@@ -111,13 +114,17 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Bloomington Velo Club | Google Calendar | — | |
 | Hoosier Fly Fishers | ICS | — | |
 | Indivisible Central Indiana | Scraper | ~21 | `mobilize.py` — civic/political organizing |
+| The Afrobellas At IU | Eventbrite scraper | ~1 | IU student org events |
+| Falun Dafa Club at IU | Eventbrite scraper | ~1 | IU student org practice sessions |
 
-### Food & Beverage (5 sources)
+### Food & Beverage (9 sources)
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Cardinal Spirits | Scraper | ~5 | Squarespace — `cardinal_spirits.py` |
 | The Tap | Eventbrite scraper | — | Live music, craft beer events |
+| Big Red Liquors | Eventbrite scraper | 0 current | Tastings/events |
+| Blueline Bloomington | Eventbrite scraper | 0 current | Restaurant/bar events |
 | Martinsville Arts Council | Eventbrite scraper | ~6 | Community theater in Martinsville (20 mi) |
 | Story Inn | Eventbrite scraper | — | Seasonal: wine fairs, comedy, music in Story (17 mi) |
 | Hard Truth Distilling Co. | Scraper | ~15 | `tribe_rest.py` — TEC site behind SiteGround sgcaptcha (ICS + REST APIs challenged); plain-Mozilla UA; Nashville, IN (16 mi) |
@@ -415,7 +422,7 @@ Annual events with reliable dates but no feeds — a once-a-season curator sweep
 | Events Manager (EM) | `lib/em_events.py` | WFHB | WordPress plugin; AJAX listing endpoint |
 | Sugar Calendar Lite | `lib/sugar_calendar.py` | Writers Guild | WordPress plugin; list + detail pages |
 | Songkick | `lib/songkick.py` | Bluebird, Blockhouse | Venue event pages |
-| Eventbrite | `scrapers/eventbrite.py` | Morgenstern Books, Nerd Nite | Organizer page → JSON-LD |
+| Eventbrite | `scrapers/eventbrite.py` | Morgenstern Books, Nerd Nite, The Tap, Story Inn, Martinsville Arts Council, Gallery at the Vault, Keplinger Institute, Big Red Liquors, Blueline Bloomington, Falun Dafa Club at IU, The Afrobellas At IU, Reviving Hope for the Nations, Exodus Refugee Immigration, Gaden KhachoeShing Monastery | Organizer page → JSON-LD |
 | Mobilize.us | `scrapers/mobilize.py` | Indivisible | Organizer event pages |
 | The Events Calendar (Tribe) | `lib/tribe_events.py`, `scrapers/tribe_rest.py` | Bloomington Symphony, Boys & Girls Club, Community Band, Upland, Hard Truth Distilling Co. | WordPress plugin REST API; bypasses blocked or empty ICS exports |
 | Localist | `scrapers/localist.py` | McCormick's Creek SP, Brown County SP | events.in.gov JSON API; filter by venue_id |
@@ -486,6 +493,28 @@ Annual events with reliable dates but no feeds — a once-a-season curator sweep
 - Source is the Sidearm v3 Calendar API (`iuhoosiers.com/api/v2/Calendar`), which returns structured game data with a `locationIndicator` of `H` (home site), `A` (away), or `N` (neutral site). `--home-only` previously dropped only `A`, so every neutral-site game — ITA regionals in Ohio, invitationals in Georgia and Arizona, 149 in all — flowed into Bloomington. The combine-time geo-filter does not catch them: it recognises only abbreviated states (`, OH`), and Sidearm writes the full name (`Mason, Ohio`). `--home-only` now drops both `A` and `N` on the v3 API path. The API states a start time only, so each event also gets a two-hour default end.
 - The v3 request window now comes from `BaseScraper.horizon_cutoff(now)` — six months is 6 × 31 = 186 days — instead of a hardcoded 180 days, which had dropped the last six days of the Horizon. A fixed-clock test pins the window.
 - Verified 2026-10-10: full 6-month run emits **85 events**, all home-site — 79 in Bloomington, 4 at Indianapolis (IU-hosted), 2 with no location — every event carrying `X-SOURCE:IU Athletics`, unique UIDs. `add_scraper.py --test` (`SCRAPE_MONTHS=2`) produced 131 before the fix and 50 after. Feed health is clean.
+
+### 2026-10-10: Eventbrite organizer batch registered (issues #196, #197, #200–#209)
+- Registered 12 Eventbrite organizer feeds for Bloomington via the standard DB-first path — `add_scraper.py eventbrite bloomington "<Name>" --extra-args '--url "<organizer>" --name "<Name>"' --output-name eventbrite_<slug>` wrote each `cities/bloomington/pending_feeds.txt` entry (`# cmd: python scrapers/eventbrite.py --url ... --name ... --output cities/bloomington/eventbrite_<slug>.ics`). No workflow edit and no scraper code change: `scrapers/eventbrite.py` (organizer page → per-event JSON-LD) already exists.
+- Eleven match the registration upstream already carries (Morgenstern Books, Falun Dafa Club at IU, The Afrobellas At IU, Reviving Hope for the Nations, Big Red Liquors, Blueline Bloomington, Gallery at the Vault, Martinsville Arts Council, Nerd Nite Bloomington, Story Inn, The Tap); Keplinger Institute for Wellness and Art (#197) is new — its organizer URL was not on file and was resolved during this batch (`/o/the-keplinger-institute-for-wellness-and-art-89215506373`). This fills the fork's gap: none of the twelve had been registered in the fork's `feeds` table — five were already listed in the tables above, and this batch documents the other seven for the first time.
+- Live `add_scraper.py` smoke runs (2026-10-10, `SCRAPE_MONTHS=2`):
+
+| Issue | Source | Organizer | Events (test) |
+|-------|--------|-----------|---------------|
+| #196 | Morgenstern Books | `/o/morgenstern-books-34376767621` | 12 |
+| #197 | Keplinger Institute for Wellness and Art | `/o/the-keplinger-institute-for-wellness-and-art-89215506373` | 2 |
+| #200 | Falun Dafa Club at IU | `/o/102507618371` | 1 |
+| #201 | The Afrobellas At IU | `/o/106566049911` | 1 |
+| #202 | Reviving Hope for the Nations | `/o/106576693901` | 0 current |
+| #203 | Big Red Liquors | `/o/18076093080` | 0 current |
+| #204 | Blueline Bloomington | `/o/24897361037` | 0 current |
+| #205 | Gallery at the Vault | `/o/31640015525` | 5 |
+| #206 | Martinsville Arts Council | `/o/martinsville-arts-council-59689470843` | 8 |
+| #207 | Nerd Nite Bloomington | `/o/nerd-nite-bloomington-95199764993` | 0 current |
+| #208 | Story Inn | `/o/story-inn-825970603` | 0 current |
+| #209 | The Tap | `/o/the-tap-bloomington-69461600243` | 0 current |
+
+- The six sources that produced 0 upcoming events at test time are wire-and-wait, not broken: Eventbrite organizer pages are intermittently CAPTCHA-gated to non-browser clients (the same behaviour recorded for Gaden KhachoeShing and Exodus Refugee Immigration), and several organizers simply have no posted upcoming events. Each writes a valid-empty calendar — classified `quiet`, not `broken_feed` — and repopulates when the organizer posts again.
 
 ### 2026-09-07: Master Gardeners URL fix (issue #13)
 - `Monroe County Master Gardeners` scraper 404s: DB `feeds` row id=14 still runs `squarespace.py --url "https://www.mcmga.net/events"` (404). Same stale-URL pattern as Sassafras (#8) — the pre-DB-first URL fix never reached the seeded DB row.
