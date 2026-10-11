@@ -81,7 +81,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Redbud Books | Google Calendar | ~348 | Book clubs, author talks, film, community events |
 | Nerd Nite Bloomington | Eventbrite scraper | ~1 | Quarterly science talks at The Bishop |
 
-### Community & Family (8 sources)
+### Community & Family (9 sources)
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
@@ -90,7 +90,8 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | First United Church | ICS | ~50+ | WordPress ICS — community hub (DSA, Al-Anon, scouts) |
 | Bloomington Community Band | Scraper | ~5 | `tribe_rest.py` — Tribe ICS returns an empty body; REST API works (2026-08) |
 | Bloominglabs Makerspace | Google Calendar | ~10+ | |
-| Habitat for Humanity Monroe County | Scraper | ~4 | `habitat.py` — fundraisers, 5K, volunteer events |
+| Goat Conspiracy | Scraper | ~19 | Squarespace — `squarespace.py`; farm sanctuary events (goat yoga, 5K) at 6030 E Kent Rd |
+| Habitat for Humanity Monroe County | Scraper | ~4 | `habitat.py` — fundraisers, 5K, volunteer events (site redesigned; `/events/` archive) |
 | Reviving Hope for the Nations | Eventbrite scraper | 0 current | Faith/community events |
 | Bloomington Spinners & Weavers Guild | ICS | — | |
 
@@ -113,7 +114,7 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Bloomington Bicycle Club | Google Calendar | ~5023 | Cycling rides, weekly events |
 | Bloomington Velo Club | Google Calendar | — | |
 | Hoosier Fly Fishers | ICS | — | |
-| Indivisible Central Indiana | Scraper | ~21 | `mobilize.py` — civic/political organizing |
+| Indivisible Central Indiana | Scraper | ~51 | `mobilize.py` — civic/political organizing |
 | The Afrobellas At IU | Eventbrite scraper | ~1 | IU student org events |
 | Falun Dafa Club at IU | Eventbrite scraper | ~1 | IU student org practice sessions |
 
@@ -515,6 +516,14 @@ Annual events with reliable dates but no feeds — a once-a-season curator sweep
 | #209 | The Tap | `/o/the-tap-bloomington-69461600243` | 0 current |
 
 - The six sources that produced 0 upcoming events at test time are wire-and-wait, not broken: Eventbrite organizer pages are intermittently CAPTCHA-gated to non-browser clients (the same behaviour recorded for Gaden KhachoeShing and Exodus Refugee Immigration), and several organizers simply have no posted upcoming events. Each writes a valid-empty calendar — classified `quiet`, not `broken_feed` — and repopulates when the organizer posts again.
+
+### 2026-10-10: Group C batch registered (issues #193, #195, #198, #199)
+- Registered four existing scrapers for Bloomington via the standard DB-first path (`add_scraper.py <scraper> bloomington "<Name>" --output-name <slug>`), each writing a `cities/bloomington/pending_feeds.txt` entry. No workflow edit and no per-scraper code change except Habitat (below).
+- **#193 Indivisible Central Indiana** — `mobilize.py --url "https://www.mobilize.us/indivisiblecentralindiana/" --name "Indivisible Central Indiana"`, output `mobilize_indivisible_central_indiana.ics`. Distinct from the already-registered Indivisible South Central Indiana. Display name is the bare canonical per the `pending_feeds.txt` template. Test (`SCRAPE_MONTHS=2`): **51 events**.
+- **#195 Goat Conspiracy** — `squarespace.py --url "https://www.thegoatconspiracy.com/events" --name "Goat Conspiracy"`, output `goat_conspiracy.ics`. The organizer URL was not on file and was resolved during this batch (the site's `/events` listing exposes per-event `?format=ical`). Test: **19 events**.
+- **#198 BloomingtonArts.Today** — `bloomington_arts_today.py`, output `bloomington_arts_today.ics`. Test: **57 events**.
+- **#199 Habitat for Humanity Monroe County** — `habitat.py`, output `habitat.ics`. Activation caught a real defect: the site was redesigned since upstream added the scraper, and events moved from the who-we-are `#events` section to a `/events/` archive whose cards carry a `Month D, YYYY` date string. The old `#events` selector matched nothing, so the scraper silently emitted 0 events (upstream's copy is equally stale). `fetch_events` now parses the archive cards' full `Month D, YYYY` dates; cards without a real day are skipped — a month-only label ("December 2026") has an unknown day, and inventing one would both mislead readers and let the past-event filter drop the event once that day passed. `tests/test_habitat.py` pins the full-date, month-only-skipped, no-date, impossible-date, stable-UID, description, and listing-parse cases, and its fixture models the real DOM. A second silent-empty surfaced in review: the card blurb is a sibling `<div>`, not a `<p>`, so every DESCRIPTION shipped empty until the description was read from the title div's next sibling. Test after the fixes: **3 events** (October 11, October 21, November 7), all with populated descriptions; the December "Homeownership Information Meeting" is month-only and stays out until the source posts a real day.
+- Feed-health note: the four scrapers each write a valid, non-empty calendar; the Habitat and Arts calendars are aggregator-adjacent but still lose cross-source dedup to primaries, and none are aggregators.
 
 ### 2026-09-07: Master Gardeners URL fix (issue #13)
 - `Monroe County Master Gardeners` scraper 404s: DB `feeds` row id=14 still runs `squarespace.py --url "https://www.mcmga.net/events"` (404). Same stale-URL pattern as Sassafras (#8) — the pre-DB-first URL fix never reached the seeded DB row.

@@ -8,24 +8,25 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 sys.path.insert(0, __file__.rsplit("/", 2)[0])
 from lib.base import BaseScraper
 
+# The /events/ archive renders each card's date as a full month name.
 MONTHS = {
-    "Jan": 1,
-    "Feb": 2,
-    "Mar": 3,
-    "Apr": 4,
+    "January": 1,
+    "February": 2,
+    "March": 3,
+    "April": 4,
     "May": 5,
-    "Jun": 6,
-    "Jul": 7,
-    "Aug": 8,
-    "Sep": 9,
-    "Oct": 10,
-    "Nov": 11,
-    "Dec": 12,
+    "June": 6,
+    "July": 7,
+    "August": 8,
+    "September": 9,
+    "October": 10,
+    "November": 11,
+    "December": 12,
 }
 
 HEADERS = {
@@ -39,81 +40,80 @@ class HabitatScraper(BaseScraper):
 
     name = "Habitat for Humanity Monroe County"
     domain = "monroecountyhabitat.org"
-    events_url = "https://monroecountyhabitat.org/who-we-are/"
+    events_url = "https://monroecountyhabitat.org/events/"
     timezone = "America/Indiana/Indianapolis"
 
     def fetch_events(self) -> list[dict[str, Any]]:
-        """Fetch events from the who-we-are page #events section."""
+        """Fetch events from the /events/ archive page."""
         self.logger.info(f"Fetching {self.events_url}")
         response = requests.get(self.events_url, headers=HEADERS, timeout=30)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "html.parser")
-        events_section = soup.select_one("#events")
-        if not events_section:
-            self.logger.warning("No #events section found")
-            return []
-
         tz = ZoneInfo(self.timezone)
-        now = datetime.now(tz)
         events = []
         seen = set()
 
-        for h3 in events_section.select("h3"):
-            title = h3.get_text(strip=True)
-            if title in seen:
+        for h3 in soup.select("h3"):
+            card = h3.find_parent("div", class_="kt-inside-inner-col")
+            if card is None:
                 continue
-            seen.add(title)
-
-            parent = h3.parent
-            if not parent:
+            event = self._parse_card(card, h3, tz)
+            if event is None or event["uid"] in seen:
                 continue
-
-            h1 = parent.select_one("h1")
-            h2 = parent.select_one("h2")
-            if not h1 or not h2:
-                continue
-
-            month_str = h1.get_text(strip=True)
-            day_str = h2.get_text(strip=True)
-
-            month = MONTHS.get(month_str, 0)
-            if not month:
-                continue
-            day = int(day_str)
-
-            # Infer year: use current year, bump to next if month is past
-            year = now.year
-            if month < now.month or (month == now.month and day < now.day):
-                year += 1
-
-            dtstart = datetime(year, month, day, 12, 0, tzinfo=tz)
-            dtend = dtstart + timedelta(hours=3)
-
-            a = parent.select_one("a[href*=events]")
-            url = a.get("href", "") if a else ""
-
-            # Get description from first <p>
-            desc_p = parent.select_one("p")
-            description = desc_p.get_text(strip=True)[:300] if desc_p else ""
-
-            slug = re.sub(r"[^a-z0-9]+", "-", title.lower())[:40]
-            uid = f"habitat-{year}{month:02d}{day:02d}-{slug}@monroecountyhabitat.org"
-
-            events.append(
-                {
-                    "title": title,
-                    "dtstart": dtstart,
-                    "dtend": dtend,
-                    "url": url,
-                    "location": "Bloomington, IN",
-                    "description": description,
-                    "uid": uid,
-                }
-            )
+            seen.add(event["uid"])
+            events.append(event)
 
         self.logger.info(f"Found {len(events)} events")
         return events
+
+    def _parse_card(self, card: Tag, title_el: Tag, tz: ZoneInfo) -> dict[str, Any] | None:
+        """Parse one event card, or None if it has no title/date."""
+        title = title_el.get_text(strip=True)
+        if not title:
+            return None
+
+        dtstart = self._parse_date(card.get_text(" ", strip=True), tz)
+        if dtstart is None:
+            return None
+        dtend = dtstart + timedelta(hours=3)
+
+        title_div = title_el.find_parent("div")
+        desc_el = title_div.find_next_sibling("div") if title_div else None
+        description = desc_el.get_text(" ", strip=True)[:300] if desc_el else ""
+
+        slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:40]
+        uid = f"habitat-{dtstart:%Y%m%d}-{slug}@monroecountyhabitat.org"
+
+        return {
+            "title": title,
+            "dtstart": dtstart,
+            "dtend": dtend,
+            "url": self.events_url,
+            "location": "Bloomington, IN",
+            "description": description,
+            "uid": uid,
+        }
+
+    @staticmethod
+    def _parse_date(text: str, tz: ZoneInfo) -> datetime | None:
+        """Parse a full "Month D, YYYY" date from card text.
+
+        A month-only label ("December 2026") is not a date: its real day is
+        unknown, so publishing any concrete day would invent one, and the
+        past-event filter would then drop the event once that day passes.
+        Skip it until the source supplies a real day.
+        """
+        match = re.search(r"([A-Z][a-z]+)\s+(\d{1,2}),\s*(\d{4})", text)
+        if match and match.group(1) in MONTHS:
+            day = int(match.group(2))
+            if not 1 <= day <= 31:
+                return None
+            try:
+                return datetime(int(match.group(3)), MONTHS[match.group(1)], day, 12, 0, tzinfo=tz)
+            except ValueError:  # e.g. "February 31" — a malformed card, not ours to guess
+                return None
+        return None
 
 
 if __name__ == "__main__":
