@@ -101,8 +101,8 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Sassafras Audubon Society | Scraper | ~31 | Squarespace — `sassafras_audubon.py` |
 | Monroe County Master Gardeners | Scraper | ~62 | Squarespace — `master_gardeners.py` |
 | Sycamore Land Trust | Scraper | ~131 | WordPress — `sycamore_land_trust.py` |
-| McCormick's Creek State Park | Localist scraper | ~44 | `localist.py` — events.in.gov venue 35217665860404 (13 mi) |
-| Brown County State Park | Localist scraper | ~13 | `localist.py` — events.in.gov venue 35217662417669 (17 mi) |
+| McCormick's Creek State Park | Localist scraper | ~88 | `localist.py` — events.in.gov venue 35217665860404 (13 mi) |
+| Brown County State Park | Localist scraper | ~47 | `localist.py` — events.in.gov venue 35217662417669 (17 mi) |
 | Knobstone Hiking Trail Meetup | ICS | ~10 | Meetup group — regional hiking |
 
 ### Interest Groups & Civic (7 sources)

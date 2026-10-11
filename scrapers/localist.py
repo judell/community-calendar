@@ -35,6 +35,10 @@ from urllib.request import Request, urlopen
 
 from lib.base import BaseScraper
 
+# Bound the crawl: an API that keeps returning a `next_page` cursor must not
+# fetch forever (AGENTS.md "Cap pagination").
+MAX_PAGES = 20
+
 
 class LocalistScraper(BaseScraper):
     name = "Localist"
@@ -47,7 +51,7 @@ class LocalistScraper(BaseScraper):
         name: str,
         venue_id: str | None = None,
         group_id: str | None = None,
-        days: int = 90,
+        days: int | None = None,
     ):
         super().__init__()
         self.base_url = base_url.rstrip("/")
@@ -55,7 +59,8 @@ class LocalistScraper(BaseScraper):
         self.domain = re.sub(r"https?://", "", base_url).split("/")[0]
         self.venue_id = venue_id
         self.group_id = group_id
-        self.days = days
+        # Default fetch window covers the Horizon, which is months_ahead * 31.
+        self.days = days if days is not None else self.months_ahead * 31
 
     def _fetch_api(self, page: int = 1) -> dict:
         """Fetch one page of events from the Localist API."""
@@ -123,8 +128,12 @@ class LocalistScraper(BaseScraper):
                     # Description
                     description = self._clean_html(evt.get("description", ""))
 
-                    # URL
+                    # URL: some event URLs arrive as bare hosts (e.g.
+                    # "on.IN.gov/mccormickscreek") and break as ICS links, so
+                    # fall back to the always-absolute localist_url.
                     url = evt.get("url") or evt.get("localist_url", "")
+                    if url and not url.startswith(("http://", "https://")):
+                        url = evt.get("localist_url") or f"https://{url}"
 
                     events.append(
                         {
@@ -137,12 +146,12 @@ class LocalistScraper(BaseScraper):
                         }
                     )
 
-            # Check for more pages
-            page_info = data.get("page", {})
-            total = page_info.get("total", 0)
-            current = page_info.get("current", page)
-            size = page_info.get("size", 100)
-            if current * size >= total:
+            # Check for more pages. The API's `total` counts pages, not items,
+            # so follow its `next_page` cursor rather than a size-based offset.
+            if not data.get("page", {}).get("next_page"):
+                break
+            if page >= MAX_PAGES:
+                self.logger.warning(f"Stopping at page cap ({MAX_PAGES}); more pages remain")
                 break
             page += 1
 
@@ -158,7 +167,12 @@ def main():
     parser.add_argument("--venue-id", help="Filter by venue ID")
     parser.add_argument("--group-id", help="Filter by group ID")
     parser.add_argument("--name", required=True, help="Source display name")
-    parser.add_argument("--days", type=int, default=90, help="Days ahead to fetch (default: 90)")
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=None,
+        help="Days ahead to fetch (default: SCRAPE_MONTHS months, 31 days each)",
+    )
     parser.add_argument("--output", "-o", required=True, help="Output ICS file")
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
