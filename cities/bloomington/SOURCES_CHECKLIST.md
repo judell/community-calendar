@@ -47,10 +47,11 @@ Docs: https://documentation.events.iu.edu/feed-and-linked-calendars/ical-feed.ht
 | Parks and Recreation | Google Calendar | ~1615 | Concerts, fitness, nature, family events |
 | Bloomington Farmers Market | Google Calendar | ~307 | |
 
-### Music & Performing Arts (7 sources)
+### Music & Performing Arts (8 sources)
 
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
+| On Tap Tickets | Scraper | ~15 | `ontap_tickets.py` — the ticketing platform's Evvnt discovery listing (publisher 11409); covers The MET in Martinsville (19 mi) and Tier 10 Music & Sports Park in Spencer (15 mi, summer concert season) |
 | The Bluebird | Songkick | ~9 | `songkick.py` venue 78904 |
 | Blockhouse Bar | Songkick | ~2 | `songkick.py` venue 3607354 |
 | Buskirk-Chumley Theater | Scraper | ~32 | `buskirk_chumley.py` |
