@@ -44,38 +44,52 @@ class FARCenterScraper(BaseScraper):
 
         main = soup.select_one(".entry-main")
         if not main:
-            return events
+            # A missing container is a layout change, not a quiet week. Raise
+            # so the run exits non-zero with a traceback, instead of writing a
+            # valid-empty calendar that report.py reads as a quiet week.
+            raise RuntimeError(
+                "FAR Center listing page has no .entry-main container; the layout changed"
+            )
 
         now = datetime.now(tz)
-        for card in main.select("div.mb-8"):
-            parsed = self._parse_card(card, tz, now)
-            if parsed:
-                events.append(parsed)
+        cards = list(main.select("div.mb-8"))
+        for card in cards:
+            events.extend(self._parse_card(card, tz, now))
+
+        # Container present with no cards is a genuine quiet week; cards that
+        # yield no date at all mean the cards changed shape.
+        if cards and not events:
+            raise RuntimeError(
+                f"FAR Center listing has {len(cards)} cards but none carried a "
+                "parseable date; the card layout changed"
+            )
 
         self.logger.info(f"Found {len(events)} events")
         return events
 
-    def _parse_card(self, card, tz: ZoneInfo, now: datetime) -> dict[str, Any] | None:
-        """Parse a single event card."""
+    def _parse_card(self, card, tz: ZoneInfo, now: datetime) -> list[dict[str, Any]]:
+        """Parse a card into one event per date it lists."""
         title_el = card.select_one("h3 a")
         if not title_el:
-            return None
+            return []
 
         title = title_el.get_text(strip=True)
         url = title_el.get("href", "")
         if url and not url.startswith("http"):
             url = f"https://www.thefar.org{url}"
 
-        # Find date/time in the second p.text-sm.mb-1
         paragraphs = card.select("p.text-sm.mb-1")
         description = ""
         dtstart = None
         dtend = None
+        upcoming = ""
 
         for p in paragraphs:
             text = p.get_text(strip=True)
+            if text.lower().startswith("upcoming:"):
+                upcoming = text
             # Check if this paragraph contains a date pattern
-            if not dtstart and re.search(
+            elif not dtstart and re.search(
                 r"(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d",
                 text,
             ):
@@ -86,26 +100,64 @@ class FARCenterScraper(BaseScraper):
                 description = text
 
         if not dtstart:
-            return None
+            return []
 
         if not dtend:
             dtend = dtstart + timedelta(hours=2)
 
         # Key the UID by the detail-page id and the occurrence datetime, as
-        # WFIU does. A truncated title slug can collide across events.
+        # WFIU does. A truncated title slug can collide across events; the
+        # datetime keeps each occurrence of a recurring card distinct.
         event_id = re.search(r"/events/event/(\d+)", url)
         identity = event_id.group(1) if event_id else (url or title)
-        uid = generate_uid(identity, dtstart, self.domain)
 
-        return {
-            "title": title,
-            "dtstart": dtstart,
-            "dtend": dtend,
-            "url": url,
-            "location": "FAR Center for Contemporary Arts, 505 W 4th St, Bloomington, IN",
-            "description": description,
-            "uid": uid,
-        }
+        def occurrence(start: datetime, end: datetime) -> dict[str, Any]:
+            return {
+                "title": title,
+                "dtstart": start,
+                "dtend": end,
+                "url": url,
+                "location": "FAR Center for Contemporary Arts, 505 W 4th St, Bloomington, IN",
+                "description": description,
+                "uid": generate_uid(identity, start, self.domain),
+            }
+
+        events = [occurrence(dtstart, dtend)]
+        for start, end in self._parse_upcoming(upcoming, dtstart, dtend, tz, now):
+            events.append(occurrence(start, end))
+        return events
+
+    def _parse_upcoming(
+        self, text: str, dtstart: datetime, dtend: datetime, tz: ZoneInfo, now: datetime
+    ) -> list[tuple[datetime, datetime]]:
+        """Extra dates a card lists after "Upcoming:".
+
+        The monthly Photo Review lists e.g. "Upcoming: November 18, December
+        16, January 20, February 17, March 17". Each shares the primary
+        occurrence's time of day.
+        """
+        if not text:
+            return []
+        body = text.split(":", 1)[1]
+        span = dtend - dtstart
+        time_str = dtstart.strftime("%I:%M%p")
+        occurrences = []
+        for token in body.split(","):
+            token = token.strip()
+            if not token:
+                continue
+            # Each comma-separated entry is "Month D". Warn for any token that
+            # is not one, so an unrecognised format (Nov. 18, 11/18) surfaces
+            # instead of the date vanishing while the primary still parses.
+            if re.fullmatch(r"[A-Za-z]+ \d{1,2}", token):
+                start = self._make_dt(token, time_str, self._resolve_year(token, now), tz)
+            else:
+                start = None
+            if start:
+                occurrences.append((start, start + span))
+            else:
+                self.logger.warning(f"Unparseable upcoming date {token!r} in {text!r}")
+        return occurrences
 
     def _parse_datetime(self, text: str, tz: ZoneInfo, now: datetime):
         """Parse date/time from strings like 'Friday, April 3 | 5:00pm - 8:00pm'.
