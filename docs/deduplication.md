@@ -146,6 +146,8 @@ const { error } = await supabase
 
 **Gap:** Same issue as combine_ics.py - cross-source duplicates have different `source_uid` values.
 
+**Stale cleanup:** after upsert, `load-events` calls `delete_stale_events(p_city, p_source_uids, p_sources)` to remove rows the source no longer lists. The sweep is scoped to `p_sources` — the `source_id`s present in the payload — so a source that failed to produce output (a crashed scraper, a 404'd feed) is absent from the payload and keeps its rows ([issue #227](https://github.com/B-Square-Bulletin/community-calendar/issues/227)). A source that legitimately runs empty is indistinguishable from a failed one and is preserved until its next non-empty run; retiring a source deletes explicitly via `remove_feed`.
+
 ---
 
 ### Stage 5: PostgreSQL Database

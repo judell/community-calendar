@@ -294,7 +294,7 @@ cities/{city}/example.ics (with X-SOURCE headers)
 
 ### Database Schema (Key Tables)
 
-- **events** — All calendar events (title, start_time, location, description, source, category, city, source_uid)
+- **events** — All calendar events (title, start_time, location, description, source, category, city, source_uid). `load-events` upserts by `source_uid`, then sweeps stale rows scoped to the `source_id`s present in the payload, so a source that failed to produce output keeps its rows.
 - **feeds** — Source registry (url, name, city, status, feed_type, scraper_cmd)
 - **picks** — User-saved events (user_id, event_id)
 - **category_overrides** — Curator manual category corrections (source_uid, category)

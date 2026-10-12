@@ -28,6 +28,11 @@ CREATE POLICY "Admin users can manage feeds" ON feeds FOR ALL
 -- transaction, returns what it deleted, and raises for an unknown id.
 -- Callers that still pre-delete events by source+city simply leave 0
 -- rows for the RPC to delete — backward compatible.
+--
+-- Matches `events.source = feeds.name` only. A merge survivor's source is the
+-- comma-joined member names, so it is not matched here; it is re-attributed by
+-- the next build instead. Matching it by name would delete a survivor owned by
+-- another feed and cascade away that event's saved picks (ADR 0017).
 CREATE FUNCTION remove_feed(feed_id bigint)
 RETURNS TABLE (events_deleted bigint, feed_deleted boolean)
 LANGUAGE plpgsql SECURITY DEFINER
