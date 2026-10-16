@@ -19,6 +19,11 @@ The REST endpoint is discovered as:
 
 Pagination is automatic. By default fetches up to 6 months ahead
 (controlled by SCRAPE_MONTHS env var, inherited from BaseScraper.run()).
+
+A failure fetching the *first* page fails the run (a broken ingest, not a
+dormant calendar); a first page with an empty events array writes a
+valid-empty calendar, and a later-page failure keeps the pages already
+fetched. See docs/scrapers.md.
 """
 
 import sys
@@ -109,6 +114,12 @@ class TribeRestScraper(BaseScraper):
                 response.raise_for_status()
                 data = response.json()
             except Exception as e:
+                # An unreachable first page means a broken ingest, not a dormant
+                # calendar: fail the run so feed-health reports a scraper failure
+                # instead of a valid-empty (quiet) calendar. Later-page failures
+                # keep the pages already fetched.
+                if page == 1:
+                    raise
                 self.logger.warning(f"Error fetching page {page}: {e}")
                 break
 

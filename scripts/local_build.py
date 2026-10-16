@@ -1112,6 +1112,8 @@ def main() -> int:
         validation_errors.extend(city_errors)
         logger.section(city, "build", "END")
 
+    # Reads the tracked feeds.txt, not run_city's DB-rendered snapshot, so a
+    # stale tracked copy can drift the local report (dev-only).
     update_report(cities, str(ROOT / args.feed_report))
     build_errors = parse_build_errors(str(ROOT / args.build_log))
     for city_result in results:

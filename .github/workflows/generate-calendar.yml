@@ -231,8 +231,12 @@ jobs:
 
     - name: Generate feed health report
       run: |
+        skip_flag=""
+        if [ "${{ github.event.inputs.regenerate_only }}" = "true" ]; then
+          skip_flag="--scrapers-skipped"
+        fi
         python scripts/report.py --cities ${{ steps.locations.outputs.list }} --build-log build.log \
-          --slice-dir report --template scripts/report_page_template.html
+          --slice-dir report --template scripts/report_page_template.html $skip_flag
 
     - name: Generate PRODID platform report
       run: python scripts/prodid.py

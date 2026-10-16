@@ -68,6 +68,12 @@ class TribeEventsScraper(BaseScraper):
                 response.raise_for_status()
                 data = response.json()
             except Exception as e:
+                # An unreachable first page means a broken ingest, not a dormant
+                # calendar: fail the run so feed-health reports a scraper failure
+                # instead of a valid-empty (quiet) calendar. Later-page failures
+                # keep the pages already fetched.
+                if page == 1:
+                    raise
                 self.logger.warning(f"Error fetching page {page}: {e}")
                 break
 

@@ -36,6 +36,10 @@ _Avoid_: Venue, organization (when referring to the calendar entry point)
 The technical mechanism that delivers events from a source — an ICS URL or a scraper command. One source has one feed. The implementation layer — what the pipeline operates on.
 _Avoid_: URL, scraper (when referring to the abstraction)
 
+**Quiet source**:
+A source whose build wrote a valid calendar with no upcoming events — a genuinely dormant calendar, not a problem to fix. Distinct from a failed source, whose scraper exits non-zero and writes no calendar, so feed-health reports it as a scraper failure.
+_Avoid_: Empty feed, broken source
+
 **Fork**:
 This repository is a *hard fork* of the upstream community-calendar project (judell/community-calendar). It intentionally diverges from upstream — origin/main contains Bloomington-only customizations, scrapers, and infrastructure that are not present in upstream/main. origin/main ≠ upstream/main by design.
 _Avoid_: Tracking fork, downstream mirror

@@ -134,3 +134,20 @@ Events often have multiple timeslots (recurring phone banks, weekly protests, et
 **Discovery:** Search `site:mobilize.us "{city name}"` or `site:mobilize.us "{county name}"` to find organizations in a given area.
 
 **Note:** Mobilize.us appears to have a public API at `api.mobilize.us/v1/` but we could not find the correct organization endpoint for specific groups. The embedded-data approach works reliably. If you find a working API pattern, prefer it over HTML parsing.
+
+## Tribe Events Calendar REST (`scrapers/lib/tribe_events.py`, `scrapers/tribe_rest.py`) — WordPress
+
+WordPress sites running The Events Calendar ("Tribe") plugin expose a JSON API at `/wp-json/tribe/events/v1/events/`, which often works when the site's ICS export is blocked or returns an empty body.
+
+```bash
+# Parameterized: one site per invocation
+python scrapers/tribe_rest.py --api-base "https://example.org" --name "Example Venue" \
+  --timezone America/Indiana/Indianapolis --output cities/bloomington/example.ics
+```
+
+Two entry points share the same fetch behavior:
+
+- `scrapers/lib/tribe_events.py` (`TribeEventsScraper`) — subclass and set `api_url` for site-specific parsing (e.g. `scrapers/bloomington_symphony.py`).
+- `scrapers/tribe_rest.py` (`TribeRestScraper`) — parameterized, driven by `--api-base`; used by Hard Truth Distilling Co., Upland Brewing, Boys & Girls Club, and Bloomington Community Band. `--user-agent` overrides the UA for hosts that 403 the default.
+
+**Failure behavior:** if the *first* page cannot be fetched — HTTP error, network error, or unparseable JSON — the run fails non-zero, so feed-health reports a scraper failure instead of a quiet calendar. A first page returning HTTP 200 with an empty `events` array is a genuinely dormant calendar and still writes a valid-empty calendar. A failure *after* the first page keeps the pages already fetched; that partial set then becomes the source's whole output, so the unfetched events are swept from the database until the next clean run (the 50% partial-load guard preserves a source only when it would lose more than half its rows).
