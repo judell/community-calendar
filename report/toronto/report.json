@@ -1,18 +1,18 @@
 {
   "city": "toronto",
-  "generated": "2026-10-21T04:47:44.930996",
+  "generated": "2026-10-22T04:38:30.513452",
   "build": {
-    "generated": "2026-10-21T04:47:44.930996",
-    "total_events": 8501,
-    "prev_total_events": 8457,
-    "delta": 44
+    "generated": "2026-10-22T04:38:30.513452",
+    "total_events": 8471,
+    "prev_total_events": 8501,
+    "delta": -30
   },
   "problems": [
     {
       "severity": 1,
       "kind": "broken_feed",
       "title": "culturelink is serving html, not ICS",
-      "detail": "no good build in recorded history; broken since 2026-07-23",
+      "detail": "no good build in recorded history; broken since 2026-07-24",
       "feed": "culturelink",
       "repro": {
         "display": "CultureLink Settlement Services",
@@ -24,7 +24,7 @@
       "severity": 1,
       "kind": "broken_feed",
       "title": "meetup_mindful_movement_toronto is serving json, not ICS",
-      "detail": "no good build in recorded history; broken since 2026-07-23",
+      "detail": "no good build in recorded history; broken since 2026-07-24",
       "feed": "meetup_mindful_movement_toronto",
       "repro": {
         "display": "Meetup: Mindful Movement Toronto",
@@ -36,7 +36,7 @@
       "severity": 1,
       "kind": "broken_feed",
       "title": "meetup_toronto_3d_printing is serving json, not ICS",
-      "detail": "no good build in recorded history; broken since 2026-07-23",
+      "detail": "no good build in recorded history; broken since 2026-07-24",
       "feed": "meetup_toronto_3d_printing",
       "repro": {
         "display": "Meetup: Toronto 3D Printing",
@@ -57,6 +57,30 @@
       }
     },
     {
+      "severity": 1,
+      "kind": "broken_feed",
+      "title": "site3 is serving empty, not ICS",
+      "detail": "was 1 events on 2026-10-21; broken since 2026-10-22",
+      "feed": "site3",
+      "repro": {
+        "display": "Site 3 CoLaboratory",
+        "source": "https://www.site3.ca/events/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://www.site3.ca/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "severity": 2,
+      "kind": "newly_silent",
+      "title": "eventbrite_open_studio went silent (valid calendar, 0 events)",
+      "detail": "was 1 events on 2026-10-21",
+      "feed": "eventbrite_open_studio",
+      "repro": {
+        "display": "Open Studio",
+        "source": "python scrapers/eventbrite.py --url \"https://www.eventbrite.com/o/open-studio-19932715092\" --name \"Open Studio\"",
+        "command": "python scrapers/eventbrite.py --url \"https://www.eventbrite.com/o/open-studio-19932715092\" --name \"Open Studio\""
+      }
+    },
+    {
       "severity": 2,
       "kind": "newly_silent",
       "title": "eventbrite_rosedale_centre went silent (valid calendar, 0 events)",
@@ -71,18 +95,6 @@
     {
       "severity": 2,
       "kind": "newly_silent",
-      "title": "meetup_gta_hiking_meetup went silent (valid calendar, 0 events)",
-      "detail": "was 1 events on 2026-10-18",
-      "feed": "meetup_gta_hiking_meetup",
-      "repro": {
-        "display": "Meetup: GTA Hiking & Stuff",
-        "source": "https://www.meetup.com/gta-hiking-meetup/events/ical/",
-        "command": "curl -sL -A 'Mozilla/5.0' 'https://www.meetup.com/gta-hiking-meetup/events/ical/' | grep -c 'BEGIN:VEVENT'"
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "newly_silent",
       "title": "meetup_midtown_arts_and_crafts_group went silent (valid calendar, 0 events)",
       "detail": "was 1 events on 2026-10-18",
       "feed": "meetup_midtown_arts_and_crafts_group",
@@ -90,6 +102,18 @@
         "display": "Meetup: Midtown Arts & Crafts",
         "source": "https://www.meetup.com/midtown-arts-and-crafts-group/events/ical/",
         "command": "curl -sL -A 'Mozilla/5.0' 'https://www.meetup.com/midtown-arts-and-crafts-group/events/ical/' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "severity": 2,
+      "kind": "newly_silent",
+      "title": "meetup_python_toronto went silent (valid calendar, 0 events)",
+      "detail": "was 1 events on 2026-10-21",
+      "feed": "meetup_python_toronto",
+      "repro": {
+        "display": "Meetup: Python Toronto",
+        "source": "https://www.meetup.com/python-toronto/events/ical/",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://www.meetup.com/python-toronto/events/ical/' | grep -c 'BEGIN:VEVENT'"
       }
     },
     {
@@ -153,9 +177,47 @@
       }
     },
     {
+      "severity": 2,
+      "kind": "drop",
+      "title": "beachmetro: Events dropped 73% (30 \u2192 8)",
+      "detail": "2026-10-22",
+      "feed": "beachmetro",
+      "repro": {
+        "display": "Beach Metro Community News",
+        "source": "https://beachmetro.com/events/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://beachmetro.com/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
       "severity": 3,
       "kind": "tz_anomaly",
-      "title": "Toronto Public Library \u2014 Teens: 2/660 events at suspicious hours",
+      "title": "Go Latin Dance: 2/7 events at suspicious hours",
+      "detail": "likely a -4h offset error",
+      "feed": "golatindance",
+      "repro": {
+        "display": "Go Latin Dance",
+        "source": "https://golatindance.com/events/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://golatindance.com/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
+      },
+      "samples": [
+        {
+          "start_time": "2026-10-22T19:00",
+          "shows": "04:00",
+          "likely": "08:00",
+          "title": "50/50 Bachata & Salsa on Thursdays"
+        },
+        {
+          "start_time": "2026-10-22T19:30",
+          "shows": "04:30",
+          "likely": "08:30",
+          "title": "Pontoon Salsa Thursdays"
+        }
+      ]
+    },
+    {
+      "severity": 3,
+      "kind": "tz_anomaly",
+      "title": "Toronto Public Library \u2014 Teens: 2/716 events at suspicious hours",
       "detail": "likely a -4h offset error",
       "feed": null,
       "repro": null,
@@ -192,7 +254,7 @@
       "feed": "bookhug_press",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Book*hug Press",
@@ -204,7 +266,7 @@
       "feed": "cormorant_books",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Cormorant Books",
@@ -216,7 +278,7 @@
       "feed": "eventbrite_all_about_intimacy",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "All About Intimacy",
@@ -228,7 +290,7 @@
       "feed": "eventbrite_fuzzy_lab",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Fuzzy Lab Toronto",
@@ -240,7 +302,7 @@
       "feed": "eventbrite_hand_eye_society",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Hand Eye Society",
@@ -252,7 +314,7 @@
       "feed": "eventbrite_radical_aliveness",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Radical Aliveness Toronto",
@@ -276,7 +338,7 @@
       "feed": "gcal_14f446d3f140e041fb18950c3ac63c59d2f966c99df4673e9b98c9c43d50ccc9",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Toronto Tango: Roxana & Fabian",
@@ -288,7 +350,7 @@
       "feed": "gcal_2f58a371e5ad5ec4087fa5be06532c64dc551d5b70f4d0519c8efcfb00f1c4fd",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Toronto Tango: Toronto Dance Spot",
@@ -300,7 +362,7 @@
       "feed": "gcal_3fd5aca5a020c303e79e31a6aa4483159be7f4933444d55a78a7ca983fb3dc72",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Toronto Tango: LetUsDance",
@@ -324,7 +386,7 @@
       "feed": "gcal_5d8dc9ddb3e1e4350f9bd2c0cbbe6aad51a964190ad45a804ba477e7a2643dbc",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Toronto Tango: West-Way Practica",
@@ -360,7 +422,7 @@
       "feed": "gcal_b7c5827fa5ae2e2fb3a9c93805edbf0cacd4203c5d5fe10d3cae611a4ccde3d0",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Toronto Tango: Milonga La Yumba",
@@ -372,7 +434,7 @@
       "feed": "gcal_ba71c61d84d5cf3bb8fb77cd6e7aabaacc8ec8c30d47d8ed3ca1b09a067f6de1",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Toronto Tango: Paso a Paso",
@@ -396,7 +458,7 @@
       "feed": "gcal_d796559a2b13aba6b3f02dab77583d5d49c9cf8fd4a65568aa10d64e17be0e20",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Toronto Tango: City Dance Corps",
@@ -408,7 +470,7 @@
       "feed": "gcal_d7muv9fjli72io6q1a7hkdpf04",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "CITA Special Events",
@@ -420,7 +482,7 @@
       "feed": "gcal_ed741fd8854ce94ffd5dc3b27eb4493e5b1879385ec94741147e31202d3131c9",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Toronto Tango: Calle Del Tango",
@@ -432,7 +494,7 @@
       "feed": "gcal_f172f44a97b6df445f08029f216bd25da9a8d261727123f088bcf3ea82d0114b",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Toronto Tango: Milonga Salon Swansea",
@@ -444,7 +506,7 @@
       "feed": "gnntoronto",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Green Neighbours Network of Toronto",
@@ -456,7 +518,7 @@
       "feed": "harpercollins_canada",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "HarperCollins Canada",
@@ -468,7 +530,7 @@
       "feed": "house_of_anansi",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "House of Anansi",
@@ -480,7 +542,7 @@
       "feed": "indigenous",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "UofT Indigenous Studies",
@@ -504,7 +566,7 @@
       "feed": "luma_devtools_toronto",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Devtools Toronto",
@@ -528,7 +590,7 @@
       "feed": "luma_toronto_tech_week",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Toronto Tech Week",
@@ -540,7 +602,7 @@
       "feed": "meetup_civic_tech_toronto",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Civic Tech Toronto",
@@ -588,7 +650,7 @@
       "feed": "meetup_little_sunbeams_parents_tots_meetup",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Little Sunbeams (Parents + Tots)",
@@ -612,7 +674,7 @@
       "feed": "meetup_mini_me_meetups",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Mini + Me Meetups",
@@ -636,7 +698,7 @@
       "feed": "meetup_the_toronto_paddlers_meetup_group",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Toronto Paddlers",
@@ -756,7 +818,7 @@
       "feed": "thedevilsworkshop",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet",
       "repro": {
         "display": "The Devil's Workshop",
@@ -801,49 +863,56 @@
       "feed": "bookhug_press",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "cormorant_books",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "culturelink",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "not_ics:html"
     },
     {
       "feed": "eventbrite_all_about_intimacy",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "eventbrite_fuzzy_lab",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "eventbrite_hand_eye_society",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
+      "content": "quiet"
+    },
+    {
+      "feed": "eventbrite_open_studio",
+      "was": 1,
+      "was_date": "2026-10-21",
+      "silent_since": "2026-10-22",
       "content": "quiet"
     },
     {
       "feed": "eventbrite_radical_aliveness",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
@@ -864,21 +933,21 @@
       "feed": "gcal_14f446d3f140e041fb18950c3ac63c59d2f966c99df4673e9b98c9c43d50ccc9",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "gcal_2f58a371e5ad5ec4087fa5be06532c64dc551d5b70f4d0519c8efcfb00f1c4fd",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "gcal_3fd5aca5a020c303e79e31a6aa4483159be7f4933444d55a78a7ca983fb3dc72",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
@@ -892,7 +961,7 @@
       "feed": "gcal_5d8dc9ddb3e1e4350f9bd2c0cbbe6aad51a964190ad45a804ba477e7a2643dbc",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
@@ -913,14 +982,14 @@
       "feed": "gcal_b7c5827fa5ae2e2fb3a9c93805edbf0cacd4203c5d5fe10d3cae611a4ccde3d0",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "gcal_ba71c61d84d5cf3bb8fb77cd6e7aabaacc8ec8c30d47d8ed3ca1b09a067f6de1",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
@@ -934,56 +1003,56 @@
       "feed": "gcal_d796559a2b13aba6b3f02dab77583d5d49c9cf8fd4a65568aa10d64e17be0e20",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "gcal_d7muv9fjli72io6q1a7hkdpf04",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "gcal_ed741fd8854ce94ffd5dc3b27eb4493e5b1879385ec94741147e31202d3131c9",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "gcal_f172f44a97b6df445f08029f216bd25da9a8d261727123f088bcf3ea82d0114b",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "gnntoronto",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "harpercollins_canada",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "house_of_anansi",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "indigenous",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
@@ -997,7 +1066,7 @@
       "feed": "luma_devtools_toronto",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
@@ -1011,14 +1080,14 @@
       "feed": "luma_toronto_tech_week",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "meetup_civic_tech_toronto",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
@@ -1026,13 +1095,6 @@
       "was": 1,
       "was_date": "2026-09-13",
       "silent_since": "2026-09-14",
-      "content": "quiet"
-    },
-    {
-      "feed": "meetup_gta_hiking_meetup",
-      "was": 1,
-      "was_date": "2026-10-18",
-      "silent_since": "2026-10-19",
       "content": "quiet"
     },
     {
@@ -1053,7 +1115,7 @@
       "feed": "meetup_little_sunbeams_parents_tots_meetup",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
@@ -1074,14 +1136,21 @@
       "feed": "meetup_mindful_movement_toronto",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "not_ics:json"
     },
     {
       "feed": "meetup_mini_me_meetups",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
+      "content": "quiet"
+    },
+    {
+      "feed": "meetup_python_toronto",
+      "was": 1,
+      "was_date": "2026-10-21",
+      "silent_since": "2026-10-22",
       "content": "quiet"
     },
     {
@@ -1095,14 +1164,14 @@
       "feed": "meetup_the_toronto_paddlers_meetup_group",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
       "feed": "meetup_toronto_3d_printing",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "not_ics:json"
     },
     {
@@ -1162,6 +1231,13 @@
       "content": "quiet"
     },
     {
+      "feed": "site3",
+      "was": 1,
+      "was_date": "2026-10-21",
+      "silent_since": "2026-10-22",
+      "content": "not_ics:empty"
+    },
+    {
       "feed": "sunshinecentres",
       "was": 1,
       "was_date": "2026-08-21",
@@ -1179,7 +1255,7 @@
       "feed": "thedevilsworkshop",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-07-23",
+      "silent_since": "2026-07-24",
       "content": "quiet"
     },
     {
@@ -1208,9 +1284,29 @@
   "ongoing_errors": [],
   "tz_anomalies": [
     {
+      "source": "Go Latin Dance",
+      "count": 2,
+      "total": 7,
+      "offset": -4,
+      "samples": [
+        {
+          "start_time": "2026-10-22T19:00",
+          "shows": "04:00",
+          "likely": "08:00",
+          "title": "50/50 Bachata & Salsa on Thursdays"
+        },
+        {
+          "start_time": "2026-10-22T19:30",
+          "shows": "04:30",
+          "likely": "08:30",
+          "title": "Pontoon Salsa Thursdays"
+        }
+      ]
+    },
+    {
       "source": "Toronto Public Library \u2014 Teens",
       "count": 2,
-      "total": 660,
+      "total": 716,
       "offset": -4,
       "samples": [
         {
@@ -1229,22 +1325,6 @@
     }
   ],
   "recent_anomalies": [
-    {
-      "type": "zero_events",
-      "message": "Feed returned 0 events (was 1)",
-      "severity": "info",
-      "date": "2026-10-14",
-      "city": "toronto",
-      "feed": "eventbrite_being_and_becoming"
-    },
-    {
-      "type": "zero_events",
-      "message": "Feed returned 0 events (was 1)",
-      "severity": "info",
-      "date": "2026-10-14",
-      "city": "toronto",
-      "feed": "meetup_techto"
-    },
     {
       "type": "zero_events",
       "message": "Feed returned 0 events (was 12)",
@@ -1332,6 +1412,38 @@
       "date": "2026-10-21",
       "city": "toronto",
       "feed": "torontounion_toronto_union_events"
+    },
+    {
+      "type": "significant_drop",
+      "message": "Events dropped 73% (30 \u2192 8)",
+      "severity": "medium",
+      "date": "2026-10-22",
+      "city": "toronto",
+      "feed": "beachmetro"
+    },
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 1)",
+      "severity": "info",
+      "date": "2026-10-22",
+      "city": "toronto",
+      "feed": "eventbrite_open_studio"
+    },
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 1)",
+      "severity": "info",
+      "date": "2026-10-22",
+      "city": "toronto",
+      "feed": "meetup_python_toronto"
+    },
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 1)",
+      "severity": "info",
+      "date": "2026-10-22",
+      "city": "toronto",
+      "feed": "site3"
     }
   ],
   "detail": {
@@ -1341,10 +1453,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1
-          },
           {
             "date": "2026-09-23",
             "count": 2
@@ -1460,18 +1568,18 @@
           {
             "date": "2026-10-21",
             "count": 2
+          },
+          {
+            "date": "2026-10-22",
+            "count": 2
           }
         ]
       },
       "agakhan_museum": {
-        "count": 53,
+        "count": 47,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 53
-          },
           {
             "date": "2026-09-23",
             "count": 62
@@ -1587,18 +1695,18 @@
           {
             "date": "2026-10-21",
             "count": 53
+          },
+          {
+            "date": "2026-10-22",
+            "count": 47
           }
         ]
       },
       "angas_farm": {
-        "count": 21,
+        "count": 22,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 23
-          },
           {
             "date": "2026-09-23",
             "count": 23
@@ -1714,6 +1822,10 @@
           {
             "date": "2026-10-21",
             "count": 21
+          },
+          {
+            "date": "2026-10-22",
+            "count": 22
           }
         ]
       },
@@ -1722,10 +1834,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1
-          },
           {
             "date": "2026-09-23",
             "count": 1
@@ -1841,6 +1949,10 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1
           }
         ]
       },
@@ -1849,10 +1961,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1
-          },
           {
             "date": "2026-09-23",
             "count": 1
@@ -1968,18 +2076,18 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1
           }
         ]
       },
       "beachmetro": {
-        "count": 30,
+        "count": 8,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 26
-          },
           {
             "date": "2026-09-23",
             "count": 30
@@ -2095,18 +2203,18 @@
           {
             "date": "2026-10-21",
             "count": 30
+          },
+          {
+            "date": "2026-10-22",
+            "count": 8
           }
         ]
       },
       "ben_mcnally_bm": {
-        "count": 7,
+        "count": 6,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 6
-          },
           {
             "date": "2026-09-23",
             "count": 5
@@ -2222,6 +2330,10 @@
           {
             "date": "2026-10-21",
             "count": 7
+          },
+          {
+            "date": "2026-10-22",
+            "count": 6
           }
         ]
       },
@@ -2231,10 +2343,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 2
-          },
-          {
             "date": "2026-09-23",
             "count": 2
           },
@@ -2348,6 +2456,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 4
+          },
+          {
+            "date": "2026-10-22",
             "count": 4
           }
         ]
@@ -2358,10 +2470,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -2475,6 +2583,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -2485,10 +2597,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 4
-          },
-          {
             "date": "2026-09-23",
             "count": 4
           },
@@ -2602,6 +2710,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 4
+          },
+          {
+            "date": "2026-10-22",
             "count": 4
           }
         ]
@@ -2612,10 +2724,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -2729,6 +2837,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -2739,10 +2851,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 2
-          },
-          {
             "date": "2026-09-23",
             "count": 2
           },
@@ -2857,18 +2965,18 @@
           {
             "date": "2026-10-21",
             "count": 2
+          },
+          {
+            "date": "2026-10-22",
+            "count": 2
           }
         ]
       },
       "buddiesinbadtimes": {
-        "count": 10,
+        "count": 9,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 7
@@ -2984,6 +3092,10 @@
           {
             "date": "2026-10-21",
             "count": 10
+          },
+          {
+            "date": "2026-10-22",
+            "count": 9
           }
         ]
       },
@@ -2992,10 +3104,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -3110,6 +3218,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -3120,10 +3232,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -3237,6 +3345,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -3247,10 +3359,6 @@
         "content": "not_ics:html",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -3365,6 +3473,10 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
@@ -3373,10 +3485,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 72
-          },
           {
             "date": "2026-09-23",
             "count": 71
@@ -3492,18 +3600,18 @@
           {
             "date": "2026-10-21",
             "count": 51
+          },
+          {
+            "date": "2026-10-22",
+            "count": 51
           }
         ]
       },
       "diaspora_dialogues": {
-        "count": 1,
+        "count": 7,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -3619,18 +3727,18 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 7
           }
         ]
       },
       "engineering_engineering_events": {
-        "count": 11,
+        "count": 10,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 16
-          },
           {
             "date": "2026-09-23",
             "count": 14
@@ -3746,6 +3854,10 @@
           {
             "date": "2026-10-21",
             "count": 11
+          },
+          {
+            "date": "2026-10-22",
+            "count": 10
           }
         ]
       },
@@ -3754,10 +3866,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 3
-          },
           {
             "date": "2026-09-23",
             "count": 3
@@ -3872,6 +3980,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 3
+          },
+          {
+            "date": "2026-10-22",
             "count": 3
           }
         ]
@@ -3882,10 +3994,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -3999,6 +4107,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -4009,10 +4121,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 12
-          },
-          {
             "date": "2026-09-23",
             "count": 12
           },
@@ -4126,6 +4234,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 12
+          },
+          {
+            "date": "2026-10-22",
             "count": 12
           }
         ]
@@ -4136,10 +4248,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 1
-          },
-          {
             "date": "2026-09-23",
             "count": 1
           },
@@ -4254,6 +4362,10 @@
           {
             "date": "2026-10-21",
             "count": 2
+          },
+          {
+            "date": "2026-10-22",
+            "count": 2
           }
         ]
       },
@@ -4262,10 +4374,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -4381,18 +4489,18 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1
           }
         ]
       },
       "eventbrite_brains_and_barstools": {
-        "count": 12,
+        "count": 10,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 12
-          },
           {
             "date": "2026-09-23",
             "count": 12
@@ -4508,6 +4616,10 @@
           {
             "date": "2026-10-21",
             "count": 12
+          },
+          {
+            "date": "2026-10-22",
+            "count": 10
           }
         ]
       },
@@ -4516,10 +4628,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 2
-          },
           {
             "date": "2026-09-23",
             "count": 2
@@ -4634,6 +4742,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 2
+          },
+          {
+            "date": "2026-10-22",
             "count": 2
           }
         ]
@@ -4644,10 +4756,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -4761,6 +4869,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -4771,10 +4883,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -4889,18 +4997,18 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
       "eventbrite_glad_day": {
-        "count": 4,
+        "count": 3,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 5
-          },
           {
             "date": "2026-09-23",
             "count": 5
@@ -5016,6 +5124,10 @@
           {
             "date": "2026-10-21",
             "count": 4
+          },
+          {
+            "date": "2026-10-22",
+            "count": 3
           }
         ]
       },
@@ -5024,10 +5136,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -5142,6 +5250,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -5152,10 +5264,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 1
           },
@@ -5270,18 +5378,18 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1
           }
         ]
       },
       "eventbrite_lula_lounge": {
-        "count": 14,
+        "count": 13,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 13
-          },
           {
             "date": "2026-09-23",
             "count": 13
@@ -5397,18 +5505,18 @@
           {
             "date": "2026-10-21",
             "count": 14
+          },
+          {
+            "date": "2026-10-22",
+            "count": 13
           }
         ]
       },
       "eventbrite_open_studio": {
-        "count": 1,
+        "count": 0,
         "error": null,
-        "content": null,
+        "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 8
-          },
           {
             "date": "2026-09-23",
             "count": 8
@@ -5524,6 +5632,10 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
@@ -5532,10 +5644,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -5650,6 +5758,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -5660,10 +5772,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -5777,6 +5885,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -5787,10 +5899,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 4
-          },
-          {
             "date": "2026-09-23",
             "count": 4
           },
@@ -5905,11 +6013,15 @@
           {
             "date": "2026-10-21",
             "count": 2
+          },
+          {
+            "date": "2026-10-22",
+            "count": 2
           }
         ]
       },
       "events": {
-        "count": 232,
+        "count": 208,
         "error": null,
         "content": null,
         "history": [
@@ -5988,18 +6100,18 @@
           {
             "date": "2026-10-21",
             "count": 232
+          },
+          {
+            "date": "2026-10-22",
+            "count": 208
           }
         ]
       },
       "flying_books": {
-        "count": 10,
+        "count": 9,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 9
-          },
           {
             "date": "2026-09-23",
             "count": 9
@@ -6115,6 +6227,10 @@
           {
             "date": "2026-10-21",
             "count": 10
+          },
+          {
+            "date": "2026-10-22",
+            "count": 9
           }
         ]
       },
@@ -6123,10 +6239,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 28
-          },
           {
             "date": "2026-09-23",
             "count": 28
@@ -6242,6 +6354,10 @@
           {
             "date": "2026-10-21",
             "count": 8
+          },
+          {
+            "date": "2026-10-22",
+            "count": 8
           }
         ]
       },
@@ -6250,10 +6366,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1
-          },
           {
             "date": "2026-09-23",
             "count": 1
@@ -6368,6 +6480,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -6378,10 +6494,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -6495,6 +6607,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -6505,10 +6621,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -6622,6 +6734,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -6632,10 +6748,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 1
-          },
-          {
             "date": "2026-09-23",
             "count": 1
           },
@@ -6749,6 +6861,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -6759,10 +6875,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -6876,6 +6988,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -6886,10 +7002,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 11
-          },
-          {
             "date": "2026-09-23",
             "count": 11
           },
@@ -7003,6 +7115,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 12
+          },
+          {
+            "date": "2026-10-22",
             "count": 12
           }
         ]
@@ -7013,10 +7129,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 3
-          },
-          {
             "date": "2026-09-23",
             "count": 3
           },
@@ -7130,6 +7242,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 2
+          },
+          {
+            "date": "2026-10-22",
             "count": 2
           }
         ]
@@ -7140,10 +7256,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -7258,6 +7370,10 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
@@ -7266,10 +7382,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 12
-          },
           {
             "date": "2026-09-23",
             "count": 11
@@ -7385,6 +7497,10 @@
           {
             "date": "2026-10-21",
             "count": 8
+          },
+          {
+            "date": "2026-10-22",
+            "count": 8
           }
         ]
       },
@@ -7393,10 +7509,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -7511,6 +7623,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -7521,10 +7637,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -7638,6 +7750,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -7648,10 +7764,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -7765,6 +7877,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -7775,10 +7891,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -7892,6 +8004,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -7902,10 +8018,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -8019,6 +8131,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -8029,10 +8145,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 1
-          },
-          {
             "date": "2026-09-23",
             "count": 1
           },
@@ -8146,6 +8258,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -8156,10 +8272,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -8273,6 +8385,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -8283,10 +8399,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -8400,6 +8512,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -8410,10 +8526,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 1
-          },
-          {
             "date": "2026-09-23",
             "count": 1
           },
@@ -8527,6 +8639,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -8537,10 +8653,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -8654,6 +8766,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -8664,10 +8780,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -8781,6 +8893,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -8791,10 +8907,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 4
-          },
-          {
             "date": "2026-09-23",
             "count": 2
           },
@@ -8908,6 +9020,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -8918,10 +9034,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -9035,6 +9147,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -9131,6 +9247,10 @@
           {
             "date": "2026-10-21",
             "count": 30
+          },
+          {
+            "date": "2026-10-22",
+            "count": 30
           }
         ]
       },
@@ -9139,10 +9259,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 30
-          },
           {
             "date": "2026-09-23",
             "count": 30
@@ -9257,6 +9373,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 30
+          },
+          {
+            "date": "2026-10-22",
             "count": 30
           }
         ]
@@ -9267,10 +9387,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 2
-          },
-          {
             "date": "2026-09-23",
             "count": 1
           },
@@ -9384,6 +9500,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -9394,10 +9514,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 4
-          },
-          {
             "date": "2026-09-23",
             "count": 4
           },
@@ -9512,6 +9628,10 @@
           {
             "date": "2026-10-21",
             "count": 3
+          },
+          {
+            "date": "2026-10-22",
+            "count": 3
           }
         ]
       },
@@ -9520,10 +9640,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -9639,6 +9755,10 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
@@ -9647,10 +9767,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 9
@@ -9766,18 +9882,18 @@
           {
             "date": "2026-10-21",
             "count": 10
+          },
+          {
+            "date": "2026-10-22",
+            "count": 10
           }
         ]
       },
       "history": {
-        "count": 47,
+        "count": 48,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 62
-          },
           {
             "date": "2026-09-23",
             "count": 60
@@ -9893,6 +10009,10 @@
           {
             "date": "2026-10-21",
             "count": 47
+          },
+          {
+            "date": "2026-10-22",
+            "count": 48
           }
         ]
       },
@@ -9901,10 +10021,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 19
-          },
           {
             "date": "2026-09-23",
             "count": 18
@@ -10020,6 +10136,10 @@
           {
             "date": "2026-10-21",
             "count": 10
+          },
+          {
+            "date": "2026-10-22",
+            "count": 10
           }
         ]
       },
@@ -10028,10 +10148,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -10146,6 +10262,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -10156,10 +10276,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -10274,11 +10390,15 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
       "jazzbistro": {
-        "count": 21,
+        "count": 19,
         "error": null,
         "content": null,
         "history": [
@@ -10369,6 +10489,10 @@
           {
             "date": "2026-10-21",
             "count": 21
+          },
+          {
+            "date": "2026-10-22",
+            "count": 19
           }
         ]
       },
@@ -10377,10 +10501,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 9
-          },
           {
             "date": "2026-09-23",
             "count": 9
@@ -10496,6 +10616,10 @@
           {
             "date": "2026-10-21",
             "count": 18
+          },
+          {
+            "date": "2026-10-22",
+            "count": 18
           }
         ]
       },
@@ -10504,10 +10628,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 17
-          },
           {
             "date": "2026-09-23",
             "count": 16
@@ -10623,18 +10743,18 @@
           {
             "date": "2026-10-21",
             "count": 6
+          },
+          {
+            "date": "2026-10-22",
+            "count": 6
           }
         ]
       },
       "lees_palace": {
-        "count": 25,
+        "count": 24,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 42
-          },
           {
             "date": "2026-09-23",
             "count": 42
@@ -10750,18 +10870,18 @@
           {
             "date": "2026-10-21",
             "count": 25
+          },
+          {
+            "date": "2026-10-22",
+            "count": 24
           }
         ]
       },
       "luma_again_again": {
-        "count": 13,
+        "count": 14,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 8
-          },
           {
             "date": "2026-09-23",
             "count": 9
@@ -10877,6 +10997,10 @@
           {
             "date": "2026-10-21",
             "count": 13
+          },
+          {
+            "date": "2026-10-22",
+            "count": 14
           }
         ]
       },
@@ -10885,10 +11009,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -11003,6 +11123,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -11013,10 +11137,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -11131,18 +11251,18 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
       "luma_genai_collective": {
-        "count": 96,
+        "count": 92,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 84
-          },
           {
             "date": "2026-09-23",
             "count": 84
@@ -11258,6 +11378,10 @@
           {
             "date": "2026-10-21",
             "count": 96
+          },
+          {
+            "date": "2026-10-22",
+            "count": 92
           }
         ]
       },
@@ -11266,10 +11390,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 2
-          },
           {
             "date": "2026-09-23",
             "count": 2
@@ -11385,18 +11505,18 @@
           {
             "date": "2026-10-21",
             "count": 2
+          },
+          {
+            "date": "2026-10-22",
+            "count": 2
           }
         ]
       },
       "luma_pluto_toronto": {
-        "count": 40,
+        "count": 46,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 36
-          },
           {
             "date": "2026-09-23",
             "count": 42
@@ -11512,6 +11632,10 @@
           {
             "date": "2026-10-21",
             "count": 40
+          },
+          {
+            "date": "2026-10-22",
+            "count": 46
           }
         ]
       },
@@ -11520,10 +11644,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 11
-          },
           {
             "date": "2026-09-23",
             "count": 10
@@ -11639,18 +11759,18 @@
           {
             "date": "2026-10-21",
             "count": 4
+          },
+          {
+            "date": "2026-10-22",
+            "count": 4
           }
         ]
       },
       "luma_toronto_discover": {
-        "count": 36,
+        "count": 33,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 34
-          },
           {
             "date": "2026-09-23",
             "count": 28
@@ -11766,6 +11886,10 @@
           {
             "date": "2026-10-21",
             "count": 36
+          },
+          {
+            "date": "2026-10-22",
+            "count": 33
           }
         ]
       },
@@ -11774,10 +11898,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1
-          },
           {
             "date": "2026-09-23",
             "count": 1
@@ -11892,6 +12012,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -11902,10 +12026,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -12020,18 +12140,18 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
       "luma_uplift_collective": {
-        "count": 4,
+        "count": 3,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 4
-          },
           {
             "date": "2026-09-23",
             "count": 4
@@ -12147,6 +12267,10 @@
           {
             "date": "2026-10-21",
             "count": 4
+          },
+          {
+            "date": "2026-10-22",
+            "count": 3
           }
         ]
       },
@@ -12155,10 +12279,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -12274,6 +12394,10 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1
           }
         ]
       },
@@ -12282,10 +12406,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 28
-          },
           {
             "date": "2026-09-23",
             "count": 29
@@ -12401,6 +12521,10 @@
           {
             "date": "2026-10-21",
             "count": 20
+          },
+          {
+            "date": "2026-10-22",
+            "count": 20
           }
         ]
       },
@@ -12409,10 +12533,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 4
-          },
           {
             "date": "2026-09-23",
             "count": 4
@@ -12527,6 +12647,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -12537,10 +12661,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 4
-          },
-          {
             "date": "2026-09-23",
             "count": 4
           },
@@ -12654,6 +12774,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 3
+          },
+          {
+            "date": "2026-10-22",
             "count": 3
           }
         ]
@@ -12664,10 +12788,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -12781,6 +12901,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -12791,10 +12915,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -12908,6 +13028,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -12918,10 +13042,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -13035,6 +13155,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -13045,10 +13169,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -13162,6 +13282,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -13172,10 +13296,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 6
-          },
-          {
             "date": "2026-09-23",
             "count": 6
           },
@@ -13289,6 +13409,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -13299,10 +13423,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -13416,6 +13536,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -13426,10 +13550,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -13543,19 +13663,19 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
       },
       "meetup_gta_hiking_meetup": {
-        "count": 0,
+        "count": 1,
         "error": null,
-        "content": "quiet",
+        "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1
-          },
           {
             "date": "2026-09-23",
             "count": 1
@@ -13671,6 +13791,10 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1
           }
         ]
       },
@@ -13680,10 +13804,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -13797,6 +13917,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -13807,10 +13931,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -13924,6 +14044,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -13934,10 +14058,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -14051,6 +14171,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -14061,10 +14185,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -14178,6 +14298,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -14188,10 +14312,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -14305,6 +14425,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -14315,10 +14439,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -14432,6 +14552,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -14442,10 +14566,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -14559,6 +14679,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -14569,10 +14693,6 @@
         "content": "not_ics:json",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -14686,6 +14806,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -14696,10 +14820,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -14813,6 +14933,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -14823,10 +14947,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 2
-          },
-          {
             "date": "2026-09-23",
             "count": 2
           },
@@ -14940,19 +15060,19 @@
           },
           {
             "date": "2026-10-21",
+            "count": 2
+          },
+          {
+            "date": "2026-10-22",
             "count": 2
           }
         ]
       },
       "meetup_python_toronto": {
-        "count": 1,
+        "count": 0,
         "error": null,
-        "content": null,
+        "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1
-          },
           {
             "date": "2026-09-23",
             "count": 1
@@ -15068,6 +15188,10 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
@@ -15077,10 +15201,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -15194,6 +15314,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -15204,10 +15328,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -15321,6 +15441,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -15331,10 +15455,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -15448,6 +15568,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -15458,10 +15582,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -15575,6 +15695,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -15585,10 +15709,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 3
-          },
-          {
             "date": "2026-09-23",
             "count": 3
           },
@@ -15702,6 +15822,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -15712,10 +15836,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -15829,6 +15949,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -15839,10 +15963,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -15956,6 +16076,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -15966,10 +16090,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 4
-          },
-          {
             "date": "2026-09-23",
             "count": 4
           },
@@ -16083,6 +16203,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 3
+          },
+          {
+            "date": "2026-10-22",
             "count": 3
           }
         ]
@@ -16093,10 +16217,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 7
-          },
-          {
             "date": "2026-09-23",
             "count": 7
           },
@@ -16210,6 +16330,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 6
+          },
+          {
+            "date": "2026-10-22",
             "count": 6
           }
         ]
@@ -16220,10 +16344,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -16337,6 +16457,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 9
+          },
+          {
+            "date": "2026-10-22",
             "count": 9
           }
         ]
@@ -16347,10 +16471,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -16464,6 +16584,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -16474,10 +16598,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 2
-          },
-          {
             "date": "2026-09-23",
             "count": 2
           },
@@ -16591,6 +16711,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 4
+          },
+          {
+            "date": "2026-10-22",
             "count": 4
           }
         ]
@@ -16601,10 +16725,6 @@
         "content": "not_ics:json",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -16719,18 +16839,18 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
       "meetup_toronto_ai_machine_learning_data_science": {
-        "count": 7,
+        "count": 8,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 9
-          },
           {
             "date": "2026-09-23",
             "count": 10
@@ -16846,6 +16966,10 @@
           {
             "date": "2026-10-21",
             "count": 7
+          },
+          {
+            "date": "2026-10-22",
+            "count": 8
           }
         ]
       },
@@ -16854,10 +16978,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 10
-          },
           {
             "date": "2026-09-23",
             "count": 10
@@ -16972,6 +17092,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -16982,10 +17106,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 2
-          },
-          {
             "date": "2026-09-23",
             "count": 2
           },
@@ -17099,6 +17219,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -17109,10 +17233,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 1
-          },
-          {
             "date": "2026-09-23",
             "count": 1
           },
@@ -17226,6 +17346,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -17236,10 +17360,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -17353,19 +17473,19 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
       },
       "meetup_toronto_movies_and_social_group": {
-        "count": 9,
+        "count": 10,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 10
-          },
           {
             "date": "2026-09-23",
             "count": 10
@@ -17481,6 +17601,10 @@
           {
             "date": "2026-10-21",
             "count": 9
+          },
+          {
+            "date": "2026-10-22",
+            "count": 10
           }
         ]
       },
@@ -17490,10 +17614,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 1
-          },
-          {
             "date": "2026-09-23",
             "count": 1
           },
@@ -17607,6 +17727,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -17617,10 +17741,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 4
-          },
-          {
             "date": "2026-09-23",
             "count": 3
           },
@@ -17734,6 +17854,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 3
+          },
+          {
+            "date": "2026-10-22",
             "count": 3
           }
         ]
@@ -17744,10 +17868,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 1
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -17861,6 +17981,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -17871,10 +17995,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -17988,6 +18108,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -17998,10 +18122,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -18115,6 +18235,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -18125,10 +18249,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 4
-          },
-          {
             "date": "2026-09-23",
             "count": 4
           },
@@ -18242,6 +18362,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -18252,10 +18376,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -18369,6 +18489,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -18379,10 +18503,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -18496,6 +18616,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -18506,10 +18630,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -18623,6 +18743,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -18633,10 +18757,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -18750,6 +18870,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -18760,10 +18884,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 1
-          },
-          {
             "date": "2026-09-23",
             "count": 1
           },
@@ -18877,6 +18997,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -18887,10 +19011,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 10
-          },
-          {
             "date": "2026-09-23",
             "count": 10
           },
@@ -19004,6 +19124,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 10
+          },
+          {
+            "date": "2026-10-22",
             "count": 10
           }
         ]
@@ -19014,10 +19138,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 7
-          },
-          {
             "date": "2026-09-23",
             "count": 7
           },
@@ -19131,6 +19251,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 3
+          },
+          {
+            "date": "2026-10-22",
             "count": 3
           }
         ]
@@ -19141,10 +19265,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 1
-          },
-          {
             "date": "2026-09-23",
             "count": 1
           },
@@ -19258,6 +19378,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -19268,10 +19392,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 3
-          },
-          {
             "date": "2026-09-23",
             "count": 2
           },
@@ -19385,6 +19505,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 1
+          },
+          {
+            "date": "2026-10-22",
             "count": 1
           }
         ]
@@ -19395,10 +19519,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 32
-          },
-          {
             "date": "2026-09-23",
             "count": 32
           },
@@ -19513,6 +19633,10 @@
           {
             "date": "2026-10-21",
             "count": 32
+          },
+          {
+            "date": "2026-10-22",
+            "count": 32
           }
         ]
       },
@@ -19521,10 +19645,6 @@
         "error": null,
         "content": "not_ics:unknown",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 2
-          },
           {
             "date": "2026-09-23",
             "count": 2
@@ -19640,6 +19760,10 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
@@ -19691,18 +19815,18 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1
           }
         ]
       },
       "philosophy": {
-        "count": 21,
+        "count": 23,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 22
-          },
           {
             "date": "2026-09-23",
             "count": 22
@@ -19818,6 +19942,10 @@
           {
             "date": "2026-10-21",
             "count": 21
+          },
+          {
+            "date": "2026-10-22",
+            "count": 23
           }
         ]
       },
@@ -19826,10 +19954,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1
-          },
           {
             "date": "2026-09-23",
             "count": 1
@@ -19945,6 +20069,10 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1
           }
         ]
       },
@@ -19953,10 +20081,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 7
-          },
           {
             "date": "2026-09-23",
             "count": 6
@@ -20072,6 +20196,10 @@
           {
             "date": "2026-10-21",
             "count": 6
+          },
+          {
+            "date": "2026-10-22",
+            "count": 6
           }
         ]
       },
@@ -20080,10 +20208,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1
-          },
           {
             "date": "2026-09-23",
             "count": 1
@@ -20199,6 +20323,10 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1
           }
         ]
       },
@@ -20207,10 +20335,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 31
-          },
           {
             "date": "2026-09-23",
             "count": 31
@@ -20326,6 +20450,10 @@
           {
             "date": "2026-10-21",
             "count": 39
+          },
+          {
+            "date": "2026-10-22",
+            "count": 39
           }
         ]
       },
@@ -20334,10 +20462,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 2
-          },
           {
             "date": "2026-09-23",
             "count": 2
@@ -20453,18 +20577,18 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1
           }
         ]
       },
       "scaddingcourt": {
-        "count": 192,
+        "count": 187,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 280
@@ -20580,18 +20704,18 @@
           {
             "date": "2026-10-21",
             "count": 192
+          },
+          {
+            "date": "2026-10-22",
+            "count": 187
           }
         ]
       },
       "scotiabank_arena": {
-        "count": 207,
+        "count": 235,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 167
-          },
           {
             "date": "2026-09-23",
             "count": 196
@@ -20707,18 +20831,18 @@
           {
             "date": "2026-10-21",
             "count": 207
+          },
+          {
+            "date": "2026-10-22",
+            "count": 235
           }
         ]
       },
       "showuptoronto_static_showupto_ics": {
-        "count": 30,
+        "count": 23,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 46
-          },
           {
             "date": "2026-09-23",
             "count": 50
@@ -20834,6 +20958,10 @@
           {
             "date": "2026-10-21",
             "count": 30
+          },
+          {
+            "date": "2026-10-22",
+            "count": 23
           }
         ]
       },
@@ -20843,10 +20971,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -20960,19 +21084,19 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
       },
       "site3": {
-        "count": 1,
+        "count": 0,
         "error": null,
-        "content": null,
+        "content": "not_ics:empty",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -21088,6 +21212,10 @@
           {
             "date": "2026-10-21",
             "count": 1
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
@@ -21096,10 +21224,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 12
-          },
           {
             "date": "2026-09-23",
             "count": 12
@@ -21215,6 +21339,10 @@
           {
             "date": "2026-10-21",
             "count": 6
+          },
+          {
+            "date": "2026-10-22",
+            "count": 6
           }
         ]
       },
@@ -21223,10 +21351,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -21341,6 +21465,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -21351,10 +21479,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -21469,6 +21593,10 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
@@ -21477,10 +21605,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 8
-          },
           {
             "date": "2026-09-23",
             "count": 8
@@ -21596,6 +21720,10 @@
           {
             "date": "2026-10-21",
             "count": 8
+          },
+          {
+            "date": "2026-10-22",
+            "count": 8
           }
         ]
       },
@@ -21604,10 +21732,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -21723,18 +21847,18 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
       "tockify_distilleryevents": {
-        "count": 8,
+        "count": 7,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 28
-          },
           {
             "date": "2026-09-23",
             "count": 28
@@ -21850,6 +21974,10 @@
           {
             "date": "2026-10-21",
             "count": 8
+          },
+          {
+            "date": "2026-10-22",
+            "count": 7
           }
         ]
       },
@@ -21858,10 +21986,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -21977,6 +22101,10 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
@@ -21985,10 +22113,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 68
-          },
           {
             "date": "2026-09-23",
             "count": 68
@@ -22104,18 +22228,18 @@
           {
             "date": "2026-10-21",
             "count": 63
+          },
+          {
+            "date": "2026-10-22",
+            "count": 63
           }
         ]
       },
       "tockify_torevent": {
-        "count": 2021,
+        "count": 1989,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1944
-          },
           {
             "date": "2026-09-23",
             "count": 2091
@@ -22231,18 +22355,18 @@
           {
             "date": "2026-10-21",
             "count": 2021
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1989
           }
         ]
       },
       "toronto_bicycling_network": {
-        "count": 48,
+        "count": 47,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 69
-          },
           {
             "date": "2026-09-23",
             "count": 70
@@ -22358,6 +22482,10 @@
           {
             "date": "2026-10-21",
             "count": 48
+          },
+          {
+            "date": "2026-10-22",
+            "count": 47
           }
         ]
       },
@@ -22366,10 +22494,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 4
-          },
           {
             "date": "2026-09-23",
             "count": 4
@@ -22485,6 +22609,10 @@
           {
             "date": "2026-10-21",
             "count": 5
+          },
+          {
+            "date": "2026-10-22",
+            "count": 5
           }
         ]
       },
@@ -22494,10 +22622,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 5
-          },
-          {
             "date": "2026-09-23",
             "count": 5
           },
@@ -22611,19 +22735,19 @@
           },
           {
             "date": "2026-10-21",
+            "count": 3
+          },
+          {
+            "date": "2026-10-22",
             "count": 3
           }
         ]
       },
       "toronto_meetings": {
-        "count": 8,
+        "count": 7,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 16
-          },
           {
             "date": "2026-09-23",
             "count": 16
@@ -22739,6 +22863,10 @@
           {
             "date": "2026-10-21",
             "count": 8
+          },
+          {
+            "date": "2026-10-22",
+            "count": 7
           }
         ]
       },
@@ -22748,10 +22876,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-09-22",
-            "count": 0
-          },
-          {
             "date": "2026-09-23",
             "count": 0
           },
@@ -22865,6 +22989,10 @@
           },
           {
             "date": "2026-10-21",
+            "count": 0
+          },
+          {
+            "date": "2026-10-22",
             "count": 0
           }
         ]
@@ -22905,18 +23033,18 @@
           {
             "date": "2026-10-21",
             "count": 10
+          },
+          {
+            "date": "2026-10-22",
+            "count": 10
           }
         ]
       },
       "torontobotanicalgarden": {
-        "count": 20,
+        "count": 19,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 29
-          },
           {
             "date": "2026-09-23",
             "count": 30
@@ -23032,18 +23160,18 @@
           {
             "date": "2026-10-21",
             "count": 20
+          },
+          {
+            "date": "2026-10-22",
+            "count": 19
           }
         ]
       },
       "torontomastergardeners": {
-        "count": 6,
+        "count": 4,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 3
-          },
           {
             "date": "2026-09-23",
             "count": 3
@@ -23159,6 +23287,10 @@
           {
             "date": "2026-10-21",
             "count": 6
+          },
+          {
+            "date": "2026-10-22",
+            "count": 4
           }
         ]
       },
@@ -23167,10 +23299,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 3
-          },
           {
             "date": "2026-09-23",
             "count": 3
@@ -23286,18 +23414,18 @@
           {
             "date": "2026-10-21",
             "count": 0
+          },
+          {
+            "date": "2026-10-22",
+            "count": 0
           }
         ]
       },
       "tpl_adults": {
-        "count": 840,
+        "count": 818,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1051
-          },
           {
             "date": "2026-09-23",
             "count": 1028
@@ -23413,18 +23541,18 @@
           {
             "date": "2026-10-21",
             "count": 840
+          },
+          {
+            "date": "2026-10-22",
+            "count": 818
           }
         ]
       },
       "tpl_older_adults": {
-        "count": 980,
+        "count": 976,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1124
-          },
           {
             "date": "2026-09-23",
             "count": 1116
@@ -23540,18 +23668,18 @@
           {
             "date": "2026-10-21",
             "count": 980
+          },
+          {
+            "date": "2026-10-22",
+            "count": 976
           }
         ]
       },
       "tpl_preschool": {
-        "count": 1344,
+        "count": 1332,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1602
-          },
           {
             "date": "2026-09-23",
             "count": 1588
@@ -23667,18 +23795,18 @@
           {
             "date": "2026-10-21",
             "count": 1344
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1332
           }
         ]
       },
       "tpl_school_age": {
-        "count": 1186,
+        "count": 1177,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 1239
-          },
           {
             "date": "2026-09-23",
             "count": 1241
@@ -23794,18 +23922,18 @@
           {
             "date": "2026-10-21",
             "count": 1186
+          },
+          {
+            "date": "2026-10-22",
+            "count": 1177
           }
         ]
       },
       "tpl_teens": {
-        "count": 687,
+        "count": 750,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 750
-          },
           {
             "date": "2026-09-23",
             "count": 727
@@ -23921,18 +24049,18 @@
           {
             "date": "2026-10-21",
             "count": 687
+          },
+          {
+            "date": "2026-10-22",
+            "count": 750
           }
         ]
       },
       "tpl_young_adults": {
-        "count": 352,
+        "count": 348,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 364
-          },
           {
             "date": "2026-09-23",
             "count": 375
@@ -24048,6 +24176,10 @@
           {
             "date": "2026-10-21",
             "count": 352
+          },
+          {
+            "date": "2026-10-22",
+            "count": 348
           }
         ]
       },
@@ -24056,10 +24188,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 160
-          },
           {
             "date": "2026-09-23",
             "count": 147
@@ -24175,6 +24303,10 @@
           {
             "date": "2026-10-21",
             "count": 114
+          },
+          {
+            "date": "2026-10-22",
+            "count": 114
           }
         ]
       },
@@ -24183,10 +24315,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 148
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -24302,18 +24430,18 @@
           {
             "date": "2026-10-21",
             "count": 6
+          },
+          {
+            "date": "2026-10-22",
+            "count": 6
           }
         ]
       },
       "waterfront_bia": {
-        "count": 6,
+        "count": 7,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 0
-          },
           {
             "date": "2026-09-23",
             "count": 0
@@ -24429,6 +24557,10 @@
           {
             "date": "2026-10-21",
             "count": 6
+          },
+          {
+            "date": "2026-10-22",
+            "count": 7
           }
         ]
       },
@@ -24437,10 +24569,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 12
-          },
           {
             "date": "2026-09-23",
             "count": 12
@@ -24556,18 +24684,18 @@
           {
             "date": "2026-10-21",
             "count": 7
+          },
+          {
+            "date": "2026-10-22",
+            "count": 7
           }
         ]
       },
       "yohomo": {
-        "count": 144,
+        "count": 154,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-09-22",
-            "count": 109
-          },
           {
             "date": "2026-09-23",
             "count": 123
@@ -24683,29 +24811,33 @@
           {
             "date": "2026-10-21",
             "count": 144
+          },
+          {
+            "date": "2026-10-22",
+            "count": 154
           }
         ]
       }
     },
     "url_quality": {
-      "total_with_url": 7947,
-      "total_events": 8501,
-      "unique_urls": 7703,
-      "generic_count": 50,
+      "total_with_url": 7929,
+      "total_events": 8471,
+      "unique_urls": 7697,
+      "generic_count": 46,
       "generic_domains": [
         {
           "domain": "students.yorku.ca",
-          "events": 35,
+          "events": 33,
           "url": "https://students.yorku.ca/PASS"
         },
         {
           "domain": "www.toronto.ca",
-          "events": 8,
+          "events": 7,
           "url": "https://www.toronto.ca/city-government/council/"
         },
         {
           "domain": "shop.benmcnallybooks.com",
-          "events": 7,
+          "events": 6,
           "url": "https://shop.benmcnallybooks.com/events"
         }
       ],
@@ -24714,74 +24846,74 @@
       "source_specificity": [
         {
           "source": "Toronto Events (Tockify)",
-          "events": 1955,
-          "unique_urls": 1955,
+          "events": 1924,
+          "unique_urls": 1924,
           "specificity_pct": 100
         },
         {
           "source": "Toronto Public Library \u2014 Older Adults",
-          "events": 886,
-          "unique_urls": 886,
+          "events": 882,
+          "unique_urls": 882,
           "specificity_pct": 100
         },
         {
           "source": "Toronto Public Library \u2014 School Age",
-          "events": 749,
-          "unique_urls": 749,
-          "specificity_pct": 100
-        },
-        {
-          "source": "Toronto Public Library \u2014 Preschool",
-          "events": 687,
-          "unique_urls": 687,
+          "events": 747,
+          "unique_urls": 747,
           "specificity_pct": 100
         },
         {
           "source": "Toronto Public Library \u2014 Teens",
-          "events": 660,
-          "unique_urls": 660,
+          "events": 716,
+          "unique_urls": 716,
+          "specificity_pct": 100
+        },
+        {
+          "source": "Toronto Public Library \u2014 Preschool",
+          "events": 684,
+          "unique_urls": 684,
           "specificity_pct": 100
         },
         {
           "source": "Toronto Public Library \u2014 Adults",
-          "events": 650,
-          "unique_urls": 650,
+          "events": 631,
+          "unique_urls": 631,
           "specificity_pct": 100
         },
         {
           "source": "York University",
-          "events": 391,
-          "unique_urls": 189,
+          "events": 374,
+          "unique_urls": 178,
           "specificity_pct": 48
         },
         {
           "source": "Toronto Public Library \u2014 Young Adults",
-          "events": 344,
-          "unique_urls": 344,
+          "events": 340,
+          "unique_urls": 340,
           "specificity_pct": 100
         },
         {
           "source": "Scotiabank Arena",
-          "events": 204,
-          "unique_urls": 204,
+          "events": 232,
+          "unique_urls": 232,
           "specificity_pct": 100
         },
         {
           "source": "Scadding Court Community Centre",
-          "events": 186,
-          "unique_urls": 186,
+          "events": 181,
+          "unique_urls": 181,
           "specificity_pct": 100
         },
         {
           "source": "University of Toronto",
-          "events": 96,
-          "unique_urls": 95,
+          "events": 95,
+          "unique_urls": 94,
           "specificity_pct": 99
         },
         {
           "source": "The AI Collective",
-          "events": 67,
-          "unique_urls": 67,
+          "events": 66,
+          "unique_urls": 66,
           "specificity_pct": 100
         },
         {
@@ -24797,20 +24929,20 @@
           "specificity_pct": 100
         },
         {
-          "source": "Toronto Bicycling Network",
-          "events": 46,
-          "unique_urls": 46,
+          "source": "History",
+          "events": 45,
+          "unique_urls": 45,
           "specificity_pct": 100
         }
       ]
     },
     "tzid_inventory": {
       "city_timezone": "America/Toronto",
-      "distinct_tzids": 12,
+      "distinct_tzids": 16,
       "tzids": [
         {
           "tzid": "UTC (Z suffix)",
-          "count": 13714,
+          "count": 13636,
           "files": 26,
           "matches_city": false,
           "sample_files": [
@@ -24823,8 +24955,8 @@
         },
         {
           "tzid": "America/Toronto",
-          "count": 7385,
-          "files": 102,
+          "count": 7408,
+          "files": 101,
           "matches_city": true,
           "sample_files": [
             "a_different_booklist.ics",
@@ -24836,8 +24968,8 @@
         },
         {
           "tzid": "America/New_York",
-          "count": 768,
-          "files": 32,
+          "count": 763,
+          "files": 31,
           "matches_city": false,
           "sample_files": [
             "eventbrite_another_story.ics",
@@ -24849,8 +24981,8 @@
         },
         {
           "tzid": "(bare \u2014 assumes city tz)",
-          "count": 401,
-          "files": 74,
+          "count": 428,
+          "files": 73,
           "matches_city": false,
           "sample_files": [
             "batashoemuseum.ics",
@@ -24862,7 +24994,7 @@
         },
         {
           "tzid": "America/Los_Angeles",
-          "count": 36,
+          "count": 37,
           "files": 2,
           "matches_city": false,
           "sample_files": [
@@ -24872,21 +25004,12 @@
         },
         {
           "tzid": "UTC",
-          "count": 27,
+          "count": 21,
           "files": 2,
           "matches_city": false,
           "sample_files": [
             "engineering_engineering_events.ics",
             "sunshinecentres.ics"
-          ]
-        },
-        {
-          "tzid": "America/Chicago",
-          "count": 6,
-          "files": 1,
-          "matches_city": false,
-          "sample_files": [
-            "golatindance.ics"
           ]
         },
         {
@@ -24908,8 +25031,26 @@
           ]
         },
         {
+          "tzid": "Australia/Melbourne",
+          "count": 2,
+          "files": 1,
+          "matches_city": false,
+          "sample_files": [
+            "golatindance.ics"
+          ]
+        },
+        {
           "tzid": "Europe/London",
-          "count": 4,
+          "count": 2,
+          "files": 1,
+          "matches_city": false,
+          "sample_files": [
+            "golatindance.ics"
+          ]
+        },
+        {
+          "tzid": "America/Chicago",
+          "count": 2,
           "files": 1,
           "matches_city": false,
           "sample_files": [
@@ -24926,7 +25067,34 @@
           ]
         },
         {
-          "tzid": "Australia/Melbourne",
+          "tzid": "America/Denver",
+          "count": 1,
+          "files": 1,
+          "matches_city": false,
+          "sample_files": [
+            "golatindance.ics"
+          ]
+        },
+        {
+          "tzid": "America/Vancouver",
+          "count": 1,
+          "files": 1,
+          "matches_city": false,
+          "sample_files": [
+            "golatindance.ics"
+          ]
+        },
+        {
+          "tzid": "Australia/Sydney",
+          "count": 1,
+          "files": 1,
+          "matches_city": false,
+          "sample_files": [
+            "golatindance.ics"
+          ]
+        },
+        {
+          "tzid": "America/Phoenix",
           "count": 1,
           "files": 1,
           "matches_city": false,
@@ -24943,9 +25111,9 @@
         "location": "7883 Keele St #9, Concord, ON L4K 1Y6, Canada\r",
         "count": 32,
         "titles": [
-          "Guided practica by Sergei & Olga (LetUsDance)",
-          "Guided practica by Sergei & Olga (LetUsDance)",
-          "Guided practica by Sergei & Olga (LetUsDance)"
+          "Class by Sergei & Olga (LetUsDance): Beg",
+          "Class by Sergei & Olga (LetUsDance): Beg",
+          "Class by Sergei & Olga (LetUsDance): Beg"
         ]
       },
       {
@@ -24954,9 +25122,9 @@
         "location": "2630 Bristol Cir, Oakville, ON L6H 6Z7, Canada\r",
         "count": 30,
         "titles": [
-          "Class by Estelle Nicol (City Dance Corps): Tango Technique",
-          "Class by Estelle Nicol (City Dance Corps): Tango Technique",
-          "Class by Estelle Nicol (City Dance Corps): Tango Technique"
+          "Class by Estelle Nicol (City Dance Corps): Intro to tango",
+          "Class by Estelle Nicol (City Dance Corps): Intro to tango",
+          "Class by Estelle Nicol (City Dance Corps): Intro to tango"
         ]
       },
       {
@@ -24971,17 +25139,6 @@
         ]
       },
       {
-        "source": "Events",
-        "source_id": "events",
-        "location": "1 University Blvd., Markham, ON L6G 0A1\r",
-        "count": 9,
-        "titles": [
-          "Markham Pop-up Advising Fair",
-          "ECON 1000 \u2013 Peer-Assisted Study Session (PASS)",
-          "ECON 1000 \u2013 Peer-Assisted Study Session (PASS)"
-        ]
-      },
-      {
         "source": "YOHOMO",
         "source_id": "yohomo",
         "location": "Wiggle Room, 772 Dundas St W",
@@ -24990,6 +25147,17 @@
           "RISE: MANDIZ [Montreal] | Barroness",
           "Sunday SerVice: MAXIMILIANO [DC] | Manzone &amp\\; Strong",
           "WiGGLEWEEN + Afterparty [10pm-6am]"
+        ]
+      },
+      {
+        "source": "Events",
+        "source_id": "events",
+        "location": "1 University Blvd., Markham, ON L6G 0A1\r",
+        "count": 7,
+        "titles": [
+          "ECON 1000 \u2013 Peer-Assisted Study Session (PASS)",
+          "ECON 1000 \u2013 Peer-Assisted Study Session (PASS)",
+          "ECON 1000 \u2013 Peer-Assisted Study Session (PASS)"
         ]
       },
       {
@@ -25004,28 +25172,6 @@
         ]
       },
       {
-        "source": "YOHOMO",
-        "source_id": "yohomo",
-        "location": "The Black Eagle, 457 Church Street",
-        "count": 6,
-        "titles": [
-          "L.O.C.K. (Lovers Of Chastity &amp\\; Kink)",
-          "Stache",
-          "Redlite"
-        ]
-      },
-      {
-        "source": "Flying Books",
-        "source_id": "flying_books",
-        "location": "Flying Books at Neverland, 371 Queen St. W.",
-        "count": 5,
-        "titles": [
-          "JOIN US FOR OUR OCTOBER FICTION BOOK CLUB",
-          "MAKE IT MAKE SENSE: THE FLYING BOOKS NONFICTION BOOKCLUB",
-          "JOIN US FOR AN AUTHOR SOCIAL WITH EVA JURCZYK AND SAMANTHA M. BAIL"
-        ]
-      },
-      {
         "source": "OCAD University",
         "source_id": "ocad_u",
         "location": "Onsite Gallery (RHD) 199 Richmond Street West 199 Richmond Street West",
@@ -25037,6 +25183,39 @@
         ]
       },
       {
+        "source": "YOHOMO",
+        "source_id": "yohomo",
+        "location": "Buddies in Bad Times, 12 Alexander St",
+        "count": 5,
+        "titles": [
+          "SCENE STEALER by Midas",
+          "WINK-O-WEEN",
+          "QUEEIRDO by Andy Christ"
+        ]
+      },
+      {
+        "source": "YOHOMO",
+        "source_id": "yohomo",
+        "location": "Cafeteria, 1650 Dupont Street",
+        "count": 5,
+        "titles": [
+          "Suck My Deck: SLAY 3",
+          "HALLOMEME BY CITYPOOLWARRIOR",
+          "CW &amp\\; Cold Pod Present HALLOWEEN HOUSE PARTY"
+        ]
+      },
+      {
+        "source": "YOHOMO",
+        "source_id": "yohomo",
+        "location": "The Black Eagle, 457 Church Street",
+        "count": 5,
+        "titles": [
+          "Stache",
+          "Redlite",
+          "Northern Bear Bash"
+        ]
+      },
+      {
         "source": "Flying Books",
         "source_id": "flying_books",
         "location": "Flying Books, 784 College Street",
@@ -25045,6 +25224,17 @@
           "JOIN US FOR THE LAUNCH OF YOU KNOW WHAT YOU DID: THE HILLS",
           "JOIN US FOR THE LAUNCH OF WHAT'S A SNOW LEOPARD TO YOU?",
           "JOIN US FOR THE VEHICULE PRESS FALL LAUNCH"
+        ]
+      },
+      {
+        "source": "Flying Books",
+        "source_id": "flying_books",
+        "location": "Flying Books at Neverland, 371 Queen St. W.",
+        "count": 4,
+        "titles": [
+          "MAKE IT MAKE SENSE: THE FLYING BOOKS NONFICTION BOOKCLUB",
+          "JOIN US FOR AN AUTHOR SOCIAL WITH EVA JURCZYK AND SAMANTHA M. BAIL",
+          "JOIN US FOR OUR NOVEMBER FICTION BOOK CLUB"
         ]
       },
       {
@@ -25072,28 +25262,6 @@
       {
         "source": "YOHOMO",
         "source_id": "yohomo",
-        "location": "Comedy Bar, 945 Bloor Street W",
-        "count": 4,
-        "titles": [
-          "GAY SH!T",
-          "GAY SH!T",
-          "Exhausted Showgirl | Comedy Album Recording"
-        ]
-      },
-      {
-        "source": "YOHOMO",
-        "source_id": "yohomo",
-        "location": "Buddies in Bad Times, 12 Alexander St",
-        "count": 4,
-        "titles": [
-          "SCENE STEALER by Midas",
-          "WINK-O-WEEN",
-          "Mega Slur: Halloween"
-        ]
-      },
-      {
-        "source": "YOHOMO",
-        "source_id": "yohomo",
         "location": "Bellwoods Brewery, 124 Ossington Avenue",
         "count": 4,
         "titles": [
@@ -25116,12 +25284,23 @@
       {
         "source": "YOHOMO",
         "source_id": "yohomo",
-        "location": "Cafeteria, 1650 Dupont Street",
+        "location": "Bambi&#x27\\;s, 1265 Dundas Street West",
         "count": 3,
         "titles": [
-          "Suck My Deck: SLAY 3",
-          "CW &amp\\; Cold Pod Present HALLOWEEN HOUSE PARTY",
-          "Cafeteria Halloween: Invisible City x LYRIX"
+          "IOU presents Jeku (FIN)",
+          "Dungeon Dance - Halloween in The Grotto",
+          "LOVE ONLY featuring CanCon Legend Eddie C and Kiki LeFreak"
+        ]
+      },
+      {
+        "source": "YOHOMO",
+        "source_id": "yohomo",
+        "location": "Bampot, 201 Harbord St",
+        "count": 3,
+        "titles": [
+          "Bampot Presents CARNIVAL FAIRy: a queer fairy party",
+          "Sapphic Books &amp\\; Brunch",
+          "FREAKERS CORNER"
         ]
       },
       {
@@ -25144,36 +25323,6 @@
           "Haunted Mansion",
           "STARKERS Naked Tea Dance (Halloween Edition)",
           "STARKERS Naked Tea Dance"
-        ]
-      },
-      {
-        "source": "Beachmetro",
-        "source_id": "beachmetro",
-        "location": "Kingston Road United Church, 975 Kingston Rd",
-        "count": 2,
-        "titles": [
-          "Kingston Road United Bowling Nights",
-          "Toronto Halloween Kids Concert"
-        ]
-      },
-      {
-        "source": "Beachmetro",
-        "source_id": "beachmetro",
-        "location": "Centennial Recreation Centre, 1967 Ellesmere Rd.",
-        "count": 2,
-        "titles": [
-          "Art Guild of Scarborough's Fall Art Show and Sale",
-          "Art Guild of Scarborough's Fall Art Show and Sale"
-        ]
-      },
-      {
-        "source": "Brains and Barstools",
-        "source_id": "eventbrite_brains_and_barstools",
-        "location": "The Nelson Pub & Eatery, 244 Laurier Avenue East, Ottawa, ON K1N 6P4, Ottawa, ON",
-        "count": 2,
-        "titles": [
-          "Ottawa: When Thinking Harder Doesn't Work",
-          "Ottawa: Understanding Moral Injury"
         ]
       },
       {
@@ -25204,16 +25353,6 @@
         "titles": [
           "Milonga by Carlos w/ class: Milonga La Yumba",
           "Milonga by Carlos w/ class: Milonga La Yumba"
-        ]
-      },
-      {
-        "source": "The AI Collective",
-        "source_id": "luma_genai_collective",
-        "location": "Indianapolis, IN",
-        "count": 2,
-        "titles": [
-          "Experiential AI - Data\\, Security & Safety\\, AI Transformation (w/",
-          "AI Learning and Sharing (w/ The AI Collective)"
         ]
       },
       {
@@ -25259,16 +25398,6 @@
       {
         "source": "YOHOMO",
         "source_id": "yohomo",
-        "location": "Ground Control, 1279 Queen St W",
-        "count": 2,
-        "titles": [
-          "Questionable - SAPPHIC OVER 30 EDITION : Queer Singles Trivia",
-          "Spookakke: THE WEEN!"
-        ]
-      },
-      {
-        "source": "YOHOMO",
-        "source_id": "yohomo",
         "location": "Tallboys Craft Beer House, 838 Bloor Street West",
         "count": 2,
         "titles": [
@@ -25309,6 +25438,16 @@
       {
         "source": "YOHOMO",
         "source_id": "yohomo",
+        "location": "Comedy Bar, 945 Bloor Street W",
+        "count": 2,
+        "titles": [
+          "Exhausted Showgirl | Comedy Album Recording",
+          "Hump Day Comedy"
+        ]
+      },
+      {
+        "source": "YOHOMO",
+        "source_id": "yohomo",
         "location": "The House of Lancaster, 1215 Bloor St W",
         "count": 2,
         "titles": [
@@ -25329,11 +25468,11 @@
       {
         "source": "YOHOMO",
         "source_id": "yohomo",
-        "location": "Bampot, 201 Harbord St",
+        "location": "Lodge on Queen, 251 Queen Street W",
         "count": 2,
         "titles": [
-          "Bampot Presents CARNIVAL FAIRy: a queer fairy party",
-          "FREAKERS CORNER"
+          "Frigays",
+          "Welcome To The Bronze with Juliet Landau (DRUSILLA)!"
         ]
       },
       {
@@ -25344,6 +25483,16 @@
         "titles": [
           "Glad Day Drag Brunch in Toronto",
           "Glad Day Drag Brunch with Baby Bel Bel &amp\\; Gay Jesus"
+        ]
+      },
+      {
+        "source": "YOHOMO",
+        "source_id": "yohomo",
+        "location": "The Drink, 459 Church Street 2nd floor",
+        "count": 2,
+        "titles": [
+          "Kinked",
+          "Grapple - Queer wrestling night"
         ]
       },
       {
@@ -25389,6 +25538,16 @@
       {
         "source": "YOHOMO",
         "source_id": "yohomo",
+        "location": "Cake Cabaret, 627 Danforth Ave",
+        "count": 2,
+        "titles": [
+          "Drag vs. Cabaret: Scream Queens 2",
+          "DOLLS 3: VENUS"
+        ]
+      },
+      {
+        "source": "YOHOMO",
+        "source_id": "yohomo",
         "location": "Vertigo, 66 Gerrard St East",
         "count": 2,
         "titles": [
@@ -25399,11 +25558,39 @@
       {
         "source": "YOHOMO",
         "source_id": "yohomo",
+        "location": "Ground Control, 1279 Queen St W",
+        "count": 2,
+        "titles": [
+          "Spookakke: THE WEEN!",
+          "Alternative All-Gender Clothing Swap"
+        ]
+      },
+      {
+        "source": "YOHOMO",
+        "source_id": "yohomo",
         "location": "821 Runnymede Rd, 821 Runnymede Rd",
         "count": 2,
         "titles": [
           "DEH&#x27\\;YA: DANCEHALL QUEENS (HALLOWEEN EDITION)",
           "Pep Rally presents Fetish with Special Guest TBA"
+        ]
+      },
+      {
+        "source": "Beachmetro",
+        "source_id": "beachmetro",
+        "location": "Kingston Road United Church, 975 Kingston Rd",
+        "count": 1,
+        "titles": [
+          "Kingston Road United Bowling Nights"
+        ]
+      },
+      {
+        "source": "Brains and Barstools",
+        "source_id": "eventbrite_brains_and_barstools",
+        "location": "The Nelson Pub & Eatery, 244 Laurier Avenue East, Ottawa, ON K1N 6P4, Ottawa, ON",
+        "count": 1,
+        "titles": [
+          "Ottawa: When Thinking Harder Doesn't Work"
         ]
       },
       {
@@ -25436,145 +25623,28 @@
       {
         "source": "Golatindance",
         "source_id": "golatindance",
-        "location": "Washington Square Park, Ny, NY, 10012, United States",
+        "location": "salsa Secrets, 2800 Lafayette Road, Portsmouth, NH, 03801, United States",
         "count": 1,
         "titles": [
-          "Mi Salsa Dura Baile in the park!"
+          "Salsa Underground"
         ]
       },
       {
         "source": "Golatindance",
         "source_id": "golatindance",
-        "location": "Negril Village, 70 W 3rd St, Manhattan,, NY, 10012, United States",
+        "location": "The Avalon Ballroom, 6185 Arapahoe Rd, Boulder, CO, United States",
         "count": 1,
         "titles": [
-          "Salsa Bajo Techo!"
+          "Let's Dance! Salsa\\, Bachata\\, Rueda & WC Swing Thursdays at Avalon!"
         ]
       },
       {
         "source": "Golatindance",
         "source_id": "golatindance",
-        "location": "The Third Day, 288-294 McCaulay Rd, North Melbourne, VIC, 3051, Australia",
+        "location": "MGM Diablos Cantina, 101 MGM National Ave, Oxon Hill, MD, 20745, United States",
         "count": 1,
         "titles": [
-          "Bachata ConeXion 'Wednesdays'"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Club Louies, 32001 Agoura Rd, Westlake Village, CA, 91361, United States",
-        "count": 1,
-        "titles": [
-          "Latin Wednesday\\, Salsa and Bachata Night"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Stevens Steak and Seafood House Restaurant, 5332 Stevens Pl, Commerce, CA, 90040, United States",
-        "count": 1,
-        "titles": [
-          "Salsa Timba Wednesdays"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Tony Pepperoni Pizza, 1860 University Dr, Vista, CA, 92083, United States",
-        "count": 1,
-        "titles": [
-          "Salsa and Bachata Wednesdays"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Las Tunas Mexican Restaurant, 1043 W Patrick St, Suite A, Frederick, MD, 21702, United States",
-        "count": 1,
-        "titles": [
-          "Dancing at Las Tunas Mexican  Restaurant"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Vidorra Dallas, 2642 Main St, Dallas, TX, 75226, United States",
-        "count": 1,
-        "titles": [
-          "Latin Wednesdays at Vidora"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Adulis Eritrean  Restaurant, 44 Brixton Rd., London, SW96BT, GB",
-        "count": 1,
-        "titles": [
-          "Brixton/Oval Wednesday Salsa Dance Classes & Party"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Jonny Cabs, 212 Burr Ridge Pkwy, Burr Ridge, IL, 60527, United States",
-        "count": 1,
-        "titles": [
-          "Latin Wednesdays at Jonny Cabs"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Port Covington Marina Pier, 321 E Cromwell St, Baltimore, MD, 21230, United States",
-        "count": 1,
-        "titles": [
-          "Sunset Salsa Wednesdays"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Henke & Pillot, 809 Congress Street, Houston, TX 77002, Houston, TX, 77002, US",
-        "count": 1,
-        "titles": [
-          "Salsa Bachata Wednesday - Classes & Social in Houston!"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Dave and Busters \u2013 Tempe, 2000 E Rio Salado Pkwy, Tempe, AZ, United States",
-        "count": 1,
-        "titles": [
-          "Havana Nights at Dave & Busters"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Black Box Media, 12355 NE 13th Ave, Miami, 33161, United States",
-        "count": 1,
-        "titles": [
-          "Amor Bachata Wednesday"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Public Bar Live, 1214 18th St NW, Washington D.C., DC 20036, Washington D.C., DC, 20036, US",
-        "count": 1,
-        "titles": [
-          "Salsa Con Candela"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "BeAtOne Greek Street, 17 Greek St, London, W1D 4DR, United Kingdom",
-        "count": 1,
-        "titles": [
-          "METROLATINA Wednesdays"
+          "Latin Night at Diablos Cantina"
         ]
       },
       {
@@ -25583,7 +25653,106 @@
         "location": "Albertos Night Club, 736 W Dana St, Mountain View, CA, 94041, United States",
         "count": 1,
         "titles": [
-          "Salsa Bachata Wednesdays at Albertos"
+          "Salsa Thursdays at Albertos"
+        ]
+      },
+      {
+        "source": "Golatindance",
+        "source_id": "golatindance",
+        "location": "Time Out on Pine, 2840 Pine Rd, Huntington Valley, PA, 19006, United States",
+        "count": 1,
+        "titles": [
+          "Latin Night @ Time Out on Pine"
+        ]
+      },
+      {
+        "source": "Golatindance",
+        "source_id": "golatindance",
+        "location": "Bistro 880, 39900 Balentine Dr, Newark, CA, 94560, United States",
+        "count": 1,
+        "titles": [
+          "Dance Thursdays"
+        ]
+      },
+      {
+        "source": "Golatindance",
+        "source_id": "golatindance",
+        "location": "German Club Tivoli, 291 Dandenong Rd, Windsor, 3181, AU",
+        "count": 1,
+        "titles": [
+          "Salsa Thursdays at Club Tivoli"
+        ]
+      },
+      {
+        "source": "Golatindance",
+        "source_id": "golatindance",
+        "location": "Cigar Bar and Grill, 850 Montgomery St, San Francisco, CA, 94133, United States",
+        "count": 1,
+        "titles": [
+          "Bachata Thursdays at Cigar Bar"
+        ]
+      },
+      {
+        "source": "Golatindance",
+        "source_id": "golatindance",
+        "location": "La Terraza Tapas Bar & Restaurant, 27-31 Bedford Rd, London, SW4 7SH, United Kingdom",
+        "count": 1,
+        "titles": [
+          "FUEGO Thursdays"
+        ]
+      },
+      {
+        "source": "Golatindance",
+        "source_id": "golatindance",
+        "location": "Steep Station Kava Bar, 2235 1st Avenue South, St. Petersburg, FL 33713, St. Petersburg, FL, 33713, US",
+        "count": 1,
+        "titles": [
+          "Bachata Jungle"
+        ]
+      },
+      {
+        "source": "Golatindance",
+        "source_id": "golatindance",
+        "location": "Vinnie\u2019s Bar And Grill, 2045 Mount Diablo St, Concord, CA, 94520, United States",
+        "count": 1,
+        "titles": [
+          "Salsa Night at Vinnies"
+        ]
+      },
+      {
+        "source": "Golatindance",
+        "source_id": "golatindance",
+        "location": "The Original Cancun Cantina, 7501 Old Telegraph Rd, Hanover, MD, 21076, US",
+        "count": 1,
+        "titles": [
+          "Discoteca Latina Thursdays"
+        ]
+      },
+      {
+        "source": "Golatindance",
+        "source_id": "golatindance",
+        "location": "Stevens Steakhouse, 5332 E. Stevens Place, Commerce, CA, 90040, United States",
+        "count": 1,
+        "titles": [
+          "Salsa Thursdays at Stevens Steakhouse"
+        ]
+      },
+      {
+        "source": "Golatindance",
+        "source_id": "golatindance",
+        "location": "Blue Martini \u2013 Orlando, 9101 International Dr, Orlando, FL, 32819, United States",
+        "count": 1,
+        "titles": [
+          "Latin Night at Blue Martini"
+        ]
+      },
+      {
+        "source": "Golatindance",
+        "source_id": "golatindance",
+        "location": "Salsa Studio \u2013 Granville, 927 Granville Street Studio 5, Vancouver, British Columbia, V6Z 1L3, Canada",
+        "count": 1,
+        "titles": [
+          "Bachata Me Thursdays"
         ]
       },
       {
@@ -25598,109 +25767,64 @@
       {
         "source": "Golatindance",
         "source_id": "golatindance",
-        "location": "Blue Agave Cantina, 14555 Grisby Rd, Houston, TX, 77079, United States",
+        "location": "Reserv Rooftop, 744 S Dearborn St, Chicago, IL, United States",
         "count": 1,
         "titles": [
-          "Latin Nights"
+          "Social Thursdays"
         ]
       },
       {
         "source": "Golatindance",
         "source_id": "golatindance",
-        "location": "Willie\u2019s Steak House, 1832 Westchester Ave, Bronx, NY, 10472-3018, United States",
+        "location": "The Rose Gaming Resort, 17680 Colonial Street, Dumfries, VA, 22026, United States",
         "count": 1,
         "titles": [
-          "Live Salsa Wednesdays at Willies Steakhouse"
+          "Live Salsa at the Rose Gaming Resort"
         ]
       },
       {
         "source": "Golatindance",
         "source_id": "golatindance",
-        "location": "3Vinos Restaurant & Night Club, 201 N Citrus Ave, Covina, CA, 91273, United States",
+        "location": "Mamajuana Cafe, 909 Texas Street #Suite E, Houston, TX 77002, Houston, TX, 77002, US",
         "count": 1,
         "titles": [
-          "Salsa And Bachata Wednesday At 3Vs"
+          "INOLVIDABLE THURSDAYS @ MAMAJUANA | Salsa\\, Bachata\\, Live Music\\, Free Lesson"
         ]
       },
       {
         "source": "Golatindance",
         "source_id": "golatindance",
-        "location": "Bachata Lounge, 12033 Veterans Memorial Dr #117, Houston, TX, 77067, United States",
+        "location": "Rae Loft PDX, 2222 NE Oregon St, Suite 207, Portland, OR, United States",
         "count": 1,
         "titles": [
-          "Bachata Lounge"
+          "Thursday Salsa & Bachata Socials"
         ]
       },
       {
         "source": "Golatindance",
         "source_id": "golatindance",
-        "location": "Lions and Sun Bar and Lounge, 18947 Woodbine Ave, Sharon, Ontario, L0G 1V0, Canada",
+        "location": "Dave & Buster\u2019s, 2000 E. Rio Salado Pkwy, Suite 1100, Tempe, AZ, 85281, United States",
         "count": 1,
         "titles": [
-          "Newmarket Latin Dance Wednesday"
+          "Bachata Addiction Thursday at Dave & Busters"
         ]
       },
       {
         "source": "Golatindance",
         "source_id": "golatindance",
-        "location": "The Mississippi Pizza Pub & The Atlantis Music Room, 3552 N Mississippi Ave, Portland, OR, 97227, United States",
+        "location": "Zanzi, 19 Grand Ave, Oakland, 94612",
         "count": 1,
         "titles": [
-          "Cubaneo! Live band Salsa Wednesdays!"
+          "Ahi Nama at Zanzi"
         ]
       },
       {
         "source": "Golatindance",
         "source_id": "golatindance",
-        "location": "Salsa Brava, 14933 Baltimore Ave, Laurel, MD, 20707, United States",
+        "location": "Tango Del Rey, 3567 Del Rey St, San Diego, CA, 92109, United States",
         "count": 1,
         "titles": [
-          "Salsa Brava Wednesdays with SalsaNow"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Cabana Club Austin, 5012 E 7th St, Austin, 78702, United States",
-        "count": 1,
-        "titles": [
-          "Salsa Bachata Wednesdays"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Cosmos Nightclub & Lounge, 99 SE 1st Ave, Boca Raton, FL, 33432, United States",
-        "count": 1,
-        "titles": [
-          "Latin Wednesdays at Cosmos"
-        ]
-      },
-      {
-        "source": "Golatindance",
-        "source_id": "golatindance",
-        "location": "Hyatt Regency Dulles, 2300 Dulles Corner Blvd, Herndon, VA, 20171, United States",
-        "count": 1,
-        "titles": [
-          "Latin Beat Wednesday"
-        ]
-      },
-      {
-        "source": "The AI Collective",
-        "source_id": "luma_genai_collective",
-        "location": "Tech North Atlanta, 925 North Point Pkwy Ste 130, Alpharetta, Alpharetta, GA",
-        "count": 1,
-        "titles": [
-          "AI for Lawyers & Attorneys: A Community Discussion w/ The AI Colle"
-        ]
-      },
-      {
-        "source": "The AI Collective",
-        "source_id": "luma_genai_collective",
-        "location": "University of Connecticut-Stamford Campus, 1 University Pl, Stamford, Stamford, CT",
-        "count": 1,
-        "titles": [
-          "Building with AI: Vibe2Pitch #2 (w/ The AI Collective)"
+          "Salsa & Bachata Thursdays at Tango Del Rey"
         ]
       },
       {
@@ -25913,6 +26037,15 @@
       {
         "source": "The AI Collective",
         "source_id": "luma_genai_collective",
+        "location": "Indianapolis, IN",
+        "count": 1,
+        "titles": [
+          "AI Learning and Sharing (w/ The AI Collective)"
+        ]
+      },
+      {
+        "source": "The AI Collective",
+        "source_id": "luma_genai_collective",
         "location": "Salt Lake City, UT",
         "count": 1,
         "titles": [
@@ -25944,6 +26077,15 @@
         "count": 1,
         "titles": [
           "The Growth Table: SAAS NORTH AI"
+        ]
+      },
+      {
+        "source": "OCAD University",
+        "source_id": "ocad_u",
+        "location": "230 Richmond (RHB) 230 Richmond St. W RHB 322",
+        "count": 1,
+        "titles": [
+          "Sabbatical Presentations - Michelle Forsyth\\, Anda Kubis\\, and Der"
         ]
       },
       {
@@ -26028,30 +26170,12 @@
         ]
       },
       {
-        "source": "OCAD University",
-        "source_id": "ocad_u",
-        "location": "Main Building & Rosalie Sharp Centre for Design (MCA) 100 McCaul Street Main Lobby",
-        "count": 1,
-        "titles": [
-          "Library Services Book Sale"
-        ]
-      },
-      {
         "source": "Queen Books",
         "source_id": "queen_books_bm",
         "location": "Its Ok Studios - 468 Queen Street West",
         "count": 1,
         "titles": [
           "That Asian Girl is a Problem: Book Launch!"
-        ]
-      },
-      {
-        "source": "Showuptoronto Static Showupto Ics",
-        "source_id": "showuptoronto_static_showupto_ics",
-        "location": "3939 Lawrence Ave E",
-        "count": 1,
-        "titles": [
-          "Bike Maintenance Workshop - by Scarborough Cycles"
         ]
       },
       {
@@ -26091,6 +26215,15 @@
         ]
       },
       {
+        "source": "Toronto Bicycling Network",
+        "source_id": "toronto_bicycling_network",
+        "location": "the Tim Hortons, 2575 Danforth Ave, just south and east of Main Subway Station",
+        "count": 1,
+        "titles": [
+          "City Walk - Main to St Lawrence"
+        ]
+      },
+      {
         "source": "Toronto Community Housing",
         "source_id": "toronto_community_housing",
         "location": "2195 Jane Street",
@@ -26106,24 +26239,6 @@
         "count": 1,
         "titles": [
           "Ballet 101 with J\u00f6rgen Dance"
-        ]
-      },
-      {
-        "source": "YOHOMO",
-        "source_id": "yohomo",
-        "location": "Steamworks, 540 Church Street",
-        "count": 1,
-        "titles": [
-          "TRANSlation 2"
-        ]
-      },
-      {
-        "source": "YOHOMO",
-        "source_id": "yohomo",
-        "location": "Boutique, 553 Church St",
-        "count": 1,
-        "titles": [
-          "College Night Kick-off Party"
         ]
       },
       {
@@ -26363,15 +26478,6 @@
       {
         "source": "YOHOMO",
         "source_id": "yohomo",
-        "location": "Lodge on Queen, 251 Queen Street W",
-        "count": 1,
-        "titles": [
-          "Welcome To The Bronze with Juliet Landau (DRUSILLA)!"
-        ]
-      },
-      {
-        "source": "YOHOMO",
-        "source_id": "yohomo",
         "location": "The Pearl, 184 Pearl St",
         "count": 1,
         "titles": [
@@ -26489,6 +26595,15 @@
       {
         "source": "YOHOMO",
         "source_id": "yohomo",
+        "location": "Sound Machine, 178 Bathurst St",
+        "count": 1,
+        "titles": [
+          "Roots Of House w/ Osunlade\\, Jojoflores &amp\\; DJ YOGI"
+        ]
+      },
+      {
+        "source": "YOHOMO",
+        "source_id": "yohomo",
         "location": "Woody&#x27\\;s, 467 Church Street",
         "count": 1,
         "titles": [
@@ -26525,28 +26640,10 @@
       {
         "source": "YOHOMO",
         "source_id": "yohomo",
-        "location": "Cake Cabaret, 627 Danforth Ave",
+        "location": "The Cameron House, 408 Queen St W",
         "count": 1,
         "titles": [
-          "DOLLS 3: VENUS"
-        ]
-      },
-      {
-        "source": "YOHOMO",
-        "source_id": "yohomo",
-        "location": "Bambi&#x27\\;s, 1265 Dundas Street West",
-        "count": 1,
-        "titles": [
-          "LOVE ONLY featuring CanCon Legend Eddie C and Kiki LeFreak"
-        ]
-      },
-      {
-        "source": "YOHOMO",
-        "source_id": "yohomo",
-        "location": "The Drink, 459 Church Street 2nd floor",
-        "count": 1,
-        "titles": [
-          "Grapple - Queer wrestling night"
+          "The Wytchfae Ball"
         ]
       },
       {
@@ -26571,91 +26668,91 @@
     "categories": [
       {
         "category": "Music / Concerts",
-        "count": 1719
+        "count": 1697
       },
       {
         "category": "Family / Kids",
-        "count": 1061
+        "count": 1065
       },
       {
         "category": "Education / Workshops",
-        "count": 1041
+        "count": 1042
       },
       {
         "category": "Craft / Maker",
-        "count": 797
+        "count": 796
       },
       {
         "category": "Community / Social",
-        "count": 535
+        "count": 544
       },
       {
         "category": "Games / Trivia",
-        "count": 467
+        "count": 483
       },
       {
         "category": "Dance / Performance",
-        "count": 449
+        "count": 447
       },
       {
         "category": "Books / Literature / Poetry",
-        "count": 409
+        "count": 396
       },
       {
         "category": "Health / Wellness",
-        "count": 357
+        "count": 352
       },
       {
         "category": "Technology / Careers",
-        "count": 338
+        "count": 331
       },
       {
         "category": "Sports / Fitness",
-        "count": 297
+        "count": 300
       },
       {
         "category": "Comedy / Improv",
-        "count": 283
+        "count": 278
       },
       {
         "category": "Film / Cinema",
-        "count": 269
+        "count": 265
       },
       {
         "category": "Arts / Culture",
-        "count": 174
+        "count": 169
       },
       {
         "category": "Government / Civic",
-        "count": 69
+        "count": 76
       },
       {
         "category": "Nature / Outdoors / Recreation",
-        "count": 59
+        "count": 61
       },
       {
         "category": "Gardening / Horticulture",
-        "count": 51
+        "count": 49
       },
       {
         "category": "History / Heritage",
-        "count": 50
+        "count": 47
       },
       {
         "category": "Food / Drink",
-        "count": 35
+        "count": 33
       },
       {
         "category": "LGBTQ+ / Gender",
-        "count": 19
+        "count": 18
       },
       {
         "category": "Religion / Spirituality",
-        "count": 13
+        "count": 11
       },
       {
         "category": "(uncategorized)",
-        "count": 8
+        "count": 10
       },
       {
         "category": "Schools / K-12",
@@ -26663,23 +26760,23 @@
       }
     ],
     "images": {
-      "total": 8501,
-      "with_image": 687,
+      "total": 8471,
+      "with_image": 676,
       "by_source": [
         {
           "source": "York University",
-          "total": 391,
-          "with_image": 247
+          "total": 374,
+          "with_image": 243
         },
         {
           "source": "Toronto Events (Tockify)",
-          "total": 1955,
-          "with_image": 120
+          "total": 1924,
+          "with_image": 119
         },
         {
           "source": "The AI Collective",
-          "total": 67,
-          "with_image": 67
+          "total": 66,
+          "with_image": 66
         },
         {
           "source": "St. Lawrence Neighbourhood Association",
@@ -26687,39 +26784,29 @@
           "with_image": 63
         },
         {
-          "source": "Aga Khan Museum",
-          "total": 41,
-          "with_image": 41
+          "source": "Pluto Toronto",
+          "total": 44,
+          "with_image": 44
         },
         {
-          "source": "Pluto Toronto",
-          "total": 38,
-          "with_image": 38
+          "source": "Aga Khan Museum",
+          "total": 37,
+          "with_image": 37
         },
         {
           "source": "Toronto Botanical Garden",
-          "total": 20,
-          "with_image": 20
+          "total": 19,
+          "with_image": 19
         },
         {
           "source": "UofT Philosophy",
-          "total": 18,
-          "with_image": 14
+          "total": 19,
+          "with_image": 15
         },
         {
           "source": "again again",
-          "total": 11,
-          "with_image": 11
-        },
-        {
-          "source": "Beach Metro Community News",
-          "total": 26,
-          "with_image": 9
-        },
-        {
-          "source": "Distillery District",
-          "total": 8,
-          "with_image": 8
+          "total": 12,
+          "with_image": 12
         },
         {
           "source": "Textile Museum of Canada",
@@ -26732,14 +26819,14 @@
           "with_image": 8
         },
         {
-          "source": "Ben McNally Books",
+          "source": "Go Latin Dance",
           "total": 7,
-          "with_image": 5
+          "with_image": 7
         },
         {
-          "source": "UofT St. Michael's College",
-          "total": 5,
-          "with_image": 4
+          "source": "Distillery District",
+          "total": 7,
+          "with_image": 7
         },
         {
           "source": "Bloor West Village BIA",
@@ -26747,17 +26834,17 @@
           "with_image": 4
         },
         {
-          "source": "Uplift Collective",
+          "source": "Ben McNally Books",
+          "total": 6,
+          "with_image": 4
+        },
+        {
+          "source": "UofT St. Michael's College",
           "total": 4,
-          "with_image": 3
+          "with_image": 4
         },
         {
           "source": "A Different Booklist",
-          "total": 2,
-          "with_image": 2
-        },
-        {
-          "source": "Go Latin Dance",
           "total": 2,
           "with_image": 2
         },
@@ -26777,9 +26864,9 @@
           "with_image": 2
         },
         {
-          "source": "Site 3 CoLaboratory",
-          "total": 1,
-          "with_image": 1
+          "source": "Uplift Collective",
+          "total": 3,
+          "with_image": 2
         },
         {
           "source": "Bakka Phoenix Books",
