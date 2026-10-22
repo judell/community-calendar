@@ -63,6 +63,7 @@ supabase test db supabase/tests/
 - `tests/test_tribe_fetch.py` - the fetch contract shared by both Tribe REST scrapers, parameterized over `scrapers/lib/tribe_events.py` and `scrapers/tribe_rest.py` (broken first page fails, dormant 200+empty stays quiet, later-page failure keeps fetched pages)
 - `tests/test_tribe_events.py` - Tribe Events REST base scraper headers and event parsing
 - `tests/test_tribe_rest.py` - parameterized Tribe REST scraper `run()` output (dormant writes a valid empty ICS, first-page failure writes no calendar)
+- `tests/test_monroe_county_history_center.py` - SiteGround `sgcaptcha` handling: a blocked first page fails the run and writes no calendar, a later-page non-400 error keeps fetched pages and logs its status, the end-of-list 400 stays quiet
 - `tests/test_report.py` - feed-health report keeps a `feeds.txt` source with no `.ics` as a failed build, and drops a source `feeds.txt` no longer lists
 - `tests/test_base_scraper.py` - base scraper `X-SOURCE-URL` and `GEO` emission
 - `tests/test_validate_pr_feeds.py` - PR feed/scraper registration validation against the DB-first contract
