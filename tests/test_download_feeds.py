@@ -7,6 +7,7 @@ sources (events.in.gov / Localist) stop flapping between "a good build" and
 """
 
 import email.message
+import json
 import socket
 import subprocess
 import sys
@@ -224,6 +225,8 @@ class TestMecTimezonePassthrough:
                     "name": "Brown County Events",
                     "fallback_url": None,
                     "status": "active",
+                    "feed_type": "ics_url",
+                    "source_ids": [],
                 }
             ],
         )
@@ -508,6 +511,8 @@ class TestDownloadProgressLog:
                     "name": "Example",
                     "fallback_url": None,
                     "status": "active",
+                    "feed_type": "ics_url",
+                    "source_ids": [],
                 }
             ],
         )
@@ -526,3 +531,86 @@ class TestDownloadProgressLog:
 
         assert "calendar.google.com" in log_before_fetch["log"]
         assert ".ics" in log_before_fetch["log"]
+
+
+class TestRecordFeedSources:
+    """remove_feed reads feeds.source_ids, so a wrong payload here silently
+    disables survivor deletion (#232)."""
+
+    def test_posts_the_stem_and_activates_only_pending_rows(self, monkeypatch):
+        monkeypatch.setenv("SUPABASE_URL", "https://fake.supabase.co")
+        monkeypatch.setenv("SUPABASE_SERVICE_KEY", "service-key")
+        sent: list[tuple[str, str, dict]] = []
+
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        def fake_urlopen(req, timeout=None):
+            sent.append((req.get_method(), req.full_url, json.loads(req.data)))
+            return FakeResponse()
+
+        monkeypatch.setattr(df.urllib.request, "urlopen", fake_urlopen)
+
+        df.record_feed_sources(
+            [
+                {
+                    "id": 7,
+                    "url": "https://example.com/events/feed.ics",
+                    "name": "Example",
+                    "feed_type": "ics_url",
+                    "status": "active",
+                },
+                {
+                    "id": 8,
+                    "url": "https://tockify.com/api/feeds/ics/examplefarmers",
+                    "name": "Tockify",
+                    "feed_type": "curator",
+                    "status": "pending",
+                },
+            ]
+        )
+
+        assert sent == [
+            (
+                "POST",
+                "https://fake.supabase.co/rest/v1/rpc/record_feed_source",
+                {"p_feed_id": 7, "p_source_id": "example_feed_ics"},
+            ),
+            (
+                "POST",
+                "https://fake.supabase.co/rest/v1/rpc/record_feed_source",
+                {"p_feed_id": 8, "p_source_id": "tockify_examplefarmers"},
+            ),
+            (
+                "PATCH",
+                "https://fake.supabase.co/rest/v1/feeds?id=eq.8",
+                {"status": "active"},
+            ),
+        ]
+
+    def test_a_failed_patch_is_reported_not_raised(self, monkeypatch, capsys):
+        monkeypatch.setenv("SUPABASE_URL", "https://fake.supabase.co")
+        monkeypatch.setenv("SUPABASE_SERVICE_KEY", "service-key")
+
+        def boom(req, timeout=None):
+            raise OSError("network down")
+
+        monkeypatch.setattr(df.urllib.request, "urlopen", boom)
+
+        df.record_feed_sources(
+            [
+                {
+                    "id": 7,
+                    "url": "https://example.com/events/feed.ics",
+                    "name": "Example",
+                    "feed_type": "ics_url",
+                    "status": "active",
+                }
+            ]
+        )
+
+        assert "Failed to record source_id: Example" in capsys.readouterr().out

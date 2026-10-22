@@ -18,7 +18,7 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlparse
 
-from feed_slug import slugify
+from feed_slug import slugify, source_id_for
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 
@@ -105,7 +105,7 @@ def fetch_feeds_from_db(city: str):
 
     query_url = (
         f"{supabase_url}/rest/v1/feeds"
-        f"?select=id,url,name,status,fallback_url"
+        f"?select=id,url,name,status,fallback_url,feed_type"
         f"&city=eq.{city}"
         f"&status=in.(active,pending)"
         f"&feed_type=in.(ics_url,curator)"
@@ -128,8 +128,16 @@ def fetch_feeds_from_db(city: str):
     return feeds  # list of dicts with id, url, name, status
 
 
-def mark_feeds_active(feeds_to_activate):
-    """Mark pending feeds as active after successful download."""
+def record_feed_sources(feeds_to_record):
+    """Record each feed's source_id and activate pending rows.
+
+    source_ids is the feed's history of produced .ics stems; remove_feed needs
+    it to delete the merge survivors the feed owns (#232). The stem follows from
+    the feed's url, so every row records it, whether or not this run wrote a
+    file: a feed that has failed every build since deploy must still map.
+    A failed PATCH leaves the mapping stale until the next build, and
+    remove_feed falls back to matching by name.
+    """
     supabase_url = os.environ.get("SUPABASE_URL")
     service_key = os.environ.get("SUPABASE_SERVICE_KEY")
     if not supabase_url or not service_key:
@@ -140,10 +148,29 @@ def mark_feeds_active(feeds_to_activate):
         "Content-Type": "application/json",
         "Prefer": "return=minimal",
     }
-    for feed in feeds_to_activate:
-        patch_url = f"{supabase_url}/rest/v1/feeds?id=eq.{feed['id']}"
+    for feed in feeds_to_record:
+        source_id = source_id_for(feed["feed_type"], feed["url"])
+        data = json.dumps({"p_feed_id": feed["id"], "p_source_id": source_id}).encode()
+        req = urllib.request.Request(
+            f"{supabase_url}/rest/v1/rpc/record_feed_source",
+            data=data,
+            headers=headers,
+            method="POST",
+        )
+        try:
+            urllib.request.urlopen(req, timeout=_DB_TIMEOUT_SECONDS)
+        except OSError as e:
+            print(f"  ⚠️  Failed to record source_id: {feed['name']}: {e}")
+            continue
+        if feed.get("status") != "pending":
+            continue
         data = json.dumps({"status": "active"}).encode()
-        req = urllib.request.Request(patch_url, data=data, headers=headers, method="PATCH")
+        req = urllib.request.Request(
+            f"{supabase_url}/rest/v1/feeds?id=eq.{feed['id']}",
+            data=data,
+            headers=headers,
+            method="PATCH",
+        )
         try:
             urllib.request.urlopen(req, timeout=_DB_TIMEOUT_SECONDS)
             print(f"  ✅ Marked active: {feed['name']}")
@@ -318,14 +345,14 @@ def download_feeds(city: str) -> None:
     if db_feeds is not None:
         print(f"  Using feeds table ({len(db_feeds)} feeds)")
         feed_list = [(f["url"], f["name"], f.get("fallback_url")) for f in db_feeds]
-        pending_feeds = [f for f in db_feeds if f.get("status") == "pending"]
+        db_feeds_by_url = {f["url"]: f for f in db_feeds}
     else:
         feeds_file = Path("cities") / city / "feeds.txt"
         if not feeds_file.exists():
             print(f"No feeds.txt found for {city}")
             return
         feed_list = list(parse_feeds_txt(feeds_file))
-        pending_feeds = []
+        db_feeds_by_url = {}
         print(f"  Using feeds.txt ({len(feed_list)} feeds)")
 
     count = 0
@@ -368,9 +395,10 @@ def download_feeds(city: str) -> None:
 
     print(f"Downloaded {count} feeds for {city}")
 
-    # Mark pending feeds as active
-    if pending_feeds:
-        mark_feeds_active(pending_feeds)
+    # Record every row's source_id: the stem follows from the url, so a feed
+    # that failed this run must still map for a later retirement (#232).
+    if db_feeds_by_url:
+        record_feed_sources(db_feeds_by_url.values())
 
 
 if __name__ == "__main__":

@@ -78,7 +78,7 @@ The workflow in `.github/workflows/generate-calendar.yml` runs daily or on manua
 
 1. **Process `pending_feeds.txt`** — `process_pending_feeds.py` inserts staged entries into the `feeds` table and resets the file to its template, so just-merged sources participate in this build
 2. **Run scrapers** — `run_scrapers_from_db.py` executes the active scraper rows in the `feeds` table (DB-first; the workflow carries no per-scraper lines)
-3. **Download live feeds** — `download_feeds.py` queries the `feeds` table for active+pending `ics_url`/`curator` feeds, downloads each, injects `X-SOURCE` headers. Falls back to `feeds.txt` if DB not available (forks). Marks pending feeds as `active` after download.
+3. **Download live feeds** — `download_feeds.py` queries the `feeds` table for active+pending `ics_url`/`curator` feeds, downloads each, injects `X-SOURCE` headers. Falls back to `feeds.txt` if DB not available (forks). Records each feed's output stem in `feeds.source_ids` and marks pending feeds as `active` after download.
 4. **Export feeds.txt** — `export_feeds_txt.py` regenerates `feeds.txt` from the `feeds` table (the read-only reference of what the database drives). It exports active+pending rows so just-added sources appear immediately.
 5. **Combine ICS** — `combine_ics.py` merges all `.ics` files, deduplicates, applies geo filtering. Display names come from `feeds.txt` (parsed at runtime) for scrapers, and from `X-SOURCE` headers (injected by `download_feeds.py`) for live feeds.
 6. **Convert to JSON** — `ics_to_json.py` converts combined ICS to JSON with fuzzy title clustering

@@ -36,6 +36,14 @@ _Avoid_: Venue, organization (when referring to the calendar entry point)
 The technical mechanism that delivers events from a source — an ICS URL or a scraper command. One source has one feed. The implementation layer — what the pipeline operates on.
 _Avoid_: URL, scraper (when referring to the abstraction)
 
+**Source id**:
+The `.ics` filename stem a feed's build produces — a scraper's output filename, or the slug of an ICS URL. The build stamps it on every event as `X-SOURCE-ID` and records it on the feed row in `feeds.source_ids`, which is a history because a feed's URL can change. Stable per feed, unlike the display `source`, which becomes a comma-joined aggregate after a Merge. A stem that two same-city feeds share identifies neither exclusively; retirement keeps those rows.
+_Avoid_: Source name, slug (when the identity is meant)
+
+**Feed-owned survivor**:
+A Merge survivor belongs to the feed whose copy won the Merge: its `source_id` is that feed's. Retiring that feed deletes the survivor; retiring a member feed does not, because the survivor's `source_id` names another feed and its saved picks must stay.
+_Avoid_: Primary source (when ownership is meant)
+
 **Quiet source**:
 A source whose build wrote a valid calendar with no upcoming events — a genuinely dormant calendar, not a problem to fix. Distinct from a failed source, whose scraper exits non-zero and writes no calendar, so feed-health reports it as a scraper failure.
 _Avoid_: Empty feed, broken source
@@ -299,7 +307,7 @@ cities/{city}/example.ics (with X-SOURCE headers)
 ### Database Schema (Key Tables)
 
 - **events** — All calendar events (title, start_time, location, description, source, category, city, source_uid). `load-events` upserts by `source_uid`, then sweeps stale rows scoped to the `source_id`s present in the payload, so a source that failed to produce output keeps its rows.
-- **feeds** — Source registry (url, name, city, status, feed_type, scraper_cmd)
+- **feeds** — Source registry (url, name, city, status, feed_type, scraper_cmd, source_ids)
 - **picks** — User-saved events (user_id, event_id)
 - **category_overrides** — Curator manual category corrections (source_uid, category)
 - **event_enrichments** — Audio capture transcripts and enrichments (event_id, transcript)

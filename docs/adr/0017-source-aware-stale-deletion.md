@@ -62,13 +62,9 @@ payload before the sweep (`load-events` does).
   non-empty run. The preserved rows are not necessarily past: if a source
   removed or cancelled its future events, those rows stay and remain visible as
   upcoming. This is the deliberate cost of never deleting on a transient
-  failure, and repeated empty runs do not clean them. `remove_feed` deletes
-  only rows whose `source` equals the feed's name, so it leaves a merge survivor
-  (whose `source` is the comma-joined member names) for the next build to
-  re-attribute; matching the survivor by name would delete an event owned by
-  another feed and cascade away its saved picks. Clearing a survivor when its
-  own feed is retired needs a durable feed-to-`source_id` mapping and is a
-  follow-up.
+  failure, and repeated empty runs do not clean them. `remove_feed` clears a
+  survivor the retiring feed owns via `feeds.source_ids` (see the 2026-10-21
+  amendment below).
 - A source whose *entire* output is merged into another source's survivors has
   no `source_id` in the payload, so its old rows can linger as duplicates. The
   condition self-heals only if the source later emits a non-merged event; a
@@ -78,6 +74,42 @@ payload before the sweep (`load-events` does).
   this change.
 - Rows with a NULL `source_id` belong to no source and are never swept when
   `p_sources` is set.
+
+## Amendment 2026-10-21 (#232)
+
+`feeds.source_ids text[]` records every `.ics` stem the feed's build has
+produced: `download_feeds.py` for `ics_url`/`curator` rows, and
+`run_scrapers_from_db.py` for scraper rows. It is a history because a feed's
+URL can change, and rows built under an older stem must stay attributable.
+
+`remove_feed` deletes rows whose `source_id` is in that history, so it clears a
+merge survivor the retiring feed owns. A survivor owned by another feed stays,
+because its `source_id` names that feed, and so do its saved picks. The
+exact-name arm remains for rows built before the mapping existed, and it skips
+rows that another same-city feed's history owns. An empty history also raises a
+WARNING.
+
+There is no backfill: the mapping fills on the next build. In that window the
+name arm still deletes a feed's plain rows, but not a survivor the feed owns,
+whose `source` is the comma-joined list — a survivor can outlive its owner
+until that feed completes one build.
+
+A stem is an exclusive identity only while one feed claims it. Two same-city
+feeds can produce the same stem: Bloomington's two `events.in.gov` rows both
+slug to `events_search_events_ics`, because the general slug drops the query
+string. `remove_feed` keeps rows that carry a stem another same-city feed also
+claims, and warns. Those rows stay until the feeds are disambiguated.
+
+`record_feed_source` appends server-side instead of writing a whole array, so
+two overlapping builds — the workflow has no concurrency group — cannot erase
+each other's stems.
+
+Retiring the owner of a survivor deletes the survivor even when another member
+feed still lists the event. The next build recreates that event under a new row
+id, and picks saved on the old row are gone with it. The alternative — keeping
+a survivor whose owner is gone — leaves a duplicate that the source-aware sweep
+cannot clear, because the retiring feed's `source_id` is no longer in the
+payload.
 
 ## Alternatives Considered
 

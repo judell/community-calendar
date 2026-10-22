@@ -30,6 +30,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from feed_slug import source_id_for
+
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -109,6 +111,7 @@ def query_db_scraper_rows(city: str) -> tuple[list[dict] | None, str | None]:
             continue
         rows.append(
             {
+                "id": row["id"],
                 "city": row["city"],
                 "url": row["url"],
                 "name": row["name"],
@@ -192,6 +195,38 @@ def localize_cmd(cmd: str) -> str:
     return shlex.join(tokens)
 
 
+def record_source_id(row: dict) -> None:
+    """Record the .ics stem this scraper wrote on the feed's source_ids history.
+
+    remove_feed needs it to delete the merge survivors the feed owns (#232).
+    Best-effort: a failed PATCH just leaves the mapping stale until the next
+    build, and remove_feed falls back to matching by name.
+    """
+    supabase_url = os.environ.get("SUPABASE_URL")
+    service_key = os.environ.get("SUPABASE_SERVICE_KEY")
+    if not supabase_url or not service_key or not row.get("id"):
+        return
+    payload = {
+        "p_feed_id": row["id"],
+        "p_source_id": source_id_for(row["feed_type"], row["url"]),
+    }
+    req = urllib.request.Request(
+        f"{supabase_url}/rest/v1/rpc/record_feed_source",
+        data=json.dumps(payload).encode(),
+        headers={
+            "apikey": service_key,
+            "Authorization": f"Bearer {service_key}",
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal",
+        },
+        method="POST",
+    )
+    try:
+        urllib.request.urlopen(req, timeout=30)
+    except OSError as exc:
+        print(f"[db-first] WARNING failed to record source_id for {row['name']}: {exc}")
+
+
 def run_rows(city: str, rows: list[dict], months: str) -> int:
     """Execute rows with RUN/EXIT log bracketing; return count of failures."""
     env = os.environ.copy()
@@ -216,6 +251,9 @@ def run_rows(city: str, rows: list[dict], months: str) -> int:
         print(f"[{city}][scraper] EXIT {result.returncode} {label}")
         if result.returncode != 0:
             failures += 1
+        # Record on failure too: the stem follows from the row's url, and a
+        # scraper broken since deploy must still map for a later retirement.
+        record_source_id(row)
     return failures
 
 

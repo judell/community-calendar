@@ -13,7 +13,6 @@
   var.hasRecurrence="{false}"
   var.showInfo="{false}"
   var.deleteError=""
-  var.deletingId=""
   var.sortedFeeds="{(feedsList.value || []).slice().sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); })}"
   var.scraperFeeds="{sortedFeeds.filter(function(f) { return f.feed_type === 'scraper'; })}"
   var.pendingFeeds="{sortedFeeds.filter(function(f) { return f.status === 'pending'; })}"
@@ -69,19 +68,6 @@
     onError="(err) => { validationError = 'Failed to save feed: ' + err; }" />
 
   <APICall
-    id="deleteEventsApi"
-    method="delete"
-    url="{appGlobals.supabaseUrl + '/rest/v1/events?source=eq.' + encodeURIComponent($param.name) + '&city=eq.' + encodeURIComponent(window.cityFilter || 'bloomington')}"
-    headers="{{
-      'apikey': appGlobals.supabasePublishableKey,
-      'Authorization': 'Bearer ' + window.authSession?.access_token
-    }}"
-    onSuccess="() => {
-      markRemovedApi.execute({ feed_id: deletingId });
-    }"
-    onError="(err) => { deleteError = 'Failed to delete events: ' + (err.message || err); }" />
-
-  <APICall
     id="markRemovedApi"
     method="post"
     url="{appGlobals.supabaseUrl + '/rest/v1/rpc/remove_feed'}"
@@ -92,7 +78,7 @@
     }}"
     body="{$param}"
     onSuccess="() => { deleteError = ''; feedsList.refetch(); }"
-    onError="(err) => { deleteError = 'Failed to mark feed as removed: ' + (err.message || err); }" />
+    onError="(err) => { deleteError = 'Failed to delete feed: ' + (err.message || err); }" />
 
   <Theme>
   <Card
@@ -251,9 +237,8 @@
                       size="xs"
                       onClick="() => {
                         if (!confirm('Delete ' + $item.name + ' and all its events?')) return;
-                        deletingId = $item.id;
                         deleteError = '';
-                        deleteEventsApi.execute({ name: $item.name });
+                        markRemovedApi.execute({ feed_id: $item.id });
                       }"
                     />
                   </HStack>
@@ -279,9 +264,8 @@
                       size="xs"
                       onClick="() => {
                         if (!confirm('Delete ' + $item.name + ' and all its events?')) return;
-                        deletingId = $item.id;
                         deleteError = '';
-                        deleteEventsApi.execute({ name: $item.name });
+                        markRemovedApi.execute({ feed_id: $item.id });
                       }"
                     />
                   </HStack>

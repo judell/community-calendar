@@ -1,16 +1,27 @@
 #!/usr/bin/env python3
-"""Canonical feed-URL -> filename slug.
+"""Feed identity helpers: canonical filename slugs and source_id history.
 
-Single source of truth shared by add_feed.py (test/registration time) and
-download_feeds.py (download time) so the two always agree on a feed's .ics
-filename. Provider-specific cases fold a disambiguating query param into the
-slug (CivicPlus catID, Finalsite calendar_ids, LibCal cid, LiveWhale group_id)
-so feeds that share a URL path but differ only in the query string do not
-collide on the same filename.
+Single source of truth shared by add_feed.py (test/registration time),
+download_feeds.py (download time) and run_scrapers_from_db.py (scraper time) so
+the .ics filename a feed produces and the source_id the feeds table records for
+it always agree. Provider-specific cases fold a disambiguating query param into
+the slug (CivicPlus catID, Finalsite calendar_ids, LibCal cid, LiveWhale
+group_id) so feeds that share a URL path but differ only in the query string do
+not collide on the same filename.
 """
 
 import re
+from pathlib import Path
 from urllib.parse import urlparse
+
+
+def source_id_for(feed_type: str, url: str) -> str:
+    """The .ics stem the build stamps as events.source_id for this feed row.
+
+    A scraper's url is its output path; every other feed type downloads to
+    slugify(url).ics.
+    """
+    return Path(url).stem if feed_type == "scraper" else slugify(url)
 
 
 def slugify(url: str) -> str:
