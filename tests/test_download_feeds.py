@@ -614,3 +614,54 @@ class TestRecordFeedSources:
         )
 
         assert "Failed to record source_id: Example" in capsys.readouterr().out
+
+
+class TestRanSourcesManifest:
+    """Only a real calendar counts as ran; a block page keeps its rows (#233)."""
+
+    def _run(self, monkeypatch, tmp_path, body):
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(
+            df,
+            "fetch_feeds_from_db",
+            lambda city: [
+                {
+                    "id": 1,
+                    "url": BROWNCOUNTY_URL,
+                    "name": "Brown County Events",
+                    "fallback_url": None,
+                    "status": "active",
+                    "feed_type": "ics_url",
+                    "source_ids": [],
+                }
+            ],
+        )
+        monkeypatch.setattr(df, "record_feed_sources", lambda rows: None)
+
+        def fake_fetch(url, outfile):
+            outfile.write_text(body, encoding="utf-8")
+            return True
+
+        monkeypatch.setattr(df, "fetch_with_curl_fallback", fake_fetch)
+
+        df.download_feeds("bloomington")
+
+        return tmp_path / "cities" / "bloomington" / "ran_sources.txt"
+
+    def test_valid_calendar_is_recorded(self, monkeypatch, tmp_path):
+        manifest = self._run(monkeypatch, tmp_path, BROWNCOUNTY_RAW_ICS)
+        assert manifest.read_text().strip() == df.slugify(BROWNCOUNTY_URL)
+
+    def test_quiet_calendar_is_recorded(self, monkeypatch, tmp_path):
+        """Zero upcoming events is still a ran source, not a failure."""
+        manifest = self._run(monkeypatch, tmp_path, make_ics(""))
+        assert manifest.read_text().strip() == df.slugify(BROWNCOUNTY_URL)
+
+    def test_block_page_is_not_recorded(self, monkeypatch, tmp_path):
+        manifest = self._run(monkeypatch, tmp_path, "<html>Access denied</html>")
+        assert not manifest.exists()
+
+    def test_truncated_calendar_is_not_recorded(self, monkeypatch, tmp_path):
+        """A body that opens a calendar but never closes it is a failed fetch."""
+        manifest = self._run(monkeypatch, tmp_path, "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\n")
+        assert not manifest.exists()

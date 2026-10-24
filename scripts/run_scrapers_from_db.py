@@ -31,6 +31,7 @@ import urllib.request
 from pathlib import Path
 
 from feed_slug import source_id_for
+from ran_sources import is_calendar, record_ran
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -227,6 +228,19 @@ def record_source_id(row: dict) -> None:
         print(f"[db-first] WARNING failed to record source_id for {row['name']}: {exc}")
 
 
+def record_ran_if_success(row: dict, returncode: int) -> None:
+    """Record a source as ran when it exited 0 with a parseable calendar.
+
+    The exit code alone is not enough: a scraper that wrote nothing, or
+    wrote a block page, must keep its rows (issue #233).
+    """
+    if returncode != 0:
+        return
+    output = ROOT / row["url"]
+    if is_calendar(output):
+        record_ran(output)
+
+
 def run_rows(city: str, rows: list[dict], months: str) -> int:
     """Execute rows with RUN/EXIT log bracketing; return count of failures."""
     env = os.environ.copy()
@@ -254,6 +268,7 @@ def run_rows(city: str, rows: list[dict], months: str) -> int:
         # Record on failure too: the stem follows from the row's url, and a
         # scraper broken since deploy must still map for a later retirement.
         record_source_id(row)
+        record_ran_if_success(row, result.returncode)
     return failures
 
 

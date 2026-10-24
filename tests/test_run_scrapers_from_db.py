@@ -87,3 +87,56 @@ class TestRunRowsRecordsOnFailure:
 
         assert failures == 1
         assert recorded == [row]
+
+
+class TestRecordRanIfSuccess:
+    """Only a clean exit with a real calendar marks a source as ran (#233)."""
+
+    def _calendar(self, tmp_path, body="BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n"):
+        out = tmp_path / "cities" / "bloomington" / "iu_events.ics"
+        out.parent.mkdir(parents=True)
+        out.write_text(body)
+        return out
+
+    def test_clean_exit_with_calendar_is_recorded(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(rs, "ROOT", tmp_path)
+        out = self._calendar(tmp_path)
+
+        rs.record_ran_if_success(_row(), 0)
+
+        assert (out.parent / "ran_sources.txt").read_text() == "iu_events\n"
+
+    def test_nonzero_exit_is_not_recorded(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(rs, "ROOT", tmp_path)
+        out = self._calendar(tmp_path)
+
+        rs.record_ran_if_success(_row(), 1)
+
+        assert not (out.parent / "ran_sources.txt").exists()
+
+    def test_missing_output_is_not_recorded(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(rs, "ROOT", tmp_path)
+        out = self._calendar(tmp_path)
+        out.unlink()
+
+        rs.record_ran_if_success(_row(), 0)
+
+        assert not (out.parent / "ran_sources.txt").exists()
+
+    def test_block_page_is_not_recorded(self, tmp_path, monkeypatch):
+        """A 200 HTML body is a failed source, not a quiet one."""
+        monkeypatch.setattr(rs, "ROOT", tmp_path)
+        out = self._calendar(tmp_path, body="<html>Access denied</html>")
+
+        rs.record_ran_if_success(_row(), 0)
+
+        assert not (out.parent / "ran_sources.txt").exists()
+
+    def test_truncated_calendar_is_not_recorded(self, tmp_path, monkeypatch):
+        """A calendar that opens but never closes is a failed source."""
+        monkeypatch.setattr(rs, "ROOT", tmp_path)
+        out = self._calendar(tmp_path, body="BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\n")
+
+        rs.record_ran_if_success(_row(), 0)
+
+        assert not (out.parent / "ran_sources.txt").exists()

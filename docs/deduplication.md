@@ -146,7 +146,7 @@ const { error } = await supabase
 
 **Gap:** Same issue as combine_ics.py - cross-source duplicates have different `source_uid` values.
 
-**Stale cleanup:** after upsert, `load-events` calls `delete_stale_events(p_city, p_source_uids, p_sources)` to remove rows the source no longer lists. The sweep is scoped to `p_sources` — the `source_id`s present in the payload — so a source that failed to produce output (a crashed scraper, a 404'd feed) is absent from the payload and keeps its rows ([issue #227](https://github.com/B-Square-Bulletin/community-calendar/issues/227)). A source that legitimately runs empty is indistinguishable from a failed one and is preserved until its next non-empty run; retiring a source deletes explicitly via `remove_feed`.
+**Stale cleanup:** after upsert, `load-events` calls `delete_stale_events(p_city, p_source_uids, p_sources)` to remove rows the source no longer lists. The sweep is scoped to `p_sources` — the set of sources that ran this build, which the runners write to `cities/<city>/ran_sources.txt` and the workflow sends as `ran_sources` — so a source that ran and emptied is swept while a source that failed to produce output (a crashed scraper, a 404'd feed) keeps its rows ([issue #233](https://github.com/B-Square-Bulletin/community-calendar/issues/233), [issue #227](https://github.com/B-Square-Bulletin/community-calendar/issues/227)). Without a manifest, `load-events` falls back to the `source_id`s present in the payload. A per-source 50% check only raises a warning; it no longer preserves rows. Retiring a source deletes explicitly via `remove_feed`.
 
 ---
 

@@ -122,3 +122,31 @@ payload.
 - **Match on `source_names` (the route's structured name array).** Handles the
   merged-away-source case, but names can be slug fallbacks and the predicate
   becomes an array intersection. Rejected in favor of the stable `source_id`.
+
+## Amendment 2026-10-22 (#233)
+
+The sweep no longer infers its scope from the payload. Each runner appends the
+stem of every source whose ingestion succeeded — a scraper that exits 0 and
+leaves a parseable calendar, or a feed fetch that returns a valid ICS body — to
+`cities/<city>/ran_sources.txt`. The workflow sends that list to `load-events`
+as `ran_sources`, and `load-events` passes it as `p_sources`. A source that ran
+and emptied is swept; a source that failed keeps its rows. An absent field falls
+back to payload presence (the pre-#233 behavior), and an empty array sweeps
+nothing.
+
+This supersedes the per-source guard paragraph under Decision. The 50% check
+now raises a WARNING and the sweep proceeds: the manifest is the authority on
+which sources ran, so a shrinking source is either real churn or a truncated run
+that exited 0, and this layer cannot tell them apart. The aggregate guard on the
+legacy `p_sources IS NULL` path is unchanged.
+
+Consequences that remain:
+
+- An all-quiet city never reaches the upload, because `validate_city` treats an
+  empty `combined.ics` as an error. Its sources are ran, but the loader never
+  runs.
+- A per-file `combine_ics` exception prints an error and contributes zero events,
+  so a healthy source looks quiet and is swept. The 50% check warns, but the
+  notice lands in the Postgres log, not the Actions log (#231).
+- A feed whose URL changes gets a new stem in the manifest; rows under the old
+  stem stay unswept, exactly as before.

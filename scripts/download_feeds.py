@@ -19,6 +19,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from feed_slug import slugify, source_id_for
+from ran_sources import is_calendar_body, record_ran
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 
@@ -371,18 +372,20 @@ def download_feeds(city: str) -> None:
         print(f"  ⬇️  {filename} ({host})")
 
         ok = fetch_with_curl_fallback(url, outfile)
+        body = outfile.read_text(encoding="utf-8", errors="ignore") if ok else ""
+        # A 200 carrying an HTML block page is a failed source, not a quiet
+        # one: only a real calendar counts as ran (#233).
+        ok = ok and is_calendar_body(body)
 
         # Report result
         if ok:
-            try:
-                with outfile.open() as ics:
-                    events = ics.read().count("BEGIN:VEVENT")
-            except Exception:
-                events = 0
+            events = body.count("BEGIN:VEVENT")
 
             # Inject source headers from feeds.txt metadata
             if friendly_name:
                 inject_source_headers(outfile, friendly_name, fallback_url)
+
+            record_ran(outfile)
 
             print(
                 f"  ✅ {filename}: {events} events"

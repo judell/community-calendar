@@ -28,16 +28,16 @@ CREATE TABLE IF NOT EXISTS events (
 -- RPC for stale event cleanup (used by load-events edge function;
 -- replaces URL-based NOT IN filter that exceeded PostgREST URL length limits)
 --
--- Source-aware (20261011130000_source_aware_delete_stale_events.sql): only
--- rows belonging to a source_id present in the payload (p_sources) are swept,
--- so a source whose ingestion failed and produced no output keeps its rows.
--- p_sources IS NULL falls back to the old whole-city sweep.
+-- Scoped by the ran-source manifest (20261022120000_ran_source_sweep.sql):
+-- load-events passes p_sources = the source_ids whose ingestion succeeded this
+-- build, so a source that ran and emptied is swept while a failed one keeps
+-- its rows. p_sources IS NULL falls back to the old whole-city sweep.
 --
--- Includes the partial-load guard from 20260722210000_guard_delete_stale_events.sql,
--- which the migrations apply but a CLI `init` (which runs only supabase/ddl/*.sql)
--- would otherwise miss. The guard is evaluated per present source, so a healthy
--- source's uid count cannot mask a truncated one; an offending source is
--- preserved and the rest are swept.
+-- The per-source 50% check is a signal, not a skip: a source that loses more
+-- than half its rows is swept anyway and named in a WARNING, because the
+-- manifest says it ran. A truncated scraper run looks the same as real churn
+-- at this layer (ADR 0017). The aggregate guard on the legacy whole-city path
+-- (20260722210000_guard_delete_stale_events.sql) is unchanged.
 --
 -- Uses NOT EXISTS (unnest) instead of != ALL() because != ALL() with 3000+ items
 -- hits Postgres statement timeout. The unnest pattern is index-friendly and
@@ -55,7 +55,7 @@ DECLARE
   current_count bigint;
   would_delete bigint;
   incoming_count bigint;
-  guard_sources text[] := ARRAY[]::text[];
+  shrinking_sources text[] := ARRAY[]::text[];
   deleted_count bigint;
 BEGIN
   IF p_sources IS NULL THEN
@@ -85,7 +85,7 @@ BEGIN
     END IF;
   ELSE
     SELECT coalesce(array_agg(s.source_id), ARRAY[]::text[])
-      INTO guard_sources
+      INTO shrinking_sources
     FROM (
       SELECT e.source_id,
              count(*) AS current_s,
@@ -103,11 +103,12 @@ BEGIN
     ) s
     WHERE s.stale_s * 2 > s.current_s;
 
-    IF array_length(guard_sources, 1) IS NOT NULL THEN
+    IF array_length(shrinking_sources, 1) IS NOT NULL THEN
       RAISE WARNING
-        'delete_stale_events preserved % source(s) for city % (would delete '
-        'more than half their rows): %',
-        array_length(guard_sources, 1), p_city, array_to_string(guard_sources, ', ');
+        'delete_stale_events swept % source(s) for city % after losing more '
+        'than half their rows: %',
+        array_length(shrinking_sources, 1), p_city,
+        array_to_string(shrinking_sources, ', ');
     END IF;
   END IF;
 
@@ -115,7 +116,6 @@ BEGIN
   WHERE e.city = p_city
     AND e.source_uid IS NOT NULL
     AND (p_sources IS NULL OR e.source_id = ANY(p_sources))
-    AND NOT (e.source_id = ANY(guard_sources))
     AND NOT EXISTS (
       SELECT 1 FROM unnest(p_source_uids) AS u(uid)
       WHERE u.uid = e.source_uid

@@ -62,7 +62,7 @@ test-node:
 # Run edge-function tests (Deno; not covered by pytest or vitest)
 test-deno:
 	@echo "Running Deno tests..."
-	@deno test supabase/functions/my-picks/dedupe_test.ts
+	@deno test supabase/functions/my-picks/dedupe_test.ts supabase/functions/load-events/scope_test.ts
 
 # Run browser groups (requires playwright browsers: pnpm exec playwright install chromium)
 test-browser:

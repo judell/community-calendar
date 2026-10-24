@@ -315,6 +315,7 @@ def clean_known_outputs(city: str, workflow_rows: list[dict], live_feed_rows: li
         {
             ROOT / "cities" / city / "combined.ics",
             ROOT / "cities" / city / "events.json",
+            ROOT / "cities" / city / "ran_sources.txt",
         }
     )
     for path in paths:

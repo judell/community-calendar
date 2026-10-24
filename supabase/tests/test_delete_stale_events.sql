@@ -3,13 +3,13 @@
 -- which was hitting Postgres statement timeout with 3500+ source_uids.
 --
 -- Tests 1-4 call the 2-arg form (p_sources defaulted to NULL = legacy
--- whole-city sweep). Tests 5-6 cover source-aware behavior (issue #227).
+-- whole-city sweep). Tests 5-9 cover source-aware behavior (issues #227, #233).
 --
 -- Run: supabase test db supabase/tests/
 -- Or:  make test-sql
 
 BEGIN;
-SELECT plan(17);
+SELECT plan(19);
 
 -- ============================================================================
 -- Test 1: Basic stale event deletion
@@ -181,10 +181,10 @@ SELECT is(
 );
 
 -- ============================================================================
--- Test 7: the guard preserves a source that would lose more than half its rows
+-- Test 7: a source over the threshold is swept, with a warning (#233)
 -- ============================================================================
--- Four src-a rows and a payload with one uid: src-a is over the threshold, so
--- it is preserved (skipped) rather than emptied.
+-- Four src-a rows and a payload with one uid: src-a is over the threshold, but
+-- the manifest says it ran, so the sweep proceeds instead of preserving it.
 DELETE FROM events
 WHERE city = 'test_dse';
 
@@ -194,8 +194,8 @@ FROM generate_series(1, 4) g;
 
 SELECT is(
     delete_stale_events('test_dse', ARRAY['uid-a1'], ARRAY['src-a']),
-    bigint '0',
-    'Test 7: a source over the threshold is preserved, not emptied'
+    bigint '3',
+    'Test 7: a source over the threshold is swept anyway'
 );
 
 SELECT is(
@@ -203,16 +203,15 @@ SELECT is(
         SELECT count(*)::int FROM events
         WHERE city = 'test_dse'
     ),
-    4,
-    'Test 7b: the guarded source keeps all its rows'
+    1,
+    'Test 7b: only the uid carried by the payload survives'
 );
 
 -- ============================================================================
--- Test 8: a healthy source is still swept while another is preserved
+-- Test 8: both a shrinking and a healthy source are swept
 -- ============================================================================
 -- src-a is over the threshold (4 rows, sends 1) and src-b is healthy (100
--- rows, sends 99). src-a is preserved and src-b's one stale row is swept, so a
--- source winding down cannot block cleanup for the rest of the city.
+-- rows, sends 99). Both ran, so both are swept.
 DELETE FROM events
 WHERE city = 'test_dse';
 
@@ -230,8 +229,8 @@ SELECT is(
         ARRAY['uid-a1'] || ARRAY(SELECT 'uid-b' || g FROM generate_series(1, 99) g),
         ARRAY['src-a', 'src-b']
     ),
-    bigint '1',
-    'Test 8: healthy source is swept while the guarded one is preserved'
+    bigint '4',
+    'Test 8: both sources are swept'
 );
 
 SELECT is(
@@ -239,8 +238,8 @@ SELECT is(
         SELECT count(*)::int FROM events
         WHERE city = 'test_dse' AND source_id = 'src-a'
     ),
-    4,
-    'Test 8b: guarded source keeps all its rows'
+    1,
+    'Test 8b: over-threshold source keeps only its carried uid'
 );
 
 SELECT is(
@@ -250,6 +249,37 @@ SELECT is(
     ),
     99,
     'Test 8c: healthy source lost only its stale row'
+);
+
+-- ============================================================================
+-- Test 9: a ran-and-empty source is swept; a failed source keeps its rows
+-- ============================================================================
+-- src-quiet ran and produced no events, so it is in the manifest with an empty
+-- keep list. src-failed is absent from the manifest and keeps its rows.
+DELETE FROM events
+WHERE city = 'test_dse';
+
+INSERT INTO events (city, title, start_time, source, source_id, source_uid)
+SELECT 'test_dse', 'Event Q' || g, now(), 'Source Q', 'src-quiet', 'uid-q' || g
+FROM generate_series(1, 3) g;
+
+INSERT INTO events (city, title, start_time, source, source_id, source_uid)
+SELECT 'test_dse', 'Event F' || g, now(), 'Source F', 'src-failed', 'uid-f' || g
+FROM generate_series(1, 2) g;
+
+SELECT is(
+    delete_stale_events('test_dse', ARRAY[]::text[], ARRAY['src-quiet']),
+    bigint '3',
+    'Test 9: a source that ran and emptied is swept'
+);
+
+SELECT is(
+    (
+        SELECT count(*)::int FROM events
+        WHERE city = 'test_dse' AND source_id = 'src-failed'
+    ),
+    2,
+    'Test 9b: a source absent from the manifest keeps its rows'
 );
 
 -- ============================================================================
