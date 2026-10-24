@@ -125,6 +125,14 @@ BEGIN
 END;
 $$;
 
+-- Only load-events (service role) may sweep. Without this the default PUBLIC
+-- EXECUTE grant let anonymous callers delete events directly through
+-- PostgREST, bypassing the edge function (GHSA-qmc5-6cfg-38p7).
+REVOKE EXECUTE ON FUNCTION public.delete_stale_events(text, text[], text[])
+  FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.delete_stale_events(text, text[], text[])
+  TO service_role;
+
 -- Unique index on source_uid for deduplication
 CREATE UNIQUE INDEX IF NOT EXISTS events_source_uid_unique ON events (source_uid);
 
@@ -149,9 +157,12 @@ CREATE POLICY "Anyone can read events"
   ON events FOR SELECT
   USING (true);
 
--- Allow service functions to insert events
-CREATE POLICY "Service function can insert events"
+-- Only the service role inserts events. The policy previously applied to
+-- PUBLIC, so anonymous REST callers could inject rows and bypass the edge
+-- function (GHSA-qmc5-6cfg-38p7).
+CREATE POLICY "service_role inserts events"
   ON events FOR INSERT
+  TO service_role
   WITH CHECK (true);
 
 -- Allow admin users to delete events

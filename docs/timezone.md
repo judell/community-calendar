@@ -84,7 +84,7 @@ The output is always an ISO 8601 string with an explicit UTC offset. This is wha
 
 ### Step 4: events.json → PostgreSQL
 
-The `load-events` edge function (`supabase/functions/load-events/index.ts`) fetches `events.json` from GitHub Pages and upserts to Supabase. No timezone processing — ISO 8601 strings pass through as-is.
+The `load-events` edge function (`supabase/functions/load-events/index.ts`) receives that `events.json` payload from the CI workflow and upserts it to Supabase. No timezone processing — ISO 8601 strings pass through as-is.
 
 PostgreSQL's `timestamptz` columns accept the offset-qualified strings and store them internally as UTC. `2025-01-15T19:00:00-05:00` and `2025-01-15T16:00:00-08:00` both become the same UTC instant.
 
@@ -135,7 +135,7 @@ For **non-recurring events**: outputs UTC times with Z suffix (`DTSTART:20250327
 
 For **recurring events** (those with an RRULE): outputs local times with TZID (`DTSTART;TZID=America/Los_Angeles:20250326T180000`). This is critical because RRULE `BYDAY` expansion happens relative to the DTSTART timezone. A Wednesday 6pm Pacific event stored as Thursday 1am UTC would expand `BYDAY=WE` on the wrong day if the calendar app uses UTC for expansion.
 
-The city timezone comes from `cities.json` fetched at runtime from the repo (via `GITHUB_REPO` env var, same pattern as `load-events`), not hardcoded. The event's `city` column in the database maps to the timezone.
+The city timezone comes from `cities.json` fetched at runtime from the repo (via the `GITHUB_REPO` env var), not hardcoded. The event's `city` column in the database maps to the timezone.
 
 ### Step 9: Capture-event day-of-week computation
 

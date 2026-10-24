@@ -10,26 +10,27 @@ const stateFile = ".cc-cli-state.json"
 
 // State holds all values collected and derived during init.
 type State struct {
-	Step            int    `json:"step"`
-	Token           string `json:"token"`
-	OrgSlug         string `json:"org_slug"`
-	City            string `json:"city"`
-	GHUser          string `json:"gh_user"`
-	AnthropicKey    string `json:"anthropic_key"`
-	OpenAIKey       string `json:"openai_key"`
-	TicketmasterKey string `json:"ticketmaster_key"`
-	ProjectName     string `json:"project_name"`
-	ProjectRef      string `json:"project_ref"`
-	DBPass          string `json:"db_pass"`
-	Region          string `json:"region"`
-	SupabaseURL     string `json:"supabase_url"`
-	AnonKey         string `json:"anon_key"`
-	PublishableKey  string `json:"publishable_key"`
-	ServiceRoleKey  string `json:"service_role_key"`
-	GHOAuthID       string `json:"gh_oauth_id"`
-	GHOAuthSecret   string `json:"gh_oauth_secret"`
-	GoogleOAuthID   string `json:"google_oauth_id"`
+	Step              int    `json:"step"`
+	Token             string `json:"token"`
+	OrgSlug           string `json:"org_slug"`
+	City              string `json:"city"`
+	GHUser            string `json:"gh_user"`
+	AnthropicKey      string `json:"anthropic_key"`
+	OpenAIKey         string `json:"openai_key"`
+	TicketmasterKey   string `json:"ticketmaster_key"`
+	ProjectName       string `json:"project_name"`
+	ProjectRef        string `json:"project_ref"`
+	DBPass            string `json:"db_pass"`
+	Region            string `json:"region"`
+	SupabaseURL       string `json:"supabase_url"`
+	AnonKey           string `json:"anon_key"`
+	PublishableKey    string `json:"publishable_key"`
+	ServiceRoleKey    string `json:"service_role_key"`
+	GHOAuthID         string `json:"gh_oauth_id"`
+	GHOAuthSecret     string `json:"gh_oauth_secret"`
+	GoogleOAuthID     string `json:"google_oauth_id"`
 	GoogleOAuthSecret string `json:"google_oauth_secret"`
+	LoadEventsSecret  string `json:"load_events_secret"`
 }
 
 // Path returns the state file path relative to repoRoot.

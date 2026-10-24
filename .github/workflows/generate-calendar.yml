@@ -252,6 +252,8 @@ jobs:
       env:
         SUPABASE_URL: ${{ vars.SUPABASE_URL }}
         SUPABASE_ANON_KEY: ${{ vars.SUPABASE_KEY }}
+        # load-events rejects anything without this header (GHSA-qmc5-6cfg-38p7).
+        LOAD_EVENTS_SECRET: ${{ secrets.LOAD_EVENTS_SECRET }}
       run: |
         TOTAL_INSERTED=0
         IFS=',' read -ra UPLOAD_CITIES <<< "${{ steps.locations.outputs.list }}"
@@ -278,6 +280,7 @@ jobs:
             fi
             RESPONSE=$(curl -sL -X POST "${SUPABASE_URL}/functions/v1/load-events" \
               -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+              -H "x-load-events-secret: ${LOAD_EVENTS_SECRET}" \
               -H 'Content-Type: application/json' \
               --data-binary @/tmp/payload_${city}.json)
             echo "$city: $(echo "$RESPONSE" | jq -c '{success, inserted, deleted}')"

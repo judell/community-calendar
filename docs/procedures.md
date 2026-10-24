@@ -369,7 +369,7 @@ const cityNames = {
 <Button variant="outlined" width="100%" onClick="window.location.search = '?city=yourcity'">Your City</Button>
 ```
 
-**`load-events` edge function** — Add the city's events.json URL to the `EVENTS_URLS` map in the Supabase `load-events` edge function. Without this, the CI workflow will generate events.json to GitHub Pages but the app won't see them (it reads from Supabase, not GitHub Pages directly).
+**`load-events` edge function** — No change is needed. The workflow sends each city's events to `load-events` in the same POST that carries the city name, so a new city directory is enough.
 
 The city key must match the directory name under `cities/` and the `?city=` URL parameter.
 

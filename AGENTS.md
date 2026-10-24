@@ -60,7 +60,10 @@ Source attribution flows through a single `X-SOURCE` ICS header — NEVER put
   the scraper runs but has no display name, or vice versa.
 - **Edge function gotcha:** Redeploying any Supabase edge function resets
   "Require JWT" to ON. The workflow calls `load-events` with the anon key, so
-  you must manually turn off "Require JWT" in the Supabase dashboard.
+  you must manually turn off "Require JWT" in the Supabase dashboard. That JWT
+  check is not what protects `load-events` — the `x-load-events-secret` header
+  is (GHSA-qmc5-6cfg-38p7); without the `LOAD_EVENTS_SECRET` project secret the
+  function returns 500 and writes nothing.
 - **DDL files** (`supabase/ddl/`) document the live database state — they are
   not migration scripts.
 - **`SOURCES_CHECKLIST.md`** in each city directory must be updated when

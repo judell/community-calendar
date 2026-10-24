@@ -41,7 +41,6 @@ supabase/
 │   ├── 02_events.sql              # Events table with RLS
 │   ├── 03_picks.sql               # User picks with RLS
 │   ├── 04_feed_tokens.sql         # Feed tokens with RLS
-│   ├── 05_cron_jobs.sql           # Scheduled event loading
 │   ├── 06_event_enrichments.sql   # Curator overrides per event
 │   ├── 07_source_suggestions.sql  # Anonymous source suggestions
 │   ├── 08_admin_users.sql         # Server-side admin allowlist (UUID-based)
@@ -52,7 +51,7 @@ supabase/
 │   └── 20260421182300_optimize_deduplicated_events_index.sql
 │
 └── functions/                     # Edge Functions (Deno/TypeScript)
-    ├── load-events/               # Fetches events.json and upserts to database
+    ├── load-events/               # Upserts CI's events payload (secret-gated)
     ├── my-picks/                  # Returns user's picks as ICS or JSON feed
     └── capture-event/             # Extracts event from poster image or audio via Claude API
 ```
@@ -86,10 +85,10 @@ For the full explanation, see: https://supabase.com/docs/guides/api/api-keys
 | Key | Format | Where used | Purpose |
 |-----|--------|-----------|---------|
 | Publishable | `sb_publishable_...` | `config.json`, `index.html` | Frontend API calls, auth initiation |
-| Legacy anon | `eyJ...` (JWT) | Cron job (`05_cron_jobs.sql`), workflow | Edge Function invocation via `Authorization: Bearer` header |
+| Legacy anon | `eyJ...` (JWT) | Workflow | Edge Function invocation via `Authorization: Bearer` header |
 | Service role | `eyJ...` (JWT) | Edge functions (auto-injected env var) | Server-side DB writes bypassing RLS |
 
-**Why both publishable and legacy anon?** Edge Functions only support JWT verification, so the cron job and GitHub Actions workflow use the legacy anon key in the `Authorization` header. The frontend uses the publishable key. Both have the same low-privilege access level.
+**Why both publishable and legacy anon?** Edge Functions only support JWT verification, so the GitHub Actions workflow uses the legacy anon key in the `Authorization` header. The frontend uses the publishable key. Both have the same low-privilege access level. That JWT check is not an authorization boundary — the publishable key is public — so `load-events` additionally requires the `x-load-events-secret` header.
 
 Find keys in: Dashboard > Settings > API > API Keys tab (publishable) and Legacy API Keys tab (anon, service_role).
 
@@ -185,7 +184,6 @@ psql $DATABASE_URL -f ddl/01_extensions.sql
 psql $DATABASE_URL -f ddl/02_events.sql
 psql $DATABASE_URL -f ddl/03_picks.sql
 psql $DATABASE_URL -f ddl/04_feed_tokens.sql
-psql $DATABASE_URL -f ddl/05_cron_jobs.sql
 psql $DATABASE_URL -f ddl/06_event_enrichments.sql
 psql $DATABASE_URL -f ddl/08_admin_users.sql
 psql $DATABASE_URL -f ddl/09_admin_github_users.sql
@@ -221,13 +219,18 @@ supabase login
 # Link to project
 supabase link --project-ref dzpdualvwspgqghrysyz
 
+# load-events rejects every call without this secret, so set it before deploying
+supabase secrets set LOAD_EVENTS_SECRET=...
+
 # Deploy functions (all need --no-verify-jwt)
 supabase functions deploy load-events --no-verify-jwt
 supabase functions deploy my-picks --no-verify-jwt
 supabase functions deploy capture-event --no-verify-jwt
 ```
 
-**JWT gotcha:** Redeploying any edge function via the Supabase MCP tool resets "Require JWT" to ON. After redeploying, manually turn off "Require JWT" in the Supabase dashboard (Edge Functions > function-name > Settings). The `load-events` function is called by the workflow with the anon key, and `my-picks` is called by calendar apps with a feed token — neither uses a JWT.
+**JWT gotcha:** Redeploying any edge function via the Supabase MCP tool resets "Require JWT" to ON. After redeploying, manually turn off "Require JWT" in the Supabase dashboard (Edge Functions > function-name > Settings). The `load-events` function is called by the workflow, and `my-picks` is called by calendar apps with a feed token — neither uses a JWT.
+
+**`load-events` gotcha:** JWT verification is not an authorization boundary for this function — the publishable key is public, so anyone can satisfy it. Writes are gated by the `x-load-events-secret` header instead. CI reads it from the `LOAD_EVENTS_SECRET` Actions secret, which must match the function secret. If the function secret is unset the function returns 500 and writes nothing; that is intentional (GHSA-qmc5-6cfg-38p7).
 
 ### 3. Set Edge Function Secrets
 
@@ -238,16 +241,22 @@ Supabase Dashboard > Edge Functions > capture-event > Secrets, or:
 supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 ```
 
+`load-events` needs `LOAD_EVENTS_SECRET` (see above). Rotate it by setting the new value in both the Supabase project and the GitHub Actions secret; no redeploy is needed.
+
 ## Edge Functions
 
-### load-events (v16)
+### load-events (v17)
 
-Fetches `cities/*/events.json` from GitHub Pages and upserts into the events table. Processes all 5 cities (santarosa, bloomington, davis, petaluma, toronto).
+Upserts one city's events into the events table and sweeps stale rows for the sources that ran. CI sends the payload directly; there is no longer a GitHub-fetch fallback, and only callers holding `LOAD_EVENTS_SECRET` are accepted.
 
 ```bash
 curl -X POST 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events' \
-  -H 'Authorization: Bearer <LEGACY_ANON_KEY>'
+  -H "x-load-events-secret: $LOAD_EVENTS_SECRET" \
+  -H 'Content-Type: application/json' \
+  --data-binary @payload.json
 ```
+
+`payload.json` is `{city, events, ran_sources}`; see the upload step in `.github/workflows/generate-calendar.yml` for how it is built.
 
 ### my-picks (v10)
 

@@ -4,9 +4,9 @@ Features that currently require code deploys or direct DB access but should be m
 
 ## 1. City configuration
 
-The list of cities and their GitHub Pages URLs is hardcoded in the `load-events` edge function. Adding a city requires editing TypeScript and redeploying.
+The list of cities is not in the edge function. The workflow reads it from the locations list and POSTs one city's payload per call to `load-events`; `index.html` keeps the city picker and `Main.xmlui` the buttons.
 
-**Current**: `EVENTS_URLS` map in `supabase/functions/load-events/index.ts`
+**Current**: locations list in `.github/workflows/generate-calendar.yml`, plus `xmlui/index.html` and `xmlui/Main.xmlui`
 
 **Proposed**: A `city_config` table:
 

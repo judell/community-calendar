@@ -375,13 +375,14 @@ skips that test. See `CONTRIBUTING.md` for the full contract.
 3. Add scrapers and feeds
 4. Update workflow YAML (add city to locations list, add scrape section, add commit step)
 5. Update UI (two places: `index.html` cityNames map + `Main.xmlui` city picker buttons)
-6. Add city to `load-events` edge function (`EVENTS_URLS` map)
-7. Optional: create `cities/{city}/city.conf` for geo-filtering
-8. Commit and push
+6. Optional: create `cities/{city}/city.conf` for geo-filtering
+7. Commit and push
+
+No edge-function change is needed: the workflow POSTs each city's payload to `load-events`, which takes one city per request.
 
 ### Edge Function Gotcha
 
-Redeploying any Supabase edge function via the Supabase MCP tool resets "Require JWT" to ON. The workflow calls `load-events` with the anon key, so after redeploying you must **manually turn off "Require JWT"** in the Supabase dashboard or the build will fail.
+Redeploying any Supabase edge function via the Supabase MCP tool resets "Require JWT" to ON. The workflow calls `load-events` with the anon key, so after redeploying you must **manually turn off "Require JWT"** in the Supabase dashboard or the build will fail. That JWT check is not what protects `load-events` — the `x-load-events-secret` header is (GHSA-qmc5-6cfg-38p7); without the `LOAD_EVENTS_SECRET` project secret the function returns 500 and writes nothing.
 
 ### Known Platform Limitations
 

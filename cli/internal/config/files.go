@@ -37,15 +37,6 @@ func UpdateHTMLFiles(repoRoot, supabaseURL, publishableKey, projectRef string) e
 	return nil
 }
 
-// UpdateCronJobSQL updates the cron job DDL with the real project URL and anon key.
-func UpdateCronJobSQL(repoRoot, supabaseURL, anonKey string) error {
-	path := filepath.Join(repoRoot, "supabase", "ddl", "05_cron_jobs.sql")
-	return replaceInFile(path, map[string]string{
-		"https://dzpdualvwspgqghrysyz.supabase.co": supabaseURL,
-		"<YOUR_LEGACY_ANON_KEY>":                   anonKey,
-	})
-}
-
 // ListOtherCities returns names of city directories that don't match the chosen city.
 func ListOtherCities(repoRoot, keepCity string) ([]string, error) {
 	citiesDir := filepath.Join(repoRoot, "cities")
