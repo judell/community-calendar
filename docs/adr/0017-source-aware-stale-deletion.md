@@ -111,6 +111,21 @@ a survivor whose owner is gone — leaves a duplicate that the source-aware swee
 cannot clear, because the retiring feed's `source_id` is no longer in the
 payload.
 
+## Amendment 2026-10-23 (#240)
+
+The `events.in.gov` pair was not two sources. The two URLs serve the same
+Monroe County Government calendar with identical UIDs, and
+`browse_type=school` filters nothing, so the mislabeled duplicate was retired
+instead of the slug being disambiguated. The row is a `status='removed'`
+tombstone, so the URL cannot return as a new feed and recreate the collision.
+
+The guard stays: a shared stem still identifies neither feed, and
+`download_feeds.py` now exits non-zero when two feeds in one city would write
+the same `.ics` file, so a feed added through Manage Feeds fails the build
+instead of overwriting another source's calendar. `tests/test_feed_slug.py`
+also fails when two same-city entries in `feeds.txt` or `pending_feeds.txt`
+produce one stem, which catches the pair at PR time.
+
 ## Alternatives Considered
 
 - **Block the whole city upload on any scraper failure.** Rejected in #226: one

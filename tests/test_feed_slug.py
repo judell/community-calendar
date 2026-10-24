@@ -122,3 +122,37 @@ class TestSourceId:
             source_id_for("curator", "https://example.com/functions/v1/my-picks")
             == "example_functions_v1"
         )
+
+
+class TestNoStemCollisions:
+    def test_no_two_feeds_in_a_city_share_a_source_id(self):
+        """Two same-city feeds on one stem write one .ics file (#240).
+
+        download_feeds.py names the file slugify(url).ics and a scraper's stem
+        is its output filename, so a query-only difference or a scraper named
+        after an ICS slug overwrites the other feed. The DB is not available
+        here, so check the exported and pending snapshots before a merge.
+        """
+        cities = Path(__file__).parent.parent / "cities"
+        collisions = []
+        for city_dir in sorted(p for p in cities.iterdir() if p.is_dir()):
+            stems: dict[str, set[str]] = {}
+            for name in ("feeds.txt", "pending_feeds.txt"):
+                path = city_dir / name
+                if not path.exists():
+                    continue
+                for line in path.read_text().splitlines():
+                    entry = line.strip()
+                    if entry.startswith("http"):
+                        stem = source_id_for("ics_url", entry)
+                    elif entry.startswith("cities/") and entry.endswith(".ics"):
+                        stem = source_id_for("scraper", entry)
+                    else:
+                        continue
+                    stems.setdefault(stem, set()).add(entry)
+            collisions += [
+                f"{city_dir.name}: {stem} <- {', '.join(sorted(entries))}"
+                for stem, entries in stems.items()
+                if len(entries) > 1
+            ]
+        assert not collisions, "feeds share an .ics stem:\n" + "\n".join(collisions)

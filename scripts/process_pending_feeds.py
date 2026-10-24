@@ -22,6 +22,7 @@ import json
 import os
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -76,6 +77,35 @@ def parse_pending_feeds(path: Path):
     return feeds
 
 
+def existing_feed_status(city, url, supabase_url, service_key):
+    """Status of the row that made an insert a duplicate, or None.
+
+    A removed row is a tombstone (#240): the unique key keeps that URL from
+    returning as a new feed, so the skip must say so rather than read as noise.
+    """
+    query = urllib.parse.urlencode({"city": f"eq.{city}", "url": f"eq.{url}", "select": "status"})
+    req = urllib.request.Request(
+        f"{supabase_url}/rest/v1/feeds?{query}",
+        headers={"apikey": service_key, "Authorization": f"Bearer {service_key}"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            rows = json.loads(resp.read().decode())
+    except OSError, ValueError:
+        return None
+    return rows[0].get("status") if isinstance(rows, list) and rows else None
+
+
+def report_skipped(feed, city, supabase_url, service_key):
+    status = existing_feed_status(city, feed["url"], supabase_url, service_key)
+    if status == "removed":
+        print(
+            f"  = {feed['name']} (already exists as removed; re-adding it has no effect — see #240)"
+        )
+    else:
+        print(f"  = {feed['name']} (already exists)")
+
+
 def insert_feeds(city, feeds, supabase_url, service_key):
     """Insert feeds into the feeds table. Returns (inserted, skipped, errors)."""
     inserted = 0
@@ -102,23 +132,26 @@ def insert_feeds(city, feeds, supabase_url, service_key):
                 "apikey": service_key,
                 "Authorization": f"Bearer {service_key}",
                 "Content-Type": "application/json",
-                "Prefer": "resolution=ignore-duplicates,return=minimal",
+                "Prefer": "resolution=ignore-duplicates,return=representation",
             },
             method="POST",
         )
         try:
             with urllib.request.urlopen(req) as resp:
-                if resp.status == 201:
-                    inserted += 1
-                    print(f"  + {feed['name']}")
-                else:
-                    skipped += 1
-                    print(f"  = {feed['name']} (already exists)")
+                # An ignored duplicate returns an empty array, so the body, not
+                # the status, says whether the row was inserted.
+                created = json.loads(resp.read().decode() or "[]")
+            if created:
+                inserted += 1
+                print(f"  + {feed['name']}")
+            else:
+                skipped += 1
+                report_skipped(feed, city, supabase_url, service_key)
         except urllib.error.HTTPError as e:
             body = e.read().decode()
             if "duplicate" in body.lower() or e.code == 409:
                 skipped += 1
-                print(f"  = {feed['name']} (already exists)")
+                report_skipped(feed, city, supabase_url, service_key)
             else:
                 errors += 1
                 print(f"  ! {feed['name']}: {e.code} {body}")

@@ -61,7 +61,8 @@ BEGIN
 
   -- A stem that two same-city feeds both claim identifies neither exclusively,
   -- so rows carrying it are left in place. Bloomington's two events.in.gov
-  -- rows share one (both slug to events_search_events_ics).
+  -- rows shared one (both slugged to events_search_events_ics) until #240
+  -- retired the duplicate feed; the guard covers any future pair.
   shared_ids := ARRAY(
     SELECT unnest(f.source_ids)
     INTERSECT

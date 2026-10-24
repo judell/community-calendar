@@ -125,8 +125,9 @@ SELECT is(
 );
 
 -- Two feeds can produce the same stem (bloomington's two events.in.gov rows
--- both slug to events_search_events_ics). That stem identifies neither feed
--- exclusively, so neither feed's rows may be deleted through it.
+-- both slugged to events_search_events_ics until #240 retired the duplicate).
+-- That stem identifies neither feed exclusively, so neither feed's rows may be
+-- deleted through it.
 SELECT remove_feed(
     (
         SELECT id FROM feeds

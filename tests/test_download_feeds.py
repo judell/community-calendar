@@ -533,6 +533,129 @@ class TestDownloadProgressLog:
         assert ".ics" in log_before_fetch["log"]
 
 
+class TestStemCollisions:
+    """A feed added via Manage Feeds never sees the PR-time snapshot test, so
+    the downloader itself must refuse a shared stem (#240)."""
+
+    def _db_feeds(self, monkeypatch, urls):
+        monkeypatch.setattr(
+            df,
+            "fetch_feeds_from_db",
+            lambda city: [
+                {
+                    "id": i,
+                    "url": url,
+                    "name": f"Feed {i}",
+                    "fallback_url": None,
+                    "status": "active",
+                    "feed_type": "ics_url",
+                    "source_ids": [],
+                }
+                for i, url in enumerate(urls)
+            ],
+        )
+
+    def test_query_only_difference_fails_before_fetching(self, monkeypatch, tmp_path, capsys):
+        monkeypatch.chdir(tmp_path)
+        self._db_feeds(
+            monkeypatch,
+            [
+                "https://events.in.gov/search/events.ics?event_types%5B%5D=1",
+                "https://events.in.gov/search/events.ics?browse_type=school&event_types%5B%5D=1",
+            ],
+        )
+        fetched: list[str] = []
+        monkeypatch.setattr(
+            df,
+            "fetch_with_curl_fallback",
+            lambda url, outfile: fetched.append(url) or True,
+        )
+
+        with pytest.raises(SystemExit) as exc:
+            df.download_feeds("bloomington")
+
+        assert "events_search_events_ics" in str(exc.value)
+        assert fetched == []
+
+    def test_distinct_stems_are_downloaded(self, monkeypatch, tmp_path):
+        monkeypatch.chdir(tmp_path)
+        self._db_feeds(
+            monkeypatch,
+            ["https://example.com/a/feed.ics", "https://example.com/b/feed.ics"],
+        )
+        fetched: list[str] = []
+
+        def fake_fetch(url, outfile):
+            fetched.append(url)
+            outfile.write_text(
+                "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nEND:VCALENDAR\r\n", encoding="utf-8"
+            )
+            return True
+
+        monkeypatch.setattr(df, "fetch_with_curl_fallback", fake_fetch)
+
+        df.download_feeds("bloomington")
+
+        assert len(fetched) == 2
+
+    def test_scraper_output_stem_is_reserved(self, monkeypatch, tmp_path):
+        """Scrapers run first, so a download must not clobber their .ics file."""
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(
+            df,
+            "fetch_feeds_from_db",
+            lambda city: [
+                {
+                    "id": 1,
+                    "url": "https://example.com/x/feed.ics",
+                    "name": "Example",
+                    "fallback_url": None,
+                    "status": "active",
+                    "feed_type": "ics_url",
+                    "source_ids": [],
+                },
+                {
+                    "id": 2,
+                    "url": "cities/bloomington/example_x_feed_ics.ics",
+                    "name": "Example Scraper",
+                    "fallback_url": None,
+                    "status": "active",
+                    "feed_type": "scraper",
+                    "source_ids": ["example_x_feed_ics"],
+                },
+            ],
+        )
+        fetched: list[str] = []
+        monkeypatch.setattr(
+            df,
+            "fetch_with_curl_fallback",
+            lambda url, outfile: fetched.append(url) or True,
+        )
+
+        with pytest.raises(SystemExit) as exc:
+            df.download_feeds("bloomington")
+
+        assert "example_x_feed_ics" in str(exc.value)
+        assert fetched == []
+
+    def test_feeds_txt_fallback_reserves_scraper_stems(self, monkeypatch, tmp_path):
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("SUPABASE_URL", raising=False)
+        monkeypatch.delenv("SUPABASE_SERVICE_KEY", raising=False)
+        city_dir = tmp_path / "cities" / "bloomington"
+        city_dir.mkdir(parents=True)
+        (city_dir / "feeds.txt").write_text(
+            "# Example Scraper\n"
+            "cities/bloomington/example_x_feed_ics.ics\n\n"
+            "# Example\n"
+            "https://example.com/x/feed.ics\n",
+            encoding="utf-8",
+        )
+
+        with pytest.raises(SystemExit):
+            df.download_feeds("bloomington")
+
+
 class TestRecordFeedSources:
     """remove_feed reads feeds.source_ids, so a wrong payload here silently
     disables survivor deletion (#232)."""

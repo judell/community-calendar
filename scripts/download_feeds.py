@@ -97,8 +97,11 @@ def inject_source_headers(filepath: Path, friendly_name: str, fallback_url: str 
 
 
 def fetch_feeds_from_db(city: str):
-    """Query the feeds table for active ics_url and curator feeds.
-    Returns list of (url, name, fallback_url) tuples, or None if DB not available."""
+    """Query the feeds table for active feeds: downloads and scraper outputs.
+
+    Scraper rows come back only so download_feeds can reserve their output
+    stems; the download loop skips them.
+    Returns a list of row dicts, or None if the DB is not available."""
     supabase_url = os.environ.get("SUPABASE_URL")
     service_key = os.environ.get("SUPABASE_SERVICE_KEY")
     if not supabase_url or not service_key:
@@ -109,7 +112,7 @@ def fetch_feeds_from_db(city: str):
         f"?select=id,url,name,status,fallback_url,feed_type"
         f"&city=eq.{city}"
         f"&status=in.(active,pending)"
-        f"&feed_type=in.(ics_url,curator)"
+        f"&feed_type=in.(ics_url,curator,scraper)"
         f"&order=name.asc"
     )
     headers = {
@@ -337,6 +340,36 @@ def fetch_with_curl_fallback(url: str, outfile: Path) -> bool:
     return outfile.exists() and outfile.stat().st_size > 0
 
 
+def scraper_stems_from_feeds_txt(feeds_file: Path) -> dict[str, str]:
+    """Stems of the scraper outputs feeds.txt lists, for the collision preflight."""
+    return {
+        Path(entry).stem: f"scraper output {entry}"
+        for entry in (line.strip() for line in feeds_file.read_text().splitlines())
+        if entry.startswith("cities/") and entry.endswith(".ics")
+    }
+
+
+def assert_unique_stems(feed_list, reserved_stems: dict[str, str]) -> None:
+    """Refuse to download a feed onto a file another source already writes.
+
+    Each download is slugify(url).ics, so two URLs that differ only in the
+    query string overwrite each other on a provider without a slug case, and a
+    feed can overwrite a scraper's output (scrapers run first). The loser's
+    rows then look stale to the sweep (ADR 0017), so fail the run instead of
+    losing a source. The PR-time check in tests/test_feed_slug.py cannot see a
+    feed added through Manage Feeds (#240).
+    """
+    stems: dict[str, str] = dict(reserved_stems)
+    for url, name, _fallback_url in feed_list:
+        stem = slugify(url)
+        if stem in stems:
+            raise SystemExit(
+                f"slug collision: {name!r} and {stems[stem]!r} both write "
+                f"{stem}.ics; give one URL a distinct path or slug case (#240)"
+            )
+        stems[stem] = name
+
+
 def download_feeds(city: str) -> None:
     output_dir = Path("cities") / city
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -344,9 +377,15 @@ def download_feeds(city: str) -> None:
     # Try DB first, fall back to feeds.txt
     db_feeds = fetch_feeds_from_db(city)
     if db_feeds is not None:
-        print(f"  Using feeds table ({len(db_feeds)} feeds)")
-        feed_list = [(f["url"], f["name"], f.get("fallback_url")) for f in db_feeds]
-        db_feeds_by_url = {f["url"]: f for f in db_feeds}
+        download_rows = [f for f in db_feeds if f["feed_type"] != "scraper"]
+        print(f"  Using feeds table ({len(download_rows)} feeds)")
+        feed_list = [(f["url"], f["name"], f.get("fallback_url")) for f in download_rows]
+        db_feeds_by_url = {f["url"]: f for f in download_rows}
+        reserved_stems = {
+            Path(f["url"]).stem: f"scraper output {f['url']}"
+            for f in db_feeds
+            if f["feed_type"] == "scraper"
+        }
     else:
         feeds_file = Path("cities") / city / "feeds.txt"
         if not feeds_file.exists():
@@ -354,7 +393,10 @@ def download_feeds(city: str) -> None:
             return
         feed_list = list(parse_feeds_txt(feeds_file))
         db_feeds_by_url = {}
+        reserved_stems = scraper_stems_from_feeds_txt(feeds_file)
         print(f"  Using feeds.txt ({len(feed_list)} feeds)")
+
+    assert_unique_stems(feed_list, reserved_stems)
 
     count = 0
     last_request_at: dict[str, float] = {}

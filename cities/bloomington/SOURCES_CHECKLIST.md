@@ -177,7 +177,7 @@ These curate or aggregate events from multiple venues:
 | Source | Type | Events | Notes |
 |--------|------|--------|-------|
 | Lotus Festival | ICS | ~7 | WordPress Events Calendar |
-| Indiana State Events | ICS | — | `events.in.gov` |
+| Monroe County Government | ICS | ~133 | `events.in.gov` search feed; serves the same calendar as the retired "Indiana State Events" duplicate (#240) |
 | Utilities Service Board | Google Calendar | — | Board meetings |
 
 ---
@@ -433,6 +433,11 @@ Annual events with reliable dates but no feeds — a once-a-season curator sweep
 ---
 
 ## Discovery Run Log
+
+### 2026-10-23: events.in.gov duplicate feed retired (issue #240)
+- Bloomington carried two feeds on one events.in.gov search endpoint: "Indiana State Events" (no `browse_type`) and "Monroe County Government" (`browse_type=school`). They returned **byte-identical ICS** on 2026-10-23 — 133 UIDs, only `DTSTAMP` differed — all county government meetings (courthouse, commissioners, plan commission). `browse_type=school` filters nothing, so "Indiana State Events" was a **mislabeled duplicate**, not a statewide source.
+- The duplicate also collided on one stem (`events_search_events_ics`) because `slugify()` drops the query string, so one download overwrote the other and the #239 manifest would make that destructive. Migration `supabase/migrations/20261023120000_retire_duplicate_events_in_gov_feed.sql` marks the duplicate `status='removed'` with `source_ids='{}'`; the tombstone keeps the URL from returning as a new feed. No events are deleted: the survivor owns them and re-stamps them by `source_uid`.
+- `tests/test_feed_slug.py` now fails when two same-city entries in `feeds.txt` or `pending_feeds.txt` produce one stem. `slugify()` still drops query strings, so a *new* query-only-different pair is caught by that test at PR time, not by a provider case.
 
 ### 2026-09-19: WFIU Community Calendar built and registered as an aggregator
 - Built `scrapers/wfiu_community_calendar.py` (Pattern A, `name = "WFIU Community Calendar"`): walks the `?f1` date-filtered listing across the Horizon, emits one event per occurrence card, and fetches each unique detail page once for street/city/state/ZIP, ticket link, image, presenting org, and `brightspot.contentId` (the UID). Hard page cap 80 and detail cap 500 both raise rather than truncate; date-drift cards (a month/day that names no real date or has already passed) raise after a small threshold, while the listing's horizon+1 leak drops silently.
