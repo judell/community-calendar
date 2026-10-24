@@ -51,7 +51,6 @@ Database tests in this repo target a disposable local project database. They are
 
 ## Current Tests
 
-- `test_refresh_source_names.sql` - verifies `refresh_source_names()` behavior, including comma-split sources, cleanup, idempotency, and malformed input handling
 - `test_deduplicated_events.sql` - verifies route persistence columns and the `deduplicated_events` view: one row per stored group, NULL-group isolation, structured source-name aggregation, deterministic representative, and source-URL union
 
 ## Troubleshooting

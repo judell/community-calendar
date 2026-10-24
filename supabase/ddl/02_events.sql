@@ -145,8 +145,7 @@ CREATE INDEX IF NOT EXISTS events_category_idx ON events (category);
 -- Composite index for delete_stale_events (city + source_uid filter)
 CREATE INDEX IF NOT EXISTS events_city_source_uid_idx ON events (city, source_uid);
 
--- Index for source filtering (kept for general source-column lookups;
--- refresh_source_names() prefers structured source_names, then falls back to source)
+-- Index for general source-column lookups
 CREATE INDEX IF NOT EXISTS events_source_idx ON events (source);
 
 -- Enable Row Level Security (public read access)

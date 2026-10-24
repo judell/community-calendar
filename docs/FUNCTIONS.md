@@ -9,8 +9,8 @@ This project uses both Postgres functions (PL/pgSQL or SQL, running inside the d
 - `get_curator_name(uuid)` — SECURITY DEFINER, resolves a curator's GitHub username by user ID
 - `apply_category_override()` — trigger function, stores original category then propagates override to events table
 - `get_source_counts(target_city)` — returns source names + event counts by querying events table directly (replaces cached `source_names` table)
-- `remove_feed(feed_id)` — SECURITY DEFINER, deletes a feed row (used by Manage Feeds dialog to avoid CORS issues with PATCH)
-- `refresh_source_names(target_city)` — legacy, refreshes the `source_names` cache table
+- `remove_feed(feed_id)` — SECURITY DEFINER, admin-only: deletes a feed row and its events (used by Manage Feeds dialog to avoid CORS issues with PATCH)
+- `refresh_deduplicated_events()` — CI-only rebuild of the `deduplicated_events` materialized view; service_role only
 
 ## Edge Functions in This Project
 
@@ -59,6 +59,8 @@ The caller can get a username for a given UUID, but cannot query auth.users arbi
 ### Required safety measures
 
 SECURITY DEFINER functions must include `SET search_path = ''` to prevent search-path hijacking (where an attacker creates a function in a schema that shadows a system function). The Supabase linter flags functions that omit this.
+
+A grant is not an authorization boundary. `anon` holds the publishable key and every signed-in user holds `authenticated`, so granting EXECUTE to either publishes the function. `SECURITY DEFINER` functions that write must either check the caller in the body (`auth.uid()` against `admin_users` for admin actions) or be granted to `service_role` alone. `remove_feed` and the refresh helpers follow this since GHSA-69r3-3gxw-fm4g.
 
 ### The antipattern: SECURITY DEFINER on views
 

@@ -168,15 +168,21 @@ GRANT SELECT ON deduplicated_events TO anon, authenticated, service_role;
 
 -- RPC used by the nightly build after load-events completes. A failure here
 -- must fail the pipeline so consumers never read a stale group decision.
+-- Service-role only and search-path pinned to match
+-- 20261024130000_secure_definer_functions.sql (GHSA-69r3-3gxw-fm4g): this file
+-- can be promoted after that hardening has already run, so it must not restore
+-- the old anonymous grant.
 CREATE OR REPLACE FUNCTION public.refresh_deduplicated_events()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET statement_timeout TO '0'
+SET search_path = ''
 AS $function$
 BEGIN
-  REFRESH MATERIALIZED VIEW CONCURRENTLY deduplicated_events;
+  REFRESH MATERIALIZED VIEW CONCURRENTLY public.deduplicated_events;
 END;
 $function$;
 
-GRANT EXECUTE ON FUNCTION public.refresh_deduplicated_events() TO anon, authenticated, service_role;
+REVOKE EXECUTE ON FUNCTION public.refresh_deduplicated_events() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.refresh_deduplicated_events() TO service_role;

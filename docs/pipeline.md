@@ -84,7 +84,7 @@ The workflow in `.github/workflows/generate-calendar.yml` runs daily or on manua
 6. **Convert to JSON** — `ics_to_json.py` converts combined ICS to JSON with fuzzy title clustering
 7. **Classify events** — `classify_events_anthropic.py` categorizes uncategorized events via Claude Haiku
 8. **Upload to Supabase** — `load-events` edge function upserts events
-9. **Refresh source names** — `refresh_source_names()` RPC updates the `source_names` cache (legacy, being replaced by `get_source_counts()` RPC)
+9. **Refresh deduplicated events** — `refresh_deduplicated_events()` RPC rebuilds the materialized view
 10. **Commit metadata** — auto-commits `feeds.txt`, `cities.json`, version info
 
 ## Source Attribution

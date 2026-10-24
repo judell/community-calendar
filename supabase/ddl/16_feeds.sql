@@ -28,6 +28,14 @@ CREATE POLICY "Admin users can manage feeds" ON feeds FOR ALL
 -- events and the feed row in one transaction, returns what it deleted, and
 -- raises for an unknown id.
 --
+-- Admin-only and unreachable by anon since
+-- 20261024130000_secure_definer_functions.sql (GHSA-69r3-3gxw-fm4g): the body
+-- requires an admin_users row for auth.uid(), and EXECUTE is revoked from
+-- PUBLIC and anon. The Manage Feeds dialog passes with the admin's JWT; a
+-- direct SQL session must set the claim first:
+--   select set_config('request.jwt.claims', '{"sub":"<admin-user-uuid>"}', true);
+--   select remove_feed(<feed-id>);
+--
 -- Ownership is `events.source_id = ANY(feeds.source_ids)` — the history of
 -- .ics stems the build produced for this feed. A merge survivor's `source` is
 -- the comma-joined member names, so only source_id identifies which feed owns
@@ -40,6 +48,7 @@ CREATE POLICY "Admin users can manage feeds" ON feeds FOR ALL
 CREATE FUNCTION remove_feed(feed_id bigint)
 RETURNS TABLE (events_deleted bigint, feed_deleted boolean)
 LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
   f record;
@@ -47,7 +56,13 @@ DECLARE
   shared_ids text[];
   ev_count bigint;
 BEGIN
-  SELECT city, name, source_ids INTO f FROM feeds WHERE id = feed_id;
+  IF NOT EXISTS (
+    SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()
+  ) THEN
+    RAISE EXCEPTION 'remove_feed: admin required' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT city, name, source_ids INTO f FROM public.feeds WHERE id = feed_id;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'remove_feed: no feed row with id %', feed_id;
   END IF;
@@ -67,7 +82,7 @@ BEGIN
     SELECT unnest(f.source_ids)
     INTERSECT
     SELECT unnest(o.source_ids)
-    FROM feeds o
+    FROM public.feeds o
     WHERE o.city = f.city
       AND o.id <> feed_id
   );
@@ -77,14 +92,14 @@ BEGIN
       f.name, feed_id, array_to_string(shared_ids, ', ');
   END IF;
 
-  DELETE FROM events e
+  DELETE FROM public.events e
   WHERE e.city = f.city
     AND (
       (has_history AND e.source_id = ANY(f.source_ids) AND NOT e.source_id = ANY(shared_ids))
       OR (
         e.source = f.name
         AND NOT EXISTS (
-          SELECT 1 FROM feeds o
+          SELECT 1 FROM public.feeds o
           WHERE o.city = f.city
             AND o.id <> feed_id
             AND e.source_id = ANY(o.source_ids)
@@ -93,11 +108,14 @@ BEGIN
     );
   GET DIAGNOSTICS ev_count = ROW_COUNT;
 
-  DELETE FROM feeds WHERE id = feed_id;
+  DELETE FROM public.feeds WHERE id = feed_id;
 
   RETURN QUERY SELECT ev_count, true;
 END;
 $$;
+
+REVOKE EXECUTE ON FUNCTION public.remove_feed(bigint) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.remove_feed(bigint) TO authenticated;
 
 -- Insert-time validation for scraper rows
 -- (since 20260807171000_insert_time_scraper_validation.sql):

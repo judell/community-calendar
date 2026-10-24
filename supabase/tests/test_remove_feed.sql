@@ -5,11 +5,15 @@
 -- merge survivor carries the comma-joined member names, so source_id is the
 -- only way to tell which feed owns it (ADR 0017).
 --
+-- The caller gate (GHSA-69r3-3gxw-fm4g) is covered at the top: anon cannot
+-- execute the function at all, and a signed-in non-admin is refused before any
+-- row is read or deleted.
+--
 -- Run: supabase test db supabase/tests/
 -- Or:  make test-sql
 
 BEGIN;
-SELECT plan(11);
+SELECT plan(15);
 
 INSERT INTO feeds (city, url, name, status, feed_type, source_ids)
 VALUES
@@ -39,11 +43,64 @@ VALUES (
     'authenticated', 'authenticated', 'pgtap@example.invalid'
 );
 
+INSERT INTO admin_users (user_id)
+VALUES ('00000000-0000-0000-0000-000000000232');
+
 INSERT INTO picks (user_id, event_id)
 VALUES
 ('00000000-0000-0000-0000-000000000232', (SELECT id FROM events WHERE source_uid = 'uid-a-owns')),
 ('00000000-0000-0000-0000-000000000232', (SELECT id FROM events WHERE source_uid = 'uid-b-owns')),
 ('00000000-0000-0000-0000-000000000232', (SELECT id FROM events WHERE source_uid = 'uid-g-shared'));
+
+-- GHSA-69r3-3gxw-fm4g: remove_feed is an admin action, not a public RPC.
+SELECT is(
+    has_function_privilege('anon', 'public.remove_feed(bigint)', 'EXECUTE'),
+    false,
+    'anon cannot execute remove_feed'
+);
+
+SELECT ok(
+    has_function_privilege('authenticated', 'public.remove_feed(bigint)', 'EXECUTE'),
+    'authenticated can reach remove_feed, where the admin check decides'
+);
+
+DO $$
+BEGIN
+  PERFORM set_config(
+    'request.jwt.claims',
+    '{"sub":"00000000-0000-0000-0000-000000000233","role":"authenticated"}',
+    true
+  );
+END
+$$;
+
+SET LOCAL ROLE authenticated;
+
+SELECT throws_ok(
+    $$ SELECT * FROM public.remove_feed(1) $$,
+    '42501',
+    NULL,
+    'a signed-in non-admin is refused'
+);
+
+RESET ROLE;
+
+SELECT is(
+    (SELECT count(*)::int FROM feeds WHERE city = 'test_rf'),
+    7,
+    'a refused call deletes nothing'
+);
+
+-- Every remaining call is the admin.
+DO $$
+BEGIN
+  PERFORM set_config(
+    'request.jwt.claims',
+    '{"sub":"00000000-0000-0000-0000-000000000232","role":"authenticated"}',
+    true
+  );
+END
+$$;
 
 -- Remove Feed A: the survivor it won must go; Feed B's survivor must stay.
 SELECT remove_feed((SELECT id FROM feeds WHERE city = 'test_rf' AND name = 'Feed A'));

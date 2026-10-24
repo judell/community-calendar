@@ -82,6 +82,16 @@ migrated — but it was never re-applied at the new authority.
 **Harder:**
 - Removing a source requires a credentialed database caller, not a plain file
   edit. The runbook must point at `remove_feed` (see `supabase/ddl/16_feeds.sql`).
+  Since GHSA-69r3-3gxw-fm4g the function also requires an admin identity, so a
+  direct SQL session must present one before the call:
+
+  ```sql
+  select set_config('request.jwt.claims', '{"sub":"<admin-user-uuid>"}', true);
+  select remove_feed(<feed-id>);
+  ```
+
+  The Manage Feeds dialog, used while signed in as an admin, needs no such
+  preamble.
 - Teams with file-only access (forks without DB credentials) cannot remove a
   source locally; they must file the change for a credentialed maintainer.
 
