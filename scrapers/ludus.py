@@ -167,6 +167,7 @@ class LudusScraper(BaseScraper):
 
         soup = BeautifulSoup(html, "html.parser")
         show_items = soup.find_all("div", class_="show_item")
+        self.mark_source_reached()
 
         if not show_items:
             self.logger.info("No show_item elements found — venue may be between productions.")

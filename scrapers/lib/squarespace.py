@@ -60,6 +60,7 @@ class SquarespaceScraper(BaseScraper):
         except (HTTPError, URLError, json.JSONDecodeError) as e:
             self.logger.error(f"Failed to fetch: {e}")
             return []
+        self.mark_source_reached()
 
         items = data.get("upcoming", data.get("items", []))
         events = []

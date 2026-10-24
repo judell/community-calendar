@@ -172,7 +172,7 @@ class DiceApiScraper(BaseScraper):
     def fetch_events(self) -> list[dict[str, Any]]:
         api_key = self._get_api_key()
         if not api_key:
-            return []
+            raise RuntimeError(f"DICE API key unavailable from {self.key_url}")
 
         events: list[dict[str, Any]] = []
         url: str | None = self._build_url()
@@ -186,6 +186,7 @@ class DiceApiScraper(BaseScraper):
             except json.JSONDecodeError as e:
                 self.logger.error(f"Bad JSON from {url}: {e}")
                 break
+            self.mark_source_reached()
             data: list[dict[str, Any]] = payload.get("data") or []
             self.logger.info(f"Page {pages + 1}: {len(data)} events")
             for item in data:

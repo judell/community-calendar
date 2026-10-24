@@ -94,6 +94,7 @@ class LocalistScraper(BaseScraper):
 
         while True:
             data = self._fetch_api(page)
+            self.mark_source_reached()
             raw_events = data.get("events", [])
             if not raw_events:
                 break

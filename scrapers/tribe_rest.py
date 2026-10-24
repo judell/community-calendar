@@ -122,6 +122,7 @@ class TribeRestScraper(BaseScraper):
                     raise
                 self.logger.warning(f"Error fetching page {page}: {e}")
                 break
+            self.mark_source_reached()
 
             events = data.get("events", [])
             if not events:

@@ -46,6 +46,7 @@ class TheBishopScraper(BaseScraper):
             self.logger.info(f"Fetching events from {url}")
             try:
                 page_events = self._fetch_page(url)
+                self.mark_source_reached()
                 for event in page_events:
                     if event["url"] not in seen_urls:
                         seen_urls.add(event["url"])

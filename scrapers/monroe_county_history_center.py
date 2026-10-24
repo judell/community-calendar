@@ -126,6 +126,7 @@ class HistoryCenterScraper(BaseScraper):
                 break
 
             items = response.json()
+            self.mark_source_reached()
             if not items:
                 break
 

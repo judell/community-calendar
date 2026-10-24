@@ -59,6 +59,7 @@ class SongkickScraper(BaseScraper):
         except (HTTPError, URLError) as e:
             self.logger.warning(f"Failed to fetch {self.url}: {e}")
             return []
+        self.mark_source_reached()
 
         now = datetime.now(UTC)
         events = []

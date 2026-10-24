@@ -44,6 +44,7 @@ class ComedyAtticScraper(BaseScraper):
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "html.parser")
+        self.mark_source_reached()
         tz = ZoneInfo(self.timezone)
 
         # Extract event URLs from listing page

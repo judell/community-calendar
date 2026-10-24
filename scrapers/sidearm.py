@@ -93,6 +93,7 @@ class SidearmScraper(BaseScraper):
                 data = json.loads(resp.read())
         except HTTPError, URLError, json.JSONDecodeError:
             return None
+        self.mark_source_reached()
 
         events = []
         for day in data:
@@ -235,6 +236,7 @@ class SidearmScraper(BaseScraper):
             if not html:
                 continue
             jsonld_events = self._extract_jsonld(html)
+            self.mark_source_reached()
             logger.info(f"  {sport}: {len(jsonld_events)} events")
             for je in jsonld_events:
                 event = self._parse_jsonld_event(je)

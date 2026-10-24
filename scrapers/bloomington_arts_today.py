@@ -62,6 +62,7 @@ class BloomingtonArtsTodayScraper(BaseScraper):
         events = []
 
         cards = soup.select("div.flex.items-start.justify-between.gap-6")
+        self.mark_source_reached()
         self.logger.info(f"Found {len(cards)} event cards")
 
         for card in cards:

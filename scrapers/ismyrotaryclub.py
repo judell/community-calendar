@@ -89,6 +89,7 @@ class IsMyRotaryClubScraper(BaseScraper):
         except (HTTPError, URLError) as e:
             self.logger.warning(f"Failed to fetch events: {e}")
             return []
+        self.mark_source_reached()
 
         self.logger.info(f"Fetched {len(data)} events for club {self.club_id}")
 

@@ -211,6 +211,7 @@ class TmbccScraper(BaseScraper):
         except json.JSONDecodeError as e:
             self.logger.warning(f"wp-json parse failed: {e}")
             return []
+        self.mark_source_reached()
         posts = []
         for item in items:
             if not isinstance(item, dict):
@@ -239,6 +240,7 @@ class TmbccScraper(BaseScraper):
         except ET.ParseError as e:
             self.logger.warning(f"RSS parse failed: {e}")
             return []
+        self.mark_source_reached()
         ns = {"content": "http://purl.org/rss/1.0/modules/content/"}
         posts = []
         for item in root.findall(".//item"):

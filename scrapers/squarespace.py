@@ -62,6 +62,7 @@ class SquarespaceScraper(BaseScraper):
     def fetch_events(self) -> list[dict[str, Any]]:
         """Fetch events by finding links and getting their iCal data."""
         event_urls = self._get_event_urls()
+        self.mark_source_reached()
         logger.info(f"Found {len(event_urls)} event URLs")
 
         events = []

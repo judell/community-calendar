@@ -59,6 +59,7 @@ class SugarCalendarScraper(BaseScraper):
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "html.parser")
+        self.mark_source_reached()
         tz = ZoneInfo(self.timezone)
         events = []
 

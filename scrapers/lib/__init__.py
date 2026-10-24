@@ -1,4 +1,4 @@
-from .base import BaseScraper
+from .base import BaseScraper, SourceNotReachedError
 from .cityspark import BohemianScraper, CitySparkScraper, PressDemocratScraper
 from .elfsight import ElfsightCalendarScraper, expand_recurring_events, fetch_elfsight_data
 from .ics import GoogleCalendarScraper, IcsScraper
@@ -25,6 +25,7 @@ __all__ = [
     "JsonLdScraper",
     "PressDemocratScraper",
     "RssScraper",
+    "SourceNotReachedError",
     "WildApricotRssScraper",
     "append_source",
     "expand_recurring_events",

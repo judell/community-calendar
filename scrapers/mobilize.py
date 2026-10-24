@@ -171,6 +171,7 @@ class MobilizeScraper(BaseScraper):
         data = self._extract_embedded_data(html)
         if not data:
             return []
+        self.mark_source_reached()
 
         # Navigate: top-level has data.events
         events_list = []

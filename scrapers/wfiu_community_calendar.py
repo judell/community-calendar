@@ -489,6 +489,7 @@ class WFIUCommunityCalendarScraper(BaseScraper):
                     f"WFIU listing requested page {page} but the page reports "
                     f"{current} of {reported_total}; refusing to count a repeated page"
                 )
+            self.mark_source_reached()
             if total is None:
                 total = reported_total
                 if test_cap is None and total > PAGE_CAP:

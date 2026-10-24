@@ -121,6 +121,7 @@ class TicketmasterScraper(BaseScraper):
         except (HTTPError, URLError) as e:
             self.logger.warning(f"Failed to fetch Ticketmaster events: {e}")
             return []
+        self.mark_source_reached()
 
         total = data.get("page", {}).get("totalElements", 0)
         total_pages = data.get("page", {}).get("totalPages", 0)

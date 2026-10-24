@@ -165,3 +165,12 @@ Consequences that remain:
   notice lands in the Postgres log, not the Actions log (#231).
 - A feed whose URL changes gets a new stem in the manifest; rows under the old
   stem stay unswept, exactly as before.
+
+## Amendment 2026-10-23 (#243)
+
+The accepted cost that "a source that runs successfully but has zero upcoming
+events is indistinguishable from a failed one" now applies only to scrapers
+that have not migrated to the source-reached declaration. `BaseScraper.run()`
+fails a scraper that returns no events without declaring it reached its source
+(ADR 0018), so a migrated quiet source exits 0 and is swept while an outage
+exits non-zero and keeps its rows.

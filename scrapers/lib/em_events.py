@@ -131,6 +131,7 @@ class EmEventsScraper(BaseScraper):
             self.logger.info(f"Fetching page {pno} via AJAX (limit={self.batch_size})")
             try:
                 page_events = self._fetch_page(pno)
+                self.mark_source_reached()
                 if not page_events:
                     self.logger.info(f"No events on page {pno}, stopping pagination")
                     break

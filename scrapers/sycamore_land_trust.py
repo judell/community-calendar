@@ -135,14 +135,18 @@ class SycamoreLandTrustScraper(BaseScraper):
         """Fetch and parse events from the calendar page."""
         logger.info(f"Fetching {EVENTS_URL}")
         result = subprocess.run(
-            ["curl", "-sL", EVENTS_URL], capture_output=True, text=True, timeout=30
+            ["curl", "-sL", "-f", EVENTS_URL], capture_output=True, text=True, timeout=30
         )
         html = result.stdout
+        if result.returncode != 0 or not html:
+            stderr = (result.stderr or "").strip()
+            raise RuntimeError(f"curl fetch failed for {EVENTS_URL}: {stderr or result.returncode}")
 
         # Parse event items
         events = []
         # Split on event items
         items = re.split(r'<div class="item">', html)[1:]  # skip before first
+        self.mark_source_reached()
 
         for item in items:
             # Extract title and URL

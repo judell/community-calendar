@@ -58,6 +58,9 @@ Source attribution flows through a single `X-SOURCE` ICS header — NEVER put
 - **Always use `add_scraper.py`** to register scrapers — it handles both the
   workflow invocation AND the `pending_feeds.txt` metadata. Skipping it means
   the scraper runs but has no display name, or vice versa.
+- **Scrapers declare reach:** call `self.mark_source_reached()` after the
+  primary fetch parses. `BaseScraper.run()` fails a scraper that returns no
+  events without it, instead of writing a sweepable empty calendar.
 - **Edge function gotcha:** Redeploying any Supabase edge function resets
   "Require JWT" to ON. The workflow calls `load-events` with the anon key, so
   you must manually turn off "Require JWT" in the Supabase dashboard. That JWT

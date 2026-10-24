@@ -65,7 +65,7 @@ class OwenCountyLibraryScraper(BaseScraper):
     domain = "owenlib.org"
     timezone = "America/Indiana/Indianapolis"
 
-    def _fetch_page(self, page: int) -> dict:
+    def _fetch_page(self, page: int) -> dict | None:
         url = f"{API_URL}?limit=100&page={page}"
         req = Request(url, headers=HEADERS)
         try:
@@ -73,7 +73,7 @@ class OwenCountyLibraryScraper(BaseScraper):
                 return json.loads(resp.read().decode("utf-8"))
         except (HTTPError, URLError) as e:
             self.logger.warning(f"Failed to fetch page {page}: {e}")
-            return {}
+            return None
 
     def fetch_events(self) -> list[dict[str, Any]]:
         now = datetime.now(UTC)
@@ -82,6 +82,9 @@ class OwenCountyLibraryScraper(BaseScraper):
 
         while True:
             data = self._fetch_page(page)
+            if data is None:
+                break
+            self.mark_source_reached()
             docs = data.get("docs", [])
             if not docs:
                 break

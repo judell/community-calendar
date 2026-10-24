@@ -39,6 +39,7 @@ class OnTapTicketsScraper(BaseScraper):
         events: list[dict[str, Any]] = []
         for page in range(1, MAX_PAGES + 1):
             items = self._fetch_page(page)
+            self.mark_source_reached()
             if not items:
                 break
             if page == MAX_PAGES:

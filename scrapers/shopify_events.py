@@ -138,6 +138,7 @@ class ShopifyEventsScraper(BaseScraper):
         )
         with urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read())
+        self.mark_source_reached()
 
         events = []
         for product in data.get("products", []):

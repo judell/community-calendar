@@ -50,6 +50,7 @@ class FARCenterScraper(BaseScraper):
             raise RuntimeError(
                 "FAR Center listing page has no .entry-main container; the layout changed"
             )
+        self.mark_source_reached()
 
         now = datetime.now(tz)
         cards = list(main.select("div.mb-8"))

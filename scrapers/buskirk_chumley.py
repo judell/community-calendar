@@ -72,6 +72,7 @@ class BuskirkChumleyScraper(BaseScraper):
             )
 
         soup = BeautifulSoup(response.text, "html.parser")
+        self.mark_source_reached()
         events = []
         tz = ZoneInfo(self.timezone)
         seen_urls = set()

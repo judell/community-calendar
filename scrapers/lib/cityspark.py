@@ -72,6 +72,7 @@ class CitySparkScraper(BaseScraper):
             )
             response.raise_for_status()
             data = response.json()
+            self.mark_source_reached()
 
             events: list[dict[str, Any]] = data.get("Value") or []
             if not events:

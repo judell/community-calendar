@@ -6,10 +6,12 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import pytest
+
 # Add project root to path so scraper imports resolve
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from scrapers.lib.base import BaseScraper
+from scrapers.lib.base import BaseScraper, SourceNotReachedError
 
 TZ = ZoneInfo("America/Indiana/Indianapolis")
 
@@ -111,3 +113,66 @@ class TestRunHorizonFilter:
         ics = self._run_ics(tmp_path, events)
 
         assert "No Start" not in ics
+
+
+class TestSourceReached:
+    """run() fails an empty scraper that never declared reaching its source."""
+
+    def test_undeclared_empty_run_raises_and_writes_no_calendar(self, tmp_path):
+        out = tmp_path / "cal.ics"
+
+        with pytest.raises(SourceNotReachedError):
+            _Scraper().run(str(out))
+
+        assert not out.exists()
+
+
+class _DeclaredEmptyScraper(_Scraper):
+    """A scraper that reached its source and legitimately has nothing upcoming."""
+
+    def fetch_events(self):
+        self.mark_source_reached()
+        return []
+
+
+class TestDeclaredEmpty:
+    """A declared quiet source still writes a valid calendar and exits 0."""
+
+    def test_declared_empty_run_writes_a_quiet_calendar(self, tmp_path):
+        out = tmp_path / "cal.ics"
+
+        filename = _DeclaredEmptyScraper().run(str(out))
+
+        assert filename == str(out)
+        ics = out.read_text()
+        assert "BEGIN:VCALENDAR" in ics
+        assert "VEVENT" not in ics
+
+
+class _DeclaredEventsScraper(_FixedEventsScraper):
+    """A migrated scraper that both declares and returns events."""
+
+    def fetch_events(self):
+        self.mark_source_reached()
+        return super().fetch_events()
+
+
+class TestNonEmptyUnaffected:
+    """The declaration is only required when the result is empty."""
+
+    def _event(self):
+        return {"title": "Live Event", "dtstart": datetime.now(TZ) + timedelta(days=10)}
+
+    def test_undeclared_non_empty_run_still_writes(self, tmp_path):
+        out = tmp_path / "cal.ics"
+
+        _FixedEventsScraper([self._event()]).run(str(out))
+
+        assert "Live Event" in out.read_text()
+
+    def test_declared_non_empty_run_still_writes(self, tmp_path):
+        out = tmp_path / "cal.ics"
+
+        _DeclaredEventsScraper([self._event()]).run(str(out))
+
+        assert "Live Event" in out.read_text()

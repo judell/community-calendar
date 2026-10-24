@@ -81,6 +81,7 @@ class EventbriteScraper(BaseScraper):
         pattern = r'(?:https://www\.eventbrite\.com)?(/e/[^"?\s]+)'
         paths = set(re.findall(pattern, html))
         urls = [f"https://www.eventbrite.com{p}" if p.startswith("/") else p for p in paths]
+        self.mark_source_reached()
         self.logger.info(f"Discovered {len(urls)} event URLs from organizer page")
         return urls
 

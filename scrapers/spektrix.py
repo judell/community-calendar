@@ -50,6 +50,7 @@ class SpektrixScraper(BaseScraper):
         """Fetch events and instances from Spektrix API."""
         events_data = self._api_get("events")
         instances_data = self._api_get("instances?filter=startFrom%3Dnow")
+        self.mark_source_reached()
 
         # Build event lookup
         event_map = {}

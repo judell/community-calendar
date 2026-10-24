@@ -120,6 +120,7 @@ class SimpleviewScraper(BaseScraper):
         except ET.ParseError as exc:
             self.logger.error(f"Failed to parse RSS: {exc}")
             return []
+        self.mark_source_reached()
 
         now_utc = datetime.now(UTC)
         items = []

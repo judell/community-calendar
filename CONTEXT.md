@@ -45,11 +45,15 @@ A Merge survivor belongs to the feed whose copy won the Merge: its `source_id` i
 _Avoid_: Primary source (when ownership is meant)
 
 **Quiet source**:
-A source whose build wrote a valid calendar with no upcoming events — a genuinely dormant calendar, not a problem to fix. A quiet source is a ran source: the distinction from a failed source is event count, not ingestion success.
+A source whose build wrote a valid calendar with no upcoming events — a genuinely dormant calendar, not a problem to fix. A quiet source is a ran source only when its scraper declared it reached its source; a valid-empty calendar from a scraper that never reached it is a False quiet, which is a failure.
 _Avoid_: Empty feed, broken source
 
+**False quiet**:
+A valid-empty calendar produced by a scraper that never reached its source; it looks like a Quiet source and would be swept like one, so the scraper fails instead of writing it.
+_Avoid_: Quiet source (when the source was never reached), empty feed
+
 **Ran source**:
-A source whose ingestion succeeded in a build run — a scraper that exited 0 and left a parseable calendar, or a feed fetch that returned a valid ICS body — regardless of how many events survive later filtering. The build lists these in `cities/<city>/ran_sources.txt`, and the stale sweep deletes only from them. A quiet source and a source the geo or horizon filter emptied are both ran; a failed source is not.
+A source whose ingestion succeeded in a build run — a scraper that exited 0, declared it reached its source, and left a parseable calendar, or a feed fetch that returned a valid ICS body — regardless of how many events survive later filtering. The build lists these in `cities/<city>/ran_sources.txt`, and the stale sweep deletes only from them. A quiet source and a source the geo or horizon filter emptied are both ran; a failed source is not.
 _Avoid_: Successful source (when ingestion success is meant), processed source
 
 **Fork**:

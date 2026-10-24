@@ -307,7 +307,9 @@ class VisitBloomingtonScraper(BaseScraper):
                 timeout=REQUEST_TIMEOUT,
             )
         _raise_for_status(response, EVENTS_URL)
-        return response.json().get("docs", {}) or {}, token
+        docs: dict[str, Any] = response.json().get("docs", {}) or {}
+        self.mark_source_reached()
+        return docs, token
 
     def _fetch_docs(self, token: str) -> list[dict[str, Any]]:
         """Page the events endpoint until the reported `count` is exhausted.
