@@ -1,28 +1,14 @@
--- Scheduled jobs for automatic event loading
-
--- Schedule load-events to run daily at 6am UTC
--- Note: Replace the Authorization token with your project's anon key (legacy format)
-SELECT cron.schedule(
-  'load-events-daily',
-  '0 6 * * *',
-  $$
-  SELECT net.http_post(
-    url := 'https://dzpdualvwspgqghrysyz.supabase.co/functions/v1/load-events',
-    headers := jsonb_build_object(
-      'Authorization', 'Bearer <YOUR_LEGACY_ANON_KEY>',
-      'Content-Type', 'application/json'
-    ),
-    body := '{}'::jsonb
-  );
-  $$
-);
-
+-- Scheduled jobs
+--
+-- None. The former 'load-events-daily' job (06:00 UTC, POSTed an empty
+-- body to the load-events edge function, which then fetched every city's
+-- events.json from GitHub) was unscheduled on 2026-10-24. The nightly
+-- GitHub Actions workflow uploads each city's events directly, and
+-- load-events no longer has the empty-body mode; it also requires the
+-- x-load-events-secret header, which the cron job never sent.
+--
+--   SELECT cron.unschedule('load-events-daily');
+--
 -- Useful commands:
 -- List all scheduled jobs:
 --   SELECT * FROM cron.job;
---
--- Delete a job:
---   SELECT cron.unschedule('load-events-daily');
---
--- Run job manually (for testing):
---   SELECT cron.schedule('manual-load', 'now', $$ ... $$);
