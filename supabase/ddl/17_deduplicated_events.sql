@@ -39,16 +39,20 @@ CREATE INDEX deduplicated_events_city_start_time_idx ON deduplicated_events (cit
 
 GRANT SELECT ON deduplicated_events TO anon, authenticated, service_role;
 
--- RPC used by the nightly build after load-events completes.
+-- RPC used by the nightly build (service key) after load-events completes.
+-- Service-role only, with a pinned search_path, since
+-- 20261024140000_lock_down_definer_rpcs.sql.
 CREATE OR REPLACE FUNCTION public.refresh_deduplicated_events()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 SET statement_timeout TO '0'
 AS $function$
 BEGIN
-  REFRESH MATERIALIZED VIEW CONCURRENTLY deduplicated_events;
+  REFRESH MATERIALIZED VIEW CONCURRENTLY public.deduplicated_events;
 END;
 $function$;
 
-GRANT EXECUTE ON FUNCTION public.refresh_deduplicated_events() TO anon, authenticated, service_role;
+REVOKE EXECUTE ON FUNCTION public.refresh_deduplicated_events() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.refresh_deduplicated_events() TO service_role;

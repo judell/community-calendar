@@ -27,15 +27,47 @@ CREATE TABLE IF NOT EXISTS events (
 -- Uses NOT EXISTS (unnest) instead of != ALL() because != ALL() with 3000+ items
 -- hits Postgres statement timeout (57014). The unnest pattern is index-friendly
 -- and works with the composite events_city_source_uid_idx index.
-CREATE OR REPLACE FUNCTION delete_stale_events(p_city text, p_source_uids text[])
+-- Guarded since 20260722210000_guard_delete_stale_events.sql (refuses a
+-- >50% deletion driven by a short uid list). Service-role only, with a
+-- pinned search_path, since 20261024140000_lock_down_definer_rpcs.sql.
+CREATE OR REPLACE FUNCTION public.delete_stale_events(p_city text, p_source_uids text[])
 RETURNS bigint
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
+  current_count bigint;
+  would_delete bigint;
+  incoming_count bigint;
   deleted_count bigint;
 BEGIN
-  DELETE FROM events e
+  SELECT count(*) INTO current_count
+  FROM public.events
+  WHERE city = p_city;
+
+  SELECT count(*) INTO would_delete
+  FROM public.events e
+  WHERE e.city = p_city
+    AND e.source_uid IS NOT NULL
+    AND NOT EXISTS (
+      SELECT 1 FROM unnest(p_source_uids) AS u(uid)
+      WHERE u.uid = e.source_uid
+    );
+
+  incoming_count := coalesce(array_length(p_source_uids, 1), 0);
+
+  IF current_count > 0
+     AND would_delete * 2 > current_count
+     AND incoming_count < would_delete THEN
+    RAISE EXCEPTION
+      'delete_stale_events refused for city %: would delete % of % events '
+      'with only % incoming source_uids (>50%% deletion driven by a short '
+      'uid list looks like a partial load, not real churn)',
+      p_city, would_delete, current_count, incoming_count;
+  END IF;
+
+  DELETE FROM public.events e
   WHERE e.city = p_city
     AND e.source_uid IS NOT NULL
     AND NOT EXISTS (
@@ -46,6 +78,9 @@ BEGIN
   RETURN deleted_count;
 END;
 $$;
+
+REVOKE EXECUTE ON FUNCTION public.delete_stale_events(text, text[]) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.delete_stale_events(text, text[]) TO service_role;
 
 -- Unique index on source_uid for deduplication
 CREATE UNIQUE INDEX IF NOT EXISTS events_source_uid_unique ON events (source_uid);

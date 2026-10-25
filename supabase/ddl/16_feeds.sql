@@ -28,27 +28,41 @@ CREATE POLICY "Admin users can manage feeds" ON feeds FOR ALL
 -- transaction, returns what it deleted, and raises for an unknown id.
 -- Callers that still pre-delete events by source+city simply leave 0
 -- rows for the RPC to delete — backward compatible.
-CREATE FUNCTION remove_feed(feed_id bigint)
+-- Admin-gated since 20261024140000_lock_down_definer_rpcs.sql: callable
+-- only with an admin JWT or the service key (42501 otherwise); anon has
+-- no EXECUTE; search_path pinned.
+CREATE OR REPLACE FUNCTION public.remove_feed(feed_id bigint)
 RETURNS TABLE (events_deleted bigint, feed_deleted boolean)
-LANGUAGE plpgsql SECURITY DEFINER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
   f record;
   ev_count bigint;
 BEGIN
-  SELECT city, name INTO f FROM feeds WHERE id = feed_id;
+  IF coalesce(auth.role(), '') <> 'service_role' AND NOT EXISTS (
+    SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()
+  ) THEN
+    RAISE EXCEPTION 'remove_feed: admin required' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT city, name INTO f FROM public.feeds WHERE id = feed_id;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'remove_feed: no feed row with id %', feed_id;
   END IF;
 
-  DELETE FROM events e WHERE e.city = f.city AND e.source = f.name;
+  DELETE FROM public.events e WHERE e.city = f.city AND e.source = f.name;
   GET DIAGNOSTICS ev_count = ROW_COUNT;
 
-  DELETE FROM feeds WHERE id = feed_id;
+  DELETE FROM public.feeds WHERE id = feed_id;
 
   RETURN QUERY SELECT ev_count, true;
 END;
 $$;
+
+REVOKE EXECUTE ON FUNCTION public.remove_feed(bigint) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.remove_feed(bigint) TO authenticated, service_role;
 
 -- Insert-time validation for scraper rows
 -- (since 20260807171000_insert_time_scraper_validation.sql):
