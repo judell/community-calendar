@@ -413,9 +413,15 @@ func Init() error {
 	// --- Step 8: Supabase secrets ---
 	if s.Step < 8 {
 		fmt.Printf("Setting Supabase secrets...")
+		// Shared secret the nightly workflow presents to load-events
+		// (x-load-events-secret); also set as a GitHub secret in step 10.
+		if s.LoadEventsSecret == "" {
+			s.LoadEventsSecret = generatePassword(64)
+		}
 		secrets := map[string]string{
-			"GITHUB_REPO":      repo,
-			"ANTHROPIC_API_KEY": s.AnthropicKey,
+			"GITHUB_REPO":        repo,
+			"ANTHROPIC_API_KEY":  s.AnthropicKey,
+			"LOAD_EVENTS_SECRET": s.LoadEventsSecret,
 		}
 		if s.OpenAIKey != "" {
 			secrets["OPENAI_API_KEY"] = s.OpenAIKey
@@ -522,6 +528,7 @@ func Init() error {
 			"SUPABASE_ANON_KEY":    s.AnonKey,
 			"SUPABASE_SERVICE_KEY": s.ServiceRoleKey,
 			"ANTHROPIC_API_KEY":    s.AnthropicKey,
+			"LOAD_EVENTS_SECRET":   s.LoadEventsSecret,
 		}
 		if s.TicketmasterKey != "" {
 			ghSecrets["TICKETMASTER_API_KEY"] = s.TicketmasterKey

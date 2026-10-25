@@ -30,6 +30,7 @@ type State struct {
 	GHOAuthSecret   string `json:"gh_oauth_secret"`
 	GoogleOAuthID   string `json:"google_oauth_id"`
 	GoogleOAuthSecret string `json:"google_oauth_secret"`
+	LoadEventsSecret  string `json:"load_events_secret"`
 }
 
 // Path returns the state file path relative to repoRoot.
