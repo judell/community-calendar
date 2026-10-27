@@ -3,7 +3,9 @@
 # `uv audit` checks the locked dependency set against the OSV database. It runs
 # on PRs that touch dependency files and on a weekly schedule, so an advisory
 # disclosed against an unchanged lock still surfaces. Local equivalent:
-# `uv audit --locked`. See docs/dependencies.md and ADR 0016.
+# `uv audit --locked --preview-features audit-command` — the preview flag only
+# silences the "experimental command" warning; drop it once `audit` stabilizes.
+# See docs/dependencies.md and ADR 0016.
 name: Dependency Audit
 
 on:
@@ -31,4 +33,4 @@ jobs:
           python-version: "3.14"
 
       - name: Audit locked dependencies
-        run: uv audit --locked
+        run: uv audit --locked --preview-features audit-command

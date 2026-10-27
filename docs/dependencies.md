@@ -17,7 +17,7 @@ Two automations keep the manifest from going stale — the failure mode that let
 | Automation | Trigger | What it does |
 | --- | --- | --- |
 | Dependabot (`uv` ecosystem) | Weekly, Monday | Opens one grouped PR for minor/patch bumps across runtime deps and dev tools. Major bumps open as individual PRs. |
-| Dependency Audit workflow (`.github/workflows/dependency-audit.yml`) | PRs touching `pyproject.toml` or `uv.lock`, plus weekly (Monday 06:00 UTC) | Runs `uv audit --locked`, checking the locked set against the OSV vulnerability database. |
+| Dependency Audit workflow (`.github/workflows/dependency-audit.yml`) | PRs touching `pyproject.toml` or `uv.lock`, plus weekly (Monday 06:00 UTC) | Runs `uv audit --locked`, checking the locked set against the OSV vulnerability database. The step passes `--preview-features audit-command` to silence the experimental-command warning; the flag does not affect pass/fail. |
 
 Dependabot edits `pyproject.toml` and `uv.lock` together, so a bump is a
 coherent lockfile change rather than a manifest edit that a later `uv sync`
@@ -42,8 +42,9 @@ alert on its own.
 - **Weekly** — Dependabot PRs and the scheduled audit both run Monday.
 - **On dependency changes** — the audit runs on any PR touching
   `pyproject.toml` or `uv.lock`.
-- **Ad hoc** — run the audit locally with `uv audit --locked`, or bump the lock
-  with `uv lock --upgrade`.
+- **Ad hoc** — run the audit locally with
+  `uv audit --locked --preview-features audit-command`, or bump the lock with
+  `uv lock --upgrade`.
 
 ## Deliberate holds
 
