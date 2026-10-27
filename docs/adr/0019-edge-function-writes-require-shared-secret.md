@@ -1,4 +1,4 @@
-# 0018. Edge Function Writes Require a Shared Secret, Not JWT Verification
+# 0019. Edge Function Writes Require a Shared Secret, Not JWT Verification
 
 Date: 2026-10-24
 
