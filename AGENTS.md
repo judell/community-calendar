@@ -102,6 +102,7 @@ Python (pytest) and DB (pgTAP/Supabase) tests are orchestrated via the Makefile:
 
 ```bash
 make help            # list all targets
+make setup-node      # install JS deps (pnpm install) into this checkout's node_modules
 make test            # python pytest (runs from a venv if present)
 make test-sql        # pgTAP DB tests; requires local Supabase running
 make setup-local     # start local Supabase + migrations, then `make test-sql`
@@ -109,6 +110,9 @@ make setup-local     # start local Supabase + migrations, then `make test-sql`
 
 - Python tests MUST run with `env -u PYTHONPATH` (the Makefile does this) to
   avoid importing files from the repo root instead of installed packages.
+- `node_modules` is per-checkout, so a fresh worktree has none: run
+  `make setup-node` before `make lint` / `make test`, or their JS halves fail
+  with `prettier: command not found` / `vitest not found`.
 - New ICS tests reuse `make_ics()`/`make_vevent()` from `tests/helpers.py`.
 - DB tests live as `.sql` pgTAP files under `supabase/tests/` (see its README).
 
