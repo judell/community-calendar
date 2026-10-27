@@ -368,7 +368,7 @@ A producer signs up, gets a My Picks account, and uses the capture feature to ad
 
 That feed serves two purposes:
 
-**1. A feed for aggregators.** The producer's My Picks ICS feed URL is a stable, automatically-updating calendar feed — the same thing a WordPress site provides, but without needing WordPress. A community calendar curator adds that feed URL to the pipeline just like any other source. When the producer adds or updates events, the changes propagate automatically.
+**1. A feed for aggregators.** The producer's My Picks ICS feed URL is a stable, automatically-updating calendar feed — the same thing a WordPress site provides, but without needing WordPress. A community calendar curator registers the producer's picks feed as a *curator source* by account, not by URL (the tokenized URL is a personal credential and never goes in the repo — see [pipeline.md](pipeline.md#adding-a-curator-feed)). When the producer adds or updates events, the changes propagate automatically.
 
 **2. A widget for their own site.** The same feed can power an embeddable calendar widget on the producer's own website, showing only their events. A yoga teacher's site gets a live calendar of upcoming classes. A food truck's site shows where they'll be this week. The producer maintains events in one place (the capture interface), and both the community calendar and their own site stay in sync.
 

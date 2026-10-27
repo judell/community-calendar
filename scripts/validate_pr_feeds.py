@@ -9,7 +9,8 @@ Rules (DB-first model):
   so the workflow carries no per-scraper lines and is not consulted here.
 - A new scraper .py added to scrapers/ must be referenced by a
   feeds.txt or pending_feeds.txt entry.
-- ICS URL entries in pending_feeds.txt are self-contained (no other checks).
+- ICS URL entries in pending_feeds.txt are self-contained, except that a
+  personal my-picks capability URL is always rejected.
 
 Runs on PRs. Exits 0 if no feed/scraper files were touched or all checks pass.
 
@@ -33,6 +34,10 @@ ROOT = Path(__file__).parent.parent
 # path and its command invokes a repo script. Keep these in sync.
 SCRAPER_OUTPUT_RE = re.compile(r"^cities/[a-z0-9-]+/[A-Za-z0-9._-]+\.ics$")
 SCRAPER_CMD_RE = re.compile(r"^python (scrapers|scripts)/")
+
+# A personal my-picks URL is a capability URL, never a source to commit
+# (GHSA-3pg8-w4j4-6wv8). Same substring the feeds-table CHECK rejects.
+CAPABILITY_PATH = "/functions/v1/my-picks"
 
 
 def get_changed_file_statuses(base_ref: str) -> list[tuple[str, str]]:
@@ -74,6 +79,8 @@ def is_relevant(changed_files: list[str]) -> bool:
     """Check if any feed/scraper-related files were touched."""
     for f in changed_files:
         if "pending_feeds.txt" in f:
+            return True
+        if f.endswith("feeds.txt"):
             return True
         if f.startswith("scrapers/") and f.endswith(".py"):
             return True
@@ -132,6 +139,24 @@ def validate(base_ref: str) -> list[str]:
             print(f"  {f}")
 
     errors = []
+
+    # A my-picks token is a credential wherever it appears: a URL line, or the
+    # "# Name | fallback URL" metadata that download_feeds.py copies into
+    # X-SOURCE-URL. feeds.txt is normally generated, but hand-editing it is how
+    # the two Bloomington tokens leaked (GHSA-3pg8-w4j4-6wv8).
+    for f in changed_files:
+        if not f.endswith("feeds.txt"):
+            continue
+        path = ROOT / f
+        if not path.exists():
+            continue
+        for lineno, line in enumerate(path.read_text().splitlines(), 1):
+            if CAPABILITY_PATH in line:
+                errors.append(
+                    f"{f}:{lineno} contains a personal my-picks feed URL. Its "
+                    f"token must not be committed: register the curator in the "
+                    f"feeds table with curator_user_id instead."
+                )
 
     # Check all pending_feeds.txt files that were changed
     for f in changed_files:

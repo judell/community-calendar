@@ -138,8 +138,9 @@ For each selected city, the runner:
    restores the tracked file unless `--keep-db-export` is used
 4. cleans known generated outputs for the selected city
 5. runs workflow-first scraper commands locally
-6. runs `download_feeds.py` in fallback mode against the temporary
-   `feeds.txt` snapshot so no feed status is mutated upstream
+6. runs `download_feeds.py --feeds-txt` against the temporary `feeds.txt`
+   snapshot, so no feed status is mutated upstream; credentials stay in the
+   environment only to mint curator URLs from `feed_tokens` (read-only)
 7. runs `combine_ics.py`
 8. runs `ics_to_json.py`
 9. runs `generate_rss.py`

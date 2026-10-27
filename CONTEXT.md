@@ -315,7 +315,7 @@ cities/{city}/example.ics (with X-SOURCE headers)
 ### Database Schema (Key Tables)
 
 - **events** — All calendar events (title, start_time, location, description, source, category, city, source_uid). `load-events` upserts by `source_uid`, then sweeps stale rows scoped to the `source_id`s present in the payload, so a source that failed to produce output keeps its rows.
-- **feeds** — Source registry (url, name, city, status, feed_type, scraper_cmd, source_ids)
+- **feeds** — Source registry (url, name, city, status, feed_type, scraper_cmd, source_ids, curator_user_id). A curator feed stores `curator://<user_id>`, never its tokenized URL: `download_feeds` mints that URL from `feed_tokens` at build time.
 - **picks** — User-saved events (user_id, event_id)
 - **category_overrides** — Curator manual category corrections (source_uid, category)
 - **event_enrichments** — Audio capture transcripts and enrichments (event_id, transcript)

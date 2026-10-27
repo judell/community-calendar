@@ -58,6 +58,10 @@ Source attribution flows through a single `X-SOURCE` ICS header — NEVER put
 - **Always use `add_scraper.py`** to register scrapers — it handles both the
   workflow invocation AND the `pending_feeds.txt` metadata. Skipping it means
   the scraper runs but has no display name, or vice versa.
+- **Never commit a `my-picks?token=…` URL** — it is the only credential for a
+  curator's saved-events feed (GHSA-3pg8-w4j4-6wv8). Register the curator with
+  `curator_user_id`; the build mints the URL. A CHECK constraint and
+  `validate_pr_feeds.py` both reject it.
 - **Scrapers declare reach:** call `self.mark_source_reached()` after the
   primary fetch parses. `BaseScraper.run()` fails a scraper that returns no
   events without it, instead of writing a sweepable empty calendar.

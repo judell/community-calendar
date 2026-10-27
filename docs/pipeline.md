@@ -24,12 +24,12 @@
 - `ticketmaster.py` - Ticketmaster venues
 - `eventbrite.py` - Eventbrite organizers
 
-**Curator feeds** (type `curator`) are curated picks from community members via the `my-picks` edge function.
+**Curator feeds** (type `curator`) are curated picks from community members via the `my-picks` edge function. The row names the curator (`curator_user_id`) and its `url` is the non-secret `curator://<user_id>`; the build mints the tokenized URL from `feed_tokens` at download time. Never paste a `my-picks?token=…` URL into `feeds.txt`, `pending_feeds.txt`, or `feeds.url`: the token is the only credential for that person's saved-events feed, and `feeds` is world-readable and exported to git (GHSA-3pg8-w4j4-6wv8). A CHECK constraint rejects it.
 
 ### The `feeds` Table
 
 All sources are stored in the Supabase `feeds` table — the single source of truth. Columns:
-- `city`, `url`, `name`, `status` (active/pending/removed), `feed_type` (ics_url/scraper/curator), `scraper_cmd`
+- `city`, `url`, `name`, `status` (active/pending/removed), `feed_type` (ics_url/scraper/curator), `scraper_cmd`, `curator_user_id`, `source_ids`
 
 The Manage Feeds dialog (admin-only) reads and writes this table; its Delete button removes any source — scraper or ICS feed — and all its events in one atomic server operation. Scrapers are added via `add_scraper.py`, which stages a scraper entry in `pending_feeds.txt`; the next build inserts it into the `feeds` table (validated at insert time, before the scrape step) and the DB-first runner executes it in that same build. The workflow is never edited.
 
@@ -47,6 +47,22 @@ Use the **Manage Feeds** dialog in the app (admin calendar icon):
 4. Next build picks it up, downloads it, marks it `active`
 
 Feeds with recurring events (RRULE) show a note that the build will expand them.
+
+## Adding a Curator Feed
+
+A curator feed is a community member's `my-picks` feed. Do **not** paste its
+`?token=` URL anywhere in the repo — the token is the only credential for that
+person's saved events, and `feeds` is world-readable and exported to
+`feeds.txt`. Register the curator instead, in the SQL editor:
+
+```sql
+INSERT INTO feeds (city, url, name, status, feed_type, curator_user_id)
+VALUES ('bloomington', 'curator://<curator-user-id>', 'Their Picks', 'active',
+        'curator', '<curator-user-id>');
+```
+
+The build mints the tokenized URL from `feed_tokens` on every run, so rotating
+a token (or the curator signing in again) needs no change here.
 
 ## Deleting a Feed
 
@@ -78,7 +94,7 @@ The workflow in `.github/workflows/generate-calendar.yml` runs daily or on manua
 
 1. **Process `pending_feeds.txt`** — `process_pending_feeds.py` inserts staged entries into the `feeds` table and resets the file to its template, so just-merged sources participate in this build
 2. **Run scrapers** — `run_scrapers_from_db.py` executes the active scraper rows in the `feeds` table (DB-first; the workflow carries no per-scraper lines)
-3. **Download live feeds** — `download_feeds.py` queries the `feeds` table for active+pending `ics_url`/`curator` feeds, downloads each, injects `X-SOURCE` headers. Falls back to `feeds.txt` if DB not available (forks). Records each feed's output stem in `feeds.source_ids` and marks pending feeds as `active` after download.
+3. **Download live feeds** — `download_feeds.py` queries the `feeds` table for active+pending `ics_url`/`curator` feeds, downloads each, injects `X-SOURCE` headers. Falls back to `feeds.txt` if DB not available (forks); a `curator://` entry there is minted from `feed_tokens` when credentials are present (the local build's `--feeds-txt` mode) and skipped with a warning otherwise. Records each feed's output stem in `feeds.source_ids` and marks pending feeds as `active` after download.
 4. **Export feeds.txt** — `export_feeds_txt.py` regenerates `feeds.txt` from the `feeds` table (the read-only reference of what the database drives). It exports active+pending rows so just-added sources appear immediately.
 5. **Combine ICS** — `combine_ics.py` merges all `.ics` files, deduplicates, applies geo filtering. Display names come from `feeds.txt` (parsed at runtime) for scrapers, and from `X-SOURCE` headers (injected by `download_feeds.py`) for live feeds.
 6. **Convert to JSON** — `ics_to_json.py` converts combined ICS to JSON with fuzzy title clustering

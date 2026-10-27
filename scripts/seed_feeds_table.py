@@ -63,15 +63,20 @@ def parse_feeds_txt(feeds_file):
             continue
 
         if stripped.startswith("https://"):
+            if "/functions/v1/my-picks" in stripped:
+                # A picks feed needs curator_user_id and a curator:// url; this
+                # seed cannot infer either from feeds.txt (GHSA-3pg8-w4j4-6wv8).
+                print(f"  ⚠️  skipping curator feed with a token: {city} {pending_name or ''}")
+                pending_name = None
+                pending_cmd = None
+                continue
             name = pending_name or stripped
-            # Detect curator feeds
-            feed_type = "curator" if "my-picks" in stripped else "ics_url"
             feeds.append(
                 {
                     "city": city,
                     "url": stripped,
                     "name": name,
-                    "feed_type": feed_type,
+                    "feed_type": "ics_url",
                     "scraper_cmd": None,
                 }
             )

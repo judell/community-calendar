@@ -152,6 +152,11 @@
           enabled="{feedUrl.startsWith('https://') && feedName.length > 0 && !validating}"
           onClick="() => {
             feedUrl = feedUrl.replace(/\s+/g, '');
+            const capability = '/functions/v1/my-picks';
+            if ([feedUrl, feedName, fallbackUrl].some(function (v) { return (v || '').includes(capability); })) {
+              validationError = 'A my-picks URL is a personal feed token, not a source. Register the curator instead (docs/pipeline.md).';
+              return;
+            }
             const feeds = feedsList.value || [];
             const byUrl = feeds.find(function(f) { return f.url === feedUrl; });
             if (byUrl) { validationError = 'This URL is already a feed: ' + byUrl.name; return; }

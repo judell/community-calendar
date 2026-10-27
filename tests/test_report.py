@@ -171,3 +171,47 @@ def test_skipped_scrapers_still_check_live_feeds(tmp_path, monkeypatch):
     assert feeds["bgcbloomington"]["content"] == "no_calendar"
     # A source feeds.txt no longer lists is still retired.
     assert "retiredsrc" not in feeds
+
+
+CURATOR_URL = "curator://0d6f3c1a-1111-2222-3333-444444444444"
+CURATOR_STEM = "0d6f3c1a_1111_2222_3333_444444444444"
+CURATOR_REFERENCE = {"kind": "curator", "name": "Curator Picks", "url": CURATOR_URL}
+
+
+def test_parse_feeds_reference_registers_a_curator_feed(tmp_path, monkeypatch):
+    """feeds.txt names a curator as curator://<user_id>. Without the stem the
+    report reads the feed as retired and deletes its history."""
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    feeds = tmp_path / "cities" / "bloomington" / "feeds.txt"
+    feeds.parent.mkdir(parents=True)
+    feeds.write_text(f"# Curator Picks\n{CURATOR_URL}\n")
+    monkeypatch.syspath_prepend(str(Path(__file__).parent.parent / "scripts"))
+    monkeypatch.setattr(report, "__file__", str(scripts / "report.py"))
+
+    assert report.parse_feeds_reference("bloomington") == {CURATOR_STEM: CURATOR_REFERENCE}
+
+
+def test_curator_feed_with_no_calendar_keeps_its_history(tmp_path, monkeypatch):
+    """A skipped curator download is a failed build like any other — and its
+    repro must not carry a token (GHSA-3pg8-w4j4-6wv8)."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "cities" / "bloomington").mkdir(parents=True)
+    monkeypatch.setattr(
+        report, "parse_feeds_reference", lambda city: {CURATOR_STEM: CURATOR_REFERENCE}
+    )
+
+    report_path = tmp_path / "report.json"
+    report.update_report(["bloomington"], report_path=str(report_path))
+
+    saved = json.loads(report_path.read_text())
+    feed = saved["cities"]["bloomington"]["feeds"][CURATOR_STEM]
+    assert feed["content"] == "no_calendar"
+
+    problem = report.build_city_slice(saved, "bloomington", set())["problems"][0]
+    assert problem["kind"] == "no_calendar"
+    assert problem["repro"] == {
+        "display": "Curator Picks",
+        "source": CURATOR_URL,
+        "command": None,
+    }

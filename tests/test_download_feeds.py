@@ -496,6 +496,168 @@ class TestBoundedTimeouts:
         assert df.fetch_feeds_from_db("bloomington") is None
 
 
+class TestCuratorFeedResolution:
+    """Curator rows store curator://<user_id>; the my-picks URL is minted from
+    feed_tokens per build, so no capability token is stored or exported
+    (GHSA-3pg8-w4j4-6wv8)."""
+
+    def test_without_credentials_mints_nothing(self, monkeypatch):
+        monkeypatch.delenv("SUPABASE_URL", raising=False)
+        monkeypatch.delenv("SUPABASE_SERVICE_KEY", raising=False)
+
+        assert df.resolve_curator_urls([{"curator_user_id": "u-1"}]) == {}
+
+    def test_mints_my_picks_url_from_feed_tokens(self, monkeypatch):
+        monkeypatch.setenv("SUPABASE_URL", "https://fake.supabase.co")
+        monkeypatch.setenv("SUPABASE_SERVICE_KEY", "service-key")
+        seen: dict[str, str] = {}
+
+        def fake_urlopen(req, timeout=None):
+            seen["url"] = req.full_url
+            return _Resp(b'[{"user_id":"u-1","token":"tok-1"}]')
+
+        monkeypatch.setattr(df.urllib.request, "urlopen", fake_urlopen)
+
+        assert df.resolve_curator_urls([{"curator_user_id": "u-1"}, {"curator_user_id": None}]) == {
+            "curator://u-1": "https://fake.supabase.co/functions/v1/my-picks?token=tok-1"
+        }
+        assert "user_id=in.(u-1)" in seen["url"]
+
+    def test_curator_row_without_token_is_skipped(self, monkeypatch, tmp_path, capsys):
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("SUPABASE_URL", raising=False)
+        monkeypatch.delenv("SUPABASE_SERVICE_KEY", raising=False)
+        monkeypatch.setattr(
+            df,
+            "fetch_feeds_from_db",
+            lambda city: [
+                {
+                    "id": 7,
+                    "url": "curator://u-1",
+                    "name": "My Picks",
+                    "fallback_url": None,
+                    "status": "active",
+                    "feed_type": "curator",
+                    "curator_user_id": "u-1",
+                    "source_ids": [],
+                }
+            ],
+        )
+        monkeypatch.setattr(
+            df,
+            "fetch_with_curl_fallback",
+            lambda url, outfile: pytest.fail(f"fetched {url}"),
+        )
+
+        df.download_feeds("bloomington")
+
+        assert "no feed token" in capsys.readouterr().out
+
+    def test_http_feed_is_not_skipped(self, monkeypatch, tmp_path, capsys):
+        """Only curator rows are skipped; an http:// source still downloads."""
+        monkeypatch.chdir(tmp_path)
+        url = "http://example.invalid/feed.ics"
+        monkeypatch.setattr(
+            df,
+            "fetch_feeds_from_db",
+            lambda city: [
+                {
+                    "id": 8,
+                    "url": url,
+                    "name": "Plain HTTP",
+                    "fallback_url": None,
+                    "status": "active",
+                    "feed_type": "ics_url",
+                    "curator_user_id": None,
+                    "source_ids": [],
+                }
+            ],
+        )
+        fetched: list[str] = []
+
+        def fake_fetch(feed_url, outfile):
+            fetched.append(feed_url)
+            outfile.write_text("BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n", encoding="utf-8")
+            return True
+
+        monkeypatch.setattr(df, "fetch_with_curl_fallback", fake_fetch)
+
+        df.download_feeds("bloomington")
+
+        assert fetched == [url]
+        assert "no feed token" not in capsys.readouterr().out
+
+    def test_feeds_txt_fallback_skips_tokenized_url(self, monkeypatch, tmp_path, capsys):
+        """A no-DB run must not fetch a capability URL copied from feeds.txt."""
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("SUPABASE_URL", raising=False)
+        monkeypatch.delenv("SUPABASE_SERVICE_KEY", raising=False)
+        city = tmp_path / "cities" / "bloomington"
+        city.mkdir(parents=True)
+        (city / "feeds.txt").write_text(
+            "# Curator\n"
+            "https://ref.supabase.co/functions/v1/my-picks?token=0831f7c0\n"
+            "# Plain\n"
+            "https://example.invalid/feed.ics\n"
+        )
+        fetched: list[str] = []
+
+        def fake_fetch(feed_url, outfile):
+            fetched.append(feed_url)
+            outfile.write_text("BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n", encoding="utf-8")
+            return True
+
+        monkeypatch.setattr(df, "fetch_with_curl_fallback", fake_fetch)
+
+        df.download_feeds("bloomington")
+
+        assert fetched == ["https://example.invalid/feed.ics"]
+        assert "capability URL(s) in feeds.txt ignored" in capsys.readouterr().out
+
+    def test_feeds_txt_curator_entry_is_resolved_read_only(self, monkeypatch, tmp_path):
+        """A local build keeps credentials for token lookup, but its feeds.txt
+        snapshot stays the source list and nothing is written upstream."""
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("SUPABASE_URL", "https://fake.supabase.co")
+        monkeypatch.setenv("SUPABASE_SERVICE_KEY", "service-key")
+        city = tmp_path / "cities" / "bloomington"
+        city.mkdir(parents=True)
+        (city / "feeds.txt").write_text(
+            "# Curator Picks\ncurator://u-1\n# Plain\nhttps://example.invalid/feed.ics\n"
+        )
+        monkeypatch.setattr(
+            df.urllib.request,
+            "urlopen",
+            lambda req, timeout=None: _Resp(b'[{"user_id":"u-1","token":"tok-1"}]'),
+        )
+        monkeypatch.setattr(
+            df, "record_feed_sources", lambda rows: pytest.fail("wrote upstream feed status")
+        )
+        fetched: list[str] = []
+
+        def fake_fetch(feed_url, outfile):
+            fetched.append(feed_url)
+            outfile.write_text("BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n", encoding="utf-8")
+            return True
+
+        monkeypatch.setattr(df, "fetch_with_curl_fallback", fake_fetch)
+
+        df.download_feeds("bloomington", use_feeds_txt=True)
+
+        assert fetched == [
+            "https://fake.supabase.co/functions/v1/my-picks?token=tok-1",
+            "https://example.invalid/feed.ics",
+        ]
+
+    def test_loggable_redacts_a_capability_query(self):
+        assert (
+            df._loggable("https://ref.supabase.co/functions/v1/my-picks?token=abc")
+            == "https://ref.supabase.co/functions/v1/my-picks"
+        )
+        # Ordinary query strings stay readable for debugging.
+        assert df._loggable("https://x.test/events?ical=1") == "https://x.test/events?ical=1"
+
+
 class TestDownloadProgressLog:
     def test_logs_in_flight_feed_before_fetch(self, monkeypatch, capsys, tmp_path):
         """A hang must name the feed it is stuck on in the log."""

@@ -214,6 +214,13 @@ https://example.com/events/?ical=1
 
 After the PR is merged, the next build automatically runs `scripts/process_pending_feeds.py` to insert them into the database and clear the file. See `CONTRIBUTING.md` for the full workflow.
 
+### Curator feeds (a person's My Picks)
+
+Do not add these as ICS feeds. Their URL carries a `?token=` that is the only
+credential for that person's saved events, so it must never be committed.
+Register the curator with `curator_user_id` instead — see
+[Adding a Curator Feed](pipeline.md#adding-a-curator-feed).
+
 **Testing a feed before submitting:**
 
 ```bash
@@ -250,7 +257,7 @@ arguments.
 
 ### Forks without a feeds table
 
-If `SUPABASE_URL` is not set, `download_feeds.py` falls back to reading `feeds.txt` directly. Forks can continue using `add_feed.py` to manage feeds.txt as the primary input. See `docs/syncing-your-fork.md` for details on setting up the feeds table.
+If `SUPABASE_URL` is not set, `download_feeds.py` falls back to reading `feeds.txt` directly. Forks can continue using `add_feed.py` to manage feeds.txt as the primary input. That mode serves ICS feeds only: a curator feed is skipped, because its token has to be minted from `feed_tokens`. See `docs/syncing-your-fork.md` for details on setting up the feeds table.
 
 ---
 

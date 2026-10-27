@@ -714,14 +714,15 @@ def run_city(city: str, logger: BuildLogger, args: argparse.Namespace) -> dict:
                 )
             city_result["scrapers"].append(scraper_entry)
 
+        # Credentials stay so download_feeds can mint curator URLs from
+        # feed_tokens, but --feeds-txt keeps this guarded snapshot authoritative
+        # and skips every feed-status write upstream.
         download_env = env.copy()
-        download_env.pop("SUPABASE_URL", None)
-        download_env.pop("SUPABASE_SERVICE_KEY", None)
         download_result = run_command(
             logger,
             city,
             "download",
-            [sys.executable, "scripts/download_feeds.py", city],
+            [sys.executable, "scripts/download_feeds.py", city, "--feeds-txt"],
             download_env,
         )
         city_result["download_returncode"] = download_result["returncode"]

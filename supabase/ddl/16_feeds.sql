@@ -11,9 +11,32 @@ CREATE TABLE feeds (
   feed_type text NOT NULL CHECK (feed_type IN ('ics_url', 'scraper', 'curator')),
   scraper_cmd text,
   fallback_url text,
+  -- Curator feeds name their curator; the token lives in feed_tokens (RLS:
+  -- owner-only) and download_feeds mints the URL at build time, so no token
+  -- is ever stored here or exported to feeds.txt.
+  curator_user_id uuid REFERENCES auth.users(id) ON DELETE RESTRICT,
   source_ids text[] NOT NULL DEFAULT '{}',
   created_at timestamptz DEFAULT now(),
-  UNIQUE(city, url)
+  UNIQUE(city, url),
+  -- A capability URL is a credential and feeds is world-readable; feeds.txt
+  -- re-exports url/name/scraper_cmd and X-SOURCE-URL carries fallback_url
+  -- (GHSA-3pg8-w4j4-6wv8).
+  CONSTRAINT feeds_metadata_has_no_capability_token
+    CHECK (
+      url NOT LIKE '%/functions/v1/my-picks%'
+      AND name NOT LIKE '%/functions/v1/my-picks%'
+      AND coalesce(scraper_cmd, '') NOT LIKE '%/functions/v1/my-picks%'
+      AND coalesce(fallback_url, '') NOT LIKE '%/functions/v1/my-picks%'
+    ),
+  CONSTRAINT feeds_curator_user_matches_type
+    CHECK (
+      (
+        feed_type = 'curator'
+        AND curator_user_id IS NOT NULL
+        AND url = 'curator://' || curator_user_id
+      )
+      OR (feed_type <> 'curator' AND curator_user_id IS NULL)
+    )
 );
 
 ALTER TABLE feeds ENABLE ROW LEVEL SECURITY;

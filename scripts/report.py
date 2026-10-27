@@ -739,7 +739,7 @@ def parse_feeds_reference(city: str) -> dict:
     """Map feed stems to their source using the generated read-only
     cities/<city>/feeds.txt, so report problems can carry a
     reproduction command (curl for live feeds, the registered command
-    for scrapers)."""
+    for scrapers, none for curators — their URL is minted at build time)."""
     path = Path(__file__).parent.parent / "cities" / city / "feeds.txt"
     ref: dict[str, dict[str, Any]] = {}
     if not path.exists():
@@ -762,6 +762,9 @@ def parse_feeds_reference(city: str) -> dict:
             continue
         if line.startswith("http"):
             ref[slugify(line)] = {"kind": "feed", "name": pending_name or "", "url": line}
+            pending_name = pending_cmd = None
+        elif line.startswith("curator://"):
+            ref[slugify(line)] = {"kind": "curator", "name": pending_name or "", "url": line}
             pending_name = pending_cmd = None
         elif line.startswith("cities/") and line.endswith(".ics"):
             ref[Path(line).stem] = {
@@ -839,6 +842,14 @@ def build_city_slice(report: dict, city: str, prev_error_lines: set) -> dict:
         src = ref.get(stem)
         if not src:
             return None
+        if src["kind"] == "curator":
+            # The token is minted at download time; the report is public, so
+            # show only the non-secret curator reference.
+            return {
+                "display": src.get("name") or stem,
+                "source": src["url"],
+                "command": None,
+            }
         if src["kind"] == "feed":
             return {
                 "display": src.get("name") or stem,
