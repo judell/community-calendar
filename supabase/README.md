@@ -190,7 +190,7 @@ psql $DATABASE_URL -f ddl/09_admin_github_users.sql
 
 ### Admin access management
 
-Privileged UI features (for example audio capture) are gated by server-side tables, not by hardcoded GitHub usernames in frontend code.
+Admin features (for example Manage Feeds and category overrides) are gated by server-side tables, not by hardcoded GitHub usernames in frontend code. Poster and audio capture are available to any signed-in user.
 
 For preapproval before first sign-in, use `admin_github_users`.
 
@@ -228,7 +228,9 @@ supabase functions deploy my-picks --no-verify-jwt
 supabase functions deploy capture-event --no-verify-jwt
 ```
 
-**JWT gotcha:** Redeploying any edge function via the Supabase MCP tool resets "Require JWT" to ON. After redeploying, manually turn off "Require JWT" in the Supabase dashboard (Edge Functions > function-name > Settings). The `load-events` function is called by the workflow, and `my-picks` is called by calendar apps with a feed token — neither uses a JWT.
+**JWT gotcha:** Redeploying any edge function via the Supabase MCP tool resets "Require JWT" to ON. After redeploying, manually turn off "Require JWT" in the Supabase dashboard (Edge Functions > function-name > Settings). The `load-events` function is called by the workflow with a shared secret, and `my-picks` is called by calendar apps with a feed token — neither uses a JWT. `capture-event` does check the caller's user JWT in the function body, but the gateway check stays off for the reason in the next paragraph.
+
+**`capture-event` auth:** Both extract and commit require `Authorization: Bearer <user access token>`. The gateway check stays off because the publishable key satisfies it; the function verifies the user with `auth.getUser()` before reading the body or calling Anthropic/OpenAI (GHSA-qq24-wmxg-hrgv). Uploads over 10 MiB return 413.
 
 **`load-events` gotcha:** JWT verification is not an authorization boundary for this function — the publishable key is public, so anyone can satisfy it. Writes are gated by the `x-load-events-secret` header instead. CI reads it from the `LOAD_EVENTS_SECRET` Actions secret, which must match the function secret. If the function secret is unset the function returns 500 and writes nothing; that is intentional (GHSA-qmc5-6cfg-38p7).
 

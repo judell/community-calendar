@@ -5,6 +5,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-ue-client-tx-id",
 };
 
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+// Multipart framing adds a little to Content-Length; the file.size check is exact.
+const MAX_REQUEST_BYTES = MAX_UPLOAD_BYTES + 64 * 1024;
+
 const EVENT_JSON_FORMAT = `{
   "title": "event name",
   "start_time": "ISO8601 datetime (YYYY-MM-DDTHH:MM:SS)",
@@ -207,7 +211,7 @@ async function extractEventFromImage(imageBytes: Uint8Array, mediaType: string, 
   ]);
 }
 
-async function transcribeAudio(audioBytes: Uint8Array, mediaType: string): Promise<string> {
+async function transcribeAudio(audioBytes: Uint8Array<ArrayBuffer>, mediaType: string): Promise<string> {
   const openaiKey = Deno.env.get("OPENAI_API_KEY");
   if (!openaiKey) {
     throw new Error("OPENAI_API_KEY not configured");
@@ -253,7 +257,7 @@ async function transcribeAudio(audioBytes: Uint8Array, mediaType: string): Promi
   return result.text;
 }
 
-async function extractEventFromAudio(audioBytes: Uint8Array, mediaType: string, defaultTimezone?: string): Promise<{ event: any; transcript: string }> {
+async function extractEventFromAudio(audioBytes: Uint8Array<ArrayBuffer>, mediaType: string, defaultTimezone?: string): Promise<{ event: any; transcript: string }> {
   const transcript = await transcribeAudio(audioBytes, mediaType);
 
   const event = await callClaude([
@@ -326,7 +330,39 @@ async function commitEvent(
   return { event_id: eventData.id };
 }
 
-Deno.serve(async (req) => {
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+async function authenticatedUser(
+  req: Request,
+): Promise<Response | { id: string; displayName: string }> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return jsonResponse({ error: "Missing authorization" }, 401);
+  }
+
+  const supabaseAuth = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+  );
+  const { data, error } = await supabaseAuth.auth.getUser(
+    authHeader.slice("Bearer ".length),
+  );
+  if (error || !data?.user) {
+    return jsonResponse({ error: "Invalid authorization" }, 401);
+  }
+
+  return {
+    id: data.user.id,
+    displayName: data.user.user_metadata?.user_name || data.user.email || "unknown",
+  };
+}
+
+export async function handler(req: Request): Promise<Response> {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -340,6 +376,14 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const user = await authenticatedUser(req);
+    if (user instanceof Response) return user;
+
+    const contentLength = Number(req.headers.get("content-length"));
+    if (contentLength > MAX_REQUEST_BYTES) {
+      return jsonResponse({ error: "Upload too large (max 10 MiB)" }, 413);
+    }
+
     const contentType = req.headers.get("content-type") || "";
     console.log("Content-Type:", contentType);
 
@@ -350,12 +394,9 @@ Deno.serve(async (req) => {
       const defaultTimezone = formData.get("timezone") as string | null;
 
       // Find the file - Actions.upload uses the filename as the field name
-      let file: File | null = null;
-      formData.forEach((value, key) => {
-        if (value instanceof File) {
-          file = value;
-        }
-      });
+      const file = Array.from(formData.values()).find(
+        (value): value is File => value instanceof File,
+      );
       console.log("Mode:", mode, "File:", file?.name, "File type:", file?.type);
 
       if (mode === "extract") {
@@ -364,6 +405,9 @@ Deno.serve(async (req) => {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
+        }
+        if (file.size > MAX_UPLOAD_BYTES) {
+          return jsonResponse({ error: "Upload too large (max 10 MiB)" }, 413);
         }
 
         const fileBytes = new Uint8Array(await file.arrayBuffer());
@@ -390,35 +434,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Handle application/json (for commit mode and legacy base64 extract)
+    // Handle application/json (commit mode)
     if (contentType.includes("application/json")) {
       const body = await req.json();
-      const { mode, image, media_type, event, transcript, timezone: bodyTimezone } = body;
+      const { mode, event, transcript } = body;
 
-      if (mode === "extract") {
-        // Legacy base64 mode
-        if (!image) {
-          return new Response(JSON.stringify({ error: "Missing image parameter" }), {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-
-        const mediaType = media_type || "image/jpeg";
-        // Decode base64 to bytes
-        const binaryString = atob(image);
-        const imageBytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          imageBytes[i] = binaryString.charCodeAt(i);
-        }
-        const extractedEvent = await extractEventFromImage(imageBytes, mediaType, bodyTimezone);
-        normalizeExtractedEvent(extractedEvent);
-        applyEventTimezone(extractedEvent);
-
-        return new Response(JSON.stringify({ event: extractedEvent }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      } else if (mode === "commit") {
+      if (mode === "commit") {
         // Commit mode: save event and create pick
         if (!event) {
           return new Response(JSON.stringify({ error: "Missing event parameter" }), {
@@ -437,43 +458,19 @@ Deno.serve(async (req) => {
           );
         }
 
-        // Get user from auth header
-        const authHeader = req.headers.get("Authorization");
-        if (!authHeader?.startsWith("Bearer ")) {
-          return new Response(JSON.stringify({ error: "Missing authorization" }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-
-        const token = authHeader.replace("Bearer ", "");
-
         // Create Supabase client with service role for database writes
         const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
         const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-        // Verify the token and get user
-        const supabaseAuth = createClient(
-          supabaseUrl,
-          Deno.env.get("SUPABASE_ANON_KEY")!
-        );
-        const { data: userData, error: authError } = await supabaseAuth.auth.getUser(token);
-
-        if (authError || !userData?.user) {
-          return new Response(JSON.stringify({ error: "Invalid authorization" }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-
         // Append transcript to description if present
         if (transcript) {
-          const username = userData.user.user_metadata?.user_name || userData.user.email || "unknown";
-          event.description = (event.description || "") + `\n\nTranscribed audio from ${username}:\n${transcript}`;
+          event.description =
+            (event.description || "") +
+            `\n\nTranscribed audio from ${user.displayName}:\n${transcript}`;
         }
 
-        const result = await commitEvent(supabase, event, userData.user.id, transcript);
+        const result = await commitEvent(supabase, event, user.id, transcript);
 
         return new Response(JSON.stringify({ success: true, ...result }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -491,11 +488,15 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("Error:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Internal server error",
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }
-});
+}
+
+if (import.meta.main) Deno.serve(handler);

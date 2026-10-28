@@ -15,7 +15,7 @@ This project uses both Postgres functions (PL/pgSQL or SQL, running inside the d
 ## Edge Functions in This Project
 
 - `load-events` — upserts CI's `{city, events, ran_sources}` payload; requires the `x-load-events-secret` header
-- `capture-event` — calls Claude API to extract event data from images or audio; supports Whisper transcription for audio
+- `capture-event` — extracts event data from images or audio; requires a signed-in user's JWT and calls Claude/Whisper with the project's keys
 - `my-picks` — generates ICS/JSON feed of a user's bookmarked events (token-based auth)
 - `validate-feed` — validates an ICS feed URL, returns preview of future events, detects RRULE recurrence
 

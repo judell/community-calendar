@@ -13,7 +13,7 @@ This approach was chosen because the Claude Messages API does not support audio 
 
 ## How It Works
 
-From the app, click the play icon (visible to authorized users). Choose "Select Audio File" to upload a recording, or "Record from Microphone" to speak directly. After recording, tap "Stop and Process" to send audio to the `capture-event` edge function.
+From the app, click the mic icon (visible to signed-in users). Choose "Select Audio File" to upload a recording, or "Record from Microphone" to speak directly. After recording, tap "Stop and Process" to send audio to the `capture-event` edge function.
 
 The edge function returns extracted event fields (title, date, time, location, description, url) plus the raw Whisper transcript. The user reviews and edits the extracted fields in the PickEditor form. When confirmed:
 

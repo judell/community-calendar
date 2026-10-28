@@ -22,7 +22,7 @@ App → Supabase → GitHub → Supabase → App. The `signIn()` function in `in
 
 ## Admin Access
 
-Privileged UI features (audio capture) are gated by server-side tables (`admin_github_users`), not by hardcoded GitHub usernames in frontend code. The app queries this table via a DataSource and conditionally shows admin UI.
+Admin features (Manage Feeds, category overrides) are gated by server-side tables (`admin_github_users`), not by hardcoded GitHub usernames in frontend code. The app queries this table via a DataSource and conditionally shows admin UI. Poster and audio capture are available to any signed-in user.
 
 ## Database Tables
 

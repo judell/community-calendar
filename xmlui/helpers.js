@@ -587,6 +587,10 @@ window.utcToLocal = function (isoString, timezone) {
 // Resize image then upload to capture-event edge function via fetch
 // Returns Promise<{ event }> or Promise<{ error }>
 window.resizeAndUpload = function (file, supabaseUrl, publishableKey) {
+  var token = window.authSession && window.authSession.access_token;
+  if (!token) {
+    return Promise.resolve({ error: 'Please sign in again to capture events' });
+  }
   return window
     .resizeImageFile(file)
     .then(function (resized) {
@@ -600,11 +604,14 @@ window.resizeAndUpload = function (file, supabaseUrl, publishableKey) {
       fd.append('file', resized, resized.name);
       return fetch(supabaseUrl + '/functions/v1/capture-event', {
         method: 'POST',
-        headers: { apikey: publishableKey },
+        headers: { apikey: publishableKey, Authorization: 'Bearer ' + token },
         body: fd,
       });
     })
     .then(function (resp) {
+      if (resp.status === 401) {
+        return { error: 'Please sign in again to capture events' };
+      }
       if (!resp.ok) {
         return resp.text().then(function (t) {
           return { error: 'Server error ' + resp.status + ': ' + t };
