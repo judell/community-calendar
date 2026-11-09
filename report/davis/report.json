@@ -1,18 +1,18 @@
 {
   "city": "davis",
-  "generated": "2026-11-08T06:01:21.420598",
+  "generated": "2026-11-09T06:08:11.634979",
   "build": {
-    "generated": "2026-11-08T06:01:21.420598",
-    "total_events": 616,
-    "prev_total_events": 621,
-    "delta": -5
+    "generated": "2026-11-09T06:08:11.634979",
+    "total_events": 663,
+    "prev_total_events": 616,
+    "delta": 47
   },
   "problems": [
     {
       "severity": 1,
       "kind": "broken_feed",
-      "title": "putahcreekcouncil is serving unknown, not ICS",
-      "detail": "no good build in recorded history; broken since 2026-08-11",
+      "title": "putahcreekcouncil is serving html, not ICS",
+      "detail": "no good build in recorded history; broken since 2026-08-12",
       "feed": "putahcreekcouncil",
       "repro": {
         "display": "Putah Creek Council",
@@ -21,9 +21,33 @@
       }
     },
     {
+      "severity": 1,
+      "kind": "broken_feed",
+      "title": "visitdavis is serving html, not ICS",
+      "detail": "no good build in recorded history; broken since 2026-11-09",
+      "feed": "visitdavis",
+      "repro": {
+        "display": "Visit Davis",
+        "source": "https://visitdavis.org/events/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://visitdavis.org/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "severity": 1,
+      "kind": "broken_feed",
+      "title": "visityolo_event is serving html, not ICS",
+      "detail": "no good build in recorded history; broken since 2026-11-09",
+      "feed": "visityolo_event",
+      "repro": {
+        "display": "Visit Yolo",
+        "source": "https://visityolo.com/event/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://visityolo.com/event/?ical=1' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
       "severity": 3,
       "kind": "tz_anomaly",
-      "title": "Hate-Free Together: 15/25 events at suspicious hours",
+      "title": "Hate-Free Together: 14/25 events at suspicious hours",
       "detail": "likely a -7h offset error",
       "feed": "hatefreetogether",
       "repro": {
@@ -32,12 +56,6 @@
         "command": "curl -sL -A 'Mozilla/5.0' 'https://hatefreetogether.org/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
       },
       "samples": [
-        {
-          "start_time": "2026-11-08T00:00",
-          "shows": "00:00",
-          "likely": "07:00",
-          "title": "Diwali, Festival of Lights"
-        },
         {
           "start_time": "2026-11-09T09:00",
           "shows": "01:00",
@@ -58,6 +76,12 @@
         },
         {
           "start_time": "2026-11-11T10:00",
+          "shows": "02:00",
+          "likely": "09:00",
+          "title": "Manetti Shrem Museum: Together Again, 1960\u20132026, Perspective"
+        },
+        {
+          "start_time": "2026-11-12T10:00",
           "shows": "02:00",
           "likely": "09:00",
           "title": "Manetti Shrem Museum: Together Again, 1960\u20132026, Perspective"
@@ -82,7 +106,7 @@
       "feed": "meetup_winters_shut_up_and_write_meetup_group",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-11",
+      "silent_since": "2026-08-12",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Winters Shut Up & Write",
@@ -115,15 +139,15 @@
       "feed": "meetup_winters_shut_up_and_write_meetup_group",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-11",
+      "silent_since": "2026-08-12",
       "content": "quiet"
     },
     {
       "feed": "putahcreekcouncil",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-11",
-      "content": "not_ics:unknown"
+      "silent_since": "2026-08-12",
+      "content": "not_ics:html"
     },
     {
       "feed": "ucdavis_arts",
@@ -131,6 +155,20 @@
       "was_date": "2026-09-08",
       "silent_since": "2026-09-09",
       "content": "quiet"
+    },
+    {
+      "feed": "visitdavis",
+      "was": null,
+      "was_date": null,
+      "silent_since": "2026-11-09",
+      "content": "not_ics:html"
+    },
+    {
+      "feed": "visityolo_event",
+      "was": null,
+      "was_date": null,
+      "silent_since": "2026-11-09",
+      "content": "not_ics:html"
     }
   ],
   "new_errors": [],
@@ -138,16 +176,10 @@
   "tz_anomalies": [
     {
       "source": "Hate-Free Together",
-      "count": 15,
+      "count": 14,
       "total": 25,
       "offset": -7,
       "samples": [
-        {
-          "start_time": "2026-11-08T00:00",
-          "shows": "00:00",
-          "likely": "07:00",
-          "title": "Diwali, Festival of Lights"
-        },
         {
           "start_time": "2026-11-09T09:00",
           "shows": "01:00",
@@ -171,6 +203,12 @@
           "shows": "02:00",
           "likely": "09:00",
           "title": "Manetti Shrem Museum: Together Again, 1960\u20132026, Perspective"
+        },
+        {
+          "start_time": "2026-11-12T10:00",
+          "shows": "02:00",
+          "likely": "09:00",
+          "title": "Manetti Shrem Museum: Together Again, 1960\u20132026, Perspective"
         }
       ]
     }
@@ -184,10 +222,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-10",
-            "count": 30
-          },
-          {
             "date": "2026-10-11",
             "count": 30
           },
@@ -301,6 +335,10 @@
           },
           {
             "date": "2026-11-08",
+            "count": 30
+          },
+          {
+            "date": "2026-11-09",
             "count": 30
           }
         ]
@@ -311,10 +349,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-10",
-            "count": 4
-          },
-          {
             "date": "2026-10-11",
             "count": 4
           },
@@ -429,6 +463,10 @@
           {
             "date": "2026-11-08",
             "count": 3
+          },
+          {
+            "date": "2026-11-09",
+            "count": 3
           }
         ]
       },
@@ -437,10 +475,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-10",
-            "count": 25
-          },
           {
             "date": "2026-10-11",
             "count": 26
@@ -556,6 +590,10 @@
           {
             "date": "2026-11-08",
             "count": 27
+          },
+          {
+            "date": "2026-11-09",
+            "count": 27
           }
         ]
       },
@@ -564,10 +602,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-10",
-            "count": 10
-          },
           {
             "date": "2026-10-11",
             "count": 10
@@ -682,6 +716,10 @@
           },
           {
             "date": "2026-11-08",
+            "count": 10
+          },
+          {
+            "date": "2026-11-09",
             "count": 10
           }
         ]
@@ -692,10 +730,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-10",
-            "count": 10
-          },
-          {
             "date": "2026-10-11",
             "count": 10
           },
@@ -809,6 +843,10 @@
           },
           {
             "date": "2026-11-08",
+            "count": 10
+          },
+          {
+            "date": "2026-11-09",
             "count": 10
           }
         ]
@@ -819,10 +857,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-10",
-            "count": 10
-          },
-          {
             "date": "2026-10-11",
             "count": 10
           },
@@ -936,6 +970,10 @@
           },
           {
             "date": "2026-11-08",
+            "count": 10
+          },
+          {
+            "date": "2026-11-09",
             "count": 10
           }
         ]
@@ -946,10 +984,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-10",
-            "count": 1
-          },
-          {
             "date": "2026-10-11",
             "count": 1
           },
@@ -1063,6 +1097,10 @@
           },
           {
             "date": "2026-11-08",
+            "count": 0
+          },
+          {
+            "date": "2026-11-09",
             "count": 0
           }
         ]
@@ -1073,10 +1111,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-10",
-            "count": 0
-          },
-          {
             "date": "2026-10-11",
             "count": 0
           },
@@ -1190,6 +1224,10 @@
           },
           {
             "date": "2026-11-08",
+            "count": 0
+          },
+          {
+            "date": "2026-11-09",
             "count": 0
           }
         ]
@@ -1200,10 +1238,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-10",
-            "count": 10
-          },
-          {
             "date": "2026-10-11",
             "count": 10
           },
@@ -1318,18 +1352,18 @@
           {
             "date": "2026-11-08",
             "count": 10
+          },
+          {
+            "date": "2026-11-09",
+            "count": 10
           }
         ]
       },
       "mobilize_indivisible_yolo": {
-        "count": 46,
+        "count": 81,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-10",
-            "count": 93
-          },
           {
             "date": "2026-10-11",
             "count": 71
@@ -1445,18 +1479,18 @@
           {
             "date": "2026-11-08",
             "count": 46
+          },
+          {
+            "date": "2026-11-09",
+            "count": 81
           }
         ]
       },
       "putahcreekcouncil": {
         "count": 0,
         "error": null,
-        "content": "not_ics:unknown",
+        "content": "not_ics:html",
         "history": [
-          {
-            "date": "2026-10-10",
-            "count": 0
-          },
           {
             "date": "2026-10-11",
             "count": 0
@@ -1572,18 +1606,18 @@
           {
             "date": "2026-11-08",
             "count": 0
+          },
+          {
+            "date": "2026-11-09",
+            "count": 0
           }
         ]
       },
       "thedirt": {
-        "count": 18,
+        "count": 19,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-10",
-            "count": 17
-          },
           {
             "date": "2026-10-11",
             "count": 17
@@ -1699,6 +1733,10 @@
           {
             "date": "2026-11-08",
             "count": 18
+          },
+          {
+            "date": "2026-11-09",
+            "count": 19
           }
         ]
       },
@@ -1707,10 +1745,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-10-10",
-            "count": 0
-          },
           {
             "date": "2026-10-11",
             "count": 0
@@ -1826,18 +1860,18 @@
           {
             "date": "2026-11-08",
             "count": 0
+          },
+          {
+            "date": "2026-11-09",
+            "count": 0
           }
         ]
       },
       "ucdavis_athletics": {
-        "count": 115,
+        "count": 111,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-10",
-            "count": 135
-          },
           {
             "date": "2026-10-11",
             "count": 133
@@ -1953,18 +1987,18 @@
           {
             "date": "2026-11-08",
             "count": 115
+          },
+          {
+            "date": "2026-11-09",
+            "count": 111
           }
         ]
       },
       "ucdavis_campusgroups": {
-        "count": 164,
+        "count": 163,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-10",
-            "count": 222
-          },
           {
             "date": "2026-10-11",
             "count": 223
@@ -2080,18 +2114,18 @@
           {
             "date": "2026-11-08",
             "count": 164
+          },
+          {
+            "date": "2026-11-09",
+            "count": 163
           }
         ]
       },
       "ucdavis_library": {
-        "count": 26,
+        "count": 27,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-10",
-            "count": 22
-          },
           {
             "date": "2026-10-11",
             "count": 21
@@ -2207,6 +2241,10 @@
           {
             "date": "2026-11-08",
             "count": 26
+          },
+          {
+            "date": "2026-11-09",
+            "count": 27
           }
         ]
       },
@@ -2215,10 +2253,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-10",
-            "count": 15
-          },
           {
             "date": "2026-10-11",
             "count": 15
@@ -2334,18 +2368,40 @@
           {
             "date": "2026-11-08",
             "count": 15
+          },
+          {
+            "date": "2026-11-09",
+            "count": 15
+          }
+        ]
+      },
+      "visitdavis": {
+        "count": 0,
+        "error": null,
+        "content": "not_ics:html",
+        "history": [
+          {
+            "date": "2026-11-09",
+            "count": 0
+          }
+        ]
+      },
+      "visityolo_event": {
+        "count": 0,
+        "error": null,
+        "content": "not_ics:html",
+        "history": [
+          {
+            "date": "2026-11-09",
+            "count": 0
           }
         ]
       },
       "yolo_library": {
-        "count": 116,
+        "count": 119,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-10",
-            "count": 123
-          },
           {
             "date": "2026-10-11",
             "count": 128
@@ -2461,19 +2517,23 @@
           {
             "date": "2026-11-08",
             "count": 116
+          },
+          {
+            "date": "2026-11-09",
+            "count": 119
           }
         ]
       }
     },
     "url_quality": {
-      "total_with_url": 616,
-      "total_events": 616,
-      "unique_urls": 454,
-      "generic_count": 145,
+      "total_with_url": 663,
+      "total_events": 663,
+      "unique_urls": 462,
+      "generic_count": 146,
       "generic_domains": [
         {
           "domain": "davisbikeclub.org",
-          "events": 130,
+          "events": 131,
           "url": "https://davisbikeclub.org/club-events-calendar/"
         },
         {
@@ -2487,27 +2547,33 @@
       "source_specificity": [
         {
           "source": "Davis Bike Club",
-          "events": 130,
+          "events": 131,
           "unique_urls": 1,
           "specificity_pct": 1
         },
         {
-          "source": "UC Davis CampusGroups",
+          "source": "Yolo Library",
           "events": 118,
           "unique_urls": 118,
           "specificity_pct": 100
         },
         {
-          "source": "Yolo Library",
-          "events": 115,
-          "unique_urls": 115,
+          "source": "UC Davis CampusGroups",
+          "events": 117,
+          "unique_urls": 117,
           "specificity_pct": 100
         },
         {
           "source": "UC Davis Athletics",
-          "events": 95,
-          "unique_urls": 95,
+          "events": 94,
+          "unique_urls": 94,
           "specificity_pct": 100
+        },
+        {
+          "source": "Indivisible Yolo (Mobilize)",
+          "events": 51,
+          "unique_urls": 11,
+          "specificity_pct": 22
         },
         {
           "source": "Davis Downtown",
@@ -2517,9 +2583,9 @@
         },
         {
           "source": "UC Davis Library",
-          "events": 26,
+          "events": 27,
           "unique_urls": 10,
-          "specificity_pct": 38
+          "specificity_pct": 37
         },
         {
           "source": "Hate-Free Together",
@@ -2564,12 +2630,6 @@
           "specificity_pct": 100
         },
         {
-          "source": "Indivisible Yolo (Mobilize)",
-          "events": 7,
-          "unique_urls": 4,
-          "specificity_pct": 57
-        },
-        {
           "source": "Meetup: Intercultural Mosaics, Meetup: Mosaics",
           "events": 2,
           "unique_urls": 2,
@@ -2583,7 +2643,7 @@
       "tzids": [
         {
           "tzid": "America/Los_Angeles",
-          "count": 2740,
+          "count": 2776,
           "files": 13,
           "matches_city": true,
           "sample_files": [
@@ -2596,7 +2656,7 @@
         },
         {
           "tzid": "UTC",
-          "count": 23,
+          "count": 24,
           "files": 1,
           "matches_city": false,
           "sample_files": [
@@ -2631,23 +2691,23 @@
       {
         "source": "Indivisible Yolo (Mobilize)",
         "source_id": "mobilize_indivisible_yolo",
+        "location": "161 Palm Ave, Auburn, CA, 95603",
+        "count": 9,
+        "titles": [
+          "AADC Coffee and Conversation",
+          "AADC Coffee and Conversation",
+          "AADC Coffee and Conversation"
+        ]
+      },
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
         "location": "Auburn City Hall, 1225 Lincoln Way, Auburn, CA, 95603",
         "count": 6,
         "titles": [
           "Auburn Fridays for the Future",
           "Auburn Fridays for the Future",
           "Auburn Fridays for the Future"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "161 Palm Ave, Auburn, CA, 95603",
-        "count": 5,
-        "titles": [
-          "AADC Coffee and Conversation",
-          "AADC Coffee and Conversation",
-          "AADC Coffee and Conversation"
         ]
       },
       {
@@ -2659,28 +2719,6 @@
           "University of California\\, Davis  Swimming & Diving at California ",
           "University of California\\, Davis  Swimming & Diving at California ",
           "University of California\\, Davis  Women's Water Polo at Cal Cup"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Planz Park, 1601 Planz Rd, Bakersfield, CA, 93304",
-        "count": 3,
-        "titles": [
-          "Planz Park Community Cleanup & Social",
-          "Planz Park Community Cleanup & Social",
-          "Planz Park Community Cleanup & Social"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "1200 E Main St Suite C, Grass Valley, CA, 95945",
-        "count": 3,
-        "titles": [
-          "Come Join Us! Nevada County Democrats Monthly Central Committee Me",
-          "Come Join Us! Nevada County Democrats Monthly Central Committee Me",
-          "Come Join Us! Nevada County Democrats Monthly Central Committee Me"
         ]
       },
       {
@@ -2718,16 +2756,6 @@
       {
         "source": "Indivisible Yolo (Mobilize)",
         "source_id": "mobilize_indivisible_yolo",
-        "location": "Sierra College, 5100 Sierra College Blvd, Rocklin, CA, 95677",
-        "count": 2,
-        "titles": [
-          "Sierra College Voter Registration",
-          "Sierra College Voter Registration"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
         "location": "Folsom, CA",
         "count": 2,
         "titles": [
@@ -2748,100 +2776,21 @@
       {
         "source": "Indivisible Yolo (Mobilize)",
         "source_id": "mobilize_indivisible_yolo",
-        "location": "Riverside, CA",
-        "count": 1,
+        "location": "Sierra College, 5100 Sierra College Blvd, Rocklin, CA, 95677",
+        "count": 2,
         "titles": [
-          "Monthly Meeting with Dems of Greater Riverside (DGR) on November 1"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Truckee, CA",
-        "count": 1,
-        "titles": [
-          "Tahoe Truckee Democrats Club Monthly Meeting"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Community Arts Center, 10046 Church St, Truckee, CA, 96161",
-        "count": 1,
-        "titles": [
-          "Tahoe Truckee Democrats Club Movie Night"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Tulare, CA",
-        "count": 1,
-        "titles": [
-          "Central Committee Meeting on August 20\\, 2026 with Tulare County D"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "BriarPatch Food Co-op, 290 Sierra College Dr, Grass Valley, CA, 95945",
-        "count": 1,
-        "titles": [
-          "Democracy Is a Learned Practice Workshop"
+          "Sierra College Voter Registration",
+          "Sierra College Voter Registration"
         ]
       },
       {
         "source": "Indivisible Yolo (Mobilize)",
         "source_id": "mobilize_indivisible_yolo",
         "location": "Auburn City Hall, Rose Room, 1225 Lincoln Way, Auburn, CA, 95603",
-        "count": 1,
+        "count": 2,
         "titles": [
+          "Auburn Area Democratic Club Monthly Meeting",
           "Auburn Area Democratic Club Monthly Meeting"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Kilaga Springs Lodge, 1167 Sun City Blvd, Lincoln, CA, 95648",
-        "count": 1,
-        "titles": [
-          "Democratic Club of Lincoln Monthly Meeting"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Maidu Community Center, 1550 Maidu Dr, Meeting Room 5, Roseville, CA, 95661",
-        "count": 1,
-        "titles": [
-          "Roseville Area Democratic Club General Meeting (in-Person)"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Fair Oaks, CA",
-        "count": 1,
-        "titles": [
-          "Post Election Celebration Wednesday November 18 with American Rive"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Moksa Barrel House, 10007 Foothills Blvd Suite 180, Roseville, CA, 95747",
-        "count": 1,
-        "titles": [
-          "Roseville Area Democratic Club Holiday Party! (December Meeting)"
-        ]
-      },
-      {
-        "source": "Indivisible Yolo (Mobilize)",
-        "source_id": "mobilize_indivisible_yolo",
-        "location": "Roseville, CA",
-        "count": 1,
-        "titles": [
-          "Placer Action Network Monthly Meeting (In-Person)"
         ]
       },
       {
@@ -2860,6 +2809,69 @@
         "count": 1,
         "titles": [
           "Holiday Party Saturday December 12\\, with American River Democrats"
+        ]
+      },
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
+        "location": "Fair Oaks, CA",
+        "count": 1,
+        "titles": [
+          "Post Election Celebration Wednesday November 18 with American Rive"
+        ]
+      },
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
+        "location": "Maidu Community Center, 1550 Maidu Dr, Meeting Room 5, Roseville, CA, 95661",
+        "count": 1,
+        "titles": [
+          "Roseville Area Democratic Club General Meeting (in-Person)"
+        ]
+      },
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
+        "location": "Roseville, CA",
+        "count": 1,
+        "titles": [
+          "Placer Action Network Monthly Meeting (In-Person)"
+        ]
+      },
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
+        "location": "Moksa Barrel House, 10007 Foothills Blvd Suite 180, Roseville, CA, 95747",
+        "count": 1,
+        "titles": [
+          "Roseville Area Democratic Club Holiday Party! (December Meeting)"
+        ]
+      },
+      {
+        "source": "Indivisible Yolo (Mobilize)",
+        "source_id": "mobilize_indivisible_yolo",
+        "location": "Kilaga Springs Lodge, 1167 Sun City Blvd, Lincoln, CA, 95648",
+        "count": 1,
+        "titles": [
+          "Democratic Club of Lincoln Monthly Meeting"
+        ]
+      },
+      {
+        "source": "Thedirt",
+        "source_id": "thedirt",
+        "location": "Watermelon Music, 1970 Lake Blvd., Suite 1",
+        "count": 1,
+        "titles": [
+          "Guitar Circle"
+        ]
+      },
+      {
+        "source": "Thedirt",
+        "source_id": "thedirt",
+        "location": "Upper Crust Baking Co. (Upper Crust), 634 G St.",
+        "count": 1,
+        "titles": [
+          "Pizza Night"
         ]
       },
       {
@@ -2884,71 +2896,75 @@
     "categories": [
       {
         "category": "Sports / Fitness",
-        "count": 168
+        "count": 169
       },
       {
         "category": "Education / Workshops",
-        "count": 76
-      },
-      {
-        "category": "Nature / Outdoors / Recreation",
-        "count": 57
-      },
-      {
-        "category": "Community / Social",
-        "count": 48
-      },
-      {
-        "category": "Family / Kids",
-        "count": 33
-      },
-      {
-        "category": "Craft / Maker",
-        "count": 33
-      },
-      {
-        "category": "Dance / Performance",
-        "count": 30
-      },
-      {
-        "category": "Arts / Culture",
-        "count": 29
-      },
-      {
-        "category": "Food / Drink",
-        "count": 24
-      },
-      {
-        "category": "Technology / Careers",
-        "count": 22
-      },
-      {
-        "category": "Games / Trivia",
-        "count": 21
-      },
-      {
-        "category": "Religion / Spirituality",
-        "count": 14
+        "count": 82
       },
       {
         "category": "Government / Civic",
-        "count": 14
+        "count": 58
       },
       {
-        "category": "Music / Concerts",
-        "count": 11
+        "category": "Nature / Outdoors / Recreation",
+        "count": 56
+      },
+      {
+        "category": "Community / Social",
+        "count": 49
+      },
+      {
+        "category": "Craft / Maker",
+        "count": 34
+      },
+      {
+        "category": "Family / Kids",
+        "count": 32
+      },
+      {
+        "category": "Arts / Culture",
+        "count": 28
+      },
+      {
+        "category": "Dance / Performance",
+        "count": 27
+      },
+      {
+        "category": "Food / Drink",
+        "count": 26
+      },
+      {
+        "category": "Technology / Careers",
+        "count": 23
+      },
+      {
+        "category": "Games / Trivia",
+        "count": 19
+      },
+      {
+        "category": "Religion / Spirituality",
+        "count": 13
       },
       {
         "category": "Health / Wellness",
-        "count": 10
+        "count": 13
+      },
+      {
+        "category": "Music / Concerts",
+        "count": 9
       },
       {
         "category": "Books / Literature / Poetry",
-        "count": 8
+        "count": 7
+      },
+      {
+        "category": "History / Heritage",
+        "count": 4
       },
       {
         "category": "Film / Cinema",
-        "count": 6
+        "count": 4
       },
       {
         "category": "Schools / K-12",
@@ -2963,10 +2979,6 @@
         "count": 2
       },
       {
-        "category": "History / Heritage",
-        "count": 2
-      },
-      {
         "category": "Gardening / Horticulture",
         "count": 1
       },
@@ -2976,9 +2988,14 @@
       }
     ],
     "images": {
-      "total": 616,
-      "with_image": 46,
+      "total": 663,
+      "with_image": 87,
       "by_source": [
+        {
+          "source": "Indivisible Yolo (Mobilize)",
+          "total": 51,
+          "with_image": 51
+        },
         {
           "source": "Hate-Free Together",
           "total": 25,
@@ -2987,12 +3004,7 @@
         {
           "source": "The Dirt",
           "total": 17,
-          "with_image": 14
-        },
-        {
-          "source": "Indivisible Yolo (Mobilize)",
-          "total": 7,
-          "with_image": 7
+          "with_image": 11
         }
       ]
     }
