@@ -1,11 +1,11 @@
 {
   "city": "raleighdurham",
-  "generated": "2026-11-11T06:03:47.587223",
+  "generated": "2026-11-12T07:13:00.798036",
   "build": {
-    "generated": "2026-11-11T06:03:47.587223",
-    "total_events": 3548,
-    "prev_total_events": 3549,
-    "delta": -1
+    "generated": "2026-11-12T07:13:00.798036",
+    "total_events": 3499,
+    "prev_total_events": 3548,
+    "delta": -49
   },
   "problems": [
     {
@@ -35,6 +35,18 @@
     {
       "severity": 1,
       "kind": "broken_feed",
+      "title": "resilientdurhamnc is serving empty, not ICS",
+      "detail": "was 5 events on 2026-11-11; broken since 2026-11-12",
+      "feed": "resilientdurhamnc",
+      "repro": {
+        "display": "Resilient Durham NC",
+        "source": "https://resilientdurhamnc.org/events/?ical=1",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://resilientdurhamnc.org/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "severity": 1,
+      "kind": "broken_feed",
       "title": "transitionslifecare is serving html, not ICS",
       "detail": "was 12 events on 2026-11-03; broken since 2026-11-04",
       "feed": "transitionslifecare",
@@ -42,6 +54,18 @@
         "display": "Transitions LifeCare",
         "source": "https://www.transitionslifecare.org/events/?ical=1",
         "command": "curl -sL -A 'Mozilla/5.0' 'https://www.transitionslifecare.org/events/?ical=1' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "severity": 2,
+      "kind": "newly_silent",
+      "title": "carolina_theatre went silent (valid calendar, 0 events)",
+      "detail": "was 84 events on 2026-11-11",
+      "feed": "carolina_theatre",
+      "repro": {
+        "display": "Carolina Theatre",
+        "source": "python scrapers/carolina_theatre.py",
+        "command": "python scrapers/carolina_theatre.py"
       }
     },
     {
@@ -78,18 +102,6 @@
         "display": "Triangle Cycling",
         "source": "https://calendar.google.com/calendar/ical/cb2ajgfjpk6bf9gifg6kg2hn1s%40group.calendar.google.com/public/basic.ics",
         "command": "curl -sL -A 'Mozilla/5.0' 'https://calendar.google.com/calendar/ical/cb2ajgfjpk6bf9gifg6kg2hn1s%40group.calendar.google.com/public/basic.ics' | grep -c 'BEGIN:VEVENT'"
-      }
-    },
-    {
-      "severity": 2,
-      "kind": "newly_silent",
-      "title": "gcal_e299fb559498ba8fef0f629f438f848f53d0b4bb946a74989b44f271146a12e5 went silent (valid calendar, 0 events)",
-      "detail": "was 1 events on 2026-11-03",
-      "feed": "gcal_e299fb559498ba8fef0f629f438f848f53d0b4bb946a74989b44f271146a12e5",
-      "repro": {
-        "display": "Durham Resistance (Durham Local Govt)",
-        "source": "https://calendar.google.com/calendar/ical/e299fb559498ba8fef0f629f438f848f53d0b4bb946a74989b44f271146a12e5%40group.calendar.google.com/public/basic.ics",
-        "command": "curl -sL -A 'Mozilla/5.0' 'https://calendar.google.com/calendar/ical/e299fb559498ba8fef0f629f438f848f53d0b4bb946a74989b44f271146a12e5%40group.calendar.google.com/public/basic.ics' | grep -c 'BEGIN:VEVENT'"
       }
     },
     {
@@ -139,6 +151,18 @@
         "source": "python scrapers/legistar.py --client wake --source \"Wake County\"",
         "command": "python scrapers/legistar.py --client wake --source \"Wake County\""
       }
+    },
+    {
+      "severity": 2,
+      "kind": "drop",
+      "title": "scrap_exchange: Events dropped 64% (14 \u2192 5)",
+      "detail": "2026-11-12",
+      "feed": "scrap_exchange",
+      "repro": {
+        "display": "The Scrap Exchange",
+        "source": "python scrapers/squarespace.py --url \"https://scrapexchange.org/tsecalendar\" --name \"The Scrap Exchange\"",
+        "command": "python scrapers/squarespace.py --url \"https://scrapexchange.org/tsecalendar\" --name \"The Scrap Exchange\""
+      }
     }
   ],
   "watching": [
@@ -176,6 +200,18 @@
         "display": "Durham Resistance (In Person)",
         "source": "https://calendar.google.com/calendar/ical/41d85e1478a55e3b4adbf2e4951c5be9f6e49241ac55a65427c71d252849bf1c%40group.calendar.google.com/public/basic.ics",
         "command": "curl -sL -A 'Mozilla/5.0' 'https://calendar.google.com/calendar/ical/41d85e1478a55e3b4adbf2e4951c5be9f6e49241ac55a65427c71d252849bf1c%40group.calendar.google.com/public/basic.ics' | grep -c 'BEGIN:VEVENT'"
+      }
+    },
+    {
+      "feed": "gcal_e299fb559498ba8fef0f629f438f848f53d0b4bb946a74989b44f271146a12e5",
+      "was": 1,
+      "was_date": "2026-11-03",
+      "silent_since": "2026-11-04",
+      "content": "quiet",
+      "repro": {
+        "display": "Durham Resistance (Durham Local Govt)",
+        "source": "https://calendar.google.com/calendar/ical/e299fb559498ba8fef0f629f438f848f53d0b4bb946a74989b44f271146a12e5%40group.calendar.google.com/public/basic.ics",
+        "command": "curl -sL -A 'Mozilla/5.0' 'https://calendar.google.com/calendar/ical/e299fb559498ba8fef0f629f438f848f53d0b4bb946a74989b44f271146a12e5%40group.calendar.google.com/public/basic.ics' | grep -c 'BEGIN:VEVENT'"
       }
     },
     {
@@ -218,7 +254,7 @@
       "feed": "meetup_blacks_in_tech_bit_rdu_durham_raleigh_meetup",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Blacks in Tech RDU",
@@ -230,7 +266,7 @@
       "feed": "meetup_chicktech_rdu",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet",
       "repro": {
         "display": "Meetup: ChickTech RDU",
@@ -242,7 +278,7 @@
       "feed": "meetup_futureofdata_triangle",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Future of Data Triangle",
@@ -254,7 +290,7 @@
       "feed": "meetup_pydata_triangle",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet",
       "repro": {
         "display": "Meetup: PyData Triangle",
@@ -266,7 +302,7 @@
       "feed": "meetup_raleigh_wordpress_meetup_group",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Raleigh WordPress",
@@ -278,7 +314,7 @@
       "feed": "meetup_research_triangle_analysts",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Research Triangle Analysts",
@@ -290,7 +326,7 @@
       "feed": "meetup_triangle_devops",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Triangle DevOps",
@@ -302,7 +338,7 @@
       "feed": "meetup_tripython",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet",
       "repro": {
         "display": "Meetup: Triangle Python Users",
@@ -317,6 +353,13 @@
       "was": 1,
       "was_date": "2026-10-29",
       "silent_since": "2026-10-30",
+      "content": "quiet"
+    },
+    {
+      "feed": "carolina_theatre",
+      "was": 84,
+      "was_date": "2026-11-11",
+      "silent_since": "2026-11-12",
       "content": "quiet"
     },
     {
@@ -407,7 +450,7 @@
       "feed": "meetup_blacks_in_tech_bit_rdu_durham_raleigh_meetup",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet"
     },
     {
@@ -421,42 +464,42 @@
       "feed": "meetup_chicktech_rdu",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet"
     },
     {
       "feed": "meetup_futureofdata_triangle",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet"
     },
     {
       "feed": "meetup_pydata_triangle",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet"
     },
     {
       "feed": "meetup_raleigh_wordpress_meetup_group",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet"
     },
     {
       "feed": "meetup_research_triangle_analysts",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet"
     },
     {
       "feed": "meetup_triangle_devops",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet"
     },
     {
@@ -470,8 +513,15 @@
       "feed": "meetup_tripython",
       "was": null,
       "was_date": null,
-      "silent_since": "2026-08-14",
+      "silent_since": "2026-08-15",
       "content": "quiet"
+    },
+    {
+      "feed": "resilientdurhamnc",
+      "was": 5,
+      "was_date": "2026-11-11",
+      "silent_since": "2026-11-12",
+      "content": "not_ics:empty"
     },
     {
       "feed": "transitionslifecare",
@@ -492,22 +542,6 @@
   "ongoing_errors": [],
   "tz_anomalies": [],
   "recent_anomalies": [
-    {
-      "type": "zero_events",
-      "message": "Feed returned 0 events (was 1)",
-      "severity": "info",
-      "date": "2026-11-04",
-      "city": "raleighdurham",
-      "feed": "gcal_e299fb559498ba8fef0f629f438f848f53d0b4bb946a74989b44f271146a12e5"
-    },
-    {
-      "type": "zero_events",
-      "message": "Feed returned 0 events (was 12)",
-      "severity": "info",
-      "date": "2026-11-04",
-      "city": "raleighdurham",
-      "feed": "transitionslifecare"
-    },
     {
       "type": "zero_events",
       "message": "Feed returned 0 events (was 1)",
@@ -579,19 +613,39 @@
       "date": "2026-11-11",
       "city": "raleighdurham",
       "feed": "wake_county_legistar"
+    },
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 84)",
+      "severity": "info",
+      "date": "2026-11-12",
+      "city": "raleighdurham",
+      "feed": "carolina_theatre"
+    },
+    {
+      "type": "zero_events",
+      "message": "Feed returned 0 events (was 5)",
+      "severity": "info",
+      "date": "2026-11-12",
+      "city": "raleighdurham",
+      "feed": "resilientdurhamnc"
+    },
+    {
+      "type": "significant_drop",
+      "message": "Events dropped 64% (14 \u2192 5)",
+      "severity": "medium",
+      "date": "2026-11-12",
+      "city": "raleighdurham",
+      "feed": "scrap_exchange"
     }
   ],
   "detail": {
     "feeds": {
       "americantobaccocampus": {
-        "count": 90,
+        "count": 89,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 116
-          },
           {
             "date": "2026-10-14",
             "count": 116
@@ -707,6 +761,10 @@
           {
             "date": "2026-11-11",
             "count": 90
+          },
+          {
+            "date": "2026-11-12",
+            "count": 89
           }
         ]
       },
@@ -715,10 +773,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 0
-          },
           {
             "date": "2026-10-14",
             "count": 0
@@ -834,6 +888,10 @@
           {
             "date": "2026-11-11",
             "count": 4
+          },
+          {
+            "date": "2026-11-12",
+            "count": 4
           }
         ]
       },
@@ -842,10 +900,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 0
-          },
           {
             "date": "2026-10-14",
             "count": 0
@@ -961,18 +1015,18 @@
           {
             "date": "2026-11-11",
             "count": 0
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
       "calendar_1_ics": {
-        "count": 188,
+        "count": 204,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 361
-          },
           {
             "date": "2026-10-14",
             "count": 362
@@ -1088,18 +1142,18 @@
           {
             "date": "2026-11-11",
             "count": 188
+          },
+          {
+            "date": "2026-11-12",
+            "count": 204
           }
         ]
       },
       "calendar_group_african_american_cultural_center": {
-        "count": 93,
+        "count": 91,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 106
-          },
           {
             "date": "2026-10-14",
             "count": 106
@@ -1215,6 +1269,10 @@
           {
             "date": "2026-11-11",
             "count": 93
+          },
+          {
+            "date": "2026-11-12",
+            "count": 91
           }
         ]
       },
@@ -1223,10 +1281,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 8
-          },
           {
             "date": "2026-10-14",
             "count": 8
@@ -1342,6 +1396,10 @@
           {
             "date": "2026-11-11",
             "count": 7
+          },
+          {
+            "date": "2026-11-12",
+            "count": 7
           }
         ]
       },
@@ -1350,10 +1408,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 36
-          },
           {
             "date": "2026-10-14",
             "count": 36
@@ -1469,6 +1523,10 @@
           {
             "date": "2026-11-11",
             "count": 35
+          },
+          {
+            "date": "2026-11-12",
+            "count": 35
           }
         ]
       },
@@ -1477,10 +1535,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 12
-          },
           {
             "date": "2026-10-14",
             "count": 11
@@ -1596,18 +1650,18 @@
           {
             "date": "2026-11-11",
             "count": 8
+          },
+          {
+            "date": "2026-11-12",
+            "count": 8
           }
         ]
       },
       "carolina_theatre": {
-        "count": 84,
+        "count": 0,
         "error": null,
-        "content": null,
+        "content": "quiet",
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 0
-          },
           {
             "date": "2026-10-14",
             "count": 87
@@ -1723,18 +1777,18 @@
           {
             "date": "2026-11-11",
             "count": 84
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
       "catscradle": {
-        "count": 57,
+        "count": 55,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 87
-          },
           {
             "date": "2026-10-14",
             "count": 86
@@ -1850,6 +1904,10 @@
           {
             "date": "2026-11-11",
             "count": 57
+          },
+          {
+            "date": "2026-11-12",
+            "count": 55
           }
         ]
       },
@@ -1858,10 +1916,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 2
-          },
           {
             "date": "2026-10-14",
             "count": 2
@@ -1977,6 +2031,10 @@
           {
             "date": "2026-11-11",
             "count": 0
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
@@ -1985,10 +2043,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 9
-          },
           {
             "date": "2026-10-14",
             "count": 9
@@ -2104,6 +2158,10 @@
           {
             "date": "2026-11-11",
             "count": 9
+          },
+          {
+            "date": "2026-11-12",
+            "count": 9
           }
         ]
       },
@@ -2112,10 +2170,6 @@
         "error": null,
         "content": "not_ics:html",
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 0
-          },
           {
             "date": "2026-10-14",
             "count": 0
@@ -2230,6 +2284,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
@@ -2240,10 +2298,6 @@
         "content": "not_ics:html",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 0
-          },
-          {
             "date": "2026-10-14",
             "count": 0
           },
@@ -2358,6 +2412,10 @@
           {
             "date": "2026-11-11",
             "count": 0
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
@@ -2366,10 +2424,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 26
-          },
           {
             "date": "2026-10-14",
             "count": 25
@@ -2485,6 +2539,10 @@
           {
             "date": "2026-11-11",
             "count": 28
+          },
+          {
+            "date": "2026-11-12",
+            "count": 28
           }
         ]
       },
@@ -2493,10 +2551,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 76
-          },
           {
             "date": "2026-10-14",
             "count": 76
@@ -2612,6 +2666,10 @@
           {
             "date": "2026-11-11",
             "count": 65
+          },
+          {
+            "date": "2026-11-12",
+            "count": 65
           }
         ]
       },
@@ -2620,10 +2678,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 82
-          },
           {
             "date": "2026-10-14",
             "count": 82
@@ -2738,6 +2792,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 83
+          },
+          {
+            "date": "2026-11-12",
             "count": 83
           }
         ]
@@ -2748,10 +2806,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 5
-          },
-          {
             "date": "2026-10-14",
             "count": 5
           },
@@ -2866,6 +2920,10 @@
           {
             "date": "2026-11-11",
             "count": 5
+          },
+          {
+            "date": "2026-11-12",
+            "count": 5
           }
         ]
       },
@@ -2874,10 +2932,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 0
-          },
           {
             "date": "2026-10-14",
             "count": 0
@@ -2993,6 +3047,10 @@
           {
             "date": "2026-11-11",
             "count": 0
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
@@ -3001,10 +3059,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 0
-          },
           {
             "date": "2026-10-14",
             "count": 0
@@ -3120,18 +3174,18 @@
           {
             "date": "2026-11-11",
             "count": 0
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
       "eventbrite_quail_ridge": {
-        "count": 4,
+        "count": 3,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 11
-          },
           {
             "date": "2026-10-14",
             "count": 11
@@ -3247,6 +3301,10 @@
           {
             "date": "2026-11-11",
             "count": 4
+          },
+          {
+            "date": "2026-11-12",
+            "count": 3
           }
         ]
       },
@@ -3255,10 +3313,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 30
-          },
           {
             "date": "2026-10-14",
             "count": 30
@@ -3374,18 +3428,18 @@
           {
             "date": "2026-11-11",
             "count": 17
+          },
+          {
+            "date": "2026-11-12",
+            "count": 17
           }
         ]
       },
       "events_1_ics": {
-        "count": 1063,
+        "count": 1053,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 1317
-          },
           {
             "date": "2026-10-14",
             "count": 1308
@@ -3501,6 +3555,10 @@
           {
             "date": "2026-11-11",
             "count": 1063
+          },
+          {
+            "date": "2026-11-12",
+            "count": 1053
           }
         ]
       },
@@ -3509,10 +3567,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 30
-          },
           {
             "date": "2026-10-14",
             "count": 30
@@ -3628,6 +3682,10 @@
           {
             "date": "2026-11-11",
             "count": 22
+          },
+          {
+            "date": "2026-11-12",
+            "count": 22
           }
         ]
       },
@@ -3636,10 +3694,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 4
-          },
           {
             "date": "2026-10-14",
             "count": 4
@@ -3755,18 +3809,18 @@
           {
             "date": "2026-11-11",
             "count": 0
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
       "gcal_b32e7018b18e1a8650f0d178e5d8314fd6664c368233eead570b44e368f882c9": {
-        "count": 18,
+        "count": 16,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 39
-          },
           {
             "date": "2026-10-14",
             "count": 37
@@ -3882,6 +3936,10 @@
           {
             "date": "2026-11-11",
             "count": 18
+          },
+          {
+            "date": "2026-11-12",
+            "count": 16
           }
         ]
       },
@@ -3890,10 +3948,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 0
-          },
           {
             "date": "2026-10-14",
             "count": 0
@@ -4008,6 +4062,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 1
+          },
+          {
+            "date": "2026-11-12",
             "count": 1
           }
         ]
@@ -4018,10 +4076,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 0
-          },
-          {
             "date": "2026-10-14",
             "count": 0
           },
@@ -4135,6 +4189,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 4
+          },
+          {
+            "date": "2026-11-12",
             "count": 4
           }
         ]
@@ -4145,10 +4203,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 7
-          },
-          {
             "date": "2026-10-14",
             "count": 7
           },
@@ -4262,6 +4316,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
@@ -4272,10 +4330,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 2
-          },
-          {
             "date": "2026-10-14",
             "count": 2
           },
@@ -4389,19 +4443,19 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
       },
       "gcal_enoriver_org_9u7o786v1jlk6heq5cp3k1gr1k": {
-        "count": 14,
+        "count": 15,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 11
-          },
           {
             "date": "2026-10-14",
             "count": 11
@@ -4517,6 +4571,10 @@
           {
             "date": "2026-11-11",
             "count": 14
+          },
+          {
+            "date": "2026-11-12",
+            "count": 15
           }
         ]
       },
@@ -4526,10 +4584,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 1
-          },
-          {
             "date": "2026-10-14",
             "count": 1
           },
@@ -4644,6 +4698,10 @@
           {
             "date": "2026-11-11",
             "count": 0
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
@@ -4652,10 +4710,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 14
-          },
           {
             "date": "2026-10-14",
             "count": 15
@@ -4771,6 +4825,10 @@
           {
             "date": "2026-11-11",
             "count": 14
+          },
+          {
+            "date": "2026-11-12",
+            "count": 14
           }
         ]
       },
@@ -4779,10 +4837,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 21
-          },
           {
             "date": "2026-10-14",
             "count": 20
@@ -4898,18 +4952,18 @@
           {
             "date": "2026-11-11",
             "count": 15
+          },
+          {
+            "date": "2026-11-12",
+            "count": 15
           }
         ]
       },
       "gcal_swdrotary": {
-        "count": 25,
+        "count": 26,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 26
-          },
           {
             "date": "2026-10-14",
             "count": 26
@@ -5025,6 +5079,10 @@
           {
             "date": "2026-11-11",
             "count": 25
+          },
+          {
+            "date": "2026-11-12",
+            "count": 26
           }
         ]
       },
@@ -5033,10 +5091,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 4
-          },
           {
             "date": "2026-10-14",
             "count": 4
@@ -5152,18 +5206,18 @@
           {
             "date": "2026-11-11",
             "count": 9
+          },
+          {
+            "date": "2026-11-12",
+            "count": 9
           }
         ]
       },
       "goduke_api_v2": {
-        "count": 181,
+        "count": 180,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 193
-          },
           {
             "date": "2026-10-14",
             "count": 192
@@ -5279,18 +5333,18 @@
           {
             "date": "2026-11-11",
             "count": 181
+          },
+          {
+            "date": "2026-11-12",
+            "count": 180
           }
         ]
       },
       "goheels_api_v2": {
-        "count": 328,
+        "count": 327,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 269
-          },
           {
             "date": "2026-10-14",
             "count": 269
@@ -5406,18 +5460,18 @@
           {
             "date": "2026-11-11",
             "count": 328
+          },
+          {
+            "date": "2026-11-12",
+            "count": 327
           }
         ]
       },
       "gopack_api_v2": {
-        "count": 265,
+        "count": 264,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 204
-          },
           {
             "date": "2026-10-14",
             "count": 204
@@ -5533,6 +5587,10 @@
           {
             "date": "2026-11-11",
             "count": 265
+          },
+          {
+            "date": "2026-11-12",
+            "count": 264
           }
         ]
       },
@@ -5541,10 +5599,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 6
-          },
           {
             "date": "2026-10-14",
             "count": 6
@@ -5659,6 +5713,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 2
+          },
+          {
+            "date": "2026-11-12",
             "count": 2
           }
         ]
@@ -5669,10 +5727,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 3
-          },
-          {
             "date": "2026-10-14",
             "count": 3
           },
@@ -5786,6 +5840,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 5
+          },
+          {
+            "date": "2026-11-12",
             "count": 5
           }
         ]
@@ -5796,10 +5854,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 3
-          },
-          {
             "date": "2026-10-14",
             "count": 3
           },
@@ -5914,6 +5968,10 @@
           {
             "date": "2026-11-11",
             "count": 0
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
@@ -5922,10 +5980,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 25
-          },
           {
             "date": "2026-10-14",
             "count": 25
@@ -6041,6 +6095,10 @@
           {
             "date": "2026-11-11",
             "count": 9
+          },
+          {
+            "date": "2026-11-12",
+            "count": 9
           }
         ]
       },
@@ -6049,10 +6107,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 0
-          },
           {
             "date": "2026-10-14",
             "count": 0
@@ -6168,18 +6222,18 @@
           {
             "date": "2026-11-11",
             "count": 0
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
       "martin_marietta": {
-        "count": 107,
+        "count": 109,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 141
-          },
           {
             "date": "2026-10-14",
             "count": 141
@@ -6295,6 +6349,10 @@
           {
             "date": "2026-11-11",
             "count": 107
+          },
+          {
+            "date": "2026-11-12",
+            "count": 109
           }
         ]
       },
@@ -6303,10 +6361,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 2
-          },
           {
             "date": "2026-10-14",
             "count": 3
@@ -6421,6 +6475,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 1
+          },
+          {
+            "date": "2026-11-12",
             "count": 1
           }
         ]
@@ -6431,10 +6489,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 1
-          },
-          {
             "date": "2026-10-14",
             "count": 1
           },
@@ -6548,6 +6602,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
@@ -6558,10 +6616,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 0
-          },
-          {
             "date": "2026-10-14",
             "count": 0
           },
@@ -6675,6 +6729,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
@@ -6685,10 +6743,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 1
-          },
-          {
             "date": "2026-10-14",
             "count": 1
           },
@@ -6802,6 +6856,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
@@ -6812,10 +6870,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 0
-          },
-          {
             "date": "2026-10-14",
             "count": 0
           },
@@ -6929,6 +6983,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
@@ -6939,10 +6997,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 1
-          },
-          {
             "date": "2026-10-14",
             "count": 1
           },
@@ -7056,19 +7110,19 @@
           },
           {
             "date": "2026-11-11",
+            "count": 1
+          },
+          {
+            "date": "2026-11-12",
             "count": 1
           }
         ]
       },
       "meetup_data_science_nc": {
-        "count": 5,
+        "count": 4,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 9
-          },
           {
             "date": "2026-10-14",
             "count": 9
@@ -7184,6 +7238,10 @@
           {
             "date": "2026-11-11",
             "count": 5
+          },
+          {
+            "date": "2026-11-12",
+            "count": 4
           }
         ]
       },
@@ -7192,10 +7250,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 6
-          },
           {
             "date": "2026-10-14",
             "count": 7
@@ -7310,6 +7364,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 4
+          },
+          {
+            "date": "2026-11-12",
             "count": 4
           }
         ]
@@ -7320,10 +7378,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 10
-          },
-          {
             "date": "2026-10-14",
             "count": 10
           },
@@ -7437,6 +7491,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 10
+          },
+          {
+            "date": "2026-11-12",
             "count": 10
           }
         ]
@@ -7447,10 +7505,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 10
-          },
-          {
             "date": "2026-10-14",
             "count": 10
           },
@@ -7564,6 +7618,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 10
+          },
+          {
+            "date": "2026-11-12",
             "count": 10
           }
         ]
@@ -7574,10 +7632,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 5
-          },
-          {
             "date": "2026-10-14",
             "count": 5
           },
@@ -7691,6 +7745,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 3
+          },
+          {
+            "date": "2026-11-12",
             "count": 3
           }
         ]
@@ -7701,10 +7759,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 10
-          },
-          {
             "date": "2026-10-14",
             "count": 10
           },
@@ -7818,6 +7872,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 7
+          },
+          {
+            "date": "2026-11-12",
             "count": 7
           }
         ]
@@ -7828,10 +7886,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 0
-          },
-          {
             "date": "2026-10-14",
             "count": 0
           },
@@ -7945,6 +7999,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
@@ -7955,10 +8013,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 7
-          },
-          {
             "date": "2026-10-14",
             "count": 6
           },
@@ -8072,6 +8126,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 7
+          },
+          {
+            "date": "2026-11-12",
             "count": 7
           }
         ]
@@ -8082,10 +8140,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 0
-          },
-          {
             "date": "2026-10-14",
             "count": 0
           },
@@ -8199,19 +8253,19 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
       },
       "meetup_raleigh_ai_machine_learning_and_computer_vision_meetup": {
-        "count": 3,
+        "count": 2,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 8
-          },
           {
             "date": "2026-10-14",
             "count": 8
@@ -8327,6 +8381,10 @@
           {
             "date": "2026-11-11",
             "count": 3
+          },
+          {
+            "date": "2026-11-12",
+            "count": 2
           }
         ]
       },
@@ -8336,10 +8394,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 10
-          },
-          {
             "date": "2026-10-14",
             "count": 10
           },
@@ -8453,6 +8507,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 10
+          },
+          {
+            "date": "2026-11-12",
             "count": 10
           }
         ]
@@ -8463,10 +8521,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 0
-          },
-          {
             "date": "2026-10-14",
             "count": 0
           },
@@ -8580,6 +8634,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
@@ -8590,10 +8648,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 1
-          },
-          {
             "date": "2026-10-14",
             "count": 3
           },
@@ -8707,6 +8761,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 1
+          },
+          {
+            "date": "2026-11-12",
             "count": 1
           }
         ]
@@ -8717,10 +8775,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 0
-          },
-          {
             "date": "2026-10-14",
             "count": 0
           },
@@ -8834,6 +8888,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
@@ -8844,10 +8902,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 1
-          },
-          {
             "date": "2026-10-14",
             "count": 1
           },
@@ -8961,6 +9015,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 1
+          },
+          {
+            "date": "2026-11-12",
             "count": 1
           }
         ]
@@ -8971,10 +9029,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 10
-          },
-          {
             "date": "2026-10-14",
             "count": 10
           },
@@ -9088,6 +9142,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 10
+          },
+          {
+            "date": "2026-11-12",
             "count": 10
           }
         ]
@@ -9098,10 +9156,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 10
-          },
-          {
             "date": "2026-10-14",
             "count": 10
           },
@@ -9215,19 +9269,19 @@
           },
           {
             "date": "2026-11-11",
+            "count": 10
+          },
+          {
+            "date": "2026-11-12",
             "count": 10
           }
         ]
       },
       "meetup_triangle_code_for_america": {
-        "count": 3,
+        "count": 2,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 4
-          },
           {
             "date": "2026-10-14",
             "count": 4
@@ -9343,6 +9397,10 @@
           {
             "date": "2026-11-11",
             "count": 3
+          },
+          {
+            "date": "2026-11-12",
+            "count": 2
           }
         ]
       },
@@ -9352,10 +9410,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 0
-          },
-          {
             "date": "2026-10-14",
             "count": 0
           },
@@ -9469,6 +9523,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
@@ -9479,10 +9537,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 5
-          },
-          {
             "date": "2026-10-14",
             "count": 5
           },
@@ -9596,6 +9650,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 4
+          },
+          {
+            "date": "2026-11-12",
             "count": 4
           }
         ]
@@ -9606,10 +9664,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 1
-          },
-          {
             "date": "2026-10-14",
             "count": 1
           },
@@ -9723,6 +9777,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 1
+          },
+          {
+            "date": "2026-11-12",
             "count": 1
           }
         ]
@@ -9733,10 +9791,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 1
-          },
-          {
             "date": "2026-10-14",
             "count": 1
           },
@@ -9850,6 +9904,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 1
+          },
+          {
+            "date": "2026-11-12",
             "count": 1
           }
         ]
@@ -9860,10 +9918,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 1
-          },
-          {
             "date": "2026-10-14",
             "count": 1
           },
@@ -9977,6 +10031,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
@@ -9987,10 +10045,6 @@
         "content": "quiet",
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 0
-          },
-          {
             "date": "2026-10-14",
             "count": 0
           },
@@ -10104,19 +10158,19 @@
           },
           {
             "date": "2026-11-11",
+            "count": 0
+          },
+          {
+            "date": "2026-11-12",
             "count": 0
           }
         ]
       },
       "meetup_yogainnaturenc": {
-        "count": 2,
+        "count": 3,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 5
-          },
           {
             "date": "2026-10-14",
             "count": 5
@@ -10232,6 +10286,10 @@
           {
             "date": "2026-11-11",
             "count": 2
+          },
+          {
+            "date": "2026-11-12",
+            "count": 3
           }
         ]
       },
@@ -10240,10 +10298,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 30
-          },
           {
             "date": "2026-10-14",
             "count": 30
@@ -10359,6 +10413,10 @@
           {
             "date": "2026-11-11",
             "count": 22
+          },
+          {
+            "date": "2026-11-12",
+            "count": 22
           }
         ]
       },
@@ -10367,10 +10425,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 37
-          },
           {
             "date": "2026-10-14",
             "count": 37
@@ -10486,6 +10540,10 @@
           {
             "date": "2026-11-11",
             "count": 22
+          },
+          {
+            "date": "2026-11-12",
+            "count": 22
           }
         ]
       },
@@ -10494,10 +10552,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 30
-          },
           {
             "date": "2026-10-14",
             "count": 30
@@ -10612,6 +10666,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 30
+          },
+          {
+            "date": "2026-11-12",
             "count": 30
           }
         ]
@@ -10622,10 +10680,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 30
-          },
-          {
             "date": "2026-10-14",
             "count": 30
           },
@@ -10739,6 +10793,10 @@
           },
           {
             "date": "2026-11-11",
+            "count": 30
+          },
+          {
+            "date": "2026-11-12",
             "count": 30
           }
         ]
@@ -10749,10 +10807,6 @@
         "content": null,
         "history": [
           {
-            "date": "2026-10-13",
-            "count": 9
-          },
-          {
             "date": "2026-10-14",
             "count": 9
           },
@@ -10867,6 +10921,10 @@
           {
             "date": "2026-11-11",
             "count": 2
+          },
+          {
+            "date": "2026-11-12",
+            "count": 2
           }
         ]
       },
@@ -10875,10 +10933,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 29
-          },
           {
             "date": "2026-10-14",
             "count": 29
@@ -10994,18 +11048,18 @@
           {
             "date": "2026-11-11",
             "count": 23
+          },
+          {
+            "date": "2026-11-12",
+            "count": 23
           }
         ]
       },
       "ncwf": {
-        "count": 17,
+        "count": 18,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 23
-          },
           {
             "date": "2026-10-14",
             "count": 27
@@ -11121,18 +11175,18 @@
           {
             "date": "2026-11-11",
             "count": 17
+          },
+          {
+            "date": "2026-11-12",
+            "count": 18
           }
         ]
       },
       "ponysaurus": {
-        "count": 26,
+        "count": 24,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 43
-          },
           {
             "date": "2026-10-14",
             "count": 42
@@ -11248,6 +11302,10 @@
           {
             "date": "2026-11-11",
             "count": 26
+          },
+          {
+            "date": "2026-11-12",
+            "count": 24
           }
         ]
       },
@@ -11256,10 +11314,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 59
-          },
           {
             "date": "2026-10-14",
             "count": 59
@@ -11375,6 +11429,10 @@
           {
             "date": "2026-11-11",
             "count": 69
+          },
+          {
+            "date": "2026-11-12",
+            "count": 69
           }
         ]
       },
@@ -11383,10 +11441,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 1
-          },
           {
             "date": "2026-10-14",
             "count": 1
@@ -11502,18 +11556,18 @@
           {
             "date": "2026-11-11",
             "count": 1
+          },
+          {
+            "date": "2026-11-12",
+            "count": 1
           }
         ]
       },
       "resilientdurhamnc": {
-        "count": 5,
+        "count": 0,
         "error": null,
-        "content": null,
+        "content": "not_ics:empty",
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 1
-          },
           {
             "date": "2026-10-14",
             "count": 1
@@ -11629,18 +11683,18 @@
           {
             "date": "2026-11-11",
             "count": 5
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
       "scrap_exchange": {
-        "count": 14,
+        "count": 5,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 22
-          },
           {
             "date": "2026-10-14",
             "count": 21
@@ -11756,18 +11810,18 @@
           {
             "date": "2026-11-11",
             "count": 14
+          },
+          {
+            "date": "2026-11-12",
+            "count": 5
           }
         ]
       },
       "secondchancenc": {
-        "count": 5,
+        "count": 6,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 0
-          },
           {
             "date": "2026-10-14",
             "count": 0
@@ -11883,6 +11937,10 @@
           {
             "date": "2026-11-11",
             "count": 5
+          },
+          {
+            "date": "2026-11-12",
+            "count": 6
           }
         ]
       },
@@ -11926,18 +11984,18 @@
           {
             "date": "2026-11-11",
             "count": 0
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
       "triangleland": {
-        "count": 14,
+        "count": 15,
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 15
-          },
           {
             "date": "2026-10-14",
             "count": 15
@@ -12053,6 +12111,10 @@
           {
             "date": "2026-11-11",
             "count": 14
+          },
+          {
+            "date": "2026-11-12",
+            "count": 15
           }
         ]
       },
@@ -12061,10 +12123,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 29
-          },
           {
             "date": "2026-10-14",
             "count": 29
@@ -12180,6 +12238,10 @@
           {
             "date": "2026-11-11",
             "count": 30
+          },
+          {
+            "date": "2026-11-12",
+            "count": 30
           }
         ]
       },
@@ -12188,10 +12250,6 @@
         "error": null,
         "content": "quiet",
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 0
-          },
           {
             "date": "2026-10-14",
             "count": 0
@@ -12307,6 +12365,10 @@
           {
             "date": "2026-11-11",
             "count": 0
+          },
+          {
+            "date": "2026-11-12",
+            "count": 0
           }
         ]
       },
@@ -12315,10 +12377,6 @@
         "error": null,
         "content": null,
         "history": [
-          {
-            "date": "2026-10-13",
-            "count": 28
-          },
           {
             "date": "2026-10-14",
             "count": 27
@@ -12434,14 +12492,18 @@
           {
             "date": "2026-11-11",
             "count": 33
+          },
+          {
+            "date": "2026-11-12",
+            "count": 33
           }
         ]
       }
     },
     "url_quality": {
-      "total_with_url": 2708,
-      "total_events": 3548,
-      "unique_urls": 1746,
+      "total_with_url": 2656,
+      "total_events": 3499,
+      "unique_urls": 1694,
       "generic_count": 15,
       "generic_domains": [
         {
@@ -12460,62 +12522,62 @@
       "source_specificity": [
         {
           "source": "NC Cultural Resources",
-          "events": 1031,
-          "unique_urls": 225,
+          "events": 1021,
+          "unique_urls": 222,
           "specificity_pct": 22
         },
         {
           "source": "UNC Athletics",
-          "events": 249,
-          "unique_urls": 249,
-          "specificity_pct": 100
-        },
-        {
-          "source": "NC State Athletics",
-          "events": 170,
-          "unique_urls": 170,
+          "events": 248,
+          "unique_urls": 248,
           "specificity_pct": 100
         },
         {
           "source": "UNC Chapel Hill",
-          "events": 168,
-          "unique_urls": 144,
-          "specificity_pct": 86
+          "events": 181,
+          "unique_urls": 145,
+          "specificity_pct": 80
+        },
+        {
+          "source": "NC State Athletics",
+          "events": 169,
+          "unique_urls": 169,
+          "specificity_pct": 100
         },
         {
           "source": "Duke Athletics",
-          "events": 146,
-          "unique_urls": 146,
+          "events": 145,
+          "unique_urls": 145,
           "specificity_pct": 100
         },
         {
           "source": "NC State African American Cultural Center",
-          "events": 93,
-          "unique_urls": 12,
-          "specificity_pct": 13
+          "events": 91,
+          "unique_urls": 11,
+          "specificity_pct": 12
         },
         {
           "source": "Martin Marietta Center",
-          "events": 84,
-          "unique_urls": 84,
+          "events": 86,
+          "unique_urls": 86,
           "specificity_pct": 100
         },
         {
           "source": "Duke Arts",
-          "events": 80,
-          "unique_urls": 73,
+          "events": 75,
+          "unique_urls": 68,
           "specificity_pct": 91
         },
         {
           "source": "American Tobacco Campus",
-          "events": 71,
-          "unique_urls": 71,
+          "events": 70,
+          "unique_urls": 70,
           "specificity_pct": 100
         },
         {
           "source": "Cat's Cradle",
-          "events": 54,
-          "unique_urls": 54,
+          "events": 52,
+          "unique_urls": 52,
           "specificity_pct": 100
         },
         {
@@ -12537,15 +12599,15 @@
           "specificity_pct": 10
         },
         {
-          "source": "Carolina Theatre",
-          "events": 28,
-          "unique_urls": 24,
-          "specificity_pct": 86
+          "source": "NC Museum of Natural Sciences",
+          "events": 25,
+          "unique_urls": 25,
+          "specificity_pct": 100
         },
         {
-          "source": "Ponysaurus Brewing",
-          "events": 26,
-          "unique_urls": 26,
+          "source": "Downtown Durham Inc",
+          "events": 25,
+          "unique_urls": 25,
           "specificity_pct": 100
         }
       ]
@@ -12556,7 +12618,7 @@
       "tzids": [
         {
           "tzid": "UTC (Z suffix)",
-          "count": 13086,
+          "count": 13098,
           "files": 21,
           "matches_city": false,
           "sample_files": [
@@ -12569,8 +12631,8 @@
         },
         {
           "tzid": "America/New_York",
-          "count": 2195,
-          "files": 52,
+          "count": 2194,
+          "files": 51,
           "matches_city": true,
           "sample_files": [
             "americantobaccocampus.ics",
@@ -12582,20 +12644,20 @@
         },
         {
           "tzid": "(bare \u2014 assumes city tz)",
-          "count": 482,
-          "files": 55,
+          "count": 388,
+          "files": 53,
           "matches_city": false,
           "sample_files": [
             "americantobaccocampus.ics",
             "animalrescue.ics",
             "calendar_index_ics.ics",
             "carolina_performing_arts.ics",
-            "carolina_theatre.ics"
+            "catscradle.ics"
           ]
         },
         {
           "tzid": "America/Los_Angeles",
-          "count": 208,
+          "count": 198,
           "files": 6,
           "matches_city": false,
           "sample_files": [
@@ -12630,17 +12692,6 @@
         ]
       },
       {
-        "source": "Gcal Lgbtqcenterofdurham Org Qb71V8N48D0A304Sq7Dtm89F84",
-        "source_id": "gcal_lgbtqcenterofdurham_org_qb71v8n48d0a304sq7dtm89f84",
-        "location": "118 Hunt St\r",
-        "count": 13,
-        "titles": [
-          "Youth Drop-in - Youth Center",
-          "Youth Drop-in - Youth Center",
-          "CANCELLED: Youth Drop-in - Youth Center"
-        ]
-      },
-      {
         "source": "Nchumanities",
         "source_id": "nchumanities",
         "location": "Pope House Museum, 511 S Wilmington St, Raleigh, NC, NC, 27601, United States",
@@ -12649,6 +12700,17 @@
           "Fall African American Walking Tours",
           "Exhibit Opening: The Doctor Is In",
           "Fall African American Walking Tours"
+        ]
+      },
+      {
+        "source": "Gcal Lgbtqcenterofdurham Org Qb71V8N48D0A304Sq7Dtm89F84",
+        "source_id": "gcal_lgbtqcenterofdurham_org_qb71v8n48d0a304sq7dtm89f84",
+        "location": "118 Hunt St\r",
+        "count": 12,
+        "titles": [
+          "Youth Drop-in - Youth Center",
+          "CANCELLED: Youth Drop-in - Youth Center",
+          "Youth Drop-in - Youth Center"
         ]
       },
       {
@@ -12762,6 +12824,17 @@
         ]
       },
       {
+        "source": "Naturalsciences",
+        "source_id": "naturalsciences",
+        "location": "Whiteville, 415 South Madison Street, Whiteville, NC, 28472, United States",
+        "count": 5,
+        "titles": [
+          "Creature Connections (Whiteville)",
+          "Creature Connections (Whiteville)",
+          "Nature Storytime (Whiteville)"
+        ]
+      },
+      {
         "source": "Goheels Api V2",
         "source_id": "goheels_api_v2",
         "location": "Philadelphia, PA",
@@ -12836,17 +12909,6 @@
           "NC State University Women's Golf vs ACC Championship",
           "NC State University Women's Golf vs ACC Championship",
           "NC State University Women's Golf vs ACC Championship"
-        ]
-      },
-      {
-        "source": "Naturalsciences",
-        "source_id": "naturalsciences",
-        "location": "Whiteville, 415 South Madison Street, Whiteville, NC, 28472, United States",
-        "count": 4,
-        "titles": [
-          "Creature Connections (Whiteville)",
-          "Creature Connections (Whiteville)",
-          "Nature Storytime (Whiteville)"
         ]
       },
       {
@@ -13846,35 +13908,35 @@
     "categories": [
       {
         "category": "Sports / Fitness",
-        "count": 775
+        "count": 774
       },
       {
         "category": "History / Heritage",
-        "count": 592
+        "count": 589
       },
       {
         "category": "Music / Concerts",
-        "count": 328
+        "count": 317
       },
       {
         "category": "Government / Civic",
-        "count": 307
+        "count": 308
       },
       {
         "category": "Arts / Culture",
-        "count": 270
+        "count": 266
       },
       {
         "category": "Education / Workshops",
-        "count": 244
+        "count": 245
       },
       {
         "category": "Dance / Performance",
-        "count": 167
+        "count": 170
       },
       {
         "category": "Community / Social",
-        "count": 144
+        "count": 141
       },
       {
         "category": "Food / Drink",
@@ -13882,7 +13944,7 @@
       },
       {
         "category": "Family / Kids",
-        "count": 115
+        "count": 112
       },
       {
         "category": "Nature / Outdoors / Recreation",
@@ -13890,67 +13952,67 @@
       },
       {
         "category": "Games / Trivia",
-        "count": 86
+        "count": 81
       },
       {
         "category": "(uncategorized)",
-        "count": 48
+        "count": 44
       },
       {
         "category": "Technology / Careers",
-        "count": 41
-      },
-      {
-        "category": "Craft / Maker",
-        "count": 39
+        "count": 37
       },
       {
         "category": "Books / Literature / Poetry",
-        "count": 34
+        "count": 37
+      },
+      {
+        "category": "Craft / Maker",
+        "count": 31
       },
       {
         "category": "Health / Wellness",
-        "count": 32
+        "count": 29
       },
       {
         "category": "LGBTQ+ / Gender",
-        "count": 28
+        "count": 29
       },
       {
         "category": "Film / Cinema",
-        "count": 27
+        "count": 26
       },
       {
         "category": "Gardening / Horticulture",
         "count": 19
       },
       {
-        "category": "Comedy / Improv",
-        "count": 18
-      },
-      {
         "category": "Religion / Spirituality",
         "count": 11
+      },
+      {
+        "category": "Comedy / Improv",
+        "count": 10
       }
     ],
     "images": {
-      "total": 3548,
-      "with_image": 197,
+      "total": 3499,
+      "with_image": 198,
       "by_source": [
         {
           "source": "American Tobacco Campus",
-          "total": 71,
-          "with_image": 71
-        },
-        {
-          "source": "Duke University",
-          "total": 34,
-          "with_image": 27
+          "total": 70,
+          "with_image": 70
         },
         {
           "source": "Downtown Durham Inc",
-          "total": 26,
-          "with_image": 26
+          "total": 25,
+          "with_image": 25
+        },
+        {
+          "source": "Duke University",
+          "total": 29,
+          "with_image": 24
         },
         {
           "source": "Sarah P. Duke Gardens",
@@ -13964,13 +14026,18 @@
         },
         {
           "source": "NC Wildlife Federation",
-          "total": 17,
+          "total": 18,
           "with_image": 11
         },
         {
           "source": "United Arts Wake County",
-          "total": 20,
+          "total": 19,
           "with_image": 8
+        },
+        {
+          "source": "Duke Arts, Duke University",
+          "total": 5,
+          "with_image": 5
         },
         {
           "source": "NC Humanities Council",
@@ -13988,7 +14055,7 @@
           "with_image": 3
         },
         {
-          "source": "Duke Arts, Duke University",
+          "source": "Duke University, Nasher Museum of Art",
           "total": 1,
           "with_image": 1
         },
@@ -14010,6 +14077,11 @@
         {
           "source": "NC Botanical Garden",
           "total": 2,
+          "with_image": 1
+        },
+        {
+          "source": "Downtown Durham Inc, Meetup: Discover Durham Together",
+          "total": 1,
           "with_image": 1
         },
         {
