@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>504 Hosting Server Read Timeout | GoDaddy Website Security</title>
+    <!--
+        Base origin-error page (502/504). lualibs/error_pages.lua fills the double-brace placeholders
+        per $whitelabel at request time; init.lua substitutes the server id at load. Keep it
+        self-contained: no external stylesheet, script, font, CSS import or remote image
+        (tests/rules/71-error-pages-self-contained.sh).
+    -->
+    <style>
+        :root {
+            --accent: #09757a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f5f7;
+            color: #1d2330;
+            font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        a {
+            color: var(--accent);
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        .wrap {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 32px 16px 48px;
+        }
+
+        .product {
+            margin: 0 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: .02em;
+            color: var(--accent);
+        }
+
+        .card {
+            padding: 28px 24px;
+            background: #fff;
+            border: 1px solid #e1e4ea;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 26px;
+            line-height: 1.25;
+        }
+
+        h2 {
+            margin: 24px 0 8px;
+            font-size: 17px;
+        }
+
+        .lead {
+            margin: 0 0 4px;
+            font-size: 18px;
+            color: #414a5a;
+        }
+
+        .retry {
+            margin: 0;
+            color: #5b6475;
+        }
+
+        /* You -> Firewall -> Hosting diagram */
+        .flow {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 28px 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .node {
+            flex: 0 0 auto;
+            width: 132px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            margin-bottom: 6px;
+            border-radius: 50%;
+        }
+
+        .icon svg {
+            width: 32px;
+            height: 32px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .ok-node .icon {
+            background: #e7f4ea;
+            color: #2f7d3c;
+        }
+
+        .fail-node,
+        .fail-node .icon {
+            color: #c0362c;
+        }
+
+        .fail-node .icon {
+            background: #fdebea;
+        }
+
+        .badge {
+            position: absolute;
+            right: -2px;
+            bottom: -2px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 13px;
+            line-height: 22px;
+        }
+
+        .badge.ok {
+            background: #2f7d3c;
+        }
+
+        .badge.fail {
+            background: #c0362c;
+        }
+
+        /* Connector, vertically centred on the 64px icons */
+        .link {
+            flex: 1 1 auto;
+            height: 2px;
+            margin-top: 31px;
+            background: #c9ced8;
+        }
+
+        .link.broken {
+            background: repeating-linear-gradient(90deg, #c0362c 0 6px, transparent 6px 11px);
+        }
+
+        dl {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 4px 16px;
+            margin: 0;
+            padding: 14px 16px;
+            background: #f7f8fa;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        dt {
+            color: #5b6475;
+        }
+
+        dd {
+            margin: 0;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+        ul.causes {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #6b7383;
+            text-align: center;
+        }
+
+        @media (max-width: 520px) {
+            .wrap {
+                padding: 20px 16px 32px;
+            }
+
+            .card {
+                padding: 20px 16px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .flow {
+                gap: 4px;
+            }
+
+            .node {
+                flex: 1 1 0;
+                width: auto;
+                min-width: 0;
+                font-size: 12px;
+                line-height: 1.3;
+            }
+
+            /* Connector, vertically centred on the 52px icons */
+            .link {
+                flex: 0 0 14px;
+                margin-top: 25px;
+            }
+
+            .icon {
+                width: 52px;
+                height: 52px;
+            }
+
+            .icon svg {
+                width: 26px;
+                height: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="wrap">
+        <p class="product">GoDaddy Website Security</p>
+
+        <div class="card">
+            <h1>Hosting Server Read Timeout</h1>
+            <p class="lead">HTTP 504 &mdash; Unable to Read from the Origin Server</p>
+            <p class="retry">Please try again in a few minutes.</p>
+
+            <ol class="flow" aria-label="Connection path">
+                <li class="node ok-node">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+                        </svg>
+                        <span class="badge ok" aria-hidden="true">&#10003;</span>
+                    </span><br>
+                    You
+                </li>
+                <li class="link" aria-hidden="true"></li>
+                <li class="node ok-node">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5z"/>
+                        </svg>
+                        <span class="badge ok" aria-hidden="true">&#10003;</span>
+                    </span><br>
+                    GoDaddy Firewall
+                </li>
+                <li class="link broken" aria-hidden="true"></li>
+                <li class="node fail-node">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="4" y="3" width="16" height="7" rx="1.5"/>
+                            <rect x="4" y="14" width="16" height="7" rx="1.5"/>
+                            <path d="M8 6.5h.01M8 17.5h.01"/>
+                        </svg>
+                        <span class="badge fail" aria-hidden="true">&#10005;</span>
+                    </span><br>
+                    Hosting Timeout
+                </li>
+            </ol>
+
+            <h2>Error details</h2>
+            <dl>
+                <dt>Error code</dt>
+                <dd>HTTP 504</dd>
+                <dt>Error message</dt>
+                <dd>Backend or gateway read timeout.</dd>
+                <dt>Server ID</dt>
+                <dd>11002</dd>
+            </dl>
+
+            <h2>What's going on?</h2>
+            <ul class="causes">
+                <li>The request is taking too long to respond</li>
+                <li>The origin server is not responding or is too busy</li>
+                <li>The GoDaddy network might be blocked by the origin&#39;s firewall</li>
+            </ul>
+
+            <h2>What can I do to fix it?</h2>
+            <p>
+                If you are just visiting the site, wait a bit and it should be back soon.
+                We apologize for the inconvenience.
+            </p>
+            <p>
+                If you own the website, check with your hosting company that your server is up and
+                running and that they have our firewall IPs allowlisted.
+            </p>
+            <p>If the problem persists, open a ticket on our <a href="https://supportx.sucuri.net/support/">support page</a> and we will help you troubleshoot.</p>
+        </div>
+
+        <footer>&copy; GoDaddy Operating Company, LLC. All rights reserved. &middot; <a href="https://www.godaddy.com/agreements/privacy">Privacy Policy</a></footer>
+    </main>
+</body>
+</html>
+
